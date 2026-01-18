@@ -1,0 +1,602 @@
+<div>
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-neutral-900">Paramètres</h1>
+        <p class="text-neutral-500 mt-1">Configurez votre restaurant</p>
+    </div>
+
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div x-data="{ show: true }" 
+             x-show="show"
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-2"
+             class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="font-medium">{{ session('success') }}</span>
+            </div>
+            <button @click="show = false" class="text-emerald-600 hover:text-emerald-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div x-data="{ show: true }" 
+             x-show="show"
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-2"
+             class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="font-medium">{{ session('error') }}</span>
+            </div>
+            <button @click="show = false" class="text-red-600 hover:text-red-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    @endif
+
+    <!-- Tabs -->
+    <div x-data="{ activeTab: '{{ $activeTab }}' }" class="space-y-6">
+        <div class="flex overflow-x-auto gap-2 border-b border-neutral-200 mb-8">
+            @foreach([
+                'general' => ['label' => 'Général', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                'appearance' => ['label' => 'Apparence', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
+                'delivery' => ['label' => 'Livraison', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
+                'payment' => ['label' => 'Paiement', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+                'hours' => ['label' => 'Horaires', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ] as $key => $tab)
+                <button @click="activeTab = '{{ $key }}'"
+                        :class="activeTab === '{{ $key }}' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
+                        class="flex items-center gap-2 px-4 py-3 font-medium whitespace-nowrap border-b-2 -mb-px transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tab['icon'] }}"/>
+                    </svg>
+                    {{ $tab['label'] }}
+                </button>
+            @endforeach
+        </div>
+
+        <!-- General Tab -->
+        <div x-show="activeTab === 'general'">
+            <form wire:submit="saveGeneral" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Public Link -->
+                    <div class="card p-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-2 border-primary-200">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            Lien public de votre menu
+                        </h2>
+                        <p class="text-sm text-neutral-600 mb-4">Partagez ce lien avec vos clients pour qu'ils puissent voir votre menu et commander en ligne.</p>
+                        
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 bg-white rounded-lg border border-primary-200 p-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                <input type="text" 
+                                       id="public-link"
+                                       value="{{ $restaurant->slug ? route('r.menu', $restaurant->slug) : 'Slug en cours de génération...' }}" 
+                                       readonly
+                                       class="flex-1 bg-transparent border-none outline-none text-sm font-mono text-neutral-700">
+                            </div>
+                            <button type="button"
+                                    onclick="copyLink()"
+                                    class="px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                Copier
+                            </button>
+                            @if($restaurant->slug)
+                                <a href="{{ route('r.menu', $restaurant->slug) }}" 
+                                   target="_blank"
+                                   class="px-4 py-3 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Ouvrir
+                                </a>
+                            @endif
+                        </div>
+                        <p class="text-xs text-neutral-500 mt-3 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Ce lien est accessible publiquement. Assurez-vous que votre restaurant est activé.
+                        </p>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="card p-6">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations générales</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nom du restaurant *</label>
+                                <input type="text" wire:model="name" class="input @error('name') border-red-500 @enderror">
+                                @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Slogan</label>
+                                <input type="text" wire:model="tagline" class="input" placeholder="Ex: Le goût de l'authenticité">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Description</label>
+                                <textarea wire:model="description" rows="4" class="input" placeholder="Décrivez votre restaurant..."></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone</label>
+                                    <input type="tel" wire:model="phone" class="input" placeholder="+225 07 00 00 00 00">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                                    <input type="email" wire:model="email" class="input" placeholder="contact@restaurant.ci">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Site web</label>
+                                <input type="url" wire:model="website" class="input" placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="card p-6">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
+                                <input type="text" wire:model="address" class="input" placeholder="Rue, quartier...">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
+                                    <input type="text" wire:model="city" class="input" placeholder="Abidjan">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-neutral-700 mb-2">Code postal</label>
+                                    <input type="text" wire:model="postal_code" class="input" placeholder="00000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Logo -->
+                    <div class="card p-6">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-4">Logo</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="w-32 h-32 mx-auto bg-neutral-100 rounded-xl overflow-hidden">
+                                @if($logo)
+                                    <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                @elseif($existingLogo)
+                                    <img src="{{ Storage::url($existingLogo) }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-neutral-300">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <label class="btn btn-secondary w-full cursor-pointer justify-center px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                                <input type="file" wire:model="logo" accept="image/*" class="hidden">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                                Changer le logo
+                            </label>
+
+                            @if($existingLogo)
+                                <button type="button" wire:click="deleteMedia('logo')" class="w-full text-sm text-red-500 hover:text-red-600">
+                                    Supprimer
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Banner -->
+                    <div class="card p-6">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-4">Bannière</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="aspect-video bg-neutral-100 rounded-xl overflow-hidden">
+                                @if($banner)
+                                    <img src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover">
+                                @elseif($existingBanner)
+                                    <img src="{{ Storage::url($existingBanner) }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-neutral-300">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <label class="btn btn-secondary w-full cursor-pointer justify-center px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                                <input type="file" wire:model="banner" accept="image/*" class="hidden">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                                Changer la bannière
+                            </label>
+
+                            @if($existingBanner)
+                                <button type="button" wire:click="deleteMedia('banner')" class="w-full text-sm text-red-500 hover:text-red-600">
+                                    Supprimer
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Save -->
+                    <button type="submit" class="w-full btn btn-primary px-6 py-3 flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="saveGeneral">Enregistrer</span>
+                        <span wire:loading wire:target="saveGeneral" class="flex items-center gap-2">
+                            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Enregistrement...
+                        </span>
+                    </button>
+                </div>
+            </div>
+            </form>
+        </div>
+
+        <!-- Appearance Tab -->
+        <div x-show="activeTab === 'appearance'" x-cloak>
+            <form wire:submit="saveAppearance" class="space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-bold text-neutral-900 mb-6">Personnalisation des couleurs</h2>
+                <p class="text-neutral-600 mb-6">Personnalisez les couleurs de votre site public pour qu'il corresponde à votre identité visuelle.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Primary Color -->
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                            Couleur principale
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   wire:model.live="primary_color" 
+                                   class="w-16 h-16 rounded-lg border-2 border-neutral-200 cursor-pointer"
+                                   title="Couleur principale">
+                            <div class="flex-1">
+                                <input type="text" 
+                                       wire:model="primary_color" 
+                                       class="input font-mono text-sm"
+                                       placeholder="#f97316"
+                                       pattern="^#[0-9A-Fa-f]{6}$">
+                                <p class="text-xs text-neutral-500 mt-1">Utilisée pour les boutons, liens et éléments importants</p>
+                            </div>
+                        </div>
+                        @error('primary_color')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Secondary Color -->
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                            Couleur secondaire
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   wire:model.live="secondary_color" 
+                                   class="w-16 h-16 rounded-lg border-2 border-neutral-200 cursor-pointer"
+                                   title="Couleur secondaire">
+                            <div class="flex-1">
+                                <input type="text" 
+                                       wire:model="secondary_color" 
+                                       class="input font-mono text-sm"
+                                       placeholder="#1c1917"
+                                       pattern="^#[0-9A-Fa-f]{6}$">
+                                <p class="text-xs text-neutral-500 mt-1">Utilisée pour les textes et éléments de fond</p>
+                            </div>
+                        </div>
+                        @error('secondary_color')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="mt-8 p-6 bg-neutral-50 rounded-xl border-2 border-dashed border-neutral-200">
+                    <h3 class="text-sm font-semibold text-neutral-700 mb-4">Aperçu</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <button type="button" 
+                                    class="px-4 py-2 rounded-lg text-white font-medium transition-all"
+                                    style="background-color: {{ $primary_color ?? '#f97316' }};"
+                                    onmouseover="this.style.opacity='0.9'" 
+                                    onmouseout="this.style.opacity='1'">
+                                Bouton principal
+                            </button>
+                            <a href="#" 
+                               class="text-sm font-medium transition-colors"
+                               style="color: {{ $primary_color ?? '#f97316' }};"
+                               onmouseover="this.style.opacity='0.8'" 
+                               onmouseout="this.style.opacity='1'">
+                                Lien
+                            </a>
+                        </div>
+                        <div class="p-4 rounded-lg text-white"
+                             style="background-color: {{ $secondary_color ?? '#1c1917' }};">
+                            <p class="text-sm">Zone avec couleur secondaire</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex items-center justify-end gap-3">
+                    <a href="{{ route('r.menu', $restaurant->slug) }}" 
+                       target="_blank"
+                       class="btn btn-secondary px-4 py-2 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Voir le site
+                    </a>
+                    <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Enregistrer les couleurs
+                    </button>
+                </div>
+            </div>
+            </form>
+        </div>
+
+        <!-- Delivery Tab -->
+        <div x-show="activeTab === 'delivery'" x-cloak>
+            <form wire:submit="saveDelivery" class="max-w-2xl">
+            <div class="card p-6 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-neutral-900">Activer la livraison</h3>
+                        <p class="text-sm text-neutral-500">Proposez la livraison à vos clients</p>
+                    </div>
+                    <button type="button" wire:click="$toggle('delivery_enabled')"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $delivery_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $delivery_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                    </button>
+                </div>
+
+                @if($delivery_enabled)
+                    <div class="border-t border-neutral-200 pt-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Frais de livraison (FCFA)</label>
+                            <input type="number" wire:model="delivery_fee" class="input w-48" min="0" step="100">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Commande minimum (FCFA)</label>
+                            <input type="number" wire:model="min_order_amount" class="input w-48" min="0" step="100">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Temps de préparation estimé (minutes)</label>
+                            <input type="number" wire:model="estimated_prep_time" class="input w-32" min="1">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Zones de livraison</label>
+                            <textarea wire:model="delivery_zones" rows="3" class="input" 
+                                      placeholder="Ex: Cocody, Plateau, Marcory..."></textarea>
+                            <p class="text-xs text-neutral-500 mt-1">Listez les zones que vous desservez</p>
+                        </div>
+                    </div>
+                @endif
+
+                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Enregistrer
+                </button>
+            </div>
+            </form>
+        </div>
+
+        <!-- Payment Tab -->
+        <div x-show="activeTab === 'payment'" x-cloak>
+            <form wire:submit="savePayment" class="max-w-2xl">
+            <div class="card p-6 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-neutral-900">Paiement à la livraison</h3>
+                        <p class="text-sm text-neutral-500">Accepter les paiements en espèces</p>
+                    </div>
+                    <button type="button" wire:click="$toggle('cash_on_delivery')"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $cash_on_delivery ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $cash_on_delivery ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                    </button>
+                </div>
+
+                <div class="border-t border-neutral-200 pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-neutral-900">Paiement mobile (Lygos)</h3>
+                            <p class="text-sm text-neutral-500">Orange Money, MTN MoMo, Wave...</p>
+                        </div>
+                        <button type="button" wire:click="$toggle('lygos_enabled')"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $lygos_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $lygos_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </div>
+
+                    @if($lygos_enabled)
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Clé API Lygos <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" wire:model="lygos_api_key" class="input" placeholder="Votre clé API Lygos">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Clé API obtenue sur votre compte Lygos (lygos.ci)
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Clé Secrète Lygos <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
+                                </label>
+                                <input type="password" wire:model="lygos_api_secret" class="input" placeholder="Optionnel - pour webhooks sécurisés">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Optionnel : Utilisée uniquement pour la vérification des signatures de webhooks (si fournie par Lygos)
+                                </p>
+                            </div>
+                            
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-xs text-blue-800">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Obtenez votre clé API sur <a href="https://lygos.ci" target="_blank" class="text-blue-600 hover:underline font-medium">lygos.ci</a>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Enregistrer
+                </button>
+            </div>
+            </form>
+        </div>
+
+        <!-- Hours Tab -->
+        <div x-show="activeTab === 'hours'" x-cloak>
+            <form wire:submit="saveHours" class="max-w-2xl">
+            <div class="card p-6">
+                <h2 class="text-lg font-bold text-neutral-900 mb-6">Horaires d'ouverture</h2>
+
+                <div class="space-y-4">
+                    @php
+                        $dayLabels = [
+                            'monday' => 'Lundi',
+                            'tuesday' => 'Mardi',
+                            'wednesday' => 'Mercredi',
+                            'thursday' => 'Jeudi',
+                            'friday' => 'Vendredi',
+                            'saturday' => 'Samedi',
+                            'sunday' => 'Dimanche',
+                        ];
+                    @endphp
+
+                    @foreach($dayLabels as $day => $label)
+                        <div class="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl">
+                            <div class="w-24">
+                                <span class="font-medium text-neutral-900">{{ $label }}</span>
+                            </div>
+                            
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" 
+                                       wire:model="opening_hours.{{ $day }}.is_open"
+                                       class="w-4 h-4 text-primary-500 rounded focus:ring-primary-500">
+                                <span class="text-sm text-neutral-600">Ouvert</span>
+                            </label>
+
+                            @if($opening_hours[$day]['is_open'] ?? true)
+                                <div class="flex items-center gap-2 ml-auto">
+                                    <input type="time" 
+                                           wire:model="opening_hours.{{ $day }}.open"
+                                           class="input w-32 text-sm">
+                                    <span class="text-neutral-400">à</span>
+                                    <input type="time" 
+                                           wire:model="opening_hours.{{ $day }}.close"
+                                           class="input w-32 text-sm">
+                                </div>
+                            @else
+                                <span class="ml-auto text-sm text-neutral-500">Fermé</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <button type="submit" class="mt-6 btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Enregistrer les horaires
+                    </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function copyLink() {
+    const input = document.getElementById('public-link');
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile devices
+    
+    navigator.clipboard.writeText(input.value).then(function() {
+        // Show success message
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copié !';
+        button.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        button.classList.remove('bg-primary-500', 'hover:bg-primary-600');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
+            button.classList.add('bg-primary-500', 'hover:bg-primary-600');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Erreur lors de la copie:', err);
+        alert('Erreur lors de la copie du lien');
+    });
+}
+</script>
+@endpush
+

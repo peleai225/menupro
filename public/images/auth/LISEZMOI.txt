@@ -1,0 +1,13 @@
+Votre image de fond pour la page de connexion/inscription
+========================================================
+
+Placez votre image dans ce dossier avec l'un de ces noms :
+  - custom.jpg
+  - custom.png
+  - custom.webp
+
+Votre image servira de FOND ENTIER (plein écran) sur le panneau gauche
+des pages de connexion et d'inscription. Un voile noir semi-transparent
+est appliqué par-dessus pour garder le texte lisible.
+
+Formats : JPG, PNG, WebP. Taille recommandée : 1200x800 px ou plus (paysage).
