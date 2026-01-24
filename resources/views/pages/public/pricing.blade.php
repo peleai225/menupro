@@ -15,7 +15,7 @@
     <!-- Main Pricing Section -->
     <section class="py-20 bg-slate-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="pricingCalculator()" x-init="init()">
                 <!-- Left Column: Features & Add-ons -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Features List -->
@@ -38,7 +38,7 @@
                                     ['icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'text' => 'Statistiques avancées'],
                                     ['icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'text' => 'Réservations en ligne'],
                                     ['icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', 'text' => 'Avis clients'],
-                                    ['icon' => 'M3 10h18M7 15h1m4 0h1m-6 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v4a3 3 0 003 3z', 'text' => 'Paiement Lygos'],
+                                    ['icon' => 'M3 10h18M7 15h1m4 0h1m-6 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v4a3 3 0 003 3z', 'text' => 'Paiement Mobile Money'],
                                 ];
                             @endphp
                             @foreach($features as $feature)
@@ -97,9 +97,7 @@
 
                 <!-- Right Column: Sticky Price Card -->
                 <div class="lg:col-span-1">
-                    <div x-data="pricingCalculator()" 
-                         x-init="init()"
-                         class="sticky top-8">
+                    <div class="sticky top-8">
                         <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border-2 border-orange-500/20 shadow-2xl">
                             <!-- Badge MEILLEUR pour Annuel -->
                             <div x-show="billingCycle === 'annual'" 
@@ -185,7 +183,7 @@
                                     <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span>14 jours d'essai gratuit</span>
+                                    <span>Satisfait ou remboursé 7 jours</span>
                                 </div>
                             </div>
                         </div>
@@ -199,30 +197,59 @@
     <section class="py-16 bg-slate-800 border-t border-slate-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-2xl font-bold text-white mb-4">Paiement sécurisé par LYGOS</h2>
+                <h2 class="text-2xl font-bold text-white mb-4">Paiement sécurisé</h2>
                 <p class="text-slate-400">Vos transactions sont protégées et sécurisées</p>
             </div>
             
             <!-- Payment Methods -->
-            <div class="flex flex-wrap items-center justify-center gap-8 mb-12">
-                <div class="flex items-center gap-3 bg-slate-700/50 px-6 py-3 rounded-lg">
-                    <svg class="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.9 1.57h1.6c0-1.15-.64-2.7-3.5-2.7-2.22 0-3.7 1.29-3.7 3.24 0 1.77 1.11 2.56 2.73 3.05 1.77.54 2.34.95 2.34 1.67 0 .73-.68 1.48-2.1 1.48-1.64 0-2.26-.72-2.26-1.64H6.04c0 1.7 1.44 2.95 3.97 2.95 2.35 0 3.89-1.35 3.89-3.35 0-1.95-1.18-2.73-2.49-3.19z"/>
-                    </svg>
-                    <span class="text-white font-semibold">LYGOS</span>
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <!-- Orange Money -->
+                <div class="flex items-center gap-3 bg-slate-700/50 px-5 py-3 rounded-xl border border-slate-600">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_vfRbApK454_NJJitH8Cjm4tm6FcBHbYQdA&s" alt="Orange Money" class="h-10 w-auto object-contain rounded">
+                    <span class="text-white font-medium">Orange Money</span>
                 </div>
-                <div class="text-slate-400 text-sm">Orange Money</div>
-                <div class="text-slate-400 text-sm">MTN Mobile Money</div>
-                <div class="text-slate-400 text-sm">Wave</div>
-                <div class="text-slate-400 text-sm">Cartes bancaires</div>
+                
+                <!-- MTN Mobile Money -->
+                <div class="flex items-center gap-3 bg-slate-700/50 px-5 py-3 rounded-xl border border-slate-600">
+                    <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                        <span class="text-black font-bold text-sm">MTN</span>
+                    </div>
+                    <span class="text-white font-medium">MTN MoMo</span>
+                </div>
+                
+                <!-- Wave -->
+                <div class="flex items-center gap-3 bg-slate-700/50 px-5 py-3 rounded-xl border border-slate-600">
+                    <img src="https://play-lh.googleusercontent.com/-Mp3XW7uhwn3KGQxUKGPoc4MbA5ti-3-q23TgoVi9ujBgHWW5n4IySvlG5Exwrxsjw=w240-h480-rw" alt="Wave" class="h-10 w-auto object-contain rounded">
+                    <span class="text-white font-medium">Wave</span>
+                </div>
+                
+                <!-- Moov Money -->
+                <div class="flex items-center gap-3 bg-slate-700/50 px-5 py-3 rounded-xl border border-slate-600">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s" alt="Moov Money" class="h-10 w-auto object-contain rounded">
+                    <span class="text-white font-medium">Moov Money</span>
+                </div>
             </div>
-
-            <!-- Partner Logos (Fictifs) -->
-            <div class="flex flex-wrap items-center justify-center gap-12 opacity-60">
-                <div class="text-slate-500 text-sm font-semibold">Partenaire 1</div>
-                <div class="text-slate-500 text-sm font-semibold">Partenaire 2</div>
-                <div class="text-slate-500 text-sm font-semibold">Partenaire 3</div>
-                <div class="text-slate-500 text-sm font-semibold">Partenaire 4</div>
+            
+            <!-- Security badges -->
+            <div class="flex flex-wrap items-center justify-center gap-8 mt-10 pt-8 border-t border-slate-700">
+                <div class="flex items-center gap-2 text-slate-400 text-sm">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Transactions sécurisées</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-400 text-sm">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Données cryptées</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-400 text-sm">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Confirmation instantanée</span>
+                </div>
             </div>
         </div>
     </section>
@@ -267,15 +294,14 @@
 
                 <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
                     <button @click="active = active === 3 ? null : 3" class="w-full text-left flex items-center justify-between">
-                        <span class="font-semibold text-white">Comment fonctionne la période d'essai ?</span>
+                        <span class="font-semibold text-white">Comment fonctionne la garantie satisfait ou remboursé ?</span>
                         <svg :class="{ 'rotate-180': active === 3 }" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
                     <div x-show="active === 3" x-collapse class="mt-4">
                         <p class="text-slate-400">
-                            Vous bénéficiez de 14 jours d'essai gratuit avec toutes les fonctionnalités du plan MenuPro.
-                            Aucune carte bancaire n'est requise. À la fin de l'essai, vous serez invité à activer votre abonnement.
+                            Après votre inscription et paiement, votre restaurant est activé sous 24h. Si vous n'êtes pas satisfait dans les 7 premiers jours, contactez-nous et nous vous remboursons intégralement. Testez d'abord notre démo pour découvrir toutes les fonctionnalités.
                         </p>
                     </div>
                 </div>
@@ -290,10 +316,10 @@
                 Prêt à digitaliser votre restaurant ?
             </h2>
             <p class="text-xl text-slate-300 mb-8">
-                Commencez votre essai gratuit de 14 jours maintenant.
+                25 000 FCFA/mois • Satisfait ou remboursé 7 jours
             </p>
             <a href="{{ route('register') }}?plan=menupro" class="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-                Créer mon restaurant gratuitement
+                Créer mon restaurant maintenant
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>

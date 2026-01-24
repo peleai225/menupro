@@ -13,7 +13,7 @@ class Settings extends Component
 {
     use WithFileUploads;
 
-    public Restaurant $restaurant;
+    public ?Restaurant $restaurant = null;
 
     // General Info
     #[Rule('required|string|max:100')]
@@ -73,11 +73,26 @@ class Settings extends Component
     // Opening Hours
     public array $opening_hours = [];
 
+    // Verification / RCCM
+    public ?string $company_name = null;
+    public ?string $rccm = null;
+    public $rccm_document = null;
+    public ?string $existingRccmDocument = null;
+
     public string $activeTab = 'general';
 
     public function mount(): void
     {
-        $this->restaurant = auth()->user()->restaurant;
+        $restaurant = auth()->user()->restaurant;
+        
+        // Redirect if user has no restaurant
+        if (!$restaurant) {
+            session()->flash('error', 'Vous n\'avez pas de restaurant associé à votre compte.');
+            $this->redirect(route('home'));
+            return;
+        }
+        
+        $this->restaurant = $restaurant;
         
         // Ensure restaurant has a slug
         if (!$this->restaurant->slug) {
@@ -109,6 +124,11 @@ class Settings extends Component
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
         $this->opening_hours = $this->restaurant->opening_hours ?? $this->getDefaultOpeningHours();
+        
+        // Verification fields
+        $this->company_name = $this->restaurant->company_name;
+        $this->rccm = $this->restaurant->rccm;
+        $this->existingRccmDocument = $this->restaurant->rccm_document_path;
     }
 
     protected function getDefaultOpeningHours(): array
@@ -310,6 +330,54 @@ class Settings extends Component
         }
     }
 
+    public function saveVerification(): void
+    {
+        try {
+            $this->validate([
+                'company_name' => 'nullable|string|max:255',
+                'rccm' => 'nullable|string|max:50|unique:restaurants,rccm,' . $this->restaurant->id,
+                'rccm_document' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
+            ]);
+
+            $data = [
+                'company_name' => $this->company_name,
+                'rccm' => $this->rccm,
+            ];
+
+            // Handle RCCM document upload
+            if ($this->rccm_document) {
+                $uploader = app(MediaUploader::class);
+                $data['rccm_document_path'] = $uploader->upload(
+                    $this->rccm_document, 
+                    "restaurants/{$this->restaurant->id}/documents"
+                );
+
+                // Delete old document if exists
+                if ($this->existingRccmDocument) {
+                    Storage::disk('public')->delete($this->existingRccmDocument);
+                }
+                
+                $this->existingRccmDocument = $data['rccm_document_path'];
+                $this->rccm_document = null;
+            }
+
+            // If RCCM or document removed, reset verification
+            if (empty($this->rccm) || empty($data['rccm_document_path'] ?? $this->existingRccmDocument)) {
+                $data['verified_at'] = null;
+                $data['verified_by'] = null;
+            }
+
+            $this->restaurant->update($data);
+            $this->restaurant->refresh();
+
+            session()->flash('success', 'Informations de vérification mises à jour.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
+        }
+    }
+
     public function deleteMedia(string $type): void
     {
         if ($type === 'logo' && $this->existingLogo) {
@@ -329,13 +397,25 @@ class Settings extends Component
 
     public function render()
     {
-        $restaurant = auth()->user()->restaurant;
-        $subscription = $restaurant?->activeSubscription;
+        // If no restaurant, return empty view (redirect will happen from mount)
+        if (!$this->restaurant) {
+            return view('livewire.restaurant.settings')
+                ->layout('components.layouts.admin-restaurant', [
+                    'title' => 'Paramètres',
+                    'restaurant' => null,
+                    'subscription' => null,
+                ]);
+        }
+        
+        // Refresh restaurant to get latest data (e.g., after admin verification)
+        $this->restaurant->refresh();
+        
+        $subscription = $this->restaurant->activeSubscription ?? null;
         
         return view('livewire.restaurant.settings')
             ->layout('components.layouts.admin-restaurant', [
                 'title' => 'Paramètres',
-                'restaurant' => $restaurant,
+                'restaurant' => $this->restaurant,
                 'subscription' => $subscription,
             ]);
     }

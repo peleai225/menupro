@@ -19,6 +19,31 @@
         .restaurant-hover-primary:hover { background-color: {{ $primaryColor }}; opacity: 0.9; }
     </style>
     <div x-data="cart()" class="min-h-screen bg-neutral-50">
+        {{-- Demo banner for demo restaurant --}}
+        @if(($restaurant->slug ?? '') === 'demo')
+        <div class="bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white py-2.5 px-4 text-center relative overflow-hidden">
+            {{-- Animated background --}}
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=')] opacity-30"></div>
+            <div class="relative flex items-center justify-center gap-3 flex-wrap text-sm">
+                <span class="inline-flex items-center gap-1.5 font-semibold">
+                    <svg class="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    MODE DÉMONSTRATION
+                </span>
+                <span class="text-white/80">—</span>
+                <span class="text-white/90">Explorez les fonctionnalités de MenuPro</span>
+                <span class="text-white/80">—</span>
+                <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full font-medium transition-colors">
+                    Créer mon restaurant
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        @endif
+        
         @unless($hideHeader)
         <!-- Restaurant Header -->
         <header class="relative">

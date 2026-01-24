@@ -23,9 +23,9 @@ class RegisterRequest extends FormRequest
             
             // Restaurant info
             'restaurant_name' => ['required', 'string', 'max:255'],
-            'restaurant_type' => ['required', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe'],
-            'company_name' => ['required', 'string', 'max:255'],
-            'rccm' => ['required', 'string', 'max:50', 'unique:restaurants,rccm'],
+            'restaurant_type' => ['required', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe,food_truck,brunch,evenementiel'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'rccm' => ['nullable', 'string', 'max:50', 'unique:restaurants,rccm'],
             'restaurant_description' => ['nullable', 'string', 'max:1000'],
             'restaurant_address' => ['nullable', 'string', 'max:500'],
             'restaurant_city' => ['nullable', 'string', 'max:100'],
@@ -33,7 +33,7 @@ class RegisterRequest extends FormRequest
             // Files
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
             'banner' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
-            'rccm_document' => ['required', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
+            'rccm_document' => ['nullable', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
             
             // Plan
             'plan' => ['required', 'exists:plans,slug'],
@@ -55,10 +55,7 @@ class RegisterRequest extends FormRequest
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
             'password.min' => 'Le mot de passe doit contenir au moins :min caractères.',
             'restaurant_name.required' => 'Le nom du restaurant est obligatoire.',
-            'company_name.required' => 'Le nom de l\'entreprise est obligatoire.',
-            'rccm.required' => 'Le numéro RCCM est obligatoire.',
             'rccm.unique' => 'Ce numéro RCCM est déjà enregistré.',
-            'rccm_document.required' => 'L\'extrait RCCM est obligatoire.',
             'rccm_document.mimes' => 'L\'extrait RCCM doit être au format PDF, JPEG ou PNG.',
             'rccm_document.max' => 'L\'extrait RCCM ne doit pas dépasser 5 Mo.',
             'logo.image' => 'Le logo doit être une image.',

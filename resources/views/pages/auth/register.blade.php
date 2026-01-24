@@ -22,7 +22,7 @@
                 return this.formData.name && this.formData.email && this.formData.phone && this.formData.password.length >= 8;
             },
             validateStep2() {
-                return this.formData.restaurant_name && this.formData.restaurant_type && this.formData.company_name && this.formData.rccm;
+                return this.formData.restaurant_name && this.formData.restaurant_type;
             }
         }" 
         class="animate-fade-in"
@@ -281,8 +281,11 @@
                                 <option value="bar">Bar</option>
                                 <option value="brasserie">Brasserie</option>
                                 <option value="maquis">Maquis</option>
-                                <option value="traiteur">Traiteur / Événements (mariages, anniversaires, etc.)</option>
+                                <option value="traiteur">Traiteur</option>
                                 <option value="cafe">Café</option>
+                                <option value="food_truck">Food Truck</option>
+                                <option value="brunch">Brunch / Petit-déjeuner</option>
+                                <option value="evenementiel">Événementiel (mariages, anniversaires, etc.)</option>
                             </select>
                             <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -294,7 +297,7 @@
                     <!-- Company Name -->
                     <div>
                         <label for="company_name" class="block text-sm font-medium text-neutral-700 mb-2">
-                            Nom de l'entreprise <span class="text-red-500">*</span>
+                            Nom de l'entreprise <span class="text-neutral-400 text-xs">(optionnel)</span>
                         </label>
                         <div class="relative flex items-center">
                             <span class="absolute left-4 text-neutral-400 pointer-events-none">
@@ -307,8 +310,7 @@
                                 id="company_name"
                                 name="company_name" 
                                 x-model="formData.company_name"
-                                placeholder="SARL Le Délice"
-                                required
+                                placeholder="SARL Le Délice (optionnel)"
                                 class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('company_name') border-red-500 @enderror"
                             >
                         </div>
@@ -317,52 +319,61 @@
                         @enderror
                     </div>
 
-                    <!-- RCCM -->
-                    <div>
-                        <label for="rccm" class="block text-sm font-medium text-neutral-700 mb-2">
-                            Numéro RCCM <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-4 text-neutral-400 pointer-events-none">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </span>
-                            <input 
-                                type="text" 
-                                id="rccm"
-                                name="rccm" 
-                                x-model="formData.rccm"
-                                placeholder="CI-ABJ-XX-2024-XXXXX"
-                                required
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('rccm') border-red-500 @enderror"
-                            >
+                    <!-- RCCM Section (Optional) -->
+                    <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-5 h-5 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            <span class="font-medium text-neutral-700">Vérification entreprise</span>
+                            <span class="text-xs bg-secondary-100 text-secondary-700 px-2 py-0.5 rounded-full">Optionnel</span>
                         </div>
-                        @error('rccm')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-neutral-500 mt-1">Format: CI-ABJ-XX-2024-XXXXX</p>
-                    </div>
+                        <p class="text-xs text-neutral-500 mb-4">Fournissez votre RCCM pour obtenir le badge "Vérifié" sur votre page publique. Vous pouvez l'ajouter plus tard.</p>
+                        
+                        <!-- RCCM -->
+                        <div class="mb-3">
+                            <label for="rccm" class="block text-sm font-medium text-neutral-700 mb-2">
+                                Numéro RCCM
+                            </label>
+                            <div class="relative flex items-center">
+                                <span class="absolute left-4 text-neutral-400 pointer-events-none">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    id="rccm"
+                                    name="rccm" 
+                                    x-model="formData.rccm"
+                                    placeholder="CI-ABJ-XX-2024-XXXXX"
+                                    class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('rccm') border-red-500 @enderror"
+                                >
+                            </div>
+                            @error('rccm')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    <!-- RCCM Document Upload -->
-                    <div>
-                        <label for="rccm_document" class="block text-sm font-medium text-neutral-700 mb-2">
-                            Extrait RCCM <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="file" 
-                                id="rccm_document"
-                                name="rccm_document" 
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                required
-                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('rccm_document') border-red-500 @enderror"
-                            >
+                        <!-- RCCM Document Upload -->
+                        <div>
+                            <label for="rccm_document" class="block text-sm font-medium text-neutral-700 mb-2">
+                                Extrait RCCM (document)
+                            </label>
+                            <div class="relative">
+                                <input 
+                                    type="file" 
+                                    id="rccm_document"
+                                    name="rccm_document" 
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('rccm_document') border-red-500 @enderror"
+                                >
+                            </div>
+                            @error('rccm_document')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="text-xs text-neutral-500 mt-1">PDF, JPEG ou PNG. Max 5 Mo</p>
                         </div>
-                        @error('rccm_document')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-neutral-500 mt-1">Format: PDF, JPEG ou PNG. Taille max: 5 Mo</p>
                     </div>
 
                     <!-- Logo Upload -->
@@ -459,7 +470,7 @@
             <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
                 <div class="text-center lg:text-left mb-6">
                     <h1 class="text-2xl font-bold text-neutral-900">Choisissez votre plan</h1>
-                    <p class="text-neutral-500 mt-1">14 jours d'essai gratuit, sans engagement.</p>
+                    <p class="text-neutral-500 mt-1">Satisfait ou remboursé pendant 7 jours.</p>
                 </div>
 
                 <div class="space-y-3">
@@ -600,7 +611,7 @@
                 </div>
 
                 <p class="text-center text-sm text-neutral-500 mt-4">
-                    🎁 <strong>14 jours d'essai gratuit</strong> • Annulation à tout moment
+                    ✅ <strong>Satisfait ou remboursé 7 jours</strong> • Activation sous 24h
                 </p>
             </div>
         </form>

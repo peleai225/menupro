@@ -26,24 +26,25 @@ class DemoRestaurantSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get Pro plan
-        $plan = Plan::where('slug', 'pro')->first();
+        // Get active plan (MenuPro or fallback to any active)
+        $plan = Plan::where('slug', 'menupro')->first() 
+            ?? Plan::where('is_active', true)->first();
         
         if (!$plan) {
             $this->command->error('Please run PlanSeeder first.');
             return;
         }
 
-        // Create demo restaurant
+        // Create demo restaurant with slug "demo" for public demo access
         $restaurant = Restaurant::updateOrCreate(
-            ['slug' => 'le-delice'],
+            ['slug' => 'demo'],
             [
-                'name' => 'Le Délice',
-                'slug' => 'le-delice',
-                'email' => 'contact@ledelice.ci',
-                'phone' => '+225 0712345678',
-                'description' => 'Restaurant africain authentique au cœur d\'Abidjan. Spécialités ivoiriennes et plats du continent.',
-                'address' => 'Cocody, Rue des Jardins',
+                'name' => 'Le Maquis d\'Abidjan',
+                'slug' => 'demo',
+                'email' => 'demo@menupro.ci',
+                'phone' => '+2250506805382',
+                'description' => '🎯 RESTAURANT DE DÉMONSTRATION — Découvrez toutes les fonctionnalités de MenuPro ! Spécialités ivoiriennes : poulet braisé, attiéké, alloco et bien plus.',
+                'address' => 'Cocody, Angré 8ème Tranche',
                 'city' => 'Abidjan',
                 'status' => RestaurantStatus::ACTIVE,
                 'validated_at' => now(),
@@ -238,7 +239,8 @@ class DemoRestaurantSeeder extends Seeder
         // Create sample orders
         $this->createSampleOrders($restaurant);
 
-        $this->command->info('Demo restaurant "Le Délice" created successfully.');
+        $this->command->info('Demo restaurant "Le Maquis d\'Abidjan" created successfully.');
+        $this->command->info('Public URL: /r/demo');
         $this->command->info('Login: demo@menupro.ci / password');
     }
 

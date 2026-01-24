@@ -40,6 +40,26 @@ class RestaurantController extends Controller
             });
         }
 
+        // Verification filter
+        if ($request->filled('verification')) {
+            switch ($request->verification) {
+                case 'verified':
+                    $query->whereNotNull('verified_at');
+                    break;
+                case 'pending_verification':
+                    $query->whereNotNull('rccm')
+                          ->whereNotNull('rccm_document_path')
+                          ->whereNull('verified_at');
+                    break;
+                case 'no_rccm':
+                    $query->where(function ($q) {
+                        $q->whereNull('rccm')
+                          ->orWhereNull('rccm_document_path');
+                    });
+                    break;
+            }
+        }
+
         $restaurants = $query->latest()->paginate(20)->withQueryString();
 
         $plans = Plan::active()->ordered()->get();
@@ -51,6 +71,10 @@ class RestaurantController extends Controller
             'pending' => Restaurant::where('status', RestaurantStatus::PENDING)->count(),
             'suspended' => Restaurant::where('status', RestaurantStatus::SUSPENDED)->count(),
             'expired' => Restaurant::where('status', RestaurantStatus::EXPIRED)->count(),
+            'pending_verification' => Restaurant::whereNotNull('rccm')
+                ->whereNotNull('rccm_document_path')
+                ->whereNull('verified_at')
+                ->count(),
         ];
 
         return view('pages.super-admin.restaurants', compact('restaurants', 'plans', 'stats'));
@@ -257,6 +281,36 @@ class RestaurantController extends Controller
 
         return redirect()->route('restaurant.dashboard')
             ->with('info', "Vous êtes maintenant connecté en tant que {$owner->name}.");
+    }
+
+    /**
+     * Mark a restaurant as verified (RCCM validated).
+     */
+    public function verify(Restaurant $restaurant): RedirectResponse
+    {
+        if (!$restaurant->rccm || !$restaurant->rccm_document_path) {
+            return back()->with('error', 'Ce restaurant n\'a pas fourni de documents RCCM à vérifier.');
+        }
+
+        $restaurant->update([
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Restaurant marqué comme vérifié. Le badge "Vérifié" sera affiché sur sa page publique.');
+    }
+
+    /**
+     * Remove verification from a restaurant.
+     */
+    public function unverify(Restaurant $restaurant): RedirectResponse
+    {
+        $restaurant->update([
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        return back()->with('success', 'Vérification retirée.');
     }
 
     /**

@@ -35,7 +35,7 @@
                     Nous ne vendons jamais vos données. Nous pouvons les partager avec :
                 </p>
                 <ul>
-                    <li><strong>Lygos :</strong> pour le traitement des paiements</li>
+                    <li><strong>Partenaires de paiement :</strong> pour le traitement des paiements Mobile Money</li>
                     <li><strong>Fournisseurs de services :</strong> hébergement, email (sous contrat de confidentialité)</li>
                     <li><strong>Autorités :</strong> si requis par la loi</li>
                 </ul>

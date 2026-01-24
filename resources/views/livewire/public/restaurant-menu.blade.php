@@ -118,9 +118,19 @@
                     <div class="flex-1">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <h1 class="text-2xl md:text-3xl font-bold text-neutral-900">
-                                    {{ $restaurant->name }}
-                                </h1>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h1 class="text-2xl md:text-3xl font-bold text-neutral-900">
+                                        {{ $restaurant->name }}
+                                    </h1>
+                                    @if($restaurant->is_verified)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium" title="Établissement vérifié">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Vérifié
+                                        </span>
+                                    @endif
+                                </div>
                                 @if($restaurant->description)
                                     <p class="text-neutral-500 mt-1">{{ $restaurant->description }}</p>
                                 @endif

@@ -61,6 +61,7 @@
         <div class="flex overflow-x-auto gap-2 border-b border-neutral-200 mb-8">
             @foreach([
                 'general' => ['label' => 'Général', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                'verification' => ['label' => 'Vérification', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
                 'appearance' => ['label' => 'Apparence', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
                 'delivery' => ['label' => 'Livraison', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
                 'payment' => ['label' => 'Paiement', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
@@ -282,6 +283,191 @@
                 </div>
             </div>
             </form>
+        </div>
+
+        <!-- Verification Tab -->
+        <div x-show="activeTab === 'verification'" x-cloak>
+            <div class="max-w-2xl space-y-6">
+                <!-- Status Banner -->
+                @if($restaurant->is_verified)
+                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-blue-900">Établissement vérifié</h3>
+                                <p class="text-sm text-blue-700">Votre badge "Vérifié" est affiché sur votre page publique.</p>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($restaurant->has_pending_verification)
+                    <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-orange-900">Vérification en cours</h3>
+                                <p class="text-sm text-orange-700">Vos documents sont en attente de validation par notre équipe.</p>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-neutral-900">Non vérifié</h3>
+                                <p class="text-sm text-neutral-600">Fournissez votre RCCM pour obtenir le badge "Vérifié" et renforcer la confiance de vos clients.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Form -->
+                <form wire:submit="saveVerification" class="card p-6">
+                    <h2 class="text-lg font-bold text-neutral-900 mb-2">Documents d'entreprise</h2>
+                    <p class="text-neutral-600 mb-6">Ces informations permettent de vérifier votre établissement et d'afficher le badge "Vérifié" sur votre page publique.</p>
+
+                    <div class="space-y-5">
+                        <!-- Company Name -->
+                        <div>
+                            <label for="company_name" class="block text-sm font-medium text-neutral-700 mb-2">
+                                Nom de l'entreprise
+                            </label>
+                            <input 
+                                type="text" 
+                                id="company_name"
+                                wire:model="company_name"
+                                placeholder="SARL Le Délice"
+                                class="input w-full @error('company_name') border-red-500 @enderror"
+                            >
+                            @error('company_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- RCCM Number -->
+                        <div>
+                            <label for="rccm" class="block text-sm font-medium text-neutral-700 mb-2">
+                                Numéro RCCM
+                            </label>
+                            <input 
+                                type="text" 
+                                id="rccm"
+                                wire:model="rccm"
+                                placeholder="CI-ABJ-XX-2024-XXXXX"
+                                class="input w-full font-mono @error('rccm') border-red-500 @enderror"
+                            >
+                            @error('rccm')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="text-xs text-neutral-500 mt-1">Format: CI-ABJ-XX-2024-XXXXX</p>
+                        </div>
+
+                        <!-- RCCM Document -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                Extrait RCCM (document)
+                            </label>
+                            
+                            @if($existingRccmDocument)
+                                <div class="mb-3 p-3 bg-neutral-50 border border-neutral-200 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <div>
+                                            <span class="text-sm font-medium text-neutral-700">Document actuel</span>
+                                            <p class="text-xs text-neutral-500">Cliquez pour voir</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ Storage::url($existingRccmDocument) }}" target="_blank" class="btn btn-outline btn-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Voir
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <input 
+                                type="file" 
+                                wire:model="rccm_document"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('rccm_document') border-red-500 @enderror"
+                            >
+                            @error('rccm_document')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="text-xs text-neutral-500 mt-1">Format: PDF, JPEG ou PNG. Taille max: 5 Mo</p>
+
+                            <div wire:loading wire:target="rccm_document" class="mt-2 text-sm text-primary-600">
+                                <svg class="animate-spin inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Téléchargement en cours...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-neutral-200">
+                        <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2" wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveVerification">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Enregistrer
+                            </span>
+                            <span wire:loading wire:target="saveVerification" class="flex items-center gap-2">
+                                <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Enregistrement...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Info Box -->
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                    <h3 class="font-medium text-blue-900 mb-2">Pourquoi se faire vérifier ?</h3>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                        <li class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Badge "Vérifié" visible sur votre page publique</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Renforce la confiance de vos clients</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Distingue votre établissement des autres</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- Appearance Tab -->

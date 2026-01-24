@@ -124,6 +124,9 @@ Route::prefix('dashboard')
         // Settings (Livewire)
         Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings');
         
+        // QR Code
+        Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
+        
         // Promo Codes (Livewire)
         Route::get('codes-promo', \App\Livewire\Restaurant\PromoCodes::class)->name('promo-codes');
         
@@ -193,6 +196,8 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/reactivate', [RestaurantController::class, 'reactivate'])->name('restaurants.reactivate');
         Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->name('restaurants.impersonate');
         Route::post('restaurants/{restaurant}/extend-subscription', [RestaurantController::class, 'extendSubscription'])->name('restaurants.extend-subscription');
+        Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
+        Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
         
         // Subscriptions Management
         Route::get('abonnements', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'index'])->name('subscriptions.index');

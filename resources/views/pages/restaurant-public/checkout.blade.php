@@ -137,7 +137,7 @@
                                 </svg>
                             </button>
                             <p class="text-center text-sm text-neutral-500 mt-3">
-                                Paiement sécurisé via Lygos
+                                Paiement sécurisé par Mobile Money
                             </p>
                         </div>
                     </form>
@@ -195,14 +195,15 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                Paiement sécurisé via Lygos
+                                Paiement sécurisé
                             </div>
 
                             <!-- Payment Methods -->
-                            <div class="flex items-center justify-center gap-4 mt-4">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Orange_Money.png/200px-Orange_Money.png" alt="Orange Money" class="h-6 opacity-60">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/MTN_Mobile_Money.svg/200px-MTN_Mobile_Money.svg.png" alt="MTN" class="h-6 opacity-60">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Wave_logo.png/200px-Wave_logo.png" alt="Wave" class="h-6 opacity-60">
+                            <div class="flex items-center justify-center gap-3 mt-4">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_vfRbApK454_NJJitH8Cjm4tm6FcBHbYQdA&s" alt="Orange Money" class="h-6 rounded opacity-80">
+                                <div class="px-2 py-1 bg-yellow-500 rounded text-black text-xs font-bold">MTN</div>
+                                <img src="https://play-lh.googleusercontent.com/-Mp3XW7uhwn3KGQxUKGPoc4MbA5ti-3-q23TgoVi9ujBgHWW5n4IySvlG5Exwrxsjw=w240-h480-rw" alt="Wave" class="h-6 rounded opacity-80">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s" alt="Moov Money" class="h-6 rounded opacity-80">
                             </div>
                         </x-card>
                     </div>

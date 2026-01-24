@@ -9,6 +9,12 @@
             @if($stats['pending'] > 0)
                 <span class="badge bg-yellow-500/20 text-yellow-400">{{ $stats['pending'] }} en attente</span>
             @endif
+            @if(isset($stats['pending_verification']) && $stats['pending_verification'] > 0)
+                <a href="{{ route('super-admin.restaurants.index', ['verification' => 'pending_verification']) }}" 
+                   class="badge bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors">
+                    {{ $stats['pending_verification'] }} RCCM à vérifier
+                </a>
+            @endif
         </div>
     </div>
 
@@ -64,6 +70,12 @@
                 <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspendu</option>
                 <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Expiré</option>
             </select>
+            <select name="verification" class="h-10 px-4 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="">Vérification RCCM</option>
+                <option value="verified" {{ request('verification') === 'verified' ? 'selected' : '' }}>Vérifié</option>
+                <option value="pending_verification" {{ request('verification') === 'pending_verification' ? 'selected' : '' }}>À vérifier</option>
+                <option value="no_rccm" {{ request('verification') === 'no_rccm' ? 'selected' : '' }}>Sans RCCM</option>
+            </select>
             <button type="submit" class="h-10 px-6 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors">
                 Filtrer
             </button>
@@ -97,7 +109,22 @@
                                         </div>
                                     @endif
                                     <div>
-                                        <span class="font-medium text-white">{{ $restaurant->name }}</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-medium text-white">{{ $restaurant->name }}</span>
+                                            @if($restaurant->is_verified)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400" title="RCCM vérifié">
+                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                </span>
+                                            @elseif($restaurant->has_pending_verification)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-orange-500/20 text-orange-400" title="RCCM à vérifier">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                    </svg>
+                                                </span>
+                                            @endif
+                                        </div>
                                         @if($restaurant->city)
                                             <p class="text-xs text-neutral-500">{{ $restaurant->city }}</p>
                                         @endif

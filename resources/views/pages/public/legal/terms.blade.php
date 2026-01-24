@@ -14,7 +14,7 @@
                 <h2>2. Description du service</h2>
                 <p>
                     MenuPro est une plateforme SaaS qui permet aux restaurants de créer et gérer leur menu digital,
-                    de recevoir des commandes en ligne et d'accepter des paiements via l'API Lygos.
+                    de recevoir des commandes en ligne et d'accepter des paiements via Mobile Money.
                 </p>
 
                 <h2>3. Inscription et compte</h2>

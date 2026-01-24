@@ -164,6 +164,107 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- RCCM Verification -->
+            <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-white">Vérification RCCM</h2>
+                    @if($restaurant->is_verified)
+                        <span class="badge bg-blue-500/20 text-blue-400">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Vérifié
+                        </span>
+                    @else
+                        <span class="badge bg-neutral-500/20 text-neutral-400">Non vérifié</span>
+                    @endif
+                </div>
+
+                <div class="space-y-4 text-sm">
+                    <!-- Company Name -->
+                    <div>
+                        <p class="text-neutral-400">Nom entreprise</p>
+                        <p class="text-white">{{ $restaurant->company_name ?? '-' }}</p>
+                    </div>
+
+                    <!-- RCCM Number -->
+                    <div>
+                        <p class="text-neutral-400">Numéro RCCM</p>
+                        <p class="text-white font-mono">{{ $restaurant->rccm ?? '-' }}</p>
+                    </div>
+
+                    <!-- RCCM Document -->
+                    <div>
+                        <p class="text-neutral-400 mb-2">Document RCCM</p>
+                        @if($restaurant->rccm_document_path)
+                            @php
+                                $documentUrl = Storage::url($restaurant->rccm_document_path);
+                                $extension = pathinfo($restaurant->rccm_document_path, PATHINFO_EXTENSION);
+                                $isPdf = strtolower($extension) === 'pdf';
+                            @endphp
+                            <div class="flex flex-col gap-2">
+                                @if($isPdf)
+                                    <a href="{{ $documentUrl }}" target="_blank" class="flex items-center gap-2 p-3 bg-neutral-700/50 border border-neutral-600 rounded-lg hover:bg-neutral-700 transition-colors">
+                                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                        <div>
+                                            <span class="text-white font-medium">Document PDF</span>
+                                            <span class="block text-xs text-neutral-400">Cliquez pour ouvrir</span>
+                                        </div>
+                                    </a>
+                                @else
+                                    <a href="{{ $documentUrl }}" target="_blank" class="block">
+                                        <img src="{{ $documentUrl }}" alt="Document RCCM" class="w-full rounded-lg border border-neutral-600 hover:opacity-80 transition-opacity">
+                                    </a>
+                                @endif
+                                <a href="{{ $documentUrl }}" download class="btn btn-outline btn-sm border-neutral-600 text-neutral-300 hover:bg-neutral-700">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Télécharger
+                                </a>
+                            </div>
+                        @else
+                            <p class="text-neutral-500 italic">Aucun document fourni</p>
+                        @endif
+                    </div>
+                </div>
+
+                @if($restaurant->is_verified)
+                    <div class="mt-4 pt-4 border-t border-neutral-700">
+                        <p class="text-xs text-neutral-400 mb-2">
+                            Vérifié le {{ $restaurant->verified_at->format('d/m/Y à H:i') }}
+                            @if($restaurant->verifiedBy)
+                                par {{ $restaurant->verifiedBy->name }}
+                            @endif
+                        </p>
+                        <form method="POST" action="{{ route('super-admin.restaurants.unverify', $restaurant) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer la vérification ?')">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost w-full text-neutral-400 hover:text-white hover:bg-neutral-700">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Retirer la vérification
+                            </button>
+                        </form>
+                    </div>
+                @elseif($restaurant->rccm && $restaurant->rccm_document_path)
+                    <div class="mt-4 pt-4 border-t border-neutral-700">
+                        <p class="text-xs text-neutral-400 mb-3">Après vérification du document, vous pouvez marquer ce restaurant comme vérifié.</p>
+                        <form method="POST" action="{{ route('super-admin.restaurants.verify', $restaurant) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-success w-full">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                Marquer comme vérifié
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+
             <!-- Owner Info -->
             <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-white mb-4">Propriétaire</h2>

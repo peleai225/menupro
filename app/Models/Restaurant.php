@@ -59,6 +59,12 @@ class Restaurant extends Model
         'lygos_api_secret',
         'lygos_enabled',
         'settings',
+        'verified_at',
+        'verified_by',
+        'delivery_enabled',
+        'delivery_zones',
+        'cash_on_delivery',
+        'tagline',
     ];
 
     protected $casts = [
@@ -79,6 +85,9 @@ class Restaurant extends Model
         'estimated_prep_time' => 'integer',
         'lygos_enabled' => 'boolean',
         'settings' => 'array',
+        'verified_at' => 'datetime',
+        'delivery_enabled' => 'boolean',
+        'cash_on_delivery' => 'boolean',
     ];
 
     protected $hidden = [
@@ -117,6 +126,11 @@ class Restaurant extends Model
         return $this->hasOne(User::class)
             ->where('role', 'restaurant_admin')
             ->oldest();
+    }
+
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function categories(): HasMany
@@ -263,6 +277,22 @@ class Restaurant extends Model
         return route('r.menu', $this->slug);
     }
 
+    /**
+     * Check if the restaurant has been verified by admin (RCCM validated)
+     */
+    public function getIsVerifiedAttribute(): bool
+    {
+        return !is_null($this->verified_at);
+    }
+
+    /**
+     * Check if the restaurant has RCCM documents pending verification
+     */
+    public function getHasPendingVerificationAttribute(): bool
+    {
+        return !empty($this->rccm) && !empty($this->rccm_document_path) && is_null($this->verified_at);
+    }
+
     // =========================================================================
     // METHODS
     // =========================================================================
@@ -368,7 +398,12 @@ class Restaurant extends Model
         if (!$this->lygos_api_key) {
             return null;
         }
-        return decrypt($this->lygos_api_key);
+        try {
+            return decrypt($this->lygos_api_key);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            // If decryption fails (invalid key or corrupted data), return null
+            return null;
+        }
     }
 
     /**
@@ -379,7 +414,12 @@ class Restaurant extends Model
         if (!$this->lygos_api_secret) {
             return null;
         }
-        return decrypt($this->lygos_api_secret);
+        try {
+            return decrypt($this->lygos_api_secret);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            // If decryption fails (invalid key or corrupted data), return null
+            return null;
+        }
     }
 
     /**
@@ -413,7 +453,13 @@ class Restaurant extends Model
         $todayHours = $this->opening_hours[$dayOfWeek] ?? null;
         
         // Check if restaurant is closed for this day
-        if (!$todayHours || !($todayHours['is_open'] ?? false)) {
+        // Support both 'is_open' => true and 'closed' => false formats
+        if (!$todayHours) {
+            return false;
+        }
+        
+        $isOpenToday = $todayHours['is_open'] ?? !($todayHours['closed'] ?? false);
+        if (!$isOpenToday) {
             return false;
         }
 
