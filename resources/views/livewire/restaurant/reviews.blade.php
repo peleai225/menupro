@@ -222,7 +222,9 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             @keydown.escape.window="show = false; $wire.closeResponseModal()"
+             x-init="document.body.classList.add('overflow-hidden')"
+             x-on:remove="document.body.classList.remove('overflow-hidden')"
+             @keydown.escape.window="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeResponseModal()"
              class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
              x-cloak>
             <div x-show="show"
@@ -232,14 +234,14 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 @click.away="show = false; $wire.closeResponseModal()"
+                 @click.away="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeResponseModal()"
                  class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 
                 <!-- Header -->
                 <div class="p-6 border-b border-neutral-200">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-bold text-neutral-900">Répondre à l'avis</h2>
-                        <button wire:click="closeResponseModal" class="text-neutral-400 hover:text-neutral-600 transition-colors">
+                        <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeResponseModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>

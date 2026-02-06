@@ -21,6 +21,135 @@
         </div>
     @endif
 
+    <!-- Pending Subscription Alert -->
+    @php
+        $pendingSubscription = $restaurant->subscriptions()
+            ->where('status', \App\Enums\SubscriptionStatus::PENDING)
+            ->latest()
+            ->first();
+    @endphp
+    @if($pendingSubscription && $restaurant->status === \App\Enums\RestaurantStatus::PENDING)
+        <div class="mb-6 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl shadow-lg">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-yellow-900 mb-2">Paiement en attente</h3>
+                    <p class="text-yellow-800 mb-4">
+                        Votre compte a été créé mais votre abonnement est en attente de paiement. 
+                        Complétez votre paiement pour activer votre restaurant et commencer à recevoir des commandes.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-yellow-700 mb-1">Montant à payer :</p>
+                            <p class="text-2xl font-bold text-yellow-900">
+                                {{ number_format($pendingSubscription->amount_paid, 0, ',', ' ') }} FCFA
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('restaurant.subscription.retry', $pendingSubscription) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl">
+                                Compléter le paiement
+                            </button>
+                        </form>
+                    </div>
+                    <p class="text-xs text-yellow-600 mt-4">
+                        ⚠️ Votre compte sera supprimé automatiquement si le paiement n'est pas complété dans les 48 heures.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Trial Alert -->
+    @if($subscription && $subscription->isTrial())
+        @php
+            $daysLeft = $restaurant->days_until_expiration ?? 0;
+            $trialEndsAt = $subscription->ends_at;
+        @endphp
+        <div class="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl shadow-lg">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-blue-900 mb-2">Essai gratuit de 14 jours</h3>
+                    <p class="text-blue-800 mb-4">
+                        Vous profitez actuellement de votre essai gratuit. 
+                        @if($daysLeft > 0)
+                            Il vous reste <strong>{{ $daysLeft }} jour(s)</strong> pour tester toutes les fonctionnalités de MenuPro.
+                        @else
+                            Votre essai expire aujourd'hui !
+                        @endif
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-blue-700 mb-1">Expire le :</p>
+                            <p class="text-lg font-bold text-blue-900">
+                                {{ $trialEndsAt->locale('fr')->isoFormat('dddd D MMMM YYYY [à] HH:mm') }}
+                            </p>
+                        </div>
+                        <a href="{{ route('restaurant.subscription.plans') }}" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl">
+                            Convertir en abonnement payant
+                        </a>
+                    </div>
+                    @if($daysLeft <= 3)
+                        <p class="text-xs text-blue-600 mt-4 font-medium">
+                            ⚠️ Votre essai expire bientôt ! Souscrivez maintenant pour continuer à utiliser MenuPro sans interruption.
+                        </p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Expired Trial Alert -->
+    @if($restaurant->is_subscription_expired && $subscription && $subscription->isTrial())
+        <div class="mb-6 p-6 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-400 rounded-xl shadow-lg">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-red-900 mb-2">🔒 Votre essai gratuit a expiré</h3>
+                    <p class="text-red-800 mb-4 font-medium">
+                        Votre essai gratuit de 14 jours est terminé. Pour continuer à utiliser MenuPro, vous devez souscrire à un abonnement payant.
+                    </p>
+                    <div class="bg-white rounded-lg p-4 mb-4 border border-red-200">
+                        <p class="text-sm font-semibold text-red-900 mb-2">⚠️ Fonctionnalités actuellement bloquées :</p>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Réception de nouvelles commandes</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Accès complet au tableau de bord</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Gestion des commandes</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Statistiques et rapports</li>
+                        </ul>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-red-700 mb-1">Pour débloquer votre compte :</p>
+                            <p class="text-lg font-bold text-red-900">
+                                Souscrivez à un abonnement maintenant
+                            </p>
+                        </div>
+                        <a href="{{ route('restaurant.subscription.plans') }}" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl bg-red-600 hover:bg-red-700">
+                            Souscrire maintenant
+                        </a>
+                    </div>
+                    <p class="text-xs text-red-600 mt-4 font-medium">
+                        💡 Une fois le paiement effectué, votre compte sera immédiatement débloqué et vous pourrez continuer à utiliser MenuPro.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Current Plan -->
     <div class="card p-6 mb-8">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -29,7 +158,9 @@
                     <h1 class="text-2xl font-bold text-neutral-900">
                         Plan {{ $currentPlan?->name ?? 'Aucun' }}
                     </h1>
-                    @if($subscription && $subscription->isActive())
+                    @if($subscription && $subscription->isTrial())
+                        <span class="badge bg-blue-100 text-blue-700">Essai gratuit</span>
+                    @elseif($subscription && $subscription->isActive())
                         <span class="badge badge-success">Actif</span>
                     @elseif($restaurant->subscription_ends_at && $restaurant->subscription_ends_at->isFuture())
                         <span class="badge badge-success">Actif</span>
@@ -37,7 +168,11 @@
                         <span class="badge bg-red-100 text-red-700">Expiré</span>
                     @endif
                 </div>
-                @if($restaurant->subscription_ends_at)
+                @if($subscription && $subscription->isTrial())
+                    <p class="text-blue-600 font-medium">
+                        Essai gratuit • Expire le {{ $subscription->ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}
+                    </p>
+                @elseif($restaurant->subscription_ends_at)
                     @if($restaurant->subscription_ends_at->isFuture())
                         <p class="text-neutral-500">Votre abonnement expire le {{ $restaurant->subscription_ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
                     @else
@@ -48,7 +183,10 @@
                 @endif
             </div>
             <div class="text-right">
-                @if($currentPlan)
+                @if($subscription && $subscription->isTrial())
+                    <p class="text-3xl font-bold text-blue-600">Gratuit</p>
+                    <p class="text-sm text-blue-500">{{ $restaurant->days_until_expiration ?? 0 }} jour(s) restant(s)</p>
+                @elseif($currentPlan)
                     <p class="text-3xl font-bold text-neutral-900">{{ number_format($currentPlan->price, 0, ',', ' ') }} <span class="text-lg font-normal">F/mois</span></p>
                     @if($restaurant->subscription_ends_at && $restaurant->subscription_ends_at->isFuture())
                         <p class="text-sm text-neutral-500">Expire le {{ $restaurant->subscription_ends_at->format('d M Y') }}</p>
@@ -300,23 +438,33 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                @php
-                                    $statusColors = [
-                                        'active' => 'badge-success',
-                                        'pending' => 'bg-yellow-100 text-yellow-700',
-                                        'cancelled' => 'bg-red-100 text-red-700',
-                                        'expired' => 'bg-neutral-100 text-neutral-700',
-                                    ];
-                                    $statusLabels = [
-                                        'active' => 'Actif',
-                                        'pending' => 'En attente',
-                                        'cancelled' => 'Annulé',
-                                        'expired' => 'Expiré',
-                                    ];
-                                @endphp
-                                <span class="badge {{ $statusColors[$sub->status->value] ?? 'bg-neutral-100 text-neutral-700' }}">
-                                    {{ $statusLabels[$sub->status->value] ?? $sub->status->value }}
-                                </span>
+                                <div class="flex items-center gap-3">
+                                    @php
+                                        $statusColors = [
+                                            'active' => 'badge-success',
+                                            'pending' => 'bg-yellow-100 text-yellow-700',
+                                            'cancelled' => 'bg-red-100 text-red-700',
+                                            'expired' => 'bg-neutral-100 text-neutral-700',
+                                        ];
+                                        $statusLabels = [
+                                            'active' => 'Actif',
+                                            'pending' => 'En attente',
+                                            'cancelled' => 'Annulé',
+                                            'expired' => 'Expiré',
+                                        ];
+                                    @endphp
+                                    <span class="badge {{ $statusColors[$sub->status->value] ?? 'bg-neutral-100 text-neutral-700' }}">
+                                        {{ $statusLabels[$sub->status->value] ?? $sub->status->value }}
+                                    </span>
+                                    @if($sub->status->value === 'pending')
+                                        <form method="POST" action="{{ route('restaurant.subscription.retry', $sub) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                Reprendre le paiement
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @endforeach

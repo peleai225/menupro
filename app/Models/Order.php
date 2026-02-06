@@ -19,6 +19,7 @@ class Order extends Model
     protected $fillable = [
         'restaurant_id',
         'reference',
+        'tracking_token',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -32,6 +33,8 @@ class Order extends Model
         'total',
         'delivery_address',
         'delivery_city',
+        'delivery_latitude',
+        'delivery_longitude',
         'delivery_instructions',
         'scheduled_at',
         'table_number',
@@ -83,6 +86,9 @@ class Order extends Model
         static::creating(function ($order) {
             if (empty($order->reference)) {
                 $order->reference = static::generateReference();
+            }
+            if (empty($order->tracking_token)) {
+                $order->tracking_token = static::generateTrackingToken();
             }
         });
     }
@@ -241,6 +247,14 @@ class Order extends Model
         $random = strtoupper(Str::random(4));
         
         return "{$prefix}-{$date}-{$random}";
+    }
+
+    /**
+     * Generate unique tracking token (secure, unguessable)
+     */
+    public static function generateTrackingToken(): string
+    {
+        return Str::random(32);
     }
 
     /**
@@ -415,6 +429,79 @@ class Order extends Model
         $this->save();
 
         return $item;
+    }
+
+    /**
+     * Remove item from order
+     */
+    public function removeItem(OrderItem $item): bool
+    {
+        if (!$this->status->canBeModifiedByManager()) {
+            return false;
+        }
+
+        $item->delete();
+        $this->calculateTotals();
+        $this->save();
+
+        return true;
+    }
+
+    /**
+     * Update item quantity in order
+     */
+    public function updateItem(OrderItem $item, int $quantity): bool
+    {
+        if (!$this->status->canBeModifiedByManager()) {
+            return false;
+        }
+
+        if ($quantity <= 0) {
+            return $this->removeItem($item);
+        }
+
+        return $item->updateQuantity($quantity);
+    }
+
+    /**
+     * Check if order can be modified by manager
+     */
+    public function getCanBeModifiedByManagerAttribute(): bool
+    {
+        return $this->status->canBeModifiedByManager();
+    }
+
+    /**
+     * Check if order can be modified by customer
+     * Customers can modify until 5 minutes after payment OR before confirmation
+     */
+    public function canBeModifiedByCustomer(): bool
+    {
+        if (!$this->status->canBeModifiedByCustomer()) {
+            return false;
+        }
+
+        // If paid, check if less than 5 minutes have passed
+        if ($this->status === OrderStatus::PAID && $this->paid_at) {
+            $minutesSincePayment = $this->paid_at->diffInMinutes(now());
+            return $minutesSincePayment <= 5;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get remaining time for customer modification (in minutes)
+     */
+    public function getRemainingModificationTimeAttribute(): ?int
+    {
+        if ($this->status === OrderStatus::PAID && $this->paid_at) {
+            $minutesSincePayment = $this->paid_at->diffInMinutes(now());
+            $remaining = 5 - $minutesSincePayment;
+            return max(0, $remaining);
+        }
+
+        return null;
     }
 }
 

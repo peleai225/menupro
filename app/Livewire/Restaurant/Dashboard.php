@@ -144,6 +144,43 @@ class Dashboard extends Component
             ->get();
     }
 
+    /**
+     * Get active announcements for this restaurant.
+     */
+    #[Computed]
+    public function announcements()
+    {
+        $restaurant = auth()->user()->restaurant;
+        $user = auth()->user();
+        
+        if (!$restaurant) {
+            return collect();
+        }
+
+        return \App\Models\Announcement::active()
+            ->forDashboard()
+            ->latest()
+            ->get()
+            ->filter(fn($announcement) => $announcement->isVisibleFor($restaurant))
+            ->reject(fn($announcement) => $announcement->isDismissedBy($user));
+    }
+
+    /**
+     * Dismiss an announcement.
+     */
+    public function dismissAnnouncement($announcementId)
+    {
+        $user = auth()->user();
+        
+        \App\Models\AnnouncementDismissal::firstOrCreate([
+            'announcement_id' => $announcementId,
+            'user_id' => $user->id,
+        ]);
+
+        // Clear the computed property cache
+        unset($this->announcements);
+    }
+
     public function render()
     {
         $restaurant = auth()->user()->restaurant;

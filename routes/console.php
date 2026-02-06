@@ -2,6 +2,7 @@
 
 use App\Jobs\CheckLowStock;
 use App\Jobs\ProcessSubscriptionExpiration;
+use App\Jobs\ProcessTrialExpiration;
 use App\Jobs\SendSubscriptionReminders;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -24,6 +25,13 @@ Schedule::job(new ProcessSubscriptionExpiration)
     ->name('process-subscription-expiration')
     ->withoutOverlapping();
 
+// Process trial expirations daily at 1 AM
+Schedule::job(new ProcessTrialExpiration)
+    ->daily()
+    ->at('01:00')
+    ->name('process-trial-expiration')
+    ->withoutOverlapping();
+
 // Send subscription reminders (7 days before) daily at 9 AM
 Schedule::job(new SendSubscriptionReminders(7))
     ->daily()
@@ -36,4 +44,11 @@ Schedule::job(new CheckLowStock)
     ->daily()
     ->at('08:00')
     ->name('check-low-stock')
+    ->withoutOverlapping();
+
+// Cleanup unpaid registrations (older than 48h) daily at 2 AM
+Schedule::job(new \App\Jobs\CleanupUnpaidRegistrations)
+    ->daily()
+    ->at('02:00')
+    ->name('cleanup-unpaid-registrations')
     ->withoutOverlapping();

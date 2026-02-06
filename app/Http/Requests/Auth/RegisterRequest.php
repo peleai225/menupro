@@ -17,7 +17,15 @@ class RegisterRequest extends FormRequest
         return [
             // User info
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            // Email doit être unique à la fois pour les utilisateurs et pour les restaurants
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                'unique:restaurants,email',
+            ],
             'phone' => ['required', 'string', 'max:20'],
             'password' => ['required', Password::min(8)],
             
@@ -35,8 +43,15 @@ class RegisterRequest extends FormRequest
             'banner' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
             'rccm_document' => ['nullable', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
             
-            // Plan
-            'plan' => ['required', 'exists:plans,slug'],
+            // Plan (always menupro - unique plan)
+            'plan' => ['required', 'in:menupro'],
+            
+            // Billing period
+            'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
+            
+            // Add-ons
+            'addons' => ['nullable', 'array'],
+            'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
             
             // Terms
             'terms' => ['required', 'accepted'],

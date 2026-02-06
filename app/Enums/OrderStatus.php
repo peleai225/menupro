@@ -68,6 +68,34 @@ enum OrderStatus: string
         return in_array($this, [self::DRAFT, self::PENDING_PAYMENT]);
     }
 
+    /**
+     * Check if order can be modified by manager
+     * Managers can modify orders until PREPARING status
+     */
+    public function canBeModifiedByManager(): bool
+    {
+        return in_array($this, [
+            self::DRAFT,
+            self::PENDING_PAYMENT,
+            self::PAID,
+            self::CONFIRMED,
+            self::PREPARING,
+        ]);
+    }
+
+    /**
+     * Check if order can be modified by customer
+     * Customers can modify orders until 5 minutes after payment OR before confirmation
+     */
+    public function canBeModifiedByCustomer(): bool
+    {
+        return in_array($this, [
+            self::DRAFT,
+            self::PENDING_PAYMENT,
+            self::PAID, // Limited by time (5 minutes)
+        ]);
+    }
+
     public function canBeCancelled(): bool
     {
         return in_array($this, [self::DRAFT, self::PENDING_PAYMENT, self::PAID, self::CONFIRMED]);

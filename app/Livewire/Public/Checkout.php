@@ -36,6 +36,8 @@ class Checkout extends Component
     public ?string $delivery_address = null;
     public ?string $delivery_city = null;
     public ?string $delivery_instructions = null;
+    public ?float $delivery_latitude = null;
+    public ?float $delivery_longitude = null;
 
     // Dine In
     public ?string $table_number = null;
@@ -47,6 +49,9 @@ class Checkout extends Component
     public ?string $promo_code = null;
     public ?array $appliedPromo = null;
     public ?string $promoError = null;
+
+    // Payment Method
+    public ?string $payment_method = null; // 'lygos' or 'cash_on_delivery'
 
     public function mount(string $slug): void
     {
@@ -219,6 +224,55 @@ class Checkout extends Component
             return;
         }
 
+        // Determine payment method if not already set
+        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
+        $lygosAvailable = $this->restaurant->lygos_enabled && $lygos->isConfigured();
+        $cashOnDeliveryAvailable = $this->restaurant->cash_on_delivery ?? false;
+
+        if (!$this->payment_method) {
+            if ($lygosAvailable && $cashOnDeliveryAvailable) {
+                // Both available - require user to choose
+                session()->flash('error', 'Veuillez choisir un mode de paiement.');
+                return;
+            } elseif ($lygosAvailable) {
+                $this->payment_method = 'lygos';
+            } elseif ($cashOnDeliveryAvailable) {
+                $this->payment_method = 'cash_on_delivery';
+            } else {
+                // Default to cash on delivery
+                $this->payment_method = 'cash_on_delivery';
+            }
+        } else {
+            // Validate payment method if both are available
+            if ($lygosAvailable && $cashOnDeliveryAvailable) {
+                if (!in_array($this->payment_method, ['lygos', 'cash_on_delivery'])) {
+                    session()->flash('error', 'Mode de paiement invalide.');
+                    return;
+                }
+            }
+        }
+
+        // Validate delivery radius if delivery type
+        if ($this->order_type === 'delivery' && $this->delivery_latitude && $this->delivery_longitude) {
+            $restaurantLat = $this->restaurant->latitude ?? 5.3600;
+            $restaurantLng = $this->restaurant->longitude ?? -4.0083;
+            $deliveryRadius = $this->restaurant->delivery_radius_km ?? 10;
+            
+            if ($deliveryRadius > 0) {
+                $distance = $this->calculateDistance(
+                    $restaurantLat, 
+                    $restaurantLng, 
+                    $this->delivery_latitude, 
+                    $this->delivery_longitude
+                );
+                
+                if ($distance > $deliveryRadius) {
+                    session()->flash('error', "Cette adresse est hors de notre zone de livraison (max: {$deliveryRadius} km). Distance: " . number_format($distance, 2) . " km.");
+                    return;
+                }
+            }
+        }
+
         // Create order
         $order = Order::create([
             'restaurant_id' => $this->restaurant->id,
@@ -235,6 +289,8 @@ class Checkout extends Component
             'total' => $this->total,
             'delivery_address' => $this->delivery_address,
             'delivery_city' => $this->delivery_city,
+            'delivery_latitude' => $this->delivery_latitude,
+            'delivery_longitude' => $this->delivery_longitude,
             'delivery_instructions' => $this->delivery_instructions,
             'table_number' => $this->table_number,
             'customer_notes' => $this->customer_notes,
@@ -266,10 +322,18 @@ class Checkout extends Component
         // Clear cart
         session()->forget("cart.{$this->restaurant->id}");
 
-        // Check if payment is required
-        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
-        if ($this->restaurant->lygos_enabled && $lygos->isConfigured()) {
-            // Lygos is configured - MUST go through payment gateway
+        // Notify restaurant immediately when order is created (before payment redirect)
+        // This ensures real-time notification even for online payments
+        $this->restaurant->users()
+            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+            ->each(function ($user) use ($order) {
+                $user->notify(new NewOrderNotification($order));
+            });
+
+        // Process payment based on selected method
+        if ($this->payment_method === 'lygos') {
+            // Lygos payment - redirect to payment gateway
+            $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
             try {
                 // Redirect to payment
                 $result = $lygos->createPayment(
@@ -295,7 +359,7 @@ class Checkout extends Component
                         'result' => $result,
                     ]);
                     // Keep order in PENDING_PAYMENT status - user can retry
-                    $this->redirect(route('r.order.status', [$this->restaurant->slug, $order]));
+                    $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                     return;
                 }
             } catch (\Exception $e) {
@@ -306,24 +370,45 @@ class Checkout extends Component
                     'error' => $e->getMessage(),
                 ]);
                 // Keep order in PENDING_PAYMENT status - user can retry
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order]));
+                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                 return;
             }
-        } else {
-            // No payment gateway configured - mark as paid (payment on site)
+        } elseif ($this->payment_method === 'cash_on_delivery') {
+            // Cash on delivery - mark as paid (will be collected on delivery)
             $order->markAsPaid([
-                'method' => 'on_site',
-                'metadata' => ['note' => 'Paiement sur place'],
+                'method' => 'cash_on_delivery',
+                'metadata' => ['note' => 'Paiement à la livraison'],
+            ]);
+        } else {
+            // Fallback - should not happen
+            $order->markAsPaid([
+                'method' => 'cash_on_delivery',
+                'metadata' => ['note' => 'Paiement à la livraison'],
             ]);
         }
 
-        // Notify restaurant owner
-        if ($this->restaurant->owner) {
-            $this->restaurant->owner->notify(new NewOrderNotification($order));
-        }
-
         // Redirect to order status
-        $this->redirect(route('r.order.status', [$this->restaurant->slug, $order]));
+        $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+    }
+
+    /**
+     * Calculate distance between two coordinates (Haversine formula)
+     */
+    private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371; // Radius of the earth in km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat/2) * sin($dLat/2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon/2) * sin($dLon/2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        $distance = $earthRadius * $c; // Distance in km
+
+        return $distance;
     }
 
     public function render()

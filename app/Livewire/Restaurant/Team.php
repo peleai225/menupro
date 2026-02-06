@@ -4,6 +4,7 @@ namespace App\Livewire\Restaurant;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Notifications\TeamInvitationNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Rule;
@@ -79,22 +80,16 @@ class Team extends Component
             return;
         }
 
-        // Check quota
-        $currentPlan = $restaurant->currentPlan;
-        $maxTeam = $currentPlan?->team_members ?? 1;
-        $currentTeamCount = $restaurant->users()->count();
-
-        if ($currentTeamCount >= $maxTeam && !$this->editingUser) {
-            session()->flash('error', "Vous avez atteint la limite de {$maxTeam} membre(s) d'équipe pour votre plan.");
-            return;
-        }
+        // Note: Plan unique - pas de restriction sur le nombre de membres d'équipe
 
         try {
+            // Combiner prénom et nom en un seul champ 'name'
+            $fullName = trim($this->first_name . ' ' . $this->last_name);
+
             if ($this->editingUser) {
                 // Update existing user
                 $this->editingUser->update([
-                    'first_name' => $this->first_name,
-                    'last_name' => $this->last_name,
+                    'name' => $fullName,
                     'email' => $this->email,
                     'phone' => $this->phone,
                     'role' => UserRole::from($this->role),
@@ -106,20 +101,19 @@ class Team extends Component
                 $tempPassword = Str::random(12);
 
                 $user = User::create([
-                    'first_name' => $this->first_name,
-                    'last_name' => $this->last_name,
+                    'name' => $fullName,
                     'email' => $this->email,
                     'phone' => $this->phone,
                     'password' => Hash::make($tempPassword),
                     'role' => UserRole::from($this->role),
                     'restaurant_id' => $restaurant->id,
-                    'email_verified_at' => null, // Require email verification
+                    'email_verified_at' => now(), // Auto-vérifier pour permettre la connexion immédiate
                 ]);
 
-                // TODO: Send invitation email with temp password
-                // Mail::to($user->email)->send(new TeamInvitation($user, $tempPassword));
+                // Envoyer l'email d'invitation avec le mot de passe temporaire
+                $user->notify(new TeamInvitationNotification($restaurant, $tempPassword));
 
-                session()->flash('success', "Invitation envoyée à {$user->email}. Un email avec les instructions de connexion a été envoyé.");
+                session()->flash('success', "Membre ajouté avec succès ! Un email d'invitation a été envoyé à {$user->email}.");
             }
 
             $this->closeInviteModal();
@@ -138,8 +132,12 @@ class Team extends Component
         }
 
         $this->editingUser = $user;
-        $this->first_name = $user->first_name;
-        $this->last_name = $user->last_name;
+        
+        // Séparer le nom complet en prénom et nom
+        $nameParts = explode(' ', $user->name, 2);
+        $this->first_name = $nameParts[0] ?? '';
+        $this->last_name = $nameParts[1] ?? '';
+        
         $this->email = $user->email;
         $this->phone = $user->phone;
         $this->role = $user->role->value;
@@ -185,6 +183,35 @@ class Team extends Component
         }
     }
 
+    public function resendInvitation(User $user): void
+    {
+        // Prevent resending to self
+        if ($user->id === auth()->id()) {
+            session()->flash('error', 'Vous ne pouvez pas vous renvoyer une invitation.');
+            return;
+        }
+
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant) {
+            session()->flash('error', 'Restaurant introuvable.');
+            return;
+        }
+
+        try {
+            // Générer un nouveau mot de passe temporaire
+            $tempPassword = Str::random(12);
+            $user->update(['password' => Hash::make($tempPassword)]);
+
+            // Renvoyer l'email d'invitation
+            $user->notify(new TeamInvitationNotification($restaurant, $tempPassword));
+
+            session()->flash('success', "Invitation renvoyée à {$user->email} avec un nouveau mot de passe.");
+        } catch (\Exception $e) {
+            session()->flash('error', 'Une erreur est survenue : ' . $e->getMessage());
+        }
+    }
+
     public function render()
     {
         $restaurant = auth()->user()->restaurant;
@@ -203,26 +230,20 @@ class Team extends Component
         // Search
         if (!empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('last_name', 'like', '%' . $this->search . '%')
+                $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('email', 'like', '%' . $this->search . '%');
             });
         }
 
         $teamMembers = $query->latest()->paginate(15);
 
-        $currentPlan = $restaurant->currentPlan;
-        $maxTeam = $currentPlan?->team_members ?? 1;
         $currentTeamCount = $restaurant->users()->count();
-        $canAddMore = $currentTeamCount < $maxTeam;
 
         $subscription = $restaurant->activeSubscription;
 
         return view('livewire.restaurant.team', [
             'teamMembers' => $teamMembers,
-            'maxTeam' => $maxTeam,
             'currentTeamCount' => $currentTeamCount,
-            'canAddMore' => $canAddMore,
         ])
             ->layout('components.layouts.admin-restaurant', [
                 'title' => 'Équipe',

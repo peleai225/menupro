@@ -16,6 +16,8 @@ class Subscription extends Model
         'restaurant_id',
         'plan_id',
         'status',
+        'is_trial',
+        'trial_days',
         'starts_at',
         'ends_at',
         'amount_paid',
@@ -30,6 +32,8 @@ class Subscription extends Model
 
     protected $casts = [
         'status' => SubscriptionStatus::class,
+        'is_trial' => 'boolean',
+        'trial_days' => 'integer',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
         'amount_paid' => 'integer',
@@ -59,7 +63,13 @@ class Subscription extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', SubscriptionStatus::ACTIVE);
+        return $query->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL]);
+    }
+
+    public function scopeTrial($query)
+    {
+        return $query->where('status', SubscriptionStatus::TRIAL)
+            ->orWhere('is_trial', true);
     }
 
     public function scopeExpired($query)
@@ -125,7 +135,32 @@ class Subscription extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === SubscriptionStatus::ACTIVE && $this->ends_at && $this->ends_at->isFuture();
+        return in_array($this->status, [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL]) 
+            && $this->ends_at 
+            && $this->ends_at->isFuture();
+    }
+
+    /**
+     * Check if subscription is a trial
+     */
+    public function isTrial(): bool
+    {
+        return $this->is_trial || $this->status === SubscriptionStatus::TRIAL;
+    }
+
+    /**
+     * Convert trial to paid subscription
+     */
+    public function convertToPaid(array $paymentData = []): bool
+    {
+        return $this->update([
+            'status' => SubscriptionStatus::ACTIVE,
+            'is_trial' => false,
+            'amount_paid' => $paymentData['amount'] ?? $this->amount_paid,
+            'payment_reference' => $paymentData['reference'] ?? $this->payment_reference,
+            'payment_method' => $paymentData['method'] ?? $this->payment_method,
+            'payment_metadata' => array_merge($this->payment_metadata ?? [], $paymentData['metadata'] ?? []),
+        ]);
     }
 
     /**

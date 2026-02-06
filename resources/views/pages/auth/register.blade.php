@@ -1,30 +1,6 @@
 <x-layouts.auth title="Inscription">
     <div 
-        x-data="{ 
-            step: 1, 
-            totalSteps: 3,
-            loading: false,
-            formData: {
-                name: '',
-                email: '',
-                phone: '',
-                password: '',
-                restaurant_name: '',
-                restaurant_type: '',
-                company_name: '',
-                rccm: '',
-                plan: 'pro'
-            },
-            showPassword: false,
-            logoPreview: null,
-            bannerPreview: null,
-            validateStep1() {
-                return this.formData.name && this.formData.email && this.formData.phone && this.formData.password.length >= 8;
-            },
-            validateStep2() {
-                return this.formData.restaurant_name && this.formData.restaurant_type;
-            }
-        }" 
+        x-data="registerForm()" 
         class="animate-fade-in"
     >
         <!-- Progress Steps -->
@@ -85,7 +61,26 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data" @submit="loading = true">
+        <!-- Messages d'erreur globaux -->
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-red-800 mb-2">Erreurs de validation</h3>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-red-700">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data" @submit.prevent="submitForm()" id="register-form">
             @csrf
 
             <!-- ============================================== -->
@@ -465,111 +460,271 @@
             </div>
 
             <!-- ============================================== -->
-            <!-- STEP 3: Plan Selection -->
+            <!-- STEP 3: Plan Selection (MenuPro Unique) -->
             <!-- ============================================== -->
-            <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+            <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
+                 x-data="pricingCalculator()" 
+                 x-init="init(); formData.plan = 'menupro';">
                 <div class="text-center lg:text-left mb-6">
-                    <h1 class="text-2xl font-bold text-neutral-900">Choisissez votre plan</h1>
-                    <p class="text-neutral-500 mt-1">Satisfait ou remboursé pendant 7 jours.</p>
+                    <h1 class="text-2xl font-bold text-neutral-900">Choisissez votre abonnement</h1>
+                    <p class="text-neutral-500 mt-1">Un seul plan, toutes les fonctionnalités. Économisez jusqu'à 15% avec l'abonnement annuel.</p>
                 </div>
 
-                <div class="space-y-3">
-                    <!-- Starter Plan -->
-                    <label class="block cursor-pointer group">
-                        <input type="radio" name="plan" value="starter" x-model="formData.plan" class="hidden">
-                        <div 
-                            class="p-4 rounded-xl border-2 transition-all duration-200"
-                            :class="formData.plan === 'starter' ? 'border-primary-500 bg-primary-50 shadow-sm' : 'border-neutral-200 group-hover:border-neutral-300 group-hover:bg-neutral-50'"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div 
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-                                        :class="formData.plan === 'starter' ? 'border-primary-500 bg-primary-500' : 'border-neutral-300'"
-                                    >
-                                        <svg x-show="formData.plan === 'starter'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span class="font-semibold text-neutral-900">Starter</span>
-                                        <span class="text-neutral-500 text-sm ml-2 hidden sm:inline">• 20 plats, 5 catégories</span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-neutral-900">9 900</span>
-                                    <span class="text-neutral-500 text-sm"> F/mois</span>
-                                </div>
-                            </div>
-                        </div>
-                    </label>
+                <!-- Hidden inputs for form submission -->
+                <input type="hidden" name="plan" value="menupro" x-model="formData.plan">
+                <input type="hidden" name="billing_period" :value="billingCycle">
+                <template x-for="addon in selectedAddons" :key="addon">
+                    <input type="hidden" :name="'addons[]'" :value="addon">
+                </template>
+                <input type="hidden" name="billing_period" :value="billingCycle">
+                <template x-for="addon in selectedAddons" :key="addon">
+                    <input type="hidden" name="addons[]" :value="addon">
+                </template>
 
-                    <!-- Pro Plan -->
-                    <label class="block cursor-pointer group">
-                        <input type="radio" name="plan" value="pro" x-model="formData.plan" class="hidden">
-                        <div 
-                            class="p-4 rounded-xl border-2 transition-all duration-200 relative"
-                            :class="formData.plan === 'pro' ? 'border-primary-500 bg-primary-50 shadow-sm' : 'border-neutral-200 group-hover:border-neutral-300 group-hover:bg-neutral-50'"
-                        >
-                            <span class="absolute -top-2.5 left-4 bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                                ⭐ Recommandé
-                            </span>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div 
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-                                        :class="formData.plan === 'pro' ? 'border-primary-500 bg-primary-500' : 'border-neutral-300'"
-                                    >
-                                        <svg x-show="formData.plan === 'pro'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span class="font-semibold text-neutral-900">Pro</span>
-                                        <span class="text-neutral-500 text-sm ml-2 hidden sm:inline">• 50 plats, 3 employés</span>
-                                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column: Features & Add-ons -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Features List -->
+                        <div class="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
+                            <h2 class="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Fonctionnalités incluses
+                            </h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>100 plats max</span>
                                 </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-neutral-900">19 900</span>
-                                    <span class="text-neutral-500 text-sm"> F/mois</span>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>30 catégories</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>5 employés</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>2 000 commandes/mois</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Gestion livraison</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Stock en temps réel</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Statistiques avancées</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Réservations en ligne</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Avis clients</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>Paiement Lygos</span>
                                 </div>
                             </div>
                         </div>
-                    </label>
 
-                    <!-- Premium Plan -->
-                    <label class="block cursor-pointer group">
-                        <input type="radio" name="plan" value="premium" x-model="formData.plan" class="hidden">
-                        <div 
-                            class="p-4 rounded-xl border-2 transition-all duration-200"
-                            :class="formData.plan === 'premium' ? 'border-primary-500 bg-primary-50 shadow-sm' : 'border-neutral-200 group-hover:border-neutral-300 group-hover:bg-neutral-50'"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div 
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-                                        :class="formData.plan === 'premium' ? 'border-primary-500 bg-primary-500' : 'border-neutral-300'"
-                                    >
-                                        <svg x-show="formData.plan === 'premium'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
+                        <!-- Add-ons Section -->
+                        <div class="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
+                            <h2 class="text-xl font-bold text-neutral-900 mb-2 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Add-ons optionnels
+                            </h2>
+                            <p class="text-sm text-neutral-600 mb-4">Personnalisez votre plan selon vos besoins</p>
+                            <div class="space-y-3">
+                                <label class="flex items-center justify-between p-4 rounded-lg border-2 border-neutral-200 hover:border-primary-300 cursor-pointer transition-all group"
+                                       :class="{ 'border-primary-500 bg-primary-50': selectedAddons.includes('priority_support') }">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <input type="checkbox" 
+                                               x-model="selectedAddons" 
+                                               value="priority_support"
+                                               class="w-5 h-5 rounded border-neutral-300 text-primary-500 focus:ring-primary-500 cursor-pointer">
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-neutral-900">Support Prioritaire</div>
+                                            <div class="text-sm text-neutral-600">Réponse garantie sous 2h</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="font-semibold text-neutral-900">Premium</span>
-                                        <span class="text-neutral-500 text-sm ml-2 hidden sm:inline">• Illimité, support VIP</span>
+                                    <div class="text-right">
+                                        <div class="font-bold text-primary-600">5 000 F</div>
+                                        <div class="text-xs text-neutral-500">/mois</div>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center justify-between p-4 rounded-lg border-2 border-neutral-200 hover:border-primary-300 cursor-pointer transition-all group"
+                                       :class="{ 'border-primary-500 bg-primary-50': selectedAddons.includes('custom_domain') }">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <input type="checkbox" 
+                                               x-model="selectedAddons" 
+                                               value="custom_domain"
+                                               class="w-5 h-5 rounded border-neutral-300 text-primary-500 focus:ring-primary-500 cursor-pointer">
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-neutral-900">Domaine Personnalisé</div>
+                                            <div class="text-sm text-neutral-600">Votre propre nom de domaine</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-primary-600">3 000 F</div>
+                                        <div class="text-xs text-neutral-500">/mois</div>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center justify-between p-4 rounded-lg border-2 border-neutral-200 hover:border-primary-300 cursor-pointer transition-all group"
+                                       :class="{ 'border-primary-500 bg-primary-50': selectedAddons.includes('extra_employees') }">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <input type="checkbox" 
+                                               x-model="selectedAddons" 
+                                               value="extra_employees"
+                                               class="w-5 h-5 rounded border-neutral-300 text-primary-500 focus:ring-primary-500 cursor-pointer">
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-neutral-900">Employés Supplémentaires</div>
+                                            <div class="text-sm text-neutral-600">Par employé supplémentaire</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-primary-600">2 000 F</div>
+                                        <div class="text-xs text-neutral-500">/mois</div>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center justify-between p-4 rounded-lg border-2 border-neutral-200 hover:border-primary-300 cursor-pointer transition-all group"
+                                       :class="{ 'border-primary-500 bg-primary-50': selectedAddons.includes('extra_dishes') }">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <input type="checkbox" 
+                                               x-model="selectedAddons" 
+                                               value="extra_dishes"
+                                               class="w-5 h-5 rounded border-neutral-300 text-primary-500 focus:ring-primary-500 cursor-pointer">
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-neutral-900">Plats Supplémentaires</div>
+                                            <div class="text-sm text-neutral-600">Par lot de 10 plats</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-primary-600">500 F</div>
+                                        <div class="text-xs text-neutral-500">/mois</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Sticky Price Card -->
+                    <div class="lg:col-span-1">
+                        <div class="sticky top-8">
+                            <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-6 border-2 border-primary-200 shadow-lg">
+                                <!-- Badge MEILLEUR pour Annuel -->
+                                <div x-show="billingCycle === 'annual'" 
+                                     x-transition
+                                     class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                                    <div class="bg-primary-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md">
+                                        MEILLEUR
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-neutral-900">39 900</span>
-                                    <span class="text-neutral-500 text-sm"> F/mois</span>
+
+                                <div class="text-center mb-6 pt-2">
+                                    <h3 class="text-2xl font-bold text-neutral-900 mb-1">MenuPro</h3>
+                                    <p class="text-neutral-600 text-sm">Plan unique • Toutes les fonctionnalités</p>
+                                </div>
+
+                                <!-- Billing Cycle Toggle -->
+                                <div class="mb-6">
+                                    <div class="grid grid-cols-2 gap-2 bg-white p-1 rounded-lg">
+                                        <button @click="billingCycle = 'monthly'"
+                                                :class="{ 'bg-primary-500 text-white': billingCycle === 'monthly', 'text-neutral-700 hover:bg-neutral-100': billingCycle !== 'monthly' }"
+                                                class="px-3 py-2 rounded-md text-xs font-semibold transition-all">
+                                            Mensuel
+                                        </button>
+                                        <button @click="billingCycle = 'quarterly'"
+                                                :class="{ 'bg-primary-500 text-white': billingCycle === 'quarterly', 'text-neutral-700 hover:bg-neutral-100': billingCycle !== 'quarterly' }"
+                                                class="px-3 py-2 rounded-md text-xs font-semibold transition-all">
+                                            Trim.
+                                        </button>
+                                        <button @click="billingCycle = 'semiannual'"
+                                                :class="{ 'bg-primary-500 text-white': billingCycle === 'semiannual', 'text-neutral-700 hover:bg-neutral-100': billingCycle !== 'semiannual' }"
+                                                class="px-3 py-2 rounded-md text-xs font-semibold transition-all">
+                                            Sem.
+                                        </button>
+                                        <button @click="billingCycle = 'annual'"
+                                                :class="{ 'bg-primary-500 text-white': billingCycle === 'annual', 'text-neutral-700 hover:bg-neutral-100': billingCycle !== 'annual' }"
+                                                class="px-3 py-2 rounded-md text-xs font-semibold transition-all">
+                                            Annuel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Price Display -->
+                                <div class="text-center mb-4">
+                                    <div class="mb-2">
+                                        <span class="text-4xl font-bold text-neutral-900" x-text="formatPrice(basePrice)"></span>
+                                        <span class="text-neutral-600 text-sm ml-1">FCFA</span>
+                                    </div>
+                                    <div class="text-xs text-neutral-600" x-show="billingCycle !== 'monthly'">
+                                        <span x-text="'Économisez ' + formatPrice(discountAmount) + ' FCFA'"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Add-ons Total -->
+                                <div x-show="addonsTotal > 0" 
+                                     x-transition
+                                     class="mb-4 pt-4 border-t border-primary-200">
+                                    <div class="space-y-1 text-sm">
+                                        <div class="flex justify-between text-neutral-700">
+                                            <span>Add-ons</span>
+                                            <span x-text="formatPrice(addonsTotal) + ' FCFA'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Total Price -->
+                                <div class="mb-6 pt-4 border-t-2 border-primary-300">
+                                    <div class="flex justify-between items-baseline mb-1">
+                                        <span class="text-lg font-semibold text-neutral-900">Total</span>
+                                        <span class="text-2xl font-bold text-primary-600" x-text="formatPrice(totalPrice)"></span>
+                                    </div>
+                                    <div class="text-xs text-neutral-600 text-right">
+                                        <span x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
                 <!-- Terms -->
-                <div class="mt-6 p-4 bg-neutral-50 rounded-xl">
+                <div class="mt-6 p-4 bg-neutral-50 rounded-xl" :class="submitError && !document.querySelector('input[name=terms]')?.checked ? 'border-2 border-red-300' : ''">
                     <label class="flex items-start gap-3 cursor-pointer">
                         <input 
                             type="checkbox" 
@@ -584,6 +739,19 @@
                             <a href="{{ route('privacy') }}" target="_blank" class="text-primary-600 hover:underline font-medium">politique de confidentialité</a>.
                         </span>
                     </label>
+                    @error('terms')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <!-- Message d'erreur de soumission -->
+                <div x-show="submitError" x-cloak class="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-red-700" x-text="submitError"></p>
+                    </div>
                 </div>
 
                 <div class="flex gap-3 mt-6">
@@ -596,7 +764,7 @@
                     <button 
                         type="submit" 
                         class="btn btn-primary flex-1 h-12 relative overflow-hidden"
-                        :disabled="loading"
+                        :disabled="loading || submitted"
                     >
                         <span :class="{ 'opacity-0': loading }">
                             Créer mon restaurant
@@ -611,7 +779,7 @@
                 </div>
 
                 <p class="text-center text-sm text-neutral-500 mt-4">
-                    ✅ <strong>Satisfait ou remboursé 7 jours</strong> • Activation sous 24h
+                    <svg class="w-4 h-4 text-secondary-500 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <strong>Satisfait ou remboursé 7 jours</strong> • Activation sous 24h
                 </p>
             </div>
         </form>
@@ -630,4 +798,185 @@
             Se connecter à mon compte
         </a>
     </div>
+
+    @push('scripts')
+    <script>
+        // Fonction Alpine.js pour le formulaire d'inscription
+        function registerForm() {
+            return {
+                step: 1,
+                totalSteps: 3,
+                loading: false,
+                submitted: false,
+                submitError: null,
+                formData: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    password: '',
+                    restaurant_name: '',
+                    restaurant_type: '',
+                    company_name: '',
+                    rccm: '',
+                    plan: 'menupro'
+                },
+                showPassword: false,
+                logoPreview: null,
+                bannerPreview: null,
+                validateStep1() {
+                    return this.formData.name && this.formData.email && this.formData.phone && this.formData.password.length >= 8;
+                },
+                validateStep2() {
+                    return this.formData.restaurant_name && this.formData.restaurant_type;
+                },
+                submitForm() {
+                    // Réinitialiser l'erreur
+                    this.submitError = null;
+                    
+                    // Vérifier que tous les champs requis sont remplis
+                    if (!this.validateStep1() || !this.validateStep2()) {
+                        this.submitError = 'Veuillez remplir tous les champs obligatoires.';
+                        // Retourner à l'étape avec des erreurs
+                        if (!this.validateStep1()) {
+                            this.step = 1;
+                        } else if (!this.validateStep2()) {
+                            this.step = 2;
+                        }
+                        this.loading = false;
+                        this.submitted = false;
+                        return;
+                    }
+                    
+                    // Vérifier que les conditions sont acceptées
+                    const termsCheckbox = document.querySelector('input[name=terms]');
+                    if (!termsCheckbox || !termsCheckbox.checked) {
+                        this.submitError = 'Vous devez accepter les conditions d\'utilisation.';
+                        this.step = 3;
+                        this.loading = false;
+                        this.submitted = false;
+                        return;
+                    }
+                    
+                    // Désactiver le bouton et afficher le loader
+                    this.loading = true;
+                    this.submitted = true;
+                    this.submitError = null;
+                    
+                    // Soumettre le formulaire
+                    const form = document.getElementById('register-form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            };
+        }
+        
+        // Rafraîchir le token CSRF périodiquement pour éviter l'expiration (erreur 419)
+        (function() {
+            const form = document.getElementById('register-form');
+            if (form) {
+                const tokenInput = form.querySelector('input[name="_token"]');
+                if (tokenInput) {
+                    // Rafraîchir le token toutes les 3 minutes (avant expiration de session)
+                    setInterval(function() {
+                        fetch('{{ route("csrf.token") }}', {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.token) {
+                                tokenInput.value = data.token;
+                                // Mettre à jour aussi le meta tag si présent
+                                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                                if (metaToken) {
+                                    metaToken.setAttribute('content', data.token);
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            // Ignorer silencieusement les erreurs
+                        });
+                    }, 3 * 60 * 1000); // 3 minutes
+                }
+            }
+        })();
+        
+        // Afficher les erreurs de validation si présentes
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('register-form');
+            if (form) {
+                // Si des erreurs sont présentes, scroller vers le haut
+                const errors = form.querySelector('.bg-red-50');
+                if (errors) {
+                    errors.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+        
+        function pricingCalculator() {
+            return {
+                billingCycle: 'monthly',
+                selectedAddons: [],
+                cycles: [
+                    { id: 'monthly', label: 'Mensuel', months: 1, price: 25000, discount: 0 },
+                    { id: 'quarterly', label: 'Trimestriel', months: 3, price: 69750, discount: 7, original: 75000 },
+                    { id: 'semiannual', label: 'Semestriel', months: 6, price: 130500, discount: 13, original: 150000 },
+                    { id: 'annual', label: 'Annuel', months: 12, price: 255000, discount: 15, original: 300000 },
+                ],
+                addonPrices: {
+                    priority_support: 5000,
+                    custom_domain: 3000,
+                    extra_employees: 2000,
+                    extra_dishes: 500,
+                },
+                
+                init() {
+                    // Initialize with monthly
+                    this.billingCycle = 'monthly';
+                    this.selectedAddons = [];
+                },
+                
+                getCurrentCycle() {
+                    return this.cycles.find(c => c.id === this.billingCycle);
+                },
+                
+                getMonths() {
+                    return this.getCurrentCycle().months;
+                },
+                
+                get basePrice() {
+                    return this.getCurrentCycle().price;
+                },
+                
+                get discountAmount() {
+                    const cycle = this.getCurrentCycle();
+                    if (cycle.original) {
+                        return cycle.original - cycle.price;
+                    }
+                    return 0;
+                },
+                
+                get addonsTotal() {
+                    const months = this.getMonths();
+                    return this.selectedAddons.reduce((total, addonId) => {
+                        return total + (this.addonPrices[addonId] * months);
+                    }, 0);
+                },
+                
+                get totalPrice() {
+                    return this.basePrice + this.addonsTotal;
+                },
+                
+                formatPrice(price) {
+                    return new Intl.NumberFormat('fr-FR').format(Math.round(price));
+                }
+            }
+        }
+    </script>
+    @endpush
 </x-layouts.auth>

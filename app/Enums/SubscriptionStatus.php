@@ -5,6 +5,7 @@ namespace App\Enums;
 enum SubscriptionStatus: string
 {
     case ACTIVE = 'active';
+    case TRIAL = 'trial';
     case EXPIRED = 'expired';
     case CANCELLED = 'cancelled';
     case PENDING = 'pending';
@@ -13,6 +14,7 @@ enum SubscriptionStatus: string
     {
         return match ($this) {
             self::ACTIVE => 'Actif',
+            self::TRIAL => 'Essai gratuit',
             self::EXPIRED => 'Expiré',
             self::CANCELLED => 'Annulé',
             self::PENDING => 'En attente',
@@ -23,6 +25,7 @@ enum SubscriptionStatus: string
     {
         return match ($this) {
             self::ACTIVE => 'success',
+            self::TRIAL => 'info',
             self::EXPIRED => 'error',
             self::CANCELLED => 'neutral',
             self::PENDING => 'warning',
@@ -31,7 +34,7 @@ enum SubscriptionStatus: string
 
     public function isValid(): bool
     {
-        return $this === self::ACTIVE;
+        return in_array($this, [self::ACTIVE, self::TRIAL]);
     }
 
     public static function values(): array

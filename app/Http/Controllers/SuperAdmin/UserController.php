@@ -8,6 +8,7 @@ use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
@@ -180,10 +181,31 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
 
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            // Si c'est un administrateur de restaurant, on archive aussi son restaurant
+            if ($user->isRestaurantAdmin() && $user->restaurant) {
+                /** @var Restaurant $restaurant */
+                $restaurant = $user->restaurant;
+
+                // Libérer le slug et l'email pour permettre une nouvelle inscription
+                $suffix = '-deleted-' . now()->timestamp;
+
+                $restaurant->slug = $restaurant->slug . $suffix;
+                $restaurant->email = 'deleted-' . $restaurant->id . '-' . $restaurant->email;
+                $restaurant->orders_blocked = true;
+
+                $restaurant->save();
+
+                // Soft delete du restaurant (garde l'historique mais le retire de l'app)
+                $restaurant->delete();
+            }
+
+            // Suppression du compte utilisateur
+            $user->delete();
+        });
 
         return redirect()->route('super-admin.utilisateurs.index')
-            ->with('success', 'Utilisateur supprimé.');
+            ->with('success', 'Utilisateur et restaurant associé supprimés (archivés) avec succès.');
     }
 }
 

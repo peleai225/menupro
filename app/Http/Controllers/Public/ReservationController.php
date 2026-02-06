@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Notifications\NewReservationNotification;
+use App\Notifications\ReservationReceivedNotification;
 use App\Models\Restaurant;
 use App\Models\Reservation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class ReservationController extends Controller
@@ -61,12 +63,19 @@ class ReservationController extends Controller
             'status' => 'pending',
         ]);
 
-        // Send notification to restaurant owner
+        // Send notification to restaurant owner (email + database for push)
         if ($restaurant->owner) {
             $restaurant->owner->notify(new NewReservationNotification($reservation));
         }
 
-        // TODO: Send confirmation email to customer
+        // Send confirmation email to customer
+        try {
+            Notification::route('mail', $validated['customer_email'])
+                ->notify(new ReservationReceivedNotification($reservation));
+        } catch (\Exception $e) {
+            // Log error but don't fail the reservation
+            \Log::warning('Failed to send reservation confirmation email: ' . $e->getMessage());
+        }
 
         return redirect()->route('r.menu', $slug)
             ->with('success', 'Votre réservation a été enregistrée ! Vous recevrez une confirmation par email.');

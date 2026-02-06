@@ -97,7 +97,7 @@
         <!-- Actions Sidebar -->
         <div class="space-y-6">
             <!-- Status Actions -->
-            <div class="card p-6">
+            <div class="card p-6" x-data="{ showCancelModal: false }">
                 <h2 class="text-lg font-semibold text-neutral-900 mb-4">Actions</h2>
                 <div class="space-y-3">
                     @if($reservation->status === 'pending')
@@ -105,30 +105,96 @@
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="confirmed">
-                            <button type="submit" class="btn btn-primary w-full">Confirmer la réservation</button>
+                            <button type="submit" class="btn btn-primary w-full flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Confirmer la réservation
+                            </button>
                         </form>
-                        <form method="POST" action="{{ route('restaurant.reservations.status', $reservation) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="cancelled">
-                            <button type="submit" class="btn btn-outline btn-danger w-full" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">Annuler</button>
-                        </form>
+                        <button @click="showCancelModal = true" class="btn btn-outline w-full flex items-center justify-center gap-2" style="border-color: #ef4444; color: #ef4444;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Annuler la réservation
+                        </button>
                     @elseif($reservation->status === 'confirmed')
-                        @if($reservation->reservation_date->isFuture())
+                        @if($reservation->reservation_date->isPast() || $reservation->reservation_date->isToday())
                             <form method="POST" action="{{ route('restaurant.reservations.status', $reservation) }}">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="completed">
-                                <button type="submit" class="btn btn-primary w-full">Marquer comme complétée</button>
+                                <button type="submit" class="btn btn-primary w-full flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Marquer comme complétée
+                                </button>
                             </form>
                         @endif
+                        <button @click="showCancelModal = true" class="btn btn-outline w-full flex items-center justify-center gap-2" style="border-color: #ef4444; color: #ef4444;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Annuler la réservation
+                        </button>
+                    @elseif($reservation->status === 'cancelled')
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                            <p class="text-sm text-red-700 font-medium">Cette réservation a été annulée.</p>
+                        </div>
+                    @elseif($reservation->status === 'completed')
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-700 font-medium">Cette réservation est terminée.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Cancel Modal -->
+                <div x-show="showCancelModal" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+                     style="background: rgba(0,0,0,0.5);"
+                     x-cloak>
+                    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+                         @click.away="showCancelModal = false">
+                        <h3 class="text-lg font-bold text-neutral-900 mb-4">Annuler la réservation</h3>
+                        <p class="text-neutral-600 mb-4">
+                            Êtes-vous sûr de vouloir annuler la réservation de <strong>{{ $reservation->customer_name }}</strong> 
+                            pour le <strong>{{ $reservation->reservation_date->format('d/m/Y à H:i') }}</strong> ?
+                        </p>
+                        <p class="text-sm text-neutral-500 mb-4">Le client sera notifié par email de cette annulation.</p>
+                        
                         <form method="POST" action="{{ route('restaurant.reservations.status', $reservation) }}">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="cancelled">
-                            <button type="submit" class="btn btn-outline btn-danger w-full" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">Annuler</button>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Raison de l'annulation (optionnel)
+                                </label>
+                                <textarea name="cancellation_reason" 
+                                          rows="3" 
+                                          class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                          placeholder="Ex: Restaurant complet, fermeture exceptionnelle..."></textarea>
+                                <p class="text-xs text-neutral-500 mt-1">Cette raison sera incluse dans l'email envoyé au client.</p>
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <button type="button" @click="showCancelModal = false" class="btn btn-ghost flex-1">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="btn flex-1" style="background: #ef4444; color: white;">
+                                    Confirmer l'annulation
+                                </button>
+                            </div>
                         </form>
-                    @endif
+                    </div>
                 </div>
             </div>
 

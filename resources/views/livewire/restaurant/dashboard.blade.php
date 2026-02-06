@@ -1,9 +1,53 @@
 <div>
+    <!-- Platform Announcements -->
+    @if($this->announcements->isNotEmpty())
+        <div class="space-y-3 mb-6">
+            @foreach($this->announcements as $announcement)
+                @php
+                    $colors = [
+                        'info' => ['bg' => 'from-blue-50 to-blue-100', 'border' => 'border-blue-200', 'icon' => 'bg-blue-500', 'text' => 'text-blue-800', 'dismiss' => 'hover:bg-blue-200 text-blue-600'],
+                        'warning' => ['bg' => 'from-yellow-50 to-amber-100', 'border' => 'border-yellow-200', 'icon' => 'bg-yellow-500', 'text' => 'text-yellow-800', 'dismiss' => 'hover:bg-yellow-200 text-yellow-600'],
+                        'success' => ['bg' => 'from-green-50 to-emerald-100', 'border' => 'border-green-200', 'icon' => 'bg-green-500', 'text' => 'text-green-800', 'dismiss' => 'hover:bg-green-200 text-green-600'],
+                        'danger' => ['bg' => 'from-red-50 to-rose-100', 'border' => 'border-red-200', 'icon' => 'bg-red-500', 'text' => 'text-red-800', 'dismiss' => 'hover:bg-red-200 text-red-600'],
+                    ];
+                    $style = $colors[$announcement->type] ?? $colors['info'];
+                @endphp
+                <div x-data="{ show: true }" 
+                     x-show="show" 
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="p-4 bg-gradient-to-r {{ $style['bg'] }} border {{ $style['border'] }} rounded-2xl shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 {{ $style['icon'] }} rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $announcement->type_icon }}"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold {{ $style['text'] }}">{{ $announcement->title }}</h4>
+                            <p class="{{ $style['text'] }} opacity-80 text-sm mt-1">{{ $announcement->content }}</p>
+                        </div>
+                        @if($announcement->is_dismissible)
+                            <button wire:click="dismissAnnouncement({{ $announcement->id }})" 
+                                    @click="show = false"
+                                    class="p-1.5 {{ $style['dismiss'] }} rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <!-- Welcome Banner -->
     <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white">
         <div class="flex flex-wrap items-center justify-between gap-y-2">
             <div class="min-w-0">
-                <h1 class="text-xl sm:text-2xl font-bold truncate">Bonjour, {{ auth()->user()->name }} ! 👋</h1>
+                <h1 class="text-xl sm:text-2xl font-bold truncate">Bonjour, {{ auth()->user()->name }}</h1>
                 <p class="text-primary-100 mt-1">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
             </div>
             <div class="hidden md:block">

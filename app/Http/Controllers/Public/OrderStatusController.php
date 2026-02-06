@@ -10,35 +10,72 @@ use Illuminate\View\View;
 class OrderStatusController extends Controller
 {
     /**
-     * Display order status page.
+     * Display order status page (secured with tracking token).
      */
-    public function show(string $slug, Order $order): View
+    public function show(string $slug, string $token): View
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+
+        // Try to find order by tracking token first
+        $order = Order::where('tracking_token', $token)->first();
+
+        // If not found, check if token is actually an ID (for backward compatibility)
+        // and redirect to the proper token URL
+        if (!$order && is_numeric($token)) {
+            $orderById = Order::where('id', $token)
+                ->where('restaurant_id', $restaurant->id)
+                ->first();
+            
+            if ($orderById && $orderById->tracking_token) {
+                // Redirect to the proper token URL
+                return redirect()->route('r.order.status', [
+                    $restaurant->slug,
+                    $orderById->tracking_token
+                ]);
+            }
+        }
+
+        // If still not found, 404
+        if (!$order) {
+            abort(404);
+        }
 
         // Verify order belongs to restaurant
         if ($order->restaurant_id !== $restaurant->id) {
             abort(404);
         }
 
-        $order->load('items');
+        $order->load('items.dish');
 
         // Calculate progress
         $progress = $this->calculateProgress($order);
 
+        // Get available dishes for modification (if order can be modified)
+        $availableDishes = collect();
+        if ($order->canBeModifiedByCustomer()) {
+            $availableDishes = \App\Models\Dish::where('restaurant_id', $order->restaurant_id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get();
+        }
+
         return view('pages.restaurant-public.order-status', compact(
             'restaurant',
             'order',
-            'progress'
+            'progress',
+            'availableDishes'
         ));
     }
 
     /**
-     * Get order status (AJAX for polling).
+     * Get order status (AJAX for polling) - secured with tracking token.
      */
-    public function status(string $slug, Order $order)
+    public function status(string $slug, string $token)
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+
+        // Find order by tracking token (secure, unguessable)
+        $order = Order::where('tracking_token', $token)->firstOrFail();
 
         if ($order->restaurant_id !== $restaurant->id) {
             abort(404);
@@ -54,6 +91,8 @@ class OrderStatusController extends Controller
             'estimated_ready_at' => $order->estimated_ready_at?->toISOString(),
             'progress' => $this->calculateProgress($order),
             'is_final' => $order->is_final,
+            'can_be_modified' => $order->canBeModifiedByCustomer(),
+            'remaining_modification_time' => $order->remaining_modification_time,
         ]);
     }
 

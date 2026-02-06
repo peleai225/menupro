@@ -14,7 +14,7 @@
         </div>
         <div class="flex gap-2">
             @if($user->id !== auth()->id())
-                <form method="POST" action="{{ route('super-admin.utilisateurs.toggle', $user) }}" class="inline">
+                <form method="POST" action="{{ route('super-admin.users.toggle', $user) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn {{ $user->is_active ? 'btn-warning' : 'btn-secondary' }}">
                         {{ $user->is_active ? 'Désactiver' : 'Activer' }}
@@ -137,10 +137,19 @@
                 <h2 class="text-lg font-semibold text-white mb-4">Actions</h2>
                 <div class="space-y-2">
                     @if($user->id !== auth()->id())
-                        <form method="POST" action="{{ route('super-admin.utilisateurs.reset-password', $user) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser le mot de passe de cet utilisateur ?')">
+                        <form method="POST" action="{{ route('super-admin.users.reset-password', $user) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser le mot de passe de cet utilisateur ?')">
                             @csrf
                             <button type="submit" class="w-full btn btn-secondary btn-sm">
                                 Réinitialiser mot de passe
+                            </button>
+                        </form>
+                        <form method="POST"
+                              action="{{ route('super-admin.utilisateurs.destroy', $user) }}"
+                              onsubmit="return confirm('Confirmez-vous la suppression définitive de cet utilisateur ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full btn btn-danger btn-sm">
+                                Supprimer l'utilisateur
                             </button>
                         </form>
                     @endif

@@ -101,45 +101,61 @@
                         Imprimer un modèle
                     </h3>
                     <p class="text-neutral-600 text-sm mb-4">Imprimez un modèle prêt à l'emploi avec votre QR code et le nom de votre établissement.</p>
-                    <button onclick="printQRCode()" class="btn btn-outline w-full">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <button onclick="printQRCodeTemplate()" class="btn btn-outline w-full">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
                         Imprimer le modèle
                     </button>
                 </div>
+                
+                <!-- Hidden template for printing -->
+                <template id="print-template">
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+                        <div style="max-width: 400px; border: 3px solid #e5e7eb; border-radius: 20px; padding: 50px 40px; text-align: center;">
+                            <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 8px; color: #1c1917;">{{ $restaurant->name }}</h1>
+                            <p style="font-size: 18px; color: #78716c; margin: 0 0 30px;">Scannez pour voir notre menu</p>
+                            <div style="background: #fff; padding: 20px; display: inline-block; margin-bottom: 25px;">
+                                <img id="print-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode($publicUrl) }}" width="280" height="280" alt="QR Code" style="display: block;">
+                            </div>
+                            <p style="font-size: 11px; color: #a8a29e; word-break: break-all; padding: 0 20px; margin: 0;">{{ $publicUrl }}</p>
+                        </div>
+                    </div>
+                </template>
+                
+                <script>
+                    function printQRCodeTemplate() {
+                        var template = document.getElementById('print-template');
+                        var printWindow = window.open('', '_blank', 'width=600,height=800');
+                        
+                        if (!printWindow) {
+                            alert('Le popup a été bloqué. Veuillez autoriser les popups pour ce site.');
+                            return;
+                        }
+                        
+                        var html = '<!DOCTYPE html><html><head><title>QR Code - {{ $restaurant->name }}</title></head><body style="margin:0;">' + template.innerHTML + '</body></html>';
+                        
+                        printWindow.document.open();
+                        printWindow.document.write(html);
+                        printWindow.document.close();
+                        
+                        // Wait for image to load
+                        var img = printWindow.document.getElementById('print-qr-img');
+                        if (img) {
+                            if (img.complete) {
+                                setTimeout(function() { printWindow.print(); }, 300);
+                            } else {
+                                img.onload = function() { setTimeout(function() { printWindow.print(); }, 100); };
+                                img.onerror = function() { alert('Erreur de chargement du QR code'); };
+                            }
+                        } else {
+                            setTimeout(function() { printWindow.print(); }, 500);
+                        }
+                    }
+                </script>
             </div>
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function printQRCode() {
-            const w = window.open('', '', 'width=600,height=700');
-            w.document.write(`
-                <html>
-                <head>
-                    <title>QR Code - {{ $restaurant->name }}</title>
-                    <style>
-                        body { margin: 0; padding: 40px; font-family: system-ui, sans-serif; text-align: center; }
-                        .container { max-width: 400px; margin: 0 auto; border: 2px solid #e5e7eb; border-radius: 16px; padding: 40px; }
-                        h1 { font-size: 28px; font-weight: bold; margin: 0 0 8px; color: #1c1917; }
-                        .subtitle { font-size: 16px; color: #78716c; margin: 0 0 30px; }
-                        .url { font-size: 12px; color: #a8a29e; word-break: break-all; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>{{ $restaurant->name }}</h1>
-                        <p class="subtitle">Scannez pour voir notre menu</p>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode($publicUrl) }}" width="250" height="250" style="margin: 0 auto 30px; display: block;">
-                        <p class="url">{{ $publicUrl }}</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            w.document.close();
-            setTimeout(() => { w.print(); w.close(); }, 500);
-        }
-    </script>
-    @endpush
 </x-layouts.admin-restaurant>
 

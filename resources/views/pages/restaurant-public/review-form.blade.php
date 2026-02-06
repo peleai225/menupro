@@ -92,7 +92,7 @@
 
                     <!-- Actions -->
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('r.order.status', [$restaurant->slug, $order]) }}" 
+                        <a href="{{ route('r.order.status', [$restaurant->slug, $order->tracking_token]) }}" 
                            class="btn btn-outline flex-1">
                             Annuler
                         </a>

@@ -200,5 +200,24 @@ class MediaUploader
 
         return Storage::disk($this->disk)->exists($path);
     }
+
+    /**
+     * Move file from temporary location to final location
+     */
+    public function moveFromTemp(string $tempPath, string $finalFolder): string
+    {
+        if (!Storage::disk($this->disk)->exists($tempPath)) {
+            throw new \Exception("Temporary file not found: {$tempPath}");
+        }
+
+        // Get filename from temp path
+        $filename = basename($tempPath);
+        $finalPath = "{$finalFolder}/{$filename}";
+
+        // Move file
+        Storage::disk($this->disk)->move($tempPath, $finalPath);
+
+        return $finalPath;
+    }
 }
 

@@ -8,7 +8,9 @@ use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\Reservation;
 use App\Models\Restaurant;
+use App\Models\Subscription;
 use App\Models\User;
+use App\Observers\ActivityObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
 use App\Policies\IngredientPolicy;
@@ -70,8 +72,29 @@ class AppServiceProvider extends ServiceProvider
             return null; // Let the policy decide
         });
 
+        // Register activity observers for important models
+        $this->registerActivityObservers();
+
         // Load dynamic mail configuration from SystemSetting
         $this->loadDynamicMailConfig();
+    }
+
+    /**
+     * Register activity observers for important models.
+     */
+    protected function registerActivityObservers(): void
+    {
+        $modelsToObserve = [
+            Restaurant::class,
+            Order::class,
+            Subscription::class,
+            Category::class,
+            Dish::class,
+        ];
+
+        foreach ($modelsToObserve as $model) {
+            $model::observe(ActivityObserver::class);
+        }
     }
 
     /**

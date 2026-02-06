@@ -184,13 +184,30 @@
                     @forelse($subscriptions as $subscription)
                         <tr class="hover:bg-neutral-700/30 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                    <div class="text-sm font-medium text-white">{{ $subscription->restaurant->name }}</div>
-                                    <div class="text-xs text-neutral-400">{{ $subscription->restaurant->email }}</div>
-                                </div>
+                                @if($subscription->restaurant)
+                                    <div class="flex items-center gap-3">
+                                        @if($subscription->restaurant->logo_path)
+                                            <img src="{{ Storage::url($subscription->restaurant->logo_path) }}" 
+                                                 alt="{{ $subscription->restaurant->name }}" 
+                                                 class="w-10 h-10 rounded-xl object-cover border border-neutral-600">
+                                        @else
+                                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                                {{ strtoupper(substr($subscription->restaurant->name, 0, 2)) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <a href="{{ route('super-admin.restaurants.show', $subscription->restaurant) }}" class="text-sm font-medium text-white hover:text-primary-400 transition-colors">
+                                                {{ $subscription->restaurant->name }}
+                                            </a>
+                                            <div class="text-xs text-neutral-400">{{ $subscription->restaurant->owner?->email ?? 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="text-sm text-neutral-500 italic">Restaurant supprimé</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-neutral-300">{{ $subscription->plan->name }}</span>
+                                <span class="text-sm text-neutral-300">{{ $subscription->plan?->name ?? 'N/A' }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($subscription->status->value === 'active')

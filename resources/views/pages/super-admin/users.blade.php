@@ -136,9 +136,23 @@
                                 {{ $user->created_at->format('d M Y') }}
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <a href="{{ route('super-admin.utilisateurs.show', $user) }}" class="text-primary-400 hover:text-primary-300 font-medium">
-                                    Voir →
-                                </a>
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ route('super-admin.utilisateurs.show', $user) }}" class="text-primary-400 hover:text-primary-300 font-medium">
+                                        Voir →
+                                    </a>
+                                    @if($user->id !== auth()->id())
+                                        <form method="POST"
+                                              action="{{ route('super-admin.utilisateurs.destroy', $user) }}"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est définitive.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="text-xs font-medium text-red-400 hover:text-red-300">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

@@ -69,6 +69,8 @@ class RestaurantMenu extends Component
     #[Computed]
     public function isRestaurantOpen(): bool
     {
+        // Refresh restaurant to get latest opening hours
+        $this->restaurant->refresh();
         return $this->restaurant->isOpenNow();
     }
 

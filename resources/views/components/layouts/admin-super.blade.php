@@ -5,16 +5,14 @@
                class="fixed left-0 top-0 h-full bg-neutral-900 border-r border-neutral-800 z-40 transition-all duration-300 hidden lg:block">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
-                <div class="h-16 flex items-center justify-center border-b border-neutral-800">
-                    <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                        </div>
-                        <span x-show="expanded" x-transition class="text-lg font-bold text-white">
-                            Menu<span class="text-primary-400">Pro</span>
-                            <span class="block text-xs text-neutral-500 font-normal">Super Admin</span>
+                <div class="h-16 flex items-center justify-center border-b border-neutral-800 px-3">
+                    <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('images/logo-menupro.png') }}" 
+                             alt="MenuPro" 
+                             class="h-8 w-auto object-contain transition-all duration-300"
+                             :class="expanded ? 'h-8' : 'h-7'">
+                        <span x-show="expanded" x-transition class="text-xs text-neutral-500 font-medium bg-neutral-800 px-2 py-0.5 rounded">
+                            Admin
                         </span>
                     </a>
                 </div>
@@ -89,12 +87,35 @@
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Statistiques</span>
                     </a>
 
+                    <a href="{{ route('super-admin.transactions.index') }}" 
+                       class="sidebar-item {{ request()->routeIs('super-admin.transactions*') ? 'sidebar-item-active' : '' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span x-show="expanded" x-transition class="whitespace-nowrap">Transactions</span>
+                    </a>
+
                     <a href="{{ route('super-admin.activity') }}" 
                        class="sidebar-item {{ request()->routeIs('super-admin.activity*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Activité</span>
+                    </a>
+
+                    <!-- Communication Section -->
+                    <div class="pt-4">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                            Communication
+                        </span>
+                    </div>
+
+                    <a href="{{ route('super-admin.announcements.index') }}" 
+                       class="sidebar-item {{ request()->routeIs('super-admin.announcements*') ? 'sidebar-item-active' : '' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                        </svg>
+                        <span x-show="expanded" x-transition class="whitespace-nowrap">Annonces</span>
                     </a>
 
                     <!-- Settings Section -->
@@ -145,12 +166,10 @@
 
         <!-- Sidebar mobile -->
         <aside x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed left-0 top-0 h-full w-64 bg-neutral-900 border-r border-neutral-800 z-40 lg:hidden flex flex-col" x-cloak>
-            <div class="h-16 flex items-center justify-center border-b border-neutral-800">
-                <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-3" @click="mobileOpen = false">
-                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    </div>
-                    <span class="text-lg font-bold text-white">Menu<span class="text-primary-400">Pro</span> <span class="block text-xs text-neutral-500 font-normal">Super Admin</span></span>
+            <div class="h-16 flex items-center justify-center border-b border-neutral-800 px-4">
+                <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-2" @click="mobileOpen = false">
+                    <img src="{{ asset('images/logo-menupro.png') }}" alt="MenuPro" class="h-8 w-auto object-contain">
+                    <span class="text-xs text-neutral-500 font-medium bg-neutral-800 px-2 py-0.5 rounded">Admin</span>
                 </a>
             </div>
             <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" @click="mobileOpen = false">

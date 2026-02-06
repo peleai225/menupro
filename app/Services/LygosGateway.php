@@ -109,6 +109,14 @@ class LygosGateway
     }
 
     /**
+     * Create a payment session for registration (public method)
+     */
+    public function createRegistrationPayment(array $payload, array $metadata = []): array
+    {
+        return $this->createPaymentSession($payload, $metadata);
+    }
+
+    /**
      * Create payment session (internal method)
      * According to Lygos documentation: POST /v1/gateway
      * Response contains: id, amount, currency, shop_name, user_id, creation_date, link, message, order_id, success_url, failure_url

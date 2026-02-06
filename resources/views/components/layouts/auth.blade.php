@@ -81,17 +81,12 @@
 
             <!-- Content -->
             <div class="relative z-10 flex flex-col justify-between p-8 lg:p-10 xl:p-14 w-full min-h-0">
-                <!-- Logo (sans texte "MenuPro" quand le logo est affiché) -->
+                <!-- Logo -->
                 <a href="{{ route('home') }}" class="flex items-center gap-3 group flex-shrink-0">
                     @if($logoUrl)
                         <img src="{{ $logoUrl }}" alt="{{ $appName }}" class="h-12 w-auto object-contain max-h-12">
                     @else
-                        <div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                        <span class="text-xl lg:text-2xl font-bold text-white">{{ $appName }}</span>
+                        <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-10 w-auto object-contain">
                     @endif
                 </a>
 
@@ -153,12 +148,7 @@
                         @if($logoUrl)
                             <img src="{{ $logoUrl }}" alt="{{ $appName }}" class="h-10 sm:h-11 w-auto object-contain">
                         @else
-                            <div class="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25 flex-shrink-0">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                </svg>
-                            </div>
-                            <span class="text-lg sm:text-xl font-bold text-neutral-900">{{ $appName }}</span>
+                            <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-9 sm:h-10 w-auto object-contain">
                         @endif
                     </a>
                     <!-- Stats compactes (données réelles) sur mobile -->

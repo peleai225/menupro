@@ -129,6 +129,35 @@
     @livewireScripts
 
     @stack('scripts')
+
+    <!-- Suppress external script errors (browser extensions, etc.) -->
+    <script>
+        // Suppress errors from external scripts (browser extensions, etc.)
+        window.addEventListener('error', function(e) {
+            // Ignore errors from external scripts (kins_stabilizer, vendor.js from extensions)
+            if (e.filename && (
+                e.filename.includes('kins_stabilizer') || 
+                e.filename.includes('vendor.js') ||
+                e.filename.includes('chrome-extension') ||
+                e.filename.includes('moz-extension')
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
+
+        // Suppress unhandled promise rejections from external scripts
+        window.addEventListener('unhandledrejection', function(e) {
+            // Ignore errors that don't have useful information (likely from extensions)
+            if (e.reason && typeof e.reason === 'object' && 
+                e.reason.status === null && 
+                e.reason.body === null && 
+                e.reason.json === null) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>
 

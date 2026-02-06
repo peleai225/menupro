@@ -101,11 +101,11 @@
                         <tr class="hover:bg-neutral-700/30">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-4">
-                                    @if($restaurant->logo)
-                                        <img src="{{ Storage::url($restaurant->logo) }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-xl object-cover">
+                                    @if($restaurant->logo_path)
+                                        <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-xl object-cover border border-neutral-600">
                                     @else
                                         <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold">
-                                            {{ strtoupper(substr($restaurant->name, 0, 1)) }}
+                                            {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                         </div>
                                     @endif
                                     <div>

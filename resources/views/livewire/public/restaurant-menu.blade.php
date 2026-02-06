@@ -635,8 +635,8 @@
                             <span class="text-xl font-bold text-neutral-900">{{ number_format($this->cartTotal, 0, ',', ' ') }} F</span>
                         </div>
                         <button wire:click="proceedToCheckout" 
-                                @if(!$restaurant->isOpenNow()) disabled @endif
-                                class="w-full py-4 text-white font-bold rounded-xl transition shadow-lg @if(!$restaurant->isOpenNow()) opacity-50 cursor-not-allowed @endif" 
+                                @if(!$this->isRestaurantOpen) disabled @endif
+                                class="w-full py-4 text-white font-bold rounded-xl transition shadow-lg @if(!$this->isRestaurantOpen) opacity-50 cursor-not-allowed @endif" 
                             onmouseover="@if($this->isRestaurantOpen) this.style.opacity='0.9' @endif"
                             onmouseout="@if($this->isRestaurantOpen) this.style.opacity='1' @endif"
                                 style="background-color: {{ $primaryColor }};">

@@ -217,6 +217,8 @@ class CheckoutController extends Controller
             'total' => $total,
             'delivery_address' => $request->delivery_address,
             'delivery_city' => $request->delivery_city,
+            'delivery_latitude' => $request->delivery_latitude,
+            'delivery_longitude' => $request->delivery_longitude,
             'delivery_instructions' => $request->delivery_instructions,
             'table_number' => $request->table_number,
             'customer_notes' => $request->customer_notes,
@@ -254,12 +256,12 @@ class CheckoutController extends Controller
             }
 
             // Payment creation failed - show error but keep order
-            return redirect()->route('r.order.status', [$slug, $order])
+            return redirect()->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
         }
 
         // No payment gateway - direct to order status
-        return redirect()->route('r.order.status', [$slug, $order])
+        return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('info', 'Commande créée. Le paiement sera effectué sur place.');
     }
 
@@ -283,14 +285,16 @@ class CheckoutController extends Controller
                     'metadata' => $result,
                 ]);
 
-                // Notify restaurant
-                if ($restaurant->owner) {
-                    $restaurant->owner->notify(new NewOrderNotification($order));
-                }
+                // Notify all restaurant users (admins and employees who can manage orders)
+                $restaurant->users()
+                    ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                    ->each(function ($user) use ($order) {
+                        $user->notify(new NewOrderNotification($order));
+                    });
             }
         }
 
-        return redirect()->route('r.order.status', [$slug, $order])
+        return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
     }
 
@@ -300,7 +304,7 @@ class CheckoutController extends Controller
     public function cancel(string $slug, Order $order): RedirectResponse
     {
         // Don't delete the order - customer might retry
-        return redirect()->route('r.order.status', [$slug, $order])
+        return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('warning', 'Paiement annulé. Vous pouvez réessayer.');
     }
 

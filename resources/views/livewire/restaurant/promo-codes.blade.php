@@ -160,7 +160,9 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             @keydown.escape.window="show = false; $wire.closeModal()"
+             x-init="document.body.classList.add('overflow-hidden')"
+             x-on:remove="document.body.classList.remove('overflow-hidden')"
+             @keydown.escape.window="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeModal()"
              class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
              x-cloak>
             <div x-show="show"
@@ -170,7 +172,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 @click.away="show = false; $wire.closeModal()"
+                 @click.away="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeModal()"
                  class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 
                 <!-- Header -->
@@ -179,7 +181,7 @@
                         <h2 class="text-xl font-bold text-neutral-900">
                             {{ $editingPromo ? 'Modifier le code promo' : 'Nouveau code promo' }}
                         </h2>
-                        <button wire:click="closeModal" class="text-neutral-400 hover:text-neutral-600 transition-colors">
+                        <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>

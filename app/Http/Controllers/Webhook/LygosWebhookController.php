@@ -161,10 +161,8 @@ class LygosWebhookController extends Controller
             'metadata' => $data,
         ]);
 
-        // Notify restaurant owner
-        if ($order->restaurant->owner) {
-            $order->restaurant->owner->notify(new NewOrderNotification($order));
-        }
+        // Note: Notification is already sent when order is created (in Checkout component)
+        // No need to send again here to avoid duplicates
 
         Log::channel('payments')->info('Lygos webhook: payment marked as successful', [
             'order_id' => $order->id,

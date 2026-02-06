@@ -130,6 +130,7 @@ class DashboardController extends Controller
             'lygos_api_key' => \App\Models\SystemSetting::get('lygos_api_key', ''),
             'lygos_webhook_secret' => \App\Models\SystemSetting::get('lygos_webhook_secret', ''),
             'lygos_mode' => \App\Models\SystemSetting::get('lygos_mode', 'live'),
+            'geoapify_api_key' => \App\Models\SystemSetting::get('geoapify_api_key', ''),
             'smtp_host' => \App\Models\SystemSetting::get('smtp_host', config('mail.mailers.smtp.host', '')),
             'smtp_port' => \App\Models\SystemSetting::get('smtp_port', config('mail.mailers.smtp.port', '587')),
             'smtp_encryption' => \App\Models\SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption', 'tls')),
@@ -165,11 +166,13 @@ class DashboardController extends Controller
             'app_name' => ['nullable', 'string', 'max:255'],
             'app_url' => ['nullable', 'url'],
             'contact_email' => ['nullable', 'email'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
             'maintenance_mode' => ['boolean'],
             'registrations_open' => ['boolean'],
             'lygos_api_key' => ['nullable', 'string'],
             'lygos_webhook_secret' => ['nullable', 'string'],
             'lygos_mode' => ['nullable', 'in:test,live'],
+            'geoapify_api_key' => ['nullable', 'string'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'smtp_encryption' => ['nullable', 'string', 'in:tls,ssl,'],
@@ -207,6 +210,10 @@ class DashboardController extends Controller
         } elseif (!\App\Models\SystemSetting::has('contact_email')) {
             \App\Models\SystemSetting::set('contact_email', $defaultContactEmail, 'string', 'Email de contact');
         }
+        
+        // Contact phone (always save, even if empty to allow clearing)
+        \App\Models\SystemSetting::set('contact_phone', $request->contact_phone ?? '', 'string', 'Téléphone de contact');
+        
         \App\Models\SystemSetting::set('maintenance_mode', $request->boolean('maintenance_mode'), 'boolean', 'Mode maintenance');
         \App\Models\SystemSetting::set('registrations_open', $request->boolean('registrations_open'), 'boolean', 'Inscriptions ouvertes');
         if ($request->filled('lygos_api_key')) {
@@ -217,6 +224,9 @@ class DashboardController extends Controller
         }
         if ($request->filled('lygos_mode')) {
             \App\Models\SystemSetting::set('lygos_mode', $request->lygos_mode, 'string', 'Mode Lygos (test/live)');
+        }
+        if ($request->filled('geoapify_api_key')) {
+            \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');
         }
         // SMTP Configuration
         \App\Models\SystemSetting::set('smtp_host', $request->smtp_host ?? '', 'string', 'Serveur SMTP');
@@ -264,24 +274,81 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('hero_image', $heroImagePath, 'string', 'Image hero de la page d\'accueil');
         }
 
-        // Social links
-        if ($request->filled('social_facebook')) {
-            \App\Models\SystemSetting::set('social_facebook', $request->social_facebook, 'string', 'Lien Facebook');
-        }
-        if ($request->filled('social_twitter')) {
-            \App\Models\SystemSetting::set('social_twitter', $request->social_twitter, 'string', 'Lien Twitter');
-        }
-        if ($request->filled('social_instagram')) {
-            \App\Models\SystemSetting::set('social_instagram', $request->social_instagram, 'string', 'Lien Instagram');
-        }
-        if ($request->filled('social_linkedin')) {
-            \App\Models\SystemSetting::set('social_linkedin', $request->social_linkedin, 'string', 'Lien LinkedIn');
-        }
+        // Social links (save even if empty to allow clearing)
+        \App\Models\SystemSetting::set('social_facebook', $request->social_facebook ?? '', 'string', 'Lien Facebook');
+        \App\Models\SystemSetting::set('social_twitter', $request->social_twitter ?? '', 'string', 'Lien Twitter');
+        \App\Models\SystemSetting::set('social_instagram', $request->social_instagram ?? '', 'string', 'Lien Instagram');
+        \App\Models\SystemSetting::set('social_linkedin', $request->social_linkedin ?? '', 'string', 'Lien LinkedIn');
+        
         if ($request->filled('footer_text')) {
             \App\Models\SystemSetting::set('footer_text', $request->footer_text, 'string', 'Texte du footer');
         }
 
         return back()->with('success', 'Paramètres mis à jour avec succès.');
+    }
+
+    /**
+     * Get live stats for real-time dashboard.
+     */
+    public function liveStats()
+    {
+        // Recent orders (last 5 minutes)
+        $recentOrders = Order::withoutGlobalScope('restaurant')
+            ->with('restaurant:id,name')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn($order) => [
+                'id' => $order->id,
+                'reference' => $order->reference,
+                'restaurant' => $order->restaurant?->name ?? 'N/A',
+                'total' => $order->total,
+                'status' => $order->status->value,
+                'status_label' => $order->status->label(),
+                'type' => $order->type->value,
+                'created_at' => $order->created_at->format('H:i:s'),
+            ]);
+
+        // Live stats
+        $stats = [
+            'orders_today' => Order::withoutGlobalScope('restaurant')->whereDate('created_at', today())->count(),
+            'revenue_today' => Order::withoutGlobalScope('restaurant')
+                ->where('payment_status', 'completed')
+                ->whereDate('paid_at', today())
+                ->sum('total'),
+            'pending_orders' => Order::withoutGlobalScope('restaurant')
+                ->whereIn('status', ['pending', 'confirmed', 'preparing'])
+                ->count(),
+            'active_restaurants' => Restaurant::where('status', 'active')->count(),
+            'new_registrations_today' => User::whereDate('created_at', today())->count(),
+        ];
+
+        // Orders by status (for pie chart)
+        $ordersByStatus = Order::withoutGlobalScope('restaurant')
+            ->whereDate('created_at', today())
+            ->select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->mapWithKeys(fn($item) => [$item->status => $item->count]);
+
+        // Hourly orders (for line chart)
+        $hourlyOrders = [];
+        for ($i = 0; $i < 24; $i++) {
+            $count = Order::withoutGlobalScope('restaurant')
+                ->whereDate('created_at', today())
+                ->whereRaw('HOUR(created_at) = ?', [$i])
+                ->count();
+            $hourlyOrders[] = ['hour' => sprintf('%02d:00', $i), 'count' => $count];
+        }
+
+        return response()->json([
+            'stats' => $stats,
+            'recent_orders' => $recentOrders,
+            'orders_by_status' => $ordersByStatus,
+            'hourly_orders' => $hourlyOrders,
+            'timestamp' => now()->format('H:i:s'),
+        ]);
     }
 }
 

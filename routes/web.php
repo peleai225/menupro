@@ -34,8 +34,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('home');
 Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
+Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send');
+Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
 Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
 Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
+Route::get('/test-geocoding', [\App\Http\Controllers\Public\GeocodingTestController::class, 'index'])->name('geocoding.test');
+
+// Route pour rafraîchir le token CSRF (évite l'erreur 419)
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->name('csrf.token');
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +60,12 @@ Route::middleware('guest')->group(function () {
     // Register
     Route::get('/inscription', [RegisterController::class, 'create'])->name('register');
     Route::post('/inscription', [RegisterController::class, 'store'])->name('register.post');
+    
+    // Register payment callbacks (auth required - user is logged in after registration)
+    Route::middleware('auth')->group(function () {
+        Route::get('/inscription/paiement/{subscription}/succes', [RegisterController::class, 'paymentSuccess'])->name('register.payment.success');
+        Route::get('/inscription/paiement/{subscription}/annule', [RegisterController::class, 'paymentCancel'])->name('register.payment.cancel');
+    });
     
     // Password Reset
     Route::get('/mot-de-passe-oublie', [PasswordResetController::class, 'requestForm'])->name('password.request');
@@ -102,11 +117,27 @@ Route::prefix('dashboard')
         // Orders (Livewire)
         Route::get('commandes', \App\Livewire\Restaurant\Orders::class)->name('orders');
         Route::get('commandes/board', [OrderController::class, 'board'])->name('orders.board');
+        Route::get('commandes/kanban', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'index'])->name('orders.kanban');
+        Route::get('commandes/kanban/data', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'data'])->name('orders.kanban.data');
+        Route::patch('commandes/{order}/kanban/status', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'updateStatus'])->name('orders.kanban.status');
+        Route::get('commandes/rush', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'index'])->name('orders.rush');
+        Route::get('commandes/rush/data', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'data'])->name('orders.rush.data');
+        Route::post('commandes/{order}/rush/confirm', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'confirm'])->name('orders.rush.confirm');
+        Route::post('commandes/{order}/rush/prepare', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'startPreparing'])->name('orders.rush.prepare');
+        Route::post('commandes/{order}/rush/ready', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'markReady'])->name('orders.rush.ready');
+        Route::post('commandes/{order}/rush/complete', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'complete'])->name('orders.rush.complete');
         Route::get('commandes/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('commandes/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::get('commandes/{order}/print', [OrderController::class, 'print'])->name('orders.print');
         Route::post('commandes/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('commandes/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
+        
+        // Order Modifications
+        Route::prefix('commandes/{order}')->name('orders.')->group(function () {
+            Route::post('items', [\App\Http\Controllers\Restaurant\OrderModificationController::class, 'addItem'])->name('items.add');
+            Route::delete('items/{item}', [\App\Http\Controllers\Restaurant\OrderModificationController::class, 'removeItem'])->name('items.remove');
+            Route::patch('items/{item}', [\App\Http\Controllers\Restaurant\OrderModificationController::class, 'updateItem'])->name('items.update');
+        });
         
         // Customers
         Route::get('clients', [CustomerController::class, 'index'])->name('customers');
@@ -117,7 +148,9 @@ Route::prefix('dashboard')
         Route::get('abonnement', [SubscriptionController::class, 'index'])->name('subscription');
         Route::get('abonnement/changer', [SubscriptionController::class, 'plans'])->name('subscription.plans');
         Route::post('abonnement/changer', [SubscriptionController::class, 'change'])->name('subscription.change');
+        Route::post('abonnement/{subscription}/reprendre', [SubscriptionController::class, 'retryPayment'])->name('subscription.retry');
         Route::get('abonnement/factures', [SubscriptionController::class, 'invoices'])->name('subscription.invoices');
+        Route::post('abonnement/convert-trial', [SubscriptionController::class, 'convertTrial'])->name('subscription.convertTrial');
         Route::get('abonnement/{subscription}/success', [SubscriptionController::class, 'success'])->name('subscription.success');
         Route::get('abonnement/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
         
@@ -164,10 +197,8 @@ Route::prefix('dashboard')
             Route::get('alertes', [IngredientController::class, 'alerts'])->name('alerts');
         });
         
-        // Team Management (if enabled by plan)
-        Route::middleware('subscription:team_members')->group(function () {
-            Route::get('equipe', \App\Livewire\Restaurant\Team::class)->name('team');
-        });
+        // Team Management (always accessible, upgrade prompt shown if not available)
+        Route::get('equipe', \App\Livewire\Restaurant\Team::class)->name('team');
         
         // Reservations
         Route::get('reservations', [\App\Http\Controllers\Restaurant\ReservationController::class, 'index'])->name('reservations.index');
@@ -227,6 +258,17 @@ Route::prefix('admin')
         Route::get('activite/{log}', [ActivityController::class, 'show'])->name('activity.show');
         Route::get('activite/export', [ActivityController::class, 'export'])->name('activity.export');
         
+        // Transactions
+        Route::get('transactions', [\App\Http\Controllers\SuperAdmin\TransactionController::class, 'index'])->name('transactions.index');
+        Route::get('transactions/export', [\App\Http\Controllers\SuperAdmin\TransactionController::class, 'export'])->name('transactions.export');
+        
+        // Announcements
+        Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements');
+        Route::post('annonces/{announcement}/send-emails', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'sendEmails'])->name('announcements.send-emails');
+        
+        // Live Dashboard API
+        Route::get('api/live-stats', [SuperAdminDashboardController::class, 'liveStats'])->name('api.live-stats');
+        
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
@@ -245,13 +287,13 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     // Checkout (Livewire)
     Route::get('/commander', \App\Livewire\Public\Checkout::class)->name('checkout');
     
-    // Order Status
-    Route::get('/commande/{order}', [OrderStatusController::class, 'show'])->name('order.status');
-    Route::get('/commande/{order}/json', [OrderStatusController::class, 'status'])->name('order.status.json');
+    // Order Status (secured with tracking token)
+    Route::get('/commande/{token}', [OrderStatusController::class, 'show'])->name('order.status');
+    Route::get('/commande/{token}/json', [OrderStatusController::class, 'status'])->name('order.status.json');
     
-    // Reviews
-    Route::get('/commande/{order}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'create'])->name('review.create');
-    Route::post('/commande/{order}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'store'])->name('review.store');
+    // Reviews (secured with tracking token)
+    Route::get('/commande/{token}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'create'])->name('review.create');
+    Route::post('/commande/{token}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'store'])->name('review.store');
     
     // Reservations
     Route::post('/reservations', [\App\Http\Controllers\Public\ReservationController::class, 'store'])->name('reservations.store');
@@ -259,6 +301,24 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     // Payment Callbacks
     Route::get('/commande/{order}/success', [CheckoutController::class, 'success'])->name('order.success');
     Route::get('/commande/{order}/cancel', [CheckoutController::class, 'cancel'])->name('order.cancel');
+    
+    // Order Modifications (Public - secured with tracking token)
+    Route::prefix('commande/{token}')->name('order.')->group(function () {
+        Route::post('items', [\App\Http\Controllers\Public\OrderModificationController::class, 'addItem'])->name('items.add');
+        Route::delete('items/{item}', [\App\Http\Controllers\Public\OrderModificationController::class, 'removeItem'])->name('items.remove');
+        Route::patch('items/{item}', [\App\Http\Controllers\Public\OrderModificationController::class, 'updateItem'])->name('items.update');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Geocoding API Routes (Public)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
+    Route::get('/search', [\App\Http\Controllers\Public\GeocodingController::class, 'search'])->name('search');
+    Route::get('/reverse', [\App\Http\Controllers\Public\GeocodingController::class, 'reverse'])->name('reverse');
 });
 
 /*
@@ -270,3 +330,27 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/lygos', [LygosWebhookController::class, 'handle'])->name('webhooks.lygos');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Test Route (DEV ONLY - Remove in production)
+|--------------------------------------------------------------------------
+*/
+Route::get('/test-notification', function() {
+    $user = auth()->user();
+    if (!$user) {
+        return 'Please login first';
+    }
+    
+    // Create a fake notification
+    $user->notify(new \App\Notifications\NewOrderNotification(
+        \App\Models\Order::first() ?? new \App\Models\Order([
+            'reference' => 'TEST-' . now()->format('His'),
+            'customer_name' => 'Test Client',
+            'total' => 25.50,
+            'type' => \App\Enums\OrderType::DELIVERY,
+        ])
+    ));
+    
+    return 'Notification sent to ' . $user->email . '. Check your dashboard notifications!';
+})->middleware('auth')->name('test.notification');

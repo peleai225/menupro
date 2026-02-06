@@ -21,46 +21,76 @@ class DashboardController extends Controller
         $restaurant = $request->user()->restaurant;
         $this->planLimiter->forRestaurant($restaurant);
 
-        // Today's stats
-        $todayStats = [
-            'orders' => Order::today()->count(),
-            'revenue' => Order::today()->where('payment_status', 'completed')->sum('total'),
-            'pending' => Order::today()->whereIn('status', [
+        // Today's orders
+        $ordersToday = Order::where('restaurant_id', $restaurant->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        // Yesterday's orders for comparison
+        $ordersYesterday = Order::where('restaurant_id', $restaurant->id)
+            ->whereDate('created_at', today()->subDay())
+            ->count();
+
+        // Revenue today
+        $revenueToday = Order::where('restaurant_id', $restaurant->id)
+            ->whereDate('created_at', today())
+            ->where('payment_status', 'completed')
+            ->sum('total');
+
+        // Revenue yesterday
+        $revenueYesterday = Order::where('restaurant_id', $restaurant->id)
+            ->whereDate('created_at', today()->subDay())
+            ->where('payment_status', 'completed')
+            ->sum('total');
+
+        // Pending orders
+        $pendingOrders = Order::where('restaurant_id', $restaurant->id)
+            ->whereIn('status', [
+                OrderStatus::PENDING,
                 OrderStatus::PAID,
                 OrderStatus::CONFIRMED,
                 OrderStatus::PREPARING,
-            ])->count(),
+            ])
+            ->count();
+
+        // Total dishes
+        $totalDishes = $restaurant->dishes()->count();
+
+        // Calculate growth percentages
+        $ordersGrowth = $ordersYesterday > 0 
+            ? round((($ordersToday - $ordersYesterday) / $ordersYesterday) * 100) 
+            : 0;
+        
+        $revenueGrowth = $revenueYesterday > 0 
+            ? round((($revenueToday - $revenueYesterday) / $revenueYesterday) * 100) 
+            : 0;
+
+        // Stats array for the view
+        $stats = [
+            'ordersToday' => $ordersToday,
+            'revenueToday' => $revenueToday,
+            'pendingOrders' => $pendingOrders,
+            'totalDishes' => $totalDishes,
+            'ordersGrowth' => $ordersGrowth,
+            'revenueGrowth' => $revenueGrowth,
         ];
 
-        // This month's stats
-        $monthStats = [
-            'orders' => Order::thisMonth()->count(),
-            'revenue' => Order::thisMonth()->where('payment_status', 'completed')->sum('total'),
-            'average_order' => Order::thisMonth()->where('payment_status', 'completed')->avg('total') ?? 0,
-        ];
-
-        // Recent orders
-        $recentOrders = Order::with('items')
+        // Recent orders with items
+        $recentOrders = Order::where('restaurant_id', $restaurant->id)
+            ->with('items.dish')
             ->latest()
-            ->take(10)
+            ->take(5)
             ->get();
 
-        // Active orders (need attention)
-        $activeOrders = Order::active()
-            ->with('items')
-            ->latest()
-            ->get();
-
-        // Popular dishes this month
-        $popularDishes = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('dishes', 'order_items.dish_id', '=', 'dishes.id')
-            ->where('orders.restaurant_id', $restaurant->id)
-            ->where('orders.created_at', '>=', now()->startOfMonth())
-            ->select('dishes.id', 'dishes.name', 'dishes.price', DB::raw('SUM(order_items.quantity) as total_sold'))
-            ->groupBy('dishes.id', 'dishes.name', 'dishes.price')
-            ->orderByDesc('total_sold')
-            ->limit(5)
+        // Top dishes (most ordered)
+        $topDishes = $restaurant->dishes()
+            ->withCount(['orderItems as orders_count' => function ($query) {
+                $query->whereHas('order', function ($q) {
+                    $q->where('created_at', '>=', now()->subDays(30));
+                });
+            }])
+            ->orderByDesc('orders_count')
+            ->take(5)
             ->get();
 
         // Quotas
@@ -74,15 +104,30 @@ class DashboardController extends Controller
                 ->count();
         }
 
+        // Get active subscription for trial display
+        $subscription = $restaurant->activeSubscription;
+
+        // Get active announcements for this restaurant
+        $announcements = \App\Models\Announcement::active()
+            ->forDashboard()
+            ->latest()
+            ->get()
+            ->filter(function ($announcement) use ($restaurant) {
+                return $announcement->isVisibleFor($restaurant);
+            })
+            ->reject(function ($announcement) use ($request) {
+                return $announcement->isDismissedBy($request->user());
+            });
+
         return view('pages.restaurant.dashboard', compact(
             'restaurant',
-            'todayStats',
-            'monthStats',
+            'subscription',
+            'stats',
             'recentOrders',
-            'activeOrders',
-            'popularDishes',
+            'topDishes',
             'quotas',
-            'lowStockCount'
+            'lowStockCount',
+            'announcements'
         ));
     }
 }

@@ -110,11 +110,50 @@
                 @if($order_type === 'delivery')
                     <div class="bg-white rounded-2xl p-6 shadow-sm">
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
+                        
+                        <!-- Address Search (like Glovo) -->
+                        <div class="mb-4 relative">
+                            <div class="relative">
+                                <input type="text" 
+                                       id="address-search"
+                                       autocomplete="off"
+                                       class="w-full px-4 py-3 pr-12 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                       placeholder="Rechercher une adresse en Côte d'Ivoire... (ex: Abidjan, Cocody, Marcory)">
+                                <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Autocomplete dropdown -->
+                            <div id="address-autocomplete" class="hidden absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="top: 100%; left: 0;">
+                                <!-- Results will be inserted here -->
+                            </div>
+                            
+                            <!-- Use my location button -->
+                            <button type="button" 
+                                    id="use-my-location"
+                                    class="mt-3 w-full px-4 py-2.5 bg-primary-50 text-primary-600 rounded-xl font-medium hover:bg-primary-100 transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Utiliser ma position actuelle
+                            </button>
+                            
+                            <!-- Debug info (remove in production) -->
+                            <div id="address-debug" class="mt-2 text-xs text-gray-500 hidden"></div>
+                        </div>
+                        
+                        <!-- Status message -->
+                        <div id="address-status" class="mb-4 text-sm text-neutral-600 hidden"></div>
+                        <div id="address-error" class="mb-4 text-sm text-red-600 hidden"></div>
+                        
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse *</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse complète *</label>
                                 <input type="text" 
                                        wire:model="delivery_address"
+                                       id="delivery_address_input"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_address') border-red-500 @enderror"
                                        placeholder="Rue, quartier, repère...">
                                 @error('delivery_address')
@@ -125,6 +164,7 @@
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Ville *</label>
                                 <input type="text" 
                                        wire:model="delivery_city"
+                                       id="delivery_city_input"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_city') border-red-500 @enderror"
                                        placeholder="Ex: Abidjan">
                                 @error('delivery_city')
@@ -140,6 +180,454 @@
                             </div>
                         </div>
                     </div>
+                    
+                    @push('scripts')
+                    <script>
+                        (function() {
+                            let searchTimeout = null;
+                            let currentSearchQuery = '';
+                            
+                            // Restaurant coordinates
+                            const restaurantLat = {{ $restaurant->latitude ?? 5.3600 }};
+                            const restaurantLng = {{ $restaurant->longitude ?? -4.0083 }};
+                            const deliveryRadius = {{ $restaurant->delivery_radius_km ?? 10 }};
+                            
+                            console.log('[Address] Script loaded, restaurant:', restaurantLat, restaurantLng);
+                            
+                            // Function to calculate distance
+                            function getDistance(lat1, lon1, lat2, lon2) {
+                                const R = 6371; // Radius of the earth in km
+                                const dLat = deg2rad(lat2 - lat1);
+                                const dLon = deg2rad(lon2 - lon1);
+                                const a = 
+                                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                return R * c; // Distance in km
+                            }
+                            
+                            function deg2rad(deg) {
+                                return deg * (Math.PI/180);
+                            }
+                            
+                            // Function to validate delivery distance
+                            function validateDeliveryDistance(lat, lng) {
+                                const distance = getDistance(restaurantLat, restaurantLng, lat, lng);
+                                const isInRadius = deliveryRadius === 0 || distance <= deliveryRadius;
+                                
+                                const statusEl = document.getElementById('address-status');
+                                const errorEl = document.getElementById('address-error');
+                                
+                                if (isInRadius) {
+                                    statusEl.textContent = `Distance: ${distance.toFixed(2)} km (dans la zone de livraison)`;
+                                    statusEl.className = 'mb-4 text-sm text-emerald-600';
+                                    statusEl.classList.remove('hidden');
+                                    errorEl.classList.add('hidden');
+                                    return true;
+                                } else {
+                                    statusEl.classList.add('hidden');
+                                    errorEl.textContent = `Cette zone est hors de notre zone de livraison (max: ${deliveryRadius} km). Veuillez choisir une adresse plus proche.`;
+                                    errorEl.classList.remove('hidden');
+                                    return false;
+                                }
+                            }
+                            
+                            // Address autocomplete function (like Glovo)
+                            async function searchAddresses(query) {
+                                console.log('[Address] Searching for:', query);
+                                
+                                if (!query || query.length < 3) {
+                                    const autocompleteEl = document.getElementById('address-autocomplete');
+                                    if (autocompleteEl) {
+                                        autocompleteEl.classList.add('hidden');
+                                    }
+                                    return;
+                                }
+                                
+                                currentSearchQuery = query;
+                                
+                                const autocompleteEl = document.getElementById('address-autocomplete');
+                                if (!autocompleteEl) {
+                                    console.error('[Address] Autocomplete element not found');
+                                    return;
+                                }
+                                
+                                // Show loading state
+                                autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Recherche en cours...</div>';
+                                autocompleteEl.classList.remove('hidden');
+                                
+                                try {
+                                    // Use our Laravel API endpoint (avoids CORS issues)
+                                    const url = `{{ route('api.geocoding.search') }}?q=${encodeURIComponent(query)}`;
+                                    console.log('[Address] ====== SEARCH START ======');
+                                    console.log('[Address] Query:', query);
+                                    console.log('[Address] Fetching from:', url);
+                                    console.log('[Address] Timestamp:', new Date().toISOString());
+                                    
+                                    const startTime = Date.now();
+                                    const response = await fetch(url, {
+                                        method: 'GET',
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        }
+                                    });
+                                    const endTime = Date.now();
+                                    
+                                    console.log('[Address] Response received in', (endTime - startTime), 'ms');
+                                    console.log('[Address] Response status:', response.status);
+                                    console.log('[Address] Response headers:', Object.fromEntries(response.headers.entries()));
+                                    
+                                    if (!response.ok) {
+                                        const errorText = await response.text();
+                                        console.error('[Address] HTTP error response body:', errorText);
+                                        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText.substring(0, 200)}`);
+                                    }
+                                    
+                                    const data = await response.json();
+                                    console.log('[Address] Received data type:', typeof data);
+                                    console.log('[Address] Received data:', data);
+                                    console.log('[Address] Data is array?', Array.isArray(data));
+                                    console.log('[Address] Data length:', Array.isArray(data) ? data.length : 'N/A');
+                                    
+                                    // Only process if query hasn't changed
+                                    if (query !== currentSearchQuery) {
+                                        console.log('[Address] Query changed, ignoring results');
+                                        return;
+                                    }
+                                    
+                                    if (data && data.length > 0) {
+                                        autocompleteEl.innerHTML = '';
+                                        
+                                        data.forEach((item, index) => {
+                                            const div = document.createElement('div');
+                                            div.className = 'px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0';
+                                            div.innerHTML = `
+                                                <div class="flex items-start gap-3">
+                                                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-neutral-900">${item.display_name.split(',')[0]}</p>
+                                                        <p class="text-xs text-neutral-500 mt-0.5">${item.display_name.split(',').slice(1, 3).join(', ')}</p>
+                                                    </div>
+                                                </div>
+                                            `;
+                                            
+                                            div.addEventListener('click', function() {
+                                                selectAddress(item);
+                                            });
+                                            
+                                            autocompleteEl.appendChild(div);
+                                        });
+                                        
+                                        autocompleteEl.classList.remove('hidden');
+                                        console.log('[Address] Displayed', data.length, 'results');
+                                    } else {
+                                        autocompleteEl.innerHTML = `
+                                            <div class="px-4 py-3 text-sm text-neutral-500 text-center">
+                                                Aucune adresse trouvée
+                                            </div>
+                                        `;
+                                        autocompleteEl.classList.remove('hidden');
+                                        console.log('[Address] No results found');
+                                    }
+                                } catch (error) {
+                                    console.error('[Address] Search error:', error);
+                                    autocompleteEl.innerHTML = `
+                                        <div class="px-4 py-3 text-sm text-red-500 text-center">
+                                            Erreur lors de la recherche. Veuillez réessayer.
+                                        </div>
+                                    `;
+                                    autocompleteEl.classList.remove('hidden');
+                                }
+                            }
+                            
+                            // Select address from autocomplete
+                            function selectAddress(item) {
+                                const lat = parseFloat(item.lat);
+                                const lng = parseFloat(item.lon);
+                                
+                                // Update search input
+                                document.getElementById('address-search').value = item.display_name;
+                                document.getElementById('address-autocomplete').classList.add('hidden');
+                                
+                                // Validate delivery distance
+                                const isValid = validateDeliveryDistance(lat, lng);
+                                
+                                // Extract address components
+                                const address = item.address || {};
+                                const street = address.road || address.pedestrian || item.display_name.split(',')[0];
+                                const houseNumber = address.house_number || '';
+                                const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
+                                
+                                // Update form fields
+                                const addressInput = document.getElementById('delivery_address_input');
+                                const cityInput = document.getElementById('delivery_city_input');
+                                
+                                if (addressInput) {
+                                    addressInput.value = houseNumber ? `${houseNumber} ${street}`.trim() : street;
+                                }
+                                if (cityInput) {
+                                    cityInput.value = city;
+                                }
+                                
+                                // Update Livewire
+                                if (window.Livewire) {
+                                    const component = window.Livewire.find('{{ $this->getId() }}');
+                                    if (component) {
+                                        component.set('delivery_address', houseNumber ? `${houseNumber} ${street}`.trim() : street);
+                                        component.set('delivery_city', city);
+                                        component.set('delivery_latitude', lat);
+                                        component.set('delivery_longitude', lng);
+                                    }
+                                }
+                            }
+                            
+                            // Function to reverse geocode (get address from coordinates)
+                            async function reverseGeocode(lat, lng) {
+                                try {
+                                    console.log('[Address] Reverse geocoding...');
+                                    // Use our Laravel API endpoint
+                                    const url = `{{ route('api.geocoding.reverse') }}?lat=${lat}&lon=${lng}`;
+                                    console.log('[Address] Reverse URL:', url);
+                                    
+                                    const response = await fetch(url, {
+                                        method: 'GET',
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        }
+                                    });
+                                    
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        console.log('[Address] Reverse geocoding result:', data);
+                                        
+                                        if (data.address || data.city) {
+                                            return {
+                                                address: data.address || '',
+                                                city: data.city || 'Côte d\'Ivoire'
+                                            };
+                                        }
+                                    } else {
+                                        console.error('[Address] Reverse geocoding failed:', response.status);
+                                    }
+                                } catch (error) {
+                                    console.error('[Address] Reverse geocoding error:', error);
+                                }
+                                return null;
+                            }
+                            
+                            // Use my location
+                            function useMyLocation() {
+                                console.log('[Address] Use my location clicked');
+                                const button = document.getElementById('use-my-location');
+                                if (!button) {
+                                    console.error('[Address] Button not found');
+                                    return;
+                                }
+                                
+                                const originalText = button.innerHTML;
+                                
+                                button.disabled = true;
+                                button.innerHTML = '<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Localisation...';
+                                
+                                if (navigator.geolocation) {
+                                    console.log('[Address] Requesting geolocation...');
+                                    navigator.geolocation.getCurrentPosition(
+                                        function(position) {
+                                            console.log('[Address] Position received:', position.coords.latitude, position.coords.longitude);
+                                            const lat = position.coords.latitude;
+                                            const lng = position.coords.longitude;
+                                            
+                                            // Validate delivery distance
+                                            const isValid = validateDeliveryDistance(lat, lng);
+                                            
+                                            // Reverse geocode to get address
+                                            console.log('[Address] Reverse geocoding...');
+                                            reverseGeocode(lat, lng).then(addressData => {
+                                                console.log('[Address] Address data:', addressData);
+                                                if (addressData) {
+                                                    const addressInput = document.getElementById('delivery_address_input');
+                                                    const cityInput = document.getElementById('delivery_city_input');
+                                                    const searchInput = document.getElementById('address-search');
+                                                    
+                                                    if (addressInput) addressInput.value = addressData.address;
+                                                    if (cityInput) cityInput.value = addressData.city;
+                                                    if (searchInput) searchInput.value = addressData.address + ', ' + addressData.city;
+                                                    
+                                                    // Update Livewire
+                                                    if (window.Livewire) {
+                                                        const component = window.Livewire.find('{{ $this->getId() }}');
+                                                        if (component) {
+                                                            component.set('delivery_address', addressData.address);
+                                                            component.set('delivery_city', addressData.city);
+                                                            component.set('delivery_latitude', lat);
+                                                            component.set('delivery_longitude', lng);
+                                                        }
+                                                    }
+                                                } else {
+                                                    console.warn('[Address] No address data from reverse geocoding');
+                                                }
+                                                
+                                                button.disabled = false;
+                                                button.innerHTML = originalText;
+                                            }).catch(error => {
+                                                console.error('[Address] Reverse geocoding error:', error);
+                                                button.disabled = false;
+                                                button.innerHTML = originalText;
+                                            });
+                                        },
+                                        function(error) {
+                                            console.error('[Address] Geolocation error:', error);
+                                            let errorMessage = 'Impossible d\'obtenir votre position. ';
+                                            if (error.code === error.PERMISSION_DENIED) {
+                                                errorMessage += 'Veuillez autoriser l\'accès à la localisation dans les paramètres de votre navigateur.';
+                                            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                                                errorMessage += 'Votre position n\'est pas disponible.';
+                                            } else if (error.code === error.TIMEOUT) {
+                                                errorMessage += 'La demande de localisation a expiré.';
+                                            } else {
+                                                errorMessage += 'Veuillez rechercher une adresse manuellement.';
+                                            }
+                                            alert(errorMessage);
+                                            button.disabled = false;
+                                            button.innerHTML = originalText;
+                                        },
+                                        {
+                                            enableHighAccuracy: true,
+                                            timeout: 10000,
+                                            maximumAge: 0
+                                        }
+                                    );
+                                } else {
+                                    alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                                    button.disabled = false;
+                                    button.innerHTML = originalText;
+                                }
+                            }
+                            
+                            // Initialize when DOM is ready
+                            let initialized = false;
+                            
+                            function initializeAddressSearch() {
+                                if (initialized) {
+                                    console.log('[Address] Already initialized, skipping...');
+                                    return;
+                                }
+                                
+                                console.log('[Address] Initializing address search...');
+                                
+                                // Setup address search
+                                const addressSearchInput = document.getElementById('address-search');
+                                const useMyLocationBtn = document.getElementById('use-my-location');
+                                const debugEl = document.getElementById('address-debug');
+                                
+                                if (!addressSearchInput) {
+                                    console.error('[Address] Address search input not found');
+                                    if (debugEl) {
+                                        debugEl.textContent = 'Erreur: Champ de recherche non trouvé';
+                                        debugEl.classList.remove('hidden');
+                                    }
+                                    return;
+                                }
+                                
+                                if (!useMyLocationBtn) {
+                                    console.error('[Address] Use my location button not found');
+                                    return;
+                                }
+                                
+                                console.log('[Address] Both elements found, setting up listeners...');
+                                
+                                // Remove existing listeners by cloning
+                                const newInput = addressSearchInput.cloneNode(true);
+                                addressSearchInput.parentNode.replaceChild(newInput, addressSearchInput);
+                                
+                                // Setup address search
+                                newInput.addEventListener('input', function(e) {
+                                    const query = e.target.value.trim();
+                                    
+                                    if (searchTimeout) {
+                                        clearTimeout(searchTimeout);
+                                    }
+                                    
+                                    if (query.length >= 3) {
+                                        searchTimeout = setTimeout(() => {
+                                            searchAddresses(query);
+                                        }, 500); // Debounce 500ms
+                                    } else {
+                                        const autocompleteEl = document.getElementById('address-autocomplete');
+                                        if (autocompleteEl) {
+                                            autocompleteEl.classList.add('hidden');
+                                        }
+                                    }
+                                });
+                                
+                                // Setup use my location button
+                                useMyLocationBtn.addEventListener('click', useMyLocation);
+                                
+                                // Close autocomplete when clicking outside
+                                document.addEventListener('click', function(e) {
+                                    const autocompleteEl = document.getElementById('address-autocomplete');
+                                    if (autocompleteEl && !newInput.contains(e.target) && !autocompleteEl.contains(e.target)) {
+                                        autocompleteEl.classList.add('hidden');
+                                    }
+                                });
+                                
+                                initialized = true;
+                                console.log('[Address] Initialization complete!');
+                                
+                                if (debugEl) {
+                                    debugEl.textContent = '✓ Système de recherche initialisé';
+                                    debugEl.classList.remove('hidden');
+                                    setTimeout(() => debugEl.classList.add('hidden'), 3000);
+                                }
+                            }
+                            
+                            // Initialize immediately and also after Livewire updates
+                            function tryInitialize() {
+                                const addressSearchInput = document.getElementById('address-search');
+                                const useMyLocationBtn = document.getElementById('use-my-location');
+                                
+                                if (addressSearchInput && useMyLocationBtn) {
+                                    initializeAddressSearch();
+                                    return true;
+                                }
+                                return false;
+                            }
+                            
+                            // Try immediately
+                            if (!tryInitialize()) {
+                                // Wait for DOM
+                                if (document.readyState === 'loading') {
+                                    document.addEventListener('DOMContentLoaded', () => {
+                                        setTimeout(() => tryInitialize(), 200);
+                                    });
+                                } else {
+                                    setTimeout(() => tryInitialize(), 200);
+                                }
+                            }
+                            
+                            // Also initialize after Livewire updates
+                            if (typeof Livewire !== 'undefined') {
+                                document.addEventListener('livewire:init', () => {
+                                    setTimeout(() => tryInitialize(), 300);
+                                    
+                                    Livewire.hook('morph.updated', () => {
+                                        setTimeout(() => tryInitialize(), 300);
+                                    });
+                                });
+                            }
+                            
+                            // Also try after a delay (for Livewire components that load later)
+                            setTimeout(() => tryInitialize(), 1000);
+                                
+                        })();
+                    </script>
+                    @endpush
                 @endif
 
                 <!-- Notes -->

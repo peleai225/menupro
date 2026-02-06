@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -30,6 +31,14 @@ class LoginController extends Controller
         // Update last login
         $request->user()->updateLastLogin();
 
+        // Log login activity
+        ActivityLog::log(
+            'login',
+            $request->user(),
+            "Connexion de {$request->user()->name}",
+            ['email' => $request->user()->email]
+        );
+
         // Check if email is verified
         if (!$request->user()->hasVerifiedEmail()) {
             $request->user()->sendEmailVerificationNotification();
@@ -48,6 +57,18 @@ class LoginController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        // Log logout activity before destroying session
+        if ($user) {
+            ActivityLog::log(
+                'logout',
+                $user,
+                "Déconnexion de {$user->name}",
+                ['email' => $user->email]
+            );
+        }
+
         auth()->logout();
 
         $request->session()->invalidate();

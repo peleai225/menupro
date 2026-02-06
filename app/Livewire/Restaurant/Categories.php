@@ -3,17 +3,13 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\Category;
-use App\Services\MediaUploader;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class Categories extends Component
 {
-    use WithFileUploads;
-
     public bool $showModal = false;
     public ?int $editingId = null;
 
@@ -23,12 +19,7 @@ class Categories extends Component
     #[Rule('nullable|string|max:500')]
     public ?string $description = null;
 
-    #[Rule('nullable|image|max:2048')]
-    public $image = null;
-
     public bool $is_active = true;
-
-    public ?string $existingImage = null;
 
     #[Computed]
     public function categories()
@@ -42,7 +33,7 @@ class Categories extends Component
     public function openModal(?int $id = null): void
     {
         $this->resetValidation();
-        $this->reset(['name', 'description', 'image', 'is_active', 'existingImage']);
+        $this->reset(['name', 'description', 'is_active']);
         
         if ($id) {
             $category = Category::findOrFail($id);
@@ -50,7 +41,6 @@ class Categories extends Component
             $this->name = $category->name;
             $this->description = $category->description;
             $this->is_active = $category->is_active;
-            $this->existingImage = $category->image_path;
         } else {
             $this->editingId = null;
         }
@@ -74,23 +64,6 @@ class Categories extends Component
                 'description' => $this->description,
                 'is_active' => $this->is_active,
             ];
-
-            // Handle image upload
-            if ($this->image) {
-                try {
-                    $uploader = app(MediaUploader::class);
-                    $restaurantId = auth()->user()->restaurant_id;
-                    $data['image_path'] = $uploader->upload($this->image, "restaurants/{$restaurantId}/categories");
-
-                    // Delete old image if editing
-                    if ($this->editingId && $this->existingImage) {
-                        Storage::disk('public')->delete($this->existingImage);
-                    }
-                } catch (\Exception $e) {
-                    session()->flash('error', 'Erreur lors de l\'upload de l\'image : ' . $e->getMessage());
-                    return;
-                }
-            }
 
             if ($this->editingId) {
                 $category = Category::findOrFail($this->editingId);

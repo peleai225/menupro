@@ -1,4 +1,25 @@
 <x-layouts.admin-super title="Dashboard">
+    <!-- Live Dashboard Header -->
+    <div class="flex items-center justify-between mb-8" x-data="liveDashboard()" x-init="startPolling()">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+            <p class="text-neutral-400 mt-1">Vue d'ensemble de la plateforme</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 px-4 py-2 bg-secondary-500/20 border border-secondary-500/30 rounded-xl">
+                <span class="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></span>
+                <span class="text-sm font-medium text-secondary-400">Live</span>
+                <span class="text-xs text-neutral-400" x-text="lastUpdate"></span>
+            </div>
+            <button @click="toggleLive()" :class="isLive ? 'bg-secondary-500' : 'bg-neutral-600'" 
+                    class="p-2 rounded-lg text-white transition-colors" title="Activer/Désactiver le mode live">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Restaurants -->
@@ -116,12 +137,16 @@
                 </div>
                 <div class="divide-y divide-neutral-700">
                     @forelse($recentRestaurants as $restaurant)
-                        <div class="p-4 hover:bg-neutral-700/30 transition-colors">
+                        <a href="{{ route('super-admin.restaurants.show', $restaurant) }}" class="block p-4 hover:bg-neutral-700/30 transition-colors">
                             <div class="flex flex-wrap items-center justify-between gap-y-2 gap-x-4">
                                 <div class="flex items-center gap-4 min-w-0">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
-                                        {{ strtoupper(substr($restaurant->name, 0, 1)) }}
-                                    </div>
+                                    @if($restaurant->logo_path)
+                                        <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-12 h-12 rounded-xl object-cover border border-neutral-600 flex-shrink-0">
+                                    @else
+                                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
+                                            {{ strtoupper(substr($restaurant->name, 0, 2)) }}
+                                        </div>
+                                    @endif
                                     <div class="min-w-0">
                                         <p class="font-medium text-white truncate">{{ $restaurant->name }}</p>
                                         <p class="text-sm text-neutral-400">{{ $restaurant->owner?->name ?? 'N/A' }} · {{ $restaurant->created_at->format('d M') }}</p>
@@ -150,7 +175,7 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     @empty
                         <div class="p-8 text-center">
                             <p class="text-neutral-500">Aucun restaurant récent</p>
@@ -173,9 +198,13 @@
                             <div class="p-4 hover:bg-neutral-700/30 transition-colors">
                                 <div class="flex flex-wrap items-center justify-between gap-y-2 gap-x-4">
                                     <div class="flex items-center gap-4 min-w-0">
-                                        <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center text-yellow-400 font-bold flex-shrink-0">
-                                            {{ strtoupper(substr($restaurant->name, 0, 1)) }}
-                                        </div>
+                                        @if($restaurant->logo_path)
+                                            <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-xl object-cover border border-yellow-500/30 flex-shrink-0">
+                                        @else
+                                            <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center text-yellow-400 font-bold flex-shrink-0">
+                                                {{ strtoupper(substr($restaurant->name, 0, 2)) }}
+                                            </div>
+                                        @endif
                                         <div class="min-w-0">
                                             <p class="font-medium text-white truncate">{{ $restaurant->name }}</p>
                                             <p class="text-sm text-neutral-400 truncate">{{ $restaurant->owner?->email ?? 'N/A' }}</p>
@@ -301,4 +330,178 @@
             </div>
         </div>
     </div>
+
+    <!-- Live Orders Section -->
+    <div class="mt-8" x-data="liveOrders()" x-init="startPolling()">
+        <div class="bg-neutral-800/50 backdrop-blur border border-neutral-700 rounded-2xl">
+            <div class="p-6 border-b border-neutral-700">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-3">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary-500"></span>
+                        </span>
+                        Commandes en temps réel
+                    </h2>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-neutral-400">
+                            <span x-text="stats.orders_today"></span> commandes aujourd'hui
+                        </div>
+                        <div class="text-sm font-semibold text-secondary-400">
+                            <span x-text="formatCurrency(stats.revenue_today)"></span> F
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Orders Feed -->
+            <div class="divide-y divide-neutral-700/50 max-h-96 overflow-y-auto" id="live-orders-feed">
+                <template x-for="order in orders" :key="order.id">
+                    <div class="p-4 hover:bg-neutral-700/30 transition-colors animate-fade-in">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-4 min-w-0">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                                     :class="{
+                                        'bg-yellow-500/20 text-yellow-400': order.status === 'pending',
+                                        'bg-blue-500/20 text-blue-400': order.status === 'confirmed',
+                                        'bg-accent-500/20 text-accent-400': order.status === 'preparing',
+                                        'bg-secondary-500/20 text-secondary-400': order.status === 'ready' || order.status === 'completed',
+                                        'bg-red-500/20 text-red-400': order.status === 'cancelled',
+                                     }">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-medium text-white truncate">
+                                        <span class="font-mono text-sm text-neutral-400">#</span><span x-text="order.reference"></span>
+                                    </p>
+                                    <p class="text-sm text-neutral-400 truncate" x-text="order.restaurant"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-medium"
+                                      :class="{
+                                        'bg-yellow-500/20 text-yellow-400': order.status === 'pending',
+                                        'bg-blue-500/20 text-blue-400': order.status === 'confirmed',
+                                        'bg-accent-500/20 text-accent-400': order.status === 'preparing',
+                                        'bg-secondary-500/20 text-secondary-400': order.status === 'ready' || order.status === 'completed',
+                                        'bg-red-500/20 text-red-400': order.status === 'cancelled',
+                                      }"
+                                      x-text="order.status_label">
+                                </span>
+                                <span class="text-sm font-semibold text-white" x-text="formatCurrency(order.total) + ' F'"></span>
+                                <span class="text-xs text-neutral-500" x-text="order.created_at"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <div x-show="orders.length === 0" class="p-8 text-center">
+                    <div class="w-12 h-12 bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-neutral-500">Aucune commande récente</p>
+                    <p class="text-xs text-neutral-600 mt-1">Les nouvelles commandes apparaîtront ici</p>
+                </div>
+            </div>
+
+            <!-- Stats Footer -->
+            <div class="p-4 border-t border-neutral-700 bg-neutral-900/30">
+                <div class="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                        <p class="text-2xl font-bold text-white" x-text="stats.pending_orders || 0"></p>
+                        <p class="text-xs text-neutral-500">En attente</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-secondary-400" x-text="stats.active_restaurants || 0"></p>
+                        <p class="text-xs text-neutral-500">Restaurants actifs</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-blue-400" x-text="stats.new_registrations_today || 0"></p>
+                        <p class="text-xs text-neutral-500">Nouveaux aujourd'hui</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-accent-400" x-text="stats.orders_today || 0"></p>
+                        <p class="text-xs text-neutral-500">Commandes aujourd'hui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        function liveDashboard() {
+            return {
+                isLive: true,
+                lastUpdate: '',
+                interval: null,
+                
+                startPolling() {
+                    this.lastUpdate = new Date().toLocaleTimeString('fr-FR');
+                    this.interval = setInterval(() => {
+                        if (this.isLive) {
+                            this.lastUpdate = new Date().toLocaleTimeString('fr-FR');
+                        }
+                    }, 5000);
+                },
+                
+                toggleLive() {
+                    this.isLive = !this.isLive;
+                }
+            }
+        }
+
+        function liveOrders() {
+            return {
+                orders: [],
+                stats: {
+                    orders_today: {{ $stats['orders']['today'] ?? 0 }},
+                    revenue_today: 0,
+                    pending_orders: 0,
+                    active_restaurants: {{ $stats['restaurants']['active'] ?? 0 }},
+                    new_registrations_today: 0,
+                },
+                interval: null,
+                
+                startPolling() {
+                    this.fetchData();
+                    this.interval = setInterval(() => {
+                        this.fetchData();
+                    }, 10000); // Every 10 seconds
+                },
+                
+                async fetchData() {
+                    try {
+                        const response = await fetch('{{ route("super-admin.api.live-stats") }}');
+                        const data = await response.json();
+                        
+                        this.orders = data.recent_orders || [];
+                        this.stats = data.stats || this.stats;
+                    } catch (error) {
+                        console.error('Error fetching live data:', error);
+                    }
+                },
+                
+                formatCurrency(amount) {
+                    return new Intl.NumberFormat('fr-FR').format(amount || 0);
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+    @endpush
 </x-layouts.admin-super>

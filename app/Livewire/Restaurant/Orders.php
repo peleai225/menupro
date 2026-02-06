@@ -92,7 +92,7 @@ class Orders extends Component
     public function viewOrder(int $orderId): void
     {
         try {
-            $order = Order::with('items')->findOrFail($orderId);
+            $order = Order::with(['items.dish'])->findOrFail($orderId);
             
             // Check if order belongs to user's restaurant
             if ($order->restaurant_id !== auth()->user()->restaurant_id) {
@@ -165,7 +165,7 @@ class Orders extends Component
 
             // Refresh selected order if it's the one we just updated
             if ($this->selectedOrder?->id === $orderId) {
-                $this->selectedOrder = $order->fresh(['items']);
+                $this->selectedOrder = $order->fresh(['items.dish']);
             }
 
             session()->flash('success', 'Statut mis à jour avec succès.');
@@ -226,6 +226,16 @@ class Orders extends Component
     {
         $this->showCancelModal = false;
         $this->cancellationReason = null;
+    }
+
+    /**
+     * Refresh method for polling (called automatically by wire:poll)
+     */
+    public function __refresh(): void
+    {
+        // Force refresh of computed properties
+        unset($this->orders);
+        unset($this->statusCounts);
     }
 
     public function render()

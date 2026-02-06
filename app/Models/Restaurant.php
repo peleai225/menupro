@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RestaurantStatus;
+use App\Enums\SubscriptionStatus;
 use App\Models\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -112,7 +113,7 @@ class Restaurant extends Model
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(Subscription::class)
-            ->where('status', 'active')
+            ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL])
             ->latest();
     }
 
@@ -466,9 +467,39 @@ class Restaurant extends Model
         $openTime = $todayHours['open'] ?? '00:00';
         $closeTime = $todayHours['close'] ?? '23:59';
 
+        // Normalize time format (ensure HH:ii format)
+        $openTime = $this->normalizeTime($openTime);
+        $closeTime = $this->normalizeTime($closeTime);
+        
         $currentTime = $now->format('H:i');
 
+        // Handle case where close time is after midnight (e.g., 01:00)
+        // If close time is less than open time, it means it closes the next day
+        if ($closeTime < $openTime) {
+            // Restaurant is open if current time >= open time OR current time <= close time
+            return $currentTime >= $openTime || $currentTime <= $closeTime;
+        }
+
+        // Normal case: open time < close time (same day)
         return $currentTime >= $openTime && $currentTime <= $closeTime;
+    }
+
+    /**
+     * Normalize time format to HH:ii
+     */
+    private function normalizeTime(string $time): string
+    {
+        // Remove any whitespace
+        $time = trim($time);
+        
+        // If time is in format "H:i" (single digit hour), convert to "HH:ii"
+        if (preg_match('/^(\d{1,2}):(\d{2})$/', $time, $matches)) {
+            $hour = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $minute = $matches[2];
+            return "{$hour}:{$minute}";
+        }
+        
+        return $time;
     }
 
     /**

@@ -87,6 +87,10 @@ class OrderItem extends Model
      */
     public function updateQuantity(int $quantity): bool
     {
+        if ($quantity <= 0) {
+            return false;
+        }
+
         $this->quantity = $quantity;
         $this->total_price = $this->unit_price * $quantity;
         
@@ -97,6 +101,14 @@ class OrderItem extends Model
         }
         
         return false;
+    }
+
+    /**
+     * Remove this item from order
+     */
+    public function remove(): bool
+    {
+        return $this->order->removeItem($this);
     }
 }
 

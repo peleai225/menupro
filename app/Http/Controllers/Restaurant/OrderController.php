@@ -67,7 +67,16 @@ class OrderController extends Controller
         // Get allowed status transitions
         $allowedTransitions = $order->status->allowedTransitions();
 
-        return view('pages.restaurant.order-show', compact('order', 'allowedTransitions'));
+        // Get available dishes for modification (if order can be modified)
+        $availableDishes = collect();
+        if ($order->can_be_modified_by_manager) {
+            $availableDishes = \App\Models\Dish::where('restaurant_id', $order->restaurant_id)
+                ->active()
+                ->orderBy('name')
+                ->get();
+        }
+
+        return view('pages.restaurant.order-show', compact('order', 'allowedTransitions', 'availableDishes'));
     }
 
     /**

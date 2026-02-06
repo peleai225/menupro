@@ -14,11 +14,14 @@ use Illuminate\View\View;
 class ReviewController extends Controller
 {
     /**
-     * Show review form for an order.
+     * Show review form for an order (secured with tracking token).
      */
-    public function create(string $slug, Order $order): View
+    public function create(string $slug, string $token): View
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+
+        // Find order by tracking token (secure, unguessable)
+        $order = Order::where('tracking_token', $token)->firstOrFail();
 
         // Verify order belongs to restaurant
         if ($order->restaurant_id !== $restaurant->id) {
@@ -28,14 +31,14 @@ class ReviewController extends Controller
         // Check if order is completed
         if ($order->status->value !== 'completed') {
             return redirect()
-                ->route('r.order.status', [$slug, $order])
+                ->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('error', 'Vous ne pouvez laisser un avis que pour une commande terminée.');
         }
 
         // Check if review already exists
         if ($order->review) {
             return redirect()
-                ->route('r.order.status', [$slug, $order])
+                ->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('info', 'Vous avez déjà laissé un avis pour cette commande.');
         }
 
@@ -46,11 +49,14 @@ class ReviewController extends Controller
     }
 
     /**
-     * Store a new review.
+     * Store a new review (secured with tracking token).
      */
-    public function store(Request $request, string $slug, Order $order): RedirectResponse
+    public function store(Request $request, string $slug, string $token): RedirectResponse
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+
+        // Find order by tracking token (secure, unguessable)
+        $order = Order::where('tracking_token', $token)->firstOrFail();
 
         // Verify order belongs to restaurant
         if ($order->restaurant_id !== $restaurant->id) {
@@ -99,7 +105,7 @@ class ReviewController extends Controller
             });
 
             return redirect()
-                ->route('r.order.status', [$slug, $order])
+                ->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('success', 'Merci pour votre avis ! Il sera publié après modération.');
         } catch (\Exception $e) {
             return back()

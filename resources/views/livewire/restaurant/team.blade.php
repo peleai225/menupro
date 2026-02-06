@@ -5,42 +5,39 @@
             <h1 class="text-2xl font-bold text-neutral-900">Équipe</h1>
             <p class="text-neutral-500 mt-1">Gérez les membres de votre équipe et leurs accès au système.</p>
         </div>
-        @if($canAddMore)
-            <button wire:click="openInviteModal" class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Inviter un membre
-            </button>
-        @else
-            <div class="bg-accent-50 border border-accent-200 rounded-xl px-4 py-3">
-                <p class="text-sm text-accent-700">
-                    <strong>Limite atteinte :</strong> Vous avez atteint la limite de {{ $maxTeam }} membre(s) pour votre plan actuel.
-                </p>
-            </div>
-        @endif
+        <button wire:click="openInviteModal" class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Inviter un membre
+        </button>
     </div>
 
-    <!-- Quota Info -->
+    <!-- Team Count Info -->
     <div class="card p-6 mb-6">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
             <div>
                 <p class="text-sm font-medium text-neutral-600">Membres d'équipe</p>
-                <p class="text-2xl font-bold text-neutral-900 mt-1">{{ $currentTeamCount }} / {{ $maxTeam }}</p>
-            </div>
-            <div class="w-32">
-                <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary-500 rounded-full transition-all" style="width: {{ min(100, ($currentTeamCount / $maxTeam) * 100) }}%"></div>
-                </div>
+                <p class="text-2xl font-bold text-neutral-900">{{ $currentTeamCount }}</p>
             </div>
         </div>
     </div>
 
     <!-- Search -->
     <div class="card p-6 mb-6">
-        <input type="text" wire:model.live.debounce.300ms="search" 
-               placeholder="Rechercher un membre..." 
-               class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+        <div class="relative">
+            <svg class="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" wire:model.live.debounce.300ms="search" 
+                   placeholder="Rechercher un membre..." 
+                   class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
     </div>
 
     <!-- Team Members List -->
@@ -53,15 +50,15 @@
                             <!-- Avatar -->
                             <div class="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <span class="text-lg font-bold text-primary-600">
-                                    {{ strtoupper(substr($member->first_name, 0, 1) . substr($member->last_name, 0, 1)) }}
+                                    {{ $member->initials }}
                                 </span>
                             </div>
 
                             <!-- Info -->
                             <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-1">
+                                <div class="flex items-center gap-3 mb-1 flex-wrap">
                                     <h3 class="text-lg font-bold text-neutral-900">
-                                        {{ $member->first_name }} {{ $member->last_name }}
+                                        {{ $member->name }}
                                     </h3>
                                     @if($member->id === auth()->id())
                                         <span class="badge bg-primary-500 text-white px-3 py-1 rounded-full text-xs font-medium">Vous</span>
@@ -91,14 +88,28 @@
                         <!-- Actions -->
                         <div class="flex items-center gap-2 ml-4">
                             @if($member->id !== auth()->id() && $member->id !== $member->restaurant->owner?->id)
+                                <button wire:click="resendInvitation({{ $member->id }})" 
+                                        wire:loading.attr="disabled"
+                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-primary-600 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+                                        title="Renvoyer l'invitation">
+                                    <svg wire:loading.remove wire:target="resendInvitation({{ $member->id }})" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                    <svg wire:loading wire:target="resendInvitation({{ $member->id }})" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </button>
                                 <button wire:click="editUser({{ $member->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50">
+                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50"
+                                        title="Modifier">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
                                 <button wire:click="toggleActive({{ $member->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50">
+                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50"
+                                        title="{{ $member->is_active ? 'Désactiver' : 'Activer' }}">
                                     @if($member->is_active)
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
@@ -111,7 +122,8 @@
                                 </button>
                                 <button wire:click="removeUser({{ $member->id }})" 
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce membre de l'équipe ?"
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all disabled:opacity-50">
+                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+                                        title="Supprimer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -134,14 +146,12 @@
             </svg>
             <h3 class="text-lg font-semibold text-neutral-900 mb-2">Aucun membre d'équipe</h3>
             <p class="text-neutral-500 mb-6">Invitez des membres de votre équipe pour collaborer sur la gestion de votre restaurant.</p>
-            @if($canAddMore)
-                <button wire:click="openInviteModal" class="btn btn-primary px-6 py-3 flex items-center gap-2 mx-auto shadow-sm hover:shadow-md transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Inviter un membre
-                </button>
-            @endif
+            <button wire:click="openInviteModal" class="btn btn-primary px-6 py-3 flex items-center gap-2 mx-auto shadow-sm hover:shadow-md transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Inviter un membre
+            </button>
         </div>
     @endif
 
@@ -155,7 +165,9 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             @keydown.escape.window="show = false; $wire.closeInviteModal()"
+             x-init="document.body.classList.add('overflow-hidden')"
+             x-on:remove="document.body.classList.remove('overflow-hidden')"
+             @keydown.escape.window="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeInviteModal()"
              class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
              x-cloak>
             <div x-show="show"
@@ -165,7 +177,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 @click.away="show = false; $wire.closeInviteModal()"
+                 @click.away="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeInviteModal()"
                  class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 
                 <!-- Header -->
@@ -174,7 +186,7 @@
                         <h2 class="text-xl font-bold text-neutral-900">
                             {{ $editingUser ? 'Modifier le membre' : 'Inviter un membre' }}
                         </h2>
-                        <button wire:click="closeInviteModal" class="text-neutral-400 hover:text-neutral-600 transition-colors">
+                        <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeInviteModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -317,4 +329,3 @@
         </div>
     @endif
 </div>
-
