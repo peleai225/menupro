@@ -369,7 +369,8 @@ body {
     .btn:not(.btn-sm):not(.btn-icon) {
         min-height: 44px;
     }
-    .sidebar-item {
+    .sidebar-item,
+    .sidebar-item-commando {
         min-height: 44px;
     }
 }
@@ -400,6 +401,15 @@ body {
 
 .sidebar-item-active {
     @apply bg-primary-500/10 text-primary-400 hover:bg-primary-500/20 hover:text-primary-300;
+}
+
+/* Sidebar Commando (backoffice agents) */
+.sidebar-item-commando {
+    @apply flex items-center gap-3 px-3 py-3 text-slate-400 rounded-xl transition-all duration-200 hover:bg-slate-700/50 hover:text-white;
+}
+
+.sidebar-item-commando-active {
+    @apply bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 hover:text-orange-300;
 }
 
 /* Navbar */

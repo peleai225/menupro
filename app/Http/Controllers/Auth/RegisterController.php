@@ -39,6 +39,15 @@ class RegisterController extends Controller
             return view('pages.auth.registrations-closed');
         }
 
+        // Parrainage Commando : stocker ref en session si UUID agent valide
+        $ref = request()->query('ref');
+        if ($ref) {
+            $agent = \App\Models\CommandoAgent::where('uuid', $ref)->valide()->first();
+            if ($agent && !$agent->isBanni()) {
+                session(['register_ref_agent' => $ref]);
+            }
+        }
+
         // Only get the MenuPro plan (unique plan)
         $plan = Plan::where('slug', 'menupro')->where('is_active', true)->first();
 
@@ -93,11 +102,21 @@ class RegisterController extends Controller
             $trialDays = 14;
             $trialEndsAt = now()->addDays($trialDays);
 
+            $referredByAgentId = null;
+            if (session()->has('register_ref_agent')) {
+                $refAgent = \App\Models\CommandoAgent::where('uuid', session('register_ref_agent'))->valide()->first();
+                if ($refAgent && !$refAgent->isBanni()) {
+                    $referredByAgentId = $refAgent->id;
+                }
+                session()->forget('register_ref_agent');
+            }
+
             $restaurant = Restaurant::create([
                 'name' => $request->restaurant_name,
                 'type' => $request->restaurant_type ?? 'restaurant',
                 'company_name' => $request->company_name,
                 'rccm' => $request->rccm,
+                'referred_by_agent_id' => $referredByAgentId,
                 'slug' => Str::slug($request->restaurant_name),
                 'email' => $request->email,
                 'phone' => $request->phone,

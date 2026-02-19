@@ -121,6 +121,59 @@ document.addEventListener('alpine:init', () => {
             this.show = false;
         }
     }));
+
+    // Super Admin: cloche notifications (liste + marquer lu)
+    Alpine.data('notificationBell', () => ({
+        open: false,
+        loading: false,
+        items: [],
+        unreadCount: 0,
+        badgesUrl: window.__superAdminBadgesUrl || '',
+        init() {
+            this.badgesUrl = window.__superAdminBadgesUrl || '';
+            if (this.badgesUrl) this.fetchBadges();
+        },
+        async loadNotifications() {
+            this.loading = true;
+            try {
+                const url = this.badgesUrl.replace('sidebar-badges', 'notifications');
+                const r = await fetch(url, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await r.json();
+                this.items = data.notifications || [];
+                if (this.unreadCount > 0) {
+                    const markUrl = this.badgesUrl.replace('sidebar-badges', 'notifications/mark-read');
+                    await fetch(markUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                }
+                await this.fetchBadges();
+            } catch (e) {
+                console.error('Notifications load error', e);
+            }
+            this.loading = false;
+        },
+        async fetchBadges() {
+            if (!this.badgesUrl) return;
+            try {
+                const r = await fetch(this.badgesUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                this.unreadCount = data.unread_notifications ?? 0;
+            } catch (_) {}
+        },
+        formatDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const now = new Date();
+            const diff = (now - d) / 60000;
+            if (diff < 1) return 'À l\'instant';
+            if (diff < 60) return `Il y a ${Math.floor(diff)} min`;
+            if (diff < 1440) return `Il y a ${Math.floor(diff/60)} h`;
+            return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+    }));
 });
 
 // Livewire event listeners

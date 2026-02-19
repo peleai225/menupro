@@ -147,6 +147,13 @@ class DashboardController extends Controller
             'social_instagram' => \App\Models\SystemSetting::get('social_instagram', ''),
             'social_linkedin' => \App\Models\SystemSetting::get('social_linkedin', ''),
             'footer_text' => \App\Models\SystemSetting::get('footer_text', '© ' . date('Y') . ' MenuPro. Tous droits réservés.'),
+            // Commando – commissions agents (priorité au backoffice, sinon config)
+            'commando_commission_cents_first_payment' => \App\Models\SystemSetting::has('commando_commission_cents_first_payment')
+                ? (int) \App\Models\SystemSetting::get('commando_commission_cents_first_payment', config('commando.commission_cents_first_payment', 500000))
+                : (int) config('commando.commission_cents_first_payment', 500000),
+            'commando_commission_only_first_payment' => \App\Models\SystemSetting::has('commando_commission_only_first_payment')
+                ? \App\Models\SystemSetting::get('commando_commission_only_first_payment', true)
+                : config('commando.commission_only_first_payment', true),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -190,6 +197,8 @@ class DashboardController extends Controller
             'social_instagram' => ['nullable', 'url'],
             'social_linkedin' => ['nullable', 'url'],
             'footer_text' => ['nullable', 'string', 'max:500'],
+            'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
+            'commando_commission_only_first_payment' => ['boolean'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -282,6 +291,25 @@ class DashboardController extends Controller
         
         if ($request->filled('footer_text')) {
             \App\Models\SystemSetting::set('footer_text', $request->footer_text, 'string', 'Texte du footer');
+        }
+
+        // Commando – commissions (sauvegardés si présents dans la requête, montant saisi en FCFA → stocké en centimes)
+        if ($request->has('commando_commission_fcfa_first_payment')) {
+            $fcfa = (float) ($request->commando_commission_fcfa_first_payment ?: 0);
+            \App\Models\SystemSetting::set(
+                'commando_commission_cents_first_payment',
+                (int) round($fcfa * 100),
+                'integer',
+                'Commission (centimes) versée à l\'agent au premier paiement d\'un restaurant parrainé'
+            );
+        }
+        if ($request->has('commando_commission_only_first_payment')) {
+            \App\Models\SystemSetting::set(
+                'commando_commission_only_first_payment',
+                $request->boolean('commando_commission_only_first_payment'),
+                'boolean',
+                'Commission uniquement au premier paiement par restaurant parrainé'
+            );
         }
 
         return back()->with('success', 'Paramètres mis à jour avec succès.');

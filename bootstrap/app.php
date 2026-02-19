@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'restaurant.active' => \App\Http\Middleware\EnsureRestaurantActive::class,
             'has.restaurant' => \App\Http\Middleware\EnsureUserHasRestaurant::class,
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'track.login' => \App\Http\Middleware\TrackLastLogin::class,
         ]);

@@ -7,6 +7,7 @@ enum UserRole: string
     case SUPER_ADMIN = 'super_admin';
     case RESTAURANT_ADMIN = 'restaurant_admin';
     case EMPLOYEE = 'employee';
+    case COMMANDO_AGENT = 'commando_agent';
 
     public function label(): string
     {
@@ -14,6 +15,7 @@ enum UserRole: string
             self::SUPER_ADMIN => 'Super Administrateur',
             self::RESTAURANT_ADMIN => 'Administrateur Restaurant',
             self::EMPLOYEE => 'Employé',
+            self::COMMANDO_AGENT => 'Agent Commando',
         };
     }
 
@@ -23,6 +25,7 @@ enum UserRole: string
             self::SUPER_ADMIN => 'purple',
             self::RESTAURANT_ADMIN => 'blue',
             self::EMPLOYEE => 'gray',
+            self::COMMANDO_AGENT => 'orange',
         };
     }
 

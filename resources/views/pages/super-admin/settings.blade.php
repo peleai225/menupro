@@ -55,6 +55,11 @@
                         class="px-4 py-3 border-b-2 font-medium transition-colors">
                     Apparence
                 </button>
+                <button @click="tab = 'commando'" 
+                        :class="tab === 'commando' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
+                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                    Commando
+                </button>
             </div>
 
             <!-- General Settings -->
@@ -349,6 +354,35 @@
                     </div>
                 </div>
 
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Commando - Commissions -->
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'commando'" x-cloak class="space-y-6">
+                @csrf
+                <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-white mb-4">Commissions agents Commando</h2>
+                    <p class="text-sm text-neutral-400 mb-5">Montant crédité à l'agent quand un restaurant inscrit via son lien de parrainage paie son premier abonnement.</p>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Commission au premier paiement (FCFA)</label>
+                            <input type="number" name="commando_commission_fcfa_first_payment" value="{{ old('commando_commission_fcfa_first_payment', ($settings['commando_commission_cents_first_payment'] ?? 500000) / 100) }}" min="0" step="1" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="5000">
+                            <p class="text-xs text-neutral-400 mt-1">Montant crédité à l'agent quand un restaurant parrainé paie son 1er abonnement.</p>
+                        </div>
+                        <label class="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl cursor-pointer">
+                            <div>
+                                <span class="font-medium text-white">Commission uniquement au 1er paiement</span>
+                                <p class="text-sm text-neutral-400">Si coché, l'agent ne reçoit qu'une seule commission par restaurant parrainé (au premier abonnement payé). Sinon, une commission à chaque paiement.</p>
+                            </div>
+                            <input type="checkbox" name="commando_commission_only_first_payment" value="1" {{ ($settings['commando_commission_only_first_payment'] ?? true) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-600">
+                        </label>
+                    </div>
+                </div>
                 <div class="flex justify-end">
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>

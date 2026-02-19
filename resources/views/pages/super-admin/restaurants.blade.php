@@ -161,9 +161,19 @@
                             </td>
                             <td class="px-6 py-4 text-neutral-400">{{ $restaurant->created_at->format('d M Y') }}</td>
                             <td class="px-6 py-4 text-right">
-                                <a href="{{ route('super-admin.restaurants.show', $restaurant) }}" class="text-primary-400 hover:text-primary-300 font-medium">
-                                    Voir →
-                                </a>
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ route('super-admin.restaurants.show', $restaurant) }}" class="text-primary-400 hover:text-primary-300 font-medium">
+                                        Voir →
+                                    </a>
+                                    <form method="POST" action="{{ route('super-admin.restaurants.destroy', $restaurant) }}" class="inline"
+                                          onsubmit="return confirm('Supprimer « {{ addslashes($restaurant->name) }} » ? Cette action est irréversible.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-400 hover:text-red-300 text-sm font-medium">
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

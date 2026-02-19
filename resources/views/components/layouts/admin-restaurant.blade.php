@@ -377,6 +377,11 @@
                         </svg>
                     </button>
 
+                    <!-- Logo MenuPro (navbar) -->
+                    <a href="{{ route('restaurant.dashboard') }}" class="hidden sm:flex items-center shrink-0 mr-3">
+                        <img src="{{ asset('images/logo-menupro.png') }}" alt="MenuPro" class="h-7 w-auto object-contain">
+                    </a>
+
                     <!-- Page Title (visible mobile + desktop) -->
                     <div class="flex-1 min-w-0">
                         <h1 class="text-base sm:text-xl font-bold text-neutral-900 truncate">{{ $title ?? 'Dashboard' }}</h1>

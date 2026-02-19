@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\CommandoAgent;
 use App\Models\Dish;
 use App\Models\Ingredient;
 use App\Models\Order;
@@ -10,6 +11,7 @@ use App\Models\Reservation;
 use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Models\User;
+use Illuminate\Support\Facades\View;
 use App\Observers\ActivityObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
@@ -74,6 +76,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Register activity observers for important models
         $this->registerActivityObservers();
+
+        // Share sidebar counts with super-admin layout (pending restaurants + pending Commando agents)
+        View::composer('components.layouts.admin-super', function ($view) {
+            $view->with('pendingCommandoAgents', CommandoAgent::pendingReview()->count());
+            $view->with('pendingRestaurants', \App\Models\Restaurant::withoutGlobalScopes()->where('status', \App\Enums\RestaurantStatus::PENDING)->count());
+        });
 
         // Load dynamic mail configuration from SystemSetting
         $this->loadDynamicMailConfig();

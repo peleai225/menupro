@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
+use App\Models\CommandoAgent;
 use App\Models\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class Restaurant extends Model
         'company_name',
         'rccm',
         'rccm_document_path',
+        'referred_by_agent_id',
         'slug',
         'email',
         'phone',
@@ -103,6 +105,11 @@ class Restaurant extends Model
     public function currentPlan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'current_plan_id');
+    }
+
+    public function referredByAgent(): BelongsTo
+    {
+        return $this->belongsTo(CommandoAgent::class, 'referred_by_agent_id');
     }
 
     public function subscriptions(): HasMany

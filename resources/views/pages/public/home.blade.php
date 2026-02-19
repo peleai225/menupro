@@ -97,22 +97,25 @@
                     </p>
                     
                     <!-- CTA Buttons -->
-                    <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
+                    <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start flex-wrap"
                          x-show="shown" 
                          x-transition:enter="transition ease-out duration-700 delay-400"
                          x-transition:enter-start="opacity-0 translate-y-6"
                          x-transition:enter-end="opacity-100 translate-y-0">
-                        <a href="{{ route('register') }}" class="group relative btn btn-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 overflow-hidden w-full sm:w-auto">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Démarrer gratuitement
-                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('register') }}" class="group relative inline-flex items-center justify-center gap-2 btn btn-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 overflow-hidden w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap">
+                            <span class="relative z-10 inline-flex items-center justify-center gap-2">
+                                <span>Démarrer gratuitement</span>
+                                <svg class="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                 </svg>
                             </span>
                             <div class="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </a>
-                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="group btn btn-lg bg-white/5 backdrop-blur-xl text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 w-full sm:w-auto">
-                            <svg class="w-5 h-5 text-primary-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('commando.register.step1') }}" class="group inline-flex items-center justify-center gap-2 btn btn-lg bg-white/5 backdrop-blur-xl text-white border border-orange-500/40 hover:bg-orange-500/10 hover:border-orange-500/60 transition-all duration-300 w-full sm:w-auto sm:flex-shrink-0">
+                            <span class="text-orange-400 group-hover:text-orange-300 whitespace-nowrap">Devenir agent Commando</span>
+                        </a>
+                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="group inline-flex items-center justify-center gap-2 btn btn-lg bg-white/5 backdrop-blur-xl text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap">
+                            <svg class="w-5 h-5 shrink-0 text-primary-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                             </svg>
                             <span>Voir la démo</span>
@@ -1377,16 +1380,16 @@
             </p>
             <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
                  x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                <a href="{{ route('register') }}" class="group btn btn-lg bg-white text-primary-600 hover:bg-neutral-50 shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105">
-                    Créer mon restaurant
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('register') }}" class="group inline-flex items-center justify-center gap-2 btn btn-lg bg-white text-primary-600 hover:bg-neutral-50 shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105 whitespace-nowrap">
+                    <span>Créer mon restaurant</span>
+                    <svg class="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
                 @php
                     $contactEmail = \App\Models\SystemSetting::get('contact_email', 'contact@menupro.ci');
                 @endphp
-                <a href="mailto:{{ $contactEmail }}" class="btn btn-lg bg-white/10 backdrop-blur-md text-white border-2 border-white/30 hover:bg-white/20 transition-all">
+                <a href="mailto:{{ $contactEmail }}" class="inline-flex items-center justify-center btn btn-lg bg-white/10 backdrop-blur-md text-white border-2 border-white/30 hover:bg-white/20 transition-all whitespace-nowrap">
                     Nous contacter
                 </a>
             </div>

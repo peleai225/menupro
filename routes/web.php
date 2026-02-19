@@ -41,6 +41,29 @@ Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('term
 Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
 Route::get('/test-geocoding', [\App\Http\Controllers\Public\GeocodingTestController::class, 'index'])->name('geocoding.test');
 
+/*
+|--------------------------------------------------------------------------
+| MenuPro Commando - Vérification publique (scan QR)
+|--------------------------------------------------------------------------
+*/
+Route::get('/verify/{uuid}', [\App\Http\Controllers\Commando\AgentVerificationController::class, 'show'])->name('commando.verify');
+
+/*
+|--------------------------------------------------------------------------
+| MenuPro Commando - Inscription agents (public)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('commando')->name('commando.')->group(function () {
+    Route::get('/inscription', \App\Livewire\Commando\RegisterStep1::class)->name('register.step1');
+    Route::get('/inscription/complete/{agent}', \App\Livewire\Commando\RegisterStep2::class)
+        ->middleware('signed')
+        ->name('register.step2');
+    Route::get('/inscription/success', fn () => view('pages.commando.register-success'))->name('register.success');
+    // Bienvenue agent : définir mot de passe (lien envoyé après approbation)
+    Route::get('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'show'])->name('welcome');
+    Route::post('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'store'])->name('welcome.store');
+});
+
 // Route pour rafraîchir le token CSRF (évite l'erreur 419)
 Route::get('/csrf-token', function () {
     return response()->json(['token' => csrf_token()]);
@@ -212,12 +235,36 @@ Route::prefix('dashboard')
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| MenuPro Commando - Dashboard Agent (authentifié)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('commando')->name('commando.')->middleware(['auth', 'verified', 'commando.agent'])->group(function () {
+    Route::get('/dashboard', \App\Livewire\Commando\Dashboard::class)->name('dashboard');
+    Route::get('/carte', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'card'])->name('card');
+    Route::get('/carte/download/pdf', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'downloadPdf'])->name('card.download.pdf');
+});
+
 Route::prefix('admin')
     ->name('super-admin.')
     ->middleware(['auth', 'verified', 'super.admin'])
     ->group(function () {
         // Dashboard
         Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+        // MenuPro Commando - Gestion des agents
+        Route::prefix('commando')->name('commando.')->group(function () {
+            Route::get('/agents', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'index'])->name('agents.index');
+            Route::get('/agents/{agent}', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'show'])->name('agents.show');
+            Route::post('/agents/{agent}/approve', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'approve'])->name('agents.approve');
+            Route::post('/agents/{agent}/reject', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'reject'])->name('agents.reject');
+            Route::post('/agents/{agent}/ban', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'ban'])->name('agents.ban');
+            Route::post('/agents/{agent}/commission', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'addCommission'])->name('agents.commission');
+            Route::post('/agents/{agent}/transactions/{transaction}/withdrawal-pay', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'withdrawalPay'])->name('agents.withdrawal.pay');
+            Route::post('/agents/{agent}/transactions/{transaction}/withdrawal-reject', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'withdrawalReject'])->name('agents.withdrawal.reject');
+            Route::delete('/agents/{agent}', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'destroy'])->name('agents.destroy');
+        });
         
         // Restaurants Management
         Route::resource('restaurants', RestaurantController::class)->only(['index', 'show', 'update', 'destroy']);
@@ -268,6 +315,10 @@ Route::prefix('admin')
         
         // Live Dashboard API
         Route::get('api/live-stats', [SuperAdminDashboardController::class, 'liveStats'])->name('api.live-stats');
+        // Sidebar badges + notifications (polling)
+        Route::get('api/sidebar-badges', [\App\Http\Controllers\SuperAdmin\SidebarApiController::class, 'badges'])->name('api.sidebar-badges');
+        Route::get('api/notifications', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'index'])->name('api.notifications');
+        Route::post('api/notifications/mark-read', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'markAsRead'])->name('api.notifications.mark-read');
         
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');

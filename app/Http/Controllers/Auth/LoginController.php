@@ -39,11 +39,13 @@ class LoginController extends Controller
             ['email' => $request->user()->email]
         );
 
-        // Check if email is verified
-        if (!$request->user()->hasVerifiedEmail()) {
-            $request->user()->sendEmailVerificationNotification();
-            return redirect()->route('verification.notice')
-                ->with('warning', 'Veuillez vérifier votre adresse email avant de continuer. Un nouveau lien de vérification a été envoyé.');
+        // Agents Commando approuvés : pas de vérification email (compte créé à l'approbation)
+        if (!$request->user()->isCommandoAgent()) {
+            if (!$request->user()->hasVerifiedEmail()) {
+                $request->user()->sendEmailVerificationNotification();
+                return redirect()->route('verification.notice')
+                    ->with('warning', 'Veuillez vérifier votre adresse email avant de continuer. Un nouveau lien de vérification a été envoyé.');
+            }
         }
 
         // Redirect based on role

@@ -45,4 +45,16 @@ return [
         'webhook_secret' => env('LYGOS_WEBHOOK_SECRET'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp (MenuPro Commando - envoi bienvenue + carte)
+    |--------------------------------------------------------------------------
+    */
+    'whatsapp' => [
+        'enabled' => env('WHATSAPP_ENABLED', false),
+        'api_url' => env('WHATSAPP_API_URL', ''),
+        'api_key' => env('WHATSAPP_API_KEY', ''),
+        'phone_id' => env('WHATSAPP_PHONE_ID', ''),
+    ],
+
 ];

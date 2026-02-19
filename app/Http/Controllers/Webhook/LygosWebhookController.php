@@ -254,20 +254,30 @@ class LygosWebhookController extends Controller
         switch ($event) {
             case 'payment.success':
             case 'payment.completed':
+                $restaurant = $subscription->restaurant;
                 if ($subscription->status->value !== 'active') {
                     $subscription->update([
                         'status' => \App\Enums\SubscriptionStatus::ACTIVE,
                         'payment_method' => 'lygos',
                     ]);
-                    
-                    $subscription->restaurant->update([
+                    $restaurant->update([
                         'current_plan_id' => $subscription->plan_id,
                         'subscription_ends_at' => $subscription->ends_at,
                         'orders_blocked' => false,
                     ]);
-                    
                     Log::channel('payments')->info('Lygos webhook: subscription activated', [
                         'subscription_id' => $subscription->id,
+                    ]);
+                }
+
+                // Commission agent Commando si restaurant parrainé (1er paiement ou à chaque paiement si option décochée)
+                try {
+                    app(\App\Services\CommandoCommissionService::class)
+                        ->creditAgentForRestaurantSubscription($restaurant, $subscription);
+                } catch (\Throwable $e) {
+                    Log::channel('payments')->error('Commando commission error', [
+                        'subscription_id' => $subscription->id,
+                        'message' => $e->getMessage(),
                     ]);
                 }
                 break;

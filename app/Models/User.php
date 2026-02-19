@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar_path',
         'is_active',
         'last_login_at',
+        'welcome_token',
     ];
 
     protected $hidden = [
@@ -62,6 +64,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(StockMovement::class);
     }
 
+    public function commandoAgent(): HasOne
+    {
+        return $this->hasOne(CommandoAgent::class);
+    }
+
     // =========================================================================
     // SCOPES
     // =========================================================================
@@ -84,6 +91,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function scopeEmployees($query)
     {
         return $query->where('role', UserRole::EMPLOYEE);
+    }
+
+    public function scopeCommandoAgents($query)
+    {
+        return $query->where('role', UserRole::COMMANDO_AGENT);
     }
 
     public function scopeForRestaurant($query, int $restaurantId)
@@ -142,6 +154,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === UserRole::EMPLOYEE;
     }
 
+    public function isCommandoAgent(): bool
+    {
+        return $this->role === UserRole::COMMANDO_AGENT;
+    }
+
     public function belongsToRestaurant(int $restaurantId): bool
     {
         return $this->restaurant_id === $restaurantId;
@@ -186,6 +203,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return match ($this->role) {
             UserRole::SUPER_ADMIN => 'super-admin.dashboard',
             UserRole::RESTAURANT_ADMIN, UserRole::EMPLOYEE => 'restaurant.dashboard',
+            UserRole::COMMANDO_AGENT => 'commando.dashboard',
         };
     }
 }

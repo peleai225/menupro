@@ -26,6 +26,11 @@ class EnsureUserHasRestaurant
             return $next($request);
         }
 
+        // Commando agents have their own dashboard
+        if ($user->isCommandoAgent()) {
+            return redirect()->route('commando.dashboard');
+        }
+
         // Check if user has a restaurant
         if (!$user->restaurant_id) {
             return redirect()->route('register')
