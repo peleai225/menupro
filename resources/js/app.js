@@ -97,6 +97,42 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
+    Alpine.data('cookieConsent', () => ({
+        showBanner: false,
+        cookieName: 'menupro_cookie_consent',
+        cookieExpiryDays: 365,
+
+        init() {
+            const consent = this.getConsent();
+            if (!consent) {
+                this.showBanner = true;
+            }
+        },
+
+        getConsent() {
+            const value = document.cookie
+                .split('; ')
+                .find(row => row.startsWith(this.cookieName + '='));
+            return value ? decodeURIComponent(value.split('=')[1]) : null;
+        },
+
+        setCookie(value) {
+            const date = new Date();
+            date.setTime(date.getTime() + (this.cookieExpiryDays * 24 * 60 * 60 * 1000));
+            document.cookie = `${this.cookieName}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+        },
+
+        accept() {
+            this.setCookie('accepted');
+            this.showBanner = false;
+        },
+
+        decline() {
+            this.setCookie('essential_only');
+            this.showBanner = false;
+        }
+    }));
+
     Alpine.data('notification', () => ({
         show: false,
         message: '',

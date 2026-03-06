@@ -23,6 +23,7 @@ use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\RestaurantController;
 use App\Http\Controllers\SuperAdmin\StatsController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\Webhook\GeniusPayWebhookController;
 use App\Http\Controllers\Webhook\LygosWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('home');
 Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
 Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
@@ -380,6 +383,7 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
 
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/lygos', [LygosWebhookController::class, 'handle'])->name('webhooks.lygos');
+    Route::post('/geniuspay', [GeniusPayWebhookController::class, 'handle'])->name('webhooks.geniuspay');
 });
 
 /*

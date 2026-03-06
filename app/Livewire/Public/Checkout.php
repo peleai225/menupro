@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
+use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
@@ -25,6 +26,10 @@ class Checkout extends Component
     #[Rule('required|email|max:255')]
     public string $customer_email = '';
 
+    /** Indicatif pays (ex: +225) */
+    public string $customer_phone_country = '+225';
+
+    /** Numéro au format national (ex: 05 01 86 26 40) */
     #[Rule('required|string|max:20')]
     public string $customer_phone = '';
 
@@ -51,7 +56,7 @@ class Checkout extends Component
     public ?string $promoError = null;
 
     // Payment Method
-    public ?string $payment_method = null; // 'lygos' or 'cash_on_delivery'
+    public ?string $payment_method = null; // 'lygos', 'geniuspay' or 'cash_on_delivery'
 
     public function mount(string $slug): void
     {
@@ -129,6 +134,38 @@ class Checkout extends Component
     }
 
     #[Computed]
+    public function onlinePaymentAvailable(): bool
+    {
+        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
+        $geniuspayRestaurant = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
+        $geniuspayPlatform = app(GeniusPayGateway::class)->forPlatform();
+        $lygosOk = $this->restaurant->lygos_enabled && $lygos->isConfigured();
+        $geniuspayRestaurantOk = $this->restaurant->geniuspay_enabled && $geniuspayRestaurant->isConfigured();
+        $geniuspayPlatformOk = $this->restaurant->geniuspay_enabled && $geniuspayPlatform->isConfigured();
+        return $lygosOk || $geniuspayRestaurantOk || $geniuspayPlatformOk;
+    }
+
+    #[Computed]
+    public function onlinePaymentMethod(): string
+    {
+        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
+        $geniuspayRestaurant = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
+        if ($this->restaurant->lygos_enabled && $lygos->isConfigured()) {
+            return 'lygos';
+        }
+        if ($this->restaurant->geniuspay_enabled && $geniuspayRestaurant->isConfigured()) {
+            return 'geniuspay';
+        }
+        return 'geniuspay'; // Platform fallback
+    }
+
+    #[Computed]
+    public function cashOnDeliveryAvailable(): bool
+    {
+        return (bool) ($this->restaurant->cash_on_delivery ?? false);
+    }
+
+    #[Computed]
     public function total(): int
     {
         $baseTotal = $this->subtotal + $this->deliveryFee - $this->discount;
@@ -197,13 +234,46 @@ class Checkout extends Component
         }
     }
 
+    /**
+     * Liste des indicatifs pays pour le sélecteur (Côte d'Ivoire par défaut).
+     */
+    public static function phoneCountryOptions(): array
+    {
+        return [
+            '+225' => '🇨🇮 Côte d\'Ivoire (+225)',
+            '+221' => '🇸🇳 Sénégal (+221)',
+            '+223' => '🇲🇱 Mali (+223)',
+            '+226' => '🇧🇫 Burkina Faso (+226)',
+            '+228' => '🇹🇬 Togo (+228)',
+            '+229' => '🇧🇯 Bénin (+229)',
+            '+33'  => '🇫🇷 France (+33)',
+        ];
+    }
+
+    /**
+     * Numéro complet au format international (ex: +2250501862640).
+     * On garde le 0 du numéro national pour avoir le numéro complet.
+     */
+    public function getFullPhoneNumber(): string
+    {
+        $national = preg_replace('/\D/', '', $this->customer_phone);
+        if ($national === '') {
+            return '';
+        }
+        $prefix = preg_replace('/\D/', '', $this->customer_phone_country);
+        if ($prefix === '') {
+            $prefix = '225';
+        }
+        return '+' . $prefix . $national;
+    }
+
     public function placeOrder(): void
     {
         // Validate based on order type
         $rules = [
             'customer_name' => 'required|string|max:100',
             'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'required|string|max:20',
+            'customer_phone' => 'required|string|min:8|max:20',
             'order_type' => 'required|in:dine_in,takeaway,delivery',
         ];
 
@@ -227,25 +297,27 @@ class Checkout extends Component
         // Determine payment method if not already set
         $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
         $lygosAvailable = $this->restaurant->lygos_enabled && $lygos->isConfigured();
+        $geniuspay = app(GeniusPayGateway::class)->forPlatform();
+        $geniuspayAvailable = $geniuspay->isConfigured();
+        $onlinePaymentAvailable = $lygosAvailable || $geniuspayAvailable;
         $cashOnDeliveryAvailable = $this->restaurant->cash_on_delivery ?? false;
 
         if (!$this->payment_method) {
-            if ($lygosAvailable && $cashOnDeliveryAvailable) {
-                // Both available - require user to choose
+            if ($onlinePaymentAvailable && $cashOnDeliveryAvailable) {
                 session()->flash('error', 'Veuillez choisir un mode de paiement.');
                 return;
             } elseif ($lygosAvailable) {
                 $this->payment_method = 'lygos';
+            } elseif ($geniuspayAvailable) {
+                $this->payment_method = 'geniuspay';
             } elseif ($cashOnDeliveryAvailable) {
                 $this->payment_method = 'cash_on_delivery';
             } else {
-                // Default to cash on delivery
                 $this->payment_method = 'cash_on_delivery';
             }
         } else {
-            // Validate payment method if both are available
-            if ($lygosAvailable && $cashOnDeliveryAvailable) {
-                if (!in_array($this->payment_method, ['lygos', 'cash_on_delivery'])) {
+            if ($onlinePaymentAvailable && $cashOnDeliveryAvailable) {
+                if (!in_array($this->payment_method, ['lygos', 'geniuspay', 'cash_on_delivery'])) {
                     session()->flash('error', 'Mode de paiement invalide.');
                     return;
                 }
@@ -278,7 +350,7 @@ class Checkout extends Component
             'restaurant_id' => $this->restaurant->id,
             'customer_name' => $this->customer_name,
             'customer_email' => $this->customer_email,
-            'customer_phone' => $this->customer_phone,
+            'customer_phone' => $this->getFullPhoneNumber(),
             'type' => OrderType::from($this->order_type),
             'status' => OrderStatus::PENDING_PAYMENT,
             'subtotal' => $this->subtotal,
@@ -332,10 +404,8 @@ class Checkout extends Component
 
         // Process payment based on selected method
         if ($this->payment_method === 'lygos') {
-            // Lygos payment - redirect to payment gateway
             $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
             try {
-                // Redirect to payment
                 $result = $lygos->createPayment(
                     $order,
                     route('r.order.success', [$this->restaurant->slug, $order]),
@@ -347,29 +417,48 @@ class Checkout extends Component
                         'payment_reference' => $result['payment_id'],
                         'payment_metadata' => ['payment_url' => $result['payment_url']],
                     ]);
-
                     $this->redirect($result['payment_url']);
                     return;
-                } else {
-                    // Payment creation failed but no exception
-                    $errorMessage = $result['message'] ?? 'Impossible de créer la session de paiement.';
-                    session()->flash('error', 'Erreur de paiement : ' . $errorMessage . ' Veuillez réessayer.');
-                    \Log::error('Lygos payment creation failed', [
-                        'order_id' => $order->id,
-                        'result' => $result,
+                }
+                $errorMessage = $result['message'] ?? $result['error'] ?? 'Impossible de créer la session de paiement.';
+                session()->flash('error', 'Erreur de paiement : ' . $errorMessage . ' Veuillez réessayer.');
+                \Log::error('Lygos payment creation failed', ['order_id' => $order->id, 'result' => $result]);
+                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+                return;
+            } catch (\Exception $e) {
+                session()->flash('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
+                \Log::error('Lygos payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+                return;
+            }
+        } elseif ($this->payment_method === 'geniuspay') {
+            $geniuspay = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
+            if (!$geniuspay->isConfigured()) {
+                $geniuspay = app(GeniusPayGateway::class)->forPlatform();
+            }
+            try {
+                $result = $geniuspay->createOrderPayment(
+                    $order,
+                    route('r.order.success', [$this->restaurant->slug, $order]),
+                    route('r.order.cancel', [$this->restaurant->slug, $order])
+                );
+
+                if ($result['success']) {
+                    $order->update([
+                        'payment_reference' => $result['payment_reference'] ?? $result['payment_id'],
+                        'payment_metadata' => ['payment_url' => $result['payment_url']],
                     ]);
-                    // Keep order in PENDING_PAYMENT status - user can retry
-                    $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+                    $this->redirect($result['payment_url']);
                     return;
                 }
+                $errorMessage = $result['error'] ?? 'Impossible de créer la session de paiement.';
+                session()->flash('error', 'Erreur de paiement : ' . $errorMessage . ' Veuillez réessayer.');
+                \Log::error('GeniusPay payment creation failed', ['order_id' => $order->id, 'result' => $result]);
+                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+                return;
             } catch (\Exception $e) {
-                // If payment creation fails with exception
-                session()->flash('error', 'Erreur lors de la création du paiement : ' . $e->getMessage() . ' Veuillez réessayer.');
-                \Log::error('Lygos payment creation exception', [
-                    'order_id' => $order->id,
-                    'error' => $e->getMessage(),
-                ]);
-                // Keep order in PENDING_PAYMENT status - user can retry
+                session()->flash('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
+                \Log::error('GeniusPay payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
                 $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                 return;
             }

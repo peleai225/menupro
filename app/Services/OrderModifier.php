@@ -46,8 +46,15 @@ class OrderModifier
             // Add item to order
             $item = $order->addItem($dish, $quantity, $options, $instructions);
 
-            // Deduct stock if restaurant has stock management
-            if ($restaurant->hasFeature('stock')) {
+            // Deduct stock only if order is already CONFIRMED+ (stock was already deducted at confirmation)
+            // If PAID, deduction will happen when restaurant confirms the order
+            $statusesWithStockDeducted = [
+                \App\Enums\OrderStatus::CONFIRMED,
+                \App\Enums\OrderStatus::PREPARING,
+                \App\Enums\OrderStatus::READY,
+                \App\Enums\OrderStatus::DELIVERING,
+            ];
+            if ($restaurant->hasFeature('stock') && in_array($order->status, $statusesWithStockDeducted)) {
                 $this->stockManager->deductForDish($dish, $quantity, $order);
             }
 
@@ -80,9 +87,15 @@ class OrderModifier
             
             $quantity = $item->quantity;
 
-            // Restore stock if restaurant has stock management and order was confirmed
+            // Restore stock only if it was already deducted (order was CONFIRMED or beyond)
             $restaurant = $order->restaurant;
-            if ($restaurant->hasFeature('stock') && $dish && $order->status->value !== 'pending_payment') {
+            $statusesWithStockDeducted = [
+                \App\Enums\OrderStatus::CONFIRMED,
+                \App\Enums\OrderStatus::PREPARING,
+                \App\Enums\OrderStatus::READY,
+                \App\Enums\OrderStatus::DELIVERING,
+            ];
+            if ($restaurant->hasFeature('stock') && $dish && in_array($order->status, $statusesWithStockDeducted)) {
                 $this->stockManager->forRestaurant($restaurant);
                 
                 // Restore stock for this dish
@@ -155,7 +168,16 @@ class OrderModifier
                         throw new \Exception("Stock insuffisant pour augmenter la quantité. Ingrédients manquants : {$missingList}");
                     }
 
-                    $this->stockManager->deductForDish($dish, $difference, $order);
+                    // Deduct only if order is already CONFIRMED+ (avoids double deduction at confirmation)
+                    $statusesWithStockDeducted = [
+                        \App\Enums\OrderStatus::CONFIRMED,
+                        \App\Enums\OrderStatus::PREPARING,
+                        \App\Enums\OrderStatus::READY,
+                        \App\Enums\OrderStatus::DELIVERING,
+                    ];
+                    if (in_array($order->status, $statusesWithStockDeducted)) {
+                        $this->stockManager->deductForDish($dish, $difference, $order);
+                    }
                 } else {
                     // Reducing quantity - restore stock
                     $quantityToRestore = abs($difference);

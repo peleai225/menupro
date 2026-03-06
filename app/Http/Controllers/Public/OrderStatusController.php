@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class OrderStatusController extends Controller
@@ -12,9 +13,28 @@ class OrderStatusController extends Controller
     /**
      * Display order status page (secured with tracking token).
      */
-    public function show(string $slug, string $token): View
+    public function show(string $slug, string $token): View|RedirectResponse
     {
-        $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+        $slug = trim($slug);
+        $token = trim($token);
+
+        // 1) Slug exact (insensible à la casse)
+        $restaurant = Restaurant::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->first();
+
+        // 2) Fallback : slug sans tirets (pelefood <-> pele-food)
+        if (!$restaurant) {
+            $normalized = str_replace('-', '', strtolower($slug));
+            if ($normalized !== '') {
+                $restaurant = Restaurant::whereRaw("LOWER(REPLACE(slug, '-', '')) = ?", [$normalized])->first();
+                if ($restaurant) {
+                    return redirect()->route('r.order.status', [$restaurant->slug, $token], 301);
+                }
+            }
+        }
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant non trouvé. Vérifiez l’adresse du lien.');
+        }
 
         // Try to find order by tracking token first
         $order = Order::where('tracking_token', $token)->first();
@@ -27,7 +47,6 @@ class OrderStatusController extends Controller
                 ->first();
             
             if ($orderById && $orderById->tracking_token) {
-                // Redirect to the proper token URL
                 return redirect()->route('r.order.status', [
                     $restaurant->slug,
                     $orderById->tracking_token
@@ -35,14 +54,13 @@ class OrderStatusController extends Controller
             }
         }
 
-        // If still not found, 404
         if (!$order) {
-            abort(404);
+            abort(404, 'Commande introuvable ou lien expiré. Vérifiez le lien reçu par email ou SMS.');
         }
 
-        // Verify order belongs to restaurant
-        if ($order->restaurant_id !== $restaurant->id) {
-            abort(404);
+        // Verify order belongs to restaurant (cast to int to avoid type mismatch 2 !== "2")
+        if ((int) $order->restaurant_id !== (int) $restaurant->id) {
+            abort(404, 'Cette commande n’appartient pas à ce restaurant.');
         }
 
         $order->load('items.dish');
@@ -72,12 +90,23 @@ class OrderStatusController extends Controller
      */
     public function status(string $slug, string $token)
     {
-        $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
+        $slug = trim($slug);
+        $token = trim($token);
 
-        // Find order by tracking token (secure, unguessable)
-        $order = Order::where('tracking_token', $token)->firstOrFail();
+        // Même résolution du restaurant que show() (slug exact + fallback sans tirets, insensible à la casse)
+        $restaurant = Restaurant::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->first();
+        if (!$restaurant) {
+            $normalized = str_replace('-', '', strtolower($slug));
+            if ($normalized !== '') {
+                $restaurant = Restaurant::whereRaw("LOWER(REPLACE(slug, '-', '')) = ?", [$normalized])->first();
+            }
+        }
+        if (!$restaurant) {
+            abort(404);
+        }
 
-        if ($order->restaurant_id !== $restaurant->id) {
+        $order = Order::where('tracking_token', $token)->first();
+        if (!$order || (int) $order->restaurant_id !== (int) $restaurant->id) {
             abort(404);
         }
 

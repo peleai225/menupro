@@ -75,14 +75,14 @@ class OrderBoardController extends Controller
                 ], 400);
             }
 
-            $order->transitionTo($newStatus);
-
-            // Handle stock if needed
-            if ($newStatus === OrderStatus::CONFIRMED && $order->restaurant->hasFeature('stock')) {
+            // Deduct stock BEFORE transition (PAID → CONFIRMED) so both succeed or both fail
+            if ($newStatus === OrderStatus::CONFIRMED && $order->status === OrderStatus::PAID && $order->restaurant->hasFeature('stock')) {
                 app(\App\Services\StockManager::class)
                     ->forRestaurant($order->restaurant)
                     ->deductForOrder($order);
             }
+
+            $order->transitionTo($newStatus);
 
             return response()->json([
                 'success' => true,

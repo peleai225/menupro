@@ -6,7 +6,7 @@
             </svg>
         </div>
         <div>
-            <h2 class="font-semibold text-amber-200">Complétez votre inscription</h2>
+            <h2 class="font-semibold text-amber-200">{{ $isResubmit ? 'Soumettre une nouvelle pièce d\'identité' : 'Complétez votre inscription' }}</h2>
             <p class="text-slate-400 text-sm">Pièce d'identité (CNI, passeport) ou justificatif de domicile. JPG, PNG ou PDF — max 5 Mo.</p>
         </div>
     </div>
@@ -36,14 +36,24 @@
                 </span>
                 <input type="file" wire:model="id_document" accept=".jpg,.jpeg,.png,.pdf"
                        class="w-full h-12 pl-12 pr-4 rounded-xl border border-slate-600 bg-slate-900/80 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500 file:text-white file:font-medium file:cursor-pointer text-sm text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <span wire:loading wire:target="id_document" class="absolute right-4 flex items-center gap-2 text-amber-400 text-sm">
+                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Chargement du fichier…
+                </span>
             </div>
             @error('id_document')
                 <p class="mt-1.5 text-sm text-red-400">{{ $message }}</p>
             @enderror
         </div>
         <button type="submit"
-                class="w-full h-12 rounded-xl font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800">
-            Envoyer et demander la validation
+                wire:loading.attr="disabled"
+                wire:target="id_document,submit"
+                class="w-full h-12 rounded-xl font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed">
+            <span wire:loading.remove wire:target="submit">{{ $isResubmit ? 'Envoyer la nouvelle pièce' : 'Envoyer et demander la validation' }}</span>
+            <span wire:loading wire:target="submit" class="inline-flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Envoi en cours…
+            </span>
         </button>
     </form>
 </div>

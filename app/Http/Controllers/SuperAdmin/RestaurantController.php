@@ -238,6 +238,7 @@ class RestaurantController extends Controller
         ]);
 
         $plan = Plan::findOrFail($request->plan_id);
+        $days = (int) $request->days;
 
         // Create new subscription
         Subscription::create([
@@ -245,7 +246,7 @@ class RestaurantController extends Controller
             'plan_id' => $plan->id,
             'status' => SubscriptionStatus::ACTIVE,
             'starts_at' => now(),
-            'ends_at' => now()->addDays($request->days),
+            'ends_at' => now()->addDays($days),
             'amount_paid' => 0, // Manual extension
             'payment_method' => 'admin_manual',
             'payment_metadata' => ['reason' => $request->reason, 'admin_id' => auth()->id()],
@@ -254,12 +255,12 @@ class RestaurantController extends Controller
         // Update restaurant
         $restaurant->update([
             'current_plan_id' => $plan->id,
-            'subscription_ends_at' => now()->addDays($request->days),
+            'subscription_ends_at' => now()->addDays($days),
             'status' => RestaurantStatus::ACTIVE,
             'orders_blocked' => false,
         ]);
 
-        return back()->with('success', "Abonnement prolongé de {$request->days} jours.");
+        return back()->with('success', "Abonnement prolongé de {$days} jours.");
     }
 
     /**

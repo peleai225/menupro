@@ -80,10 +80,19 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone *</label>
-                                <input type="tel" 
-                                       wire:model="customer_phone"
-                                       class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_phone') border-red-500 @enderror"
-                                       placeholder="+225 07 00 00 00 00">
+                                <div class="flex gap-2">
+                                    <select wire:model="customer_phone_country"
+                                            class="w-44 px-3 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_phone') border-red-500 @enderror bg-white">
+                                        @foreach(\App\Livewire\Public\Checkout::phoneCountryOptions() as $code => $label)
+                                            <option value="{{ $code }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="tel"
+                                           wire:model="customer_phone"
+                                           class="flex-1 px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_phone') border-red-500 @enderror"
+                                           placeholder="05 01 86 26 40 (sans indicatif)">
+                                </div>
+                                <p class="mt-1 text-xs text-neutral-500">Saisissez le numéro sans indicatif pays (ex: 05 01 86 26 40)</p>
                                 @error('customer_phone')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -721,6 +730,24 @@
                             @endif
                         @endif
                     </div>
+
+                    <!-- Payment Method (when both online and cash available) -->
+                    @if($this->onlinePaymentAvailable && $this->cashOnDeliveryAvailable)
+                        <div class="mb-6 pb-6 border-b border-neutral-200">
+                            <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ in_array($payment_method, ['lygos', 'geniuspay']) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                    <input type="radio" wire:model="payment_method" value="{{ $this->onlinePaymentMethod }}" class="text-primary-500 focus:ring-primary-500">
+                                    <span class="font-medium">Paiement en ligne</span>
+                                    <span class="text-xs text-neutral-500">(Wave, Orange Money, MTN)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'cash_on_delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                    <input type="radio" wire:model="payment_method" value="cash_on_delivery" class="text-primary-500 focus:ring-primary-500">
+                                    <span class="font-medium">Paiement à la livraison</span>
+                                </label>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Totals -->
                     <div class="border-t border-neutral-200 pt-6 space-y-3">

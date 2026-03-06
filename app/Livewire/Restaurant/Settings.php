@@ -59,8 +59,12 @@ class Settings extends Component
 
     // Payment
     public bool $lygos_enabled = false;
+    public bool $geniuspay_enabled = false;
     public ?string $lygos_api_key = null;
     public ?string $lygos_api_secret = null;
+    public ?string $geniuspay_api_key = null;
+    public ?string $geniuspay_api_secret = null;
+    public ?string $geniuspay_webhook_secret = null;
     public bool $cash_on_delivery = true;
 
     // Appearance / Colors
@@ -117,9 +121,12 @@ class Settings extends Component
         $this->estimated_prep_time = $this->restaurant->estimated_prep_time ?? 30;
         $this->delivery_zones = $this->restaurant->delivery_zones;
         $this->lygos_enabled = $this->restaurant->lygos_enabled ?? false;
-        // Note: Les clés sont décryptées automatiquement par les accesseurs
+        $this->geniuspay_enabled = $this->restaurant->geniuspay_enabled ?? false;
         $this->lygos_api_key = $this->restaurant->getLygosApiKey();
         $this->lygos_api_secret = $this->restaurant->getLygosApiSecret();
+        $this->geniuspay_api_key = $this->restaurant->getGeniusPayApiKey();
+        $this->geniuspay_api_secret = $this->restaurant->getGeniusPayApiSecret();
+        $this->geniuspay_webhook_secret = $this->restaurant->geniuspay_webhook_secret;
         $this->cash_on_delivery = $this->restaurant->cash_on_delivery ?? true;
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
@@ -246,24 +253,34 @@ class Settings extends Component
     {
         $this->validate([
             'lygos_enabled' => 'boolean',
+            'geniuspay_enabled' => 'boolean',
             'lygos_api_key' => 'nullable|string|max:255',
             'lygos_api_secret' => 'nullable|string|max:255',
+            'geniuspay_api_key' => 'nullable|string|max:255',
+            'geniuspay_api_secret' => 'nullable|string|max:255',
+            'geniuspay_webhook_secret' => 'nullable|string|max:255',
             'cash_on_delivery' => 'boolean',
         ]);
 
         $data = [
             'lygos_enabled' => $this->lygos_enabled,
+            'geniuspay_enabled' => $this->geniuspay_enabled,
             'cash_on_delivery' => $this->cash_on_delivery,
         ];
 
-        // Only update keys if provided (to avoid overwriting with empty values)
         if ($this->lygos_api_key !== null) {
             $data['lygos_api_key'] = $this->lygos_api_key;
         }
-        
         if ($this->lygos_api_secret !== null) {
             $data['lygos_api_secret'] = $this->lygos_api_secret;
         }
+        if ($this->geniuspay_api_key !== null) {
+            $data['geniuspay_api_key'] = $this->geniuspay_api_key;
+        }
+        if ($this->geniuspay_api_secret !== null) {
+            $data['geniuspay_api_secret'] = $this->geniuspay_api_secret;
+        }
+        $data['geniuspay_webhook_secret'] = $this->geniuspay_webhook_secret ?? '';
 
         $this->restaurant->update($data);
 

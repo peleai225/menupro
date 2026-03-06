@@ -127,9 +127,14 @@ class DashboardController extends Controller
             'contact_email' => !empty($contactEmail) ? $contactEmail : $defaultContactEmail,
             'maintenance_mode' => \App\Models\SystemSetting::get('maintenance_mode', false),
             'registrations_open' => \App\Models\SystemSetting::get('registrations_open', true),
+            'lygos_enabled' => \App\Models\SystemSetting::get('lygos_enabled', true),
             'lygos_api_key' => \App\Models\SystemSetting::get('lygos_api_key', ''),
             'lygos_webhook_secret' => \App\Models\SystemSetting::get('lygos_webhook_secret', ''),
             'lygos_mode' => \App\Models\SystemSetting::get('lygos_mode', 'live'),
+            'geniuspay_api_key' => \App\Models\SystemSetting::get('geniuspay_api_key', ''),
+            'geniuspay_api_secret' => \App\Models\SystemSetting::get('geniuspay_api_secret', ''),
+            'geniuspay_webhook_secret' => \App\Models\SystemSetting::get('geniuspay_webhook_secret', ''),
+            'geniuspay_mode' => \App\Models\SystemSetting::get('geniuspay_mode', 'sandbox'),
             'geoapify_api_key' => \App\Models\SystemSetting::get('geoapify_api_key', ''),
             'smtp_host' => \App\Models\SystemSetting::get('smtp_host', config('mail.mailers.smtp.host', '')),
             'smtp_port' => \App\Models\SystemSetting::get('smtp_port', config('mail.mailers.smtp.port', '587')),
@@ -179,6 +184,10 @@ class DashboardController extends Controller
             'lygos_api_key' => ['nullable', 'string'],
             'lygos_webhook_secret' => ['nullable', 'string'],
             'lygos_mode' => ['nullable', 'in:test,live'],
+            'geniuspay_api_key' => ['nullable', 'string'],
+            'geniuspay_api_secret' => ['nullable', 'string'],
+            'geniuspay_webhook_secret' => ['nullable', 'string'],
+            'geniuspay_mode' => ['nullable', 'in:sandbox,live'],
             'geoapify_api_key' => ['nullable', 'string'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
@@ -225,6 +234,9 @@ class DashboardController extends Controller
         
         \App\Models\SystemSetting::set('maintenance_mode', $request->boolean('maintenance_mode'), 'boolean', 'Mode maintenance');
         \App\Models\SystemSetting::set('registrations_open', $request->boolean('registrations_open'), 'boolean', 'Inscriptions ouvertes');
+        if ($request->has('lygos_api_key')) {
+            \App\Models\SystemSetting::set('lygos_enabled', $request->boolean('lygos_enabled'), 'boolean', 'Activer Lygos (abonnements)');
+        }
         if ($request->filled('lygos_api_key')) {
             \App\Models\SystemSetting::set('lygos_api_key', $request->lygos_api_key, 'string', 'Clé API Lygos');
         }
@@ -233,6 +245,18 @@ class DashboardController extends Controller
         }
         if ($request->filled('lygos_mode')) {
             \App\Models\SystemSetting::set('lygos_mode', $request->lygos_mode, 'string', 'Mode Lygos (test/live)');
+        }
+        if ($request->filled('geniuspay_api_key')) {
+            \App\Models\SystemSetting::set('geniuspay_api_key', $request->geniuspay_api_key, 'string', 'Clé API GeniusPay');
+        }
+        if ($request->filled('geniuspay_api_secret')) {
+            \App\Models\SystemSetting::set('geniuspay_api_secret', $request->geniuspay_api_secret, 'string', 'Secret API GeniusPay');
+        }
+        if ($request->filled('geniuspay_webhook_secret')) {
+            \App\Models\SystemSetting::set('geniuspay_webhook_secret', $request->geniuspay_webhook_secret, 'string', 'Secret webhook GeniusPay');
+        }
+        if ($request->filled('geniuspay_mode')) {
+            \App\Models\SystemSetting::set('geniuspay_mode', $request->geniuspay_mode, 'string', 'Mode GeniusPay (sandbox/live)');
         }
         if ($request->filled('geoapify_api_key')) {
             \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');

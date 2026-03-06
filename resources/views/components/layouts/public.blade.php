@@ -1,4 +1,5 @@
-<x-layouts.app :title="$title ?? null">
+@props(['title' => null, 'description' => null, 'canonical' => null])
+<x-layouts.app :title="$title" :description="$description" :canonical="$canonical">
     <!-- Navigation -->
     <nav class="navbar" x-data="{ mobileOpen: false, scrolled: false }" 
          @scroll.window="scrolled = window.scrollY > 20"
@@ -9,10 +10,13 @@
                 @php
                     $logo = \App\Models\SystemSetting::get('logo', '');
                     $appName = \App\Models\SystemSetting::get('app_name', 'MenuPro');
+                    $logoUrl = ($logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo))
+                        ? \Illuminate\Support\Facades\Storage::url($logo)
+                        : null;
                 @endphp
                 <a href="{{ route('home') }}" class="flex items-center gap-3">
-                    @if($logo)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ $appName }}" class="h-10 w-auto object-contain">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" class="h-10 w-auto object-contain">
                     @else
                         <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-9 w-auto object-contain">
                     @endif
@@ -143,11 +147,14 @@
                     $socialTwitter = \App\Models\SystemSetting::get('social_twitter', '');
                     $socialInstagram = \App\Models\SystemSetting::get('social_instagram', '');
                     $socialLinkedin = \App\Models\SystemSetting::get('social_linkedin', '');
+                    $logoUrlFooter = ($logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo))
+                        ? \Illuminate\Support\Facades\Storage::url($logo)
+                        : null;
                 @endphp
                 <div class="lg:col-span-1">
                     <div class="flex items-center gap-3 mb-6">
-                        @if($logo)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ $appName }}" class="h-10 w-auto object-contain">
+                        @if($logoUrlFooter)
+                            <img src="{{ $logoUrlFooter }}" alt="{{ $appName }}" class="h-10 w-auto object-contain">
                         @else
                             <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-9 w-auto object-contain">
                         @endif
@@ -218,6 +225,7 @@
                     <ul class="space-y-4">
                         <li><a href="{{ route('terms') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Conditions d'utilisation</a></li>
                         <li><a href="{{ route('privacy') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Politique de confidentialité</a></li>
+                        <li><a href="{{ route('privacy') }}#cookies" class="text-neutral-400 hover:text-primary-400 transition-colors">Cookies</a></li>
                         <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Mentions légales</a></li>
                     </ul>
                 </div>

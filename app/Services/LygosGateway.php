@@ -12,6 +12,7 @@ class LygosGateway
     protected string $baseUrl;
     protected ?string $apiKey = null;
     protected ?string $apiSecret = null;
+    protected bool $isPlatformMode = false;
 
     public function __construct()
     {
@@ -23,6 +24,7 @@ class LygosGateway
      */
     public function forRestaurant(Restaurant $restaurant): static
     {
+        $this->isPlatformMode = false;
         $this->apiKey = $restaurant->getLygosApiKey();
         $this->apiSecret = $restaurant->getLygosApiSecret();
 
@@ -34,6 +36,7 @@ class LygosGateway
      */
     public function forPlatform(): static
     {
+        $this->isPlatformMode = true;
         $this->apiKey = \App\Models\SystemSetting::get('lygos_api_key', '');
         $this->apiSecret = \App\Models\SystemSetting::get('lygos_webhook_secret', '');
 
@@ -43,9 +46,14 @@ class LygosGateway
     /**
      * Check if Lygos is configured
      * Note: According to Lygos documentation, only api-key is required for authentication
+     * En mode plateforme : vérifie aussi lygos_enabled pour activer/désactiver Lygos
      */
     public function isConfigured(): bool
     {
+        if ($this->isPlatformMode && !\App\Models\SystemSetting::get('lygos_enabled', true)) {
+            return false;
+        }
+
         return !empty($this->apiKey);
     }
 

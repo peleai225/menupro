@@ -13,6 +13,17 @@
             @livewire('commando.complete-profile')
         @endif
 
+        @if($agent->status_verification->value === 'rejete')
+            <div class="mb-6 p-5 rounded-2xl border border-red-500/40 bg-red-500/10">
+                <h2 class="font-semibold text-red-200 mb-2">Votre dossier n'a pas été retenu</h2>
+                @if($agent->rejection_reason)
+                    <p class="text-red-300/90 text-sm mb-3">{{ $agent->rejection_reason }}</p>
+                @endif
+                <p class="text-red-200/80 text-sm">Vous pouvez soumettre une <strong>nouvelle pièce d'identité</strong> (plus lisible ou sous un autre format) ci-dessous. L'équipe la reverra sous peu.</p>
+            </div>
+            @livewire('commando.complete-profile')
+        @endif
+
         {{-- Photo de profil : tous les agents --}}
         <section class="mb-6 rounded-2xl border border-slate-700/50 bg-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-black/20">
             <div class="flex items-center gap-3 mb-4">
@@ -242,7 +253,7 @@
                 </div>
                 <p class="text-slate-500 text-xs mt-2 text-center">Votre carte telle qu’elle apparaît aux restaurateurs. Utilisez « Ouvrir en plein écran » pour la partager ou l’imprimer.</p>
             </section>
-        @elseif($agent->status_verification->value !== 'shadow')
+        @elseif($agent->status_verification->value === 'pending_review')
             <section class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
                 <p class="text-amber-200 text-sm">
                     Votre dossier est en cours de vérification. Vous aurez accès au wallet, aux déploiements et à votre carte une fois validé.

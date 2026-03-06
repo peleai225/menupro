@@ -61,6 +61,10 @@ class Restaurant extends Model
         'lygos_api_key',
         'lygos_api_secret',
         'lygos_enabled',
+        'geniuspay_enabled',
+        'geniuspay_api_key',
+        'geniuspay_api_secret',
+        'geniuspay_webhook_secret',
         'settings',
         'verified_at',
         'verified_by',
@@ -87,6 +91,7 @@ class Restaurant extends Model
         'service_fee_enabled' => 'boolean',
         'estimated_prep_time' => 'integer',
         'lygos_enabled' => 'boolean',
+        'geniuspay_enabled' => 'boolean',
         'settings' => 'array',
         'verified_at' => 'datetime',
         'delivery_enabled' => 'boolean',
@@ -96,6 +101,9 @@ class Restaurant extends Model
     protected $hidden = [
         'lygos_api_key',
         'lygos_api_secret',
+        'geniuspay_api_key',
+        'geniuspay_api_secret',
+        'geniuspay_webhook_secret',
     ];
 
     // =========================================================================
@@ -444,6 +452,52 @@ class Restaurant extends Model
     public function setLygosApiSecretAttribute($value): void
     {
         $this->attributes['lygos_api_secret'] = $value ? encrypt($value) : null;
+    }
+
+    /**
+     * Get decrypted GeniusPay API key
+     */
+    public function getGeniusPayApiKey(): ?string
+    {
+        if (!$this->geniuspay_api_key) {
+            return null;
+        }
+        try {
+            return decrypt($this->geniuspay_api_key);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get decrypted GeniusPay API secret
+     */
+    public function getGeniusPayApiSecret(): ?string
+    {
+        if (!$this->geniuspay_api_secret) {
+            return null;
+        }
+        try {
+            return decrypt($this->geniuspay_api_secret);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Set encrypted GeniusPay API key
+     */
+    public function setGeniuspayApiKeyAttribute($value): void
+    {
+        $this->attributes['geniuspay_api_key'] = $value ? encrypt($value) : null;
+    }
+
+    /**
+     * Set encrypted GeniusPay API secret
+     */
+    public function setGeniuspayApiSecretAttribute($value): void
+    {
+        $this->attributes['geniuspay_api_secret'] = $value ? encrypt($value) : null;
     }
 
     /**

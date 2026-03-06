@@ -122,8 +122,14 @@ class OrderController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Restore stock if order was confirmed
-        if ($order->status->isActive()) {
+        // Restore stock only if it was already deducted (order was CONFIRMED or beyond)
+        $statusesWithStockDeducted = [
+            \App\Enums\OrderStatus::CONFIRMED,
+            \App\Enums\OrderStatus::PREPARING,
+            \App\Enums\OrderStatus::READY,
+            \App\Enums\OrderStatus::DELIVERING,
+        ];
+        if (in_array($order->status, $statusesWithStockDeducted)) {
             $restaurant = $order->restaurant;
             
             if ($restaurant->hasFeature('stock')) {

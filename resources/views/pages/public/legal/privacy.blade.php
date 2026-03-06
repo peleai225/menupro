@@ -1,4 +1,4 @@
-<x-layouts.public title="Politique de confidentialité">
+<x-layouts.public title="Politique de confidentialité" description="Politique de confidentialité et protection des données personnelles - MenuPro.">
     <div class="py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="font-display text-4xl font-bold text-neutral-900 mb-8">Politique de confidentialité</h1>
@@ -64,10 +64,20 @@
                 </ul>
                 <p>Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@menupro.ci" class="text-primary-500">privacy@menupro.ci</a>.</p>
 
-                <h2>8. Cookies</h2>
+                <h2 id="cookies">8. Cookies</h2>
                 <p>
-                    Nous utilisons des cookies essentiels au fonctionnement du service (session, préférences).
-                    Nous n'utilisons pas de cookies publicitaires tiers.
+                    Les cookies sont de petits fichiers texte stockés sur votre appareil lors de votre visite.
+                    Ils sont essentiels au bon fonctionnement de MenuPro et nous permettent de vous offrir une expérience personnalisée.
+                </p>
+                <h3>Pourquoi les cookies sont importants</h3>
+                <ul>
+                    <li><strong>Cookies essentiels :</strong> indispensables au fonctionnement (session de connexion, panier, protection CSRF, préférences). Sans eux, le site ne peut pas fonctionner correctement.</li>
+                    <li><strong>Cookies de préférences :</strong> mémorisent vos choix (mode sombre, langue).</li>
+                    <li><strong>Cookies de performance :</strong> nous aident à comprendre comment le site est utilisé pour l'améliorer.</li>
+                </ul>
+                <p>
+                    Nous utilisons uniquement des cookies essentiels et de préférences. Nous n'utilisons pas de cookies publicitaires tiers.
+                    Vous pouvez accepter ou refuser les cookies non essentiels via la bannière affichée lors de votre première visite.
                 </p>
 
                 <h2>9. Modifications</h2>

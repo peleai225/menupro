@@ -1,4 +1,4 @@
-<x-layouts.public title="Accueil">
+<x-layouts.public title="Accueil" description="MenuPro : digitalisez votre restaurant, menu en ligne, commandes et paiement Mobile Money. Solution SaaS pour restaurants en Côte d'Ivoire et ailleurs.">
     <!-- Hero Section - Design moderne avec glassmorphism -->
     <section class="relative min-h-[100vh] bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 overflow-hidden flex items-center" 
              x-data="{ 

@@ -1,4 +1,4 @@
-<x-layouts.public title="Tarifs">
+<x-layouts.public title="Tarifs" description="Tarifs et formules MenuPro : essai gratuit, abonnements pour digitaliser votre restaurant et accepter les commandes en ligne.">
     <!-- Hero Section -->
     <section class="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

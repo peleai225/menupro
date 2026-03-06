@@ -45,7 +45,7 @@ class LowStockNotification extends Notification implements ShouldQueue
         }
 
         return $message
-            ->action('Voir le stock', route('restaurant.stock'))
+            ->action('Voir le stock', route('restaurant.stock.alerts'))
             ->line('N\'oubliez pas de réapprovisionner pour éviter les ruptures !')
             ->salutation('L\'équipe MenuPro');
     }

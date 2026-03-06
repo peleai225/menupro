@@ -56,6 +56,10 @@ class IngredientCategoryController extends Controller
      */
     public function update(Request $request, IngredientCategory $category): RedirectResponse
     {
+        if ($category->restaurant_id !== $request->user()->restaurant_id) {
+            abort(403, 'Vous n\'avez pas accès à cette catégorie.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
@@ -69,8 +73,12 @@ class IngredientCategoryController extends Controller
     /**
      * Remove the specified category.
      */
-    public function destroy(IngredientCategory $category): RedirectResponse
+    public function destroy(Request $request, IngredientCategory $category): RedirectResponse
     {
+        if ($category->restaurant_id !== $request->user()->restaurant_id) {
+            abort(403, 'Vous n\'avez pas accès à cette catégorie.');
+        }
+
         // Move ingredients to uncategorized
         $category->ingredients()->update(['ingredient_category_id' => null]);
         

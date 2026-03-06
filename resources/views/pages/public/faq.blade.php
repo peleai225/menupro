@@ -1,4 +1,4 @@
-<x-layouts.public title="FAQ - Questions Fréquentes">
+<x-layouts.public title="FAQ - Questions Fréquentes" description="Réponses aux questions fréquentes sur MenuPro : tarifs, commandes en ligne, paiement, menu digital pour restaurants.">
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 py-20 overflow-hidden">
         <div class="absolute inset-0 pattern-dots opacity-30"></div>

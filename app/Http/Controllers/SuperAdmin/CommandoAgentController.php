@@ -83,7 +83,7 @@ class CommandoAgentController extends Controller
 
     public function withdrawalPay(Request $request, CommandoAgent $agent, CommandoCommissionTransaction $transaction): RedirectResponse
     {
-        if ($transaction->commando_agent_id !== $agent->id
+        if ((int) $transaction->commando_agent_id !== (int) $agent->id
             || $transaction->type !== CommissionTransactionType::WITHDRAWAL_REQUEST
             || $transaction->status !== CommissionTransactionStatus::PENDING) {
             return back()->with('error', 'Demande invalide.');
@@ -109,7 +109,7 @@ class CommandoAgentController extends Controller
 
     public function withdrawalReject(Request $request, CommandoAgent $agent, CommandoCommissionTransaction $transaction): RedirectResponse
     {
-        if ($transaction->commando_agent_id !== $agent->id
+        if ((int) $transaction->commando_agent_id !== (int) $agent->id
             || $transaction->type !== CommissionTransactionType::WITHDRAWAL_REQUEST
             || $transaction->status !== CommissionTransactionStatus::PENDING) {
             return back()->with('error', 'Demande invalide.');
@@ -195,7 +195,11 @@ class CommandoAgentController extends Controller
             'rejection_reason' => $request->input('reason'),
         ]);
 
-        return back()->with('success', 'Agent rejeté.');
+        if ($agent->user) {
+            $agent->user->notify(new CommandoAgentRejectedNotification($agent, $request->input('reason')));
+        }
+
+        return back()->with('success', 'Agent rejeté. Il a été notifié par email.');
     }
 
     public function ban(Request $request, CommandoAgent $agent): RedirectResponse

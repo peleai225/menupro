@@ -39,8 +39,8 @@ class StockManager
             // Update ingredient
             $ingredient->current_quantity += $quantity;
             
-            if ($unitCost !== null) {
-                // Update average cost using weighted average
+            if ($unitCost !== null && $ingredient->current_quantity > 0) {
+                // Update average cost using weighted average (avoid division by zero)
                 $totalValue = ($quantityBefore * $ingredient->unit_cost) + ($quantity * $unitCost);
                 $ingredient->unit_cost = (int) round($totalValue / $ingredient->current_quantity);
                 $ingredient->last_purchase_cost = $unitCost;

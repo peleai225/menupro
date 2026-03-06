@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
+use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ use Illuminate\View\View;
 class CheckoutController extends Controller
 {
     public function __construct(
-        protected LygosGateway $lygosGateway
+        protected LygosGateway $lygosGateway,
+        protected GeniusPayGateway $geniusPayGateway
     ) {}
 
     /**
@@ -272,25 +274,52 @@ class CheckoutController extends Controller
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
 
-        // Verify payment using order reference (order_id in Lygos)
-        if ($order->reference && $restaurant->lygos_enabled) {
+        // If webhook already marked as paid, just redirect
+        if ($order->is_paid) {
+            return redirect()->route('r.order.status', [$slug, $order->tracking_token])
+                ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
+        }
+
+        // GeniusPay: verify by payment_reference (MTX-xxx, TXN-xxx)
+        if ($order->payment_reference && (str_starts_with($order->payment_reference, 'MTX-') || str_starts_with($order->payment_reference ?? '', 'TXN-'))) {
+            $geniuspay = $this->geniusPayGateway->forRestaurant($restaurant);
+            if (!$geniuspay->isConfigured()) {
+                $geniuspay = $this->geniusPayGateway->forPlatform();
+            }
+            $result = $geniuspay->verifyPayment($order->payment_reference);
+            \Illuminate\Support\Facades\Log::channel('payments')->info('GeniusPay return (success URL): verification result', [
+                'order_id' => $order->id,
+                'reference' => $order->payment_reference,
+                'api_success' => $result['success'] ?? false,
+                'paid' => $result['paid'] ?? false,
+                'status' => $result['status'] ?? null,
+            ]);
+            if ($result['success'] && ($result['paid'] ?? false)) {
+                $order->markAsPaid([
+                    'reference' => $order->payment_reference,
+                    'method' => 'geniuspay',
+                    'metadata' => $result,
+                ]);
+                $restaurant->users()
+                    ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                    ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
+            }
+        }
+        // Lygos: verify by order reference
+        elseif ($order->reference && $restaurant->lygos_enabled) {
             $result = $this->lygosGateway
                 ->forRestaurant($restaurant)
-                ->verifyPayment($order->reference); // Lygos uses order_id to verify payment
+                ->verifyPayment($order->reference);
 
-            if ($result['success'] && $result['paid']) {
+            if ($result['success'] && ($result['paid'] ?? false)) {
                 $order->markAsPaid([
                     'reference' => $order->payment_reference ?? $order->reference,
                     'method' => 'lygos',
                     'metadata' => $result,
                 ]);
-
-                // Notify all restaurant users (admins and employees who can manage orders)
                 $restaurant->users()
                     ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                    ->each(function ($user) use ($order) {
-                        $user->notify(new NewOrderNotification($order));
-                    });
+                    ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
             }
         }
 

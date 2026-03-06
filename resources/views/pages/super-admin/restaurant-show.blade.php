@@ -369,6 +369,35 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Prolonger / Renouveler l'abonnement (sans Lygos) -->
+                    <div class="mt-4 pt-4 border-t border-neutral-700">
+                        <p class="text-sm text-neutral-400 mb-3">Lygos indisponible ? Prolongez l'abonnement manuellement (paiement hors ligne).</p>
+                        <form method="POST" action="{{ route('super-admin.restaurants.extend-subscription', $restaurant) }}" class="space-y-3">
+                            @csrf
+                            <div>
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Plan</label>
+                                <select name="plan_id" required class="w-full h-10 px-4 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    @foreach($plans as $plan)
+                                        <option value="{{ $plan->id }}" {{ $restaurant->current_plan_id == $plan->id ? 'selected' : '' }}>
+                                            {{ $plan->name }} ({{ number_format($plan->price, 0, ',', ' ') }} F)
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Durée (jours)</label>
+                                <input type="number" name="days" min="1" max="365" value="30" required class="w-full h-10 px-4 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="30">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Raison (obligatoire)</label>
+                                <input type="text" name="reason" required maxlength="255" class="w-full h-10 px-4 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Renouvellement manuel, Lygos indisponible">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full">
+                                Prolonger l'abonnement
+                            </button>
+                        </form>
+                    </div>
                 @endif
             </div>
 

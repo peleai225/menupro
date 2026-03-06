@@ -71,13 +71,12 @@ class Ingredient extends Model
             ->withTimestamps();
     }
 
-    public function preferredSupplier(): BelongsTo
+    /**
+     * Get the preferred supplier from the pivot (ingredient_supplier.is_preferred)
+     */
+    public function getPreferredSupplierAttribute(): ?Supplier
     {
-        return $this->belongsTo(Supplier::class)
-            ->whereHas('ingredients', function ($query) {
-                $query->where('ingredient_id', $this->id)
-                    ->where('is_preferred', true);
-            });
+        return $this->suppliers()->wherePivot('is_preferred', true)->first();
     }
 
     // =========================================================================

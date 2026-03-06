@@ -34,6 +34,8 @@ class SupplierController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $restaurant = $request->user()->restaurant;
+
         $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'contact_name' => ['nullable', 'string', 'max:100'],

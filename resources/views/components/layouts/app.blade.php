@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null])
+@props(['title' => null, 'description' => null, 'canonical' => null])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -39,6 +39,11 @@
     <title>{{ $title ? $title . ' - ' . $appName : $appName . ' - Votre Menu Digital' }}</title>
     <meta name="description" content="{{ $description ?? $appName . ' - La solution SaaS pour digitaliser le menu de votre restaurant et recevoir des commandes en ligne.' }}">
 
+    @php
+        $canonicalUrl = $canonical ?? request()->url();
+    @endphp
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
     <!-- Favicon -->
     @if($faviconUrl)
         <link rel="icon" type="{{ $faviconType }}" href="{{ $faviconUrl }}">
@@ -52,9 +57,11 @@
 
     <!-- Open Graph / Social -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $title ?? 'MenuPro' }}">
-    <meta property="og:description" content="{{ $description ?? 'La solution SaaS pour digitaliser votre restaurant.' }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:title" content="{{ $title ? $title . ' - ' . $appName : $appName }}">
+    <meta property="og:description" content="{{ $description ?? 'La solution SaaS pour digitaliser votre restaurant et recevoir des commandes en ligne.' }}">
     <meta property="og:image" content="{{ asset('og-image.png') }}">
+    <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -75,6 +82,9 @@
     :class="{ 'dark': darkMode }">
         
         {{ $slot }}
+
+        <!-- Cookie Consent Banner -->
+        <x-cookie-consent />
 
         <!-- Global Notification Toast -->
         <div x-show="notification.show"

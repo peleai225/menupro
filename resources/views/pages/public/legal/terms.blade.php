@@ -1,4 +1,4 @@
-<x-layouts.public title="Conditions d'utilisation">
+<x-layouts.public title="Conditions d'utilisation" description="Conditions générales d'utilisation du service MenuPro - menu digital et commandes en ligne pour restaurants.">
     <div class="py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="font-display text-4xl font-bold text-neutral-900 mb-8">Conditions d'utilisation</h1>

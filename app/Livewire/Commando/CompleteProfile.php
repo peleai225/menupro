@@ -15,6 +15,9 @@ class CompleteProfile extends Component
     public string $statut_metier = '';
     public $id_document = null;
 
+    /** true si l'agent a été rejeté et resoumet une nouvelle pièce */
+    public bool $isResubmit = false;
+
     protected function rules(): array
     {
         return [
@@ -31,10 +34,36 @@ class CompleteProfile extends Component
         ];
     }
 
+    protected function messages(): array
+    {
+        return [
+            'id_document.required' => 'Veuillez sélectionner un fichier (image ou PDF) et attendre la fin du chargement avant d\'envoyer.',
+            'id_document.file' => 'Le fichier n\'a pas été reçu. Attendez la fin du chargement puis réessayez.',
+            'id_document.max' => 'Le fichier est trop lourd. Taille maximum : 5 Mo.',
+            'id_document.mimes' => 'Format non accepté. Utilisez une image (JPG, PNG) ou un PDF.',
+        ];
+    }
+
+    public function mount(): void
+    {
+        $agent = auth()->user()->commandoAgent;
+        if ($agent) {
+            if ($agent->statut_metier) {
+                $this->statut_metier = $agent->statut_metier;
+            }
+            $this->isResubmit = $agent->status_verification === AgentVerificationStatus::REJETE;
+        }
+    }
+
     public function submit(MediaUploader $uploader): mixed
     {
         $agent = auth()->user()->commandoAgent;
-        if (!$agent || $agent->status_verification !== AgentVerificationStatus::SHADOW) {
+        if (!$agent) {
+            return null;
+        }
+
+        $allowed = [AgentVerificationStatus::SHADOW, AgentVerificationStatus::REJETE];
+        if (!in_array($agent->status_verification, $allowed, true)) {
             return null;
         }
 
@@ -53,14 +82,22 @@ class CompleteProfile extends Component
             );
         }
 
+        $wasRejected = $agent->status_verification === AgentVerificationStatus::REJETE;
+
         $agent->update([
             'statut_metier' => $this->statut_metier,
             'id_document_path' => $path,
             'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
+            'rejection_reason' => null,
         ]);
 
-        $message = 'Profil complété. L\'équipe va vérifier votre pièce d\'identité. Vous aurez accès à votre carte digitale après validation.';
+        $message = $wasRejected
+            ? 'Nouvelle pièce envoyée. L\'équipe va la vérifier sous peu.'
+            : 'Profil complété. L\'équipe va vérifier votre pièce d\'identité. Vous aurez accès à votre carte digitale après validation.';
+
         $this->dispatch('profileCompleted', $message);
+
+        return null;
     }
 
     public function render()

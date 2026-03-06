@@ -151,8 +151,11 @@
 
             <!-- Movements History -->
             <div class="card">
-                <div class="p-6 border-b border-neutral-100">
+                <div class="p-6 border-b border-neutral-100 flex items-center justify-between">
                     <h2 class="text-lg font-bold text-neutral-900">Historique des mouvements</h2>
+                    <a href="{{ route('restaurant.stock.ingredients.movements', $ingredient) }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                        Voir tout
+                    </a>
                 </div>
                 <div class="divide-y divide-neutral-100">
                     @forelse($ingredient->movements as $movement)

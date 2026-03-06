@@ -163,12 +163,48 @@
                 <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
                 
                 <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-4">Configuration Lygos</h2>
+                    <h2 class="text-lg font-semibold text-white mb-4">Configuration GeniusPay</h2>
+                    <p class="text-sm text-neutral-400 mb-5">Wave, Orange Money, MTN Money. Utilisé pour les <strong>abonnements</strong> et les <strong>commandes clients</strong> (quand Lygos n'est pas configuré par le restaurant). <a href="https://pay.genius.ci/docs/api" target="_blank" class="text-primary-400 hover:underline">Documentation</a></p>
                     <div class="space-y-5">
                         <div>
                             <label class="block text-sm font-medium text-neutral-300 mb-2">API Key</label>
+                            <input type="password" name="geniuspay_api_key" value="{{ old('geniuspay_api_key', $settings['geniuspay_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="pk_sandbox_... ou pk_live_...">
+                            <p class="text-xs text-neutral-400 mt-1">Clé publique GeniusPay pour les paiements d'abonnements</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">API Secret</label>
+                            <input type="password" name="geniuspay_api_secret" value="{{ old('geniuspay_api_secret', $settings['geniuspay_api_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="sk_sandbox_... ou sk_live_...">
+                            <p class="text-xs text-neutral-400 mt-1">Clé secrète GeniusPay</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Webhook Secret</label>
+                            <input type="password" name="geniuspay_webhook_secret" value="{{ old('geniuspay_webhook_secret', $settings['geniuspay_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="whsec_sandbox_... ou whsec_live_...">
+                            <p class="text-xs text-neutral-400 mt-1">URL webhook : <code class="bg-neutral-600 px-1 rounded">{{ url('/webhooks/geniuspay') }}</code></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Mode</label>
+                            <select name="geniuspay_mode" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="sandbox" {{ ($settings['geniuspay_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' }}>Sandbox (test)</option>
+                                <option value="live" {{ ($settings['geniuspay_mode'] ?? 'sandbox') === 'live' ? 'selected' : '' }}>Production</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-white mb-4">Configuration Lygos <span class="text-neutral-500 text-sm font-normal">(legacy - abonnements)</span></h2>
+                    <div class="space-y-5">
+                        <label class="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl cursor-pointer">
+                            <div>
+                                <span class="font-medium text-white">Activer Lygos</span>
+                                <p class="text-sm text-neutral-400">Utiliser Lygos pour les abonnements (fallback si GeniusPay non configuré)</p>
+                            </div>
+                            <input type="checkbox" name="lygos_enabled" value="1" {{ ($settings['lygos_enabled'] ?? true) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-600">
+                        </label>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">API Key</label>
                             <input type="password" name="lygos_api_key" value="{{ old('lygos_api_key', $settings['lygos_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="sk_live_...">
-                            <p class="text-xs text-neutral-400 mt-1">Votre clé API Lygos pour les paiements d'abonnements</p>
+                            <p class="text-xs text-neutral-400 mt-1">Clé API Lygos (par restaurant, pour les commandes)</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-neutral-300 mb-2">Webhook Secret (optionnel)</label>
@@ -328,7 +364,7 @@
                         <div>
                             <label class="block text-sm font-medium text-neutral-300 mb-2">Image Hero (Page d'accueil)</label>
                             <div class="flex items-center gap-4">
-                                @if(!empty($settings['hero_image'] ?? ''))
+                                @if(!empty($settings['hero_image'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['hero_image']))
                                     <img src="{{ \Illuminate\Support\Facades\Storage::url($settings['hero_image']) }}" alt="Image Hero" class="h-32 w-auto object-contain bg-white p-2 rounded-lg">
                                 @endif
                                 <input type="file" name="hero_image" accept="image/*" class="flex-1 h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500">

@@ -687,6 +687,59 @@
                     @endif
                 </div>
 
+                <div class="border-t border-neutral-200 pt-6 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-neutral-900">Paiement mobile (GeniusPay)</h3>
+                            <p class="text-sm text-neutral-500">Wave, Orange Money, MTN Money via GeniusPay</p>
+                        </div>
+                        <button type="button" wire:click="$toggle('geniuspay_enabled')"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $geniuspay_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $geniuspay_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </div>
+
+                    @if($geniuspay_enabled)
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    API Key GeniusPay <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" wire:model="geniuspay_api_key" class="input" placeholder="pk_sandbox_... ou pk_live_...">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Clé publique obtenue sur votre compte GeniusPay (pay.genius.ci)
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    API Secret GeniusPay <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" wire:model="geniuspay_api_secret" class="input" placeholder="sk_sandbox_... ou sk_live_...">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Clé secrète de votre compte marchand GeniusPay
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Webhook Secret <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
+                                </label>
+                                <input type="password" wire:model="geniuspay_webhook_secret" class="input" placeholder="whsec_sandbox_... ou whsec_live_...">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    URL webhook à configurer : <code class="bg-neutral-100 px-1 rounded">{{ url('/webhooks/geniuspay') }}</code>
+                                </p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-xs text-blue-800">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Obtenez vos clés API sur <a href="https://pay.genius.ci" target="_blank" class="text-blue-600 hover:underline font-medium">pay.genius.ci</a>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
                 <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

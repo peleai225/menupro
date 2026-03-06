@@ -37,12 +37,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Lygos Payment Gateway
+    | Lygos Payment Gateway (legacy - commandes)
     |--------------------------------------------------------------------------
     */
     'lygos' => [
         'base_url' => env('LYGOS_BASE_URL', 'https://api.lygosapp.com/v1'),
         'webhook_secret' => env('LYGOS_WEBHOOK_SECRET'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | GeniusPay Payment Gateway (abonnements)
+    |--------------------------------------------------------------------------
+    */
+    'geniuspay' => [
+        'base_url' => env('GENIUSPAY_BASE_URL', 'https://pay.genius.ci/api/v1/merchant'),
+        'webhook_secret' => env('GENIUSPAY_WEBHOOK_SECRET'),
+        // true = redirection directe Wave (push dans l'app) au lieu de la page GeniusPay/QR — à tester si le QR ne prélève pas
+        'direct_wave' => env('GENIUSPAY_DIRECT_WAVE', false),
     ],
 
     /*

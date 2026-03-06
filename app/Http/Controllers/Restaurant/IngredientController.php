@@ -74,6 +74,23 @@ class IngredientController extends Controller
     }
 
     /**
+     * Show the form for editing the specified ingredient.
+     */
+    public function edit(Request $request, Ingredient $ingredient): View
+    {
+        $this->authorize('update', $ingredient);
+
+        $restaurant = $request->user()->restaurant;
+        if (!$restaurant->hasFeature('stock')) {
+            return view('pages.restaurant.stock-upgrade');
+        }
+
+        $categories = IngredientCategory::ordered()->get();
+
+        return view('pages.restaurant.ingredient-edit', compact('ingredient', 'categories'));
+    }
+
+    /**
      * Store a newly created ingredient.
      */
     public function store(StoreIngredientRequest $request): RedirectResponse
@@ -106,16 +123,24 @@ class IngredientController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:150'],
+            'sku' => ['nullable', 'string', 'max:50', 'unique:ingredients,sku,' . $ingredient->id],
             'ingredient_category_id' => ['nullable', 'exists:ingredient_categories,id'],
+            'unit' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\Unit::class)],
+            'current_quantity' => ['required', 'numeric', 'min:0'],
             'min_quantity' => ['required', 'numeric', 'min:0'],
-            'max_quantity' => ['nullable', 'numeric', 'min:0'],
+            'max_quantity' => ['nullable', 'numeric', 'min:0', 'gte:min_quantity'],
+            'unit_cost' => ['required', 'integer', 'min:0'],
             'track_expiry' => ['boolean'],
             'default_expiry_days' => ['nullable', 'integer', 'min:1'],
             'notes' => ['nullable', 'string', 'max:500'],
             'is_active' => ['boolean'],
         ]);
 
-        $ingredient->update($request->all());
+        $ingredient->update($request->only([
+            'name', 'sku', 'ingredient_category_id', 'unit', 'current_quantity',
+            'min_quantity', 'max_quantity', 'unit_cost', 'track_expiry',
+            'default_expiry_days', 'notes', 'is_active',
+        ]));
 
         return back()->with('success', 'Ingrédient mis à jour.');
     }
@@ -129,7 +154,7 @@ class IngredientController extends Controller
 
         $ingredient->delete();
 
-        return redirect()->route('restaurant.ingredients')
+        return redirect()->route('restaurant.stock.ingredients.index')
             ->with('success', 'Ingrédient supprimé.');
     }
 

@@ -152,12 +152,12 @@ class OrderRushController extends Controller
         }
 
         try {
-            $order->transitionTo(OrderStatus::CONFIRMED);
-
-            // Deduct stock if enabled
+            // Deduct stock BEFORE transition so both succeed or both fail
             if ($order->restaurant->hasFeature('stock')) {
                 $this->stockManager->forRestaurant($order->restaurant)->deductForOrder($order);
             }
+
+            $order->transitionTo(OrderStatus::CONFIRMED);
 
             return response()->json([
                 'success' => true,
@@ -192,12 +192,12 @@ class OrderRushController extends Controller
         }
 
         try {
-            // Auto-confirm if still PAID
+            // Auto-confirm if still PAID (deduct stock BEFORE transition)
             if ($order->status === OrderStatus::PAID) {
-                $order->transitionTo(OrderStatus::CONFIRMED);
                 if ($order->restaurant->hasFeature('stock')) {
                     $this->stockManager->forRestaurant($order->restaurant)->deductForOrder($order);
                 }
+                $order->transitionTo(OrderStatus::CONFIRMED);
             }
 
             $order->transitionTo(OrderStatus::PREPARING);

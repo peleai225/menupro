@@ -250,6 +250,8 @@
     @php
         $menuProPlan = $plans->firstWhere('slug', 'menupro') ?? $plans->first();
         $isCurrentPlan = $currentPlan && $currentPlan->id === $menuProPlan?->id;
+        $canRenew = $restaurant->is_subscription_expired
+            || ($restaurant->days_until_expiration !== null && $restaurant->days_until_expiration <= 7);
         $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
     @endphp
 
@@ -389,10 +391,10 @@
             </div>
 
             <!-- Subscribe Button -->
-            @if($isCurrentPlan)
+            @if($isCurrentPlan && !$canRenew)
                 <button class="btn btn-primary w-full px-6 py-3 flex items-center justify-center gap-2 shadow-sm" disabled>Plan actuel</button>
             @else
-                <form method="POST" action="{{ route('restaurant.subscription.change') }}" x-data="{ billingPeriod: 'monthly' }" @submit.prevent="submit">
+                <form method="POST" action="{{ route('restaurant.subscription.change') }}" x-data="{ billingPeriod: 'monthly' }">
                     @csrf
                     <input type="hidden" name="plan" value="{{ $menuProPlan->slug }}">
                     <input type="hidden" name="billing_period" :value="billingPeriod">
