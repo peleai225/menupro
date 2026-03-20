@@ -52,6 +52,7 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'cancellation_reason',
+        'payment_screenshot_url',
     ];
 
     protected $casts = [
@@ -105,6 +106,11 @@ class Order extends Model
     public function review(): HasOne
     {
         return $this->hasOne(Review::class);
+    }
+
+    public function commissionLog(): HasOne
+    {
+        return $this->hasOne(CommissionLog::class);
     }
 
     // =========================================================================

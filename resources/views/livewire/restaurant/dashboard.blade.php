@@ -44,14 +44,30 @@
     @endif
 
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white">
-        <div class="flex flex-wrap items-center justify-between gap-y-2">
+    <div class="relative bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-5 sm:p-7 mb-6 sm:mb-8 text-white overflow-hidden">
+        <!-- Decorative elements -->
+        <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute right-16 -bottom-8 w-32 h-32 bg-white/5 rounded-full pointer-events-none"></div>
+        <div class="absolute right-8 top-4 opacity-10 pointer-events-none">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="36" stroke="white" stroke-width="2"/>
+                <circle cx="40" cy="40" r="24" stroke="white" stroke-width="2"/>
+                <circle cx="40" cy="40" r="12" stroke="white" stroke-width="2"/>
+            </svg>
+        </div>
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-y-3">
             <div class="min-w-0">
-                <h1 class="text-xl sm:text-2xl font-bold truncate">Bonjour, {{ auth()->user()->name }}</h1>
-                <p class="text-primary-100 mt-1">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
+                <p class="text-primary-200 text-sm font-medium mb-1">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
+                <h1 class="text-xl sm:text-2xl font-bold truncate">Bonjour, {{ auth()->user()->name }} 👋</h1>
+                <p class="text-primary-100 mt-1 text-sm sm:text-base">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
             </div>
-            <div class="hidden md:block">
-                <span class="text-sm text-primary-200">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</span>
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="{{ route('restaurant.orders') }}" class="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-xl text-sm font-semibold transition-all duration-200 border border-white/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Commandes
+                </a>
             </div>
         </div>
     </div>

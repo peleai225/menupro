@@ -28,6 +28,7 @@ class Ingredient extends Model
         'track_expiry',
         'default_expiry_days',
         'notes',
+        'image_path',
         'is_active',
     ];
 
@@ -119,6 +120,14 @@ class Ingredient extends Model
     // =========================================================================
     // ACCESSORS
     // =========================================================================
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image_path) {
+            return null;
+        }
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path);
+    }
 
     public function getFormattedQuantityAttribute(): string
     {

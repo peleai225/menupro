@@ -757,6 +757,64 @@
         </div>
     </section>
 
+    @if(!empty($videos))
+    <!-- Section Vidéos - Dynamique (SystemSetting: home_videos) -->
+    <section id="videos" class="py-20 sm:py-28 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-100 text-secondary-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Tutoriels vidéo
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Découvrez <span class="text-gradient">MenuPro en vidéo</span>
+                </h2>
+                <p class="text-neutral-600 text-lg mt-4"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Apprenez à utiliser MenuPro grâce à nos tutoriels explicatifs.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
+                @foreach($videos as $index => $video)
+                <div class="group" 
+                     x-show="shown" 
+                     x-transition:enter="transition ease-out duration-700" 
+                     x-transition:enter-start="opacity-0 translate-y-8" 
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     style="transition-delay: {{ $index * 80 }}ms">
+                    <div class="bg-white rounded-2xl overflow-hidden border-2 border-neutral-100 hover:border-primary-200 shadow-lg hover:shadow-xl transition-all duration-500 h-full flex flex-col">
+                        <div class="relative aspect-video bg-neutral-900">
+                            <iframe src="{{ $video['url'] }}?rel=0&modestbranding=1" 
+                                    class="absolute inset-0 w-full h-full"
+                                    title="{{ $video['title'] }}"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
+                        <div class="p-5 lg:p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg font-bold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors">
+                                {{ $video['title'] }}
+                            </h3>
+                            @if(!empty($video['description']))
+                            <p class="text-neutral-600 text-sm leading-relaxed flex-1">
+                                {{ $video['description'] }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Features Section -->
     <section id="features" class="py-24 bg-white relative overflow-hidden">
         <!-- Subtle background pattern -->

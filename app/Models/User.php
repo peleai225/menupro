@@ -161,7 +161,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function belongsToRestaurant(int $restaurantId): bool
     {
-        return $this->restaurant_id === $restaurantId;
+        // Cast to int: en production, MySQL/PDO peut renvoyer restaurant_id en string
+        return $this->restaurant_id !== null && (int) $this->restaurant_id === (int) $restaurantId;
     }
 
     public function canAccessRestaurant(int $restaurantId): bool

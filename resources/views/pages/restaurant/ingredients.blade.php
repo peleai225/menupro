@@ -6,18 +6,22 @@
             <p class="text-neutral-500 mt-1">Gérez vos ingrédients et suivez votre inventaire.</p>
         </div>
         <div class="flex items-center gap-3">
+            @if(auth()->user()->canManageRestaurant())
             <a href="{{ route('restaurant.stock.categories-ingredients.index') }}" class="btn btn-outline">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
                 Catégories
             </a>
+            @endif
+            @can('create', \App\Models\Ingredient::class)
             <button onclick="document.getElementById('addIngredientModal').classList.remove('hidden')" class="btn btn-primary">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
                 Ajouter un ingrédient
             </button>
+            @endcan
         </div>
     </div>
 
@@ -90,31 +94,33 @@
     </div>
 
     <!-- Filters -->
-    <form method="GET" class="card p-4 mb-6">
+    <form method="GET" class="card p-4 mb-6" id="filterForm" x-data>
         <div class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1 relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" 
-                       name="search" 
+                <input type="text"
+                       name="search"
                        value="{{ request('search') }}"
-                       placeholder="Rechercher un ingrédient..." 
+                       placeholder="Rechercher un ingrédient..."
+                       x-on:input.debounce.500ms="$el.closest('form').submit()"
                        class="w-full h-10 pl-10 pr-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
             </div>
-            <select name="category" class="h-10 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select name="category" x-on:change="$el.closest('form').submit()"
+                    class="h-10 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
                 <option value="">Toutes catégories</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                 @endforeach
             </select>
-            <select name="status" class="h-10 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select name="status" x-on:change="$el.closest('form').submit()"
+                    class="h-10 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
                 <option value="">Tous statuts</option>
                 <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>En stock</option>
                 <option value="low" {{ request('status') === 'low' ? 'selected' : '' }}>Stock faible</option>
                 <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>Rupture</option>
             </select>
-            <button type="submit" class="btn-primary">Filtrer</button>
         </div>
     </form>
 
@@ -137,11 +143,16 @@
                         <tr class="hover:bg-neutral-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                    </div>
+                                    @if($ingredient->image_url)
+                                        <img src="{{ $ingredient->image_url }}" alt="{{ $ingredient->name }}"
+                                             class="w-10 h-10 rounded-xl object-cover border border-neutral-200 flex-shrink-0">
+                                    @else
+                                        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                        </div>
+                                    @endif
                                     <div>
                                         <p class="font-medium text-neutral-900">{{ $ingredient->name }}</p>
                                         @if($ingredient->sku)
@@ -178,6 +189,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </a>
+                                    @can('update', $ingredient)
                                     <a href="{{ route('restaurant.stock.ingredients.edit', $ingredient) }}" 
                                        class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
                                        title="Modifier">
@@ -185,6 +197,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </a>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -221,11 +234,17 @@
                 <div class="p-6 border-b border-neutral-100">
                     <h2 class="text-xl font-bold text-neutral-900">Ajouter un ingrédient</h2>
                 </div>
-                <form method="POST" action="{{ route('restaurant.stock.ingredients.store') }}" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('restaurant.stock.ingredients.store') }}" class="p-6 space-y-4" enctype="multipart/form-data">
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-2">Nom *</label>
                         <input type="text" name="name" required class="input" placeholder="Ex: Tomates">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-2">Photo (optionnel)</label>
+                        <input type="file" name="image" accept="image/*"
+                               class="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                        <p class="text-xs text-neutral-400 mt-1">JPG, PNG ou WebP. Max 2 Mo.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

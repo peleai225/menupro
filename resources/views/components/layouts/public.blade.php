@@ -24,17 +24,21 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('home') }}#features" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('home') }}#features" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group">
                         Fonctionnalités
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-200 rounded-full"></span>
                     </a>
-                    <a href="{{ route('pricing') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('pricing') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('pricing') ? 'text-primary-600' : '' }}">
                         Tarifs
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('pricing') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
-                    <a href="{{ route('faq') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('faq') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('faq') ? 'text-primary-600' : '' }}">
                         FAQ
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('faq') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
-                    <a href="{{ route('contact') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('contact') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('contact') ? 'text-primary-600' : '' }}">
                         Contact
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('contact') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
                 </div>
 

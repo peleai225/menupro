@@ -28,6 +28,7 @@ class StoreIngredientRequest extends FormRequest
             'default_expiry_days' => ['nullable', 'integer', 'min:1'],
             'notes' => ['nullable', 'string', 'max:500'],
             'is_active' => ['boolean'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ];
     }
 

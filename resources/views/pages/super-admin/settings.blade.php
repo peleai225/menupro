@@ -1,5 +1,5 @@
 <x-layouts.admin-super title="Paramètres">
-    <div class="max-w-4xl">
+    <div class="max-w-5xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-white">Paramètres système</h1>
@@ -29,35 +29,35 @@
 
         <!-- Tabs -->
         <div x-data="{ tab: 'general' }" class="space-y-6">
-            <div class="flex gap-2 border-b border-neutral-700">
+            <div class="flex gap-1 overflow-x-auto border-b border-neutral-700 pb-px scrollbar-thin scrollbar-thumb-neutral-600">
                 <button @click="tab = 'general'" 
                         :class="tab === 'general' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Général
                 </button>
                 <button @click="tab = 'payment'" 
                         :class="tab === 'payment' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Paiements
                 </button>
                 <button @click="tab = 'email'" 
                         :class="tab === 'email' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Emails
                 </button>
                 <button @click="tab = 'security'" 
                         :class="tab === 'security' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Sécurité
                 </button>
                 <button @click="tab = 'appearance'" 
                         :class="tab === 'appearance' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Apparence
                 </button>
                 <button @click="tab = 'commando'" 
                         :class="tab === 'commando' ? 'border-primary-500 text-primary-400' : 'border-transparent text-neutral-500 hover:text-neutral-300'"
-                        class="px-4 py-3 border-b-2 font-medium transition-colors">
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Commando
                 </button>
             </div>
@@ -162,8 +162,48 @@
                 <input type="hidden" name="social_twitter" value="{{ $settings['social_twitter'] ?? '' }}">
                 <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
                 
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-4">Configuration GeniusPay</h2>
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                        Wave (Checkout + Payout)
+                    </h2>
+                    <p class="text-sm text-neutral-400 mb-5">
+                        Configuration globale Wave pour les paiements clients (Checkout) et les retraits vers les restaurants (Payout API).
+                        <a href="https://docs.wave.com/payout/#payout-api" target="_blank" class="text-primary-400 hover:underline">Documentation</a>
+                    </p>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">API Key Wave</label>
+                            <input type="password" name="wave_api_key" value="{{ old('wave_api_key', $settings['wave_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="wave_ci_prod_...">
+                            <p class="text-xs text-neutral-400 mt-1">
+                                Clé API Wave Business (portail développeur). Utilisée pour toutes les requêtes Checkout et Payout.
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Signing Secret Wave</label>
+                            <input type="password" name="wave_signing_secret" value="{{ old('wave_signing_secret', $settings['wave_signing_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="wave_ci_AKS_...">
+                            <p class="text-xs text-neutral-400 mt-1">
+                                Secret de signature HMAC pour les requêtes sortantes et la vérification des webhooks (header <code class="bg-neutral-600 px-1 rounded">Wave-Signature</code>).
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Commission MenuPro sur paiements Wave</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="wave_commission_rate" value="{{ old('wave_commission_rate', ($settings['wave_commission_rate'] ?? 0.02)) }}" min="0" max="1" step="0.001" class="w-32 h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <span class="text-sm text-neutral-400">0.02 = 2 %</span>
+                            </div>
+                            <p class="text-xs text-neutral-400 mt-1">
+                                Taux de commission prélevé par MenuPro sur chaque paiement Wave avant de créditer le wallet virtuel du restaurant.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        GeniusPay
+                    </h2>
                     <p class="text-sm text-neutral-400 mb-5">Wave, Orange Money, MTN Money. Utilisé pour les <strong>abonnements</strong> et les <strong>commandes clients</strong> (quand Lygos n'est pas configuré par le restaurant). <a href="https://pay.genius.ci/docs/api" target="_blank" class="text-primary-400 hover:underline">Documentation</a></p>
                     <div class="space-y-5">
                         <div>
@@ -192,7 +232,10 @@
                 </div>
 
                 <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-4">Configuration Lygos <span class="text-neutral-500 text-sm font-normal">(legacy - abonnements)</span></h2>
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Lygos <span class="text-neutral-500 text-sm font-normal">(legacy - abonnements)</span>
+                    </h2>
                     <div class="space-y-5">
                         <label class="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl cursor-pointer">
                             <div>
@@ -222,7 +265,55 @@
                 </div>
 
                 <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-4">Configuration Geoapify (Géocodage)</h2>
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        MenuPro Hub (Paiement direct)
+                    </h2>
+                    <p class="text-sm text-neutral-400 mb-5">Paiement direct sur les comptes marchands Wave, Orange Money, MTN des restaurants. Le webhook reçoit les SMS de confirmation de paiement via la passerelle SMS.</p>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Webhook Secret</label>
+                            <input type="password" name="menupo_hub_webhook_secret" value="{{ old('menupo_hub_webhook_secret', $settings['menupo_hub_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Secret pour signer les requêtes">
+                            <p class="text-xs text-neutral-400 mt-1">Secret pour vérifier la signature des webhooks (header X-Webhook-Signature ou X-Signature). Si vide, la vérification est désactivée. Laisser vide pour conserver la valeur actuelle.</p>
+                            <p class="text-xs text-neutral-500 mt-1">URL webhook : <code class="bg-neutral-600 px-1 rounded">{{ url('/webhooks/menupo-hub/verify-payment') }}</code></p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        FusionPay (MoneyFusion)
+                    </h2>
+                    <p class="text-sm text-neutral-400 mb-5">Paiements Mobile Money (Wave, Orange, MTN) et transferts vers les restaurants. <a href="https://docs.moneyfusion.net/fr" target="_blank" class="text-primary-400 hover:underline">Documentation</a></p>
+                    <div class="space-y-5">
+                        <label class="flex items-center justify-between p-4 bg-neutral-700/50 rounded-xl cursor-pointer">
+                            <div>
+                                <span class="font-medium text-white">Activer FusionPay</span>
+                                <p class="text-sm text-neutral-400">Paiements clients et transferts vers les wallets restaurants</p>
+                            </div>
+                            <input type="checkbox" name="fusionpay_enabled" value="1" {{ ($settings['fusionpay_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-600">
+                        </label>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">URL API (pay-in)</label>
+                            <input type="url" name="fusionpay_api_url" value="{{ old('fusionpay_api_url', $settings['fusionpay_api_url'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://... (depuis votre tableau de bord)">
+                            <p class="text-xs text-neutral-400 mt-1">Lien API généré dans Money Fusion > API de paiement</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-300 mb-2">Clé privée (pay-out)</label>
+                            <input type="password" name="fusionpay_private_key" value="{{ old('fusionpay_private_key', $settings['fusionpay_private_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Clé API pour les retraits">
+                            <p class="text-xs text-neutral-400 mt-1">Clé API pour l'API de retrait (transferts vers restaurants)</p>
+                            <p class="text-xs text-neutral-500 mt-1">Webhooks : <code class="bg-neutral-600 px-1 rounded">{{ url('/webhooks/fusionpay/payment') }}</code> et <code class="bg-neutral-600 px-1 rounded">{{ url('/webhooks/fusionpay/payout') }}</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6 xl:col-span-2">
+                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        Geoapify (Géocodage)
+                    </h2>
                     <div class="space-y-5">
                         <div>
                             <label class="block text-sm font-medium text-neutral-300 mb-2">API Key Geoapify</label>
@@ -234,6 +325,7 @@
                             <p class="text-xs text-neutral-500 mt-1">Si non configuré, le système utilisera Photon (gratuit, sans clé API) comme alternative.</p>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <div class="flex justify-end">
@@ -387,6 +479,37 @@
                         <label class="block text-sm font-medium text-neutral-300 mb-2">Texte du footer</label>
                         <input type="text" name="footer_text" value="{{ old('footer_text', $settings['footer_text'] ?? '© ' . date('Y') . ' MenuPro. Tous droits réservés.') }}" class="w-full h-12 px-4 bg-neutral-700 border border-neutral-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="© 2026 MenuPro. Tous droits réservés.">
                         <p class="text-xs text-neutral-400 mt-1">Texte affiché en bas de page sur le site public</p>
+                    </div>
+                </div>
+
+                <div class="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-white mb-4">Vidéos page d'accueil</h2>
+                    <p class="text-sm text-neutral-400 mb-5">Vidéos tutoriels affichées sur la page d'accueil pour expliquer MenuPro. Collez le lien YouTube (ex: https://youtube.com/watch?v=xxx ou https://youtu.be/xxx). Laisser l'URL vide pour ne pas afficher une vidéo.</p>
+                    @php
+                        $homeVideos = $settings['home_videos'] ?? [];
+                        $maxSlots = 5;
+                        $videoSlots = array_pad($homeVideos, $maxSlots, ['title' => '', 'url' => '', 'description' => '']);
+                    @endphp
+                    <div class="space-y-6">
+                        @foreach($videoSlots as $i => $video)
+                        <div class="p-4 bg-neutral-700/50 rounded-xl border border-neutral-600">
+                            <h3 class="text-sm font-medium text-neutral-300 mb-4">Vidéo {{ $i + 1 }}</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-neutral-400 mb-1">Titre</label>
+                                    <input type="text" name="home_videos[{{ $i }}][title]" value="{{ old("home_videos.{$i}.title", $video['title'] ?? '') }}" class="w-full h-10 px-3 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Comment fonctionne MenuPro ?">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-neutral-400 mb-1">Lien de la vidéo <span class="text-primary-400">*</span></label>
+                                    <input type="url" name="home_videos[{{ $i }}][url]" value="{{ old("home_videos.{$i}.url", $video['url'] ?? '') }}" class="w-full h-10 px-3 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://www.youtube.com/watch?v=xxx ou https://youtu.be/xxx">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-neutral-400 mb-1">Description (optionnel)</label>
+                                    <textarea name="home_videos[{{ $i }}][description]" rows="2" class="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Courte description de la vidéo">{{ old("home_videos.{$i}.description", $video['description'] ?? '') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
 

@@ -43,7 +43,7 @@ class IngredientPolicy
             return true;
         }
 
-        return $user->belongsToRestaurant($ingredient->restaurant_id);
+        return $this->canAccessIngredient($user, $ingredient);
     }
 
     /**
@@ -71,7 +71,7 @@ class IngredientPolicy
             return true;
         }
 
-        return $user->isRestaurantAdmin() && $user->belongsToRestaurant($ingredient->restaurant_id);
+        return $user->isRestaurantAdmin() && $this->canAccessIngredient($user, $ingredient);
     }
 
     /**
@@ -87,7 +87,7 @@ class IngredientPolicy
             return true;
         }
 
-        return $user->isRestaurantAdmin() && $user->belongsToRestaurant($ingredient->restaurant_id);
+        return $user->isRestaurantAdmin() && $this->canAccessIngredient($user, $ingredient);
     }
 
     /**
@@ -103,7 +103,7 @@ class IngredientPolicy
             return true;
         }
 
-        return $user->belongsToRestaurant($ingredient->restaurant_id) && 
+        return $this->canAccessIngredient($user, $ingredient) &&
                ($user->isRestaurantAdmin() || $user->isEmployee());
     }
 
@@ -120,7 +120,23 @@ class IngredientPolicy
             return true;
         }
 
-        return $user->belongsToRestaurant($ingredient->restaurant_id);
+        return $this->canAccessIngredient($user, $ingredient);
+    }
+
+    /**
+     * Check if user can access ingredient (handles orphaned ingredients with null restaurant_id).
+     * Uses session context when available (for consistency with the list scope).
+     */
+    protected function canAccessIngredient(User $user, Ingredient $ingredient): bool
+    {
+        if ($ingredient->restaurant_id === null) {
+            return $user->restaurant_id !== null || session()->has('current_restaurant_id');
+        }
+
+        $effectiveRestaurantId = session('current_restaurant_id') ?? $user->restaurant_id;
+
+        return $effectiveRestaurantId !== null
+            && (int) $ingredient->restaurant_id === (int) $effectiveRestaurantId;
     }
 }
 

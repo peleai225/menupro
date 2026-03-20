@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Restaurant\UpdateOrderStatusRequest;
 use App\Models\Order;
+use App\Models\OrderRefund;
 use App\Services\StockManager;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OrderController extends Controller
@@ -155,6 +160,78 @@ class OrderController extends Controller
         $order->load('items', 'restaurant');
 
         return view('pages.restaurant.order-print', compact('order'));
+    }
+
+    /**
+     * Rembourser une commande payée.
+     */
+    public function refund(Request $request, Order $order): RedirectResponse
+    {
+        $this->authorize('refund', $order);
+
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if ($order->payment_status === PaymentStatus::REFUNDED) {
+            return back()->with('error', 'Cette commande a déjà été remboursée.');
+        }
+
+        if (!$order->is_paid) {
+            return back()->with('error', 'Impossible de rembourser une commande non payée.');
+        }
+
+        DB::transaction(function () use ($order, $request) {
+            // Restaurer le stock si déjà déduit
+            $statusesWithStockDeducted = [
+                OrderStatus::CONFIRMED,
+                OrderStatus::PREPARING,
+                OrderStatus::READY,
+                OrderStatus::DELIVERING,
+            ];
+            if (in_array($order->status, $statusesWithStockDeducted)) {
+                if ($order->restaurant->hasFeature('stock')) {
+                    $this->stockManager->forRestaurant($order->restaurant)->restoreForOrder($order);
+                }
+            }
+
+            $order->update([
+                'payment_status' => PaymentStatus::REFUNDED,
+                'status'         => OrderStatus::CANCELLED,
+                'cancelled_at'   => now(),
+                'cancellation_reason' => $request->reason ?? 'Remboursement',
+            ]);
+
+            // Débiter le wallet (annuler le crédit automatique reçu via webhook)
+            $onlinePaymentMethods = ['wave', 'fusionpay', 'geniuspay', 'lygos'];
+            if (in_array($order->payment_method, $onlinePaymentMethods)) {
+                try {
+                    app(WalletService::class)->debitWallet($order->restaurant_id, (float) $order->total);
+                } catch (\DomainException $e) {
+                    Log::warning('Remboursement : solde wallet insuffisant', [
+                        'order_id' => $order->id,
+                        'amount'   => $order->total,
+                        'error'    => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            OrderRefund::create([
+                'order_id'          => $order->id,
+                'amount'            => $order->total,
+                'reason'            => $request->reason,
+                'payment_reference' => $order->payment_reference,
+                'status'            => 'pending',
+                'metadata'          => [
+                    'refunded_by'              => auth()->id(),
+                    'original_payment_method'  => $order->payment_method,
+                ],
+            ]);
+        });
+
+        Log::info('Commande remboursée', ['order_id' => $order->id, 'by' => auth()->id()]);
+
+        return back()->with('success', 'Remboursement enregistré. La commande a été annulée.');
     }
 
     /**

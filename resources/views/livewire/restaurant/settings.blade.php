@@ -58,19 +58,20 @@
 
     <!-- Tabs -->
     <div x-data="{ activeTab: '{{ $activeTab }}' }" class="space-y-6">
-        <div class="flex overflow-x-auto gap-2 border-b border-neutral-200 mb-8">
+        <div class="flex overflow-x-auto gap-1.5 p-1.5 bg-neutral-100/80 rounded-2xl mb-8">
             @foreach([
                 'general' => ['label' => 'Général', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                 'verification' => ['label' => 'Vérification', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
                 'appearance' => ['label' => 'Apparence', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
                 'delivery' => ['label' => 'Livraison', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
                 'payment' => ['label' => 'Paiement', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+                'wallet' => ['label' => 'Wallet', 'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'],
                 'hours' => ['label' => 'Horaires', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
             ] as $key => $tab)
                 <button @click="activeTab = '{{ $key }}'"
-                        :class="activeTab === '{{ $key }}' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="flex items-center gap-2 px-4 py-3 font-medium whitespace-nowrap border-b-2 -mb-px transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        :class="activeTab === '{{ $key }}' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-xl transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tab['icon'] }}"/>
                     </svg>
                     {{ $tab['label'] }}
@@ -630,6 +631,20 @@
         <div x-show="activeTab === 'payment'" x-cloak>
             <form wire:submit="savePayment" class="max-w-2xl">
             <div class="card p-6 space-y-6">
+                {{-- Modes configurés par la plateforme (Super Admin) --}}
+                @if($this->fusionpayPaymentAvailable)
+                    <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl mb-6">
+                        <h3 class="font-semibold text-neutral-900 mb-2">Modes de paiement activés par la plateforme</h3>
+                        <p class="text-sm text-neutral-500 mb-4">Ces options sont proposées à vos clients au checkout. Configuration dans Super Admin.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
+                                <x-payment-logo method="fusionpay" />
+                                FusionPay
+                            </span>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-semibold text-neutral-900">Paiement à la livraison</h3>
@@ -740,7 +755,48 @@
                     @endif
                 </div>
 
-                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                <!-- MenuPro Hub -->
+                <div class="border-t border-neutral-200 pt-6 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-neutral-900">MenuPro Hub</h3>
+                            <p class="text-sm text-neutral-500">Paiement direct sur vos comptes Wave, Orange Money, MTN, Moov (0,5% de commission)</p>
+                        </div>
+                        <button type="button" wire:click="$toggle('menupo_hub_enabled')"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $menupo_hub_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $menupo_hub_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </div>
+
+                    @if($menupo_hub_enabled)
+                        <div class="space-y-4 p-4 bg-neutral-50 rounded-xl">
+                            <p class="text-sm text-neutral-600">Renseignez vos numéros de comptes marchands. Le solde de commission doit être crédité par l'admin.</p>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">ID Marchand Wave</label>
+                                <input type="text" wire:model="wave_merchant_id" class="input font-mono uppercase" placeholder="CI12345678" maxlength="10">
+                                <p class="text-xs text-neutral-500 mt-1">Format : code pays (2 lettres) + 8 chiffres. Ex : CI12345678 (Côte d'Ivoire), SN12345678 (Sénégal)</p>
+                                @error('wave_merchant_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Orange Money</label>
+                                <input type="tel" wire:model="orange_money_number" class="input" placeholder="07 XX XX XX XX">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro MTN MoMo</label>
+                                <input type="tel" wire:model="mtn_money_number" class="input" placeholder="07 XX XX XX XX">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Moov Money</label>
+                                <input type="tel" wire:model="moov_money_number" class="input" placeholder="07 XX XX XX XX">
+                            </div>
+                            <p class="text-xs text-neutral-500">Solde commission actuel : <strong>{{ number_format($restaurant->commission_wallet_balance ?? 0, 0, ',', ' ') }} F</strong>. Contactez le support pour recharger.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -748,6 +804,74 @@
                 </button>
             </div>
             </form>
+        </div>
+
+        <!-- Wallet Tab -->
+        <div x-show="activeTab === 'wallet'" x-cloak>
+            <div class="max-w-2xl space-y-6">
+                <div class="card p-6 bg-gradient-to-r from-violet-50 to-purple-50 border-2 border-violet-200">
+                    <h2 class="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Wallet MenuPro
+                    </h2>
+                    <p class="text-sm text-neutral-600 mb-6">Solde des paiements reçus sur vos commandes. Demandez un retrait vers votre Mobile Money (Wave, Orange, MTN).</p>
+                    
+                    <div class="flex items-center gap-4 p-4 bg-white rounded-xl border border-violet-200">
+                        <div class="w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center">
+                            <span class="text-2xl font-bold text-violet-600">F</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-neutral-500">Solde disponible</p>
+                            <p class="text-2xl font-bold text-neutral-900">{{ number_format($this->walletBalance, 0, ',', ' ') }} F</p>
+                        </div>
+                    </div>
+
+                    @if(!$this->hasWallet)
+                        <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <p class="text-sm text-amber-800">
+                                <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                Votre wallet n'est pas encore configuré. Assurez-vous que le numéro de téléphone du restaurant est renseigné dans l'onglet Général. Contactez le support si le problème persiste.
+                            </p>
+                        </div>
+                    @elseif($this->payoutAvailable && $this->walletBalance >= 500)
+                        <form wire:submit="requestPayout" class="mt-6 space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Montant du retrait (FCFA) *</label>
+                                <input type="number" 
+                                       wire:model="payoutAmount" 
+                                       min="500" 
+                                       step="5"
+                                       class="input @error('payoutAmount') border-red-500 @enderror" 
+                                       placeholder="Montant minimum : 500">
+                                <p class="text-xs text-neutral-500 mt-1">Montant minimum : 500 F. Doit être un multiple de 5.</p>
+                                @error('payoutAmount')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            <button type="submit" 
+                                    wire:loading.attr="disabled"
+                                    class="btn px-6 py-3 flex items-center gap-2"
+                                    style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                                <svg wire:loading.remove wire:target="requestPayout" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <svg wire:loading wire:target="requestPayout" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span wire:loading.remove wire:target="requestPayout">Demander un retrait</span>
+                                <span wire:loading wire:target="requestPayout">Demande en cours...</span>
+                            </button>
+                        </form>
+                    @elseif($this->payoutAvailable && $this->walletBalance > 0 && $this->walletBalance < 500)
+                        <p class="mt-4 text-sm text-neutral-600">Solde insuffisant pour un retrait (minimum 500 F).</p>
+                    @elseif(!$this->payoutAvailable)
+                        <p class="mt-4 text-sm text-neutral-600">Les retraits ne sont pas disponibles. Contactez le support.</p>
+                    @endif
+                </div>
+            </div>
         </div>
 
         <!-- Hours Tab -->

@@ -9,6 +9,7 @@ use App\Http\Requests\Restaurant\StoreIngredientRequest;
 use App\Models\Ingredient;
 use App\Models\IngredientCategory;
 use App\Models\Supplier;
+use App\Services\MediaUploader;
 use App\Services\StockManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ use Illuminate\View\View;
 class IngredientController extends Controller
 {
     public function __construct(
-        protected StockManager $stockManager
+        protected StockManager $stockManager,
+        protected MediaUploader $mediaUploader,
     ) {}
 
     /**
@@ -95,7 +97,20 @@ class IngredientController extends Controller
      */
     public function store(StoreIngredientRequest $request): RedirectResponse
     {
-        Ingredient::create($request->validated());
+        $this->authorize('create', Ingredient::class);
+
+        $data = $request->validated();
+        $data['restaurant_id'] = $request->user()->restaurant_id;
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $this->mediaUploader->uploadIngredientImage(
+                $request->file('image'),
+                $data['restaurant_id']
+            );
+        }
+
+        unset($data['image']);
+        Ingredient::create($data);
 
         return back()->with('success', 'Ingrédient créé avec succès.');
     }
@@ -134,13 +149,29 @@ class IngredientController extends Controller
             'default_expiry_days' => ['nullable', 'integer', 'min:1'],
             'notes' => ['nullable', 'string', 'max:500'],
             'is_active' => ['boolean'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'remove_image' => ['nullable', 'boolean'],
         ]);
 
-        $ingredient->update($request->only([
+        $data = $request->only([
             'name', 'sku', 'ingredient_category_id', 'unit', 'current_quantity',
             'min_quantity', 'max_quantity', 'unit_cost', 'track_expiry',
             'default_expiry_days', 'notes', 'is_active',
-        ]));
+        ]);
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $this->mediaUploader->replace(
+                $ingredient->image_path,
+                $request->file('image'),
+                "restaurants/{$ingredient->restaurant_id}/ingredients",
+                ['width' => 400, 'height' => 400, 'maintain_aspect' => false]
+            );
+        } elseif ($request->boolean('remove_image') && $ingredient->image_path) {
+            $this->mediaUploader->delete($ingredient->image_path);
+            $data['image_path'] = null;
+        }
+
+        $ingredient->update($data);
 
         return back()->with('success', 'Ingrédient mis à jour.');
     }
@@ -151,6 +182,10 @@ class IngredientController extends Controller
     public function destroy(Ingredient $ingredient): RedirectResponse
     {
         $this->authorize('delete', $ingredient);
+
+        if ($ingredient->image_path) {
+            $this->mediaUploader->delete($ingredient->image_path);
+        }
 
         $ingredient->delete();
 
@@ -163,6 +198,8 @@ class IngredientController extends Controller
      */
     public function addStock(StockEntryRequest $request, Ingredient $ingredient): RedirectResponse
     {
+        $this->authorize('adjustStock', $ingredient);
+
         $restaurant = $request->user()->restaurant;
         $this->stockManager->forRestaurant($restaurant);
 
@@ -227,6 +264,8 @@ class IngredientController extends Controller
      */
     public function adjust(StockAdjustmentRequest $request, Ingredient $ingredient): RedirectResponse
     {
+        $this->authorize('adjustStock', $ingredient);
+
         $restaurant = $request->user()->restaurant;
         $this->stockManager->forRestaurant($restaurant);
 

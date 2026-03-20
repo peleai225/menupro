@@ -13,6 +13,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\View;
 use App\Observers\ActivityObserver;
+use App\Observers\OrderCommissionObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
 use App\Policies\IngredientPolicy;
@@ -25,7 +26,12 @@ use App\Services\LygosGateway;
 use App\Services\MediaUploader;
 use App\Services\PlanLimiter;
 use App\Services\StockManager;
+use App\Services\WalletService;
+use App\Services\WaveCheckoutService;
+use App\Services\WavePayoutService;
+use App\Services\WaveSignatureService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -54,6 +60,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(LygosGateway::class);
         $this->app->singleton(PlanLimiter::class);
         $this->app->singleton(StockManager::class);
+        $this->app->singleton(WaveSignatureService::class);
+        $this->app->singleton(WaveCheckoutService::class);
+        $this->app->singleton(WavePayoutService::class);
+        $this->app->singleton(WalletService::class);
     }
 
     /**
@@ -61,6 +71,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force APP_URL for correct payment redirect URLs (GeniusPay, Lygos)
+        if (config('app.env') === 'production' && $appUrl = config('app.url')) {
+            URL::forceRootUrl($appUrl);
+        }
+
         // Register policies
         foreach ($this->policies as $model => $policy) {
             Gate::policy($model, $policy);
@@ -105,6 +120,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ($modelsToObserve as $model) {
             $model::observe(ActivityObserver::class);
         }
+
+        Order::observe(OrderCommissionObserver::class);
     }
 
     /**

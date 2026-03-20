@@ -1,16 +1,36 @@
-<div class="min-h-screen bg-neutral-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <a href="{{ route('r.menu', $restaurant->slug) }}" class="inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-700 mb-4">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                Retour au menu
-            </a>
-            <h1 class="text-2xl md:text-3xl font-bold text-neutral-900">Finaliser la commande</h1>
-            <p class="text-neutral-500 mt-2">{{ $restaurant->name }}</p>
+@php
+    $primaryColor = $restaurant->primary_color ?? '#f97316';
+@endphp
+
+<div class="min-h-screen bg-neutral-50">
+    <!-- Header compact avec branding restaurant -->
+    <div class="bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('r.menu', $restaurant->slug) }}" class="flex items-center gap-2 text-neutral-500 hover:text-neutral-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    <span class="hidden sm:inline">Retour au menu</span>
+                </a>
+                <div class="flex-1 flex items-center gap-3 min-w-0">
+                    @if($restaurant->logo_path)
+                        <img src="{{ $restaurant->logo_url }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                    @else
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-sm" style="background-color: {{ $primaryColor }};">
+                            {{ strtoupper(substr($restaurant->name, 0, 1)) }}
+                        </div>
+                    @endif
+                    <div class="min-w-0">
+                        <h1 class="text-lg font-bold text-neutral-900 truncate">{{ $restaurant->name }}</h1>
+                        <p class="text-sm text-neutral-500">Finaliser la commande</p>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <!-- Flash Messages -->
         @if(session('error'))
@@ -28,27 +48,30 @@
                     <div class="grid grid-cols-3 gap-4">
                         <button type="button" 
                                 wire:click="$set('order_type', 'dine_in')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'dine_in' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'dine_in' ? 'text-primary-600' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'dine_in' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                @if($order_type === 'dine_in') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
+                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'dine_in' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'dine_in' ? 'text-primary-700' : 'text-neutral-700' }}">Sur place</span>
+                            <span class="font-medium {{ $order_type === 'dine_in' ? '' : 'text-neutral-700' }}" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>Sur place</span>
                         </button>
                         <button type="button"
                                 wire:click="$set('order_type', 'takeaway')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'takeaway' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'takeaway' ? 'text-primary-600' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'takeaway' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                @if($order_type === 'takeaway') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
+                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'takeaway' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'takeaway' ? 'text-primary-700' : 'text-neutral-700' }}">À emporter</span>
+                            <span class="font-medium {{ $order_type === 'takeaway' ? '' : 'text-neutral-700' }}" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>À emporter</span>
                         </button>
                         <button type="button"
                                 wire:click="$set('order_type', 'delivery')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'delivery' ? 'text-primary-600' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'delivery' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                @if($order_type === 'delivery') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
+                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'delivery' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'delivery' ? 'text-primary-700' : 'text-neutral-700' }}">Livraison</span>
+                            <span class="font-medium {{ $order_type === 'delivery' ? '' : 'text-neutral-700' }}" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>Livraison</span>
                         </button>
                     </div>
                 </div>
@@ -651,7 +674,7 @@
 
             <!-- Order Summary -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl p-8 shadow-sm sticky top-4">
+                <div class="bg-white rounded-2xl p-8 shadow-sm sticky top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
                     <h2 class="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
                         <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -731,20 +754,66 @@
                         @endif
                     </div>
 
-                    <!-- Payment Method (when both online and cash available) -->
-                    @if($this->onlinePaymentAvailable && $this->cashOnDeliveryAvailable)
+                    <!-- Payment Method -->
+                    @if($this->fusionpayPaymentAvailable || $this->waveCheckoutAvailable || $this->onlinePaymentAvailable || $this->menupoHubPaymentAvailable || $this->cashOnDeliveryAvailable)
                         <div class="mb-6 pb-6 border-b border-neutral-200">
                             <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
                             <div class="space-y-2">
-                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ in_array($payment_method, ['lygos', 'geniuspay']) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                    <input type="radio" wire:model="payment_method" value="{{ $this->onlinePaymentMethod }}" class="text-primary-500 focus:ring-primary-500">
-                                    <span class="font-medium">Paiement en ligne</span>
-                                    <span class="text-xs text-neutral-500">(Wave, Orange Money, MTN)</span>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'cash_on_delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                    <input type="radio" wire:model="payment_method" value="cash_on_delivery" class="text-primary-500 focus:ring-primary-500">
-                                    <span class="font-medium">Paiement à la livraison</span>
-                                </label>
+                                {{-- Wave Checkout direct — le restaurant reçoit l'argent instantanément --}}
+                                @if($this->waveCheckoutAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'wave_checkout' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="wave_checkout" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="wave" />
+                                        <div class="flex-1">
+                                            <span class="font-medium">Wave</span>
+                                            <span class="ml-2 text-xs px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">Paiement direct</span>
+                                        </div>
+                                        <span class="text-xs text-neutral-500">Rapide & sécurisé</span>
+                                    </label>
+                                @endif
+                                @if($this->fusionpayPaymentAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'fusionpay' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="fusionpay" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="fusionpay" />
+                                        <span class="font-medium">FusionPay</span>
+                                        <span class="text-xs text-neutral-500">(Wave, Orange, MTN)</span>
+                                    </label>
+                                @endif
+                                @if($this->onlinePaymentAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ in_array($payment_method, ['lygos', 'geniuspay']) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="{{ $this->onlinePaymentMethod }}" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="online" />
+                                        <span class="font-medium">Paiement en ligne</span>
+                                        <span class="text-xs text-neutral-500">(Lygos / GeniusPay)</span>
+                                    </label>
+                                @endif
+                                @if($this->menupoHubPaymentAvailable)
+                                    @foreach($this->menupoHubMethods as $method)
+                                        <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === $method ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                            <input type="radio" wire:model="payment_method" value="{{ $method }}" class="text-primary-500 focus:ring-primary-500">
+                                            <x-payment-logo :method="$method" />
+                                            <span class="font-medium">
+                                                @if($method === 'wave')
+                                                    <span class="inline-flex items-center gap-1.5">Wave</span>
+                                                @elseif($method === 'orange')
+                                                    <span class="inline-flex items-center gap-1.5">Orange Money</span>
+                                                @elseif($method === 'mtn')
+                                                    <span class="inline-flex items-center gap-1.5">MTN MoMo</span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5">Moov Money</span>
+                                                @endif
+                                            </span>
+                                            <span class="text-xs text-neutral-500">(Paiement direct · PC et mobile)</span>
+                                        </label>
+                                    @endforeach
+                                @endif
+                                @if($this->cashOnDeliveryAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'cash_on_delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="cash_on_delivery" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="cash_on_delivery" />
+                                        <span class="font-medium">Paiement à la caisse</span>
+                                    </label>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -806,14 +875,15 @@
                         @endif
                         <div class="flex justify-between items-center text-xl font-bold text-neutral-900 pt-4 border-t-2 border-neutral-300">
                             <span>Total</span>
-                            <span class="text-primary-600">{{ number_format($this->total, 0, ',', ' ') }} F</span>
+                            <span style="color: {{ $primaryColor }};">{{ number_format($this->total, 0, ',', ' ') }} F</span>
                         </div>
                     </div>
 
                     <!-- Submit -->
-                    <button wire:click="placeOrder" 
+                    <button wire:click="placeOrder"
                             wire:loading.attr="disabled"
-                            class="w-full mt-6 btn-primary py-4 disabled:opacity-50">
+                            class="w-full mt-6 py-4 text-white font-bold rounded-xl disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
+                            style="background-color: {{ $primaryColor }}; box-shadow: 0 6px 20px {{ $primaryColor }}50;">
                         <span wire:loading.remove wire:target="placeOrder">
                             Passer la commande
                         </span>

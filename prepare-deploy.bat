@@ -47,15 +47,16 @@ echo ============================================
 echo   Préparation terminée.
 echo ============================================
 echo.
-echo Prochaine étape : créer une archive ou uploader
-echo les fichiers en EXCLUANT (voir docs/PREPARATION_HEBERGEMENT.md) :
-echo   - .env
-echo   - node_modules
-echo   - .git
+echo Prochaine étape : uploader via FTP (voir docs/DEPLOIEMENT_FTP.md)
+echo.
+echo IMPORTANT - Ne pas écraser sur le serveur :
+echo   - .env (garder la config production)
+echo   - storage/app/public/ (images uploadées)
+echo.
+echo Exclure de l'upload : .env, node_modules, .git
 echo.
 echo Sur le serveur (public_html + Menupro) : créer le lien
 echo   public_html/storage -^> ../Menupro/storage/app/public
-echo pour que les images uploadées s'affichent (voir doc section 6).
 echo.
 pause
     

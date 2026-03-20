@@ -1,17 +1,17 @@
 <x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'">
-    <div x-data="sidebar()" class="min-h-screen bg-neutral-950">
+    <div x-data="sidebar()" class="min-h-screen bg-neutral-50">
         <!-- Sidebar -->
         <aside :class="expanded ? 'w-64' : 'w-20'" 
-               class="fixed left-0 top-0 h-full bg-neutral-900 border-r border-neutral-800 z-40 transition-all duration-300 hidden lg:block">
+               class="fixed left-0 top-0 h-full bg-white border-r border-neutral-200 z-40 transition-all duration-300 hidden lg:block">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
-                <div class="h-16 flex items-center justify-center border-b border-neutral-800 px-3">
+                <div class="h-16 flex items-center justify-center border-b border-neutral-200 px-3">
                     <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-2">
                         <img src="{{ asset('images/logo-menupro.png') }}" 
                              alt="MenuPro" 
                              class="h-8 w-auto object-contain transition-all duration-300"
                              :class="expanded ? 'h-8' : 'h-7'">
-                        <span x-show="expanded" x-transition class="text-xs text-neutral-500 font-medium bg-neutral-800 px-2 py-0.5 rounded">
+                        <span x-show="expanded" x-transition class="text-xs text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">
                             Admin
                         </span>
                     </a>
@@ -30,7 +30,7 @@
 
                     <!-- Restaurants Section -->
                     <div class="pt-4">
-                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                             Gestion
                         </span>
                     </div>
@@ -79,7 +79,7 @@
 
                     <!-- Analytics Section -->
                     <div class="pt-4">
-                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                             Analytics
                         </span>
                     </div>
@@ -110,7 +110,7 @@
 
                     <!-- Communication Section -->
                     <div class="pt-4">
-                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                             Communication
                         </span>
                     </div>
@@ -125,7 +125,7 @@
 
                     <!-- Settings Section -->
                     <div class="pt-4">
-                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                             Système
                         </span>
                     </div>
@@ -141,24 +141,24 @@
                 </nav>
 
                 <!-- System Status -->
-                <div x-show="expanded" x-transition class="p-4 border-t border-neutral-800">
-                    <div class="bg-neutral-800/50 rounded-xl p-4">
-                        <div class="flex items-center gap-2 text-secondary-400 text-sm font-medium mb-2">
-                            <span class="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></span>
+                <div x-show="expanded" x-transition class="p-4 border-t border-neutral-200">
+                    <div class="bg-primary-50 rounded-xl p-4 border border-primary-100">
+                        <div class="flex items-center gap-2 text-primary-700 text-sm font-medium mb-2">
+                            <span class="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
                             Système opérationnel
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-xs text-neutral-500">
-                            <div>API: <span class="text-secondary-400">OK</span></div>
-                            <div>DB: <span class="text-secondary-400">OK</span></div>
-                            <div>Cache: <span class="text-secondary-400">OK</span></div>
-                            <div>Queue: <span class="text-secondary-400">OK</span></div>
+                            <div>API: <span class="text-primary-700">OK</span></div>
+                            <div>DB: <span class="text-primary-700">OK</span></div>
+                            <div>Cache: <span class="text-primary-700">OK</span></div>
+                            <div>Queue: <span class="text-primary-700">OK</span></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Toggle Button -->
                 <button @click="toggle()" 
-                        class="hidden lg:flex items-center justify-center h-12 border-t border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors">
+                        class="hidden lg:flex items-center justify-center h-12 border-t border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors">
                     <svg :class="expanded ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
@@ -170,11 +170,11 @@
         <div x-show="mobileOpen" x-transition:enter="transition-opacity ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="mobileOpen = false" class="fixed inset-0 bg-black/50 z-30 lg:hidden" x-cloak aria-hidden="true"></div>
 
         <!-- Sidebar mobile -->
-        <aside x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed left-0 top-0 h-full w-64 bg-neutral-900 border-r border-neutral-800 z-40 lg:hidden flex flex-col" x-cloak>
-            <div class="h-16 flex items-center justify-center border-b border-neutral-800 px-4">
+        <aside x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed left-0 top-0 h-full w-64 bg-white border-r border-neutral-200 z-40 lg:hidden flex flex-col" x-cloak>
+            <div class="h-16 flex items-center justify-center border-b border-neutral-200 px-4">
                 <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-2" @click="mobileOpen = false">
                     <img src="{{ asset('images/logo-menupro.png') }}" alt="MenuPro" class="h-8 w-auto object-contain">
-                    <span class="text-xs text-neutral-500 font-medium bg-neutral-800 px-2 py-0.5 rounded">Admin</span>
+                    <span class="text-xs text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">Admin</span>
                 </a>
             </div>
             <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" @click="mobileOpen = false">
@@ -193,10 +193,10 @@
         <!-- Main Content -->
         <div :class="expanded ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 ml-0">
             <!-- Top Bar -->
-            <header class="sticky top-0 z-20 bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-800">
+            <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
                 <div class="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-8 gap-2">
                     <!-- Mobile Menu Button -->
-                    <button @click="toggleMobile()" class="lg:hidden p-2.5 -ml-1 rounded-lg hover:bg-neutral-800 text-neutral-400 min-h-[44px] min-w-[44px] flex items-center justify-center">
+                    <button @click="toggleMobile()" class="lg:hidden p-2.5 -ml-1 rounded-lg hover:bg-neutral-100 text-neutral-600 min-h-[44px] min-w-[44px] flex items-center justify-center">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
@@ -209,7 +209,7 @@
 
                     <!-- Page Title (visible mobile + desktop) -->
                     <div class="flex-1 min-w-0">
-                        <h1 class="text-base sm:text-xl font-bold text-white truncate">{{ $title ?? 'Administration' }}</h1>
+                        <h1 class="text-base sm:text-xl font-bold text-neutral-900 truncate">{{ $title ?? 'Administration' }}</h1>
                     </div>
 
                     <!-- Right Section -->
@@ -218,28 +218,28 @@
                         <div class="hidden md:block relative">
                             <input type="text" 
                                    placeholder="Rechercher..." 
-                                   class="w-64 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   class="w-64 px-4 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
 
                         <!-- Notifications -->
                         <div class="relative" x-data="notificationBell()" @click.outside="open = false">
-                            <button type="button" @click="open = !open; if(open) loadNotifications()" class="relative p-2 rounded-lg hover:bg-neutral-800 text-neutral-400">
+                            <button type="button" @click="open = !open; if(open) loadNotifications()" class="relative p-2 rounded-lg hover:bg-neutral-100 text-neutral-600">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                                 </svg>
                                 <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-accent-500 text-white text-xs font-bold rounded-full" x-cloak></span>
                             </button>
-                            <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden bg-neutral-800 rounded-xl shadow-xl border border-neutral-700 flex flex-col z-50">
-                                <div class="px-4 py-3 border-b border-neutral-700 flex items-center justify-between">
-                                    <span class="font-semibold text-white">Notifications</span>
-                                    <span x-show="unreadCount > 0" class="text-xs text-neutral-400" x-text="unreadCount + ' non lue(s)'"></span>
+                            <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden bg-white rounded-xl shadow-xl border border-neutral-200 flex flex-col z-50">
+                                <div class="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
+                                    <span class="font-semibold text-neutral-900">Notifications</span>
+                                    <span x-show="unreadCount > 0" class="text-xs text-neutral-500" x-text="unreadCount + ' non lue(s)'"></span>
                                 </div>
                                 <div class="overflow-y-auto flex-1">
                                     <template x-if="loading">
-                                        <div class="p-4 text-center text-neutral-400 text-sm">Chargement…</div>
+                                        <div class="p-4 text-center text-neutral-500 text-sm">Chargement…</div>
                                     </template>
                                     <template x-if="!loading && items.length === 0">
                                         <div class="p-4 text-center text-neutral-500 text-sm">Aucune notification</div>
@@ -248,7 +248,7 @@
                                         <ul class="py-2">
                                             <template x-for="n in items" :key="n.id">
                                                 <li>
-                                                    <a :href="n.url" class="block px-4 py-3 hover:bg-neutral-700/50 text-left border-b border-neutral-700/50 last:border-0" :class="n.read_at ? 'text-neutral-400' : 'text-white bg-neutral-700/30'">
+                                                    <a :href="n.url" class="block px-4 py-3 hover:bg-neutral-50 text-left border-b border-neutral-100 last:border-0" :class="n.read_at ? 'text-neutral-500' : 'text-neutral-900 bg-primary-50/60'">
                                                         <p class="text-sm" x-text="n.message"></p>
                                                         <p class="text-xs text-neutral-500 mt-0.5" x-text="formatDate(n.created_at)"></p>
                                                     </a>
@@ -262,14 +262,14 @@
 
                         <!-- Profile Dropdown -->
                         <div x-data="dropdown()" class="relative">
-                            <button @click="toggle()" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800">
+                            <button @click="toggle()" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100">
                                 <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-white font-bold">
                                     {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                                 </div>
-                                <span class="hidden md:block text-sm font-medium text-neutral-300">
+                                <span class="hidden md:block text-sm font-medium text-neutral-800">
                                     {{ auth()->user()->name ?? 'Admin' }}
                                 </span>
-                                <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </button>
@@ -277,22 +277,22 @@
                             <div x-show="open" 
                                  x-transition
                                  @click.outside="close()"
-                                 class="absolute right-0 mt-2 w-56 bg-neutral-800 rounded-xl shadow-elevated border border-neutral-700 py-2"
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-elevated border border-neutral-200 py-2"
                                  x-cloak>
-                                <div class="px-4 py-2 border-b border-neutral-700">
-                                    <p class="font-medium text-white">{{ auth()->user()->name ?? 'Admin' }}</p>
-                                    <p class="text-sm text-neutral-400">Super Administrateur</p>
+                                <div class="px-4 py-2 border-b border-neutral-100">
+                                    <p class="font-medium text-neutral-900">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                    <p class="text-sm text-neutral-500">Super Administrateur</p>
                                 </div>
-                                <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2 text-neutral-300 hover:bg-neutral-700">
+                                <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2 text-neutral-700 hover:bg-neutral-50">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                     </svg>
                                     Mon profil
                                 </a>
-                                <hr class="my-2 border-neutral-700">
+                                <hr class="my-2 border-neutral-100">
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="flex items-center gap-3 px-4 py-2 text-red-400 hover:bg-neutral-700 w-full">
+                                    <button type="submit" class="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 w-full">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                         </svg>

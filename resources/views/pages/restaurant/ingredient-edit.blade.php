@@ -29,11 +29,49 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('restaurant.stock.ingredients.update', $ingredient) }}" class="card p-6 max-w-2xl">
+    <form method="POST" action="{{ route('restaurant.stock.ingredients.update', $ingredient) }}" class="card p-6 max-w-2xl" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
         <div class="space-y-6">
+            <!-- Image -->
+            <div x-data="{
+                preview: '{{ $ingredient->image_url }}',
+                removeImage: false,
+                handleFile(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.preview = URL.createObjectURL(file);
+                        this.removeImage = false;
+                    }
+                }
+            }">
+                <label class="block text-sm font-medium text-neutral-700 mb-2">Photo de l'ingrédient</label>
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 rounded-xl overflow-hidden border-2 border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50 flex-shrink-0">
+                        <template x-if="preview && !removeImage">
+                            <img :src="preview" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!preview || removeImage">
+                            <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </template>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <input type="file" name="image" accept="image/*" @change="handleFile($event)"
+                               class="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                        <p class="text-xs text-neutral-400">JPG, PNG ou WebP. Max 2 Mo. Redimensionné en 400×400.</p>
+                        @if($ingredient->image_path)
+                            <label class="flex items-center gap-2 cursor-pointer text-sm text-red-600" @click="removeImage = !removeImage; preview = removeImage ? null : '{{ $ingredient->image_url }}'">
+                                <input type="checkbox" name="remove_image" value="1" x-model="removeImage" class="w-4 h-4 text-red-500 rounded">
+                                Supprimer la photo actuelle
+                            </label>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-neutral-700 mb-2">Nom *</label>
                 <input type="text" name="name" required class="input" value="{{ old('name', $ingredient->name) }}" placeholder="Ex: Tomates">

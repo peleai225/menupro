@@ -5,6 +5,7 @@ namespace App\Enums;
 enum PaymentStatus: string
 {
     case PENDING = 'pending';
+    case PENDING_VERIFICATION = 'pending_verification';
     case PROCESSING = 'processing';
     case COMPLETED = 'completed';
     case FAILED = 'failed';
@@ -14,6 +15,7 @@ enum PaymentStatus: string
     {
         return match ($this) {
             self::PENDING => 'En attente',
+            self::PENDING_VERIFICATION => 'En attente de vérification',
             self::PROCESSING => 'En cours',
             self::COMPLETED => 'Complété',
             self::FAILED => 'Échoué',
@@ -25,6 +27,7 @@ enum PaymentStatus: string
     {
         return match ($this) {
             self::PENDING => 'warning',
+            self::PENDING_VERIFICATION => 'warning',
             self::PROCESSING => 'info',
             self::COMPLETED => 'success',
             self::FAILED => 'error',
@@ -35,6 +38,11 @@ enum PaymentStatus: string
     public function isSuccessful(): bool
     {
         return $this === self::COMPLETED;
+    }
+
+    public function isPendingVerification(): bool
+    {
+        return $this === self::PENDING_VERIFICATION;
     }
 
     public static function values(): array

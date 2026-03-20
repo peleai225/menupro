@@ -23,8 +23,12 @@ use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\RestaurantController;
 use App\Http\Controllers\SuperAdmin\StatsController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\Webhook\FusionPayPaymentWebhook;
+use App\Http\Controllers\Webhook\WaveWebhookController;
+use App\Http\Controllers\Webhook\FusionPayPayoutWebhook;
 use App\Http\Controllers\Webhook\GeniusPayWebhookController;
 use App\Http\Controllers\Webhook\LygosWebhookController;
+use App\Http\Controllers\Webhook\MenuProHubWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -121,26 +125,28 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::prefix('dashboard')
     ->name('restaurant.')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'set.restaurant.scope'])
     ->group(function () {
-        // Dashboard (Livewire)
+        // Dashboard (Livewire) - tous
         Route::get('/', \App\Livewire\Restaurant\Dashboard::class)->name('dashboard');
         
-        // Categories (Livewire)
-        Route::get('categories', \App\Livewire\Restaurant\Categories::class)->name('categories.index');
-        Route::resource('categories', CategoryController::class)->except(['index']);
-        Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
+        // Categories - admin uniquement
+        Route::middleware('restaurant.admin')->group(function () {
+            Route::get('categories', \App\Livewire\Restaurant\Categories::class)->name('categories.index');
+            Route::resource('categories', CategoryController::class)->except(['index']);
+            Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
+        });
         
-        // Dishes (Livewire)
+        // Dishes - plats index et modifier pour tous, create/destroy/reorder/featured admin
         Route::get('plats', \App\Livewire\Restaurant\Dishes::class)->name('plats.index');
-        Route::get('plats/nouveau', \App\Livewire\Restaurant\DishForm::class)->name('plats.create');
+        Route::get('plats/nouveau', \App\Livewire\Restaurant\DishForm::class)->name('plats.create')->middleware('restaurant.admin');
         Route::get('plats/{dish}/modifier', \App\Livewire\Restaurant\DishForm::class)->name('plats.edit');
-        Route::delete('plats/{dish}', [DishController::class, 'destroy'])->name('plats.destroy');
-        Route::post('plats/reorder', [DishController::class, 'reorder'])->name('dishes.reorder');
+        Route::delete('plats/{dish}', [DishController::class, 'destroy'])->name('plats.destroy')->middleware('restaurant.admin');
+        Route::post('plats/reorder', [DishController::class, 'reorder'])->name('dishes.reorder')->middleware('restaurant.admin');
         Route::patch('plats/{dish}/toggle', [DishController::class, 'toggleAvailability'])->name('dishes.toggle');
-        Route::patch('plats/{dish}/featured', [DishController::class, 'toggleFeatured'])->name('dishes.featured');
+        Route::patch('plats/{dish}/featured', [DishController::class, 'toggleFeatured'])->name('dishes.featured')->middleware('restaurant.admin');
         
-        // Orders (Livewire)
+        // Orders (Livewire) - tous (employés gèrent les commandes)
         Route::get('commandes', \App\Livewire\Restaurant\Orders::class)->name('orders');
         Route::get('commandes/board', [OrderController::class, 'board'])->name('orders.board');
         Route::get('commandes/kanban', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'index'])->name('orders.kanban');
@@ -164,72 +170,72 @@ Route::prefix('dashboard')
             Route::delete('items/{item}', [\App\Http\Controllers\Restaurant\OrderModificationController::class, 'removeItem'])->name('items.remove');
             Route::patch('items/{item}', [\App\Http\Controllers\Restaurant\OrderModificationController::class, 'updateItem'])->name('items.update');
         });
+
+        // Customers - admin uniquement
+        Route::middleware('restaurant.admin')->group(function () {
+            Route::get('clients', [CustomerController::class, 'index'])->name('customers');
+            Route::get('clients/export', [CustomerController::class, 'export'])->name('customers.export');
+            Route::get('clients/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+        });
         
-        // Customers
-        Route::get('clients', [CustomerController::class, 'index'])->name('customers');
-        Route::get('clients/export', [CustomerController::class, 'export'])->name('customers.export');
-        Route::get('clients/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+        // Subscription - admin uniquement
+        Route::middleware('restaurant.admin')->group(function () {
+            Route::get('abonnement', [SubscriptionController::class, 'index'])->name('subscription');
+            Route::get('abonnement/changer', [SubscriptionController::class, 'plans'])->name('subscription.plans');
+            Route::post('abonnement/changer', [SubscriptionController::class, 'change'])->name('subscription.change');
+            Route::post('abonnement/{subscription}/reprendre', [SubscriptionController::class, 'retryPayment'])->name('subscription.retry');
+            Route::get('abonnement/factures', [SubscriptionController::class, 'invoices'])->name('subscription.invoices');
+            Route::post('abonnement/convert-trial', [SubscriptionController::class, 'convertTrial'])->name('subscription.convertTrial');
+            Route::get('abonnement/{subscription}/success', [SubscriptionController::class, 'success'])->name('subscription.success');
+            Route::post('abonnement/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+        });
         
-        // Subscription
-        Route::get('abonnement', [SubscriptionController::class, 'index'])->name('subscription');
-        Route::get('abonnement/changer', [SubscriptionController::class, 'plans'])->name('subscription.plans');
-        Route::post('abonnement/changer', [SubscriptionController::class, 'change'])->name('subscription.change');
-        Route::post('abonnement/{subscription}/reprendre', [SubscriptionController::class, 'retryPayment'])->name('subscription.retry');
-        Route::get('abonnement/factures', [SubscriptionController::class, 'invoices'])->name('subscription.invoices');
-        Route::post('abonnement/convert-trial', [SubscriptionController::class, 'convertTrial'])->name('subscription.convertTrial');
-        Route::get('abonnement/{subscription}/success', [SubscriptionController::class, 'success'])->name('subscription.success');
-        Route::get('abonnement/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
-        
-        // Settings (Livewire)
-        Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings');
+        // Settings (Livewire) - admin uniquement
+        Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings')->middleware('restaurant.admin');
         
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
         
-        // Promo Codes (Livewire)
-        Route::get('codes-promo', \App\Livewire\Restaurant\PromoCodes::class)->name('promo-codes');
-        
-        // Analytics (Livewire)
-        Route::get('statistiques', \App\Livewire\Restaurant\Analytics::class)->name('analytics');
-        
-        // Reports (Livewire)
-        Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
-        
-        // Reviews (Livewire)
-        Route::get('avis', \App\Livewire\Restaurant\Reviews::class)->name('reviews');
-        
-        // Taxes & Fees (Livewire)
-        Route::get('taxes-frais', \App\Livewire\Restaurant\TaxesAndFees::class)->name('taxes-fees');
+        // Promo Codes, Analytics, Reports, Reviews, Taxes - admin uniquement
+        Route::middleware('restaurant.admin')->group(function () {
+            Route::get('codes-promo', \App\Livewire\Restaurant\PromoCodes::class)->name('promo-codes');
+            Route::get('statistiques', \App\Livewire\Restaurant\Analytics::class)->name('analytics');
+            Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
+            Route::get('avis', \App\Livewire\Restaurant\Reviews::class)->name('reviews');
+            Route::get('taxes-frais', \App\Livewire\Restaurant\TaxesAndFees::class)->name('taxes-fees');
+        });
         
         // Stock Management
         Route::prefix('stock')->name('stock.')->group(function () {
-            // Ingredient Categories
-            Route::resource('categories-ingredients', IngredientCategoryController::class)
-                ->parameters(['categories-ingredients' => 'ingredientCategory']);
+            // Ingredient Categories & Suppliers & Rapport - admin uniquement
+            Route::middleware('restaurant.admin')->group(function () {
+                Route::resource('categories-ingredients', IngredientCategoryController::class)
+                    ->parameters(['categories-ingredients' => 'ingredientCategory']);
+                Route::resource('fournisseurs', SupplierController::class)->parameters(['fournisseurs' => 'supplier']);
+                Route::post('fournisseurs/{supplier}/link-ingredient', [SupplierController::class, 'linkIngredient'])->name('suppliers.link-ingredient');
+                Route::delete('fournisseurs/{supplier}/ingredients/{ingredient}', [SupplierController::class, 'unlinkIngredient'])->name('suppliers.unlink-ingredient');
+                Route::get('rapport', [IngredientController::class, 'report'])->name('report');
+            });
             
-            // Ingredients
+            // Ingredients - tous (policies gèrent create/update/delete)
             Route::resource('ingredients', IngredientController::class);
             Route::post('ingredients/{ingredient}/entry', [IngredientController::class, 'addStock'])->name('ingredients.entry');
             Route::post('ingredients/{ingredient}/exit', [IngredientController::class, 'removeStock'])->name('ingredients.exit');
             Route::post('ingredients/{ingredient}/adjustment', [IngredientController::class, 'adjust'])->name('ingredients.adjustment');
             Route::post('ingredients/{ingredient}/waste', [IngredientController::class, 'recordWaste'])->name('ingredients.waste');
             Route::get('ingredients/{ingredient}/movements', [IngredientController::class, 'movements'])->name('ingredients.movements');
-            
-            // Suppliers
-            Route::resource('fournisseurs', SupplierController::class)->parameters(['fournisseurs' => 'supplier']);
-            
-            // Stock Reports
-            Route::get('rapport', [IngredientController::class, 'report'])->name('report');
             Route::get('alertes', [IngredientController::class, 'alerts'])->name('alerts');
         });
         
-        // Team Management (always accessible, upgrade prompt shown if not available)
-        Route::get('equipe', \App\Livewire\Restaurant\Team::class)->name('team');
+        // Team Management - admin uniquement
+        Route::get('equipe', \App\Livewire\Restaurant\Team::class)->name('team')->middleware('restaurant.admin');
         
-        // Reservations
-        Route::get('reservations', [\App\Http\Controllers\Restaurant\ReservationController::class, 'index'])->name('reservations.index');
-        Route::get('reservations/{reservation}', [\App\Http\Controllers\Restaurant\ReservationController::class, 'show'])->name('reservations.show');
-        Route::patch('reservations/{reservation}/status', [\App\Http\Controllers\Restaurant\ReservationController::class, 'updateStatus'])->name('reservations.status');
+        // Reservations - admin uniquement
+        Route::middleware('restaurant.admin')->group(function () {
+            Route::get('reservations', [\App\Http\Controllers\Restaurant\ReservationController::class, 'index'])->name('reservations.index');
+            Route::get('reservations/{reservation}', [\App\Http\Controllers\Restaurant\ReservationController::class, 'show'])->name('reservations.show');
+            Route::patch('reservations/{reservation}/status', [\App\Http\Controllers\Restaurant\ReservationController::class, 'updateStatus'])->name('reservations.status');
+        });
     });
 
 /*
@@ -270,6 +276,7 @@ Route::prefix('admin')
         });
         
         // Restaurants Management
+        Route::get('restaurants/export', [RestaurantController::class, 'export'])->name('super-admin.restaurants.export');
         Route::resource('restaurants', RestaurantController::class)->only(['index', 'show', 'update', 'destroy']);
         Route::post('restaurants/{restaurant}/approve', [RestaurantController::class, 'approve'])->name('restaurants.approve');
         Route::post('restaurants/{restaurant}/reject', [RestaurantController::class, 'reject'])->name('restaurants.reject');
@@ -279,6 +286,7 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/extend-subscription', [RestaurantController::class, 'extendSubscription'])->name('restaurants.extend-subscription');
         Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
+        Route::post('restaurants/{restaurant}/add-commission', [RestaurantController::class, 'addCommission'])->name('restaurants.add-commission');
         
         // Subscriptions Management
         Route::get('abonnements', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'index'])->name('subscriptions.index');
@@ -384,28 +392,9 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/lygos', [LygosWebhookController::class, 'handle'])->name('webhooks.lygos');
     Route::post('/geniuspay', [GeniusPayWebhookController::class, 'handle'])->name('webhooks.geniuspay');
+    Route::post('/menupo-hub/verify-payment', [MenuProHubWebhookController::class, 'verifyPayment'])->name('webhooks.menupo-hub.verify');
+    Route::post('/wave/checkout', [WaveWebhookController::class, 'handleCheckout'])->name('webhooks.wave.checkout');
+    Route::post('/fusionpay/payment', FusionPayPaymentWebhook::class)->name('webhooks.fusionpay.payment');
+    Route::post('/fusionpay/payout', FusionPayPayoutWebhook::class)->name('webhooks.fusionpay.payout');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Test Route (DEV ONLY - Remove in production)
-|--------------------------------------------------------------------------
-*/
-Route::get('/test-notification', function() {
-    $user = auth()->user();
-    if (!$user) {
-        return 'Please login first';
-    }
-    
-    // Create a fake notification
-    $user->notify(new \App\Notifications\NewOrderNotification(
-        \App\Models\Order::first() ?? new \App\Models\Order([
-            'reference' => 'TEST-' . now()->format('His'),
-            'customer_name' => 'Test Client',
-            'total' => 25.50,
-            'type' => \App\Enums\OrderType::DELIVERY,
-        ])
-    ));
-    
-    return 'Notification sent to ' . $user->email . '. Check your dashboard notifications!';
-})->middleware('auth')->name('test.notification');

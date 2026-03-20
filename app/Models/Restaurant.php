@@ -72,6 +72,12 @@ class Restaurant extends Model
         'delivery_zones',
         'cash_on_delivery',
         'tagline',
+        'menupo_hub_enabled',
+        'wave_merchant_id',
+        'orange_money_number',
+        'mtn_money_number',
+        'moov_money_number',
+        'commission_wallet_balance',
     ];
 
     protected $casts = [
@@ -96,6 +102,8 @@ class Restaurant extends Model
         'verified_at' => 'datetime',
         'delivery_enabled' => 'boolean',
         'cash_on_delivery' => 'boolean',
+        'menupo_hub_enabled' => 'boolean',
+        'commission_wallet_balance' => 'decimal:2',
     ];
 
     protected $hidden = [
@@ -202,6 +210,16 @@ class Restaurant extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function commissionLogs(): HasMany
+    {
+        return $this->hasMany(CommissionLog::class);
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(RestaurantWallet::class);
     }
 
     // =========================================================================
