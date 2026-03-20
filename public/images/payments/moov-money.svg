@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <rect width="120" height="120" rx="20" fill="#0066B3"/>
+  <text x="60" y="45" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="20" fill="#FFFFFF">Moov</text>
+  <text x="60" y="72" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="18" fill="#8DC63F">Money</text>
+  <rect x="30" y="82" width="60" height="4" rx="2" fill="#8DC63F" opacity="0.6"/>
+</svg>

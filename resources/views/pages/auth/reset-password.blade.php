@@ -1,14 +1,15 @@
 <x-layouts.auth title="Réinitialiser le mot de passe">
     <div class="animate-fade-in">
         <!-- Header -->
-        <div class="text-center lg:text-left mb-8">
-            <div class="inline-flex items-center justify-center w-14 h-14 bg-primary-100 rounded-2xl mb-4">
-                <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-center lg:text-left mb-8 sm:mb-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-600 rounded-full text-xs font-semibold mb-4 tracking-wide uppercase">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                 </svg>
+                Sécurité
             </div>
-            <h1 class="text-3xl font-bold text-neutral-900">Nouveau mot de passe</h1>
-            <p class="text-neutral-500 mt-2">Choisissez un mot de passe sécurisé pour votre compte.</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">Nouveau mot de passe</h1>
+            <p class="text-neutral-500 mt-2 text-sm sm:text-base">Choisissez un mot de passe sécurisé pour votre compte.</p>
         </div>
 
         <form method="POST" action="{{ route('password.update') }}" class="space-y-5" x-data="{ loading: false, showPassword: false, showPasswordConfirmation: false }" @submit="loading = true">
@@ -18,11 +19,11 @@
 
             <!-- Email -->
             <div>
-                <label for="email" class="block text-sm font-medium text-neutral-700 mb-2">
+                <label for="email" class="block text-sm font-semibold text-neutral-700 mb-2">
                     Adresse email
                 </label>
-                <div class="relative flex items-center">
-                    <span class="absolute left-4 text-neutral-400 pointer-events-none">
+                <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
@@ -36,7 +37,7 @@
                         required
                         autofocus
                         autocomplete="username"
-                        class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('email') border-red-500 focus:ring-red-500 @enderror"
+                        class="w-full h-13 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white @error('email') border-red-400 bg-red-50 focus:ring-red-500/20 focus:border-red-500 @enderror"
                     >
                 </div>
                 @error('email')
@@ -51,11 +52,11 @@
 
             <!-- Password -->
             <div>
-                <label for="password" class="block text-sm font-medium text-neutral-700 mb-2">
+                <label for="password" class="block text-sm font-semibold text-neutral-700 mb-2">
                     Nouveau mot de passe
                 </label>
-                <div class="relative flex items-center">
-                    <span class="absolute left-4 text-neutral-400 pointer-events-none">
+                <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
@@ -67,12 +68,12 @@
                         placeholder="••••••••"
                         required
                         autocomplete="new-password"
-                        class="w-full h-12 pl-12 pr-12 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('password') border-red-500 focus:ring-red-500 @enderror"
+                        class="w-full h-13 pl-12 pr-12 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white @error('password') border-red-400 bg-red-50 focus:ring-red-500/20 focus:border-red-500 @enderror"
                     >
                     <button
                         type="button"
                         @click="showPassword = !showPassword"
-                        class="absolute right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                         :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
                     >
                         <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,11 +98,11 @@
 
             <!-- Password Confirmation -->
             <div>
-                <label for="password_confirmation" class="block text-sm font-medium text-neutral-700 mb-2">
+                <label for="password_confirmation" class="block text-sm font-semibold text-neutral-700 mb-2">
                     Confirmer le mot de passe
                 </label>
-                <div class="relative flex items-center">
-                    <span class="absolute left-4 text-neutral-400 pointer-events-none">
+                <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-primary-500 transition-colors pointer-events-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -113,12 +114,12 @@
                         placeholder="••••••••"
                         required
                         autocomplete="new-password"
-                        class="w-full h-12 pl-12 pr-12 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        class="w-full h-13 pl-12 pr-12 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                     >
                     <button
                         type="button"
                         @click="showPasswordConfirmation = !showPasswordConfirmation"
-                        class="absolute right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                         :aria-label="showPasswordConfirmation ? 'Masquer' : 'Afficher'"
                     >
                         <svg x-show="!showPasswordConfirmation" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,11 +136,14 @@
             <!-- Submit -->
             <button
                 type="submit"
-                class="btn btn-primary w-full h-12 relative overflow-hidden"
+                class="btn btn-primary w-full h-13 text-base font-semibold relative overflow-hidden shadow-lg shadow-primary-500/20"
                 :disabled="loading"
             >
-                <span :class="{ 'opacity-0': loading }">
+                <span :class="{ 'opacity-0': loading }" class="flex items-center justify-center gap-2">
                     Réinitialiser le mot de passe
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </span>
                 <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center">
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -152,8 +156,8 @@
 
         <!-- Back to Login -->
         <div class="mt-8 text-center">
-            <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 font-medium">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 font-semibold transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
                 </svg>
                 Retour à la connexion
