@@ -21,7 +21,7 @@ class WalletService
      */
     public function creditWallet(int $restaurantId, int $paymentId): RestaurantWallet
     {
-        return DB::transaction(function () use ($restaurantId, $paymentId) {
+        $wallet = DB::transaction(function () use ($restaurantId, $paymentId) {
             /** @var PaymentTransaction $payment */
             $payment = PaymentTransaction::query()
                 ->where('id', $paymentId)
