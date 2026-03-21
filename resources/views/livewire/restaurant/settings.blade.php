@@ -871,6 +871,88 @@
                         <p class="mt-4 text-sm text-neutral-600">Les retraits ne sont pas disponibles. Contactez le support.</p>
                     @endif
                 </div>
+
+                <!-- Auto-Payout Settings -->
+                <div class="card p-6 mt-6">
+                    <h2 class="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Retrait automatique
+                    </h2>
+                    <p class="text-sm text-neutral-600 mb-6">Activez le retrait automatique pour recevoir vos paiements directement sur votre Mobile Money après chaque commande payée.</p>
+
+                    <form wire:submit="saveAutoPayoutSettings" class="space-y-4">
+                        <!-- Toggle auto-payout -->
+                        <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
+                            <div>
+                                <p class="font-medium text-neutral-900">Activer le retrait automatique</p>
+                                <p class="text-xs text-neutral-500">Chaque paiement reçu sera transféré automatiquement vers votre Mobile Money</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" wire:model="autoPayoutEnabled" class="sr-only peer">
+                                <div class="w-11 h-6 bg-neutral-300 peer-focus:ring-4 peer-focus:ring-violet-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- Wallet phone -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Mobile Money pour les retraits *</label>
+                            <div class="flex gap-2">
+                                <select wire:model="walletPrefix" class="input w-24">
+                                    <option value="225">+225</option>
+                                    <option value="221">+221</option>
+                                </select>
+                                <input type="tel" wire:model="walletPhone" class="input flex-1" placeholder="07 XX XX XX XX">
+                            </div>
+                            @error('walletPhone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Gateway selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Passerelle de paiement</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all {{ $payoutGateway === 'wave' ? 'border-violet-500 bg-violet-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                    <input type="radio" wire:model="payoutGateway" value="wave" class="text-violet-600 focus:ring-violet-500">
+                                    <div>
+                                        <p class="font-medium text-sm">Wave</p>
+                                        <p class="text-xs text-neutral-500">Transfert via Wave</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all {{ $payoutGateway === 'fusionpay' ? 'border-violet-500 bg-violet-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                    <input type="radio" wire:model="payoutGateway" value="fusionpay" class="text-violet-600 focus:ring-violet-500">
+                                    <div>
+                                        <p class="font-medium text-sm">FusionPay</p>
+                                        <p class="text-xs text-neutral-500">MTN, Orange, Wave</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Minimum payout amount -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Montant minimum de retrait (FCFA)</label>
+                            <input type="number" wire:model="minPayoutAmount" min="500" step="100" class="input" placeholder="1000">
+                            <p class="text-xs text-neutral-500 mt-1">Le retrait automatique ne se déclenchera que si le solde atteint ce montant. Minimum : 500 F.</p>
+                            @error('minPayoutAmount')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        <button type="submit"
+                                wire:loading.attr="disabled"
+                                class="btn px-6 py-3 flex items-center gap-2"
+                                style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                            <svg wire:loading.remove wire:target="saveAutoPayoutSettings" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <svg wire:loading wire:target="saveAutoPayoutSettings" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span wire:loading.remove wire:target="saveAutoPayoutSettings">Sauvegarder</span>
+                            <span wire:loading wire:target="saveAutoPayoutSettings">Sauvegarde...</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 

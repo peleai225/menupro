@@ -15,12 +15,17 @@ class RestaurantWallet extends Model
         'total_withdrawn',
         'phone',
         'prefix',
+        'auto_payout_enabled',
+        'payout_gateway',
+        'min_payout_amount',
     ];
 
     protected $casts = [
         'balance' => 'decimal:2',
         'total_collected' => 'decimal:2',
         'total_withdrawn' => 'decimal:2',
+        'auto_payout_enabled' => 'boolean',
+        'min_payout_amount' => 'integer',
     ];
 
     public function restaurant(): BelongsTo

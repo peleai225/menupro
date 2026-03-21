@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessPayoutJob;
 use App\Models\CommissionLog;
 use App\Models\PaymentTransaction;
+use App\Models\PayoutTransaction;
 use App\Models\RestaurantWallet;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class WalletService
 {
@@ -66,8 +70,90 @@ class WalletService
             $wallet->total_collected = (float) $wallet->total_collected + $netAmount;
             $wallet->save();
 
+            // Déclencher l'auto-payout si activé
+            $this->triggerAutoPayout($wallet, $netAmount);
+
             return $wallet;
         });
+    }
+
+    /**
+     * Déclenche un payout automatique si les conditions sont remplies :
+     * - auto_payout activé sur le wallet
+     * - numéro de téléphone configuré
+     * - solde >= montant minimum de payout
+     */
+    protected function triggerAutoPayout(RestaurantWallet $wallet, float $creditedAmount): void
+    {
+        try {
+            // Recharger pour avoir les dernières valeurs (après le save dans la transaction)
+            $wallet->refresh();
+
+            if (!$wallet->auto_payout_enabled) {
+                return;
+            }
+
+            if (empty($wallet->phone)) {
+                Log::info('Auto-payout ignoré : pas de numéro de téléphone configuré', [
+                    'restaurant_id' => $wallet->restaurant_id,
+                ]);
+                return;
+            }
+
+            $minAmount = $wallet->min_payout_amount ?? 1000;
+            $balance = (float) $wallet->balance;
+
+            if ($balance < $minAmount) {
+                Log::info('Auto-payout ignoré : solde insuffisant', [
+                    'restaurant_id' => $wallet->restaurant_id,
+                    'balance' => $balance,
+                    'min_amount' => $minAmount,
+                ]);
+                return;
+            }
+
+            // Montant à transférer = tout le solde disponible
+            $payoutAmount = (int) floor($balance);
+
+            if ($payoutAmount <= 0) {
+                return;
+            }
+
+            $restaurant = $wallet->restaurant;
+            $recipientName = $restaurant?->name ?? 'Restaurant #' . $wallet->restaurant_id;
+
+            // Créer la PayoutTransaction
+            $payout = PayoutTransaction::create([
+                'restaurant_id' => $wallet->restaurant_id,
+                'restaurant_wallet_id' => $wallet->id,
+                'gateway' => $wallet->payout_gateway ?? 'wave',
+                'amount' => $payoutAmount,
+                'currency' => 'XOF',
+                'mobile' => $wallet->prefix . $wallet->phone,
+                'recipient_name' => $recipientName,
+                'payment_reason' => 'Auto-payout commande',
+                'client_reference' => 'AP-' . now()->format('ymdHis') . '-' . $wallet->restaurant_id,
+                'idempotency_key' => 'auto-' . Str::uuid()->toString(),
+                'status' => 'pending',
+            ]);
+
+            // Dispatcher le job de payout
+            ProcessPayoutJob::dispatch($payout->id);
+
+            Log::info('Auto-payout déclenché', [
+                'restaurant_id' => $wallet->restaurant_id,
+                'payout_id' => $payout->id,
+                'amount' => $payoutAmount,
+                'mobile' => $wallet->phone,
+                'gateway' => $wallet->payout_gateway,
+            ]);
+        } catch (\Throwable $e) {
+            // Ne jamais bloquer le flux principal si l'auto-payout échoue
+            Log::error('Auto-payout failed', [
+                'restaurant_id' => $wallet->restaurant_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

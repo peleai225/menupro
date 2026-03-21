@@ -100,9 +100,26 @@ class Settings extends Component
 
     public string $payoutAmount = '';
 
+    // Auto-payout settings
+    public bool $autoPayoutEnabled = false;
+    public string $payoutGateway = 'wave';
+    public int $minPayoutAmount = 1000;
+    public string $walletPhone = '';
+    public string $walletPrefix = '225';
+
     public function mount(): void
     {
         $restaurant = auth()->user()->restaurant;
+
+        // Load auto-payout settings from wallet
+        $wallet = $restaurant?->wallet;
+        if ($wallet) {
+            $this->autoPayoutEnabled = (bool) $wallet->auto_payout_enabled;
+            $this->payoutGateway = $wallet->payout_gateway ?? 'wave';
+            $this->minPayoutAmount = $wallet->min_payout_amount ?? 1000;
+            $this->walletPhone = $wallet->phone ?? '';
+            $this->walletPrefix = $wallet->prefix ?? '225';
+        }
         
         // Redirect if user has no restaurant
         if (!$restaurant) {
@@ -238,6 +255,35 @@ class Settings extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Erreur : ' . $e->getMessage());
         }
+    }
+
+    public function saveAutoPayoutSettings(): void
+    {
+        $this->validate([
+            'walletPhone' => 'required|string|min:8|max:20',
+            'walletPrefix' => 'required|string|max:10',
+            'minPayoutAmount' => 'required|integer|min:500',
+            'payoutGateway' => 'required|in:wave,fusionpay',
+        ], [
+            'walletPhone.required' => 'Le numéro de téléphone pour les retraits est requis.',
+            'minPayoutAmount.min' => 'Le montant minimum doit être au moins 500 F.',
+        ]);
+
+        $restaurant = $this->restaurant;
+        $wallet = RestaurantWallet::firstOrCreate(
+            ['restaurant_id' => $restaurant->id],
+            ['balance' => 0, 'total_collected' => 0, 'total_withdrawn' => 0]
+        );
+
+        $wallet->update([
+            'phone' => preg_replace('/\D/', '', $this->walletPhone),
+            'prefix' => $this->walletPrefix,
+            'auto_payout_enabled' => $this->autoPayoutEnabled,
+            'payout_gateway' => $this->payoutGateway,
+            'min_payout_amount' => $this->minPayoutAmount,
+        ]);
+
+        session()->flash('success', 'Paramètres de retrait automatique sauvegardés.');
     }
 
     protected function getDefaultOpeningHours(): array
