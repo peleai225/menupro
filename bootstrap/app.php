@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Append to web middleware group
         $middleware->web(append: [
             \App\Http\Middleware\TrackLastLogin::class,
+            \App\Http\Middleware\SecurityHeaders::class,
             // \App\Http\Middleware\CleanJsonResponse::class, // Temporarily disabled - causes issues
         ]);
     })

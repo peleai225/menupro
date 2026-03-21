@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 8mm;
+            margin: 6mm 8mm;
         }
 
         * {
@@ -23,82 +23,75 @@
             print-color-adjust: exact;
         }
 
-        .page-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 5mm;
+        /* ── Grid: 2 columns using table ── */
+        .grid-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4mm;
+            table-layout: fixed;
         }
 
-        /* ── Carte compacte : 2 colonnes × 4 rangées = 8 par page A4 portrait ── */
+        .grid-table td {
+            width: 50%;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        /* ── Card ── */
         .qr-card {
-            width: 93mm;
-            height: 66mm;
             border: 1.5px solid #ddd;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
+            border-left: 3px solid #f97316;
+            border-radius: 6px;
             overflow: hidden;
             background: #fff;
             page-break-inside: avoid;
-            position: relative;
+            width: 100%;
         }
 
-        /* Accent bar left */
-        .qr-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 10%;
-            bottom: 10%;
-            width: 3px;
-            background: #f97316;
-            border-radius: 0 3px 3px 0;
+        .qr-card-inner {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .qr-card-inner td {
+            vertical-align: middle;
+            border: none;
         }
 
         /* ── Left: QR code ── */
-        .qr-left {
-            width: 48%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4mm 3mm 3mm 5mm;
+        .qr-col {
+            width: 45%;
+            text-align: center;
+            padding: 3mm 2mm 3mm 3mm;
         }
 
         .qr-image-box {
             border: 1px solid #eee;
-            border-radius: 6px;
-            padding: 2.5mm;
+            border-radius: 5px;
+            padding: 2mm;
             display: inline-block;
             background: #fff;
         }
 
-        .qr-image-box img,
-        .qr-image-box svg {
-            width: 36mm;
-            height: 36mm;
-            display: block;
+        .qr-image-box img {
+            width: 34mm;
+            height: 34mm;
         }
 
         .qr-caption {
-            font-size: 6.5pt;
-            color: #888;
+            font-size: 6pt;
+            color: #999;
             font-weight: 500;
             text-align: center;
             margin-top: 1.5mm;
             letter-spacing: 0.3px;
         }
 
-        /* ── Right: Table info ── */
-        .qr-right {
-            width: 52%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 3mm 4mm 3mm 2mm;
+        /* ── Right: Info ── */
+        .info-col {
+            width: 55%;
             text-align: center;
+            padding: 3mm 4mm 3mm 2mm;
         }
 
         .table-label {
@@ -106,15 +99,15 @@
             font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #999;
-            margin-bottom: 0.5mm;
+            color: #aaa;
+            margin-bottom: 0;
         }
 
         .table-number {
-            font-size: 32pt;
+            font-size: 36pt;
             font-weight: 900;
             color: #111;
-            line-height: 1;
+            line-height: 1.1;
             margin-bottom: 2mm;
         }
 
@@ -122,13 +115,13 @@
             display: inline-block;
             background: #f97316;
             color: #fff;
-            font-size: 8pt;
+            font-size: 7.5pt;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             padding: 1.5mm 5mm;
-            border-radius: 4px;
-            margin-bottom: 2.5mm;
+            border-radius: 3px;
+            margin-bottom: 2mm;
         }
 
         .restaurant-name {
@@ -138,8 +131,6 @@
             margin-bottom: 1mm;
             max-width: 100%;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         .logo-area {
@@ -147,29 +138,15 @@
         }
 
         .logo-area img {
-            height: 8mm;
+            height: 7mm;
             width: auto;
-            max-width: 35mm;
-            object-fit: contain;
-        }
-
-        .logo-text {
-            font-size: 10pt;
-            font-weight: 800;
-        }
-
-        .logo-text .menu {
-            color: #111;
-        }
-
-        .logo-text .pro {
-            color: #f97316;
+            max-width: 30mm;
         }
 
         .footer-text {
             font-size: 5.5pt;
-            color: #bbb;
-            letter-spacing: 0.5px;
+            color: #ccc;
+            letter-spacing: 0.3px;
         }
 
         .footer-text strong {
@@ -182,60 +159,76 @@
             page-break-after: always;
         }
 
-        /* ── Cut guides (tirets discrets pour le découpage) ── */
-        .cut-guide {
-            width: 100%;
-            text-align: center;
-            padding: 1mm 0;
-        }
-
-        .cut-guide::before {
-            content: '✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -';
-            font-size: 5pt;
-            color: #ddd;
-            letter-spacing: 1px;
+        /* ── Empty cell ── */
+        .empty-cell {
+            border: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="page-grid">
-        @foreach($tables as $index => $table)
-            <div class="qr-card">
-                {{-- Left: QR Code --}}
-                <div class="qr-left">
-                    <div class="qr-image-box">
-                        <img src="data:image/svg+xml;base64,{{ $table['qr_base64'] }}" alt="QR Table {{ $table['label'] }}">
-                    </div>
-                    <div class="qr-caption">Scannez pour commander</div>
-                </div>
+@php
+    $chunks = array_chunk($tables, 8); // 8 cards per page (2 cols × 4 rows)
+@endphp
 
-                {{-- Right: Table Info --}}
-                <div class="qr-right">
-                    <div class="table-label">TABLE</div>
-                    <div class="table-number">{{ $table['label'] }}</div>
-                    <div class="scan-cta">Scanner ici</div>
+@foreach($chunks as $chunkIndex => $chunk)
+    @php
+        $rows = array_chunk($chunk, 2); // 2 per row
+    @endphp
+    <table class="grid-table">
+        @foreach($rows as $row)
+            <tr>
+                @foreach($row as $table)
+                    <td>
+                        <table class="qr-card">
+                            <tr>
+                                <td class="qr-card-inner">
+                                    <table class="qr-card-inner">
+                                        <tr>
+                                            {{-- Left: QR Code --}}
+                                            <td class="qr-col">
+                                                <div class="qr-image-box">
+                                                    <img src="data:image/svg+xml;base64,{{ $table['qr_base64'] }}" alt="QR Table {{ $table['label'] }}">
+                                                </div>
+                                                <div class="qr-caption">Scannez pour commander</div>
+                                            </td>
 
-                    <div class="logo-area">
-                        @if($logoBase64)
-                            <img src="data:image/png;base64,{{ $logoBase64 }}" alt="{{ $restaurant->name }}">
-                        @else
-                            <div class="restaurant-name">{{ $restaurant->name }}</div>
-                        @endif
-                    </div>
+                                            {{-- Right: Table Info --}}
+                                            <td class="info-col">
+                                                <div class="table-label">T A B L E</div>
+                                                <div class="table-number">{{ str_pad($table['label'], 2, '0', STR_PAD_LEFT) }}</div>
+                                                <div class="scan-cta">Scanner ici</div>
 
-                    <div class="footer-text">
-                        Propulsé par <strong>menupro.ci</strong>
-                    </div>
-                </div>
-            </div>
+                                                <div class="logo-area">
+                                                    @if($logoBase64)
+                                                        <img src="data:image/png;base64,{{ $logoBase64 }}" alt="{{ $restaurant->name }}">
+                                                    @else
+                                                        <div class="restaurant-name">{{ $restaurant->name }}</div>
+                                                    @endif
+                                                </div>
 
-            {{-- Page break after every 8 cards (2 cols × 4 rows per A4 portrait) --}}
-            @if(($index + 1) % 8 === 0 && ($index + 1) < count($tables))
-                </div>
-                <div class="page-break"></div>
-                <div class="page-grid">
-            @endif
+                                                <div class="footer-text">
+                                                    Propulsé par <strong>menupro.ci</strong>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                @endforeach
+
+                {{-- Fill empty cell if odd number in row --}}
+                @if(count($row) < 2)
+                    <td class="empty-cell"></td>
+                @endif
+            </tr>
         @endforeach
-    </div>
+    </table>
+
+    @if($chunkIndex < count($chunks) - 1)
+        <div class="page-break"></div>
+    @endif
+@endforeach
 </body>
 </html>

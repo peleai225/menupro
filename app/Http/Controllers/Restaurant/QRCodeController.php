@@ -114,6 +114,46 @@ class QRCodeController extends Controller
     }
 
     /**
+     * Generate a social media card (Facebook format 1200×630) with the restaurant QR code.
+     */
+    public function downloadSocialCard(Request $request)
+    {
+        $restaurant = $request->user()->restaurant;
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant non trouvé');
+        }
+
+        $publicUrl = route('r.menu', ['slug' => $restaurant->slug]);
+
+        $qrSvg = QrCode::format('svg')
+            ->size(400)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($publicUrl);
+
+        $qrBase64 = base64_encode((string) $qrSvg);
+
+        $logoPath = public_path('images/logo-menupro.png');
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+        }
+
+        $pdf = Pdf::loadView('pdf.qrcode-social', [
+            'restaurant' => $restaurant,
+            'qrBase64'   => $qrBase64,
+            'logoBase64' => $logoBase64,
+        ])
+        ->setPaper([0, 0, 1200, 630]) // Custom size: 1200×630 points
+        ->setOption('isRemoteEnabled', true);
+
+        $filename = 'qrcode-social-' . \Illuminate\Support\Str::slug($restaurant->name) . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
      * Preview a single table QR code card (browser view).
      */
     public function previewTableQR(Request $request, int $tableNumber)

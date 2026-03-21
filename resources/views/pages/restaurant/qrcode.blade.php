@@ -170,7 +170,35 @@
                             </a>
 
                             <p class="text-xs text-neutral-500 mt-3 text-center">
-                                Format A4 paysage — 4 QR codes par page, prêts à imprimer et découper
+                                Format A4 portrait — 8 QR codes par page, prêts à imprimer et découper
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Step 3: Social Media Card --}}
+                    <div class="mt-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                            </span>
+                            <span class="font-semibold text-neutral-800 text-sm">Format réseaux sociaux</span>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 border border-blue-100">
+                            <p class="text-sm text-neutral-600 mb-3">
+                                Image optimisée pour <strong>Facebook</strong> et <strong>Instagram</strong> avec votre QR code, le nom de votre restaurant et un appel à l'action.
+                            </p>
+
+                            <a href="{{ route('restaurant.qrcode.download-social') }}"
+                               class="btn bg-blue-600 hover:bg-blue-700 text-white w-full justify-center text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Télécharger carte Facebook (1200×630)
+                            </a>
+
+                            <p class="text-xs text-neutral-400 mt-2 text-center">
+                                Format 1200×630px — Idéal pour posts Facebook, couverture et partage
                             </p>
                         </div>
                     </div>
@@ -179,8 +207,10 @@
                     @if($restaurant->number_of_tables)
                         <div class="mt-6">
                             <div class="flex items-center gap-2 mb-3">
-                                <span class="w-6 h-6 bg-primary-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                                <span class="font-semibold text-neutral-800 text-sm">Vos tables</span>
+                                <span class="w-6 h-6 bg-neutral-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </span>
+                                <span class="font-semibold text-neutral-800 text-sm">Aperçu des tables</span>
                             </div>
                             <div class="grid grid-cols-5 sm:grid-cols-8 gap-2">
                                 @for($i = 1; $i <= min($restaurant->number_of_tables, 40); $i++)

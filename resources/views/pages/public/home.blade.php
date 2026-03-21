@@ -2,25 +2,25 @@
     @push('head')
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
+        "@@context": "https://schema.org",
+        "@@type": "SoftwareApplication",
         "name": "MenuPro",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
         "url": "{{ url('/') }}",
         "description": "Plateforme SaaS de commande en ligne pour restaurants en Côte d'Ivoire. Paiement Mobile Money, QR codes, gestion de stock.",
         "offers": {
-            "@type": "Offer",
+            "@@type": "Offer",
             "price": "0",
             "priceCurrency": "XOF"
         },
         "author": {
-            "@type": "Organization",
+            "@@type": "Organization",
             "name": "MenuPro",
             "url": "{{ url('/') }}"
         },
         "aggregateRating": {
-            "@type": "AggregateRating",
+            "@@type": "AggregateRating",
             "ratingValue": "4.8",
             "ratingCount": "150"
         }

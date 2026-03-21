@@ -42,7 +42,7 @@ Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('home');
 Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
 Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send');
+Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
 Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
 Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
 Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
@@ -197,6 +197,7 @@ Route::prefix('dashboard')
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
         Route::post('qr-code/tables', [App\Http\Controllers\Restaurant\QRCodeController::class, 'updateTables'])->name('qrcode.update-tables');
         Route::get('qr-code/tables/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadTableQR'])->name('qrcode.download-tables');
+        Route::get('qr-code/social/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadSocialCard'])->name('qrcode.download-social');
         Route::get('qr-code/tables/{tableNumber}/preview', [App\Http\Controllers\Restaurant\QRCodeController::class, 'previewTableQR'])->name('qrcode.preview-table');
         
         // Promo Codes, Analytics, Reports, Reviews, Taxes - admin uniquement
@@ -322,6 +323,11 @@ Route::prefix('admin')
         // Transactions
         Route::get('transactions', [\App\Http\Controllers\SuperAdmin\TransactionController::class, 'index'])->name('transactions.index');
         Route::get('transactions/export', [\App\Http\Controllers\SuperAdmin\TransactionController::class, 'export'])->name('transactions.export');
+
+        // Finances (Wallets, Payouts, Commissions)
+        Route::get('finances', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'index'])->name('finances.index');
+        Route::get('finances/retraits', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'payouts'])->name('finances.payouts');
+        Route::get('finances/commissions', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'commissions'])->name('finances.commissions');
         
         // Announcements
         Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements');

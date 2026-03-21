@@ -1,4 +1,47 @@
 <x-layouts.public title="Tarifs" description="Tarifs et formules MenuPro : un seul plan tout inclus pour digitaliser votre restaurant et accepter les commandes en ligne.">
+    @push('head')
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@@type": "Question",
+                "name": "Pourquoi un seul plan ?",
+                "acceptedAnswer": {
+                    "@@type": "Answer",
+                    "text": "Nous avons choisi la simplicité ! Un seul plan avec toutes les fonctionnalités incluses. Pas de choix compliqué, pas de fonctionnalités bloquées."
+                }
+            },
+            {
+                "@@type": "Question",
+                "name": "Comment fonctionne la garantie satisfait ou remboursé ?",
+                "acceptedAnswer": {
+                    "@@type": "Answer",
+                    "text": "Après votre inscription et paiement, votre restaurant est activé sous 24h. Si vous n'êtes pas satisfait dans les 7 premiers jours, contactez-nous et nous vous remboursons intégralement."
+                }
+            },
+            {
+                "@@type": "Question",
+                "name": "Comment fonctionne la réduction annuelle ?",
+                "acceptedAnswer": {
+                    "@@type": "Answer",
+                    "text": "En choisissant l'abonnement annuel, vous bénéficiez de 15% de réduction. Au lieu de 300 000 FCFA, vous payez 255 000 FCFA, soit 45 000 FCFA d'économie."
+                }
+            },
+            {
+                "@@type": "Question",
+                "name": "Comment mes clients me paient-ils ?",
+                "acceptedAnswer": {
+                    "@@type": "Answer",
+                    "text": "Vos clients paient via Orange Money, MTN MoMo, Wave ou Moov Money. Les paiements sont sécurisés et l'argent est versé directement sur votre portefeuille MenuPro."
+                }
+            }
+        ]
+    }
+    </script>
+    @endpush
+
     <!-- Hero Section -->
     <section class="py-20 sm:py-28 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(249,115,22,0.08),transparent_60%)]"></div>
