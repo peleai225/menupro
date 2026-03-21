@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\View;
 use App\Observers\ActivityObserver;
 use App\Observers\OrderCommissionObserver;
+use App\Observers\OrderWhatsAppObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
 use App\Policies\IngredientPolicy;
@@ -122,6 +123,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Order::observe(OrderCommissionObserver::class);
+        Order::observe(OrderWhatsAppObserver::class);
     }
 
     /**

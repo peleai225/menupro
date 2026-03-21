@@ -129,6 +129,9 @@ Route::prefix('dashboard')
     ->group(function () {
         // Dashboard (Livewire) - tous
         Route::get('/', \App\Livewire\Restaurant\Dashboard::class)->name('dashboard');
+
+        // POS - Mode Caisse - tous
+        Route::get('pos', \App\Livewire\Restaurant\POS::class)->name('pos');
         
         // Categories - admin uniquement
         Route::middleware('restaurant.admin')->group(function () {

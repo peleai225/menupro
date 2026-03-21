@@ -256,6 +256,14 @@ class CheckoutController extends Controller
             return $order;
         });
 
+        // Send WhatsApp notifications
+        try {
+            $whatsapp = app(\App\Services\WhatsAppService::class);
+            $whatsapp->sendNewOrderToRestaurant($order);
+        } catch (\Throwable $e) {
+            \Log::warning('WhatsApp new order notification failed: ' . $e->getMessage());
+        }
+
         // Redirect to payment or confirmation
         if ($restaurant->lygos_enabled && $restaurant->getLygosApiKey()) {
             $result = $this->lygosGateway

@@ -163,6 +163,8 @@ class Orders extends Component
                 }
             }
 
+            // WhatsApp notifications are sent automatically via OrderWhatsAppObserver
+
             // Refresh selected order if it's the one we just updated
             if ($this->selectedOrder?->id === $orderId) {
                 $this->selectedOrder = $order->fresh(['items.dish']);
