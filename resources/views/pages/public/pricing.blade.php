@@ -333,19 +333,19 @@
 
             <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
                 <div class="flex items-center gap-3 bg-neutral-800/50 px-5 py-3 rounded-xl border border-neutral-700">
-                    <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain rounded">
                     <span class="text-white font-medium hidden sm:block">Orange Money</span>
                 </div>
                 <div class="flex items-center gap-3 bg-neutral-800/50 px-5 py-3 rounded-xl border border-neutral-700">
-                    <img src="{{ asset('images/payments/mtn-momo.svg') }}" alt="MTN MoMo" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain rounded">
                     <span class="text-white font-medium hidden sm:block">MTN MoMo</span>
                 </div>
                 <div class="flex items-center gap-3 bg-neutral-800/50 px-5 py-3 rounded-xl border border-neutral-700">
-                    <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain rounded">
                     <span class="text-white font-medium hidden sm:block">Wave</span>
                 </div>
                 <div class="flex items-center gap-3 bg-neutral-800/50 px-5 py-3 rounded-xl border border-neutral-700">
-                    <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
                     <span class="text-white font-medium hidden sm:block">Moov Money</span>
                 </div>
             </div>

@@ -424,25 +424,25 @@
                 <!-- Orange Money -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 0ms">
-                    <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Orange Money</span>
                 </div>
                 <!-- MTN MoMo -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-yellow-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 100ms">
-                    <img src="{{ asset('images/payments/mtn-momo.svg') }}" alt="MTN MoMo" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">MTN MoMo</span>
                 </div>
                 <!-- Wave -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 200ms">
-                    <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Wave</span>
                 </div>
                 <!-- Moov Money -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-green-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 300ms">
-                    <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
+                    <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Moov Money</span>
                 </div>
             </div>
@@ -510,19 +510,19 @@
                     <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-8 sm:p-10 border border-emerald-100">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
-                                <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
                                 <span class="text-sm font-bold text-neutral-800">Orange Money</span>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
-                                <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
                                 <span class="text-sm font-bold text-neutral-800">Wave</span>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
-                                <img src="{{ asset('images/payments/mtn-momo.svg') }}" alt="MTN MoMo" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
                                 <span class="text-sm font-bold text-neutral-800">MTN MoMo</span>
                             </div>
                             <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
-                                <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
                                 <span class="text-sm font-bold text-neutral-800">Moov Money</span>
                             </div>
                         </div>

@@ -200,10 +200,10 @@
 
                             <!-- Payment Methods -->
                             <div class="flex items-center justify-center gap-3 mt-4">
-                                <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="h-6 w-6 rounded opacity-80">
-                                <img src="{{ asset('images/payments/mtn-momo.svg') }}" alt="MTN MoMo" class="h-6 w-6 rounded opacity-80">
-                                <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="h-6 w-6 rounded opacity-80">
-                                <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-6 w-6 rounded opacity-80">
                             </div>
                         </x-card>
                     </div>

@@ -5,32 +5,24 @@
 @endphp
 
 @if($method === 'wave')
-    {{-- Wave - logo local (public/images/payments/wave.svg) ou fallback badge texte --}}
-    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#0052FF] flex-shrink-0" title="Wave">
-        @if(file_exists(public_path('images/payments/wave.svg')))
-            <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="h-7 w-7 object-contain">
-        @else
-            <span class="text-white font-bold text-xs">Wave</span>
-        @endif
+    {{-- Wave - logo officiel PNG --}}
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white flex-shrink-0 overflow-hidden" title="Wave">
+        <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-9 w-auto object-contain">
     </span>
 @elseif($method === 'orange')
-    {{-- Orange Money - logo local (public/images/payments/orange-money.svg) ou fallback badge texte --}}
-    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-black flex-shrink-0" title="Orange Money">
-        @if(file_exists(public_path('images/payments/orange-money.svg')))
-            <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="h-7 w-7 object-contain">
-        @else
-            <span class="text-orange-400 font-bold text-[10px] leading-none">OM</span>
-        @endif
+    {{-- Orange Money - logo officiel PNG --}}
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white flex-shrink-0 overflow-hidden" title="Orange Money">
+        <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-9 w-auto object-contain">
     </span>
 @elseif($method === 'mtn')
-    {{-- MTN MoMo - badge jaune comme sur la home --}}
-    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-yellow-500 flex-shrink-0" title="MTN MoMo">
-        <span class="text-black font-bold text-xs">MTN</span>
+    {{-- MTN MoMo - logo officiel PNG --}}
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white flex-shrink-0 overflow-hidden" title="MTN MoMo">
+        <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-9 w-auto object-contain">
     </span>
 @elseif($method === 'moov')
-    {{-- Moov Money - bleu Moov --}}
-    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#0066CC] flex-shrink-0" title="Moov Money">
-        <span class="text-white font-bold text-xs">Moov</span>
+    {{-- Moov Money - logo officiel PNG --}}
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white flex-shrink-0 overflow-hidden" title="Moov Money">
+        <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-9 w-auto object-contain">
     </span>
 @elseif($method === 'fusionpay')
     {{-- FusionPay / MoneyFusion - Mobile Money --}}
