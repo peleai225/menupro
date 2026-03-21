@@ -67,7 +67,7 @@ class POS extends Component
     public function dishes()
     {
         $query = Dish::where('restaurant_id', $this->restaurant->id)
-            ->where('is_available', true)
+            ->where('is_active', true)
             ->with('category');
 
         if ($this->selectedCategory) {
@@ -146,7 +146,7 @@ class POS extends Component
     {
         $dish = Dish::where('restaurant_id', $this->restaurant->id)
             ->where('id', $dishId)
-            ->where('is_available', true)
+            ->where('is_active', true)
             ->first();
 
         if (!$dish) {
