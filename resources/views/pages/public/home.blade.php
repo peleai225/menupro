@@ -1,4 +1,33 @@
 <x-layouts.public title="Accueil" description="MenuPro : digitalisez votre restaurant, menu en ligne, commandes et paiement Mobile Money. Solution SaaS pour restaurants en Côte d'Ivoire et ailleurs.">
+    @push('head')
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "MenuPro",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "{{ url('/') }}",
+        "description": "Plateforme SaaS de commande en ligne pour restaurants en Côte d'Ivoire. Paiement Mobile Money, QR codes, gestion de stock.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "MenuPro",
+            "url": "{{ url('/') }}"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+        }
+    }
+    </script>
+    @endpush
+
     <!-- Hero Section - Design moderne avec glassmorphism -->
     <section class="relative min-h-[100vh] bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 overflow-hidden flex items-center" 
              x-data="{ 
@@ -387,8 +416,8 @@
         </div>
     </section>
 
-    <!-- Logos de confiance / Moyens de paiement -->
-    <section class="py-12 sm:py-16 bg-white border-b border-neutral-100">
+    <!-- Trusted By — Bandeau de confiance compact -->
+    <section class="py-8 sm:py-10 bg-white border-b border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-center text-neutral-500 text-sm font-medium mb-8 uppercase tracking-wider">Paiements sécurisés acceptés</p>
             <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
@@ -415,6 +444,238 @@
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 300ms">
                     <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Moov Money</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pourquoi MenuPro — Hero Features -->
+    <section class="py-20 sm:py-28 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.05),transparent_50%)]"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Fait pour la Cote d'Ivoire
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Pourquoi les restaurants choisissent <span class="text-gradient">MenuPro</span>
+                </h2>
+                <p class="text-neutral-600 text-lg mt-4"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Une solution pensee 100% pour le marche africain, pas une copie de solutions occidentales.
+                </p>
+            </div>
+
+            <!-- Hero Feature 1 — Mobile Money -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 sm:mb-28" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        Paiement
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Vos clients paient avec <span class="text-primary-500">leur telephone</span>
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Pas besoin de carte bancaire. Orange Money, Wave, MTN MoMo, Moov Money — les moyens de paiement que vos clients utilisent tous les jours.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Paiement recu directement sur votre compte Wave Business</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Confirmation instantanee par notification</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Zero frais cache, transparence totale</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-8 sm:p-10 border border-emerald-100">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/orange-money.svg') }}" alt="Orange Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Orange Money</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/wave.svg') }}" alt="Wave" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Wave</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/mtn-momo.svg') }}" alt="MTN MoMo" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">MTN MoMo</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/moov-money.svg') }}" alt="Moov Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Moov Money</span>
+                            </div>
+                        </div>
+                        {{-- Success animation --}}
+                        <div class="mt-6 bg-white rounded-xl p-4 border border-emerald-100 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm text-emerald-800">Paiement recu !</div>
+                                <div class="text-xs text-neutral-500">Wave - 12 500 FCFA - il y a 3s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Feature 2 — QR Code par table -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 sm:mb-28" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div class="order-2 lg:order-1 relative" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl p-8 sm:p-10 border border-orange-100">
+                        {{-- QR code card mockup --}}
+                        <div class="bg-white rounded-2xl p-6 shadow-xl border-l-4 border-primary-500 flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="w-28 h-28 bg-neutral-100 rounded-xl flex items-center justify-center border border-neutral-200">
+                                    <svg class="w-20 h-20 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2 text-center">Pour consulter le Menu</p>
+                            </div>
+                            <div class="flex flex-col justify-center text-center">
+                                <div class="text-[10px] font-bold tracking-[3px] text-neutral-400 uppercase">T A B L E</div>
+                                <div class="text-4xl font-black text-neutral-900 leading-none">N&deg;05</div>
+                                <div class="text-lg font-black text-neutral-900 mt-1">SCANNEZ</div>
+                                <div class="text-lg font-black text-primary-500">ICI</div>
+                                <div class="w-12 h-0.5 bg-primary-500 mx-auto mt-1 rounded-full"></div>
+                            </div>
+                        </div>
+                        {{-- Grid of small table badges --}}
+                        <div class="mt-6 flex flex-wrap gap-2 justify-center">
+                            @for($i = 1; $i <= 12; $i++)
+                                <div class="w-10 h-10 bg-white rounded-lg border border-orange-200 flex items-center justify-center text-xs font-bold text-neutral-600 hover:bg-primary-500 hover:text-white hover:border-primary-500 transition-all cursor-default {{ $i === 5 ? 'bg-primary-500 text-white border-primary-500 ring-2 ring-primary-300' : '' }}">
+                                    {{ $i }}
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                        Nouveau
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Un <span class="text-primary-500">QR code par table</span>, zero confusion
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Generez un QR code unique pour chaque table de votre restaurant. Quand le client scanne, le numero de table est automatiquement detecte. Plus besoin de demander !
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">PDF pret a imprimer et decoouper</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Numero de table pre-rempli dans la commande</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Le serveur voit d'ou vient chaque commande</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Hero Feature 3 — WhatsApp Notifications -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Communication
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Notifications clients via <span class="text-green-600">WhatsApp</span>
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Vos clients recoivent les mises a jour de leur commande directement sur WhatsApp. Pas d'email ignore, pas d'application a telecharger.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Confirmation de commande automatique</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">"Votre commande est prete !" en temps reel</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Alerte stock bas pour le restaurateur</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 sm:p-10 border border-green-100">
+                        {{-- WhatsApp chat mockup --}}
+                        <div class="space-y-3 max-w-sm mx-auto">
+                            <div class="flex justify-start">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-100 max-w-[85%]">
+                                    <p class="text-sm text-neutral-800 font-medium">Votre commande #1234 a ete confirmee !</p>
+                                    <p class="text-xs text-neutral-500 mt-1">Poulet Braise x2, Attieke x1</p>
+                                    <p class="text-[10px] text-neutral-400 mt-2 text-right">14:32</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-start">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-100 max-w-[85%]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"/></svg>
+                                        </div>
+                                        <p class="text-sm text-neutral-800 font-medium">En preparation... ~15 min</p>
+                                    </div>
+                                    <p class="text-[10px] text-neutral-400 mt-2 text-right">14:35</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-start">
+                                <div class="bg-green-100 rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-200 max-w-[85%]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                        <p class="text-sm text-green-800 font-bold">Votre commande est prete !</p>
+                                    </div>
+                                    <p class="text-xs text-green-700 mt-1">Rendez-vous au comptoir. Bon appetit !</p>
+                                    <p class="text-[10px] text-green-600 mt-2 text-right">14:48</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -855,17 +1116,17 @@
                     </div>
                 </div>
 
-                <!-- Feature 2: Paiement Mobile Money -->
+                <!-- Feature 2: Notifications WhatsApp -->
                 <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 50ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-secondary-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-green-200 hover:shadow-xl transition-all duration-500 h-full">
+                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-secondary-600 transition-colors">Paiement Mobile Money</h3>
+                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-green-600 transition-colors">Notifications WhatsApp</h3>
                         <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Recevez des paiements via Orange Money, MTN MoMo, Wave et Moov Money en toute sécurité.
+                            Vos clients recoivent confirmation, statut et alerte "pret" directement sur WhatsApp.
                         </p>
                     </div>
                 </div>
@@ -990,17 +1251,17 @@
                     </div>
                 </div>
 
-                <!-- Feature 11: QR Code -->
+                <!-- Feature 11: Mode hors ligne (PWA) -->
                 <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 500ms">
                     <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-cyan-200 hover:shadow-xl transition-all duration-500 h-full">
                         <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-7 h-7 lg:w-8 lg:h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-cyan-600 transition-colors">QR Code personnalisé</h3>
+                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-cyan-600 transition-colors">Mode hors ligne</h3>
                         <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Générez un QR code unique pour votre restaurant. Imprimez-le et placez-le sur vos tables.
+                            Le menu reste consultable meme sans connexion internet. Ideal pour les zones a couverture instable.
                         </p>
                     </div>
                 </div>

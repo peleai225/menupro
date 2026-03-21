@@ -1,6 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <rect width="120" height="120" rx="20" fill="#FF6600"/>
-  <text x="60" y="45" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="18" fill="#FFFFFF">Orange</text>
-  <text x="60" y="72" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="18" fill="#FFFFFF">Money</text>
-  <circle cx="60" cy="100" r="8" fill="#FFFFFF" opacity="0.3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120">
+  <!-- Logo Orange Money officiel : 2 flèches + texte -->
+  <g transform="translate(15, 15)">
+    <!-- Flèche vers le haut-droite (noire) -->
+    <g transform="translate(0, 0)">
+      <polygon points="55,0 55,22 33,22" fill="#1A1A1A"/>
+      <rect x="0" y="52" width="55" height="18" rx="0" fill="#1A1A1A" transform="rotate(-45, 27, 61)"/>
+    </g>
+    <!-- Flèche vers le bas-gauche (orange) -->
+    <g transform="translate(8, 15)">
+      <polygon points="0,68 0,46 22,46" fill="#FF6600"/>
+      <rect x="0" y="0" width="55" height="18" rx="0" fill="#FF6600" transform="rotate(-45, 27, 9)"/>
+    </g>
+  </g>
+  <!-- Texte Orange -->
+  <text x="110" y="52" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="28" fill="#1A1A1A">Orange</text>
+  <!-- Texte Money -->
+  <text x="110" y="85" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="28" fill="#FF6600">Money</text>
 </svg>

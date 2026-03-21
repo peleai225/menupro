@@ -74,6 +74,22 @@ class Checkout extends Component
             $this->redirect(route('r.menu', $slug));
         }
 
+        // Auto-fill table number from QR code URL (?table=X)
+        $tableFromUrl = request()->query('table');
+        if ($tableFromUrl && is_numeric($tableFromUrl)) {
+            $this->table_number = (string) $tableFromUrl;
+            $this->order_type = 'dine_in';
+        }
+
+        // Restore table from session (passed from menu page)
+        if (!$this->table_number) {
+            $sessionTable = session()->get("table.{$this->restaurant->id}");
+            if ($sessionTable) {
+                $this->table_number = (string) $sessionTable;
+                $this->order_type = 'dine_in';
+            }
+        }
+
         // Pré-sélectionner le mode de paiement s'il n'y en a qu'un
         $this->setDefaultPaymentMethod();
     }

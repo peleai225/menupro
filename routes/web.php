@@ -195,6 +195,9 @@ Route::prefix('dashboard')
         
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
+        Route::post('qr-code/tables', [App\Http\Controllers\Restaurant\QRCodeController::class, 'updateTables'])->name('qrcode.update-tables');
+        Route::get('qr-code/tables/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadTableQR'])->name('qrcode.download-tables');
+        Route::get('qr-code/tables/{tableNumber}/preview', [App\Http\Controllers\Restaurant\QRCodeController::class, 'previewTableQR'])->name('qrcode.preview-table');
         
         // Promo Codes, Analytics, Reports, Reviews, Taxes - admin uniquement
         Route::middleware('restaurant.admin')->group(function () {
@@ -276,7 +279,7 @@ Route::prefix('admin')
         });
         
         // Restaurants Management
-        Route::get('restaurants/export', [RestaurantController::class, 'export'])->name('super-admin.restaurants.export');
+        Route::get('restaurants/export', [RestaurantController::class, 'export'])->name('restaurants.export');
         Route::resource('restaurants', RestaurantController::class)->only(['index', 'show', 'update', 'destroy']);
         Route::post('restaurants/{restaurant}/approve', [RestaurantController::class, 'approve'])->name('restaurants.approve');
         Route::post('restaurants/{restaurant}/reject', [RestaurantController::class, 'reject'])->name('restaurants.reject');

@@ -16,10 +16,13 @@ class RestaurantMenu extends Component
     public ?int $activeCategory = null;
     public ?int $selectedDishId = null;
     public string $searchQuery = '';
-    
+
     // Cart state
     public array $cart = [];
     public bool $showCart = false;
+
+    // Table number from QR code scan
+    public ?int $tableNumber = null;
 
     public function mount(string $slug): void
     {
@@ -51,6 +54,13 @@ class RestaurantMenu extends Component
 
             // Load cart from session
             $this->cart = session()->get("cart.{$this->restaurant->id}", []);
+
+            // Capture table number from QR code URL (?table=X) and store in session
+            $tableFromUrl = request()->query('table');
+            if ($tableFromUrl && is_numeric($tableFromUrl)) {
+                $this->tableNumber = (int) $tableFromUrl;
+                session()->put("table.{$this->restaurant->id}", $this->tableNumber);
+            }
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, "Restaurant introuvable.");
         } catch (\Exception $e) {

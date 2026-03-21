@@ -128,10 +128,26 @@
                 @if($order_type === 'dine_in')
                     <div class="bg-white rounded-2xl p-6 shadow-sm">
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Numéro de table</h2>
-                        <input type="text" 
-                               wire:model="table_number"
-                               class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('table_number') border-red-500 @enderror"
-                               placeholder="Ex: Table 5">
+                        @if($table_number && request()->query('table'))
+                            {{-- Auto-detected from QR code --}}
+                            <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-emerald-800">Table {{ $table_number }}</p>
+                                    <p class="text-xs text-emerald-600">Détectée automatiquement via QR code</p>
+                                </div>
+                            </div>
+                            <input type="hidden" wire:model="table_number">
+                        @else
+                            <input type="text"
+                                   wire:model="table_number"
+                                   class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('table_number') border-red-500 @enderror"
+                                   placeholder="Ex: Table 5">
+                        @endif
                         @error('table_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

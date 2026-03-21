@@ -181,8 +181,7 @@ class Settings extends Component
     #[Computed]
     public function wavePayoutAvailable(): bool
     {
-        $checkout = app(WaveCheckoutService::class);
-        return $checkout->isEnabled();
+        return !empty(\App\Models\SystemSetting::get('wave_api_key', config('wave.api_key')));
     }
 
     #[Computed]

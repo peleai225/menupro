@@ -87,6 +87,16 @@
                 from { opacity: 0; transform: translateY(8px); }
                 to   { opacity: 1; transform: translateY(0);   }
             }
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(16px); }
+                to   { opacity: 1; transform: translateY(0);    }
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            @keyframes fadeInUp {
+                from { opacity: 1; }
+                to   { opacity: 1; }
+            }
         }
 
         /* Smooth scroll natif */
