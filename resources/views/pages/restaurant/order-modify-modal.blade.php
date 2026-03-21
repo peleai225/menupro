@@ -152,8 +152,10 @@
 </div>
 
 <script>
-    const orderId = {{ $order->id }};
-    const csrfToken = '{{ csrf_token() }}';
+    // orderId et csrfToken sont déjà déclarés dans order-show.blade.php (parent)
+    (function() {
+        const orderId = {{ $order->id }};
+        const csrfToken = '{{ csrf_token() }}';
 
     // Add item form
     document.getElementById('add-item-form').addEventListener('submit', async (e) => {
@@ -277,4 +279,9 @@
             this.setAttribute('data-previous-value', this.value);
         });
     });
+
+    // Exposer pour les handlers inline (onclick, onchange)
+    window.updateItemQuantity = updateItemQuantity;
+    window.removeItemFromModal = removeItemFromModal;
+    })();
 </script>

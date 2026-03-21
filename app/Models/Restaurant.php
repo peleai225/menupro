@@ -58,6 +58,7 @@ class Restaurant extends Model
         'service_fee_fixed',
         'service_fee_enabled',
         'estimated_prep_time',
+        'number_of_tables',
         'lygos_api_key',
         'lygos_api_secret',
         'lygos_enabled',
@@ -72,6 +73,12 @@ class Restaurant extends Model
         'delivery_zones',
         'cash_on_delivery',
         'tagline',
+        'menupo_hub_enabled',
+        'wave_merchant_id',
+        'orange_money_number',
+        'mtn_money_number',
+        'moov_money_number',
+        'commission_wallet_balance',
     ];
 
     protected $casts = [
@@ -90,12 +97,15 @@ class Restaurant extends Model
         'service_fee_fixed' => 'integer',
         'service_fee_enabled' => 'boolean',
         'estimated_prep_time' => 'integer',
+        'number_of_tables' => 'integer',
         'lygos_enabled' => 'boolean',
         'geniuspay_enabled' => 'boolean',
         'settings' => 'array',
         'verified_at' => 'datetime',
         'delivery_enabled' => 'boolean',
         'cash_on_delivery' => 'boolean',
+        'menupo_hub_enabled' => 'boolean',
+        'commission_wallet_balance' => 'decimal:2',
     ];
 
     protected $hidden = [
@@ -202,6 +212,16 @@ class Restaurant extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function commissionLogs(): HasMany
+    {
+        return $this->hasMany(CommissionLog::class);
+    }
+
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(RestaurantWallet::class);
     }
 
     // =========================================================================

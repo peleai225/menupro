@@ -47,7 +47,7 @@ class Orders extends Component
         }
         
         return Order::where('restaurant_id', $restaurantId)
-            ->with('items')
+            ->with('items.dish')
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('reference', 'like', "%{$this->search}%")

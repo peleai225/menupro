@@ -105,6 +105,18 @@ class MediaUploader
     }
 
     /**
+     * Upload an ingredient image
+     */
+    public function uploadIngredientImage(UploadedFile $file, int $restaurantId): string
+    {
+        return $this->uploadImage($file, "restaurants/{$restaurantId}/ingredients", [
+            'width' => 400,
+            'height' => 400,
+            'maintain_aspect' => false,
+        ]);
+    }
+
+    /**
      * Upload a category image
      */
     public function uploadCategoryImage(UploadedFile $file, int $restaurantId): string

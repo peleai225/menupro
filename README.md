@@ -2,7 +2,7 @@
 
 **La solution SaaS pour digitaliser votre restaurant et recevoir des commandes en ligne.**
 
-MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiriens de créer leur site de commande en quelques minutes, gérer leur menu et recevoir des paiements via Mobile Money (Lygos).
+MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiriens de créer leur site de commande en quelques minutes, gérer leur menu, leur stock et recevoir des paiements via Mobile Money (Lygos, GeniusPay).
 
 ![MenuPro](https://via.placeholder.com/1200x600/f97316/ffffff?text=MenuPro)
 
@@ -11,13 +11,14 @@ MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiri
 ### 🏪 Pour les restaurants
 - **Site de commande personnalisé** - URL unique pour chaque restaurant
 - **Gestion du menu** - Catégories, plats, photos, prix, disponibilité
+- **Gestion du stock** - Ingrédients, fournisseurs, alertes rupture, mouvements
 - **Tableau de bord** - Commandes en temps réel, statistiques, CA
-- **Paiement intégré** - Orange Money, MTN, Wave via Lygos
+- **Paiement intégré** - Orange Money, MTN, Wave (Lygos, GeniusPay)
 - **Multi-employés** - Accès restreints pour le personnel
 
 ### 👨‍💼 Pour l'administration
 - **Validation des restaurants** - Workflow d'approbation
-- **Gestion des abonnements** - Plans Starter/Pro/Premium
+- **Gestion des abonnements** - Plan MenuPro (25 000 FCFA/mois)
 - **Statistiques globales** - Vue d'ensemble de la plateforme
 - **Logs d'activité** - Traçabilité des actions
 
@@ -33,8 +34,8 @@ MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiri
 - **Frontend** : Livewire 4 + Blade + Alpine.js
 - **Styles** : Tailwind CSS 4
 - **Base de données** : MySQL / PostgreSQL
-- **Paiement** : API Lygos
-- **Stockage** : Laravel Storage (local V1, cloud V2)
+- **Paiement** : Lygos, GeniusPay (Wave, Mobile Money)
+- **Stockage** : Laravel Storage (local, cloud)
 
 ## 🚀 Installation
 
@@ -95,6 +96,8 @@ app/
 ├── Models/
 ├── Services/
 │   ├── LygosGateway.php
+│   ├── GeniusPayGateway.php
+│   ├── StockManager.php
 │   ├── PlanLimiter.php
 │   └── MediaUploader.php
 ├── Jobs/
@@ -137,16 +140,17 @@ resources/views/
 - **Display** : Playfair Display (titres)
 - **Mono** : JetBrains Mono (code)
 
-## 📊 Plans d'abonnement
+## 📊 Plan d'abonnement
 
-| Fonctionnalité | Starter | Pro | Premium |
-|----------------|---------|-----|---------|
-| Prix/mois | 9 900 FCFA | 19 900 FCFA | 39 900 FCFA |
-| Plats | 20 | 50 | Illimité |
-| Catégories | 5 | 15 | Illimité |
-| Employés | 0 | 3 | 10 |
-| Statistiques | Basiques | Avancées | Avancées |
-| Support | Email | Email prioritaire | WhatsApp |
+| Fonctionnalité | MenuPro |
+|----------------|---------|
+| Prix/mois | 25 000 FCFA |
+| Plats | 100 |
+| Catégories | 30 |
+| Employés | 5 |
+| Gestion du stock | ✓ |
+| Commandes/mois | 2 000 |
+| Statistiques | ✓ |
 
 ## 🔒 Sécurité
 
@@ -172,8 +176,41 @@ DB_PASSWORD=
 LYGOS_API_URL=https://api.lygos.ci
 LYGOS_WEBHOOK_SECRET=your-webhook-secret
 
+# GeniusPay (optionnel)
+GENIUSPAY_API_URL=
+GENIUSPAY_WEBHOOK_SECRET=
+
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io
+```
+
+## 📦 Déploiement
+
+### Préparation
+
+```bash
+# Windows
+prepare-deploy.bat
+
+# Ou manuellement
+composer install --no-dev --optimize-autoloader
+npm run build
+```
+
+### Hébergement cPanel
+
+- **Documentation** : `docs/PREPARATION_HEBERGEMENT.md`
+- **Déploiement FTP** : `docs/DEPLOIEMENT_CPANEL.md`
+
+### Commandes utiles (production)
+
+```bash
+# Corriger les données stock (restaurants sans plan, ingrédients orphelins)
+php artisan stock:fix-data --dry-run  # Simulation
+php artisan stock:fix-data            # Application
+
+# Diagnostiquer un 403 sur une page ingrédient
+php artisan stock:diagnose-403 {ingredient_id} {email}
 ```
 
 ## 🧪 Tests

@@ -11,10 +11,13 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
+use App\Services\FusionPayGateway;
 use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
@@ -73,7 +76,10 @@ class CheckoutController extends Controller
             'scheduled_at' => ['nullable', 'date', 'after:now'],
             'promo_code' => ['nullable', 'string', 'max:50'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.dish_id' => ['required', 'exists:dishes,id'],
+            'items.*.dish_id' => [
+                'required',
+                Rule::exists('dishes', 'id')->where('restaurant_id', $restaurant->id),
+            ],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99'],
             'items.*.options' => ['nullable', 'array'],
             'items.*.special_instructions' => ['nullable', 'string', 'max:200'],
@@ -83,11 +89,19 @@ class CheckoutController extends Controller
         $subtotal = 0;
         $orderItems = [];
 
+        // Pré-charger tous les plats en une seule requête (évite N+1)
+        $dishIds = collect($request->items)->pluck('dish_id')->unique()->toArray();
+        $dishes = Dish::whereIn('id', $dishIds)
+            ->where('restaurant_id', $restaurant->id)
+            ->with('optionGroups.options')
+            ->get()
+            ->keyBy('id');
+
         foreach ($request->items as $item) {
-            $dish = Dish::find($item['dish_id']);
-            
-            // Verify dish belongs to restaurant
-            if ($dish->restaurant_id !== $restaurant->id) {
+            $dish = $dishes->get($item['dish_id']);
+
+            // Sécurité : le plat doit exister (déjà validé via Rule::exists avec restaurant_id)
+            if (!$dish) {
                 return back()->with('error', 'Plat invalide.');
             }
 
@@ -101,13 +115,10 @@ class CheckoutController extends Controller
             $selectedOptions = [];
             
             if (!empty($item['options'])) {
+                // Recherche dans les relations déjà eager-loaded (pas de requête SQL supplémentaire)
+                $allOptions = $dish->optionGroups->flatMap(fn ($g) => $g->options);
                 foreach ($item['options'] as $optionId) {
-                    $option = $dish->optionGroups()
-                        ->join('dish_options', 'dish_option_groups.id', '=', 'dish_options.option_group_id')
-                        ->where('dish_options.id', $optionId)
-                        ->select('dish_options.*')
-                        ->first();
-                    
+                    $option = $allOptions->firstWhere('id', $optionId);
                     if ($option) {
                         $optionsPrice += $option->price_adjustment;
                         $selectedOptions[] = [
@@ -203,40 +214,47 @@ class CheckoutController extends Controller
         $baseTotal += $serviceFee;
         $total = $baseTotal;
 
-        // Create order
-        $order = Order::create([
-            'restaurant_id' => $restaurant->id,
-            'customer_name' => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'type' => $orderType,
-            'status' => OrderStatus::PENDING_PAYMENT,
-            'subtotal' => $subtotal,
-            'delivery_fee' => $deliveryFee,
-            'discount_amount' => $discountAmount,
-            'tax_amount' => $taxAmount,
-            'service_fee' => $serviceFee,
-            'total' => $total,
-            'delivery_address' => $request->delivery_address,
-            'delivery_city' => $request->delivery_city,
-            'delivery_latitude' => $request->delivery_latitude,
-            'delivery_longitude' => $request->delivery_longitude,
-            'delivery_instructions' => $request->delivery_instructions,
-            'table_number' => $request->table_number,
-            'customer_notes' => $request->customer_notes,
-            'scheduled_at' => $request->scheduled_at,
-            'estimated_prep_time' => $restaurant->estimated_prep_time,
-        ]);
+        // Create order — transaction atomique : commande + items + promo en une seule opération
+        $order = DB::transaction(function () use (
+            $restaurant, $request, $orderType, $subtotal, $deliveryFee,
+            $discountAmount, $taxAmount, $serviceFee, $total, $orderItems, $promoCode
+        ) {
+            $order = Order::create([
+                'restaurant_id' => $restaurant->id,
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
+                'customer_phone' => $request->customer_phone,
+                'type' => $orderType,
+                'status' => OrderStatus::PENDING_PAYMENT,
+                'subtotal' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'discount_amount' => $discountAmount,
+                'tax_amount' => $taxAmount,
+                'service_fee' => $serviceFee,
+                'total' => $total,
+                'delivery_address' => $request->delivery_address,
+                'delivery_city' => $request->delivery_city,
+                'delivery_latitude' => $request->delivery_latitude,
+                'delivery_longitude' => $request->delivery_longitude,
+                'delivery_instructions' => $request->delivery_instructions,
+                'table_number' => $request->table_number,
+                'customer_notes' => $request->customer_notes,
+                'scheduled_at' => $request->scheduled_at,
+                'estimated_prep_time' => $restaurant->estimated_prep_time,
+            ]);
 
-        // Create order items
-        foreach ($orderItems as $item) {
-            $order->items()->create($item);
-        }
+            // Create order items
+            foreach ($orderItems as $item) {
+                $order->items()->create($item);
+            }
 
-        // Apply promo code
-        if ($promoCode && $discountAmount > 0) {
-            $promoCode->applyToOrder($order, $request->customer_email);
-        }
+            // Apply promo code
+            if ($promoCode && $discountAmount > 0) {
+                $promoCode->applyToOrder($order, $request->customer_email);
+            }
+
+            return $order;
+        });
 
         // Redirect to payment or confirmation
         if ($restaurant->lygos_enabled && $restaurant->getLygosApiKey()) {
@@ -303,6 +321,39 @@ class CheckoutController extends Controller
                 $restaurant->users()
                     ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
                     ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
+            }
+        }
+        // FusionPay: verify by payment_reference (tokenPay) - fallback si webhook pas encore reçu
+        elseif ($order->payment_method === 'fusionpay' && $order->payment_reference && app(FusionPayGateway::class)->isEnabled()) {
+            $paymentTransaction = \App\Models\PaymentTransaction::where('gateway', 'fusionpay')
+                ->where('gateway_transaction_id', $order->payment_reference)->first();
+            if ($paymentTransaction && $paymentTransaction->order_id === $order->id && $paymentTransaction->status !== 'ACCEPTED') {
+                $gateway = app(FusionPayGateway::class);
+                $verify = $gateway->verifyPayment($order->payment_reference);
+                $status = $verify['data']['statut'] ?? null;
+                if ($status === 'paid') {
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($order, $paymentTransaction, $verify, $restaurant) {
+                        $paymentTransaction->update(['status' => 'ACCEPTED', 'metadata' => array_merge($paymentTransaction->metadata ?? [], ['verify' => $verify['data'] ?? []])]);
+                        $order->markAsPaid([
+                            'reference' => $order->payment_reference,
+                            'method' => 'fusionpay',
+                            'metadata' => $verify['data'] ?? [],
+                        ]);
+                        $phone = preg_replace('/\D/', '', $order->restaurant->phone ?? '');
+                        if (str_starts_with($phone, '225')) {
+                            $phone = substr($phone, 3);
+                        }
+                        $fullPhone = '225' . ($phone ?: '0000000000');
+                        $wallet = \App\Models\RestaurantWallet::firstOrCreate(
+                            ['restaurant_id' => $order->restaurant_id],
+                            ['balance' => 0, 'phone' => $fullPhone, 'prefix' => '225']
+                        );
+                        $wallet->increment('balance', $paymentTransaction->amount);
+                        $restaurant->users()
+                            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                            ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
+                    });
+                }
             }
         }
         // Lygos: verify by order reference

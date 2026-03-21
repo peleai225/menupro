@@ -54,10 +54,9 @@
                     <rect width="100%" height="100%" fill="url(#grid)" />
                 </svg>
             </div>
-            
-            <!-- Image de fond : votre image ou visuels par défaut -->
+
+            <!-- Image de fond -->
             @if($customAuthImage)
-                {{-- Votre image en plein fond --}}
                 <div class="absolute inset-0 z-0">
                     <img src="{{ $customAuthImage }}" alt="" class="w-full h-full object-cover" aria-hidden="true">
                 </div>
@@ -74,7 +73,7 @@
                 </div>
             @endif
 
-            <!-- Decorative Blobs (tons neutres pour fond noir) -->
+            <!-- Decorative Blobs -->
             <div class="absolute -right-32 -top-32 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
             <div class="absolute -left-32 -bottom-32 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
             <div class="absolute right-1/4 bottom-1/4 w-64 h-64 bg-neutral-500/10 rounded-full blur-3xl"></div>
@@ -93,14 +92,14 @@
                 <!-- Main Content -->
                 <div class="max-w-lg flex-1 min-h-0 flex flex-col justify-center py-6">
                     <h1 class="font-display text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">
-                        Digitalisez votre restaurant en 
+                        Digitalisez votre restaurant en
                         <span class="text-primary-400">quelques clics</span>
                     </h1>
                     <p class="text-base lg:text-lg xl:text-xl text-neutral-300 leading-relaxed">
                         Rejoignez des centaines de restaurants qui utilisent {{ $appName }} pour gérer leurs menus et commandes en ligne.
                     </p>
-                    
-                    <!-- Stats (données réelles) -->
+
+                    <!-- Stats -->
                     <div class="mt-8 lg:mt-10 xl:mt-12 grid grid-cols-3 gap-4 lg:gap-6 xl:gap-8">
                         <div class="text-center">
                             <div class="text-2xl lg:text-3xl xl:text-4xl font-bold text-white">{{ $restaurantsCount }}</div>
@@ -120,9 +119,9 @@
                 <!-- Testimonial -->
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5 xl:p-6 max-w-lg border border-white/10">
                     <div class="flex items-start gap-4">
-                        <img 
-                            src="https://ui-avatars.com/api/?name=Koffi+Adjoumani&background=f97316&color=fff&size=96" 
-                            alt="Témoignage" 
+                        <img
+                            src="https://ui-avatars.com/api/?name=Koffi+Adjoumani&background=f97316&color=fff&size=96"
+                            alt="Témoignage"
                             class="w-12 h-12 rounded-full ring-2 ring-white/20"
                         >
                         <div>
@@ -140,37 +139,48 @@
         </div>
 
         <!-- Right Side - Form -->
-        <div class="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-white overflow-y-auto min-h-screen lg:min-h-0">
-            <div class="w-full max-w-md py-4 sm:py-6">
-                <!-- Mobile Logo + Données réelles (visible sur mobile/tablette) -->
-                <div class="lg:hidden mb-6 text-center">
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2 sm:gap-3">
-                        @if($logoUrl)
-                            <img src="{{ $logoUrl }}" alt="{{ $appName }}" class="h-10 sm:h-11 w-auto object-contain">
-                        @else
-                            <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-9 sm:h-10 w-auto object-contain">
-                        @endif
-                    </a>
-                    <!-- Stats compactes (données réelles) sur mobile -->
-                    <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-3 text-sm text-neutral-500">
-                        <span><strong class="text-neutral-700">{{ $restaurantsCount }}</strong> Restaurants</span>
-                        <span class="text-neutral-300">•</span>
-                        <span><strong class="text-neutral-700">{{ $ordersCount }}</strong> Commandes</span>
-                        <span class="text-neutral-300">•</span>
-                        <span><strong class="text-neutral-700">99.9%</strong> Uptime</span>
+        <div class="w-full lg:w-1/2 flex flex-col bg-white overflow-y-auto min-h-screen lg:min-h-0">
+            <!-- Mobile Header -->
+            <div class="lg:hidden bg-gradient-to-br from-neutral-900 to-neutral-950 px-5 pt-6 pb-5">
+                <a href="{{ route('home') }}" class="inline-flex items-center gap-2">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" class="h-9 sm:h-10 w-auto object-contain">
+                    @else
+                        <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" class="h-8 sm:h-9 w-auto object-contain brightness-0 invert">
+                    @endif
+                </a>
+                <!-- Stats compactes mobile -->
+                <div class="flex items-center gap-4 mt-4">
+                    <div class="flex-1 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2.5 text-center">
+                        <div class="text-white font-bold text-sm">{{ $restaurantsCount }}</div>
+                        <div class="text-neutral-400 text-[10px] uppercase tracking-wider">Restaurants</div>
+                    </div>
+                    <div class="flex-1 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2.5 text-center">
+                        <div class="text-white font-bold text-sm">{{ $ordersCount }}</div>
+                        <div class="text-neutral-400 text-[10px] uppercase tracking-wider">Commandes</div>
+                    </div>
+                    <div class="flex-1 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2.5 text-center">
+                        <div class="text-white font-bold text-sm">99.9%</div>
+                        <div class="text-neutral-400 text-[10px] uppercase tracking-wider">Uptime</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Form Slot -->
-                {{ $slot }}
+            <!-- Form Content -->
+            <div class="flex-1 flex items-center justify-center px-5 sm:px-6 lg:px-8">
+                <div class="w-full max-w-md py-6 sm:py-8">
+                    {{ $slot }}
+                </div>
+            </div>
 
-                <!-- Footer Links -->
-                <div class="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-neutral-100 text-center">
+            <!-- Footer Links -->
+            <div class="px-5 sm:px-6 lg:px-8 pb-4 sm:pb-6">
+                <div class="max-w-md mx-auto pt-4 sm:pt-6 border-t border-neutral-100 text-center">
                     <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-neutral-500">
                         <a href="{{ route('terms') }}" class="hover:text-primary-600 transition-colors">Conditions</a>
-                        <span class="text-neutral-300">•</span>
+                        <span class="text-neutral-300">·</span>
                         <a href="{{ route('privacy') }}" class="hover:text-primary-600 transition-colors">Confidentialité</a>
-                        <span class="text-neutral-300">•</span>
+                        <span class="text-neutral-300">·</span>
                         <a href="{{ route('home') }}" class="hover:text-primary-600 transition-colors">Accueil</a>
                     </div>
                     <p class="text-xs text-neutral-400 mt-2 sm:mt-3">

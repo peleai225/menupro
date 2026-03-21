@@ -24,6 +24,7 @@ return new class extends Migration
         });
         Schema::table('restaurants', function (Blueprint $table) {
             $table->dropForeign(['referred_by_agent_id']);
+            $table->dropColumn('referred_by_agent_id');
         });
     }
 };

@@ -24,17 +24,21 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('home') }}#features" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('home') }}#features" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group">
                         Fonctionnalités
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-200 rounded-full"></span>
                     </a>
-                    <a href="{{ route('pricing') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('pricing') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('pricing') ? 'text-primary-600' : '' }}">
                         Tarifs
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('pricing') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
-                    <a href="{{ route('faq') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('faq') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('faq') ? 'text-primary-600' : '' }}">
                         FAQ
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('faq') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
-                    <a href="{{ route('contact') }}" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
+                    <a href="{{ route('contact') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('contact') ? 'text-primary-600' : '' }}">
                         Contact
+                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('contact') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                     </a>
                 </div>
 
@@ -134,6 +138,37 @@
     <main class="pt-16">
         {{ $slot }}
     </main>
+
+    <!-- Floating WhatsApp Button -->
+    @php
+        $whatsappNumber = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
+    @endphp
+    @if($whatsappNumber)
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsappNumber) }}?text={{ urlencode('Bonjour, je souhaite en savoir plus sur MenuPro.') }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="fixed bottom-6 right-6 z-50 group"
+           aria-label="Nous contacter sur WhatsApp">
+            <div class="relative">
+                {{-- Pulse ring --}}
+                <span class="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-25"></span>
+                {{-- Button --}}
+                <div class="relative w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-green-500/40 transition-all duration-300">
+                    <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.34 0-4.508-.768-6.258-2.066l-.438-.338-2.652.889.889-2.652-.338-.438A9.964 9.964 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                    </svg>
+                </div>
+                {{-- Tooltip --}}
+                <div class="absolute bottom-full right-0 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div class="bg-neutral-900 text-white text-xs font-medium px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                        Besoin d'aide ? Contactez-nous !
+                        <div class="absolute top-full right-5 w-2 h-2 bg-neutral-900 rotate-45 -translate-y-1"></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    @endif
 
     <!-- Footer -->
     <footer class="bg-neutral-900 text-white">

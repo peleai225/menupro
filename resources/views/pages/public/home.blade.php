@@ -1,4 +1,33 @@
 <x-layouts.public title="Accueil" description="MenuPro : digitalisez votre restaurant, menu en ligne, commandes et paiement Mobile Money. Solution SaaS pour restaurants en Côte d'Ivoire et ailleurs.">
+    @push('head')
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "SoftwareApplication",
+        "name": "MenuPro",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "{{ url('/') }}",
+        "description": "Plateforme SaaS de commande en ligne pour restaurants en Côte d'Ivoire. Paiement Mobile Money, QR codes, gestion de stock.",
+        "offers": {
+            "@@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF"
+        },
+        "author": {
+            "@@type": "Organization",
+            "name": "MenuPro",
+            "url": "{{ url('/') }}"
+        },
+        "aggregateRating": {
+            "@@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+        }
+    }
+    </script>
+    @endpush
+
     <!-- Hero Section - Design moderne avec glassmorphism -->
     <section class="relative min-h-[100vh] bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 overflow-hidden flex items-center" 
              x-data="{ 
@@ -387,36 +416,266 @@
         </div>
     </section>
 
-    <!-- Logos de confiance / Moyens de paiement -->
-    <section class="py-12 sm:py-16 bg-white border-b border-neutral-100">
+    <!-- Trusted By — Bandeau de confiance compact -->
+    <section class="py-8 sm:py-10 bg-white border-b border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-center text-neutral-500 text-sm font-medium mb-8 uppercase tracking-wider">Paiements sécurisés acceptés</p>
             <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
                 <!-- Orange Money -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 0ms">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_vfRbApK454_NJJitH8Cjm4tm6FcBHbYQdA&s" alt="Orange Money" class="h-10 w-auto object-contain rounded">
+                    <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Orange Money</span>
                 </div>
                 <!-- MTN MoMo -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-yellow-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 100ms">
-                    <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                        <span class="text-black font-bold text-sm">MTN</span>
-                    </div>
+                    <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">MTN MoMo</span>
                 </div>
                 <!-- Wave -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 200ms">
-                    <img src="https://play-lh.googleusercontent.com/-Mp3XW7uhwn3KGQxUKGPoc4MbA5ti-3-q23TgoVi9ujBgHWW5n4IySvlG5Exwrxsjw=w240-h480-rw" alt="Wave" class="h-10 w-auto object-contain rounded">
+                    <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Wave</span>
                 </div>
                 <!-- Moov Money -->
                 <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-green-300 hover:shadow-lg transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 300ms">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s" alt="Moov Money" class="h-10 w-auto object-contain rounded">
+                    <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain rounded">
                     <span class="font-semibold text-neutral-700 hidden sm:block">Moov Money</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pourquoi MenuPro — Hero Features -->
+    <section class="py-20 sm:py-28 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.05),transparent_50%)]"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Fait pour la Cote d'Ivoire
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Pourquoi les restaurants choisissent <span class="text-gradient">MenuPro</span>
+                </h2>
+                <p class="text-neutral-600 text-lg mt-4"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Une solution pensee 100% pour le marche africain, pas une copie de solutions occidentales.
+                </p>
+            </div>
+
+            <!-- Hero Feature 1 — Mobile Money -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 sm:mb-28" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        Paiement
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Vos clients paient avec <span class="text-primary-500">leur telephone</span>
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Pas besoin de carte bancaire. Orange Money, Wave, MTN MoMo, Moov Money — les moyens de paiement que vos clients utilisent tous les jours.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Paiement recu directement sur votre compte Wave Business</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Confirmation instantanee par notification</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Zero frais cache, transparence totale</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-8 sm:p-10 border border-emerald-100">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Orange Money</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Wave</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">MTN MoMo</span>
+                            </div>
+                            <div class="bg-white rounded-2xl p-5 shadow-lg shadow-emerald-100/50 border border-emerald-50 text-center hover:-translate-y-1 transition-transform">
+                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="w-14 h-14 object-contain rounded-2xl mx-auto mb-3 shadow-lg">
+                                <span class="text-sm font-bold text-neutral-800">Moov Money</span>
+                            </div>
+                        </div>
+                        {{-- Success animation --}}
+                        <div class="mt-6 bg-white rounded-xl p-4 border border-emerald-100 flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm text-emerald-800">Paiement recu !</div>
+                                <div class="text-xs text-neutral-500">Wave - 12 500 FCFA - il y a 3s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Feature 2 — QR Code par table -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 sm:mb-28" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div class="order-2 lg:order-1 relative" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl p-8 sm:p-10 border border-orange-100">
+                        {{-- QR code card mockup --}}
+                        <div class="bg-white rounded-2xl p-6 shadow-xl border-l-4 border-primary-500 flex gap-6">
+                            <div class="flex-shrink-0">
+                                <div class="w-28 h-28 bg-neutral-100 rounded-xl flex items-center justify-center border border-neutral-200">
+                                    <svg class="w-20 h-20 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2 text-center">Pour consulter le Menu</p>
+                            </div>
+                            <div class="flex flex-col justify-center text-center">
+                                <div class="text-[10px] font-bold tracking-[3px] text-neutral-400 uppercase">T A B L E</div>
+                                <div class="text-4xl font-black text-neutral-900 leading-none">N&deg;05</div>
+                                <div class="text-lg font-black text-neutral-900 mt-1">SCANNEZ</div>
+                                <div class="text-lg font-black text-primary-500">ICI</div>
+                                <div class="w-12 h-0.5 bg-primary-500 mx-auto mt-1 rounded-full"></div>
+                            </div>
+                        </div>
+                        {{-- Grid of small table badges --}}
+                        <div class="mt-6 flex flex-wrap gap-2 justify-center">
+                            @for($i = 1; $i <= 12; $i++)
+                                <div class="w-10 h-10 bg-white rounded-lg border border-orange-200 flex items-center justify-center text-xs font-bold text-neutral-600 hover:bg-primary-500 hover:text-white hover:border-primary-500 transition-all cursor-default {{ $i === 5 ? 'bg-primary-500 text-white border-primary-500 ring-2 ring-primary-300' : '' }}">
+                                    {{ $i }}
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                        Nouveau
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Un <span class="text-primary-500">QR code par table</span>, zero confusion
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Generez un QR code unique pour chaque table de votre restaurant. Quand le client scanne, le numero de table est automatiquement detecte. Plus besoin de demander !
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">PDF pret a imprimer et decoouper</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Numero de table pre-rempli dans la commande</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Le serveur voit d'ou vient chaque commande</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Hero Feature 3 — WhatsApp Notifications -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Communication
+                    </div>
+                    <h3 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-4">
+                        Notifications clients via <span class="text-green-600">WhatsApp</span>
+                    </h3>
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-6">
+                        Vos clients recoivent les mises a jour de leur commande directement sur WhatsApp. Pas d'email ignore, pas d'application a telecharger.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Confirmation de commande automatique</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">"Votre commande est prete !" en temps reel</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-neutral-700 font-medium">Alerte stock bas pour le restaurateur</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 sm:p-10 border border-green-100">
+                        {{-- WhatsApp chat mockup --}}
+                        <div class="space-y-3 max-w-sm mx-auto">
+                            <div class="flex justify-start">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-100 max-w-[85%]">
+                                    <p class="text-sm text-neutral-800 font-medium">Votre commande #1234 a ete confirmee !</p>
+                                    <p class="text-xs text-neutral-500 mt-1">Poulet Braise x2, Attieke x1</p>
+                                    <p class="text-[10px] text-neutral-400 mt-2 text-right">14:32</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-start">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-100 max-w-[85%]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"/></svg>
+                                        </div>
+                                        <p class="text-sm text-neutral-800 font-medium">En preparation... ~15 min</p>
+                                    </div>
+                                    <p class="text-[10px] text-neutral-400 mt-2 text-right">14:35</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-start">
+                                <div class="bg-green-100 rounded-2xl rounded-tl-sm p-4 shadow-sm border border-green-200 max-w-[85%]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                        <p class="text-sm text-green-800 font-bold">Votre commande est prete !</p>
+                                    </div>
+                                    <p class="text-xs text-green-700 mt-1">Rendez-vous au comptoir. Bon appetit !</p>
+                                    <p class="text-[10px] text-green-600 mt-2 text-right">14:48</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -757,6 +1016,64 @@
         </div>
     </section>
 
+    @if(!empty($videos))
+    <!-- Section Vidéos - Dynamique (SystemSetting: home_videos) -->
+    <section id="videos" class="py-20 sm:py-28 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-secondary-100 text-secondary-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Tutoriels vidéo
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Découvrez <span class="text-gradient">MenuPro en vidéo</span>
+                </h2>
+                <p class="text-neutral-600 text-lg mt-4"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Apprenez à utiliser MenuPro grâce à nos tutoriels explicatifs.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
+                @foreach($videos as $index => $video)
+                <div class="group" 
+                     x-show="shown" 
+                     x-transition:enter="transition ease-out duration-700" 
+                     x-transition:enter-start="opacity-0 translate-y-8" 
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     style="transition-delay: {{ $index * 80 }}ms">
+                    <div class="bg-white rounded-2xl overflow-hidden border-2 border-neutral-100 hover:border-primary-200 shadow-lg hover:shadow-xl transition-all duration-500 h-full flex flex-col">
+                        <div class="relative aspect-video bg-neutral-900">
+                            <iframe src="{{ $video['url'] }}?rel=0&modestbranding=1" 
+                                    class="absolute inset-0 w-full h-full"
+                                    title="{{ $video['title'] }}"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
+                        <div class="p-5 lg:p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg font-bold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors">
+                                {{ $video['title'] }}
+                            </h3>
+                            @if(!empty($video['description']))
+                            <p class="text-neutral-600 text-sm leading-relaxed flex-1">
+                                {{ $video['description'] }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Features Section -->
     <section id="features" class="py-24 bg-white relative overflow-hidden">
         <!-- Subtle background pattern -->
@@ -764,16 +1081,21 @@
         
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->
-            <div class="text-center max-w-3xl mx-auto mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <span class="text-primary-500 font-semibold text-sm uppercase tracking-wider"
-                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Fonctionnalités</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold text-neutral-900 mt-4"
+            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                    Fonctionnalites
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Tout ce qu'il faut pour <span class="text-gradient">réussir en ligne</span>
+                    Tout ce qu'il faut pour <span class="text-gradient">reussir en ligne</span>
                 </h2>
                 <p class="text-neutral-600 text-lg mt-4"
                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Une plateforme complète conçue spécialement pour les restaurants ivoiriens.
+                    Une plateforme complete concue specialement pour les restaurants ivoiriens.
                 </p>
             </div>
 
@@ -794,17 +1116,17 @@
                     </div>
                 </div>
 
-                <!-- Feature 2: Paiement Mobile Money -->
+                <!-- Feature 2: Notifications WhatsApp -->
                 <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 50ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-secondary-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-secondary-100 to-secondary-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-green-200 hover:shadow-xl transition-all duration-500 h-full">
+                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-secondary-600 transition-colors">Paiement Mobile Money</h3>
+                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-green-600 transition-colors">Notifications WhatsApp</h3>
                         <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Recevez des paiements via Orange Money, MTN MoMo, Wave et Moov Money en toute sécurité.
+                            Vos clients recoivent confirmation, statut et alerte "pret" directement sur WhatsApp.
                         </p>
                     </div>
                 </div>
@@ -929,17 +1251,17 @@
                     </div>
                 </div>
 
-                <!-- Feature 11: QR Code -->
+                <!-- Feature 11: Mode hors ligne (PWA) -->
                 <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 500ms">
                     <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-cyan-200 hover:shadow-xl transition-all duration-500 h-full">
                         <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-7 h-7 lg:w-8 lg:h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-cyan-600 transition-colors">QR Code personnalisé</h3>
+                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-cyan-600 transition-colors">Mode hors ligne</h3>
                         <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Générez un QR code unique pour votre restaurant. Imprimez-le et placez-le sur vos tables.
+                            Le menu reste consultable meme sans connexion internet. Ideal pour les zones a couverture instable.
                         </p>
                     </div>
                 </div>
@@ -963,68 +1285,79 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section class="py-24 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-primary-100/30 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-secondary-100/30 rounded-full blur-[80px]"></div>
-        
+    <section class="py-24 sm:py-28 bg-gradient-to-b from-neutral-50 via-white to-neutral-50 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary-100/20 rounded-full blur-[100px]"></div>
+
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->
-            <div class="text-center max-w-3xl mx-auto mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <span class="text-primary-500 font-semibold text-sm uppercase tracking-wider"
-                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Témoignages</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold text-neutral-900 mt-4"
+            <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold mb-6"
+                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    Avis clients
+                </span>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                     Ils nous font <span class="text-gradient">confiance</span>
                 </h2>
                 <p class="text-neutral-600 text-lg mt-4"
                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Découvrez ce que nos clients disent de MenuPro
+                    Des restaurateurs ivoiriens racontent leur experience avec MenuPro
                 </p>
             </div>
 
             <!-- Testimonials Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
                 @php
                     $testimonials = [
-                        ['name' => 'Kouamé Yao', 'role' => 'Gérant, Le Maquis du Port', 'location' => 'Abidjan', 'rating' => 5, 'text' => 'Depuis que j\'utilise MenuPro, mes commandes ont augmenté de 40%. Le paiement Mobile Money est un vrai plus pour mes clients.', 'avatar' => '👨‍🍳'],
-                        ['name' => 'Awa Diallo', 'role' => 'Propriétaire, Chez Awa', 'location' => 'Cocody', 'rating' => 5, 'text' => 'Interface simple et intuitive. J\'ai pu créer mon menu en moins d\'une heure. Le support WhatsApp est très réactif !', 'avatar' => '👩‍🍳'],
-                        ['name' => 'Ibrahim Koné', 'role' => 'Directeur, Restaurant Le Sahel', 'location' => 'Marcory', 'rating' => 5, 'text' => 'Mes employés gèrent les commandes facilement. Les statistiques m\'aident à mieux comprendre mes ventes.', 'avatar' => '👨‍💼'],
+                        ['name' => 'Kouame Yao', 'role' => 'Gerant, Le Maquis du Port', 'location' => 'Abidjan', 'rating' => 5, 'text' => 'Depuis que j\'utilise MenuPro, mes commandes ont augmente de 40%. Le paiement Mobile Money est un vrai plus pour mes clients.', 'avatar' => '👨‍🍳', 'highlight' => '+40% commandes'],
+                        ['name' => 'Awa Diallo', 'role' => 'Proprietaire, Chez Awa', 'location' => 'Cocody', 'rating' => 5, 'text' => 'Interface simple et intuitive. J\'ai pu creer mon menu en moins d\'une heure. Le support WhatsApp est tres reactif !', 'avatar' => '👩‍🍳', 'highlight' => 'Menu en 1h'],
+                        ['name' => 'Ibrahim Kone', 'role' => 'Directeur, Restaurant Le Sahel', 'location' => 'Marcory', 'rating' => 5, 'text' => 'Mes employes gerent les commandes facilement. Les statistiques m\'aident a mieux comprendre mes ventes.', 'avatar' => '👨‍💼', 'highlight' => 'Gestion facile'],
                     ];
                 @endphp
 
                 @foreach($testimonials as $index => $testimonial)
-                    <div x-show="shown" 
-                         x-transition:enter="transition ease-out duration-700" 
-                         x-transition:enter-start="opacity-0 translate-y-8" 
+                    <div x-show="shown"
+                         x-transition:enter="transition ease-out duration-700"
+                         x-transition:enter-start="opacity-0 translate-y-8"
                          x-transition:enter-end="opacity-100 translate-y-0"
-                         style="transition-delay: {{ $index * 150 }}ms">
-                        <div class="bg-white rounded-3xl p-8 shadow-lg shadow-neutral-200/50 border border-neutral-100 h-full flex flex-col hover:shadow-xl transition-shadow duration-300">
-                            <!-- Stars -->
-                            <div class="flex gap-1 mb-4">
-                                @for($i = 0; $i < $testimonial['rating']; $i++)
-                                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                @endfor
+                         style="transition-delay: {{ $index * 150 }}ms"
+                         class="group">
+                        <div class="relative bg-white rounded-3xl p-8 shadow-lg shadow-neutral-200/50 border-2 border-neutral-100 h-full flex flex-col hover:border-primary-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+                            <!-- Decorative quote mark -->
+                            <div class="absolute -top-2 -right-2 text-8xl font-serif text-primary-100/60 leading-none select-none pointer-events-none group-hover:text-primary-200/60 transition-colors">"</div>
+
+                            <!-- Top: Stars + Highlight badge -->
+                            <div class="flex items-center justify-between mb-5 relative z-10">
+                                <div class="flex gap-0.5">
+                                    @for($i = 0; $i < $testimonial['rating']; $i++)
+                                        <svg class="w-5 h-5 text-yellow-400 drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    @endfor
+                                </div>
+                                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">{{ $testimonial['highlight'] }}</span>
                             </div>
-                            
+
                             <!-- Quote -->
-                            <blockquote class="text-neutral-700 leading-relaxed flex-1 text-lg">
+                            <blockquote class="text-neutral-700 leading-relaxed flex-1 text-[15px] relative z-10">
                                 "{{ $testimonial['text'] }}"
                             </blockquote>
-                            
+
                             <!-- Author -->
-                            <div class="flex items-center gap-4 mt-6 pt-6 border-t border-neutral-100">
-                                <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center text-2xl">
+                            <div class="flex items-center gap-4 mt-6 pt-6 border-t border-neutral-100 relative z-10">
+                                <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-primary-100/50 group-hover:scale-110 transition-transform duration-300">
                                     {{ $testimonial['avatar'] }}
                                 </div>
                                 <div>
                                     <div class="font-bold text-neutral-900">{{ $testimonial['name'] }}</div>
                                     <div class="text-sm text-neutral-500">{{ $testimonial['role'] }}</div>
-                                    <div class="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <div class="text-xs text-primary-500 flex items-center gap-1 mt-0.5 font-medium">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                                         </svg>
                                         {{ $testimonial['location'] }}
                                     </div>
@@ -1033,6 +1366,29 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            <!-- Social proof bar -->
+            <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10" x-data="{ shown: false }" x-intersect.once="shown = true"
+                 x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                <div class="flex items-center gap-3">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 bg-primary-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👨‍🍳</div>
+                        <div class="w-8 h-8 bg-secondary-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👩‍🍳</div>
+                        <div class="w-8 h-8 bg-accent-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👨‍💼</div>
+                        <div class="w-8 h-8 bg-primary-500 rounded-full ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">+{{ $stats['raw']['restaurants'] > 10 ? $stats['raw']['restaurants'] - 3 : '7' }}</div>
+                    </div>
+                    <span class="text-sm text-neutral-500 font-medium">restaurants satisfaits</span>
+                </div>
+                <div class="hidden sm:block w-px h-6 bg-neutral-200"></div>
+                <div class="flex items-center gap-2">
+                    <div class="flex gap-0.5">
+                        @for($i = 0; $i < 5; $i++)
+                            <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @endfor
+                    </div>
+                    <span class="text-sm text-neutral-500 font-medium">4.9/5 de satisfaction</span>
+                </div>
             </div>
         </div>
     </section>
@@ -1250,111 +1606,109 @@
     </section>
 
     <!-- FAQ Section -->
-    <section id="faq" class="py-24 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <span class="text-primary-500 font-semibold text-sm uppercase tracking-wider"
-                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">FAQ</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold text-neutral-900 mt-4"
-                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Questions fréquentes
-                </h2>
-            </div>
+    <section id="faq" class="py-24 sm:py-28 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-[400px] h-[400px] bg-primary-100/20 rounded-full blur-[120px]"></div>
 
-            <div x-data="{ active: 1 }" class="space-y-4">
-                <!-- FAQ Item 1 -->
-                <div class="bg-white rounded-2xl border border-neutral-200 hover:border-primary-200 transition-colors shadow-sm overflow-hidden">
-                    <button @click="active = active === 1 ? null : 1" class="w-full p-6 text-left flex items-center justify-between gap-4">
-                        <span class="font-semibold text-neutral-900">Comment fonctionne la garantie satisfait ou remboursé ?</span>
-                        <svg :class="{ 'rotate-180': active === 1 }" class="w-5 h-5 text-neutral-500 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div x-show="active === 1" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 max-h-0"
-                         x-transition:enter-end="opacity-100 max-h-96"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100 max-h-96"
-                         x-transition:leave-end="opacity-0 max-h-0"
-                         class="overflow-hidden">
-                        <div class="px-6 pb-6">
-                            <p class="text-neutral-600 leading-relaxed">
-                                Après votre inscription et paiement, votre restaurant sera activé sous 24h. Si vous n'êtes pas satisfait dans les 7 premiers jours, nous vous remboursons intégralement, sans questions. Testez d'abord notre démo pour voir les fonctionnalités.
-                            </p>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-5 gap-12 lg:gap-16">
+                <!-- Left Column: Header + CTA -->
+                <div class="lg:col-span-2" x-data="{ shown: false }" x-intersect.once="shown = true">
+                    <div class="lg:sticky lg:top-28">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-6"
+                              x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            FAQ
+                        </span>
+                        <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
+                            x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                            Questions <span class="text-gradient">frequentes</span>
+                        </h2>
+                        <p class="text-neutral-600 text-lg mt-4 leading-relaxed"
+                           x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                            Vous avez des questions ? Nous avons les reponses. Si vous ne trouvez pas ce que vous cherchez, contactez-nous.
+                        </p>
+
+                        <!-- Contact CTA -->
+                        <div class="mt-8 p-6 bg-gradient-to-br from-primary-50 to-orange-50 rounded-2xl border border-primary-100"
+                             x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-neutral-900 text-sm">Besoin d'aide ?</div>
+                                    <div class="text-xs text-neutral-500">Reponse en moins de 2h</div>
+                                </div>
+                            </div>
+                            @php
+                                $faqWhatsapp = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
+                            @endphp
+                            @if($faqWhatsapp)
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $faqWhatsapp) }}?text=Bonjour%20MenuPro,%20j'ai%20une%20question" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors">
+                                    Ecrire sur WhatsApp
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
 
-                <!-- FAQ Item 2 -->
-                <div class="bg-white rounded-2xl border border-neutral-200 hover:border-primary-200 transition-colors shadow-sm overflow-hidden">
-                    <button @click="active = active === 2 ? null : 2" class="w-full p-6 text-left flex items-center justify-between gap-4">
-                        <span class="font-semibold text-neutral-900">Quels moyens de paiement sont acceptés ?</span>
-                        <svg :class="{ 'rotate-180': active === 2 }" class="w-5 h-5 text-neutral-500 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div x-show="active === 2" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 max-h-0"
-                         x-transition:enter-end="opacity-100 max-h-96"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100 max-h-96"
-                         x-transition:leave-end="opacity-0 max-h-0"
-                         class="overflow-hidden">
-                        <div class="px-6 pb-6">
-                            <p class="text-neutral-600 leading-relaxed">
-                                Vos clients peuvent payer via Orange Money, MTN MoMo, Wave et Moov Money. Les paiements sont sécurisés et vous recevez l'argent directement sur votre compte Mobile Money.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Right Column: FAQ Accordion -->
+                <div class="lg:col-span-3" x-data="{ active: 1 }">
+                    @php
+                        $faqs = [
+                            ['q' => 'Comment fonctionne la garantie satisfait ou rembourse ?', 'a' => 'Apres votre inscription et paiement, votre restaurant sera active sous 24h. Si vous n\'etes pas satisfait dans les 7 premiers jours, nous vous remboursons integralement, sans questions. Testez d\'abord notre demo pour voir les fonctionnalites.', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
+                            ['q' => 'Quels moyens de paiement sont acceptes ?', 'a' => 'Vos clients peuvent payer via Orange Money, MTN MoMo, Wave et Moov Money. Les paiements sont securises et vous recevez l\'argent directement sur votre compte Mobile Money.', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+                            ['q' => 'Puis-je annuler mon abonnement ?', 'a' => 'Oui, vous pouvez annuler a tout moment depuis votre tableau de bord. Vos donnees sont conservees pendant 30 jours apres l\'expiration, vous permettant de reactiver facilement si besoin.', 'icon' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            ['q' => 'Comment mes clients accedent-ils a mon menu ?', 'a' => 'Votre restaurant aura une URL unique (ex: menupro.ci/votre-restaurant). Vous pouvez partager ce lien sur vos reseaux sociaux, par QR code ou SMS. Pas d\'application a telecharger pour vos clients.', 'icon' => 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'],
+                            ['q' => 'Combien de temps pour configurer mon restaurant ?', 'a' => 'En moyenne 15 minutes ! Creez votre compte (2 min), ajoutez vos plats avec photos et prix (10 min), configurez vos horaires (3 min). Votre menu est immediatement en ligne et pret a recevoir des commandes.', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            ['q' => 'Est-ce que MenuPro fonctionne hors ligne ?', 'a' => 'Oui ! Votre menu est accessible meme sans connexion internet grace a notre technologie PWA. Les commandes seront synchronisees automatiquement des que la connexion revient. Ideal pour les zones a couverture instable.', 'icon' => 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0'],
+                        ];
+                    @endphp
 
-                <!-- FAQ Item 3 -->
-                <div class="bg-white rounded-2xl border border-neutral-200 hover:border-primary-200 transition-colors shadow-sm overflow-hidden">
-                    <button @click="active = active === 3 ? null : 3" class="w-full p-6 text-left flex items-center justify-between gap-4">
-                        <span class="font-semibold text-neutral-900">Puis-je annuler mon abonnement ?</span>
-                        <svg :class="{ 'rotate-180': active === 3 }" class="w-5 h-5 text-neutral-500 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div x-show="active === 3" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 max-h-0"
-                         x-transition:enter-end="opacity-100 max-h-96"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100 max-h-96"
-                         x-transition:leave-end="opacity-0 max-h-0"
-                         class="overflow-hidden">
-                        <div class="px-6 pb-6">
-                            <p class="text-neutral-600 leading-relaxed">
-                                Oui, vous pouvez annuler à tout moment depuis votre tableau de bord. Vos données sont conservées pendant 30 jours après l'expiration, vous permettant de réactiver facilement si besoin.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FAQ Item 4 -->
-                <div class="bg-white rounded-2xl border border-neutral-200 hover:border-primary-200 transition-colors shadow-sm overflow-hidden">
-                    <button @click="active = active === 4 ? null : 4" class="w-full p-6 text-left flex items-center justify-between gap-4">
-                        <span class="font-semibold text-neutral-900">Comment mes clients accèdent-ils à mon menu ?</span>
-                        <svg :class="{ 'rotate-180': active === 4 }" class="w-5 h-5 text-neutral-500 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div x-show="active === 4" 
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0 max-h-0"
-                         x-transition:enter-end="opacity-100 max-h-96"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100 max-h-96"
-                         x-transition:leave-end="opacity-0 max-h-0"
-                         class="overflow-hidden">
-                        <div class="px-6 pb-6">
-                            <p class="text-neutral-600 leading-relaxed">
-                                Votre restaurant aura une URL unique (ex: menupro.ci/votre-restaurant). Vous pouvez partager ce lien sur vos réseaux sociaux, par QR code ou SMS. Pas d'application à télécharger pour vos clients.
-                            </p>
-                        </div>
+                    <div class="space-y-4" x-data="{ shown: false }" x-intersect.once="shown = true">
+                        @foreach($faqs as $index => $faq)
+                            <div class="group"
+                                 x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                                 style="transition-delay: {{ $index * 80 }}ms">
+                                <div class="bg-white rounded-2xl border-2 transition-all duration-300 shadow-sm overflow-hidden"
+                                     :class="active === {{ $index + 1 }} ? 'border-primary-300 shadow-lg shadow-primary-100/50' : 'border-neutral-100 hover:border-neutral-200'">
+                                    <button @click="active = active === {{ $index + 1 }} ? null : {{ $index + 1 }}" class="w-full p-5 sm:p-6 text-left flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                                             :class="active === {{ $index + 1 }} ? 'bg-primary-500 shadow-lg shadow-primary-500/30' : 'bg-neutral-100 group-hover:bg-primary-50'">
+                                            <svg class="w-5 h-5 transition-colors duration-300"
+                                                 :class="active === {{ $index + 1 }} ? 'text-white' : 'text-neutral-400 group-hover:text-primary-500'"
+                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $faq['icon'] }}"/>
+                                            </svg>
+                                        </div>
+                                        <span class="font-semibold text-neutral-900 flex-1 text-[15px]">{{ $faq['q'] }}</span>
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                                             :class="active === {{ $index + 1 }} ? 'bg-primary-100 rotate-180' : 'bg-neutral-50'">
+                                            <svg class="w-4 h-4 transition-colors" :class="active === {{ $index + 1 }} ? 'text-primary-600' : 'text-neutral-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </div>
+                                    </button>
+                                    <div x-show="active === {{ $index + 1 }}"
+                                         x-transition:enter="transition ease-out duration-300"
+                                         x-transition:enter-start="opacity-0"
+                                         x-transition:enter-end="opacity-100"
+                                         x-transition:leave="transition ease-in duration-200"
+                                         x-transition:leave-start="opacity-100"
+                                         x-transition:leave-end="opacity-0"
+                                         class="overflow-hidden">
+                                        <div class="px-5 sm:px-6 pb-6 pl-[4.5rem]">
+                                            <p class="text-neutral-600 leading-relaxed">{{ $faq['a'] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -1362,41 +1716,91 @@
     </section>
 
     <!-- CTA Section -->
-    <section id="contact" class="py-32 bg-gradient-to-br from-primary-600 via-primary-500 to-accent-500 relative overflow-hidden">
+    <section id="contact" class="py-28 sm:py-32 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
+        <!-- Background Effects -->
         <div class="absolute inset-0">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.05)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]"></div>
         </div>
-        <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-float"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
-        
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" x-data="{ shown: false }" x-intersect.once="shown = true">
-            <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-                x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                Prêt à digitaliser votre restaurant ?
-            </h2>
-            <p class="text-xl md:text-2xl text-white/90 mt-6 max-w-2xl mx-auto leading-relaxed"
-               x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                Rejoignez les centaines de restaurants qui font confiance à MenuPro pour développer leur activité en ligne.
-            </p>
-            <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
-                 x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                <a href="{{ route('register') }}" class="group inline-flex items-center justify-center gap-2 btn btn-lg bg-white text-primary-600 hover:bg-neutral-50 shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105 whitespace-nowrap">
-                    <span>Créer mon restaurant</span>
-                    <svg class="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                </a>
-                @php
-                    $contactEmail = \App\Models\SystemSetting::get('contact_email', 'contact@menupro.ci');
-                @endphp
-                <a href="mailto:{{ $contactEmail }}" class="inline-flex items-center justify-center btn btn-lg bg-white/10 backdrop-blur-md text-white border-2 border-white/30 hover:bg-white/20 transition-all whitespace-nowrap">
-                    Nous contacter
-                </a>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/15 rounded-full blur-[200px]"></div>
+        <div class="absolute top-10 right-[10%] w-72 h-72 bg-accent-500/10 rounded-full blur-[100px] animate-float"></div>
+        <div class="absolute bottom-10 left-[10%] w-96 h-96 bg-primary-600/10 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ shown: false }" x-intersect.once="shown = true">
+            <!-- Centered Content -->
+            <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 backdrop-blur-sm border border-primary-500/20 rounded-full text-primary-400 text-sm font-semibold mb-8"
+                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-400"></span>
+                    </span>
+                    Commencez des aujourd'hui
+                </div>
+
+                <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Pret a digitaliser
+                    <br class="hidden sm:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-primary-300 to-accent-400">votre restaurant ?</span>
+                </h2>
+                <p class="text-lg md:text-xl text-neutral-400 mt-6 max-w-2xl mx-auto leading-relaxed"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Rejoignez les restaurants qui font confiance a MenuPro. Configuration en 15 minutes, resultats immediats.
+                </p>
+
+                <!-- Stats mini-bar -->
+                <div class="mt-10 inline-flex flex-wrap items-center justify-center gap-6 sm:gap-10 px-8 py-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-white">15 min</div>
+                        <div class="text-xs text-neutral-500 font-medium uppercase tracking-wider mt-1">Configuration</div>
+                    </div>
+                    <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-white">0 F</div>
+                        <div class="text-xs text-neutral-500 font-medium uppercase tracking-wider mt-1">Frais caches</div>
+                    </div>
+                    <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-white">7 jours</div>
+                        <div class="text-xs text-neutral-500 font-medium uppercase tracking-wider mt-1">Satisfait ou rembourse</div>
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    <a href="{{ route('register') }}" class="group relative inline-flex items-center justify-center gap-2 btn btn-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all transform hover:scale-105 hover:-translate-y-0.5 overflow-hidden whitespace-nowrap">
+                        <span class="relative z-10 inline-flex items-center gap-2">
+                            <span>Creer mon restaurant</span>
+                            <svg class="w-5 h-5 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </a>
+                    <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="group inline-flex items-center justify-center gap-2 btn btn-lg bg-white/5 backdrop-blur-xl text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all whitespace-nowrap">
+                        <svg class="w-5 h-5 shrink-0 text-primary-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Voir la demo</span>
+                    </a>
+                    @php
+                        $contactEmail = \App\Models\SystemSetting::get('contact_email', 'contact@menupro.ci');
+                    @endphp
+                    <a href="mailto:{{ $contactEmail }}" class="inline-flex items-center justify-center gap-2 btn btn-lg bg-white/5 backdrop-blur-xl text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all whitespace-nowrap">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Nous contacter
+                    </a>
+                </div>
+
+                <p class="text-neutral-500 mt-8 text-sm"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    Pas de carte bancaire requise &bull; Support WhatsApp reactif &bull; 25 000 FCFA/mois tout inclus
+                </p>
             </div>
-            <p class="text-white/80 mt-10 text-sm md:text-base"
-               x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                Pas de carte bancaire requise • Configuration en 10 minutes • Support réactif
-            </p>
         </div>
     </section>
 

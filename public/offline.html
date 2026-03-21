@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pas de connexion — MenuPro</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,.08);
+        }
+        .icon {
+            width: 80px; height: 80px;
+            background: #fff7ed;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .icon svg { width: 40px; height: 40px; color: #f97316; }
+        h1 { font-size: 1.5rem; font-weight: 700; color: #171717; margin-bottom: .5rem; }
+        p  { color: #737373; line-height: 1.6; margin-bottom: 1.5rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: .5rem;
+            background: #f5f5f5; border-radius: 9999px;
+            padding: .4rem 1rem; font-size: .8rem; color: #525252;
+            margin-bottom: 2rem;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+        .btn {
+            display: block; width: 100%;
+            background: #f97316; color: white;
+            border: none; border-radius: .875rem;
+            padding: .875rem 1rem; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: opacity .2s;
+        }
+        .btn:hover { opacity: .9; }
+        .hint { margin-top: 1rem; font-size: .8rem; color: #a3a3a3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
+            </svg>
+        </div>
+        <h1>Pas de connexion</h1>
+        <p>Il semble que vous soyez hors ligne. Vérifiez votre connexion internet pour continuer à commander.</p>
+        <div class="badge">
+            <span class="dot"></span>
+            Mode hors ligne
+        </div>
+        <button class="btn" onclick="location.reload()">
+            🔄 Réessayer
+        </button>
+        <p class="hint">Vos données de menu peuvent être disponibles en cache.</p>
+    </div>
+</body>
+</html>

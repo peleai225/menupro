@@ -63,6 +63,14 @@
     <meta property="og:image" content="{{ asset('og-image.png') }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $title ?? 'MenuPro — Votre restaurant en ligne' }}">
+    <meta name="twitter:description" content="{{ $description ?? 'Créez le site de commande de votre restaurant en quelques minutes.' }}">
+    <meta name="twitter:image" content="{{ asset('og-image.png') }}">
+
+    @stack('head')
+
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     

@@ -200,10 +200,10 @@
 
                             <!-- Payment Methods -->
                             <div class="flex items-center justify-center gap-3 mt-4">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_vfRbApK454_NJJitH8Cjm4tm6FcBHbYQdA&s" alt="Orange Money" class="h-6 rounded opacity-80">
-                                <div class="px-2 py-1 bg-yellow-500 rounded text-black text-xs font-bold">MTN</div>
-                                <img src="https://play-lh.googleusercontent.com/-Mp3XW7uhwn3KGQxUKGPoc4MbA5ti-3-q23TgoVi9ujBgHWW5n4IySvlG5Exwrxsjw=w240-h480-rw" alt="Wave" class="h-6 rounded opacity-80">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s" alt="Moov Money" class="h-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-6 w-6 rounded opacity-80">
+                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-6 w-6 rounded opacity-80">
                             </div>
                         </x-card>
                     </div>

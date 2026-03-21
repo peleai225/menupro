@@ -31,9 +31,15 @@
                     <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" 
+                    <input type="text"
                            x-model="search"
-                           placeholder="Rechercher une question..." 
+                           @input="
+                               const s = search.toLowerCase();
+                               document.querySelectorAll('[data-faq-item]').forEach(el => {
+                                   el.style.display = !s || el.textContent.toLowerCase().includes(s) ? '' : 'none';
+                               });
+                           "
+                           placeholder="Rechercher une question..."
                            class="block w-full pl-12 pr-4 py-4 text-lg bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm">
                 </div>
             </div>
@@ -63,15 +69,15 @@
                 <!-- General Questions -->
                 <div x-show="activeTab === 'general'" x-transition class="space-y-4">
                     <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions générales</h2>
-                    
+
                     @foreach([
-                        ['q' => "Qu'est-ce que MenuPro ?", 'a' => "MenuPro est une plateforme SaaS qui permet aux restaurants de digitaliser leur activité. Créez votre menu en ligne, recevez des commandes, gérez vos réservations et analysez vos performances depuis un seul tableau de bord."],
-                        ['q' => "Comment créer mon restaurant sur MenuPro ?", 'a' => "C'est simple ! Cliquez sur \"Créer mon restaurant\", remplissez le formulaire d'inscription avec les informations de votre établissement, et votre menu sera en ligne en quelques minutes. Vous bénéficiez d'une période d'essai gratuite pour tester toutes les fonctionnalités."],
+                        ['q' => "Qu'est-ce que MenuPro ?", 'a' => "MenuPro est une plateforme SaaS qui permet aux restaurants en Côte d'Ivoire de digitaliser leur activité. Créez votre menu en ligne, recevez des commandes, gérez votre stock et analysez vos performances depuis un seul tableau de bord."],
+                        ['q' => "Comment créer mon restaurant sur MenuPro ?", 'a' => "C'est simple ! Cliquez sur \"Créer mon restaurant\", remplissez le formulaire d'inscription avec les informations de votre établissement, et votre menu sera en ligne en quelques minutes."],
                         ['q' => "Dois-je avoir des compétences techniques ?", 'a' => "Absolument pas ! MenuPro est conçu pour être utilisé par tous. L'interface est intuitive et ne nécessite aucune connaissance en programmation. Si vous savez utiliser un smartphone, vous saurez utiliser MenuPro."],
                         ['q' => "Puis-je personnaliser l'apparence de mon menu ?", 'a' => "Oui ! Vous pouvez ajouter votre logo, personnaliser les couleurs, ajouter des photos de vos plats, et bien plus. Votre menu reflétera parfaitement l'identité de votre restaurant."],
                         ['q' => "MenuPro fonctionne-t-il sur mobile ?", 'a' => "Oui, MenuPro est entièrement responsive. Vos clients peuvent commander depuis leur smartphone, tablette ou ordinateur. Le tableau de bord de gestion est également accessible sur tous les appareils."],
                     ] as $index => $faq)
-                        <div x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                             <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
                                 <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
                                 <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,15 +96,15 @@
                 <!-- Pricing Questions -->
                 <div x-show="activeTab === 'pricing'" x-transition class="space-y-4">
                     <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions sur les tarifs</h2>
-                    
+
                     @foreach([
-                        ['q' => "Combien coûte MenuPro ?", 'a' => "MenuPro propose différents plans adaptés à vos besoins. Consultez notre page Tarifs pour découvrir nos offres. Nous proposons également une période d'essai gratuite pour tester la plateforme."],
-                        ['q' => "Y a-t-il des frais cachés ?", 'a' => "Non, absolument aucun frais caché. Le prix affiché est le prix que vous payez. Pas de commission sur les commandes, pas de frais de mise en service, pas de frais de résiliation."],
-                        ['q' => "Puis-je changer de plan à tout moment ?", 'a' => "Oui ! Vous pouvez upgrader ou downgrader votre plan à tout moment. Le changement prend effet immédiatement et la facturation est ajustée au prorata."],
-                        ['q' => "Quels moyens de paiement acceptez-vous ?", 'a' => "Nous acceptons les paiements par carte bancaire et mobile money (Orange Money, MTN Money, Wave, etc.) via notre partenaire de paiement sécurisé."],
-                        ['q' => "Proposez-vous des réductions pour un engagement annuel ?", 'a' => "Oui ! Nous offrons des réductions significatives pour les engagements trimestriels, semestriels et annuels. Plus la durée est longue, plus la réduction est importante."],
+                        ['q' => "Combien coûte MenuPro ?", 'a' => "MenuPro propose un seul plan tout inclus à partir de 25 000 FCFA/mois. Toutes les fonctionnalités sont incluses, sans surprise. Consultez notre page Tarifs pour découvrir les réductions selon la durée d'engagement."],
+                        ['q' => "Y a-t-il des frais cachés ?", 'a' => "Non, absolument aucun frais caché. Le prix affiché est le prix que vous payez. Pas de frais de mise en service, pas de frais de résiliation. Des add-ons optionnels sont disponibles si vous souhaitez aller plus loin."],
+                        ['q' => "Puis-je choisir ma durée d'abonnement ?", 'a' => "Oui ! Vous pouvez souscrire au mois, au trimestre, au semestre ou à l'année. Plus la durée est longue, plus vous économisez — jusqu'à 15% de réduction sur l'abonnement annuel."],
+                        ['q' => "Quels moyens de paiement acceptez-vous ?", 'a' => "Nous acceptons les paiements par Mobile Money : Wave, Orange Money, MTN Money et Moov Money. Tous les paiements sont sécurisés via nos partenaires certifiés."],
+                        ['q' => "Proposez-vous des réductions pour un engagement annuel ?", 'a' => "Oui ! Vous bénéficiez de 7% de réduction en trimestriel, 13% en semestriel et 15% en annuel. Plus la durée est longue, plus la réduction est importante."],
                     ] as $faq)
-                        <div x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                             <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
                                 <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
                                 <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,16 +123,16 @@
                 <!-- Features Questions -->
                 <div x-show="activeTab === 'features'" x-transition class="space-y-4">
                     <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions sur les fonctionnalités</h2>
-                    
+
                     @foreach([
                         ['q' => "Comment mes clients passent-ils commande ?", 'a' => "Vos clients scannent le QR code sur leur table ou accèdent à votre menu via le lien que vous partagez. Ils peuvent ensuite parcourir le menu, ajouter des articles au panier et passer commande. Vous recevez une notification instantanée."],
                         ['q' => "Puis-je gérer les commandes en livraison et sur place ?", 'a' => "Oui ! MenuPro supporte tous les types de commandes : sur place, à emporter et en livraison. Vous pouvez activer ou désactiver chaque option selon vos besoins."],
-                        ['q' => "Comment fonctionne le système de réservation ?", 'a' => "Les clients peuvent réserver une table directement depuis votre page. Vous recevez une notification et pouvez accepter ou refuser la réservation depuis votre tableau de bord."],
                         ['q' => "Puis-je gérer mon stock avec MenuPro ?", 'a' => "Oui ! Le module de gestion des stocks vous permet de suivre vos ingrédients, définir des alertes de stock bas, et même désactiver automatiquement un plat quand un ingrédient est épuisé."],
                         ['q' => "Comment créer des codes promo ?", 'a' => "Dans votre tableau de bord, accédez à la section \"Codes Promo\". Vous pouvez créer des réductions en pourcentage ou en montant fixe, définir des limites d'utilisation et des dates de validité."],
-                        ['q' => "Puis-je avoir plusieurs utilisateurs pour mon restaurant ?", 'a' => "Oui ! Selon votre plan, vous pouvez inviter des membres de votre équipe avec différents niveaux d'accès (admin, employé). Chacun peut gérer les commandes depuis son propre compte."],
+                        ['q' => "Puis-je avoir plusieurs utilisateurs pour mon restaurant ?", 'a' => "Oui ! Votre abonnement inclut jusqu'à 5 employés. Vous pouvez inviter des membres de votre équipe avec différents niveaux d'accès (admin, employé). Chacun peut gérer les commandes depuis son propre compte. Des employés supplémentaires sont disponibles en add-on."],
+                        ['q' => "Comment fonctionne le QR code par table ?", 'a' => "MenuPro génère un QR code unique pour chaque table de votre restaurant. Vos clients scannent le QR code et accèdent directement au menu avec le numéro de table pré-rempli. Vous pouvez télécharger et imprimer tous vos QR codes en PDF."],
                     ] as $faq)
-                        <div x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                             <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
                                 <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
                                 <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,15 +151,15 @@
                 <!-- Technical Questions -->
                 <div x-show="activeTab === 'technical'" x-transition class="space-y-4">
                     <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions techniques</h2>
-                    
+
                     @foreach([
-                        ['q' => "Comment imprimer mon QR code ?", 'a' => "Dans votre tableau de bord, accédez à la section \"QR Code\". Vous pouvez télécharger votre QR code en format PNG ou SVG, choisir la taille, et même imprimer un modèle prêt à l'emploi avec le nom de votre restaurant."],
-                        ['q' => "Les paiements en ligne sont-ils sécurisés ?", 'a' => "Absolument ! Nous utilisons des partenaires de paiement certifiés et conformes aux normes de sécurité les plus strictes (PCI-DSS). Vos données et celles de vos clients sont protégées par un chiffrement SSL."],
-                        ['q' => "Que se passe-t-il si j'ai un problème technique ?", 'a' => "Notre équipe de support est disponible par email et via le formulaire de contact. Nous nous engageons à répondre sous 24h. Les clients des plans Premium bénéficient d'un support prioritaire."],
-                        ['q' => "Puis-je exporter mes données ?", 'a' => "Oui ! Vous pouvez exporter vos commandes, clients et statistiques au format CSV. Vos données vous appartiennent et vous pouvez les récupérer à tout moment."],
+                        ['q' => "Comment imprimer mon QR code ?", 'a' => "Dans votre tableau de bord, accédez à la section \"QR Code\". Vous pouvez télécharger vos QR codes par table en format PDF prêt à imprimer, ou générer une carte format réseaux sociaux pour partager sur Facebook et Instagram."],
+                        ['q' => "Les paiements en ligne sont-ils sécurisés ?", 'a' => "Absolument ! Nous utilisons des partenaires de paiement certifiés (Wave, CinetPay, FusionPay) conformes aux normes de sécurité. Vos données et celles de vos clients sont protégées par un chiffrement SSL."],
+                        ['q' => "Que se passe-t-il si j'ai un problème technique ?", 'a' => "Notre équipe de support est disponible par email et via le formulaire de contact. Nous nous engageons à répondre sous 24h. Un add-on Support Prioritaire est également disponible pour une assistance sous 2h."],
+                        ['q' => "Puis-je exporter mes données ?", 'a' => "Oui ! Vous pouvez exporter vos commandes et statistiques au format Excel. Vos données vous appartiennent et vous pouvez les récupérer à tout moment."],
                         ['q' => "MenuPro est-il disponible hors connexion ?", 'a' => "MenuPro nécessite une connexion internet pour fonctionner. Cependant, le menu public de vos clients est optimisé pour charger rapidement même avec une connexion lente."],
                     ] as $faq)
-                        <div x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                             <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
                                 <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
                                 <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,14 +4,17 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
+use App\Exports\RestaurantsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Restaurant;
 use App\Models\Subscription;
+use App\Notifications\RestaurantRejectedNotification;
 use App\Notifications\RestaurantValidatedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RestaurantController extends Controller
 {
@@ -135,6 +138,22 @@ class RestaurantController extends Controller
     }
 
     /**
+     * Add commission balance for MenuPro Hub.
+     */
+    public function addCommission(Request $request, Restaurant $restaurant): RedirectResponse
+    {
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:1000', 'max:10000000'],
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $amount = (float) $request->amount;
+        $restaurant->increment('commission_wallet_balance', $amount);
+
+        return back()->with('success', number_format($amount, 0, ',', ' ') . ' F crédités sur le solde MenuPro Hub.');
+    }
+
+    /**
      * Approve a pending restaurant.
      */
     public function approve(Restaurant $restaurant): RedirectResponse
@@ -191,8 +210,7 @@ class RestaurantController extends Controller
 
         // Notify owner
         if ($restaurant->owner) {
-            // TODO: Create RestaurantRejectedNotification
-            // $restaurant->owner->notify(new RestaurantRejectedNotification($restaurant, $request->rejection_reason));
+            $restaurant->owner->notify(new RestaurantRejectedNotification($restaurant, $request->rejection_reason));
         }
 
         return back()->with('success', 'Restaurant rejeté. Le propriétaire a été notifié.');
@@ -312,6 +330,16 @@ class RestaurantController extends Controller
         ]);
 
         return back()->with('success', 'Vérification retirée.');
+    }
+
+    /**
+     * Export restaurants list to Excel.
+     */
+    public function export(Request $request)
+    {
+        $filename = 'restaurants_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new RestaurantsExport($request), $filename);
     }
 
     /**

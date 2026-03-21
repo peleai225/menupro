@@ -4,60 +4,68 @@
         class="animate-fade-in"
     >
         <!-- Progress Steps -->
-        <div class="mb-6 sm:mb-8">
-            <div class="flex items-center justify-between mb-3 sm:mb-4">
+        <div class="mb-8 sm:mb-10">
+            <div class="flex items-center justify-between">
                 <!-- Step 1 -->
-                <div class="flex items-center">
-                    <div 
-                        class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300"
-                        :class="step >= 1 ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-400'"
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
+                        :class="step >= 1 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
                     >
                         <template x-if="step > 1">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                             </svg>
                         </template>
                         <template x-if="step <= 1">
                             <span>1</span>
                         </template>
                     </div>
-                    <span class="ml-2 text-sm font-medium hidden sm:block" :class="step >= 1 ? 'text-neutral-900' : 'text-neutral-400'">Compte</span>
+                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 1 ? 'text-neutral-900' : 'text-neutral-400'">Compte</span>
                 </div>
-                
+
                 <!-- Connector -->
-                <div class="flex-1 h-0.5 mx-4 rounded transition-colors duration-300" :class="step > 1 ? 'bg-primary-500' : 'bg-neutral-200'"></div>
-                
+                <div class="flex-1 h-0.5 mx-3 sm:mx-4 rounded-full overflow-hidden bg-neutral-200">
+                    <div class="h-full bg-primary-500 transition-all duration-500 rounded-full" :style="step > 1 ? 'width: 100%' : 'width: 0%'"></div>
+                </div>
+
                 <!-- Step 2 -->
-                <div class="flex items-center">
-                    <div 
-                        class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300"
-                        :class="step >= 2 ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-400'"
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
+                        :class="step >= 2 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
                     >
                         <template x-if="step > 2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                             </svg>
                         </template>
                         <template x-if="step <= 2">
                             <span>2</span>
                         </template>
                     </div>
-                    <span class="ml-2 text-sm font-medium hidden sm:block" :class="step >= 2 ? 'text-neutral-900' : 'text-neutral-400'">Restaurant</span>
+                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 2 ? 'text-neutral-900' : 'text-neutral-400'">Restaurant</span>
                 </div>
-                
+
                 <!-- Connector -->
-                <div class="flex-1 h-0.5 mx-4 rounded transition-colors duration-300" :class="step > 2 ? 'bg-primary-500' : 'bg-neutral-200'"></div>
-                
+                <div class="flex-1 h-0.5 mx-3 sm:mx-4 rounded-full overflow-hidden bg-neutral-200">
+                    <div class="h-full bg-primary-500 transition-all duration-500 rounded-full" :style="step > 2 ? 'width: 100%' : 'width: 0%'"></div>
+                </div>
+
                 <!-- Step 3 -->
-                <div class="flex items-center">
-                    <div 
-                        class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300"
-                        :class="step >= 3 ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-400'"
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
+                        :class="step >= 3 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
                     >
                         <span>3</span>
                     </div>
-                    <span class="ml-2 text-sm font-medium hidden sm:block" :class="step >= 3 ? 'text-neutral-900' : 'text-neutral-400'">Plan</span>
+                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 3 ? 'text-neutral-900' : 'text-neutral-400'">Plan</span>
                 </div>
+            </div>
+            <!-- Step label for mobile -->
+            <div class="sm:hidden mt-3 text-center">
+                <span class="text-xs font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-full" x-text="step === 1 ? 'Étape 1 : Compte' : (step === 2 ? 'Étape 2 : Restaurant' : 'Étape 3 : Plan')"></span>
             </div>
         </div>
 
@@ -87,9 +95,9 @@
             <!-- STEP 1: Account Information -->
             <!-- ============================================== -->
             <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="text-center lg:text-left mb-4 sm:mb-6">
-                    <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Créez votre compte</h1>
-                    <p class="text-neutral-500 mt-1 text-sm sm:text-base">Commencez par vos informations personnelles.</p>
+                <div class="text-center lg:text-left mb-5 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Créez votre compte</h1>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Commencez par vos informations personnelles.</p>
                 </div>
 
                 <div class="space-y-4">
@@ -112,7 +120,7 @@
                                 placeholder="Jean Kouassi"
                                 required
                                 autocomplete="name"
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                             >
                         </div>
                     </div>
@@ -136,7 +144,7 @@
                                 placeholder="vous@exemple.com"
                                 required
                                 autocomplete="email"
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                             >
                         </div>
                     </div>
@@ -160,7 +168,7 @@
                                 placeholder="+225 07 00 00 00 00"
                                 required
                                 autocomplete="tel"
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                             >
                         </div>
                     </div>
@@ -185,7 +193,7 @@
                                 required
                                 minlength="8"
                                 autocomplete="new-password"
-                                class="w-full h-12 pl-12 pr-12 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full h-12 pl-12 pr-12 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                             >
                             <button 
                                 type="button" 
@@ -212,14 +220,14 @@
                     </div>
                 </div>
 
-                <button 
-                    type="button" 
-                    @click="if(validateStep1()) step = 2" 
-                    class="btn btn-primary w-full h-12 mt-6"
+                <button
+                    type="button"
+                    @click="if(validateStep1()) step = 2"
+                    class="btn btn-primary w-full h-13 mt-6 text-base font-semibold shadow-lg shadow-primary-500/20"
                     :class="{ 'opacity-50 cursor-not-allowed': !validateStep1() }"
                 >
                     Continuer
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </button>
@@ -229,9 +237,9 @@
             <!-- STEP 2: Restaurant Information -->
             <!-- ============================================== -->
             <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="text-center lg:text-left mb-6">
-                    <h1 class="text-2xl font-bold text-neutral-900">Votre restaurant</h1>
-                    <p class="text-neutral-500 mt-1">Personnalisez l'identité de votre établissement.</p>
+                <div class="text-center lg:text-left mb-5 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Votre restaurant</h1>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Personnalisez l'identité de votre établissement.</p>
                 </div>
 
                 <div class="space-y-5">
@@ -253,7 +261,7 @@
                                 x-model="formData.restaurant_name"
                                 placeholder="Le Délice"
                                 required
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white"
                             >
                         </div>
                     </div>
@@ -269,7 +277,7 @@
                                 name="restaurant_type" 
                                 x-model="formData.restaurant_type"
                                 required
-                                class="w-full h-12 pl-4 pr-10 bg-white border border-neutral-200 rounded-xl text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
+                                class="w-full h-12 pl-4 pr-10 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white appearance-none"
                             >
                                 <option value="">Sélectionnez un type</option>
                                 <option value="restaurant">Restaurant</option>
@@ -306,7 +314,7 @@
                                 name="company_name" 
                                 x-model="formData.company_name"
                                 placeholder="SARL Le Délice (optionnel)"
-                                class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('company_name') border-red-500 @enderror"
+                                class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white @error('company_name') border-red-400 bg-red-50 @enderror"
                             >
                         </div>
                         @error('company_name')
@@ -342,7 +350,7 @@
                                     name="rccm" 
                                     x-model="formData.rccm"
                                     placeholder="CI-ABJ-XX-2024-XXXXX"
-                                    class="w-full h-12 pl-12 pr-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('rccm') border-red-500 @enderror"
+                                    class="w-full h-12 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white @error('rccm') border-red-400 bg-red-50 @enderror"
                                 >
                             </div>
                             @error('rccm')
@@ -361,7 +369,7 @@
                                     id="rccm_document"
                                     name="rccm_document" 
                                     accept=".pdf,.jpg,.jpeg,.png"
-                                    class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 @error('rccm_document') border-red-500 @enderror"
+                                    class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 @error('rccm_document') border-red-400 bg-red-50 @enderror"
                                 >
                             </div>
                             @error('rccm_document')
@@ -465,9 +473,9 @@
             <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                  x-data="pricingCalculator()" 
                  x-init="init(); formData.plan = 'menupro';">
-                <div class="text-center lg:text-left mb-6">
-                    <h1 class="text-2xl font-bold text-neutral-900">Choisissez votre abonnement</h1>
-                    <p class="text-neutral-500 mt-1">Un seul plan, toutes les fonctionnalités. Économisez jusqu'à 15% avec l'abonnement annuel.</p>
+                <div class="text-center lg:text-left mb-5 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Choisissez votre abonnement</h1>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Un seul plan, toutes les fonctionnalités. Économisez jusqu'à 15%.</p>
                 </div>
 
                 <!-- Hidden inputs for form submission -->
@@ -485,74 +493,35 @@
                     <!-- Left Column: Features & Add-ons -->
                     <div class="lg:col-span-2 space-y-6">
                         <!-- Features List -->
-                        <div class="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
-                            <h2 class="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                        <div class="bg-neutral-50 rounded-xl p-5 sm:p-6 border border-neutral-200">
+                            <h2 class="text-lg sm:text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                Fonctionnalités incluses
+                                Tout est inclus
                             </h2>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                @foreach([
+                                    '100 plats & 30 catégories',
+                                    '2 000 commandes/mois',
+                                    '5 comptes employés',
+                                    'QR codes par table',
+                                    'Gestion de stock & alertes',
+                                    'Gestion livraison',
+                                    'Statistiques & rapports',
+                                    'Réservations en ligne',
+                                    'Avis clients',
+                                    'Paiement Mobile Money',
+                                    'Dashboard temps réel',
+                                    'Export Excel/PDF',
+                                ] as $f)
                                 <div class="flex items-center gap-2 text-sm text-neutral-700">
                                     <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                    <span>100 plats max</span>
+                                    <span>{{ $f }}</span>
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>30 catégories</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>5 employés</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>2 000 commandes/mois</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Gestion livraison</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Stock en temps réel</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Statistiques avancées</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Réservations en ligne</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Avis clients</span>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Paiement Lygos</span>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
 
@@ -785,16 +754,19 @@
         </form>
 
         <!-- Login Link -->
-        <div class="relative my-6">
+        <div class="relative my-8">
             <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-neutral-200"></div>
             </div>
-            <div class="relative flex justify-center text-sm">
-                <span class="px-4 bg-white text-neutral-500">Déjà inscrit ?</span>
+            <div class="relative flex justify-center text-xs sm:text-sm">
+                <span class="px-4 bg-white text-neutral-400 font-medium">Déjà inscrit ?</span>
             </div>
         </div>
 
-        <a href="{{ route('login') }}" class="btn btn-ghost w-full h-12">
+        <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 w-full h-13 border-2 border-neutral-200 rounded-xl text-neutral-700 font-semibold hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/50 transition-all duration-200">
+            <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            </svg>
             Se connecter à mon compte
         </a>
     </div>

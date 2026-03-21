@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\RestaurantStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -38,10 +39,10 @@ class DashboardController extends Controller
             ],
             'revenue' => [
                 'total' => Order::withoutGlobalScope('restaurant')
-                    ->where('payment_status', 'completed')
+                    ->where('payment_status', PaymentStatus::COMPLETED)
                     ->sum('total'),
                 'this_month' => Order::withoutGlobalScope('restaurant')
-                    ->where('payment_status', 'completed')
+                    ->where('payment_status', PaymentStatus::COMPLETED)
                     ->whereMonth('created_at', now()->month)
                     ->whereYear('created_at', now()->year)
                     ->sum('total'),
@@ -135,6 +136,10 @@ class DashboardController extends Controller
             'geniuspay_api_secret' => \App\Models\SystemSetting::get('geniuspay_api_secret', ''),
             'geniuspay_webhook_secret' => \App\Models\SystemSetting::get('geniuspay_webhook_secret', ''),
             'geniuspay_mode' => \App\Models\SystemSetting::get('geniuspay_mode', 'sandbox'),
+            'menupo_hub_webhook_secret' => \App\Models\SystemSetting::get('menupo_hub_webhook_secret', config('services.menupo_hub.webhook_secret', '')),
+            'fusionpay_enabled' => \App\Models\SystemSetting::get('fusionpay_enabled', false),
+            'fusionpay_api_url' => \App\Models\SystemSetting::get('fusionpay_api_url', config('fusionpay.api_url', '')),
+            'fusionpay_private_key' => \App\Models\SystemSetting::get('fusionpay_private_key', config('fusionpay.private_key', '')),
             'geoapify_api_key' => \App\Models\SystemSetting::get('geoapify_api_key', ''),
             'smtp_host' => \App\Models\SystemSetting::get('smtp_host', config('mail.mailers.smtp.host', '')),
             'smtp_port' => \App\Models\SystemSetting::get('smtp_port', config('mail.mailers.smtp.port', '587')),
@@ -152,6 +157,7 @@ class DashboardController extends Controller
             'social_instagram' => \App\Models\SystemSetting::get('social_instagram', ''),
             'social_linkedin' => \App\Models\SystemSetting::get('social_linkedin', ''),
             'footer_text' => \App\Models\SystemSetting::get('footer_text', '© ' . date('Y') . ' MenuPro. Tous droits réservés.'),
+            'home_videos' => \App\Models\SystemSetting::get('home_videos', []),
             // Commando – commissions agents (priorité au backoffice, sinon config)
             'commando_commission_cents_first_payment' => \App\Models\SystemSetting::has('commando_commission_cents_first_payment')
                 ? (int) \App\Models\SystemSetting::get('commando_commission_cents_first_payment', config('commando.commission_cents_first_payment', 500000))
@@ -159,6 +165,10 @@ class DashboardController extends Controller
             'commando_commission_only_first_payment' => \App\Models\SystemSetting::has('commando_commission_only_first_payment')
                 ? \App\Models\SystemSetting::get('commando_commission_only_first_payment', true)
                 : config('commando.commission_only_first_payment', true),
+            // Wave – configuration globale Plateforme (Checkout + Payout)
+            'wave_api_key' => \App\Models\SystemSetting::get('wave_api_key', config('wave.api_key', '')),
+            'wave_signing_secret' => \App\Models\SystemSetting::get('wave_signing_secret', config('wave.signing_secret', '')),
+            'wave_commission_rate' => \App\Models\SystemSetting::get('wave_commission_rate', config('wave.commission_rate', 0.02)),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -188,7 +198,15 @@ class DashboardController extends Controller
             'geniuspay_api_secret' => ['nullable', 'string'],
             'geniuspay_webhook_secret' => ['nullable', 'string'],
             'geniuspay_mode' => ['nullable', 'in:sandbox,live'],
+            'menupo_hub_webhook_secret' => ['nullable', 'string'],
+            'fusionpay_enabled' => ['boolean'],
+            'fusionpay_api_url' => ['nullable', 'string', 'url'],
+            'fusionpay_private_key' => ['nullable', 'string'],
             'geoapify_api_key' => ['nullable', 'string'],
+            // Wave – API globale
+            'wave_api_key' => ['nullable', 'string'],
+            'wave_signing_secret' => ['nullable', 'string'],
+            'wave_commission_rate' => ['nullable', 'numeric', 'min:0', 'max:1'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'smtp_encryption' => ['nullable', 'string', 'in:tls,ssl,'],
@@ -206,6 +224,10 @@ class DashboardController extends Controller
             'social_instagram' => ['nullable', 'url'],
             'social_linkedin' => ['nullable', 'url'],
             'footer_text' => ['nullable', 'string', 'max:500'],
+            'home_videos' => ['nullable', 'array'],
+            'home_videos.*.title' => ['nullable', 'string', 'max:255'],
+            'home_videos.*.url' => ['nullable', 'string', 'url', 'max:500'],
+            'home_videos.*.description' => ['nullable', 'string', 'max:500'],
             'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
             'commando_commission_only_first_payment' => ['boolean'],
         ]);
@@ -258,8 +280,29 @@ class DashboardController extends Controller
         if ($request->filled('geniuspay_mode')) {
             \App\Models\SystemSetting::set('geniuspay_mode', $request->geniuspay_mode, 'string', 'Mode GeniusPay (sandbox/live)');
         }
+        if ($request->filled('menupo_hub_webhook_secret')) {
+            \App\Models\SystemSetting::set('menupo_hub_webhook_secret', $request->menupo_hub_webhook_secret, 'string', 'Secret webhook MenuPro Hub (vérification paiements SMS)');
+        }
+        \App\Models\SystemSetting::set('fusionpay_enabled', $request->boolean('fusionpay_enabled'), 'boolean', 'Activer FusionPay (paiements + transferts)');
+        if ($request->filled('fusionpay_api_url')) {
+            \App\Models\SystemSetting::set('fusionpay_api_url', $request->fusionpay_api_url, 'string', 'URL API FusionPay (pay-in)');
+        }
+        if ($request->filled('fusionpay_private_key')) {
+            \App\Models\SystemSetting::set('fusionpay_private_key', $request->fusionpay_private_key, 'string', 'Clé privée FusionPay (pay-out)');
+        }
         if ($request->filled('geoapify_api_key')) {
             \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');
+        }
+        // Wave – settings globaux (API key, secret, commission)
+        if ($request->filled('wave_api_key')) {
+            \App\Models\SystemSetting::set('wave_api_key', $request->wave_api_key, 'string', 'Clé API Wave (payout/checkout)');
+        }
+        if ($request->filled('wave_signing_secret')) {
+            \App\Models\SystemSetting::set('wave_signing_secret', $request->wave_signing_secret, 'string', 'Secret de signature Wave (Wave-Signature)');
+        }
+        if ($request->has('wave_commission_rate')) {
+            $rate = (float) $request->wave_commission_rate;
+            \App\Models\SystemSetting::set('wave_commission_rate', $rate, 'string', 'Taux de commission Wave pour MenuPro (0.02 = 2%)');
         }
         // SMTP Configuration
         \App\Models\SystemSetting::set('smtp_host', $request->smtp_host ?? '', 'string', 'Serveur SMTP');
@@ -315,6 +358,23 @@ class DashboardController extends Controller
         
         if ($request->filled('footer_text')) {
             \App\Models\SystemSetting::set('footer_text', $request->footer_text, 'string', 'Texte du footer');
+        }
+
+        // Vidéos page d'accueil (tableau titre, url, description)
+        if ($request->has('home_videos')) {
+            $raw = $request->home_videos ?? [];
+            $videos = [];
+            foreach (is_array($raw) ? $raw : [] as $v) {
+                $url = trim($v['url'] ?? '');
+                if ($url !== '') {
+                    $videos[] = [
+                        'title' => trim($v['title'] ?? '') ?: 'Vidéo',
+                        'url' => $url,
+                        'description' => trim($v['description'] ?? ''),
+                    ];
+                }
+            }
+            \App\Models\SystemSetting::set('home_videos', $videos, 'json', 'Vidéos tutoriels de la page d\'accueil');
         }
 
         // Commando – commissions (sauvegardés si présents dans la requête, montant saisi en FCFA → stocké en centimes)

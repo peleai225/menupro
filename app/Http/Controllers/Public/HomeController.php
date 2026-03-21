@@ -6,6 +6,7 @@ use App\Enums\RestaurantStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use App\Models\SystemSetting;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -16,8 +17,49 @@ class HomeController extends Controller
     public function index(): View
     {
         $stats = $this->getStats();
-        
-        return view('pages.public.home', compact('stats'));
+        $videos = $this->getHomeVideos();
+
+        return view('pages.public.home', compact('stats', 'videos'));
+    }
+
+    /**
+     * Get home page videos from SystemSetting (dynamic, manageable by Super Admin).
+     * Format: [ { title, url, description }, ... ]
+     * url: YouTube embed (https://www.youtube.com/embed/VIDEO_ID) ou youtu.be/VIDEO_ID
+     */
+    protected function getHomeVideos(): array
+    {
+        $videos = SystemSetting::get('home_videos', []);
+
+        if (! is_array($videos) || empty($videos)) {
+            return [];
+        }
+
+        return array_values(array_map(function ($v) {
+            $url = $v['url'] ?? '';
+            $url = $this->normalizeYoutubeEmbedUrl($url);
+
+            return [
+                'title' => $v['title'] ?? 'Vidéo',
+                'url' => $url,
+                'description' => $v['description'] ?? '',
+            ];
+        }, $videos));
+    }
+
+    /**
+     * Convert YouTube URL to embed format.
+     */
+    protected function normalizeYoutubeEmbedUrl(string $url): string
+    {
+        if (str_contains($url, 'youtube.com/embed/')) {
+            return $url;
+        }
+        if (preg_match('#(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]+)#', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        return $url;
     }
 
     /**

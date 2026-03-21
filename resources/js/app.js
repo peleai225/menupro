@@ -1,4 +1,25 @@
 import './bootstrap';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
+
+// Tour guidé du dashboard restaurant (initialisé depuis le layout)
+window.runRestaurantTour = function() {
+    const steps = window.__restaurantTourSteps || [];
+    if (steps.length === 0) return;
+    const driverObj = driver({
+        showProgress: true,
+        nextBtnText: 'Suivant',
+        prevBtnText: 'Précédent',
+        doneBtnText: 'Terminer',
+        progressText: '{{current}} / {{total}}',
+        steps: steps,
+        onDestroyStarted: () => {
+            localStorage.setItem('menupro_tour_completed', '1');
+            driverObj.destroy();
+        },
+    });
+    driverObj.drive();
+};
 
 // Wait for Livewire's Alpine to be available, then register our custom components
 document.addEventListener('alpine:init', () => {

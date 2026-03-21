@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'set.restaurant.scope' => \App\Http\Middleware\SetRestaurantScope::class,
             'restaurant.active' => \App\Http\Middleware\EnsureRestaurantActive::class,
+            'restaurant.admin' => \App\Http\Middleware\EnsureRestaurantAdmin::class,
             'has.restaurant' => \App\Http\Middleware\EnsureUserHasRestaurant::class,
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Append to web middleware group
         $middleware->web(append: [
             \App\Http\Middleware\TrackLastLogin::class,
+            \App\Http\Middleware\SecurityHeaders::class,
             // \App\Http\Middleware\CleanJsonResponse::class, // Temporarily disabled - causes issues
         ]);
     })

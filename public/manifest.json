@@ -1,0 +1,50 @@
+{
+  "name": "MenuPro - Commandez en ligne",
+  "short_name": "MenuPro",
+  "description": "Commandez dans votre restaurant préféré en Côte d'Ivoire — paiement Mobile Money en 1 clic.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "fr",
+  "categories": ["food", "shopping"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/menu.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Menu du restaurant"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Voir les restaurants",
+      "url": "/",
+      "description": "Découvrir les restaurants disponibles"
+    }
+  ],
+  "prefer_related_applications": false
+}
