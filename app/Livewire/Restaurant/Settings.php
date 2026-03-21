@@ -100,6 +100,12 @@ class Settings extends Component
 
     public string $payoutAmount = '';
 
+    // Auto-payout
+    public bool $auto_payout_enabled = false;
+    public int $min_payout_amount = 1000;
+    public ?string $wallet_phone = null;
+    public ?string $wallet_recipient_name = null;
+
     public function mount(): void
     {
         $restaurant = auth()->user()->restaurant;
@@ -152,6 +158,15 @@ class Settings extends Component
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
         $this->opening_hours = $this->restaurant->opening_hours ?? $this->getDefaultOpeningHours();
         
+        // Auto-payout (wallet settings)
+        $wallet = $this->restaurant->wallet;
+        if ($wallet) {
+            $this->auto_payout_enabled = $wallet->auto_payout_enabled ?? false;
+            $this->min_payout_amount = $wallet->min_payout_amount ?? 1000;
+            $this->wallet_phone = $wallet->phone;
+            $this->wallet_recipient_name = $wallet->recipient_name;
+        }
+
         // Verification fields
         $this->company_name = $this->restaurant->company_name;
         $this->rccm = $this->restaurant->rccm;
@@ -238,6 +253,30 @@ class Settings extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Erreur : ' . $e->getMessage());
         }
+    }
+
+    public function saveWallet(): void
+    {
+        $this->validate([
+            'wallet_phone' => ['nullable', 'string', 'max:20'],
+            'wallet_recipient_name' => ['nullable', 'string', 'max:255'],
+            'min_payout_amount' => ['required', 'integer', 'min:500'],
+        ]);
+
+        $wallet = RestaurantWallet::firstOrCreate(
+            ['restaurant_id' => $this->restaurant->id],
+            ['balance' => 0, 'total_collected' => 0, 'total_withdrawn' => 0]
+        );
+
+        $wallet->update([
+            'auto_payout_enabled' => $this->auto_payout_enabled,
+            'min_payout_amount' => $this->min_payout_amount,
+            'phone' => $this->wallet_phone,
+            'recipient_name' => $this->wallet_recipient_name,
+        ]);
+
+        unset($this->walletBalance, $this->hasWallet);
+        session()->flash('success', 'Paramètres du wallet mis à jour.');
     }
 
     protected function getDefaultOpeningHours(): array

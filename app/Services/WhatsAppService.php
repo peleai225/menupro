@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CommandoAgent;
 use App\Models\Order;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -186,7 +187,11 @@ class WhatsAppService
      */
     public function send(string $phone, string $message): bool
     {
-        if (!config('services.whatsapp.enabled') || !config('services.whatsapp.api_url')) {
+        $enabled = SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false));
+        $phoneId = SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', ''));
+        $apiKey = SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', ''));
+
+        if (!$enabled || !$phoneId || !$apiKey) {
             Log::channel('stack')->info('WhatsApp non configuré — message non envoyé', [
                 'phone' => $phone,
                 'preview' => mb_substr($message, 0, 80),
@@ -194,12 +199,13 @@ class WhatsAppService
             return false;
         }
 
+        $apiUrl = "https://graph.facebook.com/v21.0/{$phoneId}/messages";
         $normalizedPhone = $this->normalizePhone($phone);
 
         try {
-            $response = Http::withToken(config('services.whatsapp.api_key'))
+            $response = Http::withToken($apiKey)
                 ->timeout(10)
-                ->post(config('services.whatsapp.api_url'), [
+                ->post($apiUrl, [
                     'messaging_product' => 'whatsapp',
                     'to'                => $normalizedPhone,
                     'type'              => 'text',

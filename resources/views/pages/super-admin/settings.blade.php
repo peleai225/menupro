@@ -55,10 +55,15 @@
                         class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Apparence
                 </button>
-                <button @click="tab = 'commando'" 
+                <button @click="tab = 'commando'"
                         :class="tab === 'commando' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
                         class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Commando
+                </button>
+                <button @click="tab = 'whatsapp'"
+                        :class="tab === 'whatsapp' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
+                    WhatsApp
                 </button>
             </div>
 
@@ -542,6 +547,58 @@
                         </label>
                     </div>
                 </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+            <!-- WhatsApp Business API -->
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'whatsapp'" x-cloak class="space-y-6">
+                @csrf
+                <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">WhatsApp Business API</h2>
+                    <p class="text-sm text-neutral-500 mb-5">Notifications automatiques aux clients et restaurateurs via WhatsApp (confirmation de commande, changement de statut, etc.).</p>
+
+                    <div class="space-y-5">
+                        <!-- Activer WhatsApp -->
+                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
+                            <div>
+                                <span class="font-medium text-neutral-900">Activer les notifications WhatsApp</span>
+                                <p class="text-sm text-neutral-500">Les messages seront envoyés automatiquement lors des changements de statut de commande.</p>
+                            </div>
+                            <input type="checkbox" name="whatsapp_enabled" value="1" {{ ($settings['whatsapp_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                        </label>
+
+                        <!-- Phone Number ID -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Phone Number ID</label>
+                            <input type="text" name="whatsapp_phone_id" value="{{ old('whatsapp_phone_id', $settings['whatsapp_phone_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789012345">
+                            <p class="text-xs text-neutral-500 mt-1">L'identifiant du numéro de téléphone dans votre compte Meta Business. Se trouve dans <strong>Meta Business Suite &gt; WhatsApp &gt; Paramètres du compte</strong>.</p>
+                        </div>
+
+                        <!-- Access Token -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Token d'accès permanent</label>
+                            <input type="password" name="whatsapp_api_key" value="{{ old('whatsapp_api_key', $settings['whatsapp_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="EAAxxxxxxx...">
+                            <p class="text-xs text-neutral-500 mt-1">Token permanent généré dans <strong>Meta for Developers &gt; Votre App &gt; WhatsApp &gt; Configuration</strong>. Ne partagez jamais ce token.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guide de configuration -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                    <h3 class="font-semibold text-amber-900 mb-3">Comment configurer WhatsApp Business API ?</h3>
+                    <ol class="text-sm text-amber-800 space-y-2 list-decimal list-inside">
+                        <li>Créez une app sur <strong>developers.facebook.com</strong> (type : Business)</li>
+                        <li>Ajoutez le produit <strong>WhatsApp</strong> à votre app</li>
+                        <li>Dans <strong>WhatsApp &gt; Configuration</strong>, copiez le <strong>Phone Number ID</strong></li>
+                        <li>Générez un <strong>token d'accès permanent</strong> (System User dans Business Settings)</li>
+                        <li>Collez les valeurs ci-dessus et activez les notifications</li>
+                    </ol>
+                </div>
+
                 <div class="flex justify-end">
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>

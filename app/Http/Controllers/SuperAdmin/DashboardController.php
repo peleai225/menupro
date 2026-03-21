@@ -169,6 +169,10 @@ class DashboardController extends Controller
             'wave_api_key' => \App\Models\SystemSetting::get('wave_api_key', config('wave.api_key', '')),
             'wave_signing_secret' => \App\Models\SystemSetting::get('wave_signing_secret', config('wave.signing_secret', '')),
             'wave_commission_rate' => \App\Models\SystemSetting::get('wave_commission_rate', config('wave.commission_rate', 0.02)),
+            // WhatsApp Business API
+            'whatsapp_enabled' => \App\Models\SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false)),
+            'whatsapp_phone_id' => \App\Models\SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', '')),
+            'whatsapp_api_key' => \App\Models\SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', '')),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -230,6 +234,10 @@ class DashboardController extends Controller
             'home_videos.*.description' => ['nullable', 'string', 'max:500'],
             'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
             'commando_commission_only_first_payment' => ['boolean'],
+            // WhatsApp Business API
+            'whatsapp_enabled' => ['boolean'],
+            'whatsapp_phone_id' => ['nullable', 'string', 'max:255'],
+            'whatsapp_api_key' => ['nullable', 'string'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -375,6 +383,17 @@ class DashboardController extends Controller
                 }
             }
             \App\Models\SystemSetting::set('home_videos', $videos, 'json', 'Vidéos tutoriels de la page d\'accueil');
+        }
+
+        // WhatsApp Business API
+        if ($request->has('whatsapp_enabled')) {
+            \App\Models\SystemSetting::set('whatsapp_enabled', $request->boolean('whatsapp_enabled'), 'boolean', 'Activer les notifications WhatsApp');
+        }
+        if ($request->filled('whatsapp_phone_id')) {
+            \App\Models\SystemSetting::set('whatsapp_phone_id', $request->whatsapp_phone_id, 'string', 'Phone Number ID WhatsApp Business');
+        }
+        if ($request->filled('whatsapp_api_key')) {
+            \App\Models\SystemSetting::set('whatsapp_api_key', $request->whatsapp_api_key, 'string', 'Token d\'accès permanent WhatsApp Business API');
         }
 
         // Commando – commissions (sauvegardés si présents dans la requête, montant saisi en FCFA → stocké en centimes)

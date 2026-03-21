@@ -871,6 +871,65 @@
                         <p class="mt-4 text-sm text-neutral-600">Les retraits ne sont pas disponibles. Contactez le support.</p>
                     @endif
                 </div>
+
+                <!-- Auto-Payout Settings -->
+                <form wire:submit="saveWallet" class="card p-6">
+                    <h2 class="text-lg font-bold text-neutral-900 mb-1 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Paiement automatique
+                    </h2>
+                    <p class="text-sm text-neutral-500 mb-5">Recevez automatiquement vos revenus sur votre Mobile Money après chaque commande payée.</p>
+
+                    <div class="space-y-5">
+                        <!-- Toggle auto-payout -->
+                        <label class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl cursor-pointer">
+                            <div>
+                                <span class="font-medium text-neutral-900">Activer le paiement automatique</span>
+                                <p class="text-sm text-neutral-500">Le montant net (après commission) sera transféré automatiquement sur votre Mobile Money.</p>
+                            </div>
+                            <input type="checkbox" wire:model="auto_payout_enabled" class="w-5 h-5 rounded border-neutral-400 text-emerald-500 focus:ring-emerald-500">
+                        </label>
+
+                        <!-- Numéro Mobile Money -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Mobile Money (Wave) *</label>
+                            <input type="tel" wire:model="wallet_phone" class="input @error('wallet_phone') border-red-500 @enderror" placeholder="07 XX XX XX XX">
+                            <p class="text-xs text-neutral-500 mt-1">Le numéro Wave sur lequel vous recevrez les paiements.</p>
+                            @error('wallet_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Nom du destinataire -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nom du destinataire</label>
+                            <input type="text" wire:model="wallet_recipient_name" class="input @error('wallet_recipient_name') border-red-500 @enderror" placeholder="Nom complet du titulaire du compte">
+                            <p class="text-xs text-neutral-500 mt-1">Le nom associé au compte Mobile Money. Si vide, le nom du propriétaire du restaurant sera utilisé.</p>
+                            @error('wallet_recipient_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Montant minimum -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Montant minimum pour auto-payout (FCFA)</label>
+                            <input type="number" wire:model="min_payout_amount" min="500" step="100" class="input @error('min_payout_amount') border-red-500 @enderror" placeholder="1000">
+                            <p class="text-xs text-neutral-500 mt-1">Le transfert ne sera déclenché que si le solde atteint ce montant. Minimum : 500 F.</p>
+                            @error('min_payout_amount')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="btn btn-primary flex items-center gap-2">
+                            <svg wire:loading.remove wire:target="saveWallet" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <svg wire:loading wire:target="saveWallet" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
