@@ -69,6 +69,14 @@
     <meta name="twitter:description" content="{{ $description ?? 'Créez le site de commande de votre restaurant en quelques minutes.' }}">
     <meta name="twitter:image" content="{{ asset('og-image.png') }}">
 
+    <!-- PWA -->
+    <meta name="theme-color" content="#f97316">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ $appName }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
     @stack('head')
 
     <!-- Styles & Scripts -->
@@ -175,6 +183,45 @@
                 return false;
             }
         });
+    </script>
+
+    <!-- PWA : Service Worker + Install Banner -->
+    <div id="pwa-install-banner"
+         style="display:none"
+         class="fixed bottom-0 inset-x-0 z-[200] p-3 sm:p-4 bg-neutral-900 border-t border-orange-500/30 shadow-2xl safe-bottom"
+         x-data="pwaInstall()" x-show="showBanner" x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full"
+         x-transition:enter-end="translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0"
+         x-transition:leave-end="translate-y-full">
+        <div class="max-w-lg mx-auto flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shrink-0 shadow-lg">
+                <img src="{{ asset('favicon.svg') }}" alt="MenuPro" class="w-7 h-7">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-white text-sm font-semibold">Installer MenuPro</p>
+                <p class="text-neutral-400 text-xs truncate">Acc&eacute;dez rapidement depuis votre &eacute;cran d'accueil</p>
+            </div>
+            <button @click="install()" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition shrink-0">
+                Installer
+            </button>
+            <button @click="dismiss()" class="p-1.5 text-neutral-500 hover:text-white transition shrink-0" aria-label="Fermer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(reg => console.log('SW enregistré, scope:', reg.scope))
+                    .catch(err => console.warn('SW erreur:', err));
+            });
+        }
     </script>
 </body>
 </html>

@@ -134,6 +134,53 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
+    // PWA Install Banner
+    Alpine.data('pwaInstall', () => ({
+        showBanner: false,
+        deferredPrompt: null,
+
+        init() {
+            // Don't show if already installed or dismissed recently
+            if (window.matchMedia('(display-mode: standalone)').matches) return;
+            if (localStorage.getItem('pwa_dismissed') &&
+                Date.now() - parseInt(localStorage.getItem('pwa_dismissed')) < 7 * 24 * 3600 * 1000) return;
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                this.deferredPrompt = e;
+                // Show banner after 30 seconds on the page
+                setTimeout(() => { this.showBanner = true; }, 30000);
+            });
+
+            // iOS: show custom banner (no beforeinstallprompt on Safari)
+            const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+            const isStandalone = window.navigator.standalone === true;
+            if (isIos && !isStandalone) {
+                setTimeout(() => { this.showBanner = true; }, 30000);
+            }
+        },
+
+        async install() {
+            if (this.deferredPrompt) {
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    this.showBanner = false;
+                }
+                this.deferredPrompt = null;
+            } else {
+                // iOS fallback: show instructions
+                alert('Pour installer MenuPro :\n1. Appuyez sur le bouton Partager (↑)\n2. Sélectionnez « Sur l\'écran d\'accueil »');
+                this.dismiss();
+            }
+        },
+
+        dismiss() {
+            this.showBanner = false;
+            localStorage.setItem('pwa_dismissed', Date.now().toString());
+        }
+    }));
+
     Alpine.data('notification', () => ({
         show: false,
         message: '',
