@@ -169,9 +169,14 @@
                 $footerText = \App\Models\SystemSetting::get('footer_text', '© ' . date('Y') . ' MenuPro. Tous droits réservés.');
             @endphp
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="text-neutral-500 text-sm">
-                    {!! $footerText !!}
-                </p>
+                <div>
+                    <p class="text-neutral-500 text-sm">
+                        {!! $footerText !!}
+                    </p>
+                    <p class="text-neutral-600 text-xs mt-1">
+                        Un produit <a href="https://pelegroup.com" target="_blank" rel="noopener" class="text-neutral-400 hover:text-primary-400 transition-colors">PeleGroup</a> — Made in Côte d'Ivoire 🇨🇮
+                    </p>
+                </div>
                 <div class="flex items-center gap-6">
                     <span class="text-neutral-500 text-sm flex items-center gap-2">
                         <span class="status-dot status-dot-success"></span>
