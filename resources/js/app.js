@@ -148,15 +148,15 @@ document.addEventListener('alpine:init', () => {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 this.deferredPrompt = e;
-                // Show banner after 30 seconds on the page
-                setTimeout(() => { this.showBanner = true; }, 30000);
+                // Show banner after 5 seconds on the page
+                setTimeout(() => { this.showBanner = true; }, 5000);
             });
 
             // iOS: show custom banner (no beforeinstallprompt on Safari)
             const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
             const isStandalone = window.navigator.standalone === true;
             if (isIos && !isStandalone) {
-                setTimeout(() => { this.showBanner = true; }, 30000);
+                setTimeout(() => { this.showBanner = true; }, 5000);
             }
         },
 
