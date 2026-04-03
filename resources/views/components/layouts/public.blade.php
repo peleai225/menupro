@@ -303,7 +303,7 @@
                         {!! $footerText !!}
                     </p>
                     <p class="text-neutral-600 text-xs mt-1">
-                        Un produit <a href="https://pelegroup.com" target="_blank" rel="noopener" class="text-neutral-400 hover:text-primary-400 transition-colors">PeleGroup</a> — Made in Côte d'Ivoire 🇨🇮
+                        Un produit <a href="https://peleai.online" target="_blank" rel="noopener" class="text-neutral-400 hover:text-primary-400 transition-colors">PeleAI</a> — Made in Côte d'Ivoire 🇨🇮
                     </p>
                 </div>
                 <div class="flex items-center gap-6">

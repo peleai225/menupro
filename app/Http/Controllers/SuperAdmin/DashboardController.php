@@ -158,6 +158,13 @@ class DashboardController extends Controller
             'social_linkedin' => \App\Models\SystemSetting::get('social_linkedin', ''),
             'footer_text' => \App\Models\SystemSetting::get('footer_text', '© ' . date('Y') . ' MenuPro. Tous droits réservés.'),
             'home_videos' => \App\Models\SystemSetting::get('home_videos', []),
+            // Marketing – bannière + Facebook Pixel + Google Analytics
+            'banner_enabled' => \App\Models\SystemSetting::get('banner_enabled', false),
+            'banner_text' => \App\Models\SystemSetting::get('banner_text', ''),
+            'banner_link' => \App\Models\SystemSetting::get('banner_link', ''),
+            'banner_color' => \App\Models\SystemSetting::get('banner_color', 'primary'),
+            'facebook_pixel_id' => \App\Models\SystemSetting::get('facebook_pixel_id', ''),
+            'google_analytics_id' => \App\Models\SystemSetting::get('google_analytics_id', ''),
             // Commando – commissions agents (priorité au backoffice, sinon config)
             'commando_commission_cents_first_payment' => \App\Models\SystemSetting::has('commando_commission_cents_first_payment')
                 ? (int) \App\Models\SystemSetting::get('commando_commission_cents_first_payment', config('commando.commission_cents_first_payment', 500000))
@@ -234,6 +241,13 @@ class DashboardController extends Controller
             'home_videos.*.description' => ['nullable', 'string', 'max:500'],
             'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
             'commando_commission_only_first_payment' => ['boolean'],
+            // Marketing
+            'banner_enabled' => ['boolean'],
+            'banner_text' => ['nullable', 'string', 'max:255'],
+            'banner_link' => ['nullable', 'url'],
+            'banner_color' => ['nullable', 'string', 'in:primary,success,warning,dark'],
+            'facebook_pixel_id' => ['nullable', 'string', 'max:50'],
+            'google_analytics_id' => ['nullable', 'string', 'max:50'],
             // WhatsApp Business API
             'whatsapp_enabled' => ['boolean'],
             'whatsapp_phone_id' => ['nullable', 'string', 'max:255'],
@@ -394,6 +408,20 @@ class DashboardController extends Controller
         }
         if ($request->filled('whatsapp_api_key')) {
             \App\Models\SystemSetting::set('whatsapp_api_key', $request->whatsapp_api_key, 'string', 'Token d\'accès permanent WhatsApp Business API');
+        }
+
+        // Marketing – bannière promotionnelle + Facebook Pixel + Google Analytics
+        if ($request->has('banner_enabled')) {
+            \App\Models\SystemSetting::set('banner_enabled', $request->boolean('banner_enabled'), 'boolean', 'Activer la bannière promotionnelle');
+            \App\Models\SystemSetting::set('banner_text', $request->banner_text ?? '', 'string', 'Texte de la bannière');
+            \App\Models\SystemSetting::set('banner_link', $request->banner_link ?? '', 'string', 'Lien de la bannière');
+            \App\Models\SystemSetting::set('banner_color', $request->banner_color ?? 'primary', 'string', 'Couleur de la bannière');
+        }
+        if ($request->has('facebook_pixel_id')) {
+            \App\Models\SystemSetting::set('facebook_pixel_id', $request->facebook_pixel_id ?? '', 'string', 'ID du Facebook Pixel');
+        }
+        if ($request->has('google_analytics_id')) {
+            \App\Models\SystemSetting::set('google_analytics_id', $request->google_analytics_id ?? '', 'string', 'ID Google Analytics GA4');
         }
 
         // Commando – commissions (sauvegardés si présents dans la requête, montant saisi en FCFA → stocké en centimes)

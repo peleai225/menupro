@@ -55,6 +55,11 @@
                         class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
                     Apparence
                 </button>
+                <button @click="tab = 'marketing'"
+                        :class="tab === 'marketing' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
+                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
+                    Marketing
+                </button>
                 <button @click="tab = 'commando'"
                         :class="tab === 'commando' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
                         class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
@@ -515,6 +520,93 @@
                             </div>
                         </div>
                         @endforeach
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Marketing - Bannière + Facebook Pixel -->
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'marketing'" x-cloak class="space-y-6">
+                @csrf
+                <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
+
+                <!-- Bannière promotionnelle -->
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Bannière promotionnelle</h2>
+                    <p class="text-sm text-neutral-500 mb-5">Affiche une bannière en haut du site public pour annoncer promos, nouveautés, etc.</p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="hidden" name="banner_enabled" value="0">
+                                <input type="checkbox" name="banner_enabled" value="1" class="sr-only peer" {{ ($settings['banner_enabled'] ?? false) ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+                            </label>
+                            <span class="text-sm font-medium text-neutral-700">Activer la bannière</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Texte de la bannière</label>
+                            <input type="text" name="banner_text" value="{{ old('banner_text', $settings['banner_text'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Nouveau : Commandez en ligne avec Mobile Money !">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Lien (optionnel)</label>
+                            <input type="url" name="banner_link" value="{{ old('banner_link', $settings['banner_link'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://menupro.ci/tarifs">
+                            <p class="text-xs text-neutral-500 mt-1">Si rempli, le texte devient un lien cliquable</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Couleur</label>
+                            <select name="banner_color" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="primary" {{ ($settings['banner_color'] ?? 'primary') === 'primary' ? 'selected' : '' }}>Orange (principal)</option>
+                                <option value="success" {{ ($settings['banner_color'] ?? '') === 'success' ? 'selected' : '' }}>Vert (succès)</option>
+                                <option value="warning" {{ ($settings['banner_color'] ?? '') === 'warning' ? 'selected' : '' }}>Jaune (attention)</option>
+                                <option value="dark" {{ ($settings['banner_color'] ?? '') === 'dark' ? 'selected' : '' }}>Noir (sobre)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facebook Pixel -->
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Facebook Pixel</h2>
+                    <p class="text-sm text-neutral-500 mb-5">Permet de suivre les conversions de vos campagnes Facebook Ads. L'ID se trouve dans Facebook Business Manager → Événements → Pixel.</p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID du Pixel Facebook</label>
+                            <input type="text" name="facebook_pixel_id" value="{{ old('facebook_pixel_id', $settings['facebook_pixel_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono" placeholder="Ex: 123456789012345">
+                            <p class="text-xs text-neutral-500 mt-1">Laissez vide pour désactiver le tracking Facebook</p>
+                        </div>
+
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                            <h3 class="text-sm font-semibold text-blue-800 mb-2">Événements trackés automatiquement :</h3>
+                            <ul class="text-xs text-blue-700 space-y-1">
+                                <li><strong>PageView</strong> — Chaque visite de page</li>
+                                <li><strong>Lead</strong> — Inscription d'un restaurant</li>
+                                <li><strong>AddToCart</strong> — Ajout d'un plat au panier</li>
+                                <li><strong>InitiateCheckout</strong> — Début de commande</li>
+                                <li><strong>Purchase</strong> — Paiement validé</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Analytics (future) -->
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Google Analytics</h2>
+                    <p class="text-sm text-neutral-500 mb-5">Suivez le trafic de votre site avec Google Analytics 4.</p>
+
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-2">ID de mesure Google Analytics (GA4)</label>
+                        <input type="text" name="google_analytics_id" value="{{ old('google_analytics_id', $settings['google_analytics_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono" placeholder="Ex: G-XXXXXXXXXX">
+                        <p class="text-xs text-neutral-500 mt-1">Laissez vide pour désactiver</p>
                     </div>
                 </div>
 
