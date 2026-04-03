@@ -307,3 +307,46 @@ window.formatDate = (date) => {
         timeStyle: 'short'
     }).format(new Date(date));
 };
+
+// Facebook Pixel helper — safe to call even if Pixel is not loaded
+window.fbTrack = (event, data = {}) => {
+    if (typeof fbq === 'function') {
+        fbq('track', event, data);
+    }
+};
+
+// Auto-track key Livewire events
+document.addEventListener('livewire:init', () => {
+    // Registration completed (Lead)
+    Livewire.on('registration-completed', () => {
+        fbTrack('Lead', { content_name: 'Restaurant Registration' });
+    });
+
+    // Checkout initiated
+    Livewire.on('checkout-initiated', (data) => {
+        fbTrack('InitiateCheckout', {
+            content_type: 'product',
+            currency: 'XOF',
+            value: data?.total || 0
+        });
+    });
+
+    // Order paid (Purchase)
+    Livewire.on('order-paid', (data) => {
+        fbTrack('Purchase', {
+            content_type: 'product',
+            currency: 'XOF',
+            value: data?.total || 0
+        });
+    });
+
+    // Cart updated (AddToCart)
+    Livewire.on('item-added-to-cart', (data) => {
+        fbTrack('AddToCart', {
+            content_name: data?.name || '',
+            content_type: 'product',
+            currency: 'XOF',
+            value: data?.price || 0
+        });
+    });
+});

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Google Fonts Import (must be first)
    ═══════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+/* Fonts loaded asynchronously via <link> in app.blade.php to avoid render-blocking */
 
 @import 'tailwindcss';
 
@@ -476,6 +476,7 @@ body {
 
 .animate-float {
     animation: float 3s ease-in-out infinite;
+    will-change: transform;
 }
 
 .animate-pulse-glow {
@@ -546,6 +547,7 @@ body {
 
 .phone-3d-auto {
     animation: phone-float-rotate 8s ease-in-out infinite;
+    will-change: transform;
 }
 
 /* Reflet / ombre 3D */
@@ -649,6 +651,7 @@ body {
     height: 8px;
     background: rgba(255,255,255,0.3);
     border-radius: 50%;
+    will-change: transform, opacity;
     animation: particle-float 6s ease-in-out infinite;
 }
 
