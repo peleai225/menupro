@@ -233,6 +233,7 @@ Route::prefix('dashboard')
             Route::post('ingredients/{ingredient}/waste', [IngredientController::class, 'recordWaste'])->name('ingredients.waste');
             Route::get('ingredients/{ingredient}/movements', [IngredientController::class, 'movements'])->name('ingredients.movements');
             Route::get('alertes', [IngredientController::class, 'alerts'])->name('alerts');
+            Route::get('mise-a-jour', \App\Livewire\Restaurant\BulkStockUpdate::class)->name('bulk-update');
         });
         
         // Team Management - admin uniquement

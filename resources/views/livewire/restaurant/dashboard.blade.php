@@ -290,24 +290,44 @@
 
             <!-- Stock Alerts -->
             @if($this->stockAlerts->isNotEmpty())
-            <div class="card p-6 border-l-4 border-accent-500">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    Alertes stock
-                </h2>
-                <div class="space-y-3">
+            <div class="card p-6 border-l-4 border-red-500">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Stock critique
+                    </h2>
+                    <span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">{{ $this->stockAlerts->count() }}</span>
+                </div>
+                <div class="space-y-2">
                     @foreach($this->stockAlerts as $ingredient)
-                        <div class="flex items-center justify-between p-2 bg-accent-50 rounded-lg">
-                            <span class="text-sm font-medium text-neutral-700">{{ $ingredient->name }}</span>
-                            <span class="text-sm text-accent-600 font-bold">{{ $ingredient->current_quantity }} {{ $ingredient->unit }}</span>
-                        </div>
+                        <a href="{{ route('restaurant.stock.ingredients.show', $ingredient) }}" class="flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-red-50 group">
+                            <div class="flex items-center gap-3">
+                                @if($ingredient->current_quantity <= 0)
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+                                @else
+                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 shrink-0"></span>
+                                @endif
+                                <span class="text-sm font-medium text-neutral-700 group-hover:text-neutral-900">{{ $ingredient->name }}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold {{ $ingredient->current_quantity <= 0 ? 'text-red-600' : 'text-yellow-600' }}">
+                                    {{ number_format($ingredient->current_quantity, 1) }} {{ $ingredient->unit->shortLabel() }}
+                                </span>
+                                <p class="text-xs text-neutral-400">min: {{ number_format($ingredient->min_quantity, 1) }}</p>
+                            </div>
+                        </a>
                     @endforeach
                 </div>
-                <a href="{{ route('restaurant.stock.alerts') }}" class="mt-4 text-sm text-accent-600 hover:text-accent-700 font-medium block text-center">
-                    Voir toutes les alertes →
-                </a>
+                <div class="flex items-center gap-3 mt-4 pt-3 border-t border-neutral-100">
+                    <a href="{{ route('restaurant.stock.bulk-update') }}" class="flex-1 btn btn-primary text-sm py-2 text-center">
+                        Mettre à jour le stock
+                    </a>
+                    <a href="{{ route('restaurant.stock.alerts') }}" class="flex-1 btn btn-outline text-sm py-2 text-center">
+                        Voir tout
+                    </a>
+                </div>
             </div>
             @endif
         </div>

@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-neutral-900">Gestion du Stock</h1>
             <p class="text-neutral-500 mt-1">Gérez vos ingrédients et suivez votre inventaire.</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
             @if(auth()->user()->canManageRestaurant())
             <a href="{{ route('restaurant.stock.categories-ingredients.index') }}" class="btn btn-outline">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,11 +15,18 @@
             </a>
             @endif
             @can('create', \App\Models\Ingredient::class)
+            @livewire('restaurant.ingredient-import')
+            <a href="{{ route('restaurant.stock.bulk-update') }}" class="btn btn-outline flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Mise à jour en masse
+            </a>
             <button onclick="document.getElementById('addIngredientModal').classList.remove('hidden')" class="btn btn-primary">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Ajouter un ingrédient
+                Ajouter
             </button>
             @endcan
         </div>
