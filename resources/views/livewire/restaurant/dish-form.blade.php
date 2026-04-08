@@ -220,39 +220,104 @@
                 </div>
 
                 <!-- Ingredients (if stock management) -->
-                @if($this->ingredients->isNotEmpty())
+                @if(auth()->user()->restaurant?->currentPlan?->has_stock_management)
                     <div class="card p-6">
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h2 class="text-lg font-bold text-neutral-900">Ingrédients</h2>
                                 <p class="text-sm text-neutral-500 mt-1">Liez ce plat aux ingrédients pour le suivi du stock</p>
                             </div>
-                            <button type="button" wire:click="addIngredient" class="btn btn-secondary px-4 py-2 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                Ajouter
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" wire:click="$toggle('showQuickIngredient')" class="btn btn-outline px-3 py-2 text-sm flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Créer
+                                </button>
+                                <button type="button" wire:click="addIngredient" class="btn btn-secondary px-3 py-2 text-sm flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    </svg>
+                                    Ajouter
+                                </button>
+                            </div>
                         </div>
 
+                        <!-- Quick Create Ingredient (inline) -->
+                        @if($showQuickIngredient)
+                            <div class="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-xl">
+                                <h3 class="text-sm font-semibold text-primary-700 mb-3">Créer un ingrédient rapidement</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                    <div class="sm:col-span-2">
+                                        <input type="text" wire:model="quickIngredientName" class="input text-sm" placeholder="Nom (ex: Riz, Huile, Poulet...)">
+                                        @error('quickIngredientName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div>
+                                        <select wire:model="quickIngredientUnit" class="input text-sm">
+                                            <option value="kg">Kilogramme (kg)</option>
+                                            <option value="g">Gramme (g)</option>
+                                            <option value="L">Litre (L)</option>
+                                            <option value="mL">Millilitre (mL)</option>
+                                            <option value="piece">Pièce</option>
+                                            <option value="pack">Paquet</option>
+                                            <option value="dozen">Douzaine</option>
+                                            <option value="bottle">Bouteille</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <input type="number" wire:model="quickIngredientQty" class="input text-sm" placeholder="Stock initial" min="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 mt-3">
+                                    <button type="button" wire:click="quickCreateIngredient" class="btn btn-primary px-4 py-2 text-sm">
+                                        Créer et ajouter
+                                    </button>
+                                    <button type="button" wire:click="$set('showQuickIngredient', false)" class="btn btn-outline px-4 py-2 text-sm">
+                                        Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="space-y-3">
-                            @foreach($selectedIngredients as $index => $item)
+                            @forelse($selectedIngredients as $index => $item)
                                 <div class="flex items-center gap-3">
-                                    <select wire:model="selectedIngredients.{{ $index }}.id" class="flex-1 input">
-                                        <option value="">Sélectionner un ingrédient...</option>
-                                        @foreach($this->ingredients as $ingredient)
-                                            <option value="{{ $ingredient->id }}">
-                                                {{ $ingredient->name }} ({{ $ingredient->unit->value }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <input type="number" 
-                                           wire:model="selectedIngredients.{{ $index }}.quantity"
-                                           class="w-24 input"
-                                           placeholder="Qté"
-                                           min="0.01"
-                                           step="0.01">
-                                    <button type="button" 
+                                    <div class="flex-1">
+                                        <select wire:model.live="selectedIngredients.{{ $index }}.id" class="input text-sm">
+                                            <option value="">Sélectionner un ingrédient...</option>
+                                            @foreach($this->ingredients as $ingredient)
+                                                <option value="{{ $ingredient->id }}">
+                                                    {{ $ingredient->name }} ({{ $ingredient->unit->shortLabel() }}) — Stock: {{ number_format($ingredient->current_quantity, 1) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="w-24">
+                                        <input type="number"
+                                               wire:model="selectedIngredients.{{ $index }}.quantity"
+                                               class="input text-sm"
+                                               placeholder="Qté"
+                                               min="0.01"
+                                               step="0.01">
+                                    </div>
+                                    @php
+                                        $selectedId = $item['id'] ?? null;
+                                        $selectedIng = $selectedId ? $this->ingredients->firstWhere('id', $selectedId) : null;
+                                    @endphp
+                                    @if($selectedIng)
+                                        <div class="w-16 text-center">
+                                            @if($selectedIng->current_quantity <= 0)
+                                                <span class="inline-block w-3 h-3 rounded-full bg-red-500" title="Rupture"></span>
+                                            @elseif($selectedIng->current_quantity <= $selectedIng->min_quantity)
+                                                <span class="inline-block w-3 h-3 rounded-full bg-yellow-400" title="Stock faible"></span>
+                                            @else
+                                                <span class="inline-block w-3 h-3 rounded-full bg-green-500" title="En stock"></span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="w-16"></div>
+                                    @endif
+                                    <button type="button"
                                             wire:click="removeIngredient({{ $index }})"
                                             class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +325,9 @@
                                         </svg>
                                     </button>
                                 </div>
-                            @endforeach
+                            @empty
+                                <p class="text-sm text-neutral-400 text-center py-4">Aucun ingrédient lié. Ajoutez des ingrédients pour activer le suivi du stock automatique.</p>
+                            @endforelse
                         </div>
                     </div>
                 @endif

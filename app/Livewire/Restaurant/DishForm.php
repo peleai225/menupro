@@ -54,6 +54,12 @@ class DishForm extends Component
     // Ingredients for stock management
     public array $selectedIngredients = [];
 
+    // Quick ingredient creation
+    public bool $showQuickIngredient = false;
+    public string $quickIngredientName = '';
+    public string $quickIngredientUnit = 'kg';
+    public float|string $quickIngredientQty = '';
+
     // Option groups
     public array $optionGroups = [];
 
@@ -110,14 +116,52 @@ class DishForm extends Component
     public function ingredients()
     {
         $restaurant = auth()->user()->restaurant;
-        
+
         if (!$restaurant->currentPlan?->has_stock_management) {
             return collect();
         }
 
         return Ingredient::where('restaurant_id', $restaurant->id)
+            ->active()
             ->orderBy('name')
-            ->get();
+            ->get(['id', 'name', 'unit', 'current_quantity', 'min_quantity']);
+    }
+
+    public function quickCreateIngredient(): void
+    {
+        $this->validate([
+            'quickIngredientName' => ['required', 'string', 'max:150'],
+            'quickIngredientUnit' => ['required', 'string'],
+        ], [
+            'quickIngredientName.required' => 'Le nom est obligatoire.',
+        ]);
+
+        $restaurant = auth()->user()->restaurant;
+
+        $ingredient = Ingredient::create([
+            'restaurant_id' => $restaurant->id,
+            'name' => $this->quickIngredientName,
+            'unit' => $this->quickIngredientUnit,
+            'current_quantity' => is_numeric($this->quickIngredientQty) ? (float) $this->quickIngredientQty : 0,
+            'min_quantity' => 0,
+            'unit_cost' => 0,
+            'is_active' => true,
+        ]);
+
+        // Add to selected ingredients
+        $this->selectedIngredients[] = [
+            'id' => $ingredient->id,
+            'quantity' => 1,
+        ];
+
+        // Reset form
+        $this->quickIngredientName = '';
+        $this->quickIngredientUnit = 'kg';
+        $this->quickIngredientQty = '';
+        $this->showQuickIngredient = false;
+
+        // Refresh computed
+        unset($this->ingredients);
     }
 
     #[Computed]

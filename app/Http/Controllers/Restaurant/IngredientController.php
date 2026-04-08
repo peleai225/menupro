@@ -101,6 +101,9 @@ class IngredientController extends Controller
 
         $data = $request->validated();
         $data['restaurant_id'] = $request->user()->restaurant_id;
+        $data['current_quantity'] = $data['current_quantity'] ?? 0;
+        $data['min_quantity'] = $data['min_quantity'] ?? 0;
+        $data['unit_cost'] = $data['unit_cost'] ?? 0;
 
         if ($request->hasFile('image')) {
             $data['image_path'] = $this->mediaUploader->uploadIngredientImage(

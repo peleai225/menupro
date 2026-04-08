@@ -146,7 +146,15 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Raison *</label>
-                        <input type="text" wire:model="exitReason" class="input" placeholder="Ex: Utilisation cuisine" required>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            @foreach(['Utilisation cuisine', 'Don/Cadeau', 'Transfert', 'Autre'] as $reason)
+                                <button type="button" wire:click="$set('exitReason', '{{ $reason }}')"
+                                        class="px-3 py-1 text-xs rounded-full border transition-colors {{ $exitReason === $reason ? 'bg-red-100 border-red-300 text-red-700' : 'border-neutral-200 text-neutral-600 hover:border-red-200' }}">
+                                    {{ $reason }}
+                                </button>
+                            @endforeach
+                        </div>
+                        <input type="text" wire:model="exitReason" class="input" placeholder="Ou saisissez une raison..." required>
                         @error('exitReason') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <button type="submit" class="btn w-full bg-red-500 text-white hover:bg-red-600" wire:loading.attr="disabled" wire:target="removeStock">
@@ -173,7 +181,15 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Raison *</label>
-                        <input type="text" wire:model="adjustReason" class="input" placeholder="Ex: Inventaire physique" required>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            @foreach(['Inventaire physique', 'Correction erreur', 'Réception sans commande', 'Autre'] as $reason)
+                                <button type="button" wire:click="$set('adjustReason', '{{ $reason }}')"
+                                        class="px-3 py-1 text-xs rounded-full border transition-colors {{ $adjustReason === $reason ? 'bg-accent-100 border-accent-300 text-accent-700' : 'border-neutral-200 text-neutral-600 hover:border-accent-200' }}">
+                                    {{ $reason }}
+                                </button>
+                            @endforeach
+                        </div>
+                        <input type="text" wire:model="adjustReason" class="input" placeholder="Ou saisissez une raison..." required>
                         @error('adjustReason') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <button type="submit" class="btn btn-outline w-full" wire:loading.attr="disabled" wire:target="adjustStock">
@@ -200,7 +216,15 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Raison</label>
-                        <input type="text" wire:model="wasteReason" class="input" placeholder="Ex: Périmé, cassé...">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            @foreach(['Périmé', 'Cassé/Abîmé', 'Renversé', 'Vol', 'Autre'] as $reason)
+                                <button type="button" wire:click="$set('wasteReason', '{{ $reason }}')"
+                                        class="px-3 py-1 text-xs rounded-full border transition-colors {{ $wasteReason === $reason ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : 'border-neutral-200 text-neutral-600 hover:border-yellow-200' }}">
+                                    {{ $reason }}
+                                </button>
+                            @endforeach
+                        </div>
+                        <input type="text" wire:model="wasteReason" class="input" placeholder="Ou saisissez une raison...">
                     </div>
                     <button type="submit" class="btn w-full bg-yellow-500 text-white hover:bg-yellow-600" wire:loading.attr="disabled" wire:target="recordWaste">
                         <span wire:loading.remove wire:target="recordWaste">Enregistrer la perte</span>
