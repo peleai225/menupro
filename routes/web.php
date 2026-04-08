@@ -46,6 +46,7 @@ Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 
 Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
 Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
 Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
+Route::get('/mentions-legales', fn () => view('pages.public.legal.mentions'))->name('mentions-legales');
 Route::get('/test-geocoding', [\App\Http\Controllers\Public\GeocodingTestController::class, 'index'])->name('geocoding.test');
 
 /*

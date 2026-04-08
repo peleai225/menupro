@@ -276,8 +276,8 @@
                         <li><a href="{{ route('home') }}#features" class="text-neutral-400 hover:text-primary-400 transition-colors">Fonctionnalités</a></li>
                         <li><a href="{{ route('pricing') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Tarifs</a></li>
                         <li><a href="{{ route('commando.register.step1') }}" class="text-neutral-400 hover:text-orange-400 transition-colors">Devenir agent Commando</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Témoignages</a></li>
+                        <li><a href="{{ route('contact') }}?type=demo" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
+                        <li><a href="{{ route('home') }}#testimonials" class="text-neutral-400 hover:text-primary-400 transition-colors">Témoignages</a></li>
                     </ul>
                 </div>
 
@@ -287,8 +287,8 @@
                     <ul class="space-y-4">
                         <li><a href="{{ route('home') }}#faq" class="text-neutral-400 hover:text-primary-400 transition-colors">FAQ</a></li>
                         <li><a href="{{ route('home') }}#contact" class="text-neutral-400 hover:text-primary-400 transition-colors">Contact</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Documentation</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Statut</a></li>
+                        <li><a href="{{ route('faq') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Documentation</a></li>
+                        <li><a href="{{ route('contact') }}?type=support" class="text-neutral-400 hover:text-primary-400 transition-colors">Statut</a></li>
                     </ul>
                 </div>
 
@@ -299,7 +299,7 @@
                         <li><a href="{{ route('terms') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Conditions d'utilisation</a></li>
                         <li><a href="{{ route('privacy') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Politique de confidentialité</a></li>
                         <li><a href="{{ route('privacy') }}#cookies" class="text-neutral-400 hover:text-primary-400 transition-colors">Cookies</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Mentions légales</a></li>
+                        <li><a href="{{ route('mentions-legales') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Mentions légales</a></li>
                     </ul>
                 </div>
             </div>
