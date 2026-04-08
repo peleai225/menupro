@@ -19,18 +19,12 @@ class NewOrderNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $order = $this->order;
-
         return (new MailMessage)
-            ->subject("🍽️ Nouvelle commande #{$order->reference}")
-            ->greeting("Nouvelle commande !")
-            ->line("Vous avez reçu une nouvelle commande de **{$order->customer_name}**.")
-            ->line("**Référence :** {$order->reference}")
-            ->line("**Montant :** {$order->formatted_total}")
-            ->line("**Type :** {$order->type->label()}")
-            ->line("**Articles :** {$order->items_count}")
-            ->action('Voir la commande', route('restaurant.orders.show', $order))
-            ->salutation('MenuPro');
+            ->subject("🍽️ Nouvelle commande #{$this->order->reference}")
+            ->view('emails.order-new', [
+                'order' => $this->order,
+                'notifiable' => $notifiable,
+            ]);
     }
 
     public function toArray(object $notifiable): array

@@ -25,14 +25,10 @@ class RestaurantValidatedNotification extends Notification implements ShouldQueu
     {
         return (new MailMessage)
             ->subject('🎉 Votre restaurant a été validé !')
-            ->greeting("Félicitations {$notifiable->first_name} !")
-            ->line("Votre restaurant **{$this->restaurant->name}** a été validé et est maintenant en ligne.")
-            ->line('Vos clients peuvent désormais passer des commandes directement depuis votre page.')
-            ->line('**Votre lien public :**')
-            ->line($this->restaurant->public_url)
-            ->action('Accéder à mon dashboard', route('restaurant.dashboard'))
-            ->line('N\'hésitez pas à partager ce lien sur vos réseaux sociaux !')
-            ->salutation('Bienvenue dans la famille MenuPro !');
+            ->view('emails.restaurant-validated', [
+                'restaurant' => $this->restaurant,
+                'notifiable' => $notifiable,
+            ]);
     }
 
     public function toArray(object $notifiable): array

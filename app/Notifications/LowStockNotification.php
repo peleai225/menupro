@@ -28,26 +28,13 @@ class LowStockNotification extends Notification implements ShouldQueue
         $count = $this->ingredients->count();
         $plural = $count > 1 ? 's' : '';
 
-        $message = (new MailMessage)
+        return (new MailMessage)
             ->subject("⚠️ {$count} ingrédient{$plural} en stock bas")
-            ->greeting("Bonjour {$notifiable->first_name},")
-            ->line("Attention ! **{$count} ingrédient{$plural}** de votre restaurant **{$this->restaurant->name}** nécessite{$plural} un réapprovisionnement :");
-
-        // List first 5 ingredients
-        $ingredientsList = $this->ingredients->take(5)->map(function ($ingredient) {
-            return "- **{$ingredient->name}** : {$ingredient->formatted_quantity} (seuil : {$ingredient->min_quantity} {$ingredient->unit->shortLabel()})";
-        })->implode("\n");
-
-        $message->line($ingredientsList);
-
-        if ($count > 5) {
-            $message->line("... et " . ($count - 5) . " autre(s).");
-        }
-
-        return $message
-            ->action('Voir le stock', route('restaurant.stock.alerts'))
-            ->line('N\'oubliez pas de réapprovisionner pour éviter les ruptures !')
-            ->salutation('L\'équipe MenuPro');
+            ->view('emails.low-stock', [
+                'restaurant' => $this->restaurant,
+                'ingredients' => $this->ingredients,
+                'notifiable' => $notifiable,
+            ]);
     }
 
     public function toArray(object $notifiable): array

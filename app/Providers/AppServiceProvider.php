@@ -124,6 +124,7 @@ class AppServiceProvider extends ServiceProvider
 
         Order::observe(OrderCommissionObserver::class);
         Order::observe(OrderWhatsAppObserver::class);
+        Order::observe(\App\Observers\OrderCustomerNotifyObserver::class);
     }
 
     /**
