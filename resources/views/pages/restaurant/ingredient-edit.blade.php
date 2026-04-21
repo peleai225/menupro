@@ -50,7 +50,7 @@
                 <div class="flex items-center gap-4">
                     <div class="w-20 h-20 rounded-xl overflow-hidden border-2 border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50 flex-shrink-0">
                         <template x-if="preview && !removeImage">
-                            <img :src="preview" class="w-full h-full object-cover">
+                            <img :src="preview" alt="Aperçu de l'ingrédient" class="w-full h-full object-cover">
                         </template>
                         <template x-if="!preview || removeImage">
                             <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

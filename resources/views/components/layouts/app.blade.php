@@ -100,7 +100,7 @@
         fbq('init', '{{ $fbPixelId }}');
         fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1"/></noscript>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1" alt=""/></noscript>
     @endif
 
     <!-- Google Analytics -->

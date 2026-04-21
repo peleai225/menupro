@@ -216,6 +216,12 @@ class RegisterController extends Controller
      */
     public function paymentSuccess(Subscription $subscription): RedirectResponse
     {
+        // Ensure the authenticated user owns this subscription (multi-tenant safety)
+        $user = auth()->user();
+        if (!$user || !$user->belongsToRestaurant($subscription->restaurant_id)) {
+            abort(403, 'Accès non autorisé à cet abonnement.');
+        }
+
         // Verify payment using subscription reference (order_id in Lygos)
         $subscriptionReference = 'SUB-' . $subscription->id . '-' . $subscription->created_at->format('Ymd');
         $platformApiKey = \App\Models\SystemSetting::get('lygos_api_key', '');
@@ -272,6 +278,12 @@ class RegisterController extends Controller
      */
     public function paymentCancel(Subscription $subscription): RedirectResponse
     {
+        // Ensure the authenticated user owns this subscription (multi-tenant safety)
+        $user = auth()->user();
+        if (!$user || !$user->belongsToRestaurant($subscription->restaurant_id)) {
+            abort(403, 'Accès non autorisé à cet abonnement.');
+        }
+
         // Keep account and subscription as PENDING
         // User can retry payment from dashboard
         return redirect()->route('restaurant.dashboard')

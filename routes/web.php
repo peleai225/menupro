@@ -86,23 +86,23 @@ Route::get('/csrf-token', function () {
 Route::middleware('guest')->group(function () {
     // Login
     Route::get('/connexion', [LoginController::class, 'create'])->name('login');
-    Route::post('/connexion', [LoginController::class, 'store'])->name('login.post');
-    
+    Route::post('/connexion', [LoginController::class, 'store'])->middleware('throttle:5,1')->name('login.post');
+
     // Register
     Route::get('/inscription', [RegisterController::class, 'create'])->name('register');
-    Route::post('/inscription', [RegisterController::class, 'store'])->name('register.post');
-    
-    // Register payment callbacks (auth required - user is logged in after registration)
-    Route::middleware('auth')->group(function () {
-        Route::get('/inscription/paiement/{subscription}/succes', [RegisterController::class, 'paymentSuccess'])->name('register.payment.success');
-        Route::get('/inscription/paiement/{subscription}/annule', [RegisterController::class, 'paymentCancel'])->name('register.payment.cancel');
-    });
-    
+    Route::post('/inscription', [RegisterController::class, 'store'])->middleware('throttle:3,1')->name('register.post');
+
     // Password Reset
     Route::get('/mot-de-passe-oublie', [PasswordResetController::class, 'requestForm'])->name('password.request');
-    Route::post('/mot-de-passe-oublie', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/mot-de-passe-oublie', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,1')->name('password.email');
     Route::get('/reinitialiser-mot-de-passe/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
-    Route::post('/reinitialiser-mot-de-passe', [PasswordResetController::class, 'reset'])->name('password.update');
+    Route::post('/reinitialiser-mot-de-passe', [PasswordResetController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
+});
+
+// Register payment callbacks - user is authenticated after registration
+Route::middleware('auth')->group(function () {
+    Route::get('/inscription/paiement/{subscription}/succes', [RegisterController::class, 'paymentSuccess'])->name('register.payment.success');
+    Route::get('/inscription/paiement/{subscription}/annule', [RegisterController::class, 'paymentCancel'])->name('register.payment.cancel');
 });
 
 // Email verification (authenticated users)

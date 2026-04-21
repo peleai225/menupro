@@ -204,9 +204,9 @@
                         <div class="space-y-4">
                             <div class="w-32 h-32 mx-auto bg-neutral-100 rounded-xl overflow-hidden">
                                 @if($logo)
-                                    <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    <img src="{{ $logo->temporaryUrl() }}" alt="Aperçu du logo" class="w-full h-full object-cover">
                                 @elseif($existingLogo)
-                                    <img src="{{ Storage::url($existingLogo) }}" class="w-full h-full object-cover">
+                                    <img src="{{ Storage::url($existingLogo) }}" alt="Logo du restaurant" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-neutral-300">
                                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,9 +239,9 @@
                         <div class="space-y-4">
                             <div class="aspect-video bg-neutral-100 rounded-xl overflow-hidden">
                                 @if($banner)
-                                    <img src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    <img src="{{ $banner->temporaryUrl() }}" alt="Aperçu de la bannière" class="w-full h-full object-cover">
                                 @elseif($existingBanner)
-                                    <img src="{{ Storage::url($existingBanner) }}" class="w-full h-full object-cover">
+                                    <img src="{{ Storage::url($existingBanner) }}" alt="Bannière du restaurant" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-neutral-300">
                                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

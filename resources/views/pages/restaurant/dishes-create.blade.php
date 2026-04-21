@@ -71,7 +71,7 @@
                 <div class="border-2 border-dashed border-neutral-300 rounded-2xl p-8 text-center hover:border-primary-400 hover:bg-primary-50/50 transition-colors">
                     <template x-if="preview">
                         <div>
-                            <img :src="preview" class="w-48 h-48 object-cover rounded-xl mx-auto mb-4">
+                            <img :src="preview" alt="Aperçu du plat" class="w-48 h-48 object-cover rounded-xl mx-auto mb-4">
                             <button type="button" @click="preview = null" class="text-red-600 text-sm font-medium">
                                 Supprimer l'image
                             </button>

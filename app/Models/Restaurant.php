@@ -521,6 +521,29 @@ class Restaurant extends Model
     }
 
     /**
+     * Get decrypted GeniusPay webhook secret
+     */
+    public function getGeniusPayWebhookSecret(): ?string
+    {
+        if (!$this->attributes['geniuspay_webhook_secret'] ?? null) {
+            return null;
+        }
+        try {
+            return decrypt($this->attributes['geniuspay_webhook_secret']);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Set encrypted GeniusPay webhook secret
+     */
+    public function setGeniuspayWebhookSecretAttribute($value): void
+    {
+        $this->attributes['geniuspay_webhook_secret'] = $value ? encrypt($value) : null;
+    }
+
+    /**
      * Check if restaurant is open now
      */
     public function isOpenNow(): bool

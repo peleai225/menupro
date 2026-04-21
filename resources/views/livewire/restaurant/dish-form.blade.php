@@ -368,9 +368,9 @@
                         <!-- Preview -->
                         <div class="aspect-square bg-neutral-100 rounded-xl overflow-hidden">
                             @if($image)
-                                <img src="{{ $image->temporaryUrl() }}" class="w-full h-full object-cover">
+                                <img src="{{ $image->temporaryUrl() }}" alt="Aperçu du plat" class="w-full h-full object-cover">
                             @elseif($existingImage)
-                                <img src="{{ Storage::url($existingImage) }}" class="w-full h-full object-cover">
+                                <img src="{{ Storage::url($existingImage) }}" alt="Image du plat" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <svg class="w-16 h-16 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

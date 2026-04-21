@@ -36,7 +36,7 @@ class GeniusPayWebhookController extends Controller
         $webhookSecret = '';
         if ($type === 'order' && !empty($metadata['restaurant_id'])) {
             $restaurant = \App\Models\Restaurant::find($metadata['restaurant_id']);
-            $webhookSecret = $restaurant?->geniuspay_webhook_secret ?? '';
+            $webhookSecret = $restaurant?->getGeniusPayWebhookSecret() ?? '';
         }
         if (empty($webhookSecret)) {
             $webhookSecret = \App\Models\SystemSetting::get('geniuspay_webhook_secret', '')

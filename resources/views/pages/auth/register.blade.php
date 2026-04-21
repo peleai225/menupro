@@ -387,7 +387,7 @@
                         <div class="flex items-center gap-4">
                             <div class="w-20 h-20 rounded-2xl bg-neutral-100 border-2 border-dashed border-neutral-300 flex items-center justify-center overflow-hidden transition-all hover:border-primary-400 hover:bg-primary-50">
                                 <template x-if="logoPreview">
-                                    <img :src="logoPreview" class="w-full h-full object-cover">
+                                    <img :src="logoPreview" alt="Aperçu du logo" class="w-full h-full object-cover">
                                 </template>
                                 <template x-if="!logoPreview">
                                     <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -423,7 +423,7 @@
                         <div class="relative">
                             <div class="w-full h-32 rounded-2xl bg-neutral-100 border-2 border-dashed border-neutral-300 flex items-center justify-center overflow-hidden transition-all hover:border-primary-400 hover:bg-primary-50 cursor-pointer">
                                 <template x-if="bannerPreview">
-                                    <img :src="bannerPreview" class="w-full h-full object-cover">
+                                    <img :src="bannerPreview" alt="Aperçu de la bannière" class="w-full h-full object-cover">
                                 </template>
                                 <template x-if="!bannerPreview">
                                     <div class="text-center">

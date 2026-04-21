@@ -147,7 +147,7 @@ class Settings extends Component
         $this->lygos_api_secret = $this->restaurant->getLygosApiSecret();
         $this->geniuspay_api_key = $this->restaurant->getGeniusPayApiKey();
         $this->geniuspay_api_secret = $this->restaurant->getGeniusPayApiSecret();
-        $this->geniuspay_webhook_secret = $this->restaurant->geniuspay_webhook_secret;
+        $this->geniuspay_webhook_secret = $this->restaurant->getGeniusPayWebhookSecret();
         $this->cash_on_delivery = $this->restaurant->cash_on_delivery ?? true;
         $this->menupo_hub_enabled = $this->restaurant->menupo_hub_enabled ?? false;
         $this->wave_merchant_id = $this->restaurant->wave_merchant_id;
