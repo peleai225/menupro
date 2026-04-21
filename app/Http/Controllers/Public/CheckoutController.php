@@ -12,7 +12,6 @@ use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
 use App\Services\FusionPayGateway;
-use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,8 +22,7 @@ use Illuminate\View\View;
 class CheckoutController extends Controller
 {
     public function __construct(
-        protected LygosGateway $lygosGateway,
-        protected GeniusPayGateway $geniusPayGateway
+        protected LygosGateway $lygosGateway
     ) {}
 
     /**
@@ -306,33 +304,8 @@ class CheckoutController extends Controller
                 ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
         }
 
-        // GeniusPay: verify by payment_reference (MTX-xxx, TXN-xxx)
-        if ($order->payment_reference && (str_starts_with($order->payment_reference, 'MTX-') || str_starts_with($order->payment_reference ?? '', 'TXN-'))) {
-            $geniuspay = $this->geniusPayGateway->forRestaurant($restaurant);
-            if (!$geniuspay->isConfigured()) {
-                $geniuspay = $this->geniusPayGateway->forPlatform();
-            }
-            $result = $geniuspay->verifyPayment($order->payment_reference);
-            \Illuminate\Support\Facades\Log::channel('payments')->info('GeniusPay return (success URL): verification result', [
-                'order_id' => $order->id,
-                'reference' => $order->payment_reference,
-                'api_success' => $result['success'] ?? false,
-                'paid' => $result['paid'] ?? false,
-                'status' => $result['status'] ?? null,
-            ]);
-            if ($result['success'] && ($result['paid'] ?? false)) {
-                $order->markAsPaid([
-                    'reference' => $order->payment_reference,
-                    'method' => 'geniuspay',
-                    'metadata' => $result,
-                ]);
-                $restaurant->users()
-                    ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                    ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
-            }
-        }
         // FusionPay: verify by payment_reference (tokenPay) - fallback si webhook pas encore reçu
-        elseif ($order->payment_method === 'fusionpay' && $order->payment_reference && app(FusionPayGateway::class)->isEnabled()) {
+        if ($order->payment_method === 'fusionpay' && $order->payment_reference && app(FusionPayGateway::class)->isEnabled()) {
             $paymentTransaction = \App\Models\PaymentTransaction::where('gateway', 'fusionpay')
                 ->where('gateway_transaction_id', $order->payment_reference)->first();
             if ($paymentTransaction && $paymentTransaction->order_id === $order->id && $paymentTransaction->status !== 'ACCEPTED') {

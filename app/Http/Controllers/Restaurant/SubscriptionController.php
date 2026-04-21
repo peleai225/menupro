@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
-use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +15,6 @@ use Illuminate\View\View;
 class SubscriptionController extends Controller
 {
     public function __construct(
-        protected GeniusPayGateway $geniusPayGateway,
         protected LygosGateway $lygosGateway
     ) {}
 
@@ -165,7 +163,7 @@ class SubscriptionController extends Controller
             }
         }
 
-        // Create payment session (GeniusPay preferred, Lygos fallback)
+        // Create payment session (Lygos)
         $result = $this->createSubscriptionPaymentSession($subscription);
 
         if ($result) {
@@ -247,7 +245,7 @@ class SubscriptionController extends Controller
             return redirect($result['payment_url']);
         }
 
-        if (!$this->geniusPayGateway->forPlatform()->isConfigured() && !$this->lygosGateway->forPlatform()->isConfigured()) {
+        if (!$this->lygosGateway->forPlatform()->isConfigured()) {
             return back()->with('info', 'Votre demande de changement de plan a été enregistrée. Notre équipe vous contactera pour le paiement.');
         }
 
@@ -372,23 +370,12 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Create payment session (GeniusPay preferred, Lygos fallback).
+     * Create payment session (Lygos).
      */
     private function createSubscriptionPaymentSession(Subscription $subscription): ?array
     {
         $successUrl = route('restaurant.subscription.success', $subscription);
         $cancelUrl = route('restaurant.subscription.cancel', $subscription);
-
-        if ($this->geniusPayGateway->forPlatform()->isConfigured()) {
-            $result = $this->geniusPayGateway->createSubscriptionPayment($subscription, $successUrl, $cancelUrl);
-            if ($result['success']) {
-                return [
-                    'payment_id' => $result['payment_reference'] ?? $result['payment_id'],
-                    'payment_url' => $result['payment_url'],
-                ];
-            }
-            return null;
-        }
 
         if ($this->lygosGateway->forPlatform()->isConfigured()) {
             $result = $this->lygosGateway->createSubscriptionPayment($subscription, $successUrl, $cancelUrl);
@@ -404,15 +391,10 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Verify subscription payment (GeniusPay or Lygos).
+     * Verify subscription payment (Lygos).
      */
     private function verifySubscriptionPayment(Subscription $subscription): bool
     {
-        if ($this->geniusPayGateway->forPlatform()->isConfigured() && $subscription->payment_reference) {
-            $result = $this->geniusPayGateway->verifyPayment($subscription->payment_reference);
-            return $result['success'] && ($result['paid'] ?? false);
-        }
-
         if ($this->lygosGateway->forPlatform()->isConfigured()) {
             $ref = 'SUB-' . $subscription->id . '-' . $subscription->created_at->format('Ymd');
             $result = $this->lygosGateway->forPlatform()->verifyPayment($ref);
@@ -424,7 +406,7 @@ class SubscriptionController extends Controller
 
     private function getSubscriptionPaymentError(): string
     {
-        if (!$this->geniusPayGateway->forPlatform()->isConfigured() && !$this->lygosGateway->forPlatform()->isConfigured()) {
+        if (!$this->lygosGateway->forPlatform()->isConfigured()) {
             return 'Le système de paiement n\'est pas configuré. Veuillez contacter le support.';
         }
         return 'Erreur lors de la création du paiement. Veuillez réessayer.';

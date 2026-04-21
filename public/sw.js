@@ -138,7 +138,7 @@ function isStaticAsset(url) {
 }
 
 function isExternalApi(url) {
-  const externalDomains = ['api.wave.com', 'cinetpay.com', 'fusionpay.io', 'geniuspay.app'];
+  const externalDomains = ['api.wave.com', 'cinetpay.com', 'fusionpay.io', 'lygosapp.com'];
   return externalDomains.some((domain) => url.hostname.includes(domain));
 }
 

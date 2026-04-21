@@ -702,98 +702,23 @@
                     @endif
                 </div>
 
+                <!-- Comptes marchands (Wave Checkout direct) -->
                 <div class="border-t border-neutral-200 pt-6 mt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="font-semibold text-neutral-900">Paiement mobile (GeniusPay)</h3>
-                            <p class="text-sm text-neutral-500">Wave, Orange Money, MTN Money via GeniusPay</p>
-                        </div>
-                        <button type="button" wire:click="$toggle('geniuspay_enabled')"
-                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $geniuspay_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $geniuspay_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                        </button>
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-neutral-900">Comptes marchands</h3>
+                        <p class="text-sm text-neutral-500">Renseignez votre ID marchand Wave pour recevoir les paiements directement sur votre compte Wave Business.</p>
                     </div>
 
-                    @if($geniuspay_enabled)
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    API Key GeniusPay <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="geniuspay_api_key" class="input" placeholder="pk_sandbox_... ou pk_live_...">
-                                <p class="text-xs text-neutral-500 mt-1">
-                                    Clé publique obtenue sur votre compte GeniusPay (pay.genius.ci)
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    API Secret GeniusPay <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="geniuspay_api_secret" class="input" placeholder="sk_sandbox_... ou sk_live_...">
-                                <p class="text-xs text-neutral-500 mt-1">
-                                    Clé secrète de votre compte marchand GeniusPay
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Webhook Secret <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
-                                </label>
-                                <input type="password" wire:model="geniuspay_webhook_secret" class="input" placeholder="whsec_sandbox_... ou whsec_live_...">
-                                <p class="text-xs text-neutral-500 mt-1">
-                                    URL webhook à configurer : <code class="bg-neutral-100 px-1 rounded">{{ url('/webhooks/geniuspay') }}</code>
-                                </p>
-                            </div>
-                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p class="text-xs text-blue-800">
-                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Obtenez vos clés API sur <a href="https://pay.genius.ci" target="_blank" class="text-blue-600 hover:underline font-medium">pay.genius.ci</a>
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- MenuPro Hub -->
-                <div class="border-t border-neutral-200 pt-6 mt-6">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="space-y-4 p-4 bg-neutral-50 rounded-xl">
                         <div>
-                            <h3 class="font-semibold text-neutral-900">MenuPro Hub</h3>
-                            <p class="text-sm text-neutral-500">Paiement direct sur vos comptes Wave, Orange Money, MTN, Moov (0,5% de commission)</p>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID Marchand Wave</label>
+                            <input type="text" wire:model="wave_merchant_id" class="input font-mono uppercase" placeholder="CI12345678" maxlength="10">
+                            <p class="text-xs text-neutral-500 mt-1">Format : code pays (2 lettres) + 8 chiffres. Ex : CI12345678 (Côte d'Ivoire), SN12345678 (Sénégal)</p>
+                            @error('wave_merchant_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <button type="button" wire:click="$toggle('menupo_hub_enabled')"
-                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $menupo_hub_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $menupo_hub_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                        </button>
                     </div>
-
-                    @if($menupo_hub_enabled)
-                        <div class="space-y-4 p-4 bg-neutral-50 rounded-xl">
-                            <p class="text-sm text-neutral-600">Renseignez vos numéros de comptes marchands. Le solde de commission doit être crédité par l'admin.</p>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">ID Marchand Wave</label>
-                                <input type="text" wire:model="wave_merchant_id" class="input font-mono uppercase" placeholder="CI12345678" maxlength="10">
-                                <p class="text-xs text-neutral-500 mt-1">Format : code pays (2 lettres) + 8 chiffres. Ex : CI12345678 (Côte d'Ivoire), SN12345678 (Sénégal)</p>
-                                @error('wave_merchant_id')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Orange Money</label>
-                                <input type="tel" wire:model="orange_money_number" class="input" placeholder="07 XX XX XX XX">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro MTN MoMo</label>
-                                <input type="tel" wire:model="mtn_money_number" class="input" placeholder="07 XX XX XX XX">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Numéro Moov Money</label>
-                                <input type="tel" wire:model="moov_money_number" class="input" placeholder="07 XX XX XX XX">
-                            </div>
-                            <p class="text-xs text-neutral-500">Solde commission actuel : <strong>{{ number_format($restaurant->commission_wallet_balance ?? 0, 0, ',', ' ') }} F</strong>. Contactez le support pour recharger.</p>
-                        </div>
-                    @endif
                 </div>
 
                 <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">

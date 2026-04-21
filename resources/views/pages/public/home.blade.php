@@ -418,34 +418,72 @@
     </section>
 
     <!-- Trusted By — Bandeau de confiance compact -->
-    <section class="py-8 sm:py-10 bg-white border-b border-neutral-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-neutral-500 text-sm font-medium mb-8 uppercase tracking-wider">Paiements sécurisés acceptés</p>
-            <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <!-- Orange Money -->
-                <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-orange-300 hover:shadow-lg transition-all duration-300"
-                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 0ms">
-                    <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" width="40" height="40" class="h-10 w-10 object-contain rounded">
-                    <span class="font-semibold text-neutral-700 hidden sm:block">Orange Money</span>
+    <section class="relative py-12 sm:py-16 bg-gradient-to-b from-white via-neutral-50 to-white border-b border-neutral-100 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.04),transparent_60%)]"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-center gap-3 mb-8" x-data="{ shown: false }" x-intersect.once="shown = true"
+                 x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                <div class="h-px w-12 bg-gradient-to-r from-transparent to-neutral-300"></div>
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white rounded-full border border-neutral-200 shadow-sm">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <span class="text-xs font-semibold text-neutral-700 uppercase tracking-wider">Paiements sécurisés</span>
                 </div>
-                <!-- MTN MoMo -->
-                <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-yellow-300 hover:shadow-lg transition-all duration-300"
-                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 100ms">
-                    <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" width="40" height="40" class="h-10 w-10 object-contain rounded">
-                    <span class="font-semibold text-neutral-700 hidden sm:block">MTN MoMo</span>
+                <div class="h-px w-12 bg-gradient-to-l from-transparent to-neutral-300"></div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <!-- Orange Money -->
+                <div class="group relative flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white px-4 py-4 sm:py-3.5 rounded-2xl border border-neutral-200 hover:border-orange-400 hover:shadow-xl hover:shadow-orange-100/50 hover:-translate-y-1 transition-all duration-300"
+                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 0ms">
+                    <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" width="44" height="44" class="relative h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <span class="relative font-semibold text-neutral-800 text-xs sm:text-sm text-center sm:text-left">Orange Money</span>
                 </div>
                 <!-- Wave -->
-                <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+                <div class="group relative flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white px-4 py-4 sm:py-3.5 rounded-2xl border border-neutral-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 hover:-translate-y-1 transition-all duration-300"
+                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 100ms">
+                    <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" width="44" height="44" class="relative h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <span class="relative font-semibold text-neutral-800 text-xs sm:text-sm text-center sm:text-left">Wave</span>
+                </div>
+                <!-- MTN MoMo -->
+                <div class="group relative flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white px-4 py-4 sm:py-3.5 rounded-2xl border border-neutral-200 hover:border-yellow-400 hover:shadow-xl hover:shadow-yellow-100/50 hover:-translate-y-1 transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 200ms">
-                    <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" width="40" height="40" class="h-10 w-10 object-contain rounded">
-                    <span class="font-semibold text-neutral-700 hidden sm:block">Wave</span>
+                    <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-yellow-500/0 via-yellow-500/0 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" width="44" height="44" class="relative h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <span class="relative font-semibold text-neutral-800 text-xs sm:text-sm text-center sm:text-left">MTN MoMo</span>
                 </div>
                 <!-- Moov Money -->
-                <div class="flex items-center gap-3 bg-neutral-50 px-5 py-3 rounded-xl border border-neutral-200 hover:border-green-300 hover:shadow-lg transition-all duration-300"
+                <div class="group relative flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white px-4 py-4 sm:py-3.5 rounded-2xl border border-neutral-200 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-100/50 hover:-translate-y-1 transition-all duration-300"
                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 300ms">
-                    <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" width="40" height="40" class="h-10 w-10 object-contain rounded">
-                    <span class="font-semibold text-neutral-700 hidden sm:block">Moov Money</span>
+                    <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" width="44" height="44" class="relative h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <span class="relative font-semibold text-neutral-800 text-xs sm:text-sm text-center sm:text-left">Moov Money</span>
                 </div>
+            </div>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-neutral-500">
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Connexion chiffrée SSL
+                </span>
+                <span class="hidden sm:inline text-neutral-300">•</span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Paiement directement sur votre compte
+                </span>
+                <span class="hidden sm:inline text-neutral-300">•</span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 7H7v6h6V7z"/>
+                        <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                    </svg>
+                    Zéro commission cachée
+                </span>
             </div>
         </div>
     </section>
@@ -1076,9 +1114,12 @@
     @endif
 
     <!-- Features Section -->
-    <section id="features" class="py-24 bg-white relative overflow-hidden">
+    <section id="features" class="py-24 bg-gradient-to-b from-white via-neutral-50/30 to-white relative overflow-hidden">
         <!-- Subtle background pattern -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <!-- Floating accent orbs -->
+        <div class="absolute top-20 -left-20 w-96 h-96 bg-primary-500/5 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-20 -right-20 w-96 h-96 bg-accent-500/5 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
         
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->

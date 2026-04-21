@@ -203,7 +203,7 @@ class OrderController extends Controller
             ]);
 
             // Débiter le wallet (annuler le crédit automatique reçu via webhook)
-            $onlinePaymentMethods = ['wave', 'fusionpay', 'geniuspay', 'lygos'];
+            $onlinePaymentMethods = ['wave', 'fusionpay', 'lygos'];
             if (in_array($order->payment_method, $onlinePaymentMethods)) {
                 try {
                     app(WalletService::class)->debitWallet($order->restaurant_id, (float) $order->total);

@@ -13,7 +13,6 @@ use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\View;
 use App\Observers\ActivityObserver;
-use App\Observers\OrderCommissionObserver;
 use App\Observers\OrderWhatsAppObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
@@ -22,7 +21,6 @@ use App\Policies\OrderPolicy;
 use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
-use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
 use App\Services\MediaUploader;
 use App\Services\PlanLimiter;
@@ -57,7 +55,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register services as singletons
         $this->app->singleton(MediaUploader::class);
-        $this->app->singleton(GeniusPayGateway::class);
         $this->app->singleton(LygosGateway::class);
         $this->app->singleton(PlanLimiter::class);
         $this->app->singleton(StockManager::class);
@@ -72,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force APP_URL for correct payment redirect URLs (GeniusPay, Lygos)
+        // Force APP_URL for correct payment redirect URLs (Lygos, Wave)
         if (config('app.env') === 'production' && $appUrl = config('app.url')) {
             URL::forceRootUrl($appUrl);
         }
@@ -122,7 +119,6 @@ class AppServiceProvider extends ServiceProvider
             $model::observe(ActivityObserver::class);
         }
 
-        Order::observe(OrderCommissionObserver::class);
         Order::observe(OrderWhatsAppObserver::class);
         Order::observe(\App\Observers\OrderCustomerNotifyObserver::class);
     }

@@ -52,7 +52,6 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'cancellation_reason',
-        'payment_screenshot_url',
     ];
 
     protected $casts = [

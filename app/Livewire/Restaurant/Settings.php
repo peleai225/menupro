@@ -65,20 +65,12 @@ class Settings extends Component
 
     // Payment
     public bool $lygos_enabled = false;
-    public bool $geniuspay_enabled = false;
     public ?string $lygos_api_key = null;
     public ?string $lygos_api_secret = null;
-    public ?string $geniuspay_api_key = null;
-    public ?string $geniuspay_api_secret = null;
-    public ?string $geniuspay_webhook_secret = null;
     public bool $cash_on_delivery = true;
 
-    // MenuPro Hub (paiement direct comptes marchands)
-    public bool $menupo_hub_enabled = false;
+    // Paiement direct comptes marchands (Wave)
     public ?string $wave_merchant_id = null;
-    public ?string $orange_money_number = null;
-    public ?string $mtn_money_number = null;
-    public ?string $moov_money_number = null;
 
     // Appearance / Colors
     #[Rule('nullable|string|regex:/^#[0-9A-Fa-f]{6}$/')]
@@ -142,18 +134,10 @@ class Settings extends Component
         $this->estimated_prep_time = $this->restaurant->estimated_prep_time ?? 30;
         $this->delivery_zones = $this->restaurant->delivery_zones;
         $this->lygos_enabled = $this->restaurant->lygos_enabled ?? false;
-        $this->geniuspay_enabled = $this->restaurant->geniuspay_enabled ?? false;
         $this->lygos_api_key = $this->restaurant->getLygosApiKey();
         $this->lygos_api_secret = $this->restaurant->getLygosApiSecret();
-        $this->geniuspay_api_key = $this->restaurant->getGeniusPayApiKey();
-        $this->geniuspay_api_secret = $this->restaurant->getGeniusPayApiSecret();
-        $this->geniuspay_webhook_secret = $this->restaurant->getGeniusPayWebhookSecret();
         $this->cash_on_delivery = $this->restaurant->cash_on_delivery ?? true;
-        $this->menupo_hub_enabled = $this->restaurant->menupo_hub_enabled ?? false;
         $this->wave_merchant_id = $this->restaurant->wave_merchant_id;
-        $this->orange_money_number = $this->restaurant->orange_money_number;
-        $this->mtn_money_number = $this->restaurant->mtn_money_number;
-        $this->moov_money_number = $this->restaurant->moov_money_number;
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
         $this->opening_hours = $this->restaurant->opening_hours ?? $this->getDefaultOpeningHours();
@@ -394,31 +378,18 @@ class Settings extends Component
     {
         $this->validate([
             'lygos_enabled' => 'boolean',
-            'geniuspay_enabled' => 'boolean',
             'lygos_api_key' => 'nullable|string|max:255',
             'lygos_api_secret' => 'nullable|string|max:255',
-            'geniuspay_api_key' => 'nullable|string|max:255',
-            'geniuspay_api_secret' => 'nullable|string|max:255',
-            'geniuspay_webhook_secret' => 'nullable|string|max:255',
             'cash_on_delivery' => 'boolean',
-            'menupo_hub_enabled' => 'boolean',
             'wave_merchant_id' => ['nullable', 'string', 'max:10', 'regex:/^[A-Z]{2}\d{8}$/'],
-            'orange_money_number' => 'nullable|string|max:20',
-            'mtn_money_number' => 'nullable|string|max:20',
-            'moov_money_number' => 'nullable|string|max:20',
         ], [
             'wave_merchant_id.regex' => "L'ID marchand Wave doit suivre le format : code pays (2 lettres) + 8 chiffres. Ex : CI12345678",
         ]);
 
         $data = [
             'lygos_enabled' => $this->lygos_enabled,
-            'geniuspay_enabled' => $this->geniuspay_enabled,
             'cash_on_delivery' => $this->cash_on_delivery,
-            'menupo_hub_enabled' => $this->menupo_hub_enabled,
             'wave_merchant_id' => $this->wave_merchant_id ? strtoupper($this->wave_merchant_id) : null,
-            'orange_money_number' => $this->orange_money_number ?: null,
-            'mtn_money_number' => $this->mtn_money_number ?: null,
-            'moov_money_number' => $this->moov_money_number ?: null,
         ];
 
         if ($this->lygos_api_key !== null) {
@@ -427,13 +398,6 @@ class Settings extends Component
         if ($this->lygos_api_secret !== null) {
             $data['lygos_api_secret'] = $this->lygos_api_secret;
         }
-        if ($this->geniuspay_api_key !== null) {
-            $data['geniuspay_api_key'] = $this->geniuspay_api_key;
-        }
-        if ($this->geniuspay_api_secret !== null) {
-            $data['geniuspay_api_secret'] = $this->geniuspay_api_secret;
-        }
-        $data['geniuspay_webhook_secret'] = $this->geniuspay_webhook_secret ?? '';
 
         $this->restaurant->update($data);
 

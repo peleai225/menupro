@@ -140,7 +140,7 @@ Le fichier `.env` doit contenir l’URL exacte de votre site en production :
 APP_URL=https://menupro.ci
 ```
 
-**Pourquoi c’est important :** Les URLs de retour après paiement (GeniusPay, Lygos) sont générées à partir de `APP_URL`. Si `APP_URL` est incorrect (ex. `http://127.0.0.1:8000`), les clients seront redirigés vers une mauvaise adresse après paiement.
+**Pourquoi c’est important :** Les URLs de retour après paiement (Lygos, FusionPay) sont générées à partir de `APP_URL`. Si `APP_URL` est incorrect (ex. `http://127.0.0.1:8000`), les clients seront redirigés vers une mauvaise adresse après paiement.
 
 Après modification du `.env` :
 

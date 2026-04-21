@@ -2,7 +2,7 @@
 
 **La solution SaaS pour digitaliser votre restaurant et recevoir des commandes en ligne.**
 
-MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiriens de créer leur site de commande en quelques minutes, gérer leur menu, leur stock et recevoir des paiements via Mobile Money (Lygos, GeniusPay).
+MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiriens de créer leur site de commande en quelques minutes, gérer leur menu, leur stock et recevoir des paiements via Mobile Money (Lygos, Wave, FusionPay).
 
 ![MenuPro](https://via.placeholder.com/1200x600/f97316/ffffff?text=MenuPro)
 
@@ -13,7 +13,7 @@ MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiri
 - **Gestion du menu** - Catégories, plats, photos, prix, disponibilité
 - **Gestion du stock** - Ingrédients, fournisseurs, alertes rupture, mouvements
 - **Tableau de bord** - Commandes en temps réel, statistiques, CA
-- **Paiement intégré** - Orange Money, MTN, Wave (Lygos, GeniusPay)
+- **Paiement intégré** - Orange Money, MTN, Wave (Lygos, FusionPay)
 - **Multi-employés** - Accès restreints pour le personnel
 
 ### 👨‍💼 Pour l'administration
@@ -34,7 +34,7 @@ MenuPro est une plateforme multi-restaurants permettant aux restaurateurs ivoiri
 - **Frontend** : Livewire 4 + Blade + Alpine.js
 - **Styles** : Tailwind CSS 4
 - **Base de données** : MySQL / PostgreSQL
-- **Paiement** : Lygos, GeniusPay (Wave, Mobile Money)
+- **Paiement** : Lygos, FusionPay, Wave (Mobile Money)
 - **Stockage** : Laravel Storage (local, cloud)
 
 ## 🚀 Installation
@@ -96,7 +96,7 @@ app/
 ├── Models/
 ├── Services/
 │   ├── LygosGateway.php
-│   ├── GeniusPayGateway.php
+│   ├── FusionPayGateway.php
 │   ├── StockManager.php
 │   ├── PlanLimiter.php
 │   └── MediaUploader.php
@@ -175,10 +175,6 @@ DB_PASSWORD=
 
 LYGOS_API_URL=https://api.lygos.ci
 LYGOS_WEBHOOK_SECRET=your-webhook-secret
-
-# GeniusPay (optionnel)
-GENIUSPAY_API_URL=
-GENIUSPAY_WEBHOOK_SECRET=
 
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io

@@ -294,41 +294,6 @@
                 @endif
             </div>
 
-            <!-- MenuPro Hub - Solde de commission -->
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-neutral-900 mb-4">MenuPro Hub</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-neutral-500">Solde commission</span>
-                        <span class="font-bold text-neutral-900 {{ ($restaurant->commission_wallet_balance ?? 0) > 0 ? 'text-secondary-600' : 'text-amber-600' }}">
-                            {{ number_format($restaurant->commission_wallet_balance ?? 0, 0, ',', ' ') }} F
-                        </span>
-                    </div>
-                    @if(($restaurant->commission_wallet_balance ?? 0) <= 0)
-                        <p class="text-xs text-amber-600">Solde insuffisant : le paiement MenuPro Hub (Wave, Orange, MTN, Moov) ne s'affichera pas au checkout tant que le solde n'est pas crédité.</p>
-                    @endif
-                    <div class="pt-4 border-t border-neutral-200">
-                        <form method="POST" action="{{ route('super-admin.restaurants.add-commission', $restaurant) }}" class="space-y-3">
-                            @csrf
-                            <div>
-                                <label class="block text-xs font-medium text-neutral-500 mb-1">Montant à créditer (FCFA)</label>
-                                <input type="number" name="amount" min="1000" step="1000" value="50000" required class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="50000">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-neutral-500 mb-1">Raison (optionnel)</label>
-                                <input type="text" name="reason" maxlength="255" class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Recharge initiale">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-full">
-                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                Créditer le solde
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- Owner Info -->
             <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h2>

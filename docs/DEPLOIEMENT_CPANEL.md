@@ -115,7 +115,7 @@ Dans le dossier **racine Laravel** (par ex. `menupro_app/` ou `menupro/`), crée
   - `APP_DEBUG=false`
   - `APP_URL=https://votre-domaine.com`
   - `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `DB_HOST` (souvent `localhost` sur cPanel)
-  - Options mail, Lygos, GeniusPay, etc. selon votre configuration
+  - Options mail, Lygos, FusionPay, etc. selon votre configuration
 
 ---
 

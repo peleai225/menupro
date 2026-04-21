@@ -132,11 +132,6 @@ class DashboardController extends Controller
             'lygos_api_key' => \App\Models\SystemSetting::get('lygos_api_key', ''),
             'lygos_webhook_secret' => \App\Models\SystemSetting::get('lygos_webhook_secret', ''),
             'lygos_mode' => \App\Models\SystemSetting::get('lygos_mode', 'live'),
-            'geniuspay_api_key' => \App\Models\SystemSetting::get('geniuspay_api_key', ''),
-            'geniuspay_api_secret' => \App\Models\SystemSetting::get('geniuspay_api_secret', ''),
-            'geniuspay_webhook_secret' => \App\Models\SystemSetting::get('geniuspay_webhook_secret', ''),
-            'geniuspay_mode' => \App\Models\SystemSetting::get('geniuspay_mode', 'sandbox'),
-            'menupo_hub_webhook_secret' => \App\Models\SystemSetting::get('menupo_hub_webhook_secret', config('services.menupo_hub.webhook_secret', '')),
             'fusionpay_enabled' => \App\Models\SystemSetting::get('fusionpay_enabled', false),
             'fusionpay_api_url' => \App\Models\SystemSetting::get('fusionpay_api_url', config('fusionpay.api_url', '')),
             'fusionpay_private_key' => \App\Models\SystemSetting::get('fusionpay_private_key', config('fusionpay.private_key', '')),
@@ -205,11 +200,6 @@ class DashboardController extends Controller
             'lygos_api_key' => ['nullable', 'string'],
             'lygos_webhook_secret' => ['nullable', 'string'],
             'lygos_mode' => ['nullable', 'in:test,live'],
-            'geniuspay_api_key' => ['nullable', 'string'],
-            'geniuspay_api_secret' => ['nullable', 'string'],
-            'geniuspay_webhook_secret' => ['nullable', 'string'],
-            'geniuspay_mode' => ['nullable', 'in:sandbox,live'],
-            'menupo_hub_webhook_secret' => ['nullable', 'string'],
             'fusionpay_enabled' => ['boolean'],
             'fusionpay_api_url' => ['nullable', 'string', 'url'],
             'fusionpay_private_key' => ['nullable', 'string'],
@@ -289,21 +279,6 @@ class DashboardController extends Controller
         }
         if ($request->filled('lygos_mode')) {
             \App\Models\SystemSetting::set('lygos_mode', $request->lygos_mode, 'string', 'Mode Lygos (test/live)');
-        }
-        if ($request->filled('geniuspay_api_key')) {
-            \App\Models\SystemSetting::set('geniuspay_api_key', $request->geniuspay_api_key, 'string', 'Clé API GeniusPay');
-        }
-        if ($request->filled('geniuspay_api_secret')) {
-            \App\Models\SystemSetting::set('geniuspay_api_secret', $request->geniuspay_api_secret, 'string', 'Secret API GeniusPay');
-        }
-        if ($request->filled('geniuspay_webhook_secret')) {
-            \App\Models\SystemSetting::set('geniuspay_webhook_secret', $request->geniuspay_webhook_secret, 'string', 'Secret webhook GeniusPay');
-        }
-        if ($request->filled('geniuspay_mode')) {
-            \App\Models\SystemSetting::set('geniuspay_mode', $request->geniuspay_mode, 'string', 'Mode GeniusPay (sandbox/live)');
-        }
-        if ($request->filled('menupo_hub_webhook_secret')) {
-            \App\Models\SystemSetting::set('menupo_hub_webhook_secret', $request->menupo_hub_webhook_secret, 'string', 'Secret webhook MenuPro Hub (vérification paiements SMS)');
         }
         \App\Models\SystemSetting::set('fusionpay_enabled', $request->boolean('fusionpay_enabled'), 'boolean', 'Activer FusionPay (paiements + transferts)');
         if ($request->filled('fusionpay_api_url')) {

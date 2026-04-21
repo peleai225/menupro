@@ -211,46 +211,14 @@
                 </div>
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        GeniusPay
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-5">Wave, Orange Money, MTN Money. Utilisé pour les <strong>abonnements</strong> et les <strong>commandes clients</strong> (quand Lygos n'est pas configuré par le restaurant). <a href="https://pay.genius.ci/docs/api" target="_blank" class="text-primary-600 hover:underline">Documentation</a></p>
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">API Key</label>
-                            <input type="password" name="geniuspay_api_key" value="{{ old('geniuspay_api_key', $settings['geniuspay_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="pk_sandbox_... ou pk_live_...">
-                            <p class="text-xs text-neutral-500 mt-1">Clé publique GeniusPay pour les paiements d'abonnements</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">API Secret</label>
-                            <input type="password" name="geniuspay_api_secret" value="{{ old('geniuspay_api_secret', $settings['geniuspay_api_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="sk_sandbox_... ou sk_live_...">
-                            <p class="text-xs text-neutral-500 mt-1">Clé secrète GeniusPay</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Webhook Secret</label>
-                            <input type="password" name="geniuspay_webhook_secret" value="{{ old('geniuspay_webhook_secret', $settings['geniuspay_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="whsec_sandbox_... ou whsec_live_...">
-                            <p class="text-xs text-neutral-500 mt-1">URL webhook : <code class="bg-neutral-200 px-1 rounded">{{ url('/webhooks/geniuspay') }}</code></p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Mode</label>
-                            <select name="geniuspay_mode" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                <option value="sandbox" {{ ($settings['geniuspay_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' }}>Sandbox (test)</option>
-                                <option value="live" {{ ($settings['geniuspay_mode'] ?? 'sandbox') === 'live' ? 'selected' : '' }}>Production</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        Lygos <span class="text-neutral-500 text-sm font-normal">(legacy - abonnements)</span>
+                        Lygos <span class="text-neutral-500 text-sm font-normal">(abonnements)</span>
                     </h2>
                     <div class="space-y-5">
                         <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
                             <div>
                                 <span class="font-medium text-neutral-900">Activer Lygos</span>
-                                <p class="text-sm text-neutral-500">Utiliser Lygos pour les abonnements (fallback si GeniusPay non configuré)</p>
+                                <p class="text-sm text-neutral-500">Utiliser Lygos pour les abonnements de la plateforme</p>
                             </div>
                             <input type="checkbox" name="lygos_enabled" value="1" {{ ($settings['lygos_enabled'] ?? true) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
                         </label>
@@ -273,23 +241,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        MenuPro Hub (Paiement direct)
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-5">Paiement direct sur les comptes marchands Wave, Orange Money, MTN des restaurants. Le webhook reçoit les SMS de confirmation de paiement via la passerelle SMS.</p>
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Webhook Secret</label>
-                            <input type="password" name="menupo_hub_webhook_secret" value="{{ old('menupo_hub_webhook_secret', $settings['menupo_hub_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Secret pour signer les requêtes">
-                            <p class="text-xs text-neutral-500 mt-1">Secret pour vérifier la signature des webhooks (header X-Webhook-Signature ou X-Signature). Si vide, la vérification est désactivée. Laisser vide pour conserver la valeur actuelle.</p>
-                            <p class="text-xs text-neutral-500 mt-1">URL webhook : <code class="bg-neutral-200 px-1 rounded">{{ url('/webhooks/menupo-hub/verify-payment') }}</code></p>
-                        </div>
-                    </div>
-                </div>
-
 
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">

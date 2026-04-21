@@ -10,9 +10,7 @@ use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
 use App\Services\FusionPayGateway;
-use App\Services\GeniusPayGateway;
 use App\Services\LygosGateway;
-use App\Services\MenuProHubService;
 use App\Services\WaveCheckoutService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
@@ -60,7 +58,7 @@ class Checkout extends Component
     public ?string $promoError = null;
 
     // Payment Method
-    public ?string $payment_method = null; // 'lygos', 'geniuspay', 'fusionpay', 'wave', 'orange', 'mtn', 'moov' (Hub), or 'cash_on_delivery'
+    public ?string $payment_method = null; // 'lygos', 'fusionpay', 'wave_checkout', or 'cash_on_delivery'
 
     public function mount(string $slug): void
     {
@@ -106,8 +104,7 @@ class Checkout extends Component
             ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : [],
             $this->fusionpayPaymentAvailable ? ['fusionpay'] : [],
             $this->waveCheckoutAvailable ? ['wave_checkout'] : [],
-            $this->onlinePaymentAvailable ? [$this->onlinePaymentMethod] : [],
-            $this->menupoHubPaymentAvailable ? $this->menupoHubMethods : []
+            $this->onlinePaymentAvailable ? [$this->onlinePaymentMethod] : []
         );
         if (count($methods) === 1) {
             $this->payment_method = $methods[0];
@@ -198,44 +195,19 @@ class Checkout extends Component
     public function onlinePaymentAvailable(): bool
     {
         $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
-        $geniuspayRestaurant = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
-        $geniuspayPlatform = app(GeniusPayGateway::class)->forPlatform();
-        $lygosOk = $this->restaurant->lygos_enabled && $lygos->isConfigured();
-        $geniuspayRestaurantOk = $this->restaurant->geniuspay_enabled && $geniuspayRestaurant->isConfigured();
-        $geniuspayPlatformOk = $this->restaurant->geniuspay_enabled && $geniuspayPlatform->isConfigured();
-        return $lygosOk || $geniuspayRestaurantOk || $geniuspayPlatformOk;
+        return (bool) ($this->restaurant->lygos_enabled && $lygos->isConfigured());
     }
 
     #[Computed]
     public function onlinePaymentMethod(): string
     {
-        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
-        $geniuspayRestaurant = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
-        if ($this->restaurant->lygos_enabled && $lygos->isConfigured()) {
-            return 'lygos';
-        }
-        if ($this->restaurant->geniuspay_enabled && $geniuspayRestaurant->isConfigured()) {
-            return 'geniuspay';
-        }
-        return 'geniuspay'; // Platform fallback
+        return 'lygos';
     }
 
     #[Computed]
     public function cashOnDeliveryAvailable(): bool
     {
         return (bool) ($this->restaurant->cash_on_delivery ?? false);
-    }
-
-    #[Computed]
-    public function menupoHubPaymentAvailable(): bool
-    {
-        return app(MenuProHubService::class)->canUseHub($this->restaurant);
-    }
-
-    #[Computed]
-    public function menupoHubMethods(): array
-    {
-        return app(MenuProHubService::class)->getAvailableMethods($this->restaurant);
     }
 
     #[Computed]
@@ -370,9 +342,6 @@ class Checkout extends Component
         // Determine payment method if not already set
         $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
         $lygosAvailable = $this->restaurant->lygos_enabled && $lygos->isConfigured();
-        $geniuspay = app(GeniusPayGateway::class)->forPlatform();
-        $geniuspayAvailable = $geniuspay->isConfigured();
-        $hubAvailable = $this->menupoHubPaymentAvailable;
         $cashOnDeliveryAvailable = $this->restaurant->cash_on_delivery ?? false;
         $fusionpayAvailable = $this->fusionpayPaymentAvailable;
 
@@ -380,9 +349,7 @@ class Checkout extends Component
             $cashOnDeliveryAvailable ? ['cash_on_delivery'] : [],
             $fusionpayAvailable ? ['fusionpay'] : [],
             $this->waveCheckoutAvailable ? ['wave_checkout'] : [],
-            $lygosAvailable ? ['lygos'] : [],
-            $geniuspayAvailable ? ['geniuspay'] : [],
-            $hubAvailable ? $this->menupoHubMethods : []
+            $lygosAvailable ? ['lygos'] : []
         );
 
         if (!$this->payment_method) {
@@ -419,8 +386,6 @@ class Checkout extends Component
             }
         }
 
-        $isHubPayment = in_array($this->payment_method, ['wave', 'orange', 'mtn', 'moov']);
-
         // Create order
         $order = Order::create([
             'restaurant_id' => $this->restaurant->id,
@@ -429,8 +394,8 @@ class Checkout extends Component
             'customer_phone' => $this->getFullPhoneNumber(),
             'type' => OrderType::from($this->order_type),
             'status' => OrderStatus::PENDING_PAYMENT,
-            'payment_status' => $isHubPayment ? PaymentStatus::PENDING_VERIFICATION : PaymentStatus::PENDING,
-            'payment_method' => $isHubPayment ? $this->payment_method : ($this->payment_method === 'fusionpay' ? 'fusionpay' : null),
+            'payment_status' => PaymentStatus::PENDING,
+            'payment_method' => $this->payment_method === 'fusionpay' ? 'fusionpay' : null,
             'subtotal' => $this->subtotal,
             'delivery_fee' => $this->deliveryFee,
             'discount_amount' => $this->discount,
@@ -524,46 +489,6 @@ class Checkout extends Component
                 $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                 return;
             }
-        } elseif ($this->payment_method === 'geniuspay') {
-            $geniuspay = app(GeniusPayGateway::class)->forRestaurant($this->restaurant);
-            if (!$geniuspay->isConfigured()) {
-                $geniuspay = app(GeniusPayGateway::class)->forPlatform();
-            }
-            try {
-                $result = $geniuspay->createOrderPayment(
-                    $order,
-                    route('r.order.success', [$this->restaurant->slug, $order]),
-                    route('r.order.cancel', [$this->restaurant->slug, $order])
-                );
-
-                if ($result['success']) {
-                    $order->update([
-                        'payment_reference' => $result['payment_reference'] ?? $result['payment_id'],
-                        'payment_metadata' => ['payment_url' => $result['payment_url']],
-                    ]);
-                    return redirect()->away($result['payment_url']);
-                }
-                $errorMessage = $result['error'] ?? 'Impossible de créer la session de paiement.';
-                session()->flash('error', 'Erreur de paiement : ' . $errorMessage . ' Veuillez réessayer.');
-                \Log::error('GeniusPay payment creation failed', ['order_id' => $order->id, 'result' => $result]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            } catch (\Exception $e) {
-                session()->flash('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
-                \Log::error('GeniusPay payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            }
-        } elseif (in_array($this->payment_method, ['wave', 'orange', 'mtn', 'moov'])) {
-            // MenuPro Hub : paiement manuel via Mobile Money (Wave deep link, codes USSD Orange/MTN/Moov)
-            // La commande est créée en statut PENDING_VERIFICATION.
-            // L'agent SMS Gateway confirmera le paiement via POST /webhooks/menupo-hub/verify-payment.
-            $order->update([
-                'payment_method' => $this->payment_method,
-                'payment_status' => PaymentStatus::PENDING_VERIFICATION,
-            ]);
-            // La page de statut de commande affiche automatiquement les instructions de paiement
-            // (deep link Wave, code USSD Orange/MTN/Moov) via MenuProHubService.
         } elseif ($this->payment_method === 'wave_checkout') {
             // Paiement Wave direct — les fonds vont directement sur le compte
             // Wave Business du restaurant (wave_merchant_id configuré).

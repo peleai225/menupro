@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Public;
 
-use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
-use App\Services\MenuProHubService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -79,26 +77,11 @@ class OrderStatusController extends Controller
                 ->get();
         }
 
-        // MenuPro Hub: payment instructions when pending verification
-        $hubPaymentInstructions = null;
-        if ($order->payment_status === PaymentStatus::PENDING_VERIFICATION && in_array($order->payment_method, ['wave', 'orange', 'mtn', 'moov'])) {
-            $hubService = app(MenuProHubService::class);
-            $hubPaymentInstructions = [
-                'method' => $order->payment_method,
-                'wave_deep_link' => $order->payment_method === 'wave' ? $hubService->getWaveDeepLink($order->restaurant, $order) : null,
-                'orange_ussd' => $order->payment_method === 'orange' ? $hubService->getOrangeUssdCode($order->restaurant, $order) : null,
-                'mtn_ussd' => $order->payment_method === 'mtn' ? $hubService->getMtnUssdCode($order->restaurant, $order) : null,
-                'moov_ussd' => $order->payment_method === 'moov' ? $hubService->getMoovUssdCode($order->restaurant, $order) : null,
-                'moov_number' => $order->payment_method === 'moov' ? $order->restaurant->moov_money_number : null,
-            ];
-        }
-
         return view('pages.restaurant-public.order-status', compact(
             'restaurant',
             'order',
             'progress',
-            'availableDishes',
-            'hubPaymentInstructions'
+            'availableDishes'
         ));
     }
 

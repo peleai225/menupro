@@ -771,7 +771,7 @@
                     </div>
 
                     <!-- Payment Method -->
-                    @if($this->fusionpayPaymentAvailable || $this->waveCheckoutAvailable || $this->onlinePaymentAvailable || $this->menupoHubPaymentAvailable || $this->cashOnDeliveryAvailable)
+                    @if($this->fusionpayPaymentAvailable || $this->waveCheckoutAvailable || $this->onlinePaymentAvailable || $this->cashOnDeliveryAvailable)
                         <div class="mb-6 pb-6 border-b border-neutral-200">
                             <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
                             <div class="space-y-2">
@@ -796,32 +796,12 @@
                                     </label>
                                 @endif
                                 @if($this->onlinePaymentAvailable)
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ in_array($payment_method, ['lygos', 'geniuspay']) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'lygos' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
                                         <input type="radio" wire:model="payment_method" value="{{ $this->onlinePaymentMethod }}" class="text-primary-500 focus:ring-primary-500">
                                         <x-payment-logo method="online" />
                                         <span class="font-medium">Paiement en ligne</span>
-                                        <span class="text-xs text-neutral-500">(Lygos / GeniusPay)</span>
+                                        <span class="text-xs text-neutral-500">(Lygos)</span>
                                     </label>
-                                @endif
-                                @if($this->menupoHubPaymentAvailable)
-                                    @foreach($this->menupoHubMethods as $method)
-                                        <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === $method ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                            <input type="radio" wire:model="payment_method" value="{{ $method }}" class="text-primary-500 focus:ring-primary-500">
-                                            <x-payment-logo :method="$method" />
-                                            <span class="font-medium">
-                                                @if($method === 'wave')
-                                                    <span class="inline-flex items-center gap-1.5">Wave</span>
-                                                @elseif($method === 'orange')
-                                                    <span class="inline-flex items-center gap-1.5">Orange Money</span>
-                                                @elseif($method === 'mtn')
-                                                    <span class="inline-flex items-center gap-1.5">MTN MoMo</span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1.5">Moov Money</span>
-                                                @endif
-                                            </span>
-                                            <span class="text-xs text-neutral-500">(Paiement direct · PC et mobile)</span>
-                                        </label>
-                                    @endforeach
                                 @endif
                                 @if($this->cashOnDeliveryAvailable)
                                     <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'cash_on_delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">

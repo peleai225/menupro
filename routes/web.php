@@ -26,9 +26,7 @@ use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\Webhook\FusionPayPaymentWebhook;
 use App\Http\Controllers\Webhook\WaveWebhookController;
 use App\Http\Controllers\Webhook\FusionPayPayoutWebhook;
-use App\Http\Controllers\Webhook\GeniusPayWebhookController;
 use App\Http\Controllers\Webhook\LygosWebhookController;
-use App\Http\Controllers\Webhook\MenuProHubWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -295,8 +293,8 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/extend-subscription', [RestaurantController::class, 'extendSubscription'])->name('restaurants.extend-subscription');
         Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
-        Route::post('restaurants/{restaurant}/add-commission', [RestaurantController::class, 'addCommission'])->name('restaurants.add-commission');
-        
+
+
         // Subscriptions Management
         Route::get('abonnements', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::get('abonnements/{subscription}', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'show'])->name('subscriptions.show');
@@ -405,8 +403,6 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
 
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/lygos', [LygosWebhookController::class, 'handle'])->name('webhooks.lygos');
-    Route::post('/geniuspay', [GeniusPayWebhookController::class, 'handle'])->name('webhooks.geniuspay');
-    Route::post('/menupo-hub/verify-payment', [MenuProHubWebhookController::class, 'verifyPayment'])->name('webhooks.menupo-hub.verify');
     Route::post('/wave/checkout', [WaveWebhookController::class, 'handleCheckout'])->name('webhooks.wave.checkout');
     Route::post('/fusionpay/payment', FusionPayPaymentWebhook::class)->name('webhooks.fusionpay.payment');
     Route::post('/fusionpay/payout', FusionPayPayoutWebhook::class)->name('webhooks.fusionpay.payout');

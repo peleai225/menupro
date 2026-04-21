@@ -138,22 +138,6 @@ class RestaurantController extends Controller
     }
 
     /**
-     * Add commission balance for MenuPro Hub.
-     */
-    public function addCommission(Request $request, Restaurant $restaurant): RedirectResponse
-    {
-        $request->validate([
-            'amount' => ['required', 'numeric', 'min:1000', 'max:10000000'],
-            'reason' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $amount = (float) $request->amount;
-        $restaurant->increment('commission_wallet_balance', $amount);
-
-        return back()->with('success', number_format($amount, 0, ',', ' ') . ' F crédités sur le solde MenuPro Hub.');
-    }
-
-    /**
      * Approve a pending restaurant.
      */
     public function approve(Restaurant $restaurant): RedirectResponse
