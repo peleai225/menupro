@@ -43,8 +43,8 @@ class RegisterRequest extends FormRequest
             'banner' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
             'rccm_document' => ['nullable', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
             
-            // Plan (always menupro - unique plan)
-            'plan' => ['required', 'in:menupro'],
+            // Plan (Starter ou MenuPro)
+            'plan' => ['required', 'in:starter,menupro'],
             
             // Billing period
             'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],

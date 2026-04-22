@@ -48,10 +48,29 @@ class RegisterController extends Controller
             }
         }
 
-        // Only get the MenuPro plan (unique plan)
-        $plan = Plan::where('slug', 'menupro')->where('is_active', true)->first();
+        // Capture le plan demande depuis l'URL (?plan=starter ou ?plan=menupro)
+        // Defaut : menupro (le plan featured)
+        $planSlug = request()->query('plan', 'menupro');
 
-        return view('pages.auth.register', compact('plan'));
+        // Ne laisser passer que les slugs connus
+        if (!in_array($planSlug, ['starter', 'menupro'], true)) {
+            $planSlug = 'menupro';
+        }
+
+        $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
+
+        // Fallback : si le plan demande est desactive, retombe sur menupro
+        if (!$plan) {
+            $plan = Plan::where('slug', 'menupro')->where('is_active', true)->first();
+        }
+
+        // Tous les plans actifs (pour permettre au user de switcher dans le formulaire)
+        $availablePlans = Plan::where('is_active', true)
+            ->whereIn('slug', ['starter', 'menupro'])
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('pages.auth.register', compact('plan', 'availablePlans'));
     }
 
     /**
@@ -61,8 +80,13 @@ class RegisterController extends Controller
      */
     public function store(RegisterRequest $request): RedirectResponse
     {
-        // Get the MenuPro plan (unique plan)
-        $plan = Plan::where('slug', 'menupro')->where('is_active', true)->firstOrFail();
+        // Determine which plan the user signed up for (Starter or MenuPro)
+        // Priority: request input (form) > query string > default menupro
+        $planSlug = $request->input('plan', $request->query('plan', 'menupro'));
+        if (!in_array($planSlug, ['starter', 'menupro'], true)) {
+            $planSlug = 'menupro';
+        }
+        $plan = Plan::where('slug', $planSlug)->where('is_active', true)->firstOrFail();
 
         // Get billing period (default: monthly)
         $billingPeriod = $request->billing_period ?? 'monthly';

@@ -85,44 +85,50 @@
                 
                 <!-- Left Content -->
                 <div class="text-center lg:text-left order-2 lg:order-1" x-data="{ shown: false }" x-intersect.once="shown = true">
-                    <!-- Badge Nouveau avec animation -->
-                    <div class="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white/10 backdrop-blur-xl rounded-full text-white text-sm font-medium mb-8 border border-white/20 shadow-lg"
-                         x-show="shown" 
+                    <!-- Badge : Social proof dynamique -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-white text-sm font-medium mb-8 border border-white/20 shadow-lg"
+                         x-show="shown"
                          x-transition:enter="transition ease-out duration-500 delay-100"
                          x-transition:enter-start="opacity-0 translate-y-4"
                          x-transition:enter-end="opacity-100 translate-y-0">
-                        <span class="relative flex h-2.5 w-2.5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary-400"></span>
+                        <span class="flex -space-x-1.5">
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">AK</span>
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">MC</span>
+                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">JB</span>
                         </span>
-                        <span>Nouveau : Paiement Mobile Money intégré</span>
+                        <span class="text-sm">{{ $stats['raw']['restaurants'] ?? 10 }}+ restaurants actifs en Cote d'Ivoire</span>
+                        <span class="relative flex h-2 w-2 ml-1">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                        </span>
                     </div>
-                    
+
                     <!-- Titre principal avec animation -->
                     <h1 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.05]"
-                        x-show="shown" 
+                        x-show="shown"
                         x-transition:enter="transition ease-out duration-700 delay-200"
                         x-transition:enter-start="opacity-0 translate-y-6"
                         x-transition:enter-end="opacity-100 translate-y-0">
-                        Digitalisez votre 
+                        Votre
                         <span class="relative inline-block">
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-primary-300 to-accent-400 animate-gradient">restaurant</span>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-primary-300 to-accent-400 animate-gradient">maquis</span>
                             <svg class="absolute -bottom-1 left-0 w-full h-3 text-primary-500/40" viewBox="0 0 200 12" preserveAspectRatio="none">
                                 <path d="M0,8 Q50,0 100,8 T200,8" stroke="currentColor" stroke-width="3" fill="none"/>
                             </svg>
                         </span>
+                        en ligne,
                         <br class="hidden sm:block">
-                        <span class="text-white/90">en quelques clics</span>
+                        <span class="text-white/90">commandes en direct.</span>
                     </h1>
-                    
+
                     <!-- Description -->
                     <p class="mt-6 sm:mt-8 text-lg sm:text-xl text-neutral-300 max-w-xl mx-auto lg:mx-0 leading-relaxed"
-                       x-show="shown" 
+                       x-show="shown"
                        x-transition:enter="transition ease-out duration-700 delay-300"
                        x-transition:enter-start="opacity-0 translate-y-6"
                        x-transition:enter-end="opacity-100 translate-y-0">
-                        Menu en ligne, commandes et paiements <span class="text-primary-400 font-semibold">Orange Money, MTN, Wave</span>. 
-                        La solution SaaS pensée pour les restaurants ivoiriens.
+                        Site de commande, QR codes sur vos tables, paiements <span class="text-primary-400 font-semibold">Wave, Orange, MTN, Moov</span>.
+                        La plateforme pensee pour les restaurateurs ivoiriens, pas une traduction.
                     </p>
                     
                     <!-- CTA Buttons -->
@@ -725,24 +731,38 @@
         <!-- Background decoration -->
         <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-primary-100/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
         <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-secondary-100/30 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2"></div>
-        
+        <!-- Wiggly decorative lines (playful touch) -->
+        <svg class="absolute top-20 right-10 w-32 h-32 text-primary-200/40 hidden lg:block" viewBox="0 0 100 100" fill="none">
+            <path d="M10,50 Q25,20 50,50 T90,50" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 6"/>
+        </svg>
+        <svg class="absolute bottom-24 left-10 w-40 h-20 text-secondary-200/40 hidden lg:block" viewBox="0 0 200 50" fill="none">
+            <path d="M5,25 C40,5 80,45 120,25 S185,5 195,25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Header -->
             <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-6"
+                <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-100 to-orange-100 text-primary-700 rounded-full text-sm font-semibold mb-6 shadow-sm"
                       x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Simple & Rapide
+                    ~15 minutes, montre en main
                 </span>
                 <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight"
                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Lancez-vous en <span class="text-gradient">3 étapes</span>
+                    De zero au premier client,
+                    <br class="hidden sm:block">
+                    en <span class="relative inline-block">
+                        <span class="text-gradient">3 etapes</span>
+                        <svg class="absolute -bottom-2 left-0 w-full h-2 text-primary-400" viewBox="0 0 100 8" preserveAspectRatio="none">
+                            <path d="M0,4 Q25,0 50,4 T100,4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4 max-w-2xl mx-auto"
+                <p class="text-neutral-600 text-lg mt-6 max-w-2xl mx-auto"
                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Pas besoin d'être expert en technologie. En quelques minutes, votre restaurant est en ligne et prêt à recevoir des commandes.
+                    Pas besoin d'etre developpeur. Juste votre restaurant, votre menu, et l'envie de recevoir des commandes.
                 </p>
             </div>
 
@@ -1185,9 +1205,18 @@
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-2 mt-6">
-                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">⚡ Rapide</span>
-                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">📱 Responsive</span>
-                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">🔥 PWA</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Ultra-rapide
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                Responsive
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/></svg>
+                                PWA
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -1302,6 +1331,15 @@
                 <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 to-pink-600 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
                      x-show="shown" x-transition:enter="transition ease-out duration-700 delay-350" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full blur-2xl"></div>
+                    <!-- Illustration BG : moto livreur -->
+                    <svg class="absolute -bottom-4 -right-4 w-40 h-40 text-white/[0.08] group-hover:text-white/[0.15] group-hover:translate-x-[-8px] transition-all duration-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.5 13.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zM4.5 13.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5S6 15.83 6 15s-.67-1.5-1.5-1.5z" opacity="0"/>
+                        <path d="M19 7h-3V5.5C16 4.67 15.33 4 14.5 4h-5C8.67 4 8 4.67 8 5.5V7H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h1c0 1.66 1.34 3 3 3s3-1.34 3-3h0c0 1.66 1.34 3 3 3s3-1.34 3-3h1c1.1 0 2-.9 2-2v-5l-2-3zM9 20c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-5-8V9h8v3H10z"/>
+                    </svg>
+                    <svg class="absolute top-4 right-4 w-16 h-16 text-white/[0.06] group-hover:text-white/[0.12] transition-all duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <circle cx="12" cy="11" r="3"/>
+                    </svg>
                     <div class="relative h-full flex flex-col justify-between">
                         <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1360,6 +1398,13 @@
                 <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500 to-fuchsia-600 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
                      x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <!-- Illustration BG : silhouettes d'equipe -->
+                    <svg class="absolute -bottom-3 -right-3 w-36 h-36 text-white/[0.08] group-hover:text-white/[0.15] transition-all duration-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <svg class="absolute top-3 right-6 w-14 h-14 text-white/[0.06] group-hover:text-white/[0.12] group-hover:rotate-12 transition-all duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
                     <div class="relative h-full flex flex-col justify-between">
                         <div class="flex -space-x-2">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 border-2 border-white flex items-center justify-center text-xs font-bold text-pink-800">AK</div>
@@ -1368,8 +1413,8 @@
                             <div class="w-9 h-9 rounded-full bg-white/20 backdrop-blur border-2 border-white flex items-center justify-center text-xs font-bold">+5</div>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold mb-1">Gestion équipe</h3>
-                            <p class="text-white/90 text-sm leading-snug">Invitez employés, gérez les accès par rôle.</p>
+                            <h3 class="text-lg font-bold mb-1">Gestion equipe</h3>
+                            <p class="text-white/90 text-sm leading-snug">Invitez employes, gerez les acces par role.</p>
                         </div>
                     </div>
                 </div>
@@ -1413,6 +1458,16 @@
                 <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-400 to-orange-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
                      x-show="shown" x-transition:enter="transition ease-out duration-700 delay-650" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                    <!-- Illustration BG : grandes etoiles -->
+                    <svg class="absolute -bottom-2 -right-2 w-32 h-32 text-white/[0.1] group-hover:text-white/[0.2] group-hover:rotate-12 transition-all duration-700" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    <svg class="absolute top-10 right-16 w-10 h-10 text-white/[0.08] group-hover:text-white/[0.18] transition-all duration-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    <svg class="absolute bottom-16 right-20 w-6 h-6 text-white/[0.1] group-hover:text-white/[0.2] transition-all duration-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
                     <div class="relative h-full flex flex-col justify-between">
                         <div class="flex gap-0.5">
                             <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -1428,6 +1483,261 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </section>
+
+    <!-- Supports QR Code Physiques -->
+    <section id="qr-supports" class="relative py-24 bg-gradient-to-b from-white via-orange-50/30 to-white overflow-hidden">
+        <!-- Decorative dots pattern -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(249,115,22,0.12)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] opacity-50"></div>
+        <div class="absolute top-10 right-10 w-64 h-64 bg-primary-200/40 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 left-10 w-72 h-72 bg-amber-200/40 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+                <!-- Left : Content -->
+                <div x-data="{ shown: false }" x-intersect.once="shown = true">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-primary-100 to-orange-100 text-primary-700 rounded-full text-xs font-bold uppercase tracking-wider mb-6"
+                         x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                        Nouveau &middot; Livre a votre restaurant
+                    </div>
+
+                    <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight mb-5"
+                        x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        Vos QR codes, imprimes
+                        <br>
+                        <span class="relative inline-block">
+                            <span class="text-gradient">et livres chez vous.</span>
+                            <svg class="absolute -bottom-2 left-0 w-full h-2.5 text-primary-400" viewBox="0 0 200 8" preserveAspectRatio="none">
+                                <path d="M0,4 Q50,0 100,4 T200,4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                    </h2>
+
+                    <p class="text-neutral-600 text-lg leading-relaxed mb-8"
+                       x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        On vous imprime des supports QR code de qualite pour chaque table de votre restaurant. Finis les QR codes colles sur papier qui se decollent : supports rigides, durables, et conçus pour resister au service.
+                    </p>
+
+                    <!-- Price highlight -->
+                    <div class="inline-flex items-baseline gap-3 mb-8 p-5 bg-white rounded-2xl border-2 border-primary-200 shadow-lg shadow-primary-100/30"
+                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+                        <span class="text-5xl font-bold bg-gradient-to-r from-primary-500 to-orange-500 bg-clip-text text-transparent">500</span>
+                        <div>
+                            <div class="font-bold text-neutral-900 text-sm">FCFA / support</div>
+                            <div class="text-xs text-neutral-500">Impression + support rigide inclus</div>
+                        </div>
+                    </div>
+
+                    <!-- Features list -->
+                    <ul class="space-y-3 mb-8"
+                        x-show="shown" x-transition:enter="transition ease-out duration-700 delay-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div>
+                                <div class="font-semibold text-neutral-900 text-sm">Support rigide & resistant</div>
+                                <div class="text-neutral-600 text-sm">Plastifie, resiste aux taches et a l'humidite.</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div>
+                                <div class="font-semibold text-neutral-900 text-sm">QR numerote par table</div>
+                                <div class="text-neutral-600 text-sm">Chaque table a son QR unique : vous savez d'ou vient la commande.</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div>
+                                <div class="font-semibold text-neutral-900 text-sm">Aux couleurs de votre restaurant</div>
+                                <div class="text-neutral-600 text-sm">Logo, couleurs, numero de table : personnalisation complete.</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div>
+                                <div class="font-semibold text-neutral-900 text-sm">Livraison a Abidjan</div>
+                                <div class="text-neutral-600 text-sm">Livre sous 5-7 jours ouvres directement dans votre restaurant.</div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Packs -->
+                    <div class="mb-8"
+                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        <p class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Packs suggeres</p>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="text-center p-3 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-md transition-all">
+                                <div class="text-xl font-bold text-neutral-900">10</div>
+                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
+                                <div class="text-xs font-bold text-primary-600">5 000 F</div>
+                            </div>
+                            <div class="text-center p-3 bg-gradient-to-br from-primary-50 to-orange-50 rounded-xl border-2 border-primary-300 shadow-md relative">
+                                <span class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-bold bg-primary-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">Populaire</span>
+                                <div class="text-xl font-bold text-neutral-900 mt-1">20</div>
+                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
+                                <div class="text-xs font-bold text-primary-600">10 000 F</div>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-md transition-all">
+                                <div class="text-xl font-bold text-neutral-900">50</div>
+                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
+                                <div class="text-xs font-bold text-primary-600">25 000 F</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-col sm:flex-row gap-3"
+                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-600" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        @php
+                            $qrWhatsapp = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
+                        @endphp
+                        @if($qrWhatsapp)
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $qrWhatsapp) }}?text=Bonjour%20MenuPro,%20je%20souhaite%20commander%20des%20supports%20QR%20code%20pour%20mon%20restaurant." target="_blank"
+                               class="inline-flex items-center justify-center gap-2 btn btn-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-[1.02] transition-all">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                                Commander mes QR codes
+                            </a>
+                        @endif
+                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank"
+                           class="inline-flex items-center justify-center gap-2 btn btn-lg bg-white border-2 border-neutral-200 text-neutral-700 hover:border-primary-300 hover:text-primary-600 transition-all">
+                            Tester un QR en demo
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right : Visual mockup -->
+                <div class="relative" x-data="{ shown: false }" x-intersect.once="shown = true">
+                    <div class="relative"
+                         x-show="shown" x-transition:enter="transition ease-out duration-1000 delay-200" x-transition:enter-start="opacity-0 translate-x-8 scale-95" x-transition:enter-end="opacity-100 translate-x-0 scale-100">
+
+                        <!-- Main QR tent card (big, front) -->
+                        <div class="relative mx-auto w-full max-w-sm bg-white rounded-3xl shadow-2xl shadow-primary-200/40 overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-500 z-20">
+                            <!-- Top color band (brand) -->
+                            <div class="bg-gradient-to-r from-primary-500 to-orange-500 px-6 py-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9h2V3H3v6zm4-6v2h10V3H7zm12 0v6h2V3h-2zM3 21h2v-6H3v6zm4 0h10v-2H7v2zm12-6v6h2v-6h-2z" opacity="0"/><path d="M12 5.83L15.17 9H8.83L12 5.83zM3 2h18v4h-4v13h-2v-5h-6v5H7V6H3V2zm6 6v3h6V8H9z"/></svg>
+                                    </div>
+                                    <span class="text-white font-bold text-sm">Le Maquis d'Abidjan</span>
+                                </div>
+                                <span class="px-2 py-1 bg-white/20 backdrop-blur rounded text-white text-[10px] font-bold">TABLE 05</span>
+                            </div>
+
+                            <!-- QR area -->
+                            <div class="px-8 py-10 flex flex-col items-center">
+                                <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-[3px] mb-4">Scannez pour commander</p>
+                                <!-- Stylized QR code (pure CSS grid) -->
+                                <div class="relative w-48 h-48 bg-white rounded-xl border-4 border-neutral-900 p-3">
+                                    <div class="w-full h-full grid grid-cols-10 grid-rows-10 gap-[2px]">
+                                        @php
+                                            // Pseudo-random QR pattern (deterministic)
+                                            $pattern = [
+                                                1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,
+                                                1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,
+                                                1,0,1,0,1,0,0,0,1,1,0,1,0,1,0,1,0,1,0,1,
+                                                1,0,1,0,1,0,1,1,0,0,1,1,1,0,1,1,1,0,1,1,
+                                                1,0,0,0,1,0,0,1,0,1,0,0,1,1,0,0,0,1,0,0,
+                                                1,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,1,0,1,0,
+                                                0,0,0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,1,1,1,
+                                                1,0,1,1,0,0,1,0,0,0,1,0,0,1,1,1,0,0,1,1,
+                                                0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,1,0,0,
+                                                1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,1,1,0,1,1,
+                                            ];
+                                        @endphp
+                                        @foreach(array_slice($pattern, 0, 100) as $cell)
+                                            <div class="{{ $cell ? 'bg-neutral-900' : 'bg-white' }} rounded-[1px]"></div>
+                                        @endforeach
+                                    </div>
+                                    <!-- 3 position markers (overlay) -->
+                                    <div class="absolute top-3 left-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
+                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
+                                    </div>
+                                    <div class="absolute top-3 right-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
+                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
+                                    </div>
+                                    <div class="absolute bottom-3 left-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
+                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
+                                    </div>
+                                    <!-- Logo center -->
+                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center">
+                                        <div class="w-full h-full bg-gradient-to-br from-primary-500 to-orange-500 rounded-md flex items-center justify-center text-white text-xs font-black">M</div>
+                                    </div>
+                                </div>
+
+                                <!-- Table number big -->
+                                <div class="mt-5 text-center">
+                                    <div class="text-[10px] font-bold tracking-[4px] text-neutral-400 uppercase">Table</div>
+                                    <div class="text-5xl font-black text-neutral-900 leading-none">N&deg;05</div>
+                                </div>
+                            </div>
+
+                            <!-- Footer strip -->
+                            <div class="bg-neutral-50 px-6 py-3 flex items-center justify-between border-t border-neutral-100">
+                                <span class="text-[10px] text-neutral-500 font-medium">menupro.ci/maquis-abidjan</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                    Secure
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Second card (back-left, smaller) -->
+                        <div class="absolute -top-6 -left-8 w-48 bg-white rounded-2xl shadow-xl border border-neutral-200 p-3 transform -rotate-6 z-10 hidden sm:block">
+                            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 rounded text-white text-[10px] font-bold mb-2 flex items-center justify-between">
+                                <span>Chez Awa</span>
+                                <span>T-02</span>
+                            </div>
+                            <div class="w-full aspect-square bg-neutral-900 rounded p-1.5">
+                                <div class="w-full h-full grid grid-cols-6 grid-rows-6 gap-[1px]">
+                                    @foreach([1,1,0,1,1,0, 1,0,1,0,0,1, 0,1,0,1,1,0, 1,0,1,0,1,1, 1,1,0,1,0,0, 0,1,1,0,1,1] as $c)
+                                        <div class="{{ $c ? 'bg-white' : 'bg-neutral-900' }}"></div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Third card (back-right, smaller) -->
+                        <div class="absolute -bottom-8 -right-6 w-44 bg-white rounded-2xl shadow-xl border border-neutral-200 p-3 transform rotate-12 z-10 hidden sm:block">
+                            <div class="bg-gradient-to-r from-purple-500 to-fuchsia-500 px-3 py-1.5 rounded text-white text-[10px] font-bold mb-2 flex items-center justify-between">
+                                <span>Le Sahel</span>
+                                <span>T-12</span>
+                            </div>
+                            <div class="w-full aspect-square bg-neutral-900 rounded p-1.5">
+                                <div class="w-full h-full grid grid-cols-6 grid-rows-6 gap-[1px]">
+                                    @foreach([0,1,1,0,1,1, 1,0,0,1,0,1, 1,1,0,1,1,0, 0,1,1,0,0,1, 1,0,1,1,1,0, 0,1,0,0,1,1] as $c)
+                                        <div class="{{ $c ? 'bg-white' : 'bg-neutral-900' }}"></div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating price badge -->
+                        <div class="absolute top-4 -right-4 sm:top-8 sm:-right-10 bg-white rounded-2xl shadow-2xl p-3 z-30 transform rotate-6 border border-neutral-100 badge-float-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-orange-500 rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-neutral-500 font-medium">A partir de</div>
+                                    <div class="font-bold text-neutral-900 text-sm">500 F / unite</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1461,9 +1771,9 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
                 @php
                     $testimonials = [
-                        ['name' => 'Kouame Yao', 'role' => 'Gerant, Le Maquis du Port', 'location' => 'Abidjan', 'rating' => 5, 'text' => 'Depuis que j\'utilise MenuPro, mes commandes ont augmente de 40%. Le paiement Mobile Money est un vrai plus pour mes clients.', 'avatar' => '👨‍🍳', 'highlight' => '+40% commandes'],
-                        ['name' => 'Awa Diallo', 'role' => 'Proprietaire, Chez Awa', 'location' => 'Cocody', 'rating' => 5, 'text' => 'Interface simple et intuitive. J\'ai pu creer mon menu en moins d\'une heure. Le support WhatsApp est tres reactif !', 'avatar' => '👩‍🍳', 'highlight' => 'Menu en 1h'],
-                        ['name' => 'Ibrahim Kone', 'role' => 'Directeur, Restaurant Le Sahel', 'location' => 'Marcory', 'rating' => 5, 'text' => 'Mes employes gerent les commandes facilement. Les statistiques m\'aident a mieux comprendre mes ventes.', 'avatar' => '👨‍💼', 'highlight' => 'Gestion facile'],
+                        ['name' => 'Kouame Yao', 'initials' => 'KY', 'gradient' => 'from-orange-400 to-red-500', 'role' => 'Gerant, Le Maquis du Port', 'location' => 'Abidjan', 'rating' => 5, 'text' => "Depuis que j'utilise MenuPro, mes commandes ont augmente de 40%. Le paiement Mobile Money est un vrai plus pour mes clients.", 'highlight' => '+40% commandes', 'type' => 'Maquis'],
+                        ['name' => 'Awa Diallo', 'initials' => 'AD', 'gradient' => 'from-pink-400 to-rose-500', 'role' => 'Proprietaire, Chez Awa', 'location' => 'Cocody', 'rating' => 5, 'text' => "Interface simple et intuitive. J'ai pu creer mon menu en moins d'une heure. Le support WhatsApp est tres reactif !", 'highlight' => 'Menu en 1h', 'type' => 'Restaurant'],
+                        ['name' => 'Ibrahim Kone', 'initials' => 'IK', 'gradient' => 'from-emerald-400 to-teal-500', 'role' => 'Directeur, Restaurant Le Sahel', 'location' => 'Marcory', 'rating' => 5, 'text' => "Mes employes gerent les commandes facilement. Les statistiques m'aident a mieux comprendre mes ventes.", 'highlight' => 'Gestion facile', 'type' => 'Restaurant'],
                     ];
                 @endphp
 
@@ -1474,9 +1784,11 @@
                          x-transition:enter-end="opacity-100 translate-y-0"
                          style="transition-delay: {{ $index * 150 }}ms"
                          class="group">
-                        <div class="relative bg-white rounded-3xl p-8 shadow-lg shadow-neutral-200/50 border-2 border-neutral-100 h-full flex flex-col hover:border-primary-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
-                            <!-- Decorative quote mark -->
-                            <div class="absolute -top-2 -right-2 text-8xl font-serif text-primary-100/60 leading-none select-none pointer-events-none group-hover:text-primary-200/60 transition-colors">"</div>
+                        <div class="relative bg-white rounded-3xl p-7 lg:p-8 shadow-lg shadow-neutral-200/50 border-2 border-neutral-100 h-full flex flex-col hover:border-primary-200 hover:shadow-2xl hover:shadow-primary-100/30 hover:-translate-y-1.5 transition-all duration-500 overflow-hidden">
+                            <!-- Big quote mark SVG (more refined than char) -->
+                            <svg class="absolute -top-3 -right-3 w-20 h-20 text-primary-100 group-hover:text-primary-200 transition-colors duration-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.5 10c-.223 0-.437.034-.65.065.069-.232.14-.468.254-.68.114-.308.292-.575.469-.844.148-.291.409-.488.601-.737.201-.242.475-.403.692-.604.213-.21.492-.315.714-.463.232-.133.434-.28.65-.35l.539-.222.474-.197-.485-1.938-.597.144c-.191.048-.424.104-.689.171-.271.05-.56.187-.882.312-.318.142-.686.238-1.028.466-.344.218-.741.4-1.091.692-.339.301-.748.562-1.05.945-.33.358-.656.734-.909 1.162-.293.408-.492.856-.702 1.299-.19.443-.343.896-.468 1.336-.237.882-.343 1.72-.384 2.437-.034.718-.014 1.315.028 1.747.015.204.043.402.063.539.017.109.025.168.025.168l.026-.006C6.213 16.346 7.215 17 8.5 17c1.933 0 3.5-1.5 3.5-3.5S10.433 10 8.5 10h-2zm10 0c-.223 0-.437.034-.65.065.069-.232.14-.468.254-.68.114-.308.292-.575.469-.844.148-.291.409-.488.601-.737.201-.242.475-.403.692-.604.213-.21.492-.315.714-.463.232-.133.434-.28.65-.35l.539-.222.474-.197-.485-1.938-.597.144c-.191.048-.424.104-.689.171-.271.05-.56.187-.882.312-.317.143-.686.238-1.028.467-.344.218-.741.4-1.091.692-.339.301-.748.562-1.05.944-.33.358-.656.734-.909 1.162-.293.408-.492.856-.702 1.299-.19.443-.343.896-.468 1.336-.237.882-.343 1.72-.384 2.437-.034.718-.014 1.315.028 1.747.015.204.043.402.063.539.017.109.025.168.025.168l.026-.006C16.213 16.346 17.215 17 18.5 17c1.933 0 3.5-1.5 3.5-3.5S20.433 10 18.5 10h-2z"/>
+                            </svg>
 
                             <!-- Top: Stars + Highlight badge -->
                             <div class="flex items-center justify-between mb-5 relative z-10">
@@ -1487,22 +1799,36 @@
                                         </svg>
                                     @endfor
                                 </div>
-                                <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">{{ $testimonial['highlight'] }}</span>
+                                <span class="inline-flex items-center gap-1 text-xs font-bold text-primary-700 bg-gradient-to-r from-primary-50 to-orange-50 px-2.5 py-1 rounded-full border border-primary-100">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    {{ $testimonial['highlight'] }}
+                                </span>
                             </div>
 
                             <!-- Quote -->
                             <blockquote class="text-neutral-700 leading-relaxed flex-1 text-[15px] relative z-10">
-                                "{{ $testimonial['text'] }}"
+                                &laquo;&nbsp;{{ $testimonial['text'] }}&nbsp;&raquo;
                             </blockquote>
 
                             <!-- Author -->
                             <div class="flex items-center gap-4 mt-6 pt-6 border-t border-neutral-100 relative z-10">
-                                <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-primary-100/50 group-hover:scale-110 transition-transform duration-300">
-                                    {{ $testimonial['avatar'] }}
+                                <div class="relative flex-shrink-0">
+                                    <div class="w-14 h-14 bg-gradient-to-br {{ $testimonial['gradient'] }} rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                                        {{ $testimonial['initials'] }}
+                                    </div>
+                                    <!-- Verified checkmark -->
+                                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
+                                        <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="font-bold text-neutral-900">{{ $testimonial['name'] }}</div>
-                                    <div class="text-sm text-neutral-500">{{ $testimonial['role'] }}</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-bold text-neutral-900 truncate">{{ $testimonial['name'] }}</div>
+                                        <span class="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">{{ $testimonial['type'] }}</span>
+                                    </div>
+                                    <div class="text-sm text-neutral-500 truncate">{{ $testimonial['role'] }}</div>
                                     <div class="text-xs text-primary-500 flex items-center gap-1 mt-0.5 font-medium">
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
@@ -1521,10 +1847,10 @@
                  x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                 <div class="flex items-center gap-3">
                     <div class="flex -space-x-2">
-                        <div class="w-8 h-8 bg-primary-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👨‍🍳</div>
-                        <div class="w-8 h-8 bg-secondary-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👩‍🍳</div>
-                        <div class="w-8 h-8 bg-accent-200 rounded-full ring-2 ring-white flex items-center justify-center text-xs">👨‍💼</div>
-                        <div class="w-8 h-8 bg-primary-500 rounded-full ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">+{{ $stats['raw']['restaurants'] > 10 ? $stats['raw']['restaurants'] - 3 : '7' }}</div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">KY</div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">AD</div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">IK</div>
+                        <div class="w-8 h-8 bg-primary-500 rounded-full ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">+{{ ($stats['raw']['restaurants'] ?? 10) > 10 ? $stats['raw']['restaurants'] - 3 : '7' }}</div>
                     </div>
                     <span class="text-sm text-neutral-500 font-medium">restaurants satisfaits</span>
                 </div>

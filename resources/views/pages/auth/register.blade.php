@@ -471,23 +471,49 @@
             <!-- STEP 3: Plan Selection (MenuPro Unique) -->
             <!-- ============================================== -->
             <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
-                 x-data="pricingCalculator()" 
-                 x-init="init(); formData.plan = 'menupro';">
+                 x-data="pricingCalculator()"
+                 x-init="init(); formData.plan = '{{ $plan->slug ?? 'menupro' }}';">
                 <div class="text-center lg:text-left mb-5 sm:mb-6">
                     <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Choisissez votre abonnement</h1>
-                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Un seul plan, toutes les fonctionnalités. Économisez jusqu'à 15%.</p>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Choisissez le plan adapté à votre activité. Économisez jusqu'à 15% sur l'année.</p>
                 </div>
 
                 <!-- Hidden inputs for form submission -->
-                <input type="hidden" name="plan" value="menupro" x-model="formData.plan">
+                <input type="hidden" name="plan" x-model="formData.plan">
                 <input type="hidden" name="billing_period" :value="billingCycle">
                 <template x-for="addon in selectedAddons" :key="addon">
                     <input type="hidden" :name="'addons[]'" :value="addon">
                 </template>
-                <input type="hidden" name="billing_period" :value="billingCycle">
-                <template x-for="addon in selectedAddons" :key="addon">
-                    <input type="hidden" name="addons[]" :value="addon">
-                </template>
+
+                {{-- Plan Switcher : Starter vs MenuPro --}}
+                @if(isset($availablePlans) && $availablePlans->count() > 1)
+                <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    @foreach($availablePlans as $p)
+                    <button type="button"
+                            @click="formData.plan = '{{ $p->slug }}'; basePriceMonthly = {{ (int) $p->price }};"
+                            :class="formData.plan === '{{ $p->slug }}' ? 'border-primary-500 bg-primary-50 shadow-md ring-2 ring-primary-200' : 'border-neutral-200 bg-white hover:border-primary-300'"
+                            class="relative p-4 rounded-xl border-2 text-left transition-all">
+                        @if($p->slug === 'menupro')
+                            <span class="absolute -top-2 right-3 bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">POPULAIRE</span>
+                        @endif
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-neutral-900">{{ $p->name }}</span>
+                            <svg x-show="formData.plan === '{{ $p->slug }}'" class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="text-2xl font-bold text-primary-600">{{ number_format($p->price, 0, ',', ' ') }} <span class="text-xs font-medium text-neutral-500">FCFA/mois</span></div>
+                        <div class="text-xs text-neutral-600 mt-1">
+                            @if($p->slug === 'starter')
+                                30 plats • 300 cmd/mois • 1 compte
+                            @else
+                                100 plats • 2000 cmd/mois • 5 comptes • Livraison
+                            @endif
+                        </div>
+                    </button>
+                    @endforeach
+                </div>
+                @endif
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left Column: Features & Add-ons -->
@@ -624,8 +650,8 @@
                                 </div>
 
                                 <div class="text-center mb-6 pt-2">
-                                    <h3 class="text-2xl font-bold text-neutral-900 mb-1">MenuPro</h3>
-                                    <p class="text-neutral-600 text-sm">Plan unique • Toutes les fonctionnalités</p>
+                                    <h3 class="text-2xl font-bold text-neutral-900 mb-1" x-text="formData.plan === 'starter' ? 'Starter' : 'MenuPro'"></h3>
+                                    <p class="text-neutral-600 text-sm" x-text="formData.plan === 'starter' ? 'Petits maquis & kiosques' : 'Plan complet • Toutes les fonctionnalités'"></p>
                                 </div>
 
                                 <!-- Billing Cycle Toggle -->
@@ -894,11 +920,13 @@
             return {
                 billingCycle: 'monthly',
                 selectedAddons: [],
-                cycles: [
-                    { id: 'monthly', label: 'Mensuel', months: 1, price: 25000, discount: 0 },
-                    { id: 'quarterly', label: 'Trimestriel', months: 3, price: 69750, discount: 7, original: 75000 },
-                    { id: 'semiannual', label: 'Semestriel', months: 6, price: 130500, discount: 13, original: 150000 },
-                    { id: 'annual', label: 'Annuel', months: 12, price: 255000, discount: 15, original: 300000 },
+                formData: { plan: '{{ $plan->slug ?? "menupro" }}' },
+                basePriceMonthly: {{ (int) ($plan->price ?? 25000) }},
+                cycleMeta: [
+                    { id: 'monthly', months: 1, discount: 0 },
+                    { id: 'quarterly', months: 3, discount: 7 },
+                    { id: 'semiannual', months: 6, discount: 13 },
+                    { id: 'annual', months: 12, discount: 15 },
                 ],
                 addonPrices: {
                     priority_support: 5000,
@@ -906,31 +934,30 @@
                     extra_employees: 2000,
                     extra_dishes: 500,
                 },
-                
+
                 init() {
-                    // Initialize with monthly
                     this.billingCycle = 'monthly';
                     this.selectedAddons = [];
                 },
-                
+
                 getCurrentCycle() {
-                    return this.cycles.find(c => c.id === this.billingCycle);
+                    const meta = this.cycleMeta.find(c => c.id === this.billingCycle);
+                    const original = this.basePriceMonthly * meta.months;
+                    const price = Math.round(original * (1 - meta.discount / 100));
+                    return { ...meta, original, price };
                 },
-                
+
                 getMonths() {
                     return this.getCurrentCycle().months;
                 },
-                
+
                 get basePrice() {
                     return this.getCurrentCycle().price;
                 },
-                
+
                 get discountAmount() {
                     const cycle = this.getCurrentCycle();
-                    if (cycle.original) {
-                        return cycle.original - cycle.price;
-                    }
-                    return 0;
+                    return cycle.discount > 0 ? cycle.original - cycle.price : 0;
                 },
                 
                 get addonsTotal() {
