@@ -9,41 +9,63 @@ class PlanSeeder extends Seeder
 {
     public function run(): void
     {
-        // Plan unique MenuPro avec toutes les fonctionnalités
-        $plan = [
-            'name' => 'MenuPro',
-            'slug' => 'menupro',
-            'description' => 'Un seul plan, toutes les fonctionnalités. Parfait pour tous les restaurants.',
-            'price' => 25000, // 25,000 FCFA/mois
+        // Plan STARTER - Pour petits maquis et kiosques
+        $starter = [
+            'name' => 'Starter',
+            'slug' => 'starter',
+            'description' => 'Parfait pour les petits maquis et kiosques qui démarrent la digitalisation.',
+            'price' => 9900, // 9 900 FCFA/mois
             'duration_days' => 30,
-            
-            // Limites généreuses mais raisonnables
-            'max_dishes' => 100,        // Suffisant pour 95% des restaurants
-            'max_categories' => 30,     // Large marge
-            'max_employees' => 5,       // Équipe standard
-            'max_orders_per_month' => 2000, // Très généreux
-            
-            // Toutes les fonctionnalités de base incluses
-            'has_delivery' => true,
-            'has_stock_management' => true,
-            'has_analytics' => true,
-            'has_custom_domain' => false,     // Add-on disponible
-            'has_priority_support' => false,   // Add-on disponible
+
+            // Limites adaptées aux petits commerces
+            'max_dishes' => 30,
+            'max_categories' => 10,
+            'max_employees' => 1,
+            'max_orders_per_month' => 300,
+
+            // Fonctionnalités essentielles
+            'has_delivery' => false,
+            'has_stock_management' => false,
+            'has_analytics' => false,
+            'has_custom_domain' => false,
+            'has_priority_support' => false,
             'is_active' => true,
-            'is_featured' => true,
+            'is_featured' => false,
             'sort_order' => 1,
         ];
 
-        Plan::updateOrCreate(
-            ['slug' => $plan['slug']],
-            $plan
-        );
+        // Plan MENUPRO - Le plan principal (featured)
+        $menupro = [
+            'name' => 'MenuPro',
+            'slug' => 'menupro',
+            'description' => 'Le plan complet pour restaurants. Toutes les fonctionnalités incluses.',
+            'price' => 25000, // 25 000 FCFA/mois
+            'duration_days' => 30,
+
+            // Limites généreuses
+            'max_dishes' => 100,
+            'max_categories' => 30,
+            'max_employees' => 5,
+            'max_orders_per_month' => 2000,
+
+            // Toutes fonctionnalités
+            'has_delivery' => true,
+            'has_stock_management' => true,
+            'has_analytics' => true,
+            'has_custom_domain' => false, // Add-on
+            'has_priority_support' => false, // Add-on
+            'is_active' => true,
+            'is_featured' => true,
+            'sort_order' => 2,
+        ];
+
+        Plan::updateOrCreate(['slug' => $starter['slug']], $starter);
+        Plan::updateOrCreate(['slug' => $menupro['slug']], $menupro);
 
         // Désactiver les anciens plans (garder pour historique)
-        Plan::whereNotIn('slug', ['menupro'])
+        Plan::whereNotIn('slug', ['starter', 'menupro'])
             ->update(['is_active' => false]);
 
-        $this->command->info('Plan MenuPro créé avec succès.');
+        $this->command->info('Plans Starter + MenuPro créés avec succès.');
     }
 }
-

@@ -73,96 +73,99 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <!-- Orders Today -->
-        <div class="card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-neutral-500">Commandes aujourd'hui</p>
-                    <p class="text-3xl font-bold text-neutral-900 mt-1">{{ $this->stats['orders_today'] }}</p>
-                    <p class="text-sm mt-2 flex items-center gap-1 {{ $this->stats['orders_change'] >= 0 ? 'text-secondary-600' : 'text-red-600' }}">
+        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-primary-200 hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $this->stats['orders_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }} flex items-center gap-0.5">
                         @if($this->stats['orders_change'] >= 0)
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                         @else
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-                            </svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                         @endif
-                        {{ $this->stats['orders_change'] >= 0 ? '+' : '' }}{{ $this->stats['orders_change'] }}% vs hier
-                    </p>
+                        {{ $this->stats['orders_change'] >= 0 ? '+' : '' }}{{ $this->stats['orders_change'] }}%
+                    </span>
                 </div>
-                <div class="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                </div>
+                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Commandes</p>
+                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['orders_today'] }}</p>
+                <p class="text-xs text-neutral-500 mt-2">aujourd'hui vs hier</p>
             </div>
         </div>
 
         <!-- Revenue Today -->
-        <div class="card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-neutral-500">Chiffre d'affaires</p>
-                    <p class="text-3xl font-bold text-neutral-900 mt-1">{{ number_format($this->stats['revenue_today'], 0, ',', ' ') }} <span class="text-lg font-normal">F</span></p>
-                    <p class="text-sm mt-2 flex items-center gap-1 {{ $this->stats['revenue_change'] >= 0 ? 'text-secondary-600' : 'text-red-600' }}">
+        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-secondary-200 hover:shadow-xl hover:shadow-secondary-500/5 transition-all duration-300 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-secondary-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-lg shadow-secondary-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $this->stats['revenue_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }} flex items-center gap-0.5">
                         @if($this->stats['revenue_change'] >= 0)
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                         @else
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-                            </svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                         @endif
-                        {{ $this->stats['revenue_change'] >= 0 ? '+' : '' }}{{ $this->stats['revenue_change'] }}% vs hier
-                    </p>
+                        {{ $this->stats['revenue_change'] >= 0 ? '+' : '' }}{{ $this->stats['revenue_change'] }}%
+                    </span>
                 </div>
-                <div class="w-14 h-14 bg-secondary-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Chiffre d'affaires</p>
+                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ number_format($this->stats['revenue_today'], 0, ',', ' ') }}<span class="text-lg text-neutral-500 font-medium ml-1">F</span></p>
+                <p class="text-xs text-neutral-500 mt-2">aujourd'hui</p>
             </div>
         </div>
 
         <!-- Pending Orders -->
-        <div class="card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-neutral-500">En attente</p>
-                    <p class="text-3xl font-bold text-neutral-900 mt-1">{{ $this->stats['pending_orders'] }}</p>
+        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-accent-200 hover:shadow-xl hover:shadow-accent-500/5 transition-all duration-300 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl flex items-center justify-center shadow-lg shadow-accent-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
                     @if($this->stats['pending_orders'] > 0)
-                        <p class="text-sm text-accent-600 mt-2 flex items-center gap-1">
-                            <span class="w-2 h-2 bg-accent-500 rounded-full animate-pulse"></span>
-                            À traiter maintenant
-                        </p>
-                    @else
-                        <p class="text-sm text-neutral-500 mt-2">Aucune commande en attente</p>
+                        <span class="text-[11px] font-bold px-2 py-1 rounded-full bg-accent-50 text-accent-700 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-accent-500 rounded-full animate-pulse"></span>
+                            Urgent
+                        </span>
                     @endif
                 </div>
-                <div class="w-14 h-14 bg-accent-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">En attente</p>
+                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['pending_orders'] }}</p>
+                <p class="text-xs {{ $this->stats['pending_orders'] > 0 ? 'text-accent-600 font-medium' : 'text-neutral-500' }} mt-2">
+                    {{ $this->stats['pending_orders'] > 0 ? 'À traiter maintenant' : 'Rien en attente' }}
+                </p>
             </div>
         </div>
 
         <!-- Total Dishes -->
-        <div class="card p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-neutral-500">Plats au menu</p>
-                    <p class="text-3xl font-bold text-neutral-900 mt-1">{{ $this->stats['dishes_count'] }}</p>
-                    <p class="text-sm text-neutral-500 mt-2">Sur {{ $this->stats['max_dishes'] }} autorisés</p>
+        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-500/5 transition-all duration-300 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-neutral-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+            <div class="relative">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 bg-gradient-to-br from-neutral-700 to-neutral-900 rounded-xl flex items-center justify-center shadow-lg shadow-neutral-900/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    @php $dishUsage = $this->stats['max_dishes'] > 0 ? round(($this->stats['dishes_count'] / $this->stats['max_dishes']) * 100) : 0; @endphp
+                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $dishUsage > 80 ? 'bg-red-50 text-red-700' : ($dishUsage > 50 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-neutral-700') }}">{{ $dishUsage }}%</span>
                 </div>
-                <div class="w-14 h-14 bg-neutral-100 rounded-2xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
+                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Plats au menu</p>
+                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['dishes_count'] }}<span class="text-lg text-neutral-400 font-medium ml-1">/{{ $this->stats['max_dishes'] }}</span></p>
+                <div class="h-1.5 bg-neutral-100 rounded-full mt-3 overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all" style="width: {{ min($dishUsage, 100) }}%"></div>
                 </div>
             </div>
         </div>
