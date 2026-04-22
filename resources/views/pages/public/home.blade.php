@@ -193,7 +193,7 @@
                             <svg class="w-5 h-5 text-secondary-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>25 000 FCFA/mois</span>
+                            <span>Des 9 900 FCFA/mois</span>
                         </div>
                         <div class="flex items-center gap-2 text-neutral-400 text-sm">
                             <svg class="w-5 h-5 text-secondary-500" fill="currentColor" viewBox="0 0 20 20">
@@ -1049,7 +1049,7 @@
                     </a>
                 </div>
                 <p class="text-neutral-500 text-sm mt-4">
-                    ✓ 25 000 FCFA/mois tout inclus &nbsp;•&nbsp; ✓ Satisfait ou remboursé &nbsp;•&nbsp; ✓ Support WhatsApp
+                    ✓ Des 9 900 FCFA/mois &nbsp;•&nbsp; ✓ Satisfait ou remboursé 7 jours &nbsp;•&nbsp; ✓ Support WhatsApp
                 </p>
             </div>
         </div>
@@ -1141,187 +1141,293 @@
                 </p>
             </div>
 
-            <!-- Features Grid - Principales -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <!-- Feature 1: Site mobile -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 0ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-primary-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                            </svg>
+            <!-- Bento Grid Features -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 auto-rows-[220px]" x-data="{ shown: false }" x-intersect.once="shown = true">
+
+                <!-- HERO CARD : Site mobile (span 2x2) -->
+                <div class="md:col-span-2 lg:col-span-2 lg:row-span-2 group relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-500 via-primary-600 to-accent-600 p-8 lg:p-10 text-white shadow-xl hover:shadow-2xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute -top-20 -right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+                    <div class="absolute top-1/2 right-4 -translate-y-1/2 w-40 h-72 bg-white/10 backdrop-blur-xl rounded-[2rem] border border-white/30 shadow-2xl hidden lg:flex flex-col items-center justify-center p-3 rotate-6 group-hover:rotate-3 transition-transform duration-500">
+                        <div class="w-full h-5 bg-white/20 rounded-lg mb-2"></div>
+                        <div class="w-full flex-1 bg-white/30 rounded-2xl overflow-hidden relative">
+                            <div class="absolute top-2 left-2 right-2 h-10 bg-white/40 rounded-lg"></div>
+                            <div class="absolute top-14 left-2 right-2 h-16 bg-white rounded-lg flex items-center p-2 gap-2">
+                                <div class="w-10 h-10 bg-primary-400 rounded-md"></div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="w-full h-2 bg-neutral-300 rounded"></div>
+                                    <div class="w-2/3 h-2 bg-neutral-200 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="absolute top-32 left-2 right-2 h-16 bg-white rounded-lg flex items-center p-2 gap-2">
+                                <div class="w-10 h-10 bg-accent-400 rounded-md"></div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="w-full h-2 bg-neutral-300 rounded"></div>
+                                    <div class="w-1/2 h-2 bg-neutral-200 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-2 left-2 right-2 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                                <div class="w-16 h-2 bg-white/80 rounded"></div>
+                            </div>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors">Site mobile optimisé</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Un site de commande responsive, rapide et beau sur tous les appareils. Vos clients commandent en quelques clics.
-                        </p>
+                    </div>
+                    <div class="relative max-w-[60%] h-full flex flex-col justify-between">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur rounded-full text-xs font-semibold mb-6">
+                                <span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                                Site de commande en ligne
+                            </div>
+                            <h3 class="font-display text-2xl lg:text-4xl font-bold leading-tight mb-4">
+                                Un site mobile<br>prêt en 5 minutes
+                            </h3>
+                            <p class="text-white/90 text-sm lg:text-base leading-relaxed">
+                                Design responsive, chargement ultra-rapide, PWA installable. Vos clients commandent en 3 clics depuis leur téléphone.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-6">
+                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">⚡ Rapide</span>
+                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">📱 Responsive</span>
+                            <span class="px-3 py-1 bg-white/15 backdrop-blur rounded-full text-xs font-medium">🔥 PWA</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Feature 2: Notifications WhatsApp -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 50ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-green-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                <!-- WhatsApp Notifications (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative h-full flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-green-600 transition-colors">Notifications WhatsApp</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Vos clients recoivent confirmation, statut et alerte "pret" directement sur WhatsApp.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Feature 3: Gestion des commandes -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 100ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-accent-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-accent-100 to-accent-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                            </svg>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">WhatsApp auto</h3>
+                            <p class="text-white/90 text-sm leading-snug">Confirmation, statut & alerte "prêt" envoyés automatiquement.</p>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-accent-600 transition-colors">Gestion des commandes</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Dashboard temps réel, vue Kanban et mode Rush pour gérer vos commandes efficacement.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Feature 4: Menu personnalisable -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 150ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-blue-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
+                <!-- Commandes temps réel (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm hover:shadow-xl hover:border-accent-300 transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-150" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div class="w-12 h-12 bg-gradient-to-br from-accent-100 to-accent-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <span class="flex items-center gap-1 text-xs font-semibold text-accent-600">
+                                <span class="w-2 h-2 bg-accent-500 rounded-full animate-pulse"></span>
+                                Live
+                            </span>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-blue-600 transition-colors">Menu personnalisable</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Catégories, plats avec photos, options, prix en FCFA. Mise à jour instantanée de votre carte.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Feature 5: Gestion du stock -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 200ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-amber-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1 group-hover:text-accent-600 transition-colors">Commandes live</h3>
+                            <p class="text-neutral-600 text-sm leading-snug">Dashboard Kanban temps réel, mode Rush pour les coups de feu.</p>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-amber-600 transition-colors">Gestion du stock</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Suivez vos ingrédients en temps réel, alertes de stock bas et gestion des fournisseurs.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Feature 6: Réservations -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 250ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-indigo-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
+                <!-- Stats & Analytics (span 2x1 - wide) -->
+                <div class="md:col-span-2 group relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 p-6 lg:p-7 text-white shadow-lg hover:shadow-2xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute top-0 right-0 w-64 h-full opacity-20">
+                        <div class="flex items-end justify-end h-full gap-1.5 p-6">
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 30%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 55%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 45%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 70%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 60%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 85%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 95%"></div>
+                            <div class="w-3 bg-gradient-to-t from-primary-500 to-accent-500 rounded-t" style="height: 75%"></div>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-indigo-600 transition-colors">Réservations en ligne</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Vos clients réservent une table directement depuis votre site. Gérez les créneaux facilement.
-                        </p>
                     </div>
-                </div>
-
-                <!-- Feature 7: Statistiques -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 300ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-yellow-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="relative h-full flex flex-col justify-between max-w-sm">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-yellow-600 transition-colors">Statistiques & Rapports</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Analysez vos ventes, plats populaires, CA journalier. Exportez vos données en Excel.
-                        </p>
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">+32%</span>
+                                <span class="text-xs text-neutral-400">de CA moyen / mois</span>
+                            </div>
+                            <h3 class="text-lg lg:text-xl font-bold mb-1">Analyse & Rapports</h3>
+                            <p class="text-neutral-300 text-sm leading-snug">Ventes, plats populaires, CA journalier. Export Excel en un clic.</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Feature 8: Avis clients -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 350ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-pink-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                <!-- Menu personnalisable (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-250" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-pink-600 transition-colors">Avis clients</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Collectez les avis après chaque commande. Répondez et améliorez votre réputation.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Feature 9: Multi-utilisateurs -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 400ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-purple-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1 group-hover:text-blue-600 transition-colors">Menu flexible</h3>
+                            <p class="text-neutral-600 text-sm leading-snug">Catégories, photos, options, prix en FCFA. MAJ instantanée.</p>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-purple-600 transition-colors">Gestion d'équipe</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Invitez vos employés avec des accès personnalisés pour gérer les commandes en toute sécurité.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Feature 10: Codes promo -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 450ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-emerald-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
+                <!-- Stock Management (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-6 shadow-sm hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">Pro</span>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-emerald-600 transition-colors">Codes promo</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Créez des codes de réduction pour fidéliser vos clients et booster vos ventes.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Feature 11: Mode hors ligne (PWA) -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 500ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-cyan-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/>
-                            </svg>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1">Stock temps réel</h3>
+                            <p class="text-neutral-700 text-sm leading-snug">Ingrédients, alertes bas, fournisseurs. Zéro rupture.</p>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-cyan-600 transition-colors">Mode hors ligne</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Le menu reste consultable meme sans connexion internet. Ideal pour les zones a couverture instable.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Feature 12: Livraison -->
-                <div class="group" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" style="transition-delay: 550ms">
-                    <div class="card card-hover p-6 lg:p-8 bg-white border-2 border-transparent hover:border-rose-200 hover:shadow-xl transition-all duration-500 h-full">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 lg:w-8 lg:h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Livraison & sur place (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 to-pink-600 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-350" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative h-full flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-bold text-neutral-900 mb-2 group-hover:text-rose-600 transition-colors">Livraison & Sur place</h3>
-                        <p class="text-neutral-600 text-sm lg:text-base leading-relaxed">
-                            Gérez les commandes à emporter, sur place et en livraison. Définissez vos zones et frais.
-                        </p>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Livraison</h3>
+                            <p class="text-white/90 text-sm leading-snug">Emporter, sur place & livraison. Zones et frais sur mesure.</p>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Multi-paiements (span 2x1 - wide featured) -->
+                <div class="md:col-span-2 group relative overflow-hidden rounded-3xl bg-white border-2 border-primary-200 p-6 lg:p-7 shadow-sm hover:shadow-xl hover:border-primary-400 transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-400" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-bold mb-3">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm3.707 6.707l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L9 10.586l3.293-3.293a1 1 0 011.414 1.414z"/></svg>
+                                    Paiements Côte d'Ivoire
+                                </span>
+                                <h3 class="text-xl lg:text-2xl font-bold text-neutral-900 mb-1">Mobile Money intégré</h3>
+                                <p class="text-neutral-600 text-sm">Wave, Orange, MTN, Moov, CinetPay. Vos clients paient comme ils veulent.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 mt-4">
+                            <div class="px-3 py-2 bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm">Wave</div>
+                            <div class="px-3 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold shadow-sm">Orange Money</div>
+                            <div class="px-3 py-2 bg-yellow-400 text-neutral-900 rounded-xl text-xs font-bold shadow-sm">MTN Money</div>
+                            <div class="px-3 py-2 bg-sky-500 text-white rounded-xl text-xs font-bold shadow-sm">Moov</div>
+                            <div class="px-3 py-2 bg-neutral-900 text-white rounded-xl text-xs font-bold shadow-sm">CinetPay</div>
+                            <div class="px-3 py-2 bg-white border-2 border-neutral-200 text-neutral-700 rounded-xl text-xs font-bold">+ Cash</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Réservations (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-450" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1 group-hover:text-indigo-600 transition-colors">Réservations</h3>
+                            <p class="text-neutral-600 text-sm leading-snug">Tables en ligne. Créneaux, rappels & confirmation auto.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Équipe (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-500 to-fuchsia-600 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative h-full flex flex-col justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 border-2 border-white flex items-center justify-center text-xs font-bold text-pink-800">AK</div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-400 border-2 border-white flex items-center justify-center text-xs font-bold text-yellow-800">MC</div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-400 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-800">JB</div>
+                            <div class="w-9 h-9 rounded-full bg-white/20 backdrop-blur border-2 border-white flex items-center justify-center text-xs font-bold">+5</div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Gestion équipe</h3>
+                            <p class="text-white/90 text-sm leading-snug">Invitez employés, gérez les accès par rôle.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Codes promo (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-6 shadow-sm hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-550" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1">Codes promo</h3>
+                            <p class="text-neutral-700 text-sm leading-snug">Réductions ciblées pour fidéliser et booster.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode hors ligne (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-white border border-neutral-200 p-6 shadow-sm hover:shadow-xl hover:border-cyan-300 transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-600" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div class="w-12 h-12 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/>
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-wider">PWA</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-neutral-900 mb-1 group-hover:text-cyan-600 transition-colors">Hors ligne</h3>
+                            <p class="text-neutral-600 text-sm leading-snug">Menu consultable sans internet. Zones instables couvertes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avis clients (span 1x1) -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-400 to-orange-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-500"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-650" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative h-full flex flex-col justify-between">
+                        <div class="flex gap-0.5">
+                            <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <svg class="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-1">Avis clients</h3>
+                            <p class="text-white/90 text-sm leading-snug">Notes & commentaires post-commande. Réputation en hausse.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -1442,203 +1548,149 @@
             <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary-500/10 rounded-full blur-[120px]"></div>
             <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent-500/10 rounded-full blur-[100px]"></div>
         </div>
-        
+
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16" x-data="{ shown: false }" x-intersect.once="shown = true">
-                <span class="text-primary-400 font-semibold text-sm uppercase tracking-wider"
-                      x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Tarifs</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mt-4"
+            <!-- Header -->
+            <div class="text-center max-w-3xl mx-auto mb-14" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-500/10 border border-primary-500/20 rounded-full text-primary-400 text-xs font-semibold mb-5 uppercase tracking-wider"
+                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    Tarifs transparents
+                </div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-white mt-2"
                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Un seul plan, toutes les fonctionnalités
+                    Deux plans adaptés à <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-400">votre activité</span>
                 </h2>
                 <p class="text-neutral-400 text-lg mt-4"
                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                    Pas de choix compliqué. Tout est inclus. Économisez jusqu'à 15% avec l'abonnement annuel.
+                    Du petit maquis au restaurant établi. Sans engagement, changez quand vous voulez.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="pricingCalculator()" x-init="init()">
-                <!-- Left Column: Features & Add-ons -->
-                <div class="lg:col-span-2 space-y-8">
-                    <!-- Features List -->
-                    <div class="bg-neutral-900/80 backdrop-blur-xl rounded-3xl p-8 border border-neutral-800" x-data="{ shown: false }" x-intersect.once="shown = true"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
-                        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            Fonctionnalités incluses
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @php
-                                $features = [
-                                    ['icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', 'text' => '100 plats max'],
-                                    ['icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z', 'text' => '30 catégories'],
-                                    ['icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', 'text' => '5 employés'],
-                                    ['icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'text' => '2 000 commandes/mois'],
-                                    ['icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'text' => 'Gestion livraison'],
-                                    ['icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'text' => 'Stock en temps réel'],
-                                    ['icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', 'text' => 'Avis clients'],
-                                    ['icon' => 'M3 10h18M7 15h1m4 0h1m-6 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v4a3 3 0 003 3z', 'text' => 'Paiement Mobile Money'],
-                                ];
-                            @endphp
-                            @foreach($features as $feature)
-                                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-colors group">
-                                    <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center group-hover:bg-primary-500 transition-colors">
-                                        <svg class="w-4 h-4 text-primary-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $feature['icon'] }}"/>
-                                        </svg>
-                                    </div>
-                                    <span class="text-neutral-300 group-hover:text-white transition-colors font-medium text-sm">{{ $feature['text'] }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+            <!-- 2-Plans Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
 
-                    <!-- Add-ons Section -->
-                    <div class="bg-neutral-900/80 backdrop-blur-xl rounded-3xl p-8 border border-neutral-800" x-data="{ shown: false }" x-intersect.once="shown = true"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-150" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
-                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-                            <div class="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                            </div>
-                            Add-ons optionnels
-                        </h2>
-                        <p class="text-neutral-500 mb-6">Personnalisez votre plan selon vos besoins</p>
-                        <div class="space-y-3">
-                            @php
-                                $addons = [
-                                    ['id' => 'support', 'name' => 'Support Prioritaire', 'price' => 5000, 'description' => 'Réponse garantie sous 2h'],
-                                    ['id' => 'domain', 'name' => 'Domaine Personnalisé', 'price' => 3000, 'description' => 'Votre propre nom de domaine'],
-                                    ['id' => 'employees', 'name' => 'Employés Supplémentaires', 'price' => 2000, 'description' => 'Par employé supplémentaire'],
-                                    ['id' => 'dishes', 'name' => 'Plats Supplémentaires', 'price' => 500, 'description' => 'Par lot de 10 plats'],
-                                ];
-                            @endphp
-                            @foreach($addons as $addon)
-                                <label class="flex items-center justify-between p-4 rounded-xl border-2 border-neutral-800 hover:border-primary-500/50 cursor-pointer transition-all group bg-neutral-800/30 hover:bg-neutral-800/50"
-                                       :class="{ 'border-primary-500 bg-neutral-800/70': selectedAddons.includes('{{ $addon['id'] }}') }">
-                                    <div class="flex items-center gap-4 flex-1">
-                                        <input type="checkbox" 
-                                               x-model="selectedAddons" 
-                                               value="{{ $addon['id'] }}"
-                                               class="w-5 h-5 rounded border-neutral-600 bg-neutral-700 text-primary-500 focus:ring-primary-500 focus:ring-2 cursor-pointer">
-                                        <div class="flex-1">
-                                            <div class="font-semibold text-white group-hover:text-primary-400 transition-colors">{{ $addon['name'] }}</div>
-                                            <div class="text-sm text-neutral-500">{{ $addon['description'] }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-lg font-bold text-primary-400">{{ number_format($addon['price'], 0, ',', ' ') }} F</div>
-                                        <div class="text-xs text-neutral-500">/mois</div>
-                                    </div>
-                                </label>
-                            @endforeach
+                <!-- STARTER PLAN -->
+                <div class="relative group" x-data="{ shown: false }" x-intersect.once="shown = true"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <div class="h-full bg-neutral-900/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-neutral-800 hover:border-neutral-700 transition-all">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-neutral-800 rounded-full text-xs font-semibold text-neutral-300 mb-4">
+                            <svg class="w-3.5 h-3.5 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Idéal petits maquis
                         </div>
+
+                        <h3 class="text-2xl font-bold text-white mb-1">Starter</h3>
+                        <p class="text-sm text-neutral-500 mb-6">Pour démarrer la digitalisation de votre maquis.</p>
+
+                        <div class="mb-6 pb-6 border-b border-neutral-800">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-5xl font-bold text-white">9 900</span>
+                                <span class="text-neutral-500 text-sm">FCFA</span>
+                            </div>
+                            <div class="text-xs text-neutral-500 mt-2">par mois · sans engagement</div>
+                        </div>
+
+                        <a href="{{ route('register') }}?plan=starter"
+                           class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm border-2 border-neutral-700 text-white hover:bg-neutral-800 hover:border-neutral-600 transition-all mb-6">
+                            Choisir Starter
+                        </a>
+
+                        <p class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Inclus</p>
+                        <ul class="space-y-2.5">
+                            @foreach([
+                                'Jusqu\'à 30 plats',
+                                '1 compte employé',
+                                '300 commandes/mois',
+                                'Menu public + QR codes',
+                                'Paiement Mobile Money',
+                                'Support WhatsApp',
+                            ] as $f)
+                                <li class="flex items-start gap-2.5 text-sm text-neutral-300">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>{{ $f }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Right Column: Sticky Price Card -->
-                <div class="lg:col-span-1">
-                    <div class="sticky top-24" x-data="{ shown: false }" x-intersect.once="shown = true"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
-                        <div class="relative bg-gradient-to-br from-neutral-900 to-neutral-950 rounded-3xl p-8 border-2 border-primary-500/30 shadow-2xl shadow-primary-500/10">
-                            <!-- Badge MEILLEUR pour Annuel -->
-                            <div x-show="billingCycle === 'annual'" 
-                                 x-transition
-                                 class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <div class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                    <span>MEILLEUR</span>
-                                </div>
-                            </div>
-
-                            <div class="text-center mb-8 pt-4">
-                                <h3 class="text-3xl font-bold text-white mb-2">MenuPro</h3>
-                                <p class="text-neutral-400 text-sm">Plan unique • Toutes les fonctionnalités</p>
-                            </div>
-
-                            <!-- Billing Cycle Toggle -->
-                            <div class="mb-8">
-                                <div class="grid grid-cols-2 gap-2 bg-neutral-800/50 p-1.5 rounded-xl">
-                                    <template x-for="cycle in cycles" :key="cycle.id">
-                                        <button @click="billingCycle = cycle.id"
-                                                :class="{
-                                                    'bg-primary-500 text-white shadow-lg shadow-primary-500/30': billingCycle === cycle.id,
-                                                    'text-neutral-400 hover:text-white': billingCycle !== cycle.id
-                                                }"
-                                                class="px-4 py-2.5 rounded-lg text-sm font-semibold transition-all">
-                                            <span x-text="cycle.label"></span>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Price Display -->
-                            <div class="text-center mb-6">
-                                <div class="mb-2">
-                                    <span class="text-5xl font-bold text-white" x-text="formatPrice(basePrice)"></span>
-                                    <span class="text-neutral-400 text-lg ml-2">FCFA</span>
-                                </div>
-                                <div class="text-sm text-secondary-400 font-medium" x-show="billingCycle !== 'monthly'">
-                                    <span x-text="'Économisez ' + formatPrice(discountAmount) + ' FCFA'"></span>
-                                </div>
-                                <div class="text-xs text-neutral-500 mt-1" x-show="billingCycle === 'monthly'">
-                                    <span x-text="formatPrice(basePrice) + ' FCFA/mois'"></span>
-                                </div>
-                            </div>
-
-                            <!-- Add-ons Total -->
-                            <div x-show="addonsTotal > 0" 
-                                 x-transition
-                                 class="mb-6 pt-6 border-t border-neutral-800">
-                                <div class="space-y-2">
-                                    <div class="flex justify-between text-sm text-neutral-400">
-                                        <span>Add-ons sélectionnés</span>
-                                        <span x-text="formatPrice(addonsTotal) + ' FCFA'"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Total Price -->
-                            <div class="mb-8 pt-6 border-t-2 border-primary-500/30">
-                                <div class="flex justify-between items-baseline mb-2">
-                                    <span class="text-lg font-semibold text-neutral-300">Total</span>
-                                    <span class="text-3xl font-bold text-primary-400" x-text="formatPrice(totalPrice)"></span>
-                                </div>
-                                <div class="text-xs text-neutral-500 text-right">
-                                    <span x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></span>
-                                </div>
-                            </div>
-
-                            <!-- CTA Button -->
-                            <a :href="'{{ route('register') }}?plan=menupro&cycle=' + billingCycle + '&addons=' + selectedAddons.join(',')"
-                               class="block w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-bold py-4 px-6 rounded-xl text-center transition-all transform hover:scale-105 shadow-lg shadow-primary-500/30 hover:shadow-xl mb-4">
-                                Commencer maintenant
-                            </a>
-
-                            <div class="text-center">
-                                <div class="inline-flex items-center gap-2 text-xs text-neutral-500">
-                                    <svg class="w-4 h-4 text-secondary-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    <span>Satisfait ou remboursé 7 jours</span>
-                                </div>
-                            </div>
+                <!-- MENUPRO PLAN (Featured) -->
+                <div class="relative group" x-data="{ shown: false }" x-intersect.once="shown = true"
+                     x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+                    <!-- Featured badge -->
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                        <div class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-primary-500/30 flex items-center gap-1.5 whitespace-nowrap">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            LE PLUS POPULAIRE
                         </div>
+                    </div>
+
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-opacity"></div>
+
+                    <div class="relative h-full bg-gradient-to-b from-neutral-900 to-neutral-950 rounded-3xl p-6 sm:p-8 border-2 border-primary-500/50 shadow-2xl shadow-primary-500/10">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-500/10 border border-primary-500/20 rounded-full text-xs font-semibold text-primary-400 mb-4">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            Tout inclus
+                        </div>
+
+                        <h3 class="text-2xl font-bold text-white mb-1">MenuPro</h3>
+                        <p class="text-sm text-neutral-400 mb-6">Le plan complet pour restaurants et maquis établis.</p>
+
+                        <div class="mb-6 pb-6 border-b border-neutral-800">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-5xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">25 000</span>
+                                <span class="text-neutral-500 text-sm">FCFA</span>
+                            </div>
+                            <div class="text-xs text-neutral-500 mt-2">par mois · ou <span class="text-secondary-400 font-medium">21 250 F</span> en annuel <span class="px-1.5 py-0.5 bg-secondary-500/20 text-secondary-400 text-[10px] font-bold rounded">-15%</span></div>
+                        </div>
+
+                        <a href="{{ route('register') }}?plan=menupro"
+                           class="flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 hover:scale-[1.02] mb-6">
+                            Choisir MenuPro
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+
+                        <p class="text-xs font-bold text-primary-400 uppercase tracking-wider mb-3">Tout Starter, plus</p>
+                        <ul class="space-y-2.5">
+                            @foreach([
+                                '100 plats + 30 catégories',
+                                '5 comptes employés',
+                                '2 000 commandes/mois',
+                                'Gestion de stock complète',
+                                'Livraison intégrée',
+                                'Analytics & rapports détaillés',
+                                'Portefeuille & retraits Mobile Money',
+                            ] as $f)
+                                <li class="flex items-start gap-2.5 text-sm text-neutral-200">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>{{ $f }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Link to full pricing page -->
-            <div class="text-center mt-12">
-                <a href="{{ route('pricing') }}" class="text-primary-400 font-semibold hover:text-primary-300 inline-flex items-center gap-2 transition-colors">
-                    Voir tous les détails et les add-ons
+            <!-- Trust + Link -->
+            <div class="mt-12 text-center">
+                <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-neutral-500 mb-6">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Satisfait ou remboursé 7 jours
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Activation sous 24h
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Sans engagement
+                    </span>
+                </div>
+                <a href="{{ route('pricing') }}" class="inline-flex items-center gap-2 text-primary-400 font-semibold hover:text-primary-300 transition-colors">
+                    Voir la comparaison détaillée et les add-ons
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
@@ -1646,6 +1698,7 @@
             </div>
         </div>
     </section>
+
 
     <!-- FAQ Section -->
     <section id="faq" class="py-24 sm:py-28 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
@@ -1840,7 +1893,7 @@
 
                 <p class="text-neutral-500 mt-8 text-sm"
                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                    Pas de carte bancaire requise &bull; Support WhatsApp reactif &bull; 25 000 FCFA/mois tout inclus
+                    Pas de carte bancaire requise &bull; Support WhatsApp reactif &bull; Des 9 900 FCFA/mois
                 </p>
             </div>
         </div>
