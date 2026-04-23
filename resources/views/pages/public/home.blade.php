@@ -53,23 +53,38 @@
              @mousemove.window="handleMouseMove($event)"
              @mouseleave.window="resetRotation()">
         
-        <!-- Animated Background Elements -->
+        <!-- Animated Background Elements (refined, more fluid) -->
         <div class="absolute inset-0">
-            <!-- Gradient Mesh Background -->
-            <div class="absolute inset-0 bg-gradient-mesh opacity-80"></div>
-            
-            <!-- Animated Grid -->
-            <div class="absolute inset-0 opacity-10">
-                <div class="absolute inset-0 bg-[linear-gradient(rgba(249,115,22,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(249,115,22,0.1)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"></div>
+            {{-- Soft radial mesh (multi-layer for fluidity) --}}
+            <div class="absolute inset-0" style="background:
+                radial-gradient(1200px 600px at 10% 10%, rgba(249,115,22,0.18), transparent 55%),
+                radial-gradient(900px 600px at 90% 20%, rgba(236,72,153,0.12), transparent 60%),
+                radial-gradient(800px 700px at 50% 100%, rgba(59,130,246,0.14), transparent 60%);"></div>
+
+            {{-- Subtle dot pattern (softer than grid) --}}
+            <div class="absolute inset-0 opacity-[0.07]">
+                <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.4)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"></div>
             </div>
-            
-            <!-- Floating Orbs with blur -->
-            <div class="absolute top-10 left-[5%] w-[500px] h-[500px] bg-primary-500/30 rounded-full blur-[120px] animate-float"></div>
-            <div class="absolute bottom-10 right-[5%] w-[400px] h-[400px] bg-accent-500/20 rounded-full blur-[100px] animate-float" style="animation-delay: 2s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary-500/10 rounded-full blur-[150px] animate-float" style="animation-delay: 1s;"></div>
+
+            {{-- Large slow-moving orbs --}}
+            <div class="absolute -top-20 -left-20 w-[520px] h-[520px] bg-primary-500/25 rounded-full blur-[130px] animate-float"></div>
+            <div class="absolute -bottom-20 -right-20 w-[440px] h-[440px] bg-accent-500/20 rounded-full blur-[120px] animate-float" style="animation-delay: 2s;"></div>
+            <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[640px] h-[640px] bg-secondary-500/10 rounded-full blur-[160px] animate-float" style="animation-delay: 1s;"></div>
+
+            {{-- SVG flowing waves (decorative) --}}
+            <svg class="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1200 600" aria-hidden="true">
+                <defs>
+                    <linearGradient id="heroWave" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f97316"/>
+                        <stop offset="100%" stop-color="#fbbf24"/>
+                    </linearGradient>
+                </defs>
+                <path d="M0,300 C200,220 400,380 600,300 C800,220 1000,380 1200,300" stroke="url(#heroWave)" stroke-width="2" fill="none"/>
+                <path d="M0,380 C200,300 400,460 600,380 C800,300 1000,460 1200,380" stroke="url(#heroWave)" stroke-width="1.5" fill="none"/>
+            </svg>
         </div>
-        
-        <!-- Floating Particles -->
+
+        {{-- Floating Particles (keep existing decorative layer) --}}
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="particle top-[15%] left-[10%]" style="animation-delay: 0s;"></div>
             <div class="particle top-[35%] left-[20%]" style="animation-delay: 1s; width: 6px; height: 6px;"></div>
@@ -85,19 +100,39 @@
                 
                 <!-- Left Content -->
                 <div class="text-center lg:text-left order-2 lg:order-1" x-data="{ shown: false }" x-intersect.once="shown = true">
-                    <!-- Badge : Social proof dynamique -->
-                    <div class="inline-flex items-center gap-2.5 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-white text-sm font-medium mb-8 border border-white/20 shadow-lg"
+                    {{-- Badge : Social proof dynamique avec logo-marks (non texte) --}}
+                    <div class="inline-flex flex-wrap items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-white text-xs sm:text-sm font-medium mb-8 border border-white/20 shadow-lg"
                          x-show="shown"
                          x-transition:enter="transition ease-out duration-500 delay-100"
                          x-transition:enter-start="opacity-0 translate-y-4"
                          x-transition:enter-end="opacity-100 translate-y-0">
-                        <span class="flex -space-x-1.5">
-                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">AK</span>
-                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">MC</span>
-                            <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 ring-2 ring-neutral-900 flex items-center justify-center text-[9px] font-bold text-white">JB</span>
+                        <span class="flex -space-x-2">
+                            {{-- Logo-mark 1 : Chef hat (Le Maquis du Port) --}}
+                            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-orange-400 to-red-500 ring-2 ring-neutral-900 flex items-center justify-center shadow-sm" title="Le Maquis du Port">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 14c-2.2 0-4-1.8-4-4s1.8-4 4-4c.4 0 .8.1 1.2.2C7.9 4.9 9.8 4 12 4s4.1.9 4.8 2.2c.4-.1.8-.2 1.2-.2 2.2 0 4 1.8 4 4s-1.8 4-4 4v6c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1v-6z"/>
+                                </svg>
+                            </span>
+                            {{-- Logo-mark 2 : Flame (Chez Awa - grill) --}}
+                            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 ring-2 ring-neutral-900 flex items-center justify-center shadow-sm" title="Chez Awa">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2s-4 6-4 10a4 4 0 008 0c0-4-4-10-4-10zm0 16a2 2 0 01-2-2c0-1 1-3 2-5 1 2 2 4 2 5a2 2 0 01-2 2z"/>
+                                </svg>
+                            </span>
+                            {{-- Logo-mark 3 : Leaf (Le Sahel - végétal) --}}
+                            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 ring-2 ring-neutral-900 flex items-center justify-center shadow-sm" title="Le Sahel">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
+                                </svg>
+                            </span>
                         </span>
-                        <span class="text-sm">{{ $stats['raw']['restaurants'] ?? 10 }}+ restaurants actifs en Cote d'Ivoire</span>
-                        <span class="relative flex h-2 w-2 ml-1">
+                        <span class="hidden sm:inline-flex items-center gap-1.5">
+                            <span class="font-semibold text-white">{{ $stats['raw']['restaurants'] ?? 10 }}+ restaurants actifs</span>
+                            <span class="text-white/60">&middot;</span>
+                            <span class="text-white/80">Côte d'Ivoire</span>
+                        </span>
+                        <span class="sm:hidden font-semibold text-white">{{ $stats['raw']['restaurants'] ?? 10 }}+ restaurants en CI</span>
+                        <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                         </span>
@@ -1407,10 +1442,16 @@
                     </svg>
                     <div class="relative h-full flex flex-col justify-between">
                         <div class="flex -space-x-2">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 border-2 border-white flex items-center justify-center text-xs font-bold text-pink-800">AK</div>
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-400 border-2 border-white flex items-center justify-center text-xs font-bold text-yellow-800">MC</div>
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-400 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-800">JB</div>
-                            <div class="w-9 h-9 rounded-full bg-white/20 backdrop-blur border-2 border-white flex items-center justify-center text-xs font-bold">+5</div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-red-500 border-2 border-white flex items-center justify-center shadow-sm">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M6 14c-2.2 0-4-1.8-4-4s1.8-4 4-4c.4 0 .8.1 1.2.2C7.9 4.9 9.8 4 12 4s4.1.9 4.8 2.2c.4-.1.8-.2 1.2-.2 2.2 0 4 1.8 4 4s-1.8 4-4 4v6c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1v-6z"/></svg>
+                            </div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white flex items-center justify-center shadow-sm">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s-4 6-4 10a4 4 0 008 0c0-4-4-10-4-10zm0 16a2 2 0 01-2-2c0-1 1-3 2-5 1 2 2 4 2 5a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-white flex items-center justify-center shadow-sm">
+                                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg>
+                            </div>
+                            <div class="w-9 h-9 rounded-full bg-white/20 backdrop-blur border-2 border-white flex items-center justify-center text-[11px] font-bold">+5</div>
                         </div>
                         <div>
                             <h3 class="text-lg font-bold mb-1">Gestion equipe</h3>
@@ -1488,256 +1529,276 @@
     </section>
 
     <!-- Supports QR Code Physiques -->
-    <section id="qr-supports" class="relative py-24 bg-gradient-to-b from-white via-orange-50/30 to-white overflow-hidden">
+    <section id="qr-supports" class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-orange-50/30 to-white overflow-hidden">
         <!-- Decorative dots pattern -->
         <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(249,115,22,0.12)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] opacity-50"></div>
         <div class="absolute top-10 right-10 w-64 h-64 bg-primary-200/40 rounded-full blur-3xl"></div>
         <div class="absolute bottom-10 left-10 w-72 h-72 bg-amber-200/40 rounded-full blur-3xl"></div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="qrSupportsPricing()">
 
-                <!-- Left : Content -->
-                <div x-data="{ shown: false }" x-intersect.once="shown = true">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-primary-100 to-orange-100 text-primary-700 rounded-full text-xs font-bold uppercase tracking-wider mb-6"
-                         x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                        Nouveau &middot; Livre a votre restaurant
-                    </div>
+            {{-- Section header --}}
+            <div class="max-w-3xl mx-auto text-center mb-10 sm:mb-14" x-data="{ shown: false }" x-intersect.once="shown = true">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-primary-100 to-orange-100 text-primary-700 rounded-full text-xs font-bold uppercase tracking-wider mb-5"
+                     x-show="shown" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01"/></svg>
+                    Nouveau &middot; Livre a votre restaurant
+                </div>
 
-                    <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight mb-5"
-                        x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        Vos QR codes, imprimes
-                        <br>
-                        <span class="relative inline-block">
-                            <span class="text-gradient">et livres chez vous.</span>
-                            <svg class="absolute -bottom-2 left-0 w-full h-2.5 text-primary-400" viewBox="0 0 200 8" preserveAspectRatio="none">
-                                <path d="M0,4 Q50,0 100,4 T200,4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                            </svg>
-                        </span>
-                    </h2>
+                <h2 class="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 leading-tight mb-5"
+                    x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    Vos QR codes,
+                    <span class="relative inline-block">
+                        <span class="text-gradient">imprimes et prets a servir.</span>
+                        <svg class="absolute -bottom-2 left-0 w-full h-2.5 text-primary-400" viewBox="0 0 200 8" preserveAspectRatio="none">
+                            <path d="M0,4 Q50,0 100,4 T200,4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </h2>
 
-                    <p class="text-neutral-600 text-lg leading-relaxed mb-8"
-                       x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        On vous imprime des supports QR code de qualite pour chaque table de votre restaurant. Finis les QR codes colles sur papier qui se decollent : supports rigides, durables, et conçus pour resister au service.
-                    </p>
+                <p class="text-neutral-600 text-base sm:text-lg leading-relaxed"
+                   x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                    On vous imprime des QR codes de qualite pour chaque table. Deux formats au choix : <strong class="text-neutral-900">support rigide</strong> pose sur la table, ou <strong class="text-neutral-900">autocollant</strong> colle directement.
+                </p>
+            </div>
 
-                    <!-- Price highlight -->
-                    <div class="inline-flex items-baseline gap-3 mb-8 p-5 bg-white rounded-2xl border-2 border-primary-200 shadow-lg shadow-primary-100/30"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
-                        <span class="text-5xl font-bold bg-gradient-to-r from-primary-500 to-orange-500 bg-clip-text text-transparent">500</span>
-                        <div>
-                            <div class="font-bold text-neutral-900 text-sm">FCFA / support</div>
-                            <div class="text-xs text-neutral-500">Impression + support rigide inclus</div>
+            {{-- 2 Format cards (Support + Sticker) side by side --}}
+            <div class="grid md:grid-cols-2 gap-5 sm:gap-6 mb-10 sm:mb-12">
+                {{-- FORMAT 1 : Support rigide sur table --}}
+                <button type="button"
+                        @click="format = 'support'"
+                        :class="format === 'support' ? 'border-primary-500 bg-white shadow-2xl shadow-primary-200/40 ring-2 ring-primary-100' : 'border-neutral-200 bg-white/60 hover:border-primary-300 hover:bg-white'"
+                        class="relative text-left border-2 rounded-3xl p-6 sm:p-7 transition-all duration-300 focus:outline-none">
+
+                    {{-- Visual on top --}}
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="relative flex-shrink-0">
+                            {{-- 3D tent card illustration --}}
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary-500 via-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 transform rotate-[-4deg] group-hover:rotate-0 transition-transform">
+                                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white" viewBox="0 0 48 48" fill="none">
+                                    {{-- Tent triangular support --}}
+                                    <path d="M8 40 L24 8 L40 40 Z" stroke="currentColor" stroke-width="2.5" fill="white" fill-opacity="0.15" stroke-linejoin="round"/>
+                                    <rect x="14" y="18" width="20" height="14" rx="1.5" fill="white"/>
+                                    {{-- Mini QR pattern --}}
+                                    <rect x="16" y="20" width="3" height="3" fill="currentColor"/>
+                                    <rect x="20" y="20" width="2" height="2" fill="currentColor"/>
+                                    <rect x="29" y="20" width="3" height="3" fill="currentColor"/>
+                                    <rect x="16" y="25" width="2" height="2" fill="currentColor"/>
+                                    <rect x="19" y="24" width="3" height="2" fill="currentColor"/>
+                                    <rect x="23" y="25" width="2" height="3" fill="currentColor"/>
+                                    <rect x="27" y="24" width="2" height="3" fill="currentColor"/>
+                                    <rect x="30" y="26" width="2" height="2" fill="currentColor"/>
+                                    <rect x="16" y="29" width="3" height="3" fill="currentColor"/>
+                                    <rect x="20" y="30" width="2" height="2" fill="currentColor"/>
+                                    <rect x="26" y="29" width="2" height="2" fill="currentColor"/>
+                                    <rect x="29" y="29" width="3" height="3" fill="currentColor"/>
+                                </svg>
+                            </div>
+                            {{-- Selected check badge --}}
+                            <div x-show="format === 'support'" x-transition class="absolute -top-2 -right-2 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-md">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-primary-600 mb-1">Format 1 &middot; Le plus populaire</div>
+                            <h3 class="font-display text-xl sm:text-2xl font-bold text-neutral-900 leading-tight mb-1">Support rigide sur table</h3>
+                            <p class="text-sm text-neutral-600 leading-snug">Chevalet triangulaire, rigide, pose directement sur la table. Visible des deux cotes.</p>
                         </div>
                     </div>
 
-                    <!-- Features list -->
-                    <ul class="space-y-3 mb-8"
-                        x-show="shown" x-transition:enter="transition ease-out duration-700 delay-400" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        <li class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <div>
-                                <div class="font-semibold text-neutral-900 text-sm">Support rigide & resistant</div>
-                                <div class="text-neutral-600 text-sm">Plastifie, resiste aux taches et a l'humidite.</div>
-                            </div>
+                    {{-- Price --}}
+                    <div class="flex items-baseline gap-2 mb-4 pb-4 border-b border-neutral-100">
+                        <span class="text-4xl sm:text-5xl font-black bg-gradient-to-r from-primary-500 to-orange-500 bg-clip-text text-transparent">1 500</span>
+                        <span class="text-sm font-semibold text-neutral-500">FCFA / unite</span>
+                    </div>
+
+                    {{-- Mini features --}}
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>PVC rigide, anti-taches et lavable</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <div>
-                                <div class="font-semibold text-neutral-900 text-sm">QR numerote par table</div>
-                                <div class="text-neutral-600 text-sm">Chaque table a son QR unique : vous savez d'ou vient la commande.</div>
-                            </div>
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>Double face : client voit le QR des deux cotes</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <div>
-                                <div class="font-semibold text-neutral-900 text-sm">Aux couleurs de votre restaurant</div>
-                                <div class="text-neutral-600 text-sm">Logo, couleurs, numero de table : personnalisation complete.</div>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <div>
-                                <div class="font-semibold text-neutral-900 text-sm">Livraison a Abidjan</div>
-                                <div class="text-neutral-600 text-sm">Livre sous 5-7 jours ouvres directement dans votre restaurant.</div>
-                            </div>
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>Se deplace facilement (changement de table)</span>
                         </li>
                     </ul>
+                </button>
 
-                    <!-- Packs -->
-                    <div class="mb-8"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        <p class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Packs suggeres</p>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="text-center p-3 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-md transition-all">
-                                <div class="text-xl font-bold text-neutral-900">10</div>
-                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
-                                <div class="text-xs font-bold text-primary-600">5 000 F</div>
+                {{-- FORMAT 2 : Autocollant --}}
+                <button type="button"
+                        @click="format = 'sticker'"
+                        :class="format === 'sticker' ? 'border-primary-500 bg-white shadow-2xl shadow-primary-200/40 ring-2 ring-primary-100' : 'border-neutral-200 bg-white/60 hover:border-primary-300 hover:bg-white'"
+                        class="relative text-left border-2 rounded-3xl p-6 sm:p-7 transition-all duration-300 focus:outline-none">
+
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="relative flex-shrink-0">
+                            {{-- Sticker illustration with peel --}}
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transform rotate-[4deg] transition-transform relative overflow-hidden">
+                                {{-- Peeled corner effect --}}
+                                <div class="absolute top-0 right-0 w-6 h-6 bg-white/90 [clip-path:polygon(100%_0,100%_100%,0_0)] rounded-bl"></div>
+                                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white relative" viewBox="0 0 48 48" fill="none">
+                                    {{-- Flat sticker (rounded rect) --}}
+                                    <rect x="10" y="10" width="28" height="28" rx="4" fill="white"/>
+                                    {{-- Mini QR pattern --}}
+                                    <rect x="13" y="13" width="4" height="4" fill="currentColor"/>
+                                    <rect x="18" y="13" width="2" height="2" fill="currentColor"/>
+                                    <rect x="22" y="14" width="3" height="2" fill="currentColor"/>
+                                    <rect x="31" y="13" width="4" height="4" fill="currentColor"/>
+                                    <rect x="13" y="19" width="2" height="3" fill="currentColor"/>
+                                    <rect x="17" y="19" width="3" height="2" fill="currentColor"/>
+                                    <rect x="22" y="19" width="2" height="4" fill="currentColor"/>
+                                    <rect x="26" y="18" width="3" height="3" fill="currentColor"/>
+                                    <rect x="31" y="19" width="2" height="3" fill="currentColor"/>
+                                    <rect x="14" y="23" width="3" height="2" fill="currentColor"/>
+                                    <rect x="19" y="24" width="2" height="3" fill="currentColor"/>
+                                    <rect x="25" y="25" width="3" height="2" fill="currentColor"/>
+                                    <rect x="30" y="24" width="4" height="2" fill="currentColor"/>
+                                    <rect x="13" y="30" width="4" height="4" fill="currentColor"/>
+                                    <rect x="19" y="30" width="2" height="3" fill="currentColor"/>
+                                    <rect x="23" y="31" width="3" height="2" fill="currentColor"/>
+                                    <rect x="28" y="30" width="2" height="4" fill="currentColor"/>
+                                    <rect x="31" y="31" width="4" height="3" fill="currentColor"/>
+                                </svg>
                             </div>
-                            <div class="text-center p-3 bg-gradient-to-br from-primary-50 to-orange-50 rounded-xl border-2 border-primary-300 shadow-md relative">
-                                <span class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-bold bg-primary-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">Populaire</span>
-                                <div class="text-xl font-bold text-neutral-900 mt-1">20</div>
-                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
-                                <div class="text-xs font-bold text-primary-600">10 000 F</div>
+                            <div x-show="format === 'sticker'" x-transition class="absolute -top-2 -right-2 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-4 ring-white shadow-md">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <div class="text-center p-3 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-md transition-all">
-                                <div class="text-xl font-bold text-neutral-900">50</div>
-                                <div class="text-[11px] text-neutral-500 mb-1">tables</div>
-                                <div class="text-xs font-bold text-primary-600">25 000 F</div>
-                            </div>
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">Format 2 &middot; Economique</div>
+                            <h3 class="font-display text-xl sm:text-2xl font-bold text-neutral-900 leading-tight mb-1">Autocollant plastifie</h3>
+                            <p class="text-sm text-neutral-600 leading-snug">Etiquette adhesive a coller directement sur la table, le menu ou la vitrine.</p>
                         </div>
                     </div>
 
-                    <!-- CTAs -->
-                    <div class="flex flex-col sm:flex-row gap-3"
-                         x-show="shown" x-transition:enter="transition ease-out duration-700 delay-600" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
-                        @php
-                            $qrWhatsapp = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
-                        @endphp
-                        @if($qrWhatsapp)
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $qrWhatsapp) }}?text=Bonjour%20MenuPro,%20je%20souhaite%20commander%20des%20supports%20QR%20code%20pour%20mon%20restaurant." target="_blank"
-                               class="inline-flex items-center justify-center gap-2 btn btn-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-[1.02] transition-all">
+                    <div class="flex items-baseline gap-2 mb-4 pb-4 border-b border-neutral-100">
+                        <span class="text-4xl sm:text-5xl font-black bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">300</span>
+                        <span class="text-sm font-semibold text-neutral-500">FCFA / unite</span>
+                    </div>
+
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>Adhesif fort, se colle sans bulles</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>Vernis protecteur, resiste a l'eau</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <span>Ideal pour tables fixes, bar, vitrine</span>
+                        </li>
+                    </ul>
+                </button>
+            </div>
+
+            {{-- Interactive quantity configurator --}}
+            <div class="grid lg:grid-cols-5 gap-6 lg:gap-8 items-start">
+
+                {{-- Left : Configurator (3/5) --}}
+                <div class="lg:col-span-3 bg-white rounded-3xl border border-neutral-200 shadow-xl shadow-neutral-200/40 p-6 sm:p-8">
+                    <div class="flex items-center gap-2 mb-6">
+                        <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <h3 class="font-display text-lg sm:text-xl font-bold text-neutral-900">Configurez votre commande</h3>
+                    </div>
+
+                    {{-- Quantity input --}}
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Nombre de tables / emplacements</label>
+                        <div class="flex items-stretch gap-3">
+                            <button type="button" @click="quantity = Math.max(1, quantity - 1)" class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                            </button>
+                            <div class="flex-1 relative">
+                                <input type="number" min="1" max="999" x-model.number="quantity"
+                                       class="w-full h-12 sm:h-14 text-center text-2xl sm:text-3xl font-black text-neutral-900 bg-neutral-50 border-2 border-neutral-200 rounded-xl focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-400 uppercase tracking-wide pointer-events-none hidden sm:block">unites</span>
+                            </div>
+                            <button type="button" @click="quantity = Math.min(999, quantity + 1)" class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary-100 hover:bg-primary-200 flex items-center justify-center text-primary-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Quick quantity presets --}}
+                    <div>
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Packs populaires</label>
+                        <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                            <template x-for="preset in [10, 20, 50, 100]" :key="preset">
+                                <button type="button"
+                                        @click="quantity = preset"
+                                        :class="quantity === preset ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/25' : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:border-primary-300 hover:bg-white'"
+                                        class="relative py-3 sm:py-4 px-2 border-2 rounded-xl font-bold transition-all focus:outline-none">
+                                    <div class="text-lg sm:text-xl" x-text="preset"></div>
+                                    <div class="text-[10px] font-medium opacity-80">tables</div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Right : Live total price card (2/5) --}}
+                <div class="lg:col-span-2">
+                    <div class="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+                        {{-- Decorative elements --}}
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 rounded-full blur-3xl"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl"></div>
+
+                        <div class="relative">
+                            <div class="text-[10px] font-bold uppercase tracking-[2px] text-primary-300 mb-2">Votre commande</div>
+
+                            <div class="flex items-baseline gap-2 mb-1">
+                                <span class="text-3xl sm:text-4xl font-black" x-text="quantity"></span>
+                                <span class="text-sm text-neutral-400">×</span>
+                                <span class="text-lg font-bold" x-text="format === 'support' ? '1 500 F' : '300 F'"></span>
+                            </div>
+                            <div class="text-xs text-neutral-400 mb-6" x-text="format === 'support' ? 'Supports rigides sur table' : 'Autocollants plastifies'"></div>
+
+                            <div class="border-t border-white/10 pt-5">
+                                <div class="text-xs uppercase tracking-wider text-neutral-400 mb-1">Total a payer</div>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-4xl sm:text-5xl font-black bg-gradient-to-r from-primary-300 to-orange-300 bg-clip-text text-transparent" x-text="formatPrice(total)"></span>
+                                    <span class="text-sm font-medium text-neutral-300">FCFA</span>
+                                </div>
+                                <div class="text-xs text-neutral-400 mt-1" x-show="quantity >= 20">
+                                    <span class="inline-flex items-center gap-1 text-emerald-300 font-medium">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                        Livraison offerte a Abidjan
+                                    </span>
+                                </div>
+                                <div class="text-xs text-neutral-400 mt-1" x-show="quantity < 20">
+                                    Livraison : 2 000 FCFA (Abidjan) &middot; Offerte des 20 unites
+                                </div>
+                            </div>
+
+                            @php
+                                $qrWhatsapp = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
+                            @endphp
+                            @if($qrWhatsapp)
+                            <a :href="'https://wa.me/{{ preg_replace('/[^0-9]/', '', $qrWhatsapp) }}?text=' + encodeURIComponent('Bonjour MenuPro, je souhaite commander ' + quantity + ' ' + (format === 'support' ? 'supports rigides QR code' : 'autocollants QR code') + ' (' + formatPrice(total) + ' FCFA). Merci de me contacter.')"
+                               target="_blank"
+                               class="mt-6 w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-gradient-to-r from-primary-500 to-orange-500 hover:from-primary-600 hover:to-orange-600 rounded-xl font-bold text-sm shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-100">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                                Commander mes QR codes
+                                Commander via WhatsApp
                             </a>
-                        @endif
-                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank"
-                           class="inline-flex items-center justify-center gap-2 btn btn-lg bg-white border-2 border-neutral-200 text-neutral-700 hover:border-primary-300 hover:text-primary-600 transition-all">
-                            Tester un QR en demo
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        </a>
-                    </div>
-                </div>
+                            @endif
 
-                <!-- Right : Visual mockup -->
-                <div class="relative" x-data="{ shown: false }" x-intersect.once="shown = true">
-                    <div class="relative"
-                         x-show="shown" x-transition:enter="transition ease-out duration-1000 delay-200" x-transition:enter-start="opacity-0 translate-x-8 scale-95" x-transition:enter-end="opacity-100 translate-x-0 scale-100">
-
-                        <!-- Main QR tent card (big, front) -->
-                        <div class="relative mx-auto w-full max-w-sm bg-white rounded-3xl shadow-2xl shadow-primary-200/40 overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-500 z-20">
-                            <!-- Top color band (brand) -->
-                            <div class="bg-gradient-to-r from-primary-500 to-orange-500 px-6 py-4 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9h2V3H3v6zm4-6v2h10V3H7zm12 0v6h2V3h-2zM3 21h2v-6H3v6zm4 0h10v-2H7v2zm12-6v6h2v-6h-2z" opacity="0"/><path d="M12 5.83L15.17 9H8.83L12 5.83zM3 2h18v4h-4v13h-2v-5h-6v5H7V6H3V2zm6 6v3h6V8H9z"/></svg>
-                                    </div>
-                                    <span class="text-white font-bold text-sm">Le Maquis d'Abidjan</span>
-                                </div>
-                                <span class="px-2 py-1 bg-white/20 backdrop-blur rounded text-white text-[10px] font-bold">TABLE 05</span>
-                            </div>
-
-                            <!-- QR area -->
-                            <div class="px-8 py-10 flex flex-col items-center">
-                                <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-[3px] mb-4">Scannez pour commander</p>
-                                <!-- Stylized QR code (pure CSS grid) -->
-                                <div class="relative w-48 h-48 bg-white rounded-xl border-4 border-neutral-900 p-3">
-                                    <div class="w-full h-full grid grid-cols-10 grid-rows-10 gap-[2px]">
-                                        @php
-                                            // Pseudo-random QR pattern (deterministic)
-                                            $pattern = [
-                                                1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,
-                                                1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,1,1,0,0,0,
-                                                1,0,1,0,1,0,0,0,1,1,0,1,0,1,0,1,0,1,0,1,
-                                                1,0,1,0,1,0,1,1,0,0,1,1,1,0,1,1,1,0,1,1,
-                                                1,0,0,0,1,0,0,1,0,1,0,0,1,1,0,0,0,1,0,0,
-                                                1,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,1,0,1,0,
-                                                0,0,0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,1,1,1,
-                                                1,0,1,1,0,0,1,0,0,0,1,0,0,1,1,1,0,0,1,1,
-                                                0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,1,0,0,
-                                                1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,1,1,0,1,1,
-                                            ];
-                                        @endphp
-                                        @foreach(array_slice($pattern, 0, 100) as $cell)
-                                            <div class="{{ $cell ? 'bg-neutral-900' : 'bg-white' }} rounded-[1px]"></div>
-                                        @endforeach
-                                    </div>
-                                    <!-- 3 position markers (overlay) -->
-                                    <div class="absolute top-3 left-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
-                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
-                                    </div>
-                                    <div class="absolute top-3 right-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
-                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
-                                    </div>
-                                    <div class="absolute bottom-3 left-3 w-10 h-10 border-[5px] border-neutral-900 rounded bg-white flex items-center justify-center">
-                                        <div class="w-4 h-4 bg-neutral-900 rounded-sm"></div>
-                                    </div>
-                                    <!-- Logo center -->
-                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center">
-                                        <div class="w-full h-full bg-gradient-to-br from-primary-500 to-orange-500 rounded-md flex items-center justify-center text-white text-xs font-black">M</div>
-                                    </div>
-                                </div>
-
-                                <!-- Table number big -->
-                                <div class="mt-5 text-center">
-                                    <div class="text-[10px] font-bold tracking-[4px] text-neutral-400 uppercase">Table</div>
-                                    <div class="text-5xl font-black text-neutral-900 leading-none">N&deg;05</div>
-                                </div>
-                            </div>
-
-                            <!-- Footer strip -->
-                            <div class="bg-neutral-50 px-6 py-3 flex items-center justify-between border-t border-neutral-100">
-                                <span class="text-[10px] text-neutral-500 font-medium">menupro.ci/maquis-abidjan</span>
-                                <span class="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
-                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                                    Secure
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Second card (back-left, smaller) -->
-                        <div class="absolute -top-6 -left-8 w-48 bg-white rounded-2xl shadow-xl border border-neutral-200 p-3 transform -rotate-6 z-10 hidden sm:block">
-                            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 rounded text-white text-[10px] font-bold mb-2 flex items-center justify-between">
-                                <span>Chez Awa</span>
-                                <span>T-02</span>
-                            </div>
-                            <div class="w-full aspect-square bg-neutral-900 rounded p-1.5">
-                                <div class="w-full h-full grid grid-cols-6 grid-rows-6 gap-[1px]">
-                                    @foreach([1,1,0,1,1,0, 1,0,1,0,0,1, 0,1,0,1,1,0, 1,0,1,0,1,1, 1,1,0,1,0,0, 0,1,1,0,1,1] as $c)
-                                        <div class="{{ $c ? 'bg-white' : 'bg-neutral-900' }}"></div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Third card (back-right, smaller) -->
-                        <div class="absolute -bottom-8 -right-6 w-44 bg-white rounded-2xl shadow-xl border border-neutral-200 p-3 transform rotate-12 z-10 hidden sm:block">
-                            <div class="bg-gradient-to-r from-purple-500 to-fuchsia-500 px-3 py-1.5 rounded text-white text-[10px] font-bold mb-2 flex items-center justify-between">
-                                <span>Le Sahel</span>
-                                <span>T-12</span>
-                            </div>
-                            <div class="w-full aspect-square bg-neutral-900 rounded p-1.5">
-                                <div class="w-full h-full grid grid-cols-6 grid-rows-6 gap-[1px]">
-                                    @foreach([0,1,1,0,1,1, 1,0,0,1,0,1, 1,1,0,1,1,0, 0,1,1,0,0,1, 1,0,1,1,1,0, 0,1,0,0,1,1] as $c)
-                                        <div class="{{ $c ? 'bg-white' : 'bg-neutral-900' }}"></div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Floating price badge -->
-                        <div class="absolute top-4 -right-4 sm:top-8 sm:-right-10 bg-white rounded-2xl shadow-2xl p-3 z-30 transform rotate-6 border border-neutral-100 badge-float-1">
-                            <div class="flex items-center gap-2">
-                                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-orange-500 rounded-xl flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-neutral-500 font-medium">A partir de</div>
-                                    <div class="font-bold text-neutral-900 text-sm">500 F / unite</div>
-                                </div>
+                            <div class="mt-3 flex items-center justify-center gap-4 text-[11px] text-neutral-400">
+                                <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Paiement a la livraison</span>
+                                <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>5-7 jours ouvres</span>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -1847,9 +1908,15 @@
                  x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                 <div class="flex items-center gap-3">
                     <div class="flex -space-x-2">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">KY</div>
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">AD</div>
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">IK</div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 ring-2 ring-white flex items-center justify-center shadow-sm">
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M6 14c-2.2 0-4-1.8-4-4s1.8-4 4-4c.4 0 .8.1 1.2.2C7.9 4.9 9.8 4 12 4s4.1.9 4.8 2.2c.4-.1.8-.2 1.2-.2 2.2 0 4 1.8 4 4s-1.8 4-4 4v6c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1v-6z"/></svg>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 ring-2 ring-white flex items-center justify-center shadow-sm">
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s-4 6-4 10a4 4 0 008 0c0-4-4-10-4-10zm0 16a2 2 0 01-2-2c0-1 1-3 2-5 1 2 2 4 2 5a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 ring-2 ring-white flex items-center justify-center shadow-sm">
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg>
+                        </div>
                         <div class="w-8 h-8 bg-primary-500 rounded-full ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold">+{{ ($stats['raw']['restaurants'] ?? 10) > 10 ? $stats['raw']['restaurants'] - 3 : '7' }}</div>
                     </div>
                     <span class="text-sm text-neutral-500 font-medium">restaurants satisfaits</span>
@@ -2309,6 +2376,24 @@
                     return this.basePrice + this.addonsTotal;
                 },
                 
+                formatPrice(price) {
+                    return new Intl.NumberFormat('fr-FR').format(Math.round(price));
+                }
+            }
+        }
+
+        // QR Supports physiques : configurateur prix (Support rigide 1500 F / Autocollant 300 F)
+        function qrSupportsPricing() {
+            return {
+                format: 'support',  // 'support' (1500 F) | 'sticker' (300 F)
+                quantity: 20,
+                prices: { support: 1500, sticker: 300 },
+                get unitPrice() {
+                    return this.prices[this.format];
+                },
+                get total() {
+                    return this.unitPrice * Math.max(1, Math.min(999, Number(this.quantity) || 1));
+                },
                 formatPrice(price) {
                     return new Intl.NumberFormat('fr-FR').format(Math.round(price));
                 }

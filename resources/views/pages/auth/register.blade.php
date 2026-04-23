@@ -3,69 +3,97 @@
         x-data="registerForm()" 
         class="animate-fade-in"
     >
-        <!-- Progress Steps -->
+        {{-- ===== Stepper : 3 étapes, icônes, rétroaction au clic, progression lisible ===== --}}
         <div class="mb-8 sm:mb-10">
-            <div class="flex items-center justify-between">
-                <!-- Step 1 -->
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
-                        :class="step >= 1 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
-                    >
-                        <template x-if="step > 1">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </template>
-                        <template x-if="step <= 1">
-                            <span>1</span>
-                        </template>
+            {{-- Mobile header (compact) --}}
+            <div class="sm:hidden flex items-center justify-between mb-3">
+                <div>
+                    <div class="text-[10px] font-bold text-primary-600 uppercase tracking-wider">
+                        Étape <span x-text="step"></span> / 3
                     </div>
-                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 1 ? 'text-neutral-900' : 'text-neutral-400'">Compte</span>
+                    <div class="text-base font-bold text-neutral-900 mt-0.5" x-text="step === 1 ? 'Votre compte' : (step === 2 ? 'Votre restaurant' : 'Votre abonnement')"></div>
                 </div>
-
-                <!-- Connector -->
-                <div class="flex-1 h-0.5 mx-3 sm:mx-4 rounded-full overflow-hidden bg-neutral-200">
-                    <div class="h-full bg-primary-500 transition-all duration-500 rounded-full" :style="step > 1 ? 'width: 100%' : 'width: 0%'"></div>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
-                        :class="step >= 2 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
-                    >
-                        <template x-if="step > 2">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </template>
-                        <template x-if="step <= 2">
-                            <span>2</span>
-                        </template>
+                {{-- Circular progress (mobile) --}}
+                <div class="relative w-12 h-12 flex-shrink-0">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f1f5f9" stroke-width="3"/>
+                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f97316" stroke-width="3"
+                                stroke-linecap="round"
+                                :stroke-dasharray="`${(step / 3) * 100}, 100`"
+                                class="transition-all duration-500"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary-600">
+                        <span x-text="Math.round((step / 3) * 100) + '%'"></span>
                     </div>
-                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 2 ? 'text-neutral-900' : 'text-neutral-400'">Restaurant</span>
-                </div>
-
-                <!-- Connector -->
-                <div class="flex-1 h-0.5 mx-3 sm:mx-4 rounded-full overflow-hidden bg-neutral-200">
-                    <div class="h-full bg-primary-500 transition-all duration-500 rounded-full" :style="step > 2 ? 'width: 100%' : 'width: 0%'"></div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm"
-                        :class="step >= 3 ? 'bg-primary-500 text-white shadow-primary-500/25' : 'bg-neutral-100 text-neutral-400'"
-                    >
-                        <span>3</span>
-                    </div>
-                    <span class="text-xs sm:text-sm font-semibold hidden sm:block" :class="step >= 3 ? 'text-neutral-900' : 'text-neutral-400'">Plan</span>
                 </div>
             </div>
-            <!-- Step label for mobile -->
-            <div class="sm:hidden mt-3 text-center">
-                <span class="text-xs font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-full" x-text="step === 1 ? 'Étape 1 : Compte' : (step === 2 ? 'Étape 2 : Restaurant' : 'Étape 3 : Plan')"></span>
+
+            {{-- Mobile progress bar --}}
+            <div class="sm:hidden h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-primary-500 to-orange-500 transition-all duration-500 rounded-full"
+                     :style="`width: ${(step / 3) * 100}%`"></div>
+            </div>
+
+            {{-- Desktop full stepper --}}
+            <div class="hidden sm:block">
+                <div class="flex items-start justify-between relative">
+                    {{-- Shared connector line (behind) --}}
+                    <div class="absolute top-5 left-[10%] right-[10%] h-0.5 bg-neutral-200 rounded-full overflow-hidden" aria-hidden="true">
+                        <div class="h-full bg-gradient-to-r from-primary-500 to-orange-500 transition-all duration-700 rounded-full"
+                             :style="`width: ${((step - 1) / 2) * 100}%`"></div>
+                    </div>
+
+                    @foreach([
+                        ['n' => 1, 'title' => 'Votre compte', 'sub' => 'Email, mot de passe', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
+                        ['n' => 2, 'title' => 'Votre restaurant', 'sub' => 'Nom, adresse, logo', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                        ['n' => 3, 'title' => 'Votre abonnement', 'sub' => 'Plan, période, total', 'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z']
+                    ] as $s)
+                        <button type="button"
+                                @click="if (step > {{ $s['n'] }} || (step === {{ $s['n'] }})) goToStep({{ $s['n'] }})"
+                                :disabled="step < {{ $s['n'] }}"
+                                :class="{
+                                    'cursor-pointer': step >= {{ $s['n'] }},
+                                    'cursor-not-allowed opacity-60': step < {{ $s['n'] }}
+                                }"
+                                class="relative z-10 flex flex-col items-center gap-2 text-center group focus:outline-none"
+                                :aria-current="step === {{ $s['n'] }} ? 'step' : null">
+                            {{-- Circle with icon --}}
+                            <div class="relative">
+                                <div
+                                    class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2"
+                                    :class="step > {{ $s['n'] }}
+                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-500 border-emerald-400 shadow-md shadow-emerald-500/30 text-white'
+                                        : (step === {{ $s['n'] }}
+                                            ? 'bg-gradient-to-br from-primary-500 to-orange-500 border-primary-400 shadow-lg shadow-primary-500/40 text-white scale-110'
+                                            : 'bg-white border-neutral-200 text-neutral-400')">
+                                    {{-- Done check --}}
+                                    <template x-if="step > {{ $s['n'] }}">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </template>
+                                    {{-- Current / future icon --}}
+                                    <template x-if="step <= {{ $s['n'] }}">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $s['icon'] }}"/>
+                                        </svg>
+                                    </template>
+                                </div>
+                                {{-- Pulsing dot for current step --}}
+                                <template x-if="step === {{ $s['n'] }}">
+                                    <span class="absolute -inset-1 rounded-full border-2 border-primary-400/40 animate-ping"></span>
+                                </template>
+                            </div>
+                            {{-- Labels --}}
+                            <div class="min-w-0">
+                                <div class="text-sm font-bold transition-colors duration-300"
+                                     :class="step >= {{ $s['n'] }} ? 'text-neutral-900' : 'text-neutral-400'">{{ $s['title'] }}</div>
+                                <div class="text-[11px] transition-colors duration-300"
+                                     :class="step >= {{ $s['n'] }} ? 'text-neutral-500' : 'text-neutral-300'">{{ $s['sub'] }}</div>
+                            </div>
+                        </button>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -816,7 +844,7 @@
                     restaurant_type: '',
                     company_name: '',
                     rccm: '',
-                    plan: 'menupro'
+                    plan: '{{ $plan->slug ?? "menupro" }}'
                 },
                 showPassword: false,
                 logoPreview: null,
@@ -826,6 +854,45 @@
                 },
                 validateStep2() {
                     return this.formData.restaurant_name && this.formData.restaurant_type;
+                },
+                // Navigation libre vers une étape déjà atteinte (pas de saut en avant)
+                goToStep(targetStep) {
+                    if (targetStep < 1 || targetStep > this.totalSteps) return;
+                    // Autorise uniquement d'aller sur une étape déjà visitée (step ≤ targetStep ne fonctionne pas pour le retour, mais on se base sur step courant)
+                    if (targetStep <= this.step) {
+                        this.step = targetStep;
+                        this.submitError = null;
+                        // Scroll en haut pour voir la nouvelle étape
+                        if (typeof window !== 'undefined') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }
+                },
+                nextStep() {
+                    if (this.step === 1 && !this.validateStep1()) {
+                        this.submitError = 'Veuillez remplir les champs du compte (email, mot de passe ≥ 8 caractères).';
+                        return;
+                    }
+                    if (this.step === 2 && !this.validateStep2()) {
+                        this.submitError = 'Veuillez renseigner le nom et le type de votre restaurant.';
+                        return;
+                    }
+                    if (this.step < this.totalSteps) {
+                        this.step++;
+                        this.submitError = null;
+                        if (typeof window !== 'undefined') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }
+                },
+                prevStep() {
+                    if (this.step > 1) {
+                        this.step--;
+                        this.submitError = null;
+                        if (typeof window !== 'undefined') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }
                 },
                 submitForm() {
                     // Réinitialiser l'erreur
@@ -920,7 +987,7 @@
             return {
                 billingCycle: 'monthly',
                 selectedAddons: [],
-                formData: { plan: '{{ $plan->slug ?? "menupro" }}' },
+                // NOTE : formData vient du scope parent (registerForm), ne pas le shadow ici
                 basePriceMonthly: {{ (int) ($plan->price ?? 25000) }},
                 cycleMeta: [
                     { id: 'monthly', months: 1, discount: 0 },
