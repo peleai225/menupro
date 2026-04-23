@@ -1782,16 +1782,27 @@
                             @php
                                 $qrWhatsapp = \App\Models\SystemSetting::get('contact_whatsapp', \App\Models\SystemSetting::get('contact_phone', ''));
                             @endphp
+
+                            {{-- Primary CTA : always visible - opens inline order form --}}
+                            <button type="button"
+                                    @click="showOrderForm = true; $nextTick(() => document.getElementById('qr-order-form')?.scrollIntoView({behavior: 'smooth', block: 'center'}))"
+                                    x-show="!showOrderForm"
+                                    class="mt-6 w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-gradient-to-r from-primary-500 to-orange-500 hover:from-primary-600 hover:to-orange-600 rounded-xl font-bold text-sm shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-100 focus:outline-none focus:ring-4 focus:ring-primary-400/40">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                Passer commande maintenant
+                            </button>
+
                             @if($qrWhatsapp)
                             <a :href="'https://wa.me/{{ preg_replace('/[^0-9]/', '', $qrWhatsapp) }}?text=' + encodeURIComponent('Bonjour MenuPro, je souhaite commander ' + quantity + ' ' + (format === 'support' ? 'supports rigides QR code' : 'autocollants QR code') + ' (' + formatPrice(total) + ' FCFA). Merci de me contacter.')"
                                target="_blank"
-                               class="mt-6 w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-gradient-to-r from-primary-500 to-orange-500 hover:from-primary-600 hover:to-orange-600 rounded-xl font-bold text-sm shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-100">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                                Commander via WhatsApp
+                               x-show="!showOrderForm"
+                               class="mt-3 w-full inline-flex items-center justify-center gap-2 py-3 px-5 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-emerald-400/50 rounded-xl font-semibold text-xs text-white transition-all">
+                                <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                                Ou via WhatsApp
                             </a>
                             @endif
 
-                            <div class="mt-3 flex items-center justify-center gap-4 text-[11px] text-neutral-400">
+                            <div class="mt-3 flex items-center justify-center gap-4 text-[11px] text-neutral-400" x-show="!showOrderForm">
                                 <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Paiement a la livraison</span>
                                 <span class="inline-flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>5-7 jours ouvres</span>
                             </div>
@@ -1800,6 +1811,156 @@
                 </div>
 
             </div>
+
+            {{-- INLINE ORDER FORM --}}
+            <div id="qr-order-form" class="mt-8 sm:mt-10" x-show="showOrderForm" x-cloak
+                 x-transition:enter="transition ease-out duration-400"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+
+                @if(session('qr_success'))
+                    <div class="mb-6 p-5 bg-emerald-50 border-2 border-emerald-200 rounded-2xl flex items-start gap-3">
+                        <svg class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <div class="font-bold text-emerald-900 mb-1">Commande envoyee !</div>
+                            <div class="text-sm text-emerald-800">{{ session('qr_success') }}</div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('qr_error'))
+                    <div class="mb-6 p-5 bg-red-50 border-2 border-red-200 rounded-2xl flex items-start gap-3">
+                        <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <div class="font-bold text-red-900 mb-1">Erreur</div>
+                            <div class="text-sm text-red-800">{{ session('qr_error') }}</div>
+                        </div>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-6 p-5 bg-red-50 border-2 border-red-200 rounded-2xl">
+                        <div class="font-bold text-red-900 mb-2">Veuillez corriger les erreurs suivantes :</div>
+                        <ul class="list-disc list-inside text-sm text-red-800 space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="bg-white border-2 border-neutral-200 rounded-3xl shadow-xl p-6 sm:p-10">
+                    <div class="flex items-start justify-between gap-4 mb-6 pb-6 border-b border-neutral-100">
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-[2px] text-primary-600 mb-2">Etape finale</div>
+                            <h3 class="font-display text-2xl sm:text-3xl font-bold text-neutral-900">Vos informations de livraison</h3>
+                            <p class="text-sm text-neutral-600 mt-2">Notre equipe vous rappelle sous 24h pour confirmer et organiser la livraison. Aucun paiement en ligne : vous reglez a la reception.</p>
+                        </div>
+                        <button type="button" @click="showOrderForm = false"
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 transition-colors"
+                                aria-label="Fermer">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Order summary --}}
+                    <div class="mb-6 p-4 bg-gradient-to-br from-primary-50 to-orange-50 border border-primary-200/50 rounded-2xl flex items-center gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                            <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-primary-700 uppercase tracking-wide mb-1">Recapitulatif</div>
+                            <div class="text-sm text-neutral-900">
+                                <span class="font-bold" x-text="quantity"></span>
+                                <span x-text="format === 'support' ? ' supports rigides' : ' autocollants'"></span>
+                                &middot;
+                                <span class="font-bold text-primary-700" x-text="formatPrice(total) + ' FCFA'"></span>
+                                <span class="text-neutral-500" x-show="quantity >= 20">+ livraison offerte</span>
+                                <span class="text-neutral-500" x-show="quantity < 20">+ 2 000 F livraison</span>
+                            </div>
+                        </div>
+                        <button type="button" @click="showOrderForm = false"
+                                class="hidden sm:inline-flex flex-shrink-0 text-xs font-semibold text-primary-600 hover:text-primary-700 underline">
+                            Modifier
+                        </button>
+                    </div>
+
+                    <form action="{{ route('qr-supports.order') }}" method="POST" class="space-y-5" @submit="submitting = true">
+                        @csrf
+                        <input type="hidden" name="format" :value="format">
+                        <input type="hidden" name="quantity" :value="quantity">
+
+                        <div class="grid sm:grid-cols-2 gap-4 sm:gap-5">
+                            <div>
+                                <label for="qr-name" class="block text-sm font-semibold text-neutral-800 mb-2">Nom complet <span class="text-red-500">*</span></label>
+                                <input id="qr-name" name="name" type="text" required maxlength="100"
+                                       value="{{ old('name') }}"
+                                       placeholder="Ex: Kouame Yao"
+                                       class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                            </div>
+                            <div>
+                                <label for="qr-phone" class="block text-sm font-semibold text-neutral-800 mb-2">Telephone <span class="text-red-500">*</span></label>
+                                <input id="qr-phone" name="phone" type="tel" required maxlength="30"
+                                       value="{{ old('phone') }}"
+                                       placeholder="+225 07 00 00 00 00"
+                                       class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                            </div>
+                        </div>
+
+                        <div class="grid sm:grid-cols-2 gap-4 sm:gap-5">
+                            <div>
+                                <label for="qr-email" class="block text-sm font-semibold text-neutral-800 mb-2">Email <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                                <input id="qr-email" name="email" type="email" maxlength="255"
+                                       value="{{ old('email') }}"
+                                       placeholder="votre@email.com"
+                                       class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                            </div>
+                            <div>
+                                <label for="qr-city" class="block text-sm font-semibold text-neutral-800 mb-2">Ville <span class="text-red-500">*</span></label>
+                                <input id="qr-city" name="city" type="text" required maxlength="100"
+                                       value="{{ old('city', 'Abidjan') }}"
+                                       placeholder="Ex: Abidjan"
+                                       class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="qr-address" class="block text-sm font-semibold text-neutral-800 mb-2">Adresse de livraison <span class="text-neutral-400 font-normal">(commune / quartier / point de repere)</span></label>
+                            <input id="qr-address" name="address" type="text" maxlength="500"
+                                   value="{{ old('address') }}"
+                                   placeholder="Ex: Cocody, Riviera 2, pres de la pharmacie..."
+                                   class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all">
+                        </div>
+
+                        <div>
+                            <label for="qr-note" class="block text-sm font-semibold text-neutral-800 mb-2">Message / precisions <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                            <textarea id="qr-note" name="note" rows="3" maxlength="1000"
+                                      placeholder="Nom de votre restaurant, instructions particulieres..."
+                                      class="w-full px-4 py-3 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all resize-none">{{ old('note') }}</textarea>
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                            <button type="submit" :disabled="submitting"
+                                    class="flex-1 inline-flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-primary-500 to-orange-500 hover:from-primary-600 hover:to-orange-600 disabled:opacity-70 disabled:cursor-not-allowed rounded-xl font-bold text-white shadow-lg shadow-primary-500/25 transition-all hover:scale-[1.01] active:scale-100 focus:outline-none focus:ring-4 focus:ring-primary-400/40">
+                                <svg x-show="!submitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <svg x-show="submitting" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                                <span x-text="submitting ? 'Envoi en cours...' : 'Confirmer ma commande'"></span>
+                            </button>
+                            <button type="button" @click="showOrderForm = false"
+                                    class="sm:w-auto px-6 py-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl font-semibold transition-colors">
+                                Annuler
+                            </button>
+                        </div>
+
+                        <div class="pt-2 flex items-center justify-center gap-5 text-[11px] text-neutral-500">
+                            <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Aucun paiement en ligne</span>
+                            <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Rappel sous 24h</span>
+                            <span class="hidden sm:inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Sans engagement</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -2388,6 +2549,8 @@
                 format: 'support',  // 'support' (1500 F) | 'sticker' (300 F)
                 quantity: 20,
                 prices: { support: 1500, sticker: 300 },
+                showOrderForm: @json(session()->has('qr_success') || session()->has('qr_error') || ($errors->any() && old('quantity'))),
+                submitting: false,
                 get unitPrice() {
                     return this.prices[this.format];
                 },
@@ -2396,6 +2559,24 @@
                 },
                 formatPrice(price) {
                     return new Intl.NumberFormat('fr-FR').format(Math.round(price));
+                },
+                init() {
+                    // Re-hydrate form state on validation error / success
+                    const oldFormat = @json(old('format'));
+                    const oldQty = @json(old('quantity'));
+                    if (oldFormat && ['support', 'sticker'].includes(oldFormat)) {
+                        this.format = oldFormat;
+                    }
+                    if (oldQty) {
+                        const n = parseInt(oldQty, 10);
+                        if (!isNaN(n) && n > 0) this.quantity = Math.min(999, n);
+                    }
+                    // Auto-scroll to the form/result if shown
+                    if (this.showOrderForm) {
+                        this.$nextTick(() => {
+                            document.getElementById('qr-order-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
+                    }
                 }
             }
         }

@@ -41,6 +41,7 @@ Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->
 Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
 Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
+Route::post('/qr-supports/order', [\App\Http\Controllers\Public\QrSupportOrderController::class, 'store'])->name('qr-supports.order')->middleware('throttle:5,1');
 Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
 Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
 Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
