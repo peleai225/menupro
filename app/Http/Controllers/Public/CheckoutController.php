@@ -63,7 +63,6 @@ class CheckoutController extends Controller
         // Validate request
         $request->validate([
             'customer_name' => ['required', 'string', 'max:100'],
-            'customer_email' => ['required', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:20'],
             'type' => ['required', 'in:dine_in,takeaway,delivery'],
             'delivery_address' => ['required_if:type,delivery', 'nullable', 'string', 'max:500'],

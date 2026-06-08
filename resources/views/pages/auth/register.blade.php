@@ -500,10 +500,10 @@
             <!-- ============================================== -->
             <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                  x-data="pricingCalculator()"
-                 x-init="init(); formData.plan = '{{ $plan->slug ?? 'menupro' }}';">
+                 x-init="init(); formData.plan = '{{ $plan->slug ?? 'pro' }}';">
                 <div class="text-center lg:text-left mb-5 sm:mb-6">
                     <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Choisissez votre abonnement</h1>
-                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Choisissez le plan adapté à votre activité. Économisez jusqu'à 15% sur l'année.</p>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Choisissez le plan adapte a votre activite. Economisez jusqu'a 20% sur l'annee.</p>
                 </div>
 
                 <!-- Hidden inputs for form submission -->
@@ -521,7 +521,7 @@
                             @click="formData.plan = '{{ $p->slug }}'; basePriceMonthly = {{ (int) $p->price }};"
                             :class="formData.plan === '{{ $p->slug }}' ? 'border-primary-500 bg-primary-50 shadow-md ring-2 ring-primary-200' : 'border-neutral-200 bg-white hover:border-primary-300'"
                             class="relative p-4 rounded-xl border-2 text-left transition-all">
-                        @if($p->slug === 'menupro')
+                        @if($p->is_featured)
                             <span class="absolute -top-2 right-3 bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">POPULAIRE</span>
                         @endif
                         <div class="flex items-center justify-between mb-1">
@@ -532,11 +532,7 @@
                         </div>
                         <div class="text-2xl font-bold text-primary-600">{{ number_format($p->price, 0, ',', ' ') }} <span class="text-xs font-medium text-neutral-500">FCFA/mois</span></div>
                         <div class="text-xs text-neutral-600 mt-1">
-                            @if($p->slug === 'starter')
-                                30 plats • 300 cmd/mois • 1 compte
-                            @else
-                                100 plats • 2000 cmd/mois • 5 comptes • Livraison
-                            @endif
+                            {{ $p->max_dishes >= 9999 ? 'Plats illimites' : $p->max_dishes . ' plats' }} • {{ $p->max_orders_per_month >= 9999 ? 'Cmd illimitees' : number_format($p->max_orders_per_month) . ' cmd/mois' }} • {{ $p->max_employees }} compte(s){{ $p->has_delivery ? ' • Livraison' : '' }}
                         </div>
                     </button>
                     @endforeach
@@ -844,7 +840,7 @@
                     restaurant_type: '',
                     company_name: '',
                     rccm: '',
-                    plan: '{{ $plan->slug ?? "menupro" }}'
+                    plan: '{{ $plan->slug ?? "pro" }}'
                 },
                 showPassword: false,
                 logoPreview: null,

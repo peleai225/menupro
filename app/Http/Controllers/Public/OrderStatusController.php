@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class OrderStatusController extends Controller
@@ -63,7 +65,7 @@ class OrderStatusController extends Controller
             abort(404, 'Cette commande n’appartient pas à ce restaurant.');
         }
 
-        $order->load('items.dish');
+        $order->load(['items.dish', 'delivery.driver']);
 
         // Calculate progress
         $progress = $this->calculateProgress($order);
@@ -123,7 +125,34 @@ class OrderStatusController extends Controller
             'is_final' => $order->is_final,
             'can_be_modified' => $order->canBeModifiedByCustomer(),
             'remaining_modification_time' => $order->remaining_modification_time,
+            'has_review' => $order->review()->exists(),
+            'review_url' => (!$order->review()->exists() && in_array($order->status->value, ['ready', 'completed']))
+                ? route('r.review.create', [$restaurant->slug, $order->tracking_token])
+                : null,
         ]);
+    }
+
+    /**
+     * Download order receipt as PDF.
+     */
+    public function receipt(string $slug, string $token): Response
+    {
+        $restaurant = Restaurant::whereRaw('LOWER(slug) = ?', [strtolower(trim($slug))])->first();
+        if (!$restaurant) {
+            abort(404);
+        }
+
+        $order = Order::where('tracking_token', trim($token))->first();
+        if (!$order || (int) $order->restaurant_id !== (int) $restaurant->id) {
+            abort(404);
+        }
+
+        $order->load('items.dish');
+
+        $pdf = Pdf::loadView('pdf.order-receipt', compact('restaurant', 'order'));
+        $pdf->setPaper('a6', 'portrait');
+
+        return $pdf->download("recu-{$order->reference}.pdf");
     }
 
     /**

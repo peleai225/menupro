@@ -1,59 +1,31 @@
-<div class="bg-amber-500/10 border border-amber-500/40 rounded-2xl p-6 mb-6">
-    <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="font-semibold text-amber-200">{{ $isResubmit ? 'Soumettre une nouvelle pièce d\'identité' : 'Complétez votre inscription' }}</h2>
-            <p class="text-slate-400 text-sm">Pièce d'identité (CNI, passeport) ou justificatif de domicile. JPG, PNG ou PDF — max 5 Mo.</p>
-        </div>
-    </div>
+<div class="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+    <p class="text-amber-200 text-sm font-medium mb-1">{{ $isResubmit ? 'Nouvelle piece d\'identite' : 'Completez votre profil' }}</p>
+    <p class="text-slate-400 text-xs mb-3">Piece d'identite (CNI, passeport) pour activer votre carte. JPG, PNG ou PDF, max 5 Mo.</p>
 
-    <form wire:submit="submit" class="space-y-5">
-        <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Statut</label>
-            <select wire:model="statut_metier"
-                    class="w-full h-12 px-4 rounded-xl border border-slate-600 bg-slate-900/80 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
-                <option value="">Choisir...</option>
-                <option value="etudiant">Étudiant</option>
-                <option value="auto_entrepreneur">Auto-entrepreneur</option>
-                <option value="salarie">Salarié</option>
-                <option value="autre">Autre</option>
-            </select>
-            @error('statut_metier')
-                <p class="mt-1.5 text-sm text-red-400">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Pièce d'identité ou justificatif de domicile</label>
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-slate-500 pointer-events-none">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                </span>
-                <input type="file" wire:model="id_document" accept=".jpg,.jpeg,.png,.pdf"
-                       class="w-full h-12 pl-12 pr-4 rounded-xl border border-slate-600 bg-slate-900/80 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500 file:text-white file:font-medium file:cursor-pointer text-sm text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                <span wire:loading wire:target="id_document" class="absolute right-4 flex items-center gap-2 text-amber-400 text-sm">
-                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Chargement du fichier…
-                </span>
-            </div>
-            @error('id_document')
-                <p class="mt-1.5 text-sm text-red-400">{{ $message }}</p>
-            @enderror
-        </div>
-        <button type="submit"
-                wire:loading.attr="disabled"
-                wire:target="id_document,submit"
-                class="w-full h-12 rounded-xl font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-60 disabled:cursor-not-allowed">
-            <span wire:loading.remove wire:target="submit">{{ $isResubmit ? 'Envoyer la nouvelle pièce' : 'Envoyer et demander la validation' }}</span>
-            <span wire:loading wire:target="submit" class="inline-flex items-center gap-2">
-                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                Envoi en cours…
+    <form wire:submit="submit" class="space-y-3">
+        <select wire:model="statut_metier"
+                class="w-full h-10 px-3 rounded-lg border border-slate-600 bg-slate-900/60 text-white text-sm focus:ring-1 focus:ring-orange-500 transition">
+            <option value="">Statut professionnel...</option>
+            <option value="etudiant">Etudiant</option>
+            <option value="auto_entrepreneur">Auto-entrepreneur</option>
+            <option value="salarie">Salarie</option>
+            <option value="autre">Autre</option>
+        </select>
+        @error('statut_metier') <p class="text-red-400 text-[11px]">{{ $message }}</p> @enderror
+
+        <div class="relative">
+            <input type="file" wire:model="id_document" accept=".jpg,.jpeg,.png,.pdf"
+                   class="w-full h-10 px-3 rounded-lg border border-slate-600 bg-slate-900/60 text-sm text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-orange-500 file:text-white file:text-xs file:font-medium file:cursor-pointer focus:ring-1 focus:ring-orange-500">
+            <span wire:loading wire:target="id_document" class="absolute right-3 top-1/2 -translate-y-1/2">
+                <svg class="animate-spin h-4 w-4 text-orange-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
             </span>
+        </div>
+        @error('id_document') <p class="text-red-400 text-[11px]">{{ $message }}</p> @enderror
+
+        <button type="submit" wire:loading.attr="disabled" wire:target="id_document,submit"
+                class="w-full h-10 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2">
+            <span wire:loading.remove wire:target="submit">{{ $isResubmit ? 'Renvoyer' : 'Envoyer' }}</span>
+            <span wire:loading wire:target="submit">Envoi...</span>
         </button>
     </form>
 </div>

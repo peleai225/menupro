@@ -246,19 +246,21 @@
         </div>
     @endif
 
-    <!-- Plan MenuPro -->
+    <!-- Plan actuel / Renouveler -->
     @php
-        $menuProPlan = $plans->firstWhere('slug', 'menupro') ?? $plans->first();
-        $isCurrentPlan = $currentPlan && $currentPlan->id === $menuProPlan?->id;
+        $featuredPlan = $plans->firstWhere('is_featured', true) ?? $plans->first();
+        $isCurrentPlan = $currentPlan && $currentPlan->id === $featuredPlan?->id;
         $canRenew = $restaurant->is_subscription_expired
             || ($restaurant->days_until_expiration !== null && $restaurant->days_until_expiration <= 7);
         $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
     @endphp
 
-    @if($menuProPlan)
+    @if($featuredPlan)
         <div class="mb-6">
             <h2 class="text-2xl font-bold text-neutral-900 mb-2">{{ $currentPlan ? 'Renouveler votre abonnement' : 'Choisir votre abonnement' }}</h2>
-            <p class="text-neutral-500">Un seul plan, toutes les fonctionnalités. Choisissez votre période de facturation.</p>
+            <p class="text-neutral-500">Choisissez votre periode de facturation.
+                <a href="{{ route('restaurant.subscription.plans') }}" class="text-primary-600 hover:text-primary-700 font-medium">Voir tous les plans &rarr;</a>
+            </p>
         </div>
 
         <div class="card p-8 mb-8 border-2 {{ $isCurrentPlan ? 'border-primary-500 bg-primary-50/30' : 'border-neutral-200' }} relative overflow-visible">
@@ -268,8 +270,8 @@
             <span class="absolute -top-3 right-4 bg-secondary-500 text-white text-sm px-3 py-2 rounded-full font-bold shadow-lg z-10 border-2 border-white">Populaire</span>
             
             <div class="mb-6">
-                <h3 class="text-3xl font-bold text-neutral-900 mb-2">{{ $menuProPlan->name }}</h3>
-                <p class="text-neutral-600">{{ $menuProPlan->description }}</p>
+                <h3 class="text-3xl font-bold text-neutral-900 mb-2">{{ $featuredPlan->name }}</h3>
+                <p class="text-neutral-600">{{ $featuredPlan->description }}</p>
             </div>
 
             <!-- Billing Period Selection -->
@@ -278,12 +280,12 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach([
                         'monthly' => ['label' => 'Mensuel', 'months' => 1, 'discount' => 0],
-                        'quarterly' => ['label' => 'Trimestriel', 'months' => 3, 'discount' => 7],
-                        'semiannual' => ['label' => 'Semestriel', 'months' => 6, 'discount' => 13],
-                        'annual' => ['label' => 'Annuel', 'months' => 12, 'discount' => 15],
+                        'quarterly' => ['label' => 'Trimestriel', 'months' => 3, 'discount' => 10],
+                        'semiannual' => ['label' => 'Semestriel', 'months' => 6, 'discount' => 15],
+                        'annual' => ['label' => 'Annuel', 'months' => 12, 'discount' => 20],
                     ] as $period => $data)
                         @php
-                            $calc = \App\Models\Subscription::calculatePriceWithDiscount($menuProPlan->price, $period);
+                            $calc = \App\Models\Subscription::calculatePriceWithDiscount($featuredPlan->price, $period);
                         @endphp
                         <label class="relative cursor-pointer">
                             <input type="radio" name="billing_period" value="{{ $period }}" x-model="billingPeriod" class="sr-only peer">
@@ -311,29 +313,29 @@
                             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            {{ $menuProPlan->max_dishes }} plats maximum
+                            {{ $featuredPlan->max_dishes }} plats maximum
                         </li>
                         <li class="flex items-center gap-2 text-neutral-600">
                             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            {{ $menuProPlan->max_categories }} catégories
+                            {{ $featuredPlan->max_categories }} catégories
                         </li>
                         <li class="flex items-center gap-2 text-neutral-600">
                             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            {{ $menuProPlan->max_employees }} employés
+                            {{ $featuredPlan->max_employees }} employés
                         </li>
                         <li class="flex items-center gap-2 text-neutral-600">
                             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            {{ number_format($menuProPlan->max_orders_per_month ?? 0, 0, ',', ' ') }} commandes/mois
+                            {{ number_format($featuredPlan->max_orders_per_month ?? 0, 0, ',', ' ') }} commandes/mois
                         </li>
                     </ul>
                     <ul class="space-y-3">
-                        @if($menuProPlan->has_delivery)
+                        @if($featuredPlan->has_delivery)
                             <li class="flex items-center gap-2 text-neutral-600">
                                 <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -341,7 +343,7 @@
                                 Gestion de la livraison
                             </li>
                         @endif
-                        @if($menuProPlan->has_stock_management)
+                        @if($featuredPlan->has_stock_management)
                             <li class="flex items-center gap-2 text-neutral-600">
                                 <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -349,7 +351,7 @@
                                 Gestion du stock
                             </li>
                         @endif
-                        @if($menuProPlan->has_analytics)
+                        @if($featuredPlan->has_analytics)
                             <li class="flex items-center gap-2 text-neutral-600">
                                 <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -396,7 +398,7 @@
             @else
                 <form method="POST" action="{{ route('restaurant.subscription.change') }}" x-data="{ billingPeriod: 'monthly' }">
                     @csrf
-                    <input type="hidden" name="plan" value="{{ $menuProPlan->slug }}">
+                    <input type="hidden" name="plan" value="{{ $featuredPlan->slug }}">
                     <input type="hidden" name="billing_period" :value="billingPeriod">
                     <div class="flex items-center justify-center gap-4 mb-4">
                         <button type="submit" class="btn btn-primary px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all">

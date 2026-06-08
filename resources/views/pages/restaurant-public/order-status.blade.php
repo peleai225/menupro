@@ -26,6 +26,12 @@
                 </div>
                 <h1 class="text-2xl font-bold text-neutral-900">Commande #{{ $order->reference }}</h1>
                 <p class="text-neutral-500 mt-1">Merci pour votre commande !</p>
+                @if($order->is_paid)
+                    <p class="text-xs text-neutral-400 mt-3 flex items-center justify-center gap-1">
+                        <svg class="w-3.5 h-3.5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        Scrollez pour télécharger votre reçu
+                    </p>
+                @endif
             </div>
 
             <!-- Status Card -->
@@ -244,6 +250,40 @@
                     </div>
                 </div>
             </div>
+            @if($order->delivery && $order->delivery->driver && $order->delivery->status->isActive())
+            <!-- Driver Tracking -->
+            <div class="card p-6 mb-6 border-2 border-blue-200 bg-blue-50/30">
+                <h2 class="font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    </svg>
+                    Votre livreur
+                </h2>
+
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                        {{ strtoupper(substr($order->delivery->driver->name, 0, 1)) }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-neutral-900">{{ $order->delivery->driver->name }}</p>
+                        <p class="text-sm text-neutral-500">{{ ucfirst($order->delivery->driver->vehicle_type) }}</p>
+                    </div>
+                    <a href="tel:{{ $order->delivery->driver->phone }}" class="p-3 rounded-full bg-green-500 text-white hover:bg-green-600 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl p-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span class="text-sm font-medium text-blue-700">{{ $order->delivery->status->label() }}</span>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @elseif($order->table_number)
             <!-- Table Info -->
             <div class="card p-6 mb-6">
@@ -311,8 +351,8 @@
                 </div>
             </div>
 
-            <!-- Review Section (if completed and no review) -->
-            @if($order->status->value === 'completed' && !$order->review)
+            <!-- Review Section (if ready/completed and no review) -->
+            @if(in_array($order->status->value, ['ready', 'completed']) && !$order->review)
                 <div class="card p-6 mb-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-2 border-primary-200">
                     <div class="flex items-start gap-4">
                         <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -337,9 +377,23 @@
                 </div>
             @endif
 
-            <!-- Back to Menu -->
-            <div class="text-center mt-8">
-                <a href="{{ route('r.menu', $restaurant->slug) }}" class="text-primary-600 hover:text-primary-700 font-medium">
+            <!-- Receipt & Actions -->
+            <div class="flex flex-col items-center gap-4 mt-8" id="actions-section">
+                @if($order->is_paid)
+                    <a href="{{ route('r.order.receipt', [$restaurant->slug, $order->tracking_token]) }}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-xl text-sm font-semibold hover:bg-neutral-800 transition shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Télécharger mon reçu
+                    </a>
+                @endif
+                @if(in_array($order->status->value, ['ready', 'completed']) && !$order->review)
+                    <a href="{{ route('r.review.create', [$restaurant->slug, $order->tracking_token]) }}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition shadow-lg">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Donner mon avis
+                    </a>
+                @endif
+                <a href="{{ route('r.menu', $restaurant->slug) }}" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
                     ← Retour au menu
                 </a>
             </div>
@@ -510,12 +564,24 @@
             })
             .then(data => {
                 if (data.status !== currentStatus) {
+                    const previousStatus = currentStatus;
                     currentStatus = data.status;
                     updateStatusDisplay(data);
-                    
+
                     // Show a subtle notification
                     if (data.status_label) {
                         showStatusUpdate(data.status_label);
+                    }
+
+                    // When order reaches "ready" or "completed", reload to show review section & receipt
+                    if ((data.status === 'ready' || data.status === 'completed') && previousStatus !== 'ready' && previousStatus !== 'completed') {
+                        setTimeout(() => window.location.reload(), 1500);
+                        return;
+                    }
+
+                    // Inject review button dynamically if it becomes available
+                    if (data.review_url && !data.has_review && !document.getElementById('dynamic-review-section')) {
+                        injectReviewSection(data.review_url);
                     }
                 }
             })
@@ -537,6 +603,36 @@
                 notification.classList.add('animate-fade-out');
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
+        }
+
+        function injectReviewSection(reviewUrl) {
+            const actionsSection = document.getElementById('actions-section');
+            if (!actionsSection) return;
+
+            const reviewBlock = document.createElement('div');
+            reviewBlock.id = 'dynamic-review-section';
+            reviewBlock.className = 'card p-6 mb-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-2 border-primary-200';
+            reviewBlock.style.animation = 'fadeIn 0.5s ease-out';
+            reviewBlock.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-neutral-900 mb-2">Partagez votre experience</h3>
+                        <p class="text-sm text-neutral-600 mb-4">Votre avis nous aide a ameliorer nos services !</p>
+                        <a href="${reviewUrl}" class="btn btn-primary inline-flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                            </svg>
+                            Laisser un avis
+                        </a>
+                    </div>
+                </div>
+            `;
+            actionsSection.parentNode.insertBefore(reviewBlock, actionsSection);
         }
 
         function stopPolling() {

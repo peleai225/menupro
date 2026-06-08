@@ -112,6 +112,11 @@ class Order extends Model
         return $this->hasOne(CommissionLog::class);
     }
 
+    public function delivery(): HasOne
+    {
+        return $this->hasOne(Delivery::class);
+    }
+
     // =========================================================================
     // SCOPES
     // =========================================================================
@@ -184,6 +189,32 @@ class Order extends Model
               ->orWhere('customer_email', 'like', "%{$term}%")
               ->orWhere('customer_phone', 'like', "%{$term}%");
         });
+    }
+
+    /**
+     * Orders valid for financial reporting.
+     * Excludes: DRAFT, CANCELLED, REFUNDED.
+     */
+    public function scopeValidForReporting($query)
+    {
+        return $query->whereNotIn('status', [
+            OrderStatus::DRAFT,
+            OrderStatus::CANCELLED,
+            OrderStatus::REFUNDED,
+        ]);
+    }
+
+    /**
+     * Orders that generated confirmed revenue (paid + not cancelled/refunded).
+     */
+    public function scopeRevenue($query)
+    {
+        return $query->where('payment_status', PaymentStatus::COMPLETED)
+            ->whereNotIn('status', [
+                OrderStatus::DRAFT,
+                OrderStatus::CANCELLED,
+                OrderStatus::REFUNDED,
+            ]);
     }
 
     // =========================================================================

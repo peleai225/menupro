@@ -35,16 +35,13 @@
 
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                Email *
+                                Telephone
                             </label>
-                            <input type="email" 
-                                   name="customer_email" 
-                                   value="{{ old('customer_email', $order->customer_email) }}"
-                                   required
-                                   class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('customer_email') border-red-500 @enderror">
-                            @error('customer_email')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                            <input type="tel"
+                                   name="customer_phone"
+                                   value="{{ old('customer_phone', $order->customer_phone) }}"
+                                   readonly
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-600">
                         </div>
                     </div>
 

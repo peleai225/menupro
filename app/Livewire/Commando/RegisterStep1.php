@@ -77,14 +77,14 @@ class RegisterStep1 extends Component
             'last_name' => $this->last_name,
             'whatsapp' => preg_replace('/\s+/', '', $this->whatsapp),
             'city' => $this->city,
-            'status_verification' => AgentVerificationStatus::SHADOW,
+            'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
             'user_id' => $user->id,
         ]);
 
         Auth::login($user);
 
         return redirect()->route('commando.dashboard')
-            ->with('success', 'Compte créé. Complétez votre profil (pièce d\'identité) pour que l\'équipe valide votre accès à la carte digitale.');
+            ->with('success', 'Compte créé ! L\'équipe va activer votre accès sous 24h.');
     }
 
     public function render()

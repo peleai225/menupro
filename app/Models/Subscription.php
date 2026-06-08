@@ -242,9 +242,9 @@ class Subscription extends Model
     {
         $periods = [
             'monthly' => ['months' => 1, 'discount' => 0],
-            'quarterly' => ['months' => 3, 'discount' => 7],
-            'semiannual' => ['months' => 6, 'discount' => 13],
-            'annual' => ['months' => 12, 'discount' => 15],
+            'quarterly' => ['months' => 3, 'discount' => 10],
+            'semiannual' => ['months' => 6, 'discount' => 15],
+            'annual' => ['months' => 12, 'discount' => 20],
         ];
 
         $period = $periods[$billingPeriod] ?? $periods['monthly'];

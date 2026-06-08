@@ -111,6 +111,96 @@
     
     @livewireScripts
 
+    {{-- Smart PWA Install Banner — register component inline to avoid timing issues with Vite modules --}}
+    <script>
+    (function() {
+        function registerPwa(Alpine) {
+            Alpine.data('pwaSmartInstall', () => ({
+            showBanner: false,
+            deferredPrompt: null,
+            restaurantName: '',
+            init() {
+                if (window.matchMedia('(display-mode: standalone)').matches) return;
+                if (window.navigator.standalone === true) return;
+                const dismissed = localStorage.getItem('pwa_smart_dismissed');
+                if (dismissed && Date.now() - parseInt(dismissed) < 14 * 24 * 3600 * 1000) return;
+                this.restaurantName = this.$el.dataset.restaurant || '';
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    this._checkTrigger();
+                });
+                if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) this._checkTrigger();
+                document.addEventListener('cart-updated', () => this._onEngagement());
+                this._trackVisit();
+            },
+            _trackVisit() {
+                const key = 'pwa_visits_' + (this.restaurantName || 'global');
+                const count = parseInt(localStorage.getItem(key) || '0') + 1;
+                localStorage.setItem(key, count.toString());
+                if (count >= 2) this._onEngagement();
+            },
+            _onEngagement() {
+                if (this.showBanner) return;
+                if (this.deferredPrompt || /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
+                    setTimeout(() => { this.showBanner = true; }, 800);
+                }
+            },
+            _checkTrigger() {
+                const key = 'pwa_visits_' + (this.restaurantName || 'global');
+                if (parseInt(localStorage.getItem(key) || '0') >= 2) this._onEngagement();
+            },
+            async install() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') this.showBanner = false;
+                    this.deferredPrompt = null;
+                } else {
+                    alert('Pour installer :\n1. Appuyez sur le bouton Partager\n2. « Sur l\'écran d\'accueil »');
+                    this.dismiss();
+                }
+            },
+            dismiss() {
+                this.showBanner = false;
+                localStorage.setItem('pwa_smart_dismissed', Date.now().toString());
+            }
+        }));
+        }
+        if (window.Alpine) { registerPwa(window.Alpine); }
+        else { document.addEventListener('alpine:init', () => { registerPwa(window.Alpine); }); }
+    })();
+    </script>
+    <div x-data="pwaSmartInstall()" x-show="showBanner" x-cloak
+         data-restaurant="{{ $restaurant->name ?? '' }}"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="translate-y-full opacity-0"
+         class="fixed bottom-0 inset-x-0 z-[100] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-neutral-200/80 p-4 flex items-center gap-3">
+            @if(isset($restaurant) && $restaurant->logo_path)
+                <img src="{{ $restaurant->logo_url }}" alt="{{ $restaurant->name }}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+            @else
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, {{ $restaurant->primary_color ?? '#f97316' }}, {{ $restaurant->secondary_color ?? '#1c1917' }});">
+                    <span class="text-xl font-bold text-white">{{ strtoupper(substr($restaurant->name ?? 'M', 0, 1)) }}</span>
+                </div>
+            @endif
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-neutral-900 truncate">Installer {{ $restaurant->name ?? 'ce restaurant' }}</p>
+                <p class="text-xs text-neutral-500">Commander plus vite depuis l'accueil</p>
+            </div>
+            <button @click="install()" class="px-3.5 py-2 rounded-xl text-white text-sm font-semibold transition flex-shrink-0" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }};">
+                Installer
+            </button>
+            <button @click="dismiss()" class="p-1 text-neutral-400 hover:text-neutral-600 transition flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+
     {{-- Service Worker — mode hors ligne + cache menu --}}
     <script>
         if ('serviceWorker' in navigator) {

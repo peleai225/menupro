@@ -529,10 +529,140 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden">
+            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-24 lg:pb-8">
                 {{ $slot }}
             </main>
         </div>
+
+        {{-- Bottom Navigation Bar (Mobile) — Style app mobile --}}
+        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+             x-data="{ more: false }">
+            <div class="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
+                {{-- Dashboard --}}
+                <a href="{{ route('restaurant.dashboard') }}"
+                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.dashboard') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.dashboard') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.dashboard') ? '0' : '1.5' }}" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Accueil</span>
+                    @if(request()->routeIs('restaurant.dashboard'))
+                    <span class="absolute top-1 w-1 h-1 bg-primary-500 rounded-full"></span>
+                    @endif
+                </a>
+
+                {{-- Commandes --}}
+                <a href="{{ route('restaurant.orders') }}"
+                   class="relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.orders*') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.orders*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.orders*') ? '0' : '1.5' }}" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Commandes</span>
+                    @if(isset($pendingOrders) && $pendingOrders > 0)
+                    <span class="absolute top-0 right-1 w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ $pendingOrders > 9 ? '9+' : $pendingOrders }}</span>
+                    @endif
+                </a>
+
+                {{-- Plats (centre, plus gros) --}}
+                <a href="{{ route('restaurant.plats.index') }}"
+                   class="relative flex flex-col items-center justify-center gap-0.5 -mt-4">
+                    <span class="flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg {{ request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*') ? 'bg-primary-500 text-white' : 'bg-neutral-900 text-white' }}">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </span>
+                    <span class="text-[10px] font-medium mt-0.5 {{ request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*') ? 'text-primary-600' : 'text-neutral-500' }}">Menu</span>
+                </a>
+
+                {{-- QR Code --}}
+                <a href="{{ route('restaurant.qrcode') }}"
+                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.qrcode*') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.qrcode*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.qrcode*') ? '0' : '1.5' }}" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">QR Code</span>
+                </a>
+
+                {{-- Plus (menu) --}}
+                <button @click="more = !more"
+                        :class="more ? 'text-primary-600' : 'text-neutral-500'"
+                        class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px]">
+                    <svg class="w-6 h-6 transition-transform" :class="more && 'rotate-45'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Plus</span>
+                </button>
+            </div>
+
+            {{-- Menu "Plus" expandable --}}
+            <div x-show="more"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-4"
+                 @click.outside="more = false"
+                 class="absolute bottom-full left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-2xl px-4 pt-4 pb-3"
+                 x-cloak>
+                <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
+                <div class="grid grid-cols-4 gap-3 mb-3">
+                    @if($isAdmin)
+                    <a href="{{ route('restaurant.categories.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.categories*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Categories</span>
+                    </a>
+                    <a href="{{ route('restaurant.customers') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.customers*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Clients</span>
+                    </a>
+                    <a href="{{ route('restaurant.analytics') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.analytics*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Stats</span>
+                    </a>
+                    <a href="{{ route('restaurant.promo-codes') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.promo-codes*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Promos</span>
+                    </a>
+                    @endif
+                    <a href="{{ route('restaurant.pos') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.pos*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Caisse</span>
+                    </a>
+                    @if(isset($restaurant) && $restaurant?->hasFeature('stock'))
+                    <a href="{{ route('restaurant.stock.ingredients.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.stock*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Stock</span>
+                    </a>
+                    @endif
+                    @if($isAdmin)
+                    <a href="{{ route('restaurant.team') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.team*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Equipe</span>
+                    </a>
+                    <a href="{{ route('restaurant.settings') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.settings*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Reglages</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </nav>
     </div>
 
     @push('scripts')

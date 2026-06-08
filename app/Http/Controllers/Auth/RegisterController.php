@@ -48,25 +48,19 @@ class RegisterController extends Controller
             }
         }
 
-        // Capture le plan demande depuis l'URL (?plan=starter ou ?plan=menupro)
-        // Defaut : menupro (le plan featured)
-        $planSlug = request()->query('plan', 'menupro');
-
-        // Ne laisser passer que les slugs connus
-        if (!in_array($planSlug, ['starter', 'menupro'], true)) {
-            $planSlug = 'menupro';
-        }
+        // Capture le plan demande depuis l'URL (?plan=essentiel, ?plan=pro, ?plan=business)
+        $planSlug = request()->query('plan', 'pro');
 
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
 
-        // Fallback : si le plan demande est desactive, retombe sur menupro
+        // Fallback : si le plan demande est desactive, retombe sur le plan featured
         if (!$plan) {
-            $plan = Plan::where('slug', 'menupro')->where('is_active', true)->first();
+            $plan = Plan::where('is_featured', true)->where('is_active', true)->first()
+                ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
         }
 
         // Tous les plans actifs (pour permettre au user de switcher dans le formulaire)
         $availablePlans = Plan::where('is_active', true)
-            ->whereIn('slug', ['starter', 'menupro'])
             ->orderBy('sort_order')
             ->get();
 
@@ -122,8 +116,8 @@ class RegisterController extends Controller
         try {
             DB::beginTransaction();
 
-            // CREATE ACCOUNT WITH 14-DAY FREE TRIAL
-            $trialDays = 14;
+            // CREATE ACCOUNT WITH 7-DAY FREE TRIAL
+            $trialDays = 7;
             $trialEndsAt = now()->addDays($trialDays);
 
             $referredByAgentId = null;
@@ -190,7 +184,7 @@ class RegisterController extends Controller
                 'restaurant_id' => $restaurant->id,
             ]);
 
-            // Create FREE TRIAL subscription (14 days)
+            // Create FREE TRIAL subscription (7 days)
             $subscription = Subscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,

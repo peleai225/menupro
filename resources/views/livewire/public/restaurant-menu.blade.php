@@ -419,30 +419,30 @@
                 @endif
             </div>
         @else
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-5">
                 @foreach($this->dishes as $index => $dish)
                     <div wire:click="openDish({{ $dish->id }})"
-                         class="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-neutral-200/60 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-[0.98] {{ !$dish->is_available ? 'opacity-60' : '' }}"
+                         class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-neutral-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-[0.97] {{ !$dish->is_available ? 'opacity-60' : '' }}"
                          style="animation: fadeInUp .4s ease-out {{ $index * 0.04 }}s both;">
                         <!-- Image -->
-                        <div class="aspect-square sm:aspect-[4/3] relative overflow-hidden">
+                        <div class="aspect-[4/3] relative overflow-hidden">
                             @if($dish->image_path)
                                 <img src="{{ Storage::url($dish->image_path) }}"
                                      alt="{{ $dish->name }}"
                                      loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                             @else
                                 <div class="w-full h-full flex items-center justify-center"
-                                     style="background: linear-gradient(135deg, {{ $primaryColor }}12 0%, {{ $primaryColor }}25 100%);">
-                                    <svg class="w-10 sm:w-14 h-10 sm:h-14 opacity-30" fill="none" stroke="{{ $primaryColor }}" viewBox="0 0 24 24">
+                                     style="background: linear-gradient(135deg, {{ $primaryColor }}08 0%, {{ $primaryColor }}20 100%);">
+                                    <svg class="w-10 sm:w-14 h-10 sm:h-14 opacity-20" fill="none" stroke="{{ $primaryColor }}" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                     </svg>
                                 </div>
                             @endif
                             @if($dish->is_featured)
-                                <div class="absolute top-2 left-2 sm:top-3 sm:left-3 z-20">
-                                    <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 text-white rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1 shadow-md" style="background-color: {{ $primaryColor }};">
+                                <div class="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-20">
+                                    <span class="px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-white rounded-full text-[9px] sm:text-xs font-bold flex items-center gap-0.5 shadow-md" style="background-color: {{ $primaryColor }};">
                                         <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                         </svg>
@@ -452,32 +452,39 @@
                             @endif
                             @if(!$dish->is_available)
                                 <div class="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex items-center justify-center z-20">
-                                    <span class="px-2 sm:px-3 py-1 sm:py-1.5 bg-neutral-900/80 text-white rounded-full text-xs font-medium">
+                                    <span class="px-2 sm:px-3 py-1 bg-neutral-900/80 text-white rounded-full text-[10px] sm:text-xs font-medium">
                                         Indisponible
                                     </span>
                                 </div>
                             @endif
-                            {{-- Bouton "+" en overlay sur l'image (mobile) --}}
+                            {{-- Prix en overlay sur l'image (mobile) --}}
+                            <div class="absolute bottom-1.5 left-1.5 sm:hidden z-20">
+                                <span class="px-2 py-0.5 bg-white/95 backdrop-blur-sm rounded-lg text-xs font-bold shadow-sm" style="color: {{ $primaryColor }};">
+                                    {{ number_format($dish->price, 0, ',', ' ') }} F
+                                </span>
+                            </div>
+                            {{-- Bouton "+" en overlay (mobile) --}}
                             @if($dish->is_available)
-                                <button class="absolute bottom-2 right-2 w-8 h-8 sm:hidden text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform z-20"
+                                <button class="absolute bottom-1.5 right-1.5 w-7 h-7 sm:hidden text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform z-20"
                                         style="background-color: {{ $primaryColor }};">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"/>
                                     </svg>
                                 </button>
                             @endif
                         </div>
 
-                        <!-- Content — compact sur mobile -->
-                        <div class="p-2.5 sm:p-4">
-                            <h3 class="font-semibold text-neutral-900 line-clamp-1 text-sm sm:text-base">{{ $dish->name }}</h3>
+                        <!-- Content — ultra compact sur mobile, normal sur desktop -->
+                        <div class="p-2 sm:p-4">
+                            <h3 class="font-bold text-neutral-900 line-clamp-1 text-[13px] sm:text-base leading-tight">{{ $dish->name }}</h3>
                             @if($dish->description)
-                                <p class="text-xs sm:text-sm text-neutral-500 line-clamp-1 sm:line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">{{ $dish->description }}</p>
+                                <p class="text-[11px] sm:text-sm text-neutral-500 line-clamp-1 sm:line-clamp-2 mt-0.5 sm:mt-1 leading-snug">{{ $dish->description }}</p>
                             @endif
-                            <div class="flex items-center justify-between mt-2 sm:mt-3">
-                                <span class="text-sm sm:text-base font-bold" style="color: {{ $primaryColor }};">{{ number_format($dish->price, 0, ',', ' ') }} F</span>
+                            {{-- Prix visible uniquement sur desktop --}}
+                            <div class="hidden sm:flex items-center justify-between mt-3">
+                                <span class="text-base font-bold" style="color: {{ $primaryColor }};">{{ number_format($dish->price, 0, ',', ' ') }} F</span>
                                 @if($dish->is_available)
-                                    <button class="hidden sm:flex w-9 h-9 text-white rounded-full items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                                    <button class="w-9 h-9 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                                             style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 12px {{ $primaryColor }}50;">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"/>

@@ -97,3 +97,10 @@ Schedule::job(new \App\Jobs\CleanupUnpaidRegistrations)
     ->at('02:00')
     ->name('cleanup-unpaid-registrations')
     ->withoutOverlapping();
+
+// Send daily revenue recap via WhatsApp at 11 PM
+Schedule::command('recap:daily')
+    ->daily()
+    ->at('23:00')
+    ->name('send-daily-recap')
+    ->withoutOverlapping();

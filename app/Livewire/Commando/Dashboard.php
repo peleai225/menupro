@@ -3,59 +3,30 @@
 namespace App\Livewire\Commando;
 
 use App\Enums\CommissionTransactionType;
-use App\Enums\DeploymentStatus;
+use App\Enums\CommissionTransactionStatus;
 use App\Models\CommandoAgent;
-use App\Models\CommandoDeployment;
 use App\Models\CommandoCommissionTransaction;
 use App\Models\User;
 use App\Notifications\CommandoWithdrawalRequestNotification;
 use App\Services\MediaUploader;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads;
 
-    /** @var CommandoAgent */
     public $agent;
 
     public ?string $successMessage = null;
 
-    /** Demande de retrait */
     public string $withdrawalAmount = '';
     public bool $showWithdrawalModal = false;
 
-    /** Objectif mensuel (signatures) */
-    public int $monthlyTarget = 10;
-
-    /** CRM - Nouveau prospect */
-    public string $deploy_restaurant_name = '';
-    public string $deploy_manager_name = '';
-    public string $deploy_phone = '';
-    public ?float $deploy_lat = null;
-    public ?float $deploy_lng = null;
-
-    /** Photo de profil (upload) */
     public $photo = null;
 
-    /** Profil modifiable (ville, WhatsApp) */
     public string $profile_city = '';
     public string $profile_whatsapp = '';
-
-    protected $listeners = ['profileCompleted' => 'onProfileCompleted'];
-    protected $queryString = [];
-
-    protected function rules(): array
-    {
-        return [
-            'withdrawalAmount' => ['nullable', 'numeric', 'min:1', 'max:10000000'],
-            'deploy_restaurant_name' => ['required_with:deploy_restaurant_name', 'string', 'max:255'],
-            'deploy_manager_name' => ['nullable', 'string', 'max:255'],
-            'deploy_phone' => ['nullable', 'string', 'max:30'],
-        ];
-    }
 
     public function mount(): void
     {
@@ -66,13 +37,8 @@ class Dashboard extends Component
             abort(404, 'Profil agent introuvable.');
         }
 
-        $this->monthlyTarget = (int) config('commando.monthly_target', 10);
-    }
-
-    public function onProfileCompleted(?string $message = null): void
-    {
-        $this->successMessage = $message ?? 'Profil complété. L\'équipe va vérifier votre pièce d\'identité.';
-        $this->refreshAgent();
+        $this->profile_city = $this->agent->city ?? '';
+        $this->profile_whatsapp = $this->agent->whatsapp ?? '';
     }
 
     public function refreshAgent(): void
@@ -116,7 +82,7 @@ class Dashboard extends Component
         CommandoCommissionTransaction::create([
             'commando_agent_id' => $this->agent->id,
             'type' => CommissionTransactionType::WITHDRAWAL_REQUEST,
-            'status' => \App\Enums\CommissionTransactionStatus::PENDING,
+            'status' => CommissionTransactionStatus::PENDING,
             'amount_cents' => $amountCents,
             'description' => 'Demande de retrait',
         ]);
@@ -128,7 +94,7 @@ class Dashboard extends Component
 
         $this->showWithdrawalModal = false;
         $this->withdrawalAmount = '';
-        $this->successMessage = 'Votre demande de retrait a bien été envoyée. L\'équipe vous recontactera.';
+        $this->successMessage = 'Votre demande de retrait a bien été envoyée.';
         $this->refreshAgent();
     }
 
@@ -147,36 +113,9 @@ class Dashboard extends Component
 
         $this->agent->update(['photo_path' => $path]);
         $this->photo = null;
-        $this->successMessage = 'Photo de profil mise à jour.';
+        $this->successMessage = 'Photo mise à jour.';
         $this->refreshAgent();
         $this->dispatch('photoUploaded');
-    }
-
-    public function addDeployment(): void
-    {
-        $this->validate([
-            'deploy_restaurant_name' => ['required', 'string', 'max:255'],
-            'deploy_manager_name' => ['nullable', 'string', 'max:255'],
-            'deploy_phone' => ['nullable', 'string', 'max:30'],
-        ]);
-
-        CommandoDeployment::create([
-            'commando_agent_id' => $this->agent->id,
-            'restaurant_name' => $this->deploy_restaurant_name,
-            'manager_name' => $this->deploy_manager_name ?: null,
-            'phone' => $this->deploy_phone ?: null,
-            'latitude' => $this->deploy_lat,
-            'longitude' => $this->deploy_lng,
-            'status' => DeploymentStatus::EN_NEGOCIATION,
-        ]);
-
-        $this->deploy_restaurant_name = '';
-        $this->deploy_manager_name = '';
-        $this->deploy_phone = '';
-        $this->deploy_lat = null;
-        $this->deploy_lng = null;
-        $this->successMessage = 'Prospect enregistré.';
-        $this->refreshAgent();
     }
 
     public function getWalletHistoryProperty()
@@ -190,67 +129,24 @@ class Dashboard extends Component
             ->get();
     }
 
-    public function getMonthlySignaturesCountProperty(): int
-    {
-        if (!$this->agent) {
-            return 0;
-        }
-        return $this->agent->referredRestaurants()
-            ->whereMonth('restaurants.created_at', now()->month)
-            ->whereYear('restaurants.created_at', now()->year)
-            ->count();
-    }
-
-    /**
-     * Liste fusionnée : restaurants inscrits via le lien de parrainage (ACTIF) + prospects enregistrés à la main.
-     * Ainsi, quand un resto s'inscrit via le lien, il apparaît automatiquement dans le déploiement opérationnel.
-     */
-    public function getDeploymentItemsProperty(): \Illuminate\Support\Collection
+    public function getReferredRestaurantsProperty()
     {
         if (!$this->agent) {
             return collect();
         }
-        $items = collect();
-
-        // 1. Restaurants inscrits via le lien de parrainage (affichés en premier, statut ACTIF)
-        foreach ($this->agent->referredRestaurants()->orderByDesc('created_at')->limit(50)->get() as $restaurant) {
-            $items->push((object)[
-                'name' => $restaurant->name,
-                'subtitle' => $restaurant->email ?: $restaurant->phone ?: '—',
-                'status' => 'actif',
-                'is_referral' => true,
-            ]);
-        }
-
-        // 2. Prospects enregistrés manuellement (déploiements) — on évite les doublons si un resto parrainé a aussi été saisi à la main
-        $referralNames = $items->pluck('name')->map(fn ($n) => \Illuminate\Support\Str::lower($n))->flip();
-        foreach ($this->agent->deployments()->orderByDesc('created_at')->limit(50)->get() as $d) {
-            if ($referralNames->has(\Illuminate\Support\Str::lower($d->restaurant_name))) {
-                continue; // déjà affiché comme parrainé
-            }
-            $items->push((object)[
-                'name' => $d->restaurant_name,
-                'subtitle' => $d->manager_name ?: $d->phone ?: '—',
-                'subtitle_extra' => $d->phone && $d->manager_name ? $d->phone : null,
-                'status' => $d->status->value,
-                'is_referral' => false,
-            ]);
-        }
-
-        return $items;
+        return $this->agent->referredRestaurants()
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
     }
 
     public function render()
     {
         return view('livewire.commando.dashboard', [
             'walletHistory' => $this->walletHistory,
-            'monthlySignatures' => $this->monthlySignaturesCount,
-            'deployments' => $this->agent
-                ? $this->agent->deployments()->orderByDesc('created_at')->limit(50)->get()
-                : collect(),
-            'deploymentItems' => $this->deploymentItems,
+            'referredRestaurants' => $this->referredRestaurants,
         ])->layout('components.layouts.admin-commando', [
-            'title' => 'Centre d\'opérations',
+            'title' => 'Mon espace',
             'agent' => $this->agent,
         ]);
     }

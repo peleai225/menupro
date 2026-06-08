@@ -92,6 +92,15 @@
                     <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">Board Cuisine</span>
                 </a>
 
+                <a href="{{ route('restaurant.deliveries') }}"
+                   class="sidebar-item {{ request()->routeIs('restaurant.deliveries*') ? 'sidebar-item-active' : '' }}"
+                   :title="!expanded ? 'Livraisons' : ''">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">Livraisons</span>
+                </a>
+
                 <a href="{{ route('restaurant.customers') }}"
                    class="sidebar-item {{ request()->routeIs('restaurant.customers*') ? 'sidebar-item-active' : '' }}"
                    :title="!expanded ? 'Clients' : ''">
@@ -106,6 +115,24 @@
                     <span x-show="expanded" x-transition.opacity.duration.200ms class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Gestion</span>
                     <span x-show="!expanded" class="block border-t border-neutral-700 mx-2"></span>
                 </div>
+
+                <a href="{{ route('restaurant.expenses') }}"
+                   class="sidebar-item {{ request()->routeIs('restaurant.expenses*') ? 'sidebar-item-active' : '' }}"
+                   :title="!expanded ? 'Dépenses' : ''">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">Dépenses</span>
+                </a>
+
+                <a href="{{ route('restaurant.profitability') }}"
+                   class="sidebar-item {{ request()->routeIs('restaurant.profitability*') ? 'sidebar-item-active' : '' }}"
+                   :title="!expanded ? 'Rentabilité' : ''">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">Rentabilité</span>
+                </a>
 
                 <a href="{{ route('restaurant.team') }}"
                    class="sidebar-item {{ request()->routeIs('restaurant.team*') ? 'sidebar-item-active' : '' }}"

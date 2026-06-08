@@ -70,6 +70,7 @@ class Restaurant extends Model
         'cash_on_delivery',
         'tagline',
         'wave_merchant_id',
+        'kitchen_token',
     ];
 
     protected $casts = [
@@ -157,6 +158,16 @@ class Restaurant extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function deliveryDrivers(): HasMany
+    {
+        return $this->hasMany(DeliveryDriver::class);
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(Delivery::class);
     }
 
     public function ingredients(): HasMany

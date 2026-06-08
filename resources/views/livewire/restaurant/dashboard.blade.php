@@ -118,9 +118,14 @@
                         {{ $this->stats['revenue_change'] >= 0 ? '+' : '' }}{{ $this->stats['revenue_change'] }}%
                     </span>
                 </div>
-                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Chiffre d'affaires</p>
+                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">CA brut</p>
                 <p class="text-3xl font-bold text-neutral-900 leading-none">{{ number_format($this->stats['revenue_today'], 0, ',', ' ') }}<span class="text-lg text-neutral-500 font-medium ml-1">F</span></p>
-                <p class="text-xs text-neutral-500 mt-2">aujourd'hui</p>
+                <div class="flex items-center gap-3 mt-2">
+                    <p class="text-xs text-neutral-500">Net : <span class="font-semibold text-secondary-700">{{ number_format($this->stats['revenue_net_today'], 0, ',', ' ') }} F</span></p>
+                    @if($this->stats['average_ticket'] > 0)
+                        <p class="text-xs text-neutral-500">Panier : <span class="font-semibold text-neutral-700">{{ number_format($this->stats['average_ticket'], 0, ',', ' ') }} F</span></p>
+                    @endif
+                </div>
             </div>
         </div>
 

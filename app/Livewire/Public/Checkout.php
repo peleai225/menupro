@@ -25,7 +25,6 @@ class Checkout extends Component
     #[Rule('required|string|max:100')]
     public string $customer_name = '';
 
-    #[Rule('required|email|max:255')]
     public string $customer_email = '';
 
     /** Indicatif pays (ex: +225) */
@@ -317,7 +316,6 @@ class Checkout extends Component
         // Validate based on order type
         $rules = [
             'customer_name' => 'required|string|max:100',
-            'customer_email' => 'required|email|max:255',
             'customer_phone' => 'required|string|min:8|max:20',
             'order_type' => 'required|in:dine_in,takeaway,delivery',
         ];
@@ -390,7 +388,7 @@ class Checkout extends Component
         $order = Order::create([
             'restaurant_id' => $this->restaurant->id,
             'customer_name' => $this->customer_name,
-            'customer_email' => $this->customer_email,
+            'customer_email' => $this->customer_email ?: null,
             'customer_phone' => $this->getFullPhoneNumber(),
             'type' => OrderType::from($this->order_type),
             'status' => OrderStatus::PENDING_PAYMENT,

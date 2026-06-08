@@ -90,17 +90,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Email *</label>
-                                <input type="email" 
-                                       wire:model="customer_email"
-                                       class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_email') border-red-500 @enderror"
-                                       placeholder="jean@email.com">
-                                @error('customer_email')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone *</label>
                                 <div class="flex gap-2">
@@ -158,59 +148,66 @@
                 @if($order_type === 'delivery')
                     <div class="bg-white rounded-2xl p-6 shadow-sm">
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
-                        
-                        <!-- Address Search (like Glovo) -->
+
+                        {{-- GPS button prominent (Glovo-style) --}}
+                        <button type="button"
+                                id="use-my-location"
+                                class="w-full px-4 py-4 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors flex items-center justify-center gap-3 mb-4 shadow-md">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Utiliser ma position GPS
+                        </button>
+
+                        <div class="relative flex items-center mb-4">
+                            <div class="flex-1 border-t border-neutral-200"></div>
+                            <span class="px-3 text-xs text-neutral-400 uppercase">ou rechercher</span>
+                            <div class="flex-1 border-t border-neutral-200"></div>
+                        </div>
+
+                        {{-- Address Search --}}
                         <div class="mb-4 relative">
                             <div class="relative">
-                                <input type="text" 
+                                <input type="text"
                                        id="address-search"
                                        autocomplete="off"
                                        class="w-full px-4 py-3 pr-12 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="Rechercher une adresse en Côte d'Ivoire... (ex: Abidjan, Cocody, Marcory)">
+                                       placeholder="Rechercher (quartier, rue, repere...)">
                                 <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
-                            
-                            <!-- Autocomplete dropdown -->
+
+                            {{-- Autocomplete dropdown --}}
                             <div id="address-autocomplete" class="hidden absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="top: 100%; left: 0;">
-                                <!-- Results will be inserted here -->
                             </div>
-                            
-                            <!-- Use my location button -->
-                            <button type="button" 
-                                    id="use-my-location"
-                                    class="mt-3 w-full px-4 py-2.5 bg-primary-50 text-primary-600 rounded-xl font-medium hover:bg-primary-100 transition-colors flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Utiliser ma position actuelle
-                            </button>
-                            
-                            <!-- Debug info (remove in production) -->
+
                             <div id="address-debug" class="mt-2 text-xs text-gray-500 hidden"></div>
                         </div>
-                        
-                        <!-- Status message -->
-                        <div id="address-status" class="mb-4 text-sm text-neutral-600 hidden"></div>
+
+                        {{-- Status messages --}}
+                        <div id="address-status" class="mb-4 text-sm text-green-600 hidden flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span></span>
+                        </div>
                         <div id="address-error" class="mb-4 text-sm text-red-600 hidden"></div>
-                        
+
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse complète *</label>
-                                <input type="text" 
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse *</label>
+                                <input type="text"
                                        wire:model="delivery_address"
                                        id="delivery_address_input"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_address') border-red-500 @enderror"
-                                       placeholder="Rue, quartier, repère...">
+                                       placeholder="Rue, quartier, repere...">
                                 @error('delivery_address')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Ville *</label>
-                                <input type="text" 
+                                <input type="text"
                                        wire:model="delivery_city"
                                        id="delivery_city_input"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_city') border-red-500 @enderror"
@@ -220,11 +217,11 @@
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Instructions (optionnel)</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Instructions pour le livreur (optionnel)</label>
                                 <textarea wire:model="delivery_instructions"
                                           rows="2"
                                           class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                          placeholder="Ex: Code portail, étage..."></textarea>
+                                          placeholder="Ex: Code portail 1234, 2e etage porte gauche..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -423,15 +420,21 @@
                                 }
                                 
                                 // Update Livewire
+                                const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
                                 if (window.Livewire) {
                                     const component = window.Livewire.find('{{ $this->getId() }}');
                                     if (component) {
-                                        component.set('delivery_address', houseNumber ? `${houseNumber} ${street}`.trim() : street);
+                                        component.set('delivery_address', finalAddress);
                                         component.set('delivery_city', city);
                                         component.set('delivery_latitude', lat);
                                         component.set('delivery_longitude', lng);
                                     }
                                 }
+                                // Save for next time
+                                localStorage.setItem('menupro_delivery_address', finalAddress);
+                                localStorage.setItem('menupro_delivery_city', city);
+                                localStorage.setItem('menupro_delivery_lat', lat.toString());
+                                localStorage.setItem('menupro_delivery_lng', lng.toString());
                             }
                             
                             // Function to reverse geocode (get address from coordinates)
@@ -502,11 +505,11 @@
                                                     const addressInput = document.getElementById('delivery_address_input');
                                                     const cityInput = document.getElementById('delivery_city_input');
                                                     const searchInput = document.getElementById('address-search');
-                                                    
+
                                                     if (addressInput) addressInput.value = addressData.address;
                                                     if (cityInput) cityInput.value = addressData.city;
                                                     if (searchInput) searchInput.value = addressData.address + ', ' + addressData.city;
-                                                    
+
                                                     // Update Livewire
                                                     if (window.Livewire) {
                                                         const component = window.Livewire.find('{{ $this->getId() }}');
@@ -517,8 +520,11 @@
                                                             component.set('delivery_longitude', lng);
                                                         }
                                                     }
-                                                } else {
-                                                    console.warn('[Address] No address data from reverse geocoding');
+                                                    // Save for next time
+                                                    localStorage.setItem('menupro_delivery_address', addressData.address);
+                                                    localStorage.setItem('menupro_delivery_city', addressData.city);
+                                                    localStorage.setItem('menupro_delivery_lat', lat.toString());
+                                                    localStorage.setItem('menupro_delivery_lng', lng.toString());
                                                 }
                                                 
                                                 button.disabled = false;
@@ -626,12 +632,73 @@
                                 });
                                 
                                 initialized = true;
-                                console.log('[Address] Initialization complete!');
-                                
-                                if (debugEl) {
-                                    debugEl.textContent = '✓ Système de recherche initialisé';
-                                    debugEl.classList.remove('hidden');
-                                    setTimeout(() => debugEl.classList.add('hidden'), 3000);
+
+                                // Auto-detect GPS on load if no address is saved
+                                const savedAddress = localStorage.getItem('menupro_delivery_address');
+                                const savedCity = localStorage.getItem('menupro_delivery_city');
+                                const savedLat = localStorage.getItem('menupro_delivery_lat');
+                                const savedLng = localStorage.getItem('menupro_delivery_lng');
+
+                                if (savedAddress && savedCity) {
+                                    // Restore saved address
+                                    const addressInput = document.getElementById('delivery_address_input');
+                                    const cityInput = document.getElementById('delivery_city_input');
+                                    if (addressInput && !addressInput.value) {
+                                        addressInput.value = savedAddress;
+                                        newInput.value = savedAddress + ', ' + savedCity;
+                                    }
+                                    if (cityInput && !cityInput.value) {
+                                        cityInput.value = savedCity;
+                                    }
+                                    if (window.Livewire) {
+                                        const component = window.Livewire.find('{{ $this->getId() }}');
+                                        if (component) {
+                                            if (!component.get('delivery_address')) {
+                                                component.set('delivery_address', savedAddress);
+                                                component.set('delivery_city', savedCity);
+                                                if (savedLat) component.set('delivery_latitude', parseFloat(savedLat));
+                                                if (savedLng) component.set('delivery_longitude', parseFloat(savedLng));
+                                            }
+                                        }
+                                    }
+                                    if (savedLat && savedLng) {
+                                        validateDeliveryDistance(parseFloat(savedLat), parseFloat(savedLng));
+                                    }
+                                } else if (navigator.geolocation) {
+                                    // Auto-trigger GPS silently
+                                    navigator.geolocation.getCurrentPosition(
+                                        function(position) {
+                                            const lat = position.coords.latitude;
+                                            const lng = position.coords.longitude;
+                                            validateDeliveryDistance(lat, lng);
+                                            reverseGeocode(lat, lng).then(addressData => {
+                                                if (addressData) {
+                                                    const addressInput = document.getElementById('delivery_address_input');
+                                                    const cityInput = document.getElementById('delivery_city_input');
+                                                    const searchInput = document.getElementById('address-search');
+                                                    if (addressInput && !addressInput.value) addressInput.value = addressData.address;
+                                                    if (cityInput && !cityInput.value) cityInput.value = addressData.city;
+                                                    if (searchInput && !searchInput.value) searchInput.value = addressData.address + ', ' + addressData.city;
+                                                    if (window.Livewire) {
+                                                        const component = window.Livewire.find('{{ $this->getId() }}');
+                                                        if (component && !component.get('delivery_address')) {
+                                                            component.set('delivery_address', addressData.address);
+                                                            component.set('delivery_city', addressData.city);
+                                                            component.set('delivery_latitude', lat);
+                                                            component.set('delivery_longitude', lng);
+                                                        }
+                                                    }
+                                                    // Save for next time
+                                                    localStorage.setItem('menupro_delivery_address', addressData.address);
+                                                    localStorage.setItem('menupro_delivery_city', addressData.city);
+                                                    localStorage.setItem('menupro_delivery_lat', lat.toString());
+                                                    localStorage.setItem('menupro_delivery_lng', lng.toString());
+                                                }
+                                            });
+                                        },
+                                        function() {}, // Silently fail
+                                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+                                    );
                                 }
                             }
                             

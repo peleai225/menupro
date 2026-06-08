@@ -41,6 +41,7 @@ Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->
 Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
 Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
+Route::get('/supports-qr', fn () => view('pages.public.qr-supports'))->name('qr-supports');
 Route::post('/qr-supports/order', [\App\Http\Controllers\Public\QrSupportOrderController::class, 'store'])->name('qr-supports.order')->middleware('throttle:5,1');
 Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
 Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
@@ -193,9 +194,16 @@ Route::prefix('dashboard')
             Route::post('abonnement/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
         });
         
+        // Delivery Management - tous
+        Route::get('livraisons', \App\Livewire\Restaurant\Deliveries::class)->name('deliveries');
+        Route::get('livreurs', \App\Livewire\Restaurant\DeliveryDrivers::class)->name('delivery-drivers');
+
         // Settings (Livewire) - admin uniquement
         Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings')->middleware('restaurant.admin');
         
+        // Kitchen token generation (admin)
+        Route::post('cuisine/generate-token', [\App\Http\Controllers\Restaurant\KitchenController::class, 'generateToken'])->name('kitchen.generate-token')->middleware('restaurant.admin');
+
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
         Route::post('qr-code/tables', [App\Http\Controllers\Restaurant\QRCodeController::class, 'updateTables'])->name('qrcode.update-tables');
@@ -210,6 +218,8 @@ Route::prefix('dashboard')
             Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
             Route::get('avis', \App\Livewire\Restaurant\Reviews::class)->name('reviews');
             Route::get('taxes-frais', \App\Livewire\Restaurant\TaxesAndFees::class)->name('taxes-fees');
+            Route::get('depenses', \App\Livewire\Restaurant\Expenses::class)->name('expenses');
+            Route::get('rentabilite', \App\Livewire\Restaurant\DishProfitability::class)->name('profitability');
         });
         
         // Stock Management
@@ -365,6 +375,7 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     // Order Status (secured with tracking token)
     Route::get('/commande/{token}', [OrderStatusController::class, 'show'])->name('order.status');
     Route::get('/commande/{token}/json', [OrderStatusController::class, 'status'])->name('order.status.json');
+    Route::get('/commande/{token}/recu', [OrderStatusController::class, 'receipt'])->name('order.receipt');
     
     // Reviews (secured with tracking token)
     Route::get('/commande/{token}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'create'])->name('review.create');
@@ -383,6 +394,31 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
         Route::delete('items/{item}', [\App\Http\Controllers\Public\OrderModificationController::class, 'removeItem'])->name('items.remove');
         Route::patch('items/{item}', [\App\Http\Controllers\Public\OrderModificationController::class, 'updateItem'])->name('items.update');
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Driver Mobile App (token-secured, no auth)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('livreur/{token}')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Public\DriverController::class, 'dashboard'])->name('driver.dashboard');
+    Route::get('/data', [\App\Http\Controllers\Public\DriverController::class, 'data'])->name('driver.data');
+    Route::post('/deliveries/{delivery}/status', [\App\Http\Controllers\Public\DriverController::class, 'updateStatus'])->name('driver.update-status');
+    Route::post('/location', [\App\Http\Controllers\Public\DriverController::class, 'updateLocation'])->name('driver.update-location');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Kitchen Display System (token-secured, no auth)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('cuisine/{token}')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
+    Route::get('/data', [\App\Http\Controllers\Restaurant\KitchenController::class, 'data'])->name('kitchen.data');
+    Route::post('/orders/{order}/status', [\App\Http\Controllers\Restaurant\KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
 });
 
 /*

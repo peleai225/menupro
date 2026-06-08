@@ -133,13 +133,20 @@ class PlanLimiter
             return 0;
         }
 
-        return match ($resource) {
+        $limit = match ($resource) {
             'dishes' => $this->plan->max_dishes,
             'categories' => $this->plan->max_categories,
             'employees' => $this->plan->max_employees,
             'orders_this_month' => $this->plan->max_orders_per_month,
             default => null,
         };
+
+        // 9999+ means unlimited
+        if ($limit !== null && $limit >= 9999) {
+            return null;
+        }
+
+        return $limit;
     }
 
     /**

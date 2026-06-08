@@ -23,6 +23,11 @@ const NEVER_CACHE = [
   '/livewire/update',
   'livewire.min.js',
   '__clockwork',
+  '/dashboard/',
+  '/admin/',
+  '/cuisine/',
+  '/livreur/',
+  '/commando/',
 ];
 
 /* ─── Installation ─────────────────────────────────────────────────────────── */
@@ -126,7 +131,7 @@ async function staleWhileRevalidate(request) {
   const networkFetch = fetch(request).then((response) => {
     if (response.ok) cache.put(request, response.clone());
     return response;
-  }).catch(() => cached);
+  }).catch(() => cached || new Response('Hors ligne', { status: 503 }));
 
   return cached || networkFetch;
 }

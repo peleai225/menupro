@@ -5,6 +5,7 @@ namespace App\Livewire\Restaurant;
 use App\Enums\OrderStatus;
 use App\Models\Dish;
 use App\Models\Order;
+use App\Services\RevenueCalculator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -12,62 +13,52 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     /**
-     * Get statistics for today.
+     * Get statistics for today using the centralized RevenueCalculator.
      */
     #[Computed]
     public function stats(): array
     {
         $restaurant = auth()->user()->restaurant;
-        
+
         if (!$restaurant) {
             return [
                 'orders_today' => 0,
                 'orders_change' => 0,
                 'revenue_today' => 0,
+                'revenue_net_today' => 0,
                 'revenue_change' => 0,
                 'pending_orders' => 0,
+                'average_ticket' => 0,
                 'dishes_count' => 0,
                 'max_dishes' => 0,
             ];
         }
-        
-        $today = now()->startOfDay();
-        $yesterday = now()->subDay()->startOfDay();
 
-        // Orders today
-        $ordersToday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', $today)
-            ->count();
+        $today = RevenueCalculator::for($restaurant->id, today()->startOfDay(), now());
+        $yesterday = RevenueCalculator::for(
+            $restaurant->id,
+            now()->subDay()->startOfDay(),
+            now()->subDay()->endOfDay()
+        );
 
-        $ordersYesterday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', $yesterday)
-            ->count();
+        $revenueToday = $today->grossRevenue();
+        $revenueYesterday = $yesterday->grossRevenue();
 
-        $ordersChange = $ordersYesterday > 0 
-            ? round((($ordersToday - $ordersYesterday) / $ordersYesterday) * 100) 
-            : ($ordersToday > 0 ? 100 : 0);
-
-        // Revenue today
-        $revenueToday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', $today)
-            ->whereNotNull('paid_at')
-            ->sum('total');
-
-        $revenueYesterday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', $yesterday)
-            ->whereNotNull('paid_at')
-            ->sum('total');
-
-        $revenueChange = $revenueYesterday > 0 
-            ? round((($revenueToday - $revenueYesterday) / $revenueYesterday) * 100) 
+        $revenueChange = $revenueYesterday > 0
+            ? round((($revenueToday - $revenueYesterday) / $revenueYesterday) * 100)
             : ($revenueToday > 0 ? 100 : 0);
 
-        // Pending orders
+        $ordersToday = $today->validOrdersCount();
+        $ordersYesterday = $yesterday->validOrdersCount();
+
+        $ordersChange = $ordersYesterday > 0
+            ? round((($ordersToday - $ordersYesterday) / $ordersYesterday) * 100)
+            : ($ordersToday > 0 ? 100 : 0);
+
         $pendingOrders = Order::where('restaurant_id', $restaurant->id)
             ->whereIn('status', [OrderStatus::PENDING_PAYMENT, OrderStatus::CONFIRMED, OrderStatus::PREPARING])
             ->count();
 
-        // Dishes count
         $dishesCount = Dish::where('restaurant_id', $restaurant->id)->count();
         $maxDishes = $restaurant->currentPlan?->max_dishes ?? 50;
 
@@ -75,8 +66,10 @@ class Dashboard extends Component
             'orders_today' => $ordersToday,
             'orders_change' => $ordersChange,
             'revenue_today' => $revenueToday,
+            'revenue_net_today' => $today->netRevenue(),
             'revenue_change' => $revenueChange,
             'pending_orders' => $pendingOrders,
+            'average_ticket' => $today->averageTicket(),
             'dishes_count' => $dishesCount,
             'max_dishes' => $maxDishes,
         ];

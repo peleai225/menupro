@@ -332,10 +332,131 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-4 lg:p-6 xl:p-8 min-h-screen overflow-x-hidden">
+            <main class="p-4 lg:p-6 xl:p-8 min-h-screen overflow-x-hidden pb-24 lg:pb-8">
                 {{ $slot }}
             </main>
         </div>
+
+        {{-- Bottom Navigation Bar (Mobile) — Style app mobile --}}
+        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+             x-data="{ more: false }">
+            <div class="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
+                {{-- Dashboard --}}
+                <a href="{{ route('super-admin.dashboard') }}"
+                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.dashboard') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.dashboard') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('super-admin.dashboard') ? '0' : '1.5' }}" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Accueil</span>
+                </a>
+
+                {{-- Restaurants --}}
+                <a href="{{ route('super-admin.restaurants.index') }}"
+                   class="relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.restaurants*') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.restaurants*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('super-admin.restaurants*') ? '0' : '1.5' }}" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Restos</span>
+                    @if(($pendingRestaurants ?? 0) > 0)
+                    <span class="absolute top-0 right-1 w-5 h-5 bg-amber-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ ($pendingRestaurants ?? 0) > 9 ? '9+' : $pendingRestaurants }}</span>
+                    @endif
+                </a>
+
+                {{-- Finances (centre, surélevé) --}}
+                <a href="{{ route('super-admin.finances.index') }}"
+                   class="relative flex flex-col items-center justify-center gap-0.5 -mt-4">
+                    <span class="flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg {{ request()->routeIs('super-admin.finances*') || request()->routeIs('super-admin.transactions*') ? 'bg-primary-500 text-white' : 'bg-neutral-900 text-white' }}">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                    <span class="text-[10px] font-medium mt-0.5 {{ request()->routeIs('super-admin.finances*') || request()->routeIs('super-admin.transactions*') ? 'text-primary-600' : 'text-neutral-500' }}">Finances</span>
+                </a>
+
+                {{-- Stats --}}
+                <a href="{{ route('super-admin.stats') }}"
+                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.stats*') ? 'text-primary-600' : 'text-neutral-500' }}">
+                    <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.stats*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('super-admin.stats*') ? '0' : '1.5' }}" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Stats</span>
+                </a>
+
+                {{-- Plus --}}
+                <button @click="more = !more"
+                        :class="more ? 'text-primary-600' : 'text-neutral-500'"
+                        class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px]">
+                    <svg class="w-6 h-6 transition-transform" :class="more && 'rotate-45'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="text-[10px] font-medium">Plus</span>
+                </button>
+            </div>
+
+            {{-- Menu "Plus" expandable --}}
+            <div x-show="more"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-4"
+                 @click.outside="more = false"
+                 class="absolute bottom-full left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-2xl px-4 pt-4 pb-3"
+                 x-cloak>
+                <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
+                <div class="grid grid-cols-4 gap-3 mb-3">
+                    <a href="{{ route('super-admin.plans.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.plans*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Plans</span>
+                    </a>
+                    <a href="{{ route('super-admin.subscriptions.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.subscriptions*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Abonnements</span>
+                    </a>
+                    <a href="{{ route('super-admin.utilisateurs.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.utilisateurs*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Users</span>
+                    </a>
+                    <a href="{{ route('super-admin.commando.agents.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.commando*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Commando</span>
+                    </a>
+                    <a href="{{ route('super-admin.transactions.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.transactions*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Transactions</span>
+                    </a>
+                    <a href="{{ route('super-admin.activity') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.activity*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Activite</span>
+                    </a>
+                    <a href="{{ route('super-admin.announcements.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.announcements*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Annonces</span>
+                    </a>
+                    <a href="{{ route('super-admin.settings') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.settings*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Reglages</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
     </div>
 
     @push('scripts')

@@ -134,13 +134,12 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    // PWA Install Banner
+    // PWA Install Banner (admin/marketing layout — simple 5s delay)
     Alpine.data('pwaInstall', () => ({
         showBanner: false,
         deferredPrompt: null,
 
         init() {
-            // Don't show if already installed or dismissed recently
             if (window.matchMedia('(display-mode: standalone)').matches) return;
             if (localStorage.getItem('pwa_dismissed') &&
                 Date.now() - parseInt(localStorage.getItem('pwa_dismissed')) < 7 * 24 * 3600 * 1000) return;
@@ -148,11 +147,9 @@ document.addEventListener('alpine:init', () => {
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 this.deferredPrompt = e;
-                // Show banner after 5 seconds on the page
                 setTimeout(() => { this.showBanner = true; }, 5000);
             });
 
-            // iOS: show custom banner (no beforeinstallprompt on Safari)
             const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
             const isStandalone = window.navigator.standalone === true;
             if (isIos && !isStandalone) {
@@ -164,12 +161,9 @@ document.addEventListener('alpine:init', () => {
             if (this.deferredPrompt) {
                 this.deferredPrompt.prompt();
                 const { outcome } = await this.deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    this.showBanner = false;
-                }
+                if (outcome === 'accepted') this.showBanner = false;
                 this.deferredPrompt = null;
             } else {
-                // iOS fallback: show instructions
                 alert('Pour installer MenuPro :\n1. Appuyez sur le bouton Partager (↑)\n2. Sélectionnez « Sur l\'écran d\'accueil »');
                 this.dismiss();
             }
@@ -178,6 +172,75 @@ document.addEventListener('alpine:init', () => {
         dismiss() {
             this.showBanner = false;
             localStorage.setItem('pwa_dismissed', Date.now().toString());
+        }
+    }));
+
+    // Smart PWA Install (restaurant-public layout — triggers on engagement)
+    Alpine.data('pwaSmartInstall', () => ({
+        showBanner: false,
+        deferredPrompt: null,
+        restaurantName: '',
+
+        init() {
+            if (window.matchMedia('(display-mode: standalone)').matches) return;
+            if (window.navigator.standalone === true) return;
+
+            const dismissed = localStorage.getItem('pwa_smart_dismissed');
+            if (dismissed && Date.now() - parseInt(dismissed) < 14 * 24 * 3600 * 1000) return;
+
+            this.restaurantName = this.$el.dataset.restaurant || '';
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                this.deferredPrompt = e;
+                this._checkTrigger();
+            });
+
+            const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+            if (isIos) this._checkTrigger();
+
+            document.addEventListener('cart-updated', () => this._onEngagement());
+            window.addEventListener('livewire:navigated', () => this._trackVisit());
+            this._trackVisit();
+        },
+
+        _trackVisit() {
+            const key = 'pwa_visits_' + (this.restaurantName || 'global');
+            const count = parseInt(localStorage.getItem(key) || '0') + 1;
+            localStorage.setItem(key, count.toString());
+            if (count >= 2) this._onEngagement();
+        },
+
+        _onEngagement() {
+            if (this.showBanner) return;
+            const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+            if (this.deferredPrompt || isIos) {
+                setTimeout(() => { this.showBanner = true; }, 800);
+            }
+        },
+
+        _checkTrigger() {
+            const key = 'pwa_visits_' + (this.restaurantName || 'global');
+            if (parseInt(localStorage.getItem(key) || '0') >= 2) {
+                this._onEngagement();
+            }
+        },
+
+        async install() {
+            if (this.deferredPrompt) {
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                if (outcome === 'accepted') this.showBanner = false;
+                this.deferredPrompt = null;
+            } else {
+                alert('Pour installer :\n1. Appuyez sur le bouton Partager (↑)\n2. « Sur l\'écran d\'accueil »');
+                this.dismiss();
+            }
+        },
+
+        dismiss() {
+            this.showBanner = false;
+            localStorage.setItem('pwa_smart_dismissed', Date.now().toString());
         }
     }));
 

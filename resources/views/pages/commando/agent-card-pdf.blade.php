@@ -1,6 +1,14 @@
 @php
     $grade = $agent->grade;
     $referredCount = $agent->referredRestaurants()->count();
+    // Fallback SVG avatar si pas de photo uploadée
+    $avatarSrc = $photoBase64 ?? 'data:image/svg+xml;base64,' . base64_encode(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">'
+        . '<rect width="72" height="72" fill="#1e293b"/>'
+        . '<circle cx="36" cy="26" r="14" fill="#475569"/>'
+        . '<ellipse cx="36" cy="58" rx="22" ry="14" fill="#475569"/>'
+        . '</svg>'
+    );
 @endphp
 <!DOCTYPE html>
 <html lang="fr">
@@ -48,7 +56,7 @@
                 <td class="col-left">
                     <div class="sys-ok">● Système OK</div>
                     <div class="photo-wrap">
-                        <img src="{{ $photoUrl }}" alt="" class="photo">
+                        <img src="{{ $avatarSrc }}" alt="" class="photo">
                     </div>
                     <div class="badge-id">{{ $agent->badge_id_display }}</div>
                     <div class="access-line">Niveau d'accès <strong>Niveau {{ $grade->accessLevel() }}</strong></div>

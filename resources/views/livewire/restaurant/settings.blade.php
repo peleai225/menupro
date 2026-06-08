@@ -67,6 +67,7 @@
                 'payment' => ['label' => 'Paiement', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
                 'wallet' => ['label' => 'Wallet', 'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'],
                 'hours' => ['label' => 'Horaires', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                'kitchen' => ['label' => 'Cuisine', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
             ] as $key => $tab)
                 <button @click="activeTab = '{{ $key }}'"
                         :class="activeTab === '{{ $key }}' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'"
@@ -916,11 +917,143 @@
             </div>
             </form>
         </div>
+
+        <!-- Kitchen Display Tab -->
+        <div x-show="activeTab === 'kitchen'" x-cloak x-data="kitchenSettings()">
+            <div class="max-w-2xl space-y-6">
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                        Ecran Cuisine (KDS)
+                    </h2>
+                    <p class="text-neutral-600 mb-6">Generez un lien unique pour afficher les commandes en cuisine. Le cuisinier peut voir et gerer les commandes sans avoir de compte.</p>
+
+                    @if($restaurant->kitchen_token)
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm font-medium text-neutral-700 mb-2 block">Lien cuisine actif</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" readonly
+                                           id="kitchen-link"
+                                           value="{{ route('kitchen.display', $restaurant->kitchen_token) }}"
+                                           class="input flex-1 bg-neutral-50 text-sm font-mono">
+                                    <button type="button" @click="copyKitchenLink()"
+                                            class="btn btn-primary px-4 py-2.5 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                        </svg>
+                                        <span x-text="copied ? 'Copie !' : 'Copier'"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('kitchen.display', $restaurant->kitchen_token) }}" target="_blank"
+                                   class="btn bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Ouvrir l'ecran cuisine
+                                </a>
+                                <button type="button" @click="regenerateToken()"
+                                        class="btn bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2.5 flex items-center gap-2"
+                                        :disabled="loading">
+                                    <svg class="w-4 h-4" :class="loading && 'animate-spin'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Regenerer le lien
+                                </button>
+                            </div>
+
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                <p class="text-sm text-amber-800">
+                                    <strong>Conseil :</strong> Ouvrez ce lien sur une tablette en cuisine et laissez-le ouvert. Les nouvelles commandes apparaitront automatiquement avec un son d'alerte.
+                                </p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg class="w-16 h-16 mx-auto text-neutral-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                            </svg>
+                            <p class="text-neutral-600 mb-4">Aucun lien cuisine genere pour le moment.</p>
+                            <button type="button" @click="regenerateToken()"
+                                    class="btn btn-primary px-6 py-3 flex items-center gap-2 mx-auto"
+                                    :disabled="loading">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                Generer le lien cuisine
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-semibold text-neutral-900 mb-4">Comment ca marche ?</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 text-sm font-bold flex items-center justify-center shrink-0">1</span>
+                            <p class="text-sm text-neutral-600">Generez le lien ci-dessus et ouvrez-le sur une tablette ou un ecran en cuisine</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 text-sm font-bold flex items-center justify-center shrink-0">2</span>
+                            <p class="text-sm text-neutral-600">Les commandes payees apparaissent automatiquement avec un son d'alerte</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 text-sm font-bold flex items-center justify-center shrink-0">3</span>
+                            <p class="text-sm text-neutral-600">Le cuisinier confirme, commence la preparation, puis marque comme pret</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 text-sm font-bold flex items-center justify-center shrink-0">4</span>
+                            <p class="text-sm text-neutral-600">Le client est notifie a chaque etape sur sa page de suivi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
+function kitchenSettings() {
+    return {
+        loading: false,
+        copied: false,
+
+        copyKitchenLink() {
+            const input = document.getElementById('kitchen-link');
+            navigator.clipboard.writeText(input.value).then(() => {
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            });
+        },
+
+        async regenerateToken() {
+            this.loading = true;
+            try {
+                const resp = await fetch('{{ route("restaurant.kitchen.generate-token") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                });
+                if (resp.ok) {
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+}
+
 function copyLink() {
     const input = document.getElementById('public-link');
     input.select();

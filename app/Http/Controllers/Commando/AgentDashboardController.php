@@ -55,14 +55,18 @@ class AgentDashboardController extends Controller
             abort(403, 'Vous n\'êtes pas autorisé à télécharger votre carte.');
         }
 
-        $photoUrl = $agent->photo_url;
-        if ($photoUrl && !str_starts_with($photoUrl, 'http')) {
-            $photoUrl = url($photoUrl);
+        // Photo en base64 pour DomPDF (évite les requêtes HTTP externes)
+        $photoBase64 = null;
+        if ($agent->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($agent->photo_path)) {
+            $content = \Illuminate\Support\Facades\Storage::disk('public')->get($agent->photo_path);
+            $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($agent->photo_path) ?: 'image/jpeg';
+            $photoBase64 = 'data:' . $mime . ';base64,' . base64_encode($content);
         }
+
         $qrSvg = QrCode::format('svg')->size(120)->margin(1)->generate($agent->verify_url);
         $qrSvgBase64 = base64_encode((string) $qrSvg);
 
-        $pdf = Pdf::loadView('pages.commando.agent-card-pdf', compact('agent', 'photoUrl', 'qrSvgBase64'))
+        $pdf = Pdf::loadView('pages.commando.agent-card-pdf', compact('agent', 'photoBase64', 'qrSvgBase64'))
             ->setPaper('a4', 'landscape')
             ->setOption('isRemoteEnabled', true);
 

@@ -78,13 +78,7 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
             'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
         ]);
-
-        // Verify customer email matches order
-        if ($validated['customer_email'] !== $order->customer_email) {
-            return back()->with('error', 'L\'adresse email ne correspond pas à celle de la commande.');
-        }
 
         try {
             // Create review
@@ -92,10 +86,10 @@ class ReviewController extends Controller
                 'restaurant_id' => $restaurant->id,
                 'order_id' => $order->id,
                 'customer_name' => $validated['customer_name'],
-                'customer_email' => $validated['customer_email'],
+                'customer_email' => $order->customer_email,
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'] ?? null,
-                'is_approved' => false, // Require approval
+                'is_approved' => false,
                 'is_visible' => false,
             ]);
 

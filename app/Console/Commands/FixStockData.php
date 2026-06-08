@@ -25,15 +25,16 @@ class FixStockData extends Command
 
         $fixed = 0;
 
-        // 1. Plan MenuPro et has_stock_management
-        $plan = Plan::where('slug', 'menupro')->first();
+        // 1. Plans avec stock management (Pro + Business)
+        $plan = Plan::where('slug', 'pro')->first()
+            ?? Plan::where('has_stock_management', true)->first();
         if (!$plan) {
-            $this->error('Plan MenuPro introuvable. Exécutez : php artisan db:seed --class=PlanSeeder');
+            $this->error('Aucun plan avec stock management. Executez : php artisan db:seed --class=PlanSeeder');
             return self::FAILURE;
         }
 
         if (!$plan->has_stock_management) {
-            $this->line('Plan MenuPro : activation de has_stock_management...');
+            $this->line('Plan ' . $plan->name . ' : activation de has_stock_management...');
             if (!$dryRun) {
                 $plan->update(['has_stock_management' => true]);
             }
