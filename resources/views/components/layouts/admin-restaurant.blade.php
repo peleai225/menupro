@@ -11,8 +11,13 @@
     }
     $isAdmin = auth()->user()?->canManageRestaurant() ?? false;
 
-    // Étapes du tutoriel guidé (selon le rôle et les fonctionnalités)
+    // Plan feature gates
     $hasStock = isset($restaurant) && $restaurant?->hasFeature('stock');
+    $hasAnalytics = isset($restaurant) && $restaurant?->hasFeature('analytics');
+    $hasDelivery = isset($restaurant) && $restaurant?->hasFeature('delivery');
+    $planName = $restaurant?->currentPlan?->slug ?? 'essentiel';
+
+    // Étapes du tutoriel guidé (selon le rôle et les fonctionnalités)
     if ($isAdmin) {
         $tourSteps = [
             ['popover' => ['title' => 'Bienvenue sur MenuPro', 'description' => 'Ce tutoriel vous présente les onglets du tableau de bord. Cliquez sur Suivant pour découvrir chaque section.']],
@@ -137,7 +142,7 @@
                     </a>
 
                     @if($isAdmin)
-                    <a href="{{ route('restaurant.customers') }}" 
+                    <a href="{{ route('restaurant.customers') }}"
                        id="tour-clients"
                        class="sidebar-item {{ request()->routeIs('restaurant.customers*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,38 +151,12 @@
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Clients</span>
                     </a>
 
-                    <a href="{{ route('restaurant.promo-codes') }}" 
-                       id="tour-codes-promo"
-                       class="sidebar-item {{ request()->routeIs('restaurant.promo-codes*') ? 'sidebar-item-active' : '' }}">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span x-show="expanded" x-transition class="whitespace-nowrap">Codes Promo</span>
-                    </a>
-
-                    <a href="{{ route('restaurant.analytics') }}" 
-                       id="tour-statistiques"
-                       class="sidebar-item {{ request()->routeIs('restaurant.analytics*') ? 'sidebar-item-active' : '' }}">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span x-show="expanded" x-transition class="whitespace-nowrap">Statistiques</span>
-                    </a>
-
-                    <a href="{{ route('restaurant.reports') }}" 
-                       class="sidebar-item {{ request()->routeIs('restaurant.reports*') ? 'sidebar-item-active' : '' }}">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <span x-show="expanded" x-transition class="whitespace-nowrap">Rapports</span>
-                    </a>
-
-                    <a href="{{ route('restaurant.reservations.index') }}" 
+                    <a href="{{ route('restaurant.reservations.index') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.reservations*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span x-show="expanded" x-transition class="whitespace-nowrap">Réservations</span>
+                        <span x-show="expanded" x-transition class="whitespace-nowrap">Reservations</span>
                         @php
                             $pendingReservations = isset($restaurant) ? $restaurant->reservations()->pending()->count() : 0;
                         @endphp
@@ -188,23 +167,86 @@
                         @endif
                     </a>
 
-                    <a href="{{ route('restaurant.reviews') }}" 
+                    <a href="{{ route('restaurant.reviews') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.reviews*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Avis</span>
                     </a>
+
+                    <!-- === SECTION PRO === -->
+                    <div class="pt-4">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                            Pilotage
+                            @if(!$hasAnalytics)
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span>
+                            @endif
+                        </span>
+                    </div>
+
+                    @if($hasAnalytics)
+                        <a href="{{ route('restaurant.analytics') }}"
+                           id="tour-statistiques"
+                           class="sidebar-item {{ request()->routeIs('restaurant.analytics*') ? 'sidebar-item-active' : '' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Statistiques</span>
+                        </a>
+
+                        <a href="{{ route('restaurant.reports') }}"
+                           class="sidebar-item {{ request()->routeIs('restaurant.reports*') ? 'sidebar-item-active' : '' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Rapports</span>
+                        </a>
+
+                        <a href="{{ route('restaurant.promo-codes') }}"
+                           id="tour-codes-promo"
+                           class="sidebar-item {{ request()->routeIs('restaurant.promo-codes*') ? 'sidebar-item-active' : '' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Codes Promo</span>
+                        </a>
+                    @else
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Statistiques</span>
+                            <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                        </a>
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Rapports</span>
+                            <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                        </a>
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Codes Promo</span>
+                            <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                        </a>
+                    @endif
                     @endif
 
-                    @if(isset($restaurant) && $restaurant?->hasFeature('stock'))
-                        <!-- Stock Section -->
-                        <div class="pt-4">
-                            <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                                Stock
-                            </span>
-                        </div>
+                    <!-- === SECTION STOCK (PRO) === -->
+                    <div class="pt-4">
+                        <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                            Stock
+                            @if(!$hasStock)
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span>
+                            @endif
+                        </span>
+                    </div>
 
+                    @if($hasStock)
                         <a href="{{ route('restaurant.stock.daily') }}"
                            id="tour-stock"
                            class="sidebar-item {{ request()->routeIs('restaurant.stock.daily') ? 'sidebar-item-active' : '' }}">
@@ -223,7 +265,7 @@
                         </a>
 
                         @if($isAdmin)
-                        <a href="{{ route('restaurant.stock.fournisseurs.index') }}" 
+                        <a href="{{ route('restaurant.stock.fournisseurs.index') }}"
                            class="sidebar-item {{ request()->routeIs('restaurant.stock.fournisseurs*') ? 'sidebar-item-active' : '' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -232,33 +274,34 @@
                         </a>
                         @endif
 
-                        <a href="{{ route('restaurant.stock.alerts') }}" 
+                        <a href="{{ route('restaurant.stock.alerts') }}"
                            class="sidebar-item {{ request()->routeIs('restaurant.stock.alerts*') ? 'sidebar-item-active' : '' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                             <span x-show="expanded" x-transition class="whitespace-nowrap">Alertes Stock</span>
                             @php
-                                $lowStockCount = isset($restaurant) && $restaurant->hasFeature('stock') 
-                                    ? $restaurant->ingredients()->whereColumn('current_quantity', '<=', 'min_quantity')->count() 
-                                    : 0;
+                                $lowStockCount = $restaurant->ingredients()->whereColumn('current_quantity', '<=', 'min_quantity')->count();
                             @endphp
                             @if($lowStockCount > 0)
-                                <span class="ml-auto bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                    {{ $lowStockCount }}
-                                </span>
+                                <span class="ml-auto bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $lowStockCount }}</span>
                             @endif
                         </a>
-
-                        @if($isAdmin)
-                        <a href="{{ route('restaurant.stock.report') }}" 
-                           class="sidebar-item {{ request()->routeIs('restaurant.stock.report*') ? 'sidebar-item-active' : '' }}">
+                    @else
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <span x-show="expanded" x-transition class="whitespace-nowrap">Rapport Stock</span>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Stock Journalier</span>
+                            <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
                         </a>
-                        @endif
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Ingredients</span>
+                            <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                        </a>
                     @endif
 
                     @if($isAdmin)
@@ -395,16 +438,23 @@
                 <a href="{{ route('restaurant.orders') }}" class="sidebar-item {{ request()->routeIs('restaurant.orders*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Commandes</span>@if(isset($pendingOrders) && $pendingOrders > 0)<span class="ml-auto bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $pendingOrders }}</span>@endif</a>
                 <a href="{{ route('restaurant.pos') }}" class="sidebar-item {{ request()->routeIs('restaurant.pos*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>Caisse (POS)</span></a>
                 @if($isAdmin)<a href="{{ route('restaurant.customers') }}" class="sidebar-item {{ request()->routeIs('restaurant.customers*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span>Clients</span></a>
-                <a href="{{ route('restaurant.promo-codes') }}" class="sidebar-item {{ request()->routeIs('restaurant.promo-codes*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Codes Promo</span></a>
+                <a href="{{ route('restaurant.reservations.index') }}" class="sidebar-item {{ request()->routeIs('restaurant.reservations*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Reservations</span></a>
+                <a href="{{ route('restaurant.reviews') }}" class="sidebar-item {{ request()->routeIs('restaurant.reviews*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg><span>Avis</span></a>@endif
+                {{-- Pilotage (Pro) --}}
+                @if($isAdmin && $hasAnalytics)
                 <a href="{{ route('restaurant.analytics') }}" class="sidebar-item {{ request()->routeIs('restaurant.analytics*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span>Statistiques</span></a>
                 <a href="{{ route('restaurant.reports') }}" class="sidebar-item {{ request()->routeIs('restaurant.reports*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Rapports</span></a>
-                <a href="{{ route('restaurant.reservations.index') }}" class="sidebar-item {{ request()->routeIs('restaurant.reservations*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Réservations</span>@if(isset($restaurant) && $restaurant->reservations()->pending()->count() > 0)<span class="ml-auto bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $restaurant->reservations()->pending()->count() }}</span>@endif</a>
-                <a href="{{ route('restaurant.reviews') }}" class="sidebar-item {{ request()->routeIs('restaurant.reviews*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg><span>Avis</span></a>@endif
-                @if(isset($restaurant) && $restaurant?->hasFeature('stock'))
-                <a href="{{ route('restaurant.stock.ingredients.index') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.ingredients*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span>Ingrédients</span></a>
-                @if($isAdmin)<a href="{{ route('restaurant.stock.fournisseurs.index') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.fournisseurs*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span>Fournisseurs</span></a>@endif
-                <a href="{{ route('restaurant.stock.alerts') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.alerts*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Alertes Stock</span></a>
-                @if($isAdmin)<a href="{{ route('restaurant.stock.report') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.report*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Rapport Stock</span></a>@endif
+                <a href="{{ route('restaurant.promo-codes') }}" class="sidebar-item {{ request()->routeIs('restaurant.promo-codes*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Codes Promo</span></a>
+                @elseif($isAdmin)
+                <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span>Statistiques</span><span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span></a>
+                <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Rapports</span><span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span></a>
+                @endif
+                {{-- Stock (Pro) --}}
+                @if($hasStock)
+                <a href="{{ route('restaurant.stock.daily') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.daily') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span>Stock Journalier</span></a>
+                <a href="{{ route('restaurant.stock.ingredients.index') }}" class="sidebar-item {{ request()->routeIs('restaurant.stock.ingredients*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span>Ingredients</span></a>
+                @elseif($isAdmin)
+                <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span>Stock</span><span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span></a>
                 @endif
                 @if($isAdmin)<a href="{{ route('restaurant.team') }}" class="sidebar-item {{ request()->routeIs('restaurant.team*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span>Équipe</span></a>
                 <a href="{{ route('restaurant.subscription') }}" class="sidebar-item {{ request()->routeIs('restaurant.subscription*') ? 'sidebar-item-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h2m2 0h.01M5 21h14a2 2 0 002-2V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span>Abonnement</span></a>

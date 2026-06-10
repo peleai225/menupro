@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'feature' => \App\Http\Middleware\CheckPlanFeature::class,
             'track.login' => \App\Http\Middleware\TrackLastLogin::class,
         ]);
 

@@ -205,23 +205,25 @@ Route::prefix('dashboard')
         Route::get('qr-code/social/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadSocialCard'])->name('qrcode.download-social');
         Route::get('qr-code/tables/{tableNumber}/preview', [App\Http\Controllers\Restaurant\QRCodeController::class, 'previewTableQR'])->name('qrcode.preview-table');
         
-        // Promo Codes, Analytics, Reports, Reviews, Taxes - admin uniquement
+        // Reviews, Taxes - admin uniquement (tous plans)
         Route::middleware('restaurant.admin')->group(function () {
+            Route::get('avis', \App\Livewire\Restaurant\Reviews::class)->name('reviews');
+            Route::get('taxes-frais', \App\Livewire\Restaurant\TaxesAndFees::class)->name('taxes-fees');
+        });
+
+        // Promo Codes, Analytics, Reports, Expenses, Profitability - plan Pro+ requis
+        Route::middleware(['restaurant.admin', 'feature:analytics'])->group(function () {
             Route::get('codes-promo', \App\Livewire\Restaurant\PromoCodes::class)->name('promo-codes');
             Route::get('statistiques', \App\Livewire\Restaurant\Analytics::class)->name('analytics');
             Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
-            Route::get('avis', \App\Livewire\Restaurant\Reviews::class)->name('reviews');
-            Route::get('taxes-frais', \App\Livewire\Restaurant\TaxesAndFees::class)->name('taxes-fees');
             Route::get('depenses', \App\Livewire\Restaurant\Expenses::class)->name('expenses');
             Route::get('rentabilite', \App\Livewire\Restaurant\DishProfitability::class)->name('profitability');
         });
         
-        // Stock Management
-        Route::prefix('stock')->name('stock.')->group(function () {
-            // Stock journalier (portions par plat) - accessible a tous
+        // Stock Management - plan Pro+ requis
+        Route::prefix('stock')->name('stock.')->middleware('feature:stock')->group(function () {
             Route::get('journalier', \App\Livewire\Restaurant\DailyStock::class)->name('daily');
 
-            // Ingredient Categories & Suppliers & Rapport - admin uniquement
             Route::middleware('restaurant.admin')->group(function () {
                 Route::resource('categories-ingredients', IngredientCategoryController::class)
                     ->parameters(['categories-ingredients' => 'ingredientCategory']);
@@ -230,8 +232,7 @@ Route::prefix('dashboard')
                 Route::delete('fournisseurs/{supplier}/ingredients/{ingredient}', [SupplierController::class, 'unlinkIngredient'])->name('suppliers.unlink-ingredient');
                 Route::get('rapport', [IngredientController::class, 'report'])->name('report');
             });
-            
-            // Ingredients - tous (policies gèrent create/update/delete)
+
             Route::resource('ingredients', IngredientController::class);
             Route::post('ingredients/{ingredient}/entry', [IngredientController::class, 'addStock'])->name('ingredients.entry');
             Route::post('ingredients/{ingredient}/exit', [IngredientController::class, 'removeStock'])->name('ingredients.exit');
