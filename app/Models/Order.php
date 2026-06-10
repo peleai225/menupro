@@ -328,8 +328,23 @@ class Order extends Model
         $this->payment_metadata = $paymentData['metadata'] ?? null;
         $this->paid_at = now();
         $this->status = OrderStatus::PAID;
-        
-        return $this->save();
+
+        $saved = $this->save();
+
+        if ($saved) {
+            $this->deductDishStock();
+        }
+
+        return $saved;
+    }
+
+    protected function deductDishStock(): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->dish && $item->dish->track_stock) {
+                $item->dish->decreaseStock($item->quantity);
+            }
+        }
     }
 
     /**
@@ -358,11 +373,28 @@ class Order extends Model
             return false;
         }
 
+        $wasPaid = $this->is_paid;
+
         $this->status = OrderStatus::CANCELLED;
         $this->cancelled_at = now();
         $this->cancellation_reason = $reason;
-        
-        return $this->save();
+
+        $saved = $this->save();
+
+        if ($saved && $wasPaid) {
+            $this->restoreDishStock();
+        }
+
+        return $saved;
+    }
+
+    protected function restoreDishStock(): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->dish && $item->dish->track_stock) {
+                $item->dish->increaseStock($item->quantity);
+            }
+        }
     }
 
     /**

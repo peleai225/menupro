@@ -235,9 +235,40 @@
 
     <!-- PWA : Service Worker + Install Banner -->
     <div id="pwa-install-banner"
-         style="display:none"
          class="fixed bottom-0 inset-x-0 z-[200] p-3 sm:p-4 bg-neutral-900 border-t border-orange-500/30 shadow-2xl safe-bottom"
-         x-data="pwaInstall()" x-show="showBanner" x-cloak
+         x-data="{
+             showBanner: false,
+             deferredPrompt: null,
+             init() {
+                 if (window.matchMedia('(display-mode: standalone)').matches) return;
+                 if (localStorage.getItem('pwa_dismissed') && Date.now() - parseInt(localStorage.getItem('pwa_dismissed')) < 7*24*3600*1000) return;
+                 window.addEventListener('beforeinstallprompt', (e) => {
+                     e.preventDefault();
+                     this.deferredPrompt = e;
+                     setTimeout(() => { this.showBanner = true; }, 5000);
+                 });
+                 const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+                 if (isIos && !window.navigator.standalone) {
+                     setTimeout(() => { this.showBanner = true; }, 5000);
+                 }
+             },
+             async install() {
+                 if (this.deferredPrompt) {
+                     this.deferredPrompt.prompt();
+                     const { outcome } = await this.deferredPrompt.userChoice;
+                     if (outcome === 'accepted') this.showBanner = false;
+                     this.deferredPrompt = null;
+                 } else {
+                     alert('Pour installer MenuPro :\n1. Appuyez sur le bouton Partager\n2. Sélectionnez Sur l\'écran d\'accueil');
+                     this.dismiss();
+                 }
+             },
+             dismiss() {
+                 localStorage.setItem('pwa_dismissed', Date.now().toString());
+                 this.showBanner = false;
+             }
+         }"
+         x-show="showBanner" x-cloak
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="translate-y-full"
          x-transition:enter-end="translate-y-0"

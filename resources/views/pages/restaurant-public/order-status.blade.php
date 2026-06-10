@@ -132,6 +132,33 @@
                 </div>
             </div>
 
+            <!-- Jeko Payment Pending -->
+            @if(!$order->is_paid && $order->payment_method === 'jeko' && isset($order->payment_metadata['payment_url']))
+                <div class="card p-6 mb-6 border-2 border-emerald-200 bg-emerald-50/40" id="jeko-payment-block">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-black text-xl">J</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-neutral-900 mb-1">Paiement en attente</h3>
+                            <p class="text-sm text-neutral-600 mb-4">
+                                Cliquez sur le bouton ci-dessous pour finaliser votre paiement Jeko (Wave, Orange, MTN, Moov, Djamo, carte).
+                                Une fois le paiement effectué, revenez sur cette page — votre commande sera confirmée automatiquement.
+                            </p>
+                            <a href="{{ $order->payment_metadata['payment_url'] }}"
+                               target="_blank"
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition shadow">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                Payer maintenant ({{ number_format($order->total, 0, ',', ' ') }} F)
+                            </a>
+                            <p class="text-xs text-neutral-400 mt-3">
+                                Après le paiement, revenez sur cette page ou rafraîchissez-la pour voir la confirmation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Order Details -->
             <div class="card p-6 mb-6" id="order-details-card">
                 <div class="flex items-center justify-between mb-4">
@@ -460,6 +487,10 @@
         };
 
         function updateStatusDisplay(data) {
+            // Hide Jeko payment block when payment is completed
+            if (data.payment_status === 'completed' && document.getElementById('jeko-payment-block')) {
+                document.getElementById('jeko-payment-block').style.display = 'none';
+            }
             // Hide MenuPro Hub payment instructions when payment is completed
             if (data.payment_status === 'completed' && document.getElementById('hub-payment-instructions')) {
                 document.getElementById('hub-payment-instructions').style.display = 'none';

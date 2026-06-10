@@ -128,13 +128,6 @@ class DashboardController extends Controller
             'contact_email' => !empty($contactEmail) ? $contactEmail : $defaultContactEmail,
             'maintenance_mode' => \App\Models\SystemSetting::get('maintenance_mode', false),
             'registrations_open' => \App\Models\SystemSetting::get('registrations_open', true),
-            'lygos_enabled' => \App\Models\SystemSetting::get('lygos_enabled', true),
-            'lygos_api_key' => \App\Models\SystemSetting::get('lygos_api_key', ''),
-            'lygos_webhook_secret' => \App\Models\SystemSetting::get('lygos_webhook_secret', ''),
-            'lygos_mode' => \App\Models\SystemSetting::get('lygos_mode', 'live'),
-            'fusionpay_enabled' => \App\Models\SystemSetting::get('fusionpay_enabled', false),
-            'fusionpay_api_url' => \App\Models\SystemSetting::get('fusionpay_api_url', config('fusionpay.api_url', '')),
-            'fusionpay_private_key' => \App\Models\SystemSetting::get('fusionpay_private_key', config('fusionpay.private_key', '')),
             'geoapify_api_key' => \App\Models\SystemSetting::get('geoapify_api_key', ''),
             'smtp_host' => \App\Models\SystemSetting::get('smtp_host', config('mail.mailers.smtp.host', '')),
             'smtp_port' => \App\Models\SystemSetting::get('smtp_port', config('mail.mailers.smtp.port', '587')),
@@ -167,10 +160,12 @@ class DashboardController extends Controller
             'commando_commission_only_first_payment' => \App\Models\SystemSetting::has('commando_commission_only_first_payment')
                 ? \App\Models\SystemSetting::get('commando_commission_only_first_payment', true)
                 : config('commando.commission_only_first_payment', true),
-            // Wave – configuration globale Plateforme (Checkout + Payout)
-            'wave_api_key' => \App\Models\SystemSetting::get('wave_api_key', config('wave.api_key', '')),
-            'wave_signing_secret' => \App\Models\SystemSetting::get('wave_signing_secret', config('wave.signing_secret', '')),
-            'wave_commission_rate' => \App\Models\SystemSetting::get('wave_commission_rate', config('wave.commission_rate', 0.02)),
+            // Jeko Africa
+            'jeko_enabled' => \App\Models\SystemSetting::get('jeko_enabled', false),
+            'jeko_api_key' => \App\Models\SystemSetting::get('jeko_api_key', ''),
+            'jeko_api_key_id' => \App\Models\SystemSetting::get('jeko_api_key_id', ''),
+            'jeko_store_id' => \App\Models\SystemSetting::get('jeko_store_id', ''),
+            'jeko_webhook_secret' => \App\Models\SystemSetting::get('jeko_webhook_secret', ''),
             // WhatsApp Business API
             'whatsapp_enabled' => \App\Models\SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false)),
             'whatsapp_phone_id' => \App\Models\SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', '')),
@@ -197,17 +192,13 @@ class DashboardController extends Controller
             'contact_phone' => ['nullable', 'string', 'max:30'],
             'maintenance_mode' => ['boolean'],
             'registrations_open' => ['boolean'],
-            'lygos_api_key' => ['nullable', 'string'],
-            'lygos_webhook_secret' => ['nullable', 'string'],
-            'lygos_mode' => ['nullable', 'in:test,live'],
-            'fusionpay_enabled' => ['boolean'],
-            'fusionpay_api_url' => ['nullable', 'string', 'url'],
-            'fusionpay_private_key' => ['nullable', 'string'],
             'geoapify_api_key' => ['nullable', 'string'],
-            // Wave – API globale
-            'wave_api_key' => ['nullable', 'string'],
-            'wave_signing_secret' => ['nullable', 'string'],
-            'wave_commission_rate' => ['nullable', 'numeric', 'min:0', 'max:1'],
+            // Jeko Africa
+            'jeko_enabled' => ['boolean'],
+            'jeko_api_key' => ['nullable', 'string'],
+            'jeko_api_key_id' => ['nullable', 'string'],
+            'jeko_store_id' => ['nullable', 'string', 'max:100'],
+            'jeko_webhook_secret' => ['nullable', 'string'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'smtp_encryption' => ['nullable', 'string', 'in:tls,ssl,'],
@@ -268,39 +259,24 @@ class DashboardController extends Controller
         
         \App\Models\SystemSetting::set('maintenance_mode', $request->boolean('maintenance_mode'), 'boolean', 'Mode maintenance');
         \App\Models\SystemSetting::set('registrations_open', $request->boolean('registrations_open'), 'boolean', 'Inscriptions ouvertes');
-        if ($request->has('lygos_api_key')) {
-            \App\Models\SystemSetting::set('lygos_enabled', $request->boolean('lygos_enabled'), 'boolean', 'Activer Lygos (abonnements)');
-        }
-        if ($request->filled('lygos_api_key')) {
-            \App\Models\SystemSetting::set('lygos_api_key', $request->lygos_api_key, 'string', 'Clé API Lygos');
-        }
-        if ($request->filled('lygos_webhook_secret')) {
-            \App\Models\SystemSetting::set('lygos_webhook_secret', $request->lygos_webhook_secret, 'string', 'Secret webhook Lygos');
-        }
-        if ($request->filled('lygos_mode')) {
-            \App\Models\SystemSetting::set('lygos_mode', $request->lygos_mode, 'string', 'Mode Lygos (test/live)');
-        }
-        \App\Models\SystemSetting::set('fusionpay_enabled', $request->boolean('fusionpay_enabled'), 'boolean', 'Activer FusionPay (paiements + transferts)');
-        if ($request->filled('fusionpay_api_url')) {
-            \App\Models\SystemSetting::set('fusionpay_api_url', $request->fusionpay_api_url, 'string', 'URL API FusionPay (pay-in)');
-        }
-        if ($request->filled('fusionpay_private_key')) {
-            \App\Models\SystemSetting::set('fusionpay_private_key', $request->fusionpay_private_key, 'string', 'Clé privée FusionPay (pay-out)');
-        }
         if ($request->filled('geoapify_api_key')) {
             \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');
         }
-        // Wave – settings globaux (API key, secret, commission)
-        if ($request->filled('wave_api_key')) {
-            \App\Models\SystemSetting::set('wave_api_key', $request->wave_api_key, 'string', 'Clé API Wave (payout/checkout)');
+        // Jeko Africa
+        \App\Models\SystemSetting::set('jeko_enabled', $request->boolean('jeko_enabled'), 'boolean', 'Activer Jeko Africa (abonnements)');
+        if ($request->filled('jeko_api_key')) {
+            \App\Models\SystemSetting::set('jeko_api_key', $request->jeko_api_key, 'string', 'Clé API Jeko (X-API-KEY)');
         }
-        if ($request->filled('wave_signing_secret')) {
-            \App\Models\SystemSetting::set('wave_signing_secret', $request->wave_signing_secret, 'string', 'Secret de signature Wave (Wave-Signature)');
+        if ($request->filled('jeko_api_key_id')) {
+            \App\Models\SystemSetting::set('jeko_api_key_id', $request->jeko_api_key_id, 'string', 'ID Clé API Jeko (X-API-KEY-ID)');
         }
-        if ($request->has('wave_commission_rate')) {
-            $rate = (float) $request->wave_commission_rate;
-            \App\Models\SystemSetting::set('wave_commission_rate', $rate, 'string', 'Taux de commission Wave pour MenuPro (0.02 = 2%)');
+        if ($request->filled('jeko_store_id')) {
+            \App\Models\SystemSetting::set('jeko_store_id', $request->jeko_store_id, 'string', 'Store ID Jeko (plateforme)');
         }
+        if ($request->filled('jeko_webhook_secret')) {
+            \App\Models\SystemSetting::set('jeko_webhook_secret', $request->jeko_webhook_secret, 'string', 'Secret webhook Jeko');
+        }
+
         // SMTP Configuration
         \App\Models\SystemSetting::set('smtp_host', $request->smtp_host ?? '', 'string', 'Serveur SMTP');
         \App\Models\SystemSetting::set('smtp_port', $request->smtp_port ?? 587, 'integer', 'Port SMTP');
@@ -483,6 +459,26 @@ class DashboardController extends Controller
             'hourly_orders' => $hourlyOrders,
             'timestamp' => now()->format('H:i:s'),
         ]);
+    }
+
+    /**
+     * Récupère les magasins Jeko via l'API (pour pré-remplir le Store ID).
+     */
+    public function jekoStores(): \Illuminate\Http\JsonResponse
+    {
+        $jeko = app(\App\Services\JekoGateway::class)->forPlatform();
+
+        if (!$jeko->isConfigured()) {
+            return response()->json(['error' => 'Clés API Jeko non configurées.'], 422);
+        }
+
+        $result = $jeko->getStores();
+
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error'] ?? 'Erreur API Jeko'], 422);
+        }
+
+        return response()->json(['stores' => $result['stores']]);
     }
 }
 

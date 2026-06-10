@@ -3,11 +3,7 @@
 namespace App\Livewire\Commando;
 
 use App\Enums\AgentVerificationStatus;
-use App\Enums\UserRole;
 use App\Models\CommandoAgent;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
@@ -17,9 +13,6 @@ class RegisterStep1 extends Component
     public string $last_name = '';
     public string $whatsapp = '';
     public string $city = '';
-    public string $email = '';
-    public string $password = '';
-    public string $password_confirmation = '';
 
     protected function rules(): array
     {
@@ -34,8 +27,13 @@ class RegisterStep1 extends Component
                 'unique:commando_agents,whatsapp',
             ],
             'city' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'whatsapp.unique' => 'Ce numéro WhatsApp est déjà enregistré. Contactez l\'équipe MenuPro si c\'est le vôtre.',
         ];
     }
 
@@ -46,8 +44,6 @@ class RegisterStep1 extends Component
             'last_name' => 'nom',
             'whatsapp' => 'numéro WhatsApp',
             'city' => 'ville',
-            'email' => 'adresse email (Gmail ou autre)',
-            'password' => 'mot de passe',
         ];
     }
 
@@ -62,29 +58,15 @@ class RegisterStep1 extends Component
         }
         RateLimiter::hit($key, 60);
 
-        $user = User::create([
-            'name' => trim($this->first_name . ' ' . $this->last_name),
-            'email' => $this->email,
-            'email_verified_at' => now(), // Pas de vérification email pour les agents Commando
-            'password' => Hash::make($this->password),
-            'role' => UserRole::COMMANDO_AGENT,
-            'phone' => preg_replace('/\s+/', '', $this->whatsapp),
-            'is_active' => true,
-        ]);
-
         $agent = CommandoAgent::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'whatsapp' => preg_replace('/\s+/', '', $this->whatsapp),
             'city' => $this->city,
             'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
-            'user_id' => $user->id,
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('commando.dashboard')
-            ->with('success', 'Compte créé ! L\'équipe va activer votre accès sous 24h.');
+        return redirect()->route('commando.register.success');
     }
 
     public function render()

@@ -147,7 +147,7 @@ class OrderModificationController extends Controller
 
             // Handle partial refund if paid
             $refundInfo = null;
-            if ($order->is_paid && $order->payment_method === 'lygos') {
+            if ($order->is_paid && in_array($order->payment_method, ['jeko', 'lygos'])) {
                 $refundInfo = $this->processPartialRefund($order, $item);
             }
 
@@ -257,7 +257,7 @@ class OrderModificationController extends Controller
     }
 
     /**
-     * Process partial refund via Lygos
+     * Process partial refund (manual — Jeko does not support automated refunds via API)
      */
     protected function processPartialRefund(Order $order, OrderItem $item, ?int $amount = null): ?array
     {
@@ -268,38 +268,21 @@ class OrderModificationController extends Controller
         $refundAmount = $amount ?? $item->total_price;
 
         try {
-            $lygos = app(\App\Services\LygosGateway::class)->forRestaurant($order->restaurant);
-            
-            $result = $lygos->refund(
-                $order->payment_reference,
-                $refundAmount,
-                "Modification commande {$order->reference} - Retrait/modification d'article"
-            );
-
-            if ($result['success']) {
-                // Create refund record
-                \App\Models\OrderRefund::create([
-                    'order_id' => $order->id,
-                    'amount' => $refundAmount,
-                    'reason' => "Modification commande - Retrait/modification d'article",
-                    'payment_reference' => $result['refund_id'] ?? null,
-                    'status' => 'pending',
-                    'metadata' => $result,
-                ]);
-
-                return [
-                    'amount' => $refundAmount,
-                    'formatted_amount' => number_format($refundAmount, 0, ',', ' ') . ' F',
-                    'status' => 'pending',
-                    'message' => 'Remboursement partiel initié. Il sera traité sous 24-48h.',
-                ];
-            }
+            \App\Models\OrderRefund::create([
+                'order_id' => $order->id,
+                'amount' => $refundAmount,
+                'reason' => "Modification commande - Retrait/modification d'article",
+                'payment_reference' => null,
+                'status' => 'pending',
+                'metadata' => ['gateway' => 'jeko', 'manual' => true],
+            ]);
 
             return [
-                'error' => true,
-                'message' => 'Erreur lors du remboursement. Veuillez contacter le restaurant.',
+                'amount' => $refundAmount,
+                'formatted_amount' => number_format($refundAmount, 0, ',', ' ') . ' F',
+                'status' => 'pending',
+                'message' => 'Remboursement partiel enregistré. Il sera traité manuellement sous 24-48h.',
             ];
-
         } catch (\Exception $e) {
             \Log::error('Partial refund error', [
                 'order_id' => $order->id,

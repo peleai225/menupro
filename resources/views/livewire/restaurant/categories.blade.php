@@ -120,9 +120,9 @@
                      Sortable.create($el, { 
                          animation: 200,
                          easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-                         ghostClass: 'opacity-30',
+                             ghostClass: 'opacity-30',
                          dragClass: 'shadow-2xl',
-                         chosenClass: 'ring-2 ring-primary-500 ring-offset-2',
+                         chosenClass: 'ring-2',
                          onEnd: function(evt) {
                              const items = [...evt.from.children].map(el => el.dataset.id);
                              $wire.updateOrder(items);
@@ -238,7 +238,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-init="document.body.classList.add('overflow-hidden')"
              x-on:remove="document.body.classList.remove('overflow-hidden')"
-             @keydown.escape.window="document.body.classList.remove('overflow-hidden'); $wire.closeModal()"
+             @keydown.escape.window="document.body.classList.remove('overflow-hidden'); $wire.closeModal()">
             <div class="flex min-h-screen items-center justify-center p-4">
                 <!-- Backdrop -->
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" 

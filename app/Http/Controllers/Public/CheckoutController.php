@@ -11,8 +11,7 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
-use App\Services\FusionPayGateway;
-use App\Services\LygosGateway;
+use App\Services\JekoGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,17 +21,13 @@ use Illuminate\View\View;
 class CheckoutController extends Controller
 {
     public function __construct(
-        protected LygosGateway $lygosGateway
+        protected JekoGateway $jekoGateway
     ) {}
 
-    /**
-     * Display checkout page.
-     */
     public function index(string $slug): View
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
 
-        // Check if restaurant can accept orders
         if (!$restaurant->can_accept_orders) {
             return view('pages.restaurant-public.unavailable', [
                 'restaurant' => $restaurant,
@@ -43,14 +38,10 @@ class CheckoutController extends Controller
         return view('pages.restaurant-public.checkout', compact('restaurant'));
     }
 
-    /**
-     * Process checkout and create order.
-     */
     public function store(Request $request, string $slug): RedirectResponse
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
 
-        // Check if restaurant is open
         if (!$restaurant->isOpenNow()) {
             $nextOpening = $restaurant->getNextOpeningTime();
             $message = 'Le restaurant est actuellement fermé.';
@@ -60,7 +51,6 @@ class CheckoutController extends Controller
             return back()->with('error', $message);
         }
 
-        // Validate request
         $request->validate([
             'customer_name' => ['required', 'string', 'max:100'],
             'customer_phone' => ['required', 'string', 'max:20'],
@@ -82,11 +72,9 @@ class CheckoutController extends Controller
             'items.*.special_instructions' => ['nullable', 'string', 'max:200'],
         ]);
 
-        // Calculate order totals
         $subtotal = 0;
         $orderItems = [];
 
-        // Pré-charger tous les plats en une seule requête (évite N+1)
         $dishIds = collect($request->items)->pluck('dish_id')->unique()->toArray();
         $dishes = Dish::whereIn('id', $dishIds)
             ->where('restaurant_id', $restaurant->id)
@@ -97,22 +85,18 @@ class CheckoutController extends Controller
         foreach ($request->items as $item) {
             $dish = $dishes->get($item['dish_id']);
 
-            // Sécurité : le plat doit exister (déjà validé via Rule::exists avec restaurant_id)
             if (!$dish) {
                 return back()->with('error', 'Plat invalide.');
             }
 
-            // Check availability
             if (!$dish->is_available) {
                 return back()->with('error', "Le plat \"{$dish->name}\" n'est plus disponible.");
             }
 
-            // Calculate options price
             $optionsPrice = 0;
             $selectedOptions = [];
-            
+
             if (!empty($item['options'])) {
-                // Recherche dans les relations déjà eager-loaded (pas de requête SQL supplémentaire)
                 $allOptions = $dish->optionGroups->flatMap(fn ($g) => $g->options);
                 foreach ($item['options'] as $optionId) {
                     $option = $allOptions->firstWhere('id', $optionId);
@@ -143,18 +127,16 @@ class CheckoutController extends Controller
             ];
         }
 
-        // Calculate delivery fee
         $deliveryFee = 0;
         $orderType = OrderType::from($request->type);
-        
+
         if ($orderType === OrderType::DELIVERY) {
             $deliveryFee = $restaurant->delivery_fee;
         }
 
-        // Apply promo code
         $discountAmount = 0;
         $promoCode = null;
-        
+
         if ($request->filled('promo_code')) {
             $promoCode = PromoCode::where('restaurant_id', $restaurant->id)
                 ->where('code', strtoupper($request->promo_code))
@@ -163,7 +145,7 @@ class CheckoutController extends Controller
 
             if ($promoCode) {
                 $error = $promoCode->getValidationError($subtotal, $request->customer_email);
-                
+
                 if ($error) {
                     return back()->with('error', $error);
                 }
@@ -174,13 +156,11 @@ class CheckoutController extends Controller
             }
         }
 
-        // Check minimum order
         if ($subtotal < $restaurant->min_order_amount) {
             $min = number_format($restaurant->min_order_amount, 0, ',', ' ');
             return back()->with('error', "Commande minimum de {$min} FCFA requise.");
         }
 
-        // Calculate tax
         $taxAmount = 0;
         if ($restaurant->tax_rate && $restaurant->tax_rate > 0) {
             $baseAmount = $subtotal + $deliveryFee - $discountAmount;
@@ -191,7 +171,6 @@ class CheckoutController extends Controller
             }
         }
 
-        // Calculate service fee
         $serviceFee = 0;
         if ($restaurant->service_fee_enabled) {
             $baseAmount = $subtotal + $deliveryFee - $discountAmount;
@@ -203,7 +182,6 @@ class CheckoutController extends Controller
             }
         }
 
-        // Calculate total
         $baseTotal = $subtotal + $deliveryFee - $discountAmount;
         if (!$restaurant->tax_included) {
             $baseTotal += $taxAmount;
@@ -211,7 +189,6 @@ class CheckoutController extends Controller
         $baseTotal += $serviceFee;
         $total = $baseTotal;
 
-        // Create order — transaction atomique : commande + items + promo en une seule opération
         $order = DB::transaction(function () use (
             $restaurant, $request, $orderType, $subtotal, $deliveryFee,
             $discountAmount, $taxAmount, $serviceFee, $total, $orderItems, $promoCode
@@ -240,12 +217,10 @@ class CheckoutController extends Controller
                 'estimated_prep_time' => $restaurant->estimated_prep_time,
             ]);
 
-            // Create order items
             foreach ($orderItems as $item) {
                 $order->items()->create($item);
             }
 
-            // Apply promo code
             if ($promoCode && $discountAmount > 0) {
                 $promoCode->applyToOrder($order, $request->customer_email);
             }
@@ -253,7 +228,6 @@ class CheckoutController extends Controller
             return $order;
         });
 
-        // Send WhatsApp notifications
         try {
             $whatsapp = app(\App\Services\WhatsAppService::class);
             $whatsapp->sendNewOrderToRestaurant($order);
@@ -261,96 +235,62 @@ class CheckoutController extends Controller
             \Log::warning('WhatsApp new order notification failed: ' . $e->getMessage());
         }
 
-        // Redirect to payment or confirmation
-        if ($restaurant->lygos_enabled && $restaurant->getLygosApiKey()) {
-            $result = $this->lygosGateway
-                ->forRestaurant($restaurant)
-                ->createPayment(
-                    $order,
-                    route('r.order.success', [$slug, $order]),
-                    route('r.order.cancel', [$slug, $order])
-                );
+        // Redirect to Jeko payment if configured
+        $jeko = $this->jekoGateway->forPlatform();
+        $storeId = $jeko->getPlatformStoreId();
+        if ($jeko->isConfigured() && $storeId) {
+            try {
+                $result = $jeko->createOrderPayment($order, $storeId);
 
-            if ($result['success']) {
-                $order->update([
-                    'payment_reference' => $result['payment_id'],
-                    'payment_metadata' => ['payment_url' => $result['payment_url']],
-                ]);
+                if ($result['success']) {
+                    $order->update([
+                        'payment_reference' => $result['payment_id'],
+                        'payment_method' => 'jeko',
+                        'payment_metadata' => ['payment_url' => $result['payment_url']],
+                    ]);
 
-                return redirect($result['payment_url']);
+                    return redirect($result['payment_url']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Jeko payment exception in CheckoutController', ['order_id' => $order->id, 'error' => $e->getMessage()]);
             }
 
-            // Payment creation failed - show error but keep order
             return redirect()->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
         }
 
-        // No payment gateway - direct to order status
         return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('info', 'Commande créée. Le paiement sera effectué sur place.');
     }
 
-    /**
-     * Handle successful payment.
-     */
     public function success(string $slug, Order $order): RedirectResponse
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
 
-        // If webhook already marked as paid, just redirect
         if ($order->is_paid) {
             return redirect()->route('r.order.status', [$slug, $order->tracking_token])
                 ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
         }
 
-        // FusionPay: verify by payment_reference (tokenPay) - fallback si webhook pas encore reçu
-        if ($order->payment_method === 'fusionpay' && $order->payment_reference && app(FusionPayGateway::class)->isEnabled()) {
-            $paymentTransaction = \App\Models\PaymentTransaction::where('gateway', 'fusionpay')
-                ->where('gateway_transaction_id', $order->payment_reference)->first();
-            if ($paymentTransaction && $paymentTransaction->order_id === $order->id && $paymentTransaction->status !== 'ACCEPTED') {
-                $gateway = app(FusionPayGateway::class);
-                $verify = $gateway->verifyPayment($order->payment_reference);
-                $status = $verify['data']['statut'] ?? null;
-                if ($status === 'paid') {
-                    \Illuminate\Support\Facades\DB::transaction(function () use ($order, $paymentTransaction, $verify, $restaurant) {
-                        $paymentTransaction->update(['status' => 'ACCEPTED', 'metadata' => array_merge($paymentTransaction->metadata ?? [], ['verify' => $verify['data'] ?? []])]);
+        // Jeko: verify by payment_reference (paymentLinkId)
+        if ($order->payment_reference) {
+            $jeko = app(JekoGateway::class)->forPlatform();
+            if ($jeko->isConfigured()) {
+                try {
+                    $result = $jeko->verifyPaymentLink($order->payment_reference);
+                    if ($result['success'] && ($result['paid'] ?? false)) {
                         $order->markAsPaid([
                             'reference' => $order->payment_reference,
-                            'method' => 'fusionpay',
-                            'metadata' => $verify['data'] ?? [],
+                            'method' => 'jeko',
+                            'metadata' => $result['data'] ?? [],
                         ]);
-                        $phone = preg_replace('/\D/', '', $order->restaurant->phone ?? '');
-                        if (str_starts_with($phone, '225')) {
-                            $phone = substr($phone, 3);
-                        }
-                        $fullPhone = '225' . ($phone ?: '0000000000');
-                        $wallet = \App\Models\RestaurantWallet::firstOrCreate(
-                            ['restaurant_id' => $order->restaurant_id],
-                            ['balance' => 0, 'phone' => $fullPhone, 'prefix' => '225']
-                        );
-                        $wallet->increment('balance', $paymentTransaction->amount);
                         $restaurant->users()
                             ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
                             ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
-                    });
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Jeko verify on success fallback failed: ' . $e->getMessage());
                 }
-            }
-        }
-        // Lygos: verify by order reference
-        elseif ($order->reference && $restaurant->lygos_enabled) {
-            $result = $this->lygosGateway
-                ->forRestaurant($restaurant)
-                ->verifyPayment($order->reference);
-
-            if ($result['success'] && ($result['paid'] ?? false)) {
-                $order->markAsPaid([
-                    'reference' => $order->payment_reference ?? $order->reference,
-                    'method' => 'lygos',
-                    'metadata' => $result,
-                ]);
-                $restaurant->users()
-                    ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                    ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
             }
         }
 
@@ -358,19 +298,12 @@ class CheckoutController extends Controller
             ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
     }
 
-    /**
-     * Handle cancelled payment.
-     */
     public function cancel(string $slug, Order $order): RedirectResponse
     {
-        // Don't delete the order - customer might retry
         return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('warning', 'Paiement annulé. Vous pouvez réessayer.');
     }
 
-    /**
-     * Apply promo code (AJAX).
-     */
     public function applyPromo(Request $request, string $slug)
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
@@ -394,7 +327,7 @@ class CheckoutController extends Controller
         }
 
         $error = $promoCode->getValidationError($request->subtotal, $request->email);
-        
+
         if ($error) {
             return response()->json([
                 'success' => false,
@@ -412,4 +345,3 @@ class CheckoutController extends Controller
         ]);
     }
 }
-

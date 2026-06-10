@@ -9,9 +9,7 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
-use App\Services\FusionPayGateway;
-use App\Services\LygosGateway;
-use App\Services\WaveCheckoutService;
+use App\Services\JekoGateway;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -57,7 +55,7 @@ class Checkout extends Component
     public ?string $promoError = null;
 
     // Payment Method
-    public ?string $payment_method = null; // 'lygos', 'fusionpay', 'wave_checkout', or 'cash_on_delivery'
+    public ?string $payment_method = null; // 'jeko' or 'cash_on_delivery'
 
     public function mount(string $slug): void
     {
@@ -91,9 +89,6 @@ class Checkout extends Component
         $this->setDefaultPaymentMethod();
     }
 
-    /**
-     * Définit le mode de paiement par défaut quand un seul est disponible.
-     */
     protected function setDefaultPaymentMethod(): void
     {
         if ($this->payment_method) {
@@ -101,9 +96,7 @@ class Checkout extends Component
         }
         $methods = array_merge(
             ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : [],
-            $this->fusionpayPaymentAvailable ? ['fusionpay'] : [],
-            $this->waveCheckoutAvailable ? ['wave_checkout'] : [],
-            $this->onlinePaymentAvailable ? [$this->onlinePaymentMethod] : []
+            $this->jekoPaymentAvailable ? ['jeko'] : []
         );
         if (count($methods) === 1) {
             $this->payment_method = $methods[0];
@@ -139,12 +132,10 @@ class Checkout extends Component
         }
 
         $baseAmount = $this->subtotal + $this->deliveryFee - $this->discount;
-        
+
         if ($this->restaurant->tax_included) {
-            // Tax is included, extract it
             return (int) round($baseAmount * ($this->restaurant->tax_rate / (100 + $this->restaurant->tax_rate)));
         } else {
-            // Tax is added on top
             return (int) round($baseAmount * ($this->restaurant->tax_rate / 100));
         }
     }
@@ -158,49 +149,23 @@ class Checkout extends Component
 
         $baseAmount = $this->subtotal + $this->deliveryFee - $this->discount;
         $feeAmount = 0;
-        
-        // Percentage fee
+
         if ($this->restaurant->service_fee_rate > 0) {
             $feeAmount += (int) round($baseAmount * ($this->restaurant->service_fee_rate / 100));
         }
-        
-        // Fixed fee
+
         if ($this->restaurant->service_fee_fixed > 0) {
             $feeAmount += $this->restaurant->service_fee_fixed;
         }
-        
+
         return $feeAmount;
     }
 
     #[Computed]
-    public function fusionpayPaymentAvailable(): bool
+    public function jekoPaymentAvailable(): bool
     {
-        $gateway = app(FusionPayGateway::class);
-        return $gateway->isEnabled() && $gateway->isConfigured();
-    }
-
-    /**
-     * Paiement Wave direct : le restaurant reçoit l'argent sur son compte Wave Business.
-     * Disponible uniquement si le restaurant a renseigné son Wave Merchant ID.
-     */
-    #[Computed]
-    public function waveCheckoutAvailable(): bool
-    {
-        return !empty($this->restaurant->wave_merchant_id)
-            && !empty(\App\Models\SystemSetting::get('wave_api_key', config('wave.api_key')));
-    }
-
-    #[Computed]
-    public function onlinePaymentAvailable(): bool
-    {
-        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
-        return (bool) ($this->restaurant->lygos_enabled && $lygos->isConfigured());
-    }
-
-    #[Computed]
-    public function onlinePaymentMethod(): string
-    {
-        return 'lygos';
+        $jeko = app(JekoGateway::class)->forPlatform();
+        return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
     }
 
     #[Computed]
@@ -213,15 +178,13 @@ class Checkout extends Component
     public function total(): int
     {
         $baseTotal = $this->subtotal + $this->deliveryFee - $this->discount;
-        
-        // Add tax if not included
+
         if (!$this->restaurant->tax_included) {
             $baseTotal += $this->taxAmount;
         }
-        
-        // Add service fee
+
         $baseTotal += $this->serviceFee;
-        
+
         return $baseTotal;
     }
 
@@ -245,7 +208,7 @@ class Checkout extends Component
         }
 
         $error = $promoCode->getValidationError($this->subtotal, $this->customer_email);
-        
+
         if ($error) {
             $this->promoError = $error;
             return;
@@ -278,9 +241,6 @@ class Checkout extends Component
         }
     }
 
-    /**
-     * Liste des indicatifs pays pour le sélecteur.
-     */
     public static function phoneCountryOptions(): array
     {
         return [
@@ -294,10 +254,6 @@ class Checkout extends Component
         ];
     }
 
-    /**
-     * Numéro complet au format international (ex: +2250501862640).
-     * On garde le 0 du numéro national pour avoir le numéro complet.
-     */
     public function getFullPhoneNumber(): string
     {
         $national = preg_replace('/\D/', '', $this->customer_phone);
@@ -313,7 +269,6 @@ class Checkout extends Component
 
     public function placeOrder()
     {
-        // Validate based on order type
         $rules = [
             'customer_name' => 'required|string|max:100',
             'customer_phone' => 'required|string|min:8|max:20',
@@ -331,23 +286,17 @@ class Checkout extends Component
 
         $this->validate($rules);
 
-        // Check minimum order
         if ($this->subtotal < ($this->restaurant->min_order_amount ?? 0)) {
             session()->flash('error', "Commande minimum de " . number_format($this->restaurant->min_order_amount, 0, ',', ' ') . " F requise.");
             return;
         }
 
-        // Determine payment method if not already set
-        $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
-        $lygosAvailable = $this->restaurant->lygos_enabled && $lygos->isConfigured();
         $cashOnDeliveryAvailable = $this->restaurant->cash_on_delivery ?? false;
-        $fusionpayAvailable = $this->fusionpayPaymentAvailable;
+        $jekoAvailable = $this->jekoPaymentAvailable;
 
         $validMethods = array_merge(
             $cashOnDeliveryAvailable ? ['cash_on_delivery'] : [],
-            $fusionpayAvailable ? ['fusionpay'] : [],
-            $this->waveCheckoutAvailable ? ['wave_checkout'] : [],
-            $lygosAvailable ? ['lygos'] : []
+            $jekoAvailable ? ['jeko'] : []
         );
 
         if (!$this->payment_method) {
@@ -355,7 +304,7 @@ class Checkout extends Component
                 session()->flash('error', 'Veuillez choisir un mode de paiement.');
                 return;
             }
-            $this->payment_method = $validMethods[0];
+            $this->payment_method = $validMethods[0] ?? 'cash_on_delivery';
         } else {
             if (!in_array($this->payment_method, $validMethods)) {
                 session()->flash('error', 'Mode de paiement invalide.');
@@ -368,15 +317,15 @@ class Checkout extends Component
             $restaurantLat = $this->restaurant->latitude ?? 5.3600;
             $restaurantLng = $this->restaurant->longitude ?? -4.0083;
             $deliveryRadius = $this->restaurant->delivery_radius_km ?? 10;
-            
+
             if ($deliveryRadius > 0) {
                 $distance = $this->calculateDistance(
-                    $restaurantLat, 
-                    $restaurantLng, 
-                    $this->delivery_latitude, 
+                    $restaurantLat,
+                    $restaurantLng,
+                    $this->delivery_latitude,
                     $this->delivery_longitude
                 );
-                
+
                 if ($distance > $deliveryRadius) {
                     session()->flash('error', "Cette adresse est hors de notre zone de livraison (max: {$deliveryRadius} km). Distance: " . number_format($distance, 2) . " km.");
                     return;
@@ -393,7 +342,7 @@ class Checkout extends Component
             'type' => OrderType::from($this->order_type),
             'status' => OrderStatus::PENDING_PAYMENT,
             'payment_status' => PaymentStatus::PENDING,
-            'payment_method' => $this->payment_method === 'fusionpay' ? 'fusionpay' : null,
+            'payment_method' => $this->payment_method === 'jeko' ? 'jeko' : null,
             'subtotal' => $this->subtotal,
             'delivery_fee' => $this->deliveryFee,
             'discount_amount' => $this->discount,
@@ -435,23 +384,19 @@ class Checkout extends Component
         // Clear cart
         session()->forget("cart.{$this->restaurant->id}");
 
-        // Notify restaurant immediately when order is created (before payment redirect)
-        // This ensures real-time notification even for online payments
+        // Notify restaurant
         $this->restaurant->users()
             ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
             ->each(function ($user) use ($order) {
                 $user->notify(new NewOrderNotification($order));
             });
 
-        // Process payment based on selected method
-        if ($this->payment_method === 'lygos') {
-            $lygos = app(LygosGateway::class)->forRestaurant($this->restaurant);
+        // Process payment
+        if ($this->payment_method === 'jeko') {
+            $jeko = app(JekoGateway::class)->forPlatform();
+            $storeId = $jeko->getPlatformStoreId();
             try {
-                $result = $lygos->createPayment(
-                    $order,
-                    route('r.order.success', [$this->restaurant->slug, $order]),
-                    route('r.order.cancel', [$this->restaurant->slug, $order])
-                );
+                $result = $jeko->createOrderPayment($order, $storeId);
 
                 if ($result['success']) {
                     $order->update([
@@ -460,79 +405,18 @@ class Checkout extends Component
                     ]);
                     return redirect()->away($result['payment_url']);
                 }
-                $errorMessage = $result['message'] ?? $result['error'] ?? 'Impossible de créer la session de paiement.';
-                session()->flash('error', 'Erreur de paiement : ' . $errorMessage . ' Veuillez réessayer.');
-                \Log::error('Lygos payment creation failed', ['order_id' => $order->id, 'result' => $result]);
+                session()->flash('error', 'Erreur de paiement : ' . ($result['error'] ?? 'Veuillez réessayer.'));
+                \Log::error('Jeko payment creation failed', ['order_id' => $order->id, 'result' => $result]);
                 $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                 return;
             } catch (\Exception $e) {
                 session()->flash('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
-                \Log::error('Lygos payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+                \Log::error('Jeko payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
                 $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
                 return;
             }
-        } elseif ($this->payment_method === 'fusionpay') {
-            $gateway = app(FusionPayGateway::class);
-            try {
-                $result = $gateway->initPayment($order);
-                $order->update([
-                    'payment_reference' => $result['transaction_id'],
-                    'payment_metadata' => ['payment_url' => $result['payment_url']],
-                ]);
-                // Redirection externe : return redirect()->away() pour forcer une vraie redirection HTTP (Livewire/AJAX)
-                return redirect()->away($result['payment_url']);
-            } catch (\Exception $e) {
-                session()->flash('error', 'Erreur FusionPay : ' . $e->getMessage());
-                \Log::error('FusionPay payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            }
-        } elseif ($this->payment_method === 'wave_checkout') {
-            // Paiement Wave direct — les fonds vont directement sur le compte
-            // Wave Business du restaurant (wave_merchant_id configuré).
-            // La plateforme facture sa commission via l'abonnement mensuel.
-            $waveService = app(WaveCheckoutService::class);
-            try {
-                $result = $waveService->createSession([
-                    'amount'        => $order->total,
-                    'restaurant_id' => $this->restaurant->id,
-                    'order_id'      => $order->id,
-                    'merchant_id'   => $this->restaurant->wave_merchant_id,
-                    'currency'      => 'XOF',
-                    'success_url'   => route('r.order.success', [$this->restaurant->slug, $order]),
-                    'error_url'     => route('r.order.cancel', [$this->restaurant->slug, $order]),
-                ]);
-
-                $order->update([
-                    'payment_reference' => $result['checkout_id'],
-                    'payment_method'    => 'wave_checkout',
-                    'payment_metadata'  => [
-                        'checkout_id'   => $result['checkout_id'],
-                        'merchant_id'   => $this->restaurant->wave_merchant_id,
-                        'launch_url'    => $result['wave_launch_url'],
-                        'direct_payment' => true,
-                    ],
-                ]);
-
-                return redirect()->away($result['wave_launch_url']);
-            } catch (\Exception $e) {
-                session()->flash('error', 'Erreur Wave : ' . $e->getMessage() . ' Veuillez réessayer.');
-                \Log::error('Wave Checkout direct exception', [
-                    'order_id'    => $order->id,
-                    'merchant_id' => $this->restaurant->wave_merchant_id,
-                    'error'       => $e->getMessage(),
-                ]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            }
-        } elseif ($this->payment_method === 'cash_on_delivery') {
-            // Cash on delivery - mark as paid (will be collected on delivery)
-            $order->markAsPaid([
-                'method' => 'cash_on_delivery',
-                'metadata' => ['note' => 'Paiement à la livraison'],
-            ]);
         } else {
-            // Fallback - should not happen
+            // Cash on delivery
             $order->markAsPaid([
                 'method' => 'cash_on_delivery',
                 'metadata' => ['note' => 'Paiement à la livraison'],
@@ -543,12 +427,9 @@ class Checkout extends Component
         $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
     }
 
-    /**
-     * Calculate distance between two coordinates (Haversine formula)
-     */
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
-        $earthRadius = 6371; // Radius of the earth in km
+        $earthRadius = 6371;
 
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
@@ -558,9 +439,8 @@ class Checkout extends Component
              sin($dLon/2) * sin($dLon/2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-        $distance = $earthRadius * $c; // Distance in km
 
-        return $distance;
+        return $earthRadius * $c;
     }
 
     public function render()
@@ -571,4 +451,3 @@ class Checkout extends Component
             ]);
     }
 }
-

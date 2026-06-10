@@ -50,7 +50,9 @@ class CommandoWelcomeController extends Controller
             'welcome_token' => null,
         ]);
 
+        $loginHint = $user->phone ?: $user->email;
+
         return redirect()->route('login')
-            ->with('success', 'Mot de passe défini. Connectez-vous avec votre email : ' . $user->email);
+            ->with('success', 'Mot de passe défini ! Connectez-vous avec : ' . $loginHint);
     }
 }

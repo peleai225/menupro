@@ -68,30 +68,34 @@ class SettingsController extends Controller
     }
 
     /**
-     * Update payment settings (Lygos).
+     * Update payment settings (Jeko).
      */
     public function updatePayment(Request $request): RedirectResponse
     {
         $restaurant = $request->user()->restaurant;
-        
+
         $this->authorize('managePayments', $restaurant);
 
         $request->validate([
-            'lygos_api_key' => ['nullable', 'string', 'max:255'],
-            'lygos_api_secret' => ['nullable', 'string', 'max:255'],
-            'lygos_enabled' => ['boolean'],
+            'jeko_api_key' => ['nullable', 'string', 'max:255'],
+            'jeko_api_key_id' => ['nullable', 'string', 'max:255'],
+            'jeko_webhook_secret' => ['nullable', 'string', 'max:255'],
+            'jeko_store_id' => ['nullable', 'string', 'max:100'],
+            'jeko_enabled' => ['boolean'],
         ]);
 
-        // Only update if new values provided
-        if ($request->filled('lygos_api_key')) {
-            $restaurant->lygos_api_key = $request->lygos_api_key;
+        if ($request->filled('jeko_api_key')) {
+            $restaurant->jeko_api_key = $request->jeko_api_key;
+        }
+        if ($request->filled('jeko_api_key_id')) {
+            $restaurant->jeko_api_key_id = $request->jeko_api_key_id;
+        }
+        if ($request->filled('jeko_webhook_secret')) {
+            $restaurant->jeko_webhook_secret = $request->jeko_webhook_secret;
         }
 
-        if ($request->filled('lygos_api_secret')) {
-            $restaurant->lygos_api_secret = $request->lygos_api_secret;
-        }
-
-        $restaurant->lygos_enabled = $request->boolean('lygos_enabled');
+        $restaurant->jeko_enabled = $request->boolean('jeko_enabled');
+        $restaurant->jeko_store_id = $request->jeko_store_id;
         $restaurant->save();
 
         return back()->with('success', 'Paramètres de paiement mis à jour.');

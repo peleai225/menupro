@@ -23,10 +23,7 @@ use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\RestaurantController;
 use App\Http\Controllers\SuperAdmin\StatsController;
 use App\Http\Controllers\SuperAdmin\UserController;
-use App\Http\Controllers\Webhook\FusionPayPaymentWebhook;
-use App\Http\Controllers\Webhook\WaveWebhookController;
-use App\Http\Controllers\Webhook\FusionPayPayoutWebhook;
-use App\Http\Controllers\Webhook\LygosWebhookController;
+use App\Http\Controllers\Webhook\JekoWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,9 +60,6 @@ Route::get('/verify/{uuid}', [\App\Http\Controllers\Commando\AgentVerificationCo
 */
 Route::prefix('commando')->name('commando.')->group(function () {
     Route::get('/inscription', \App\Livewire\Commando\RegisterStep1::class)->name('register.step1');
-    Route::get('/inscription/complete/{agent}', \App\Livewire\Commando\RegisterStep2::class)
-        ->middleware('signed')
-        ->name('register.step2');
     Route::get('/inscription/success', fn () => view('pages.commando.register-success'))->name('register.success');
     // Bienvenue agent : définir mot de passe (lien envoyé après approbation)
     Route::get('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'show'])->name('welcome');
@@ -224,6 +218,9 @@ Route::prefix('dashboard')
         
         // Stock Management
         Route::prefix('stock')->name('stock.')->group(function () {
+            // Stock journalier (portions par plat) - accessible a tous
+            Route::get('journalier', \App\Livewire\Restaurant\DailyStock::class)->name('daily');
+
             // Ingredient Categories & Suppliers & Rapport - admin uniquement
             Route::middleware('restaurant.admin')->group(function () {
                 Route::resource('categories-ingredients', IngredientCategoryController::class)
@@ -357,6 +354,7 @@ Route::prefix('admin')
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
+        Route::get('jeko/stores', [SuperAdminDashboardController::class, 'jekoStores'])->name('jeko.stores');
     });
 
 /*
@@ -439,9 +437,6 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
 */
 
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
-    Route::post('/lygos', [LygosWebhookController::class, 'handle'])->name('webhooks.lygos');
-    Route::post('/wave/checkout', [WaveWebhookController::class, 'handleCheckout'])->name('webhooks.wave.checkout');
-    Route::post('/fusionpay/payment', FusionPayPaymentWebhook::class)->name('webhooks.fusionpay.payment');
-    Route::post('/fusionpay/payout', FusionPayPayoutWebhook::class)->name('webhooks.fusionpay.payout');
+    Route::post('/jeko', [JekoWebhookController::class, 'handle'])->name('webhooks.jeko');
 });
 

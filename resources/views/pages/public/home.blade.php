@@ -156,14 +156,28 @@
     </section>
 
     {{-- LOGO TICKER — Payment methods --}}
-    <section class="py-8 bg-white border-y border-neutral-100">
+    <section class="py-10 bg-white border-y border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-                <span class="text-sm text-neutral-400 font-medium whitespace-nowrap">Paiements acceptes</span>
-                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain opacity-60 hover:opacity-100 transition-opacity" loading="lazy">
-                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain opacity-60 hover:opacity-100 transition-opacity" loading="lazy">
-                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain opacity-60 hover:opacity-100 transition-opacity" loading="lazy">
-                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain opacity-60 hover:opacity-100 transition-opacity" loading="lazy">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+                <span class="text-sm text-neutral-500 font-semibold whitespace-nowrap uppercase tracking-wide">Paiements acceptes</span>
+                <div class="flex items-center gap-6 sm:gap-10">
+                    <div class="flex flex-col items-center gap-1.5">
+                        <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <span class="text-xs text-neutral-500 font-medium">Wave</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1.5">
+                        <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <span class="text-xs text-neutral-500 font-medium">Orange Money</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1.5">
+                        <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <span class="text-xs text-neutral-500 font-medium">MTN MoMo</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1.5">
+                        <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <span class="text-xs text-neutral-500 font-medium">Moov Money</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -296,10 +310,11 @@
     </section>
 
     {{-- QR CODE — Parcours client visuel --}}
-    <section class="py-20 sm:py-28 bg-white relative overflow-hidden">
+    <section class="py-20 sm:py-28 bg-gradient-to-b from-indigo-50/40 to-white relative overflow-hidden">
         <div class="blob w-[500px] h-[500px] bg-indigo-300 -top-40 -right-60"></div>
+        <div class="blob w-[300px] h-[300px] bg-primary-200 bottom-20 -left-20"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
+            <div class="text-center max-w-2xl mx-auto mb-14 animate-on-scroll">
                 <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-4">QR CODE</div>
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
                     Du scan au paiement en 2 minutes
@@ -311,32 +326,79 @@
 
             @php
                 $qrSteps = [
-                    ['title' => 'Scanner. Commander. Savourer.', 'desc' => 'Le client scanne le QR code sur la table ou le support. Commande facile, sans application a telecharger.', 'image' => 'images/home/qr-step-1.png'],
-                    ['title' => 'Choisir avec photos et prix', 'desc' => 'Il parcourt votre menu complet avec photos appetissantes, prix clairs et navigation intuitive.', 'image' => 'images/home/qr-step-2.png'],
-                    ['title' => 'La commande arrive en cuisine', 'desc' => 'Transmission instantanee, zero delai. Plus de rapidite, plus de fiabilite, plus de satisfaction.', 'image' => 'images/home/qr-step-3.png'],
+                    ['title' => 'Scanner le QR code', 'desc' => 'Le client scanne le QR code sur la table ou le support avec son telephone. Aucune application a telecharger.', 'image' => 'images/home/qr-step-1.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>', 'color' => 'indigo'],
+                    ['title' => 'Choisir avec photos et prix', 'desc' => 'Il parcourt votre menu complet avec photos appetissantes, prix clairs et categories intuitives.', 'image' => 'images/home/qr-step-2.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>', 'color' => 'primary'],
+                    ['title' => 'La commande part en cuisine', 'desc' => 'Transmission instantanee a votre ecran cuisine. Zero erreur, zero delai, zero papier.', 'image' => 'images/home/qr-step-3.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>', 'color' => 'amber'],
+                    ['title' => 'Payer par Mobile Money', 'desc' => 'Le client paie directement depuis son telephone : Wave, Orange Money, MTN ou Moov. L\'argent arrive sur votre compte.', 'image' => null, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>', 'color' => 'emerald'],
                 ];
             @endphp
 
-            <div class="grid md:grid-cols-3 gap-6 lg:gap-8 animate-on-scroll">
+            {{-- Stepper horizontal (desktop) --}}
+            <div class="hidden lg:flex items-center justify-center gap-0 mb-10 animate-on-scroll">
                 @foreach($qrSteps as $i => $step)
-                <div class="relative group">
-                    <div class="relative z-10 bg-white rounded-2xl border border-neutral-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group-hover:-translate-y-1">
-                        {{-- Image --}}
-                        <div class="w-full aspect-[4/3] overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex items-center gap-2 px-4 py-2 rounded-full {{ $i === 0 ? 'bg-indigo-100 text-indigo-700' : ($i === 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-neutral-100 text-neutral-600') }}">
+                            <span class="w-6 h-6 rounded-full bg-{{ $step['color'] }}-500 text-white text-xs font-bold flex items-center justify-center">{{ $i + 1 }}</span>
+                            <span class="text-sm font-semibold whitespace-nowrap">{{ $step['title'] }}</span>
+                        </div>
+                        @if($i < 3)
+                        <svg class="w-6 h-6 text-neutral-300 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Grille 2x2 --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6 animate-on-scroll">
+                @foreach($qrSteps as $i => $step)
+                <div class="group relative bg-white rounded-2xl border border-neutral-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    @if($step['image'])
+                    {{-- Carte avec image --}}
+                    <div class="grid grid-cols-1 sm:grid-rows-[180px_1fr]">
+                        <div class="w-full h-44 sm:h-full overflow-hidden bg-neutral-50">
                             <img src="{{ asset($step['image']) }}" alt="{{ $step['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
                         </div>
-
-                        {{-- Contenu --}}
-                        <div class="p-5">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">{{ $i + 1 }}</span>
-                                <h3 class="font-bold text-neutral-900 text-base">{{ $step['title'] }}</h3>
+                        <div class="p-5 sm:p-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-9 h-9 bg-{{ $step['color'] }}-500 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">{{ $i + 1 }}</span>
+                                <h3 class="font-bold text-neutral-900 text-lg">{{ $step['title'] }}</h3>
                             </div>
                             <p class="text-sm text-neutral-500 leading-relaxed">{{ $step['desc'] }}</p>
                         </div>
                     </div>
+                    @else
+                    {{-- Carte sans image (paiement) — design enrichi --}}
+                    <div class="p-6 sm:p-8 h-full flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-9 h-9 bg-{{ $step['color'] }}-500 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">{{ $i + 1 }}</span>
+                                <h3 class="font-bold text-neutral-900 text-lg">{{ $step['title'] }}</h3>
+                            </div>
+                            <p class="text-sm text-neutral-500 leading-relaxed mb-6">{{ $step['desc'] }}</p>
+                        </div>
+                        {{-- Logos paiement --}}
+                        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-5 border border-emerald-100">
+                            <div class="flex items-center justify-center gap-4 flex-wrap">
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain" loading="lazy">
+                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain" loading="lazy">
+                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain" loading="lazy">
+                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain" loading="lazy">
+                            </div>
+                            <p class="text-center text-xs text-emerald-600 font-medium mt-3">Paiement instantane — argent sur votre compte</p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 @endforeach
+            </div>
+
+            {{-- CTA vers commande supports QR --}}
+            <div class="mt-10 text-center animate-on-scroll">
+                <a href="{{ url('/supports-qr') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    Commander vos supports QR
+                </a>
+                <p class="text-sm text-neutral-500 mt-2">Supports rigides ou autocollants — livres a votre restaurant</p>
             </div>
         </div>
     </section>

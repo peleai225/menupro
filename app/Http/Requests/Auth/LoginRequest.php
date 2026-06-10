@@ -19,7 +19,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -27,14 +27,14 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'L\'adresse email est obligatoire.',
-            'email.email' => 'L\'adresse email n\'est pas valide.',
+            'login.required' => 'L\'email ou le numéro WhatsApp est obligatoire.',
             'password.required' => 'Le mot de passe est obligatoire.',
         ];
     }
 
     /**
      * Attempt to authenticate the request's credentials.
+     * Accepts email OR phone/WhatsApp number.
      *
      * @throws ValidationException
      */
@@ -42,20 +42,30 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $login = $this->input('login');
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
+
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        $credentials = [
+            $field => $field === 'phone' ? preg_replace('/\s+/', '', $login) : $login,
+            'password' => $password,
+        ];
+
+        if (!Auth::attempt($credentials, $remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('Ces identifiants ne correspondent pas à nos enregistrements.'),
+                'login' => __('Ces identifiants ne correspondent pas à nos enregistrements.'),
             ]);
         }
 
-        // Check if user is active
         if (!Auth::user()->is_active) {
             Auth::logout();
-            
+
             throw ValidationException::withMessages([
-                'email' => __('Votre compte a été désactivé. Contactez le support.'),
+                'login' => __('Votre compte a été désactivé. Contactez le support.'),
             ]);
         }
 
@@ -78,7 +88,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('Trop de tentatives. Réessayez dans :seconds secondes.', [
+            'login' => __('Trop de tentatives. Réessayez dans :seconds secondes.', [
                 'seconds' => $seconds,
             ]),
         ]);
@@ -89,7 +99,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('login')) . '|' . $this->ip());
     }
 }
-

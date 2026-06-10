@@ -12,7 +12,7 @@ use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
 use App\Models\User;
-use App\Services\LygosGateway;
+use App\Services\JekoGateway;
 use App\Services\MediaUploader;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -25,21 +25,16 @@ class RegisterController extends Controller
 {
     public function __construct(
         protected MediaUploader $mediaUploader,
-        protected LygosGateway $lygosGateway
+        protected JekoGateway $jekoGateway
     ) {}
 
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
-        // Check if registrations are open
         $registrationsOpen = \App\Models\SystemSetting::get('registrations_open', true);
         if (!$registrationsOpen) {
             return view('pages.auth.registrations-closed');
         }
 
-        // Parrainage Commando : stocker ref en session si UUID agent valide
         $ref = request()->query('ref');
         if ($ref) {
             $agent = \App\Models\CommandoAgent::where('uuid', $ref)->valide()->first();
@@ -48,18 +43,15 @@ class RegisterController extends Controller
             }
         }
 
-        // Capture le plan demande depuis l'URL (?plan=essentiel, ?plan=pro, ?plan=business)
         $planSlug = request()->query('plan', 'pro');
 
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
 
-        // Fallback : si le plan demande est desactive, retombe sur le plan featured
         if (!$plan) {
             $plan = Plan::where('is_featured', true)->where('is_active', true)->first()
                 ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
         }
 
-        // Tous les plans actifs (pour permettre au user de switcher dans le formulaire)
         $availablePlans = Plan::where('is_active', true)
             ->orderBy('sort_order')
             ->get();
@@ -67,28 +59,19 @@ class RegisterController extends Controller
         return view('pages.auth.register', compact('plan', 'availablePlans'));
     }
 
-    /**
-     * Handle an incoming registration request.
-     * Create account IMMEDIATELY with PENDING status, then redirect to payment.
-     * Account will be ACTIVATED after successful payment.
-     */
     public function store(RegisterRequest $request): RedirectResponse
     {
-        // Determine which plan the user signed up for (Starter or MenuPro)
-        // Priority: request input (form) > query string > default menupro
-        $planSlug = $request->input('plan', $request->query('plan', 'menupro'));
-        if (!in_array($planSlug, ['starter', 'menupro'], true)) {
-            $planSlug = 'menupro';
+        $planSlug = $request->input('plan', $request->query('plan', 'pro'));
+        $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
+        if (!$plan) {
+            $plan = Plan::where('is_featured', true)->where('is_active', true)->first()
+                ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
         }
-        $plan = Plan::where('slug', $planSlug)->where('is_active', true)->firstOrFail();
 
-        // Get billing period (default: monthly)
         $billingPeriod = $request->billing_period ?? 'monthly';
-        
-        // Calculate price with discount based on billing period
+
         $priceCalculation = Subscription::calculatePriceWithDiscount($plan->price, $billingPeriod);
-        
-        // Calculate duration based on billing period
+
         $durationDays = match($billingPeriod) {
             'monthly' => 30,
             'quarterly' => 90,
@@ -97,7 +80,6 @@ class RegisterController extends Controller
             default => 30,
         };
 
-        // Calculate add-ons total price
         $addonsTotal = 0;
         if ($request->has('addons') && is_array($request->addons)) {
             $availableAddons = SubscriptionAddon::getAvailableAddons();
@@ -110,13 +92,11 @@ class RegisterController extends Controller
             }
         }
 
-        // Total price = base price (with discount) + add-ons
         $totalPrice = $priceCalculation['final_price'] + $addonsTotal;
 
         try {
             DB::beginTransaction();
 
-            // CREATE ACCOUNT WITH 7-DAY FREE TRIAL
             $trialDays = 7;
             $trialEndsAt = now()->addDays($trialDays);
 
@@ -141,13 +121,12 @@ class RegisterController extends Controller
                 'description' => $request->restaurant_description,
                 'address' => $request->restaurant_address,
                 'city' => $request->restaurant_city,
-                'status' => RestaurantStatus::ACTIVE, // ACTIVATED immediately for trial
+                'status' => RestaurantStatus::ACTIVE,
                 'current_plan_id' => $plan->id,
                 'subscription_ends_at' => $trialEndsAt,
-                'orders_blocked' => false, // Allow orders during trial
+                'orders_blocked' => false,
             ]);
 
-            // Upload logo if provided
             if ($request->hasFile('logo')) {
                 $restaurant->logo_path = $this->mediaUploader->uploadLogo(
                     $request->file('logo'),
@@ -155,7 +134,6 @@ class RegisterController extends Controller
                 );
             }
 
-            // Upload banner if provided
             if ($request->hasFile('banner')) {
                 $restaurant->banner_path = $this->mediaUploader->uploadBanner(
                     $request->file('banner'),
@@ -163,7 +141,6 @@ class RegisterController extends Controller
                 );
             }
 
-            // Upload RCCM document (optional)
             if ($request->hasFile('rccm_document')) {
                 $restaurant->rccm_document_path = $this->mediaUploader->upload(
                     $request->file('rccm_document'),
@@ -174,7 +151,6 @@ class RegisterController extends Controller
 
             $restaurant->save();
 
-            // Create user
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -184,7 +160,6 @@ class RegisterController extends Controller
                 'restaurant_id' => $restaurant->id,
             ]);
 
-            // Create FREE TRIAL subscription (7 days)
             $subscription = Subscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,
@@ -193,78 +168,63 @@ class RegisterController extends Controller
                 'trial_days' => $trialDays,
                 'starts_at' => now(),
                 'ends_at' => $trialEndsAt,
-                'amount_paid' => 0, // Free trial
+                'amount_paid' => 0,
                 'billing_period' => $billingPeriod,
                 'discount_percentage' => 0,
             ]);
 
-            // No add-ons during trial (can be added when converting to paid)
-
             DB::commit();
 
-            // Fire registered event (sends email verification)
             event(new Registered($user));
 
-            // Auto-login user
             auth()->login($user);
 
-            // Send welcome email with trial information
             $user->notify(new \App\Notifications\TrialStartedNotification($subscription));
 
-            // Redirect to dashboard with success message
             return redirect()->route('restaurant.dashboard')
-                ->with('success', "🎉 Bienvenue ! Votre essai gratuit de {$trialDays} jours a commencé. Profitez de toutes les fonctionnalités de MenuPro !");
+                ->with('success', "Bienvenue ! Votre essai gratuit de {$trialDays} jours a commencé. Profitez de toutes les fonctionnalités de MenuPro !");
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Registration error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'request' => $request->except(['password']),
             ]);
-            
+
             return back()
                 ->withInput()
                 ->with('error', 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
         }
     }
 
-    /**
-     * Handle successful payment callback - ACTIVATE ACCOUNT AFTER PAYMENT
-     */
     public function paymentSuccess(Subscription $subscription): RedirectResponse
     {
-        // Ensure the authenticated user owns this subscription (multi-tenant safety)
         $user = auth()->user();
         if (!$user || !$user->belongsToRestaurant($subscription->restaurant_id)) {
             abort(403, 'Accès non autorisé à cet abonnement.');
         }
 
-        // Verify payment using subscription reference (order_id in Lygos)
-        $subscriptionReference = 'SUB-' . $subscription->id . '-' . $subscription->created_at->format('Ymd');
-        $platformApiKey = \App\Models\SystemSetting::get('lygos_api_key', '');
-        
-        if ($platformApiKey) {
-            $result = $this->lygosGateway
-                ->forPlatform()
-                ->verifyPayment($subscriptionReference);
-
-            if (!$result['success'] || !$result['paid']) {
-                return redirect()->route('restaurant.dashboard')
-                    ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
+        $ref = $subscription->payment_reference;
+        if ($ref) {
+            $jeko = $this->jekoGateway->forPlatform();
+            if ($jeko->isConfigured()) {
+                $result = $jeko->verifyPaymentLink($ref);
+                if ($result['success'] && !($result['paid'] ?? false)) {
+                    return redirect()->route('restaurant.dashboard')
+                        ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
+                }
             }
         }
 
         try {
             DB::beginTransaction();
 
-            // Activate subscription
             $subscription->update([
                 'status' => SubscriptionStatus::ACTIVE,
-                'payment_method' => 'lygos',
+                'payment_method' => 'jeko',
             ]);
 
-            // Activate restaurant
             $restaurant = $subscription->restaurant;
             $restaurant->update([
                 'status' => RestaurantStatus::ACTIVE,
@@ -276,36 +236,29 @@ class RegisterController extends Controller
             DB::commit();
 
             return redirect()->route('restaurant.dashboard')
-                ->with('success', 'Félicitations ! Votre abonnement a été activé avec succès ! Votre restaurant est maintenant opérationnel.');
+                ->with('success', 'Félicitations ! Votre abonnement a été activé avec succès !');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::error('Subscription activation error: ' . $e->getMessage(), [
                 'exception' => $e,
                 'subscription_id' => $subscription->id,
             ]);
-            
+
             return redirect()->route('restaurant.dashboard')
                 ->with('error', 'Une erreur est survenue lors de l\'activation. Veuillez contacter le support.');
         }
     }
 
-    /**
-     * Handle cancelled payment - KEEP ACCOUNT, USER CAN RETRY
-     */
     public function paymentCancel(Subscription $subscription): RedirectResponse
     {
-        // Ensure the authenticated user owns this subscription (multi-tenant safety)
         $user = auth()->user();
         if (!$user || !$user->belongsToRestaurant($subscription->restaurant_id)) {
             abort(403, 'Accès non autorisé à cet abonnement.');
         }
 
-        // Keep account and subscription as PENDING
-        // User can retry payment from dashboard
         return redirect()->route('restaurant.dashboard')
             ->with('info', 'Le paiement a été annulé. Votre compte est créé mais en attente de paiement. Vous pouvez compléter votre abonnement depuis votre tableau de bord.');
     }
 }
-

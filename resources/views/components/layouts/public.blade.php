@@ -134,16 +134,26 @@
         </div>
     </nav>
 
-    <!-- Promotional Banner -->
+    <!-- Promotional Banner (dynamic) -->
     @php
         $bannerEnabled = \App\Models\SystemSetting::get('banner_enabled', false);
         $bannerText = \App\Models\SystemSetting::get('banner_text', '');
         $bannerLink = \App\Models\SystemSetting::get('banner_link', '');
         $bannerColor = \App\Models\SystemSetting::get('banner_color', 'primary');
+
+        if ($bannerEnabled && $bannerText) {
+            $bannerDynamicData = [
+                '{restaurants}' => \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->count(),
+                '{commandes}' => \App\Models\Order::count(),
+                '{villes}' => \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->whereNotNull('city')->distinct('city')->count('city'),
+                '{date}' => now()->translatedFormat('d M Y'),
+            ];
+            $bannerText = str_replace(array_keys($bannerDynamicData), array_values($bannerDynamicData), $bannerText);
+        }
     @endphp
     @if($bannerEnabled && $bannerText)
         <div class="fixed top-16 left-0 right-0 z-40 {{ $bannerColor === 'primary' ? 'bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600' : ($bannerColor === 'success' ? 'bg-gradient-to-r from-secondary-600 via-secondary-500 to-secondary-600' : ($bannerColor === 'warning' ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600' : 'bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900')) }} text-white text-sm font-medium shadow-md overflow-hidden"
-             x-data="{ showBanner: !sessionStorage.getItem('banner_closed') }" x-show="showBanner" x-cloak
+             x-data="{ showBanner: !sessionStorage.getItem('banner_closed_{{ md5($bannerText) }}') }" x-show="showBanner" x-cloak
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="-translate-y-full opacity-0"
              x-transition:enter-end="translate-y-0 opacity-100"
@@ -151,7 +161,6 @@
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="-translate-y-full opacity-0">
             <div class="relative py-2.5 px-12">
-                {{-- Marquee scrolling on mobile, static on desktop --}}
                 <div class="flex items-center justify-center">
                     <div class="animate-marquee sm:animate-none whitespace-nowrap sm:whitespace-normal flex items-center gap-2">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
@@ -165,7 +174,7 @@
                         @endif
                     </div>
                 </div>
-                <button @click="showBanner = false; sessionStorage.setItem('banner_closed', '1')" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-white/20 transition" aria-label="Fermer la bannière">
+                <button @click="showBanner = false; sessionStorage.setItem('banner_closed_{{ md5($bannerText) }}', '1')" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-white/20 transition" aria-label="Fermer la bannière">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>

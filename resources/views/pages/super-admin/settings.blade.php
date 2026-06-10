@@ -173,99 +173,120 @@
                 <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
                 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {{-- Jeko Africa --}}
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                        Wave (Checkout + Payout)
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        Jeko Africa
                     </h2>
                     <p class="text-sm text-neutral-500 mb-5">
-                        Configuration globale Wave pour les paiements clients (Checkout) et les retraits vers les restaurants (Payout API).
-                        <a href="https://docs.wave.com/payout/#payout-api" target="_blank" class="text-primary-600 hover:underline">Documentation</a>
+                        Paiements Mobile Money multi-opérateurs (Wave, Orange Money, MTN, Moov, Djamo) et cartes bancaires.
+                        <a href="https://developer.jeko.africa" target="_blank" class="text-primary-600 hover:underline">Documentation</a>
                     </p>
                     <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">API Key Wave</label>
-                            <input type="password" name="wave_api_key" value="{{ old('wave_api_key', $settings['wave_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="wave_ci_prod_...">
-                            <p class="text-xs text-neutral-500 mt-1">
-                                Clé API Wave Business (portail développeur). Utilisée pour toutes les requêtes Checkout et Payout.
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Signing Secret Wave</label>
-                            <input type="password" name="wave_signing_secret" value="{{ old('wave_signing_secret', $settings['wave_signing_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="wave_ci_AKS_...">
-                            <p class="text-xs text-neutral-500 mt-1">
-                                Secret de signature HMAC pour les requêtes sortantes et la vérification des webhooks (header <code class="bg-neutral-200 px-1 rounded">Wave-Signature</code>).
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Commission MenuPro sur paiements Wave</label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" name="wave_commission_rate" value="{{ old('wave_commission_rate', ($settings['wave_commission_rate'] ?? 0.02)) }}" min="0" max="1" step="0.001" class="w-32 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                <span class="text-sm text-neutral-500">0.02 = 2 %</span>
-                            </div>
-                            <p class="text-xs text-neutral-500 mt-1">
-                                Taux de commission prélevé par MenuPro sur chaque paiement Wave avant de créditer le wallet virtuel du restaurant.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        Lygos <span class="text-neutral-500 text-sm font-normal">(abonnements)</span>
-                    </h2>
-                    <div class="space-y-5">
                         <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
                             <div>
-                                <span class="font-medium text-neutral-900">Activer Lygos</span>
-                                <p class="text-sm text-neutral-500">Utiliser Lygos pour les abonnements de la plateforme</p>
+                                <span class="font-medium text-neutral-900">Activer Jeko (paiements abonnements)</span>
+                                <p class="text-sm text-neutral-500">Utilisé pour les abonnements restaurateurs via la plateforme</p>
                             </div>
-                            <input type="checkbox" name="lygos_enabled" value="1" {{ ($settings['lygos_enabled'] ?? true) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                            <input type="checkbox" name="jeko_enabled" value="1" {{ ($settings['jeko_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
                         </label>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">API Key</label>
-                            <input type="password" name="lygos_api_key" value="{{ old('lygos_api_key', $settings['lygos_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="sk_live_...">
-                            <p class="text-xs text-neutral-500 mt-1">Clé API Lygos (par restaurant, pour les commandes)</p>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API (X-API-KEY) <span class="text-red-500">*</span></label>
+                            <input type="password" name="jeko_api_key" value="{{ old('jeko_api_key', $settings['jeko_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Votre clé API Jeko">
+                            <p class="text-xs text-neutral-500 mt-1">Jeko Cockpit → Paramètres → API & Webhooks</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Webhook Secret (optionnel)</label>
-                            <input type="password" name="lygos_webhook_secret" value="{{ old('lygos_webhook_secret', $settings['lygos_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="whsec_...">
-                            <p class="text-xs text-neutral-500 mt-1">Secret pour vérifier les webhooks (optionnel)</p>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID Clé API (X-API-KEY-ID) <span class="text-red-500">*</span></label>
+                            <input type="password" name="jeko_api_key_id" value="{{ old('jeko_api_key_id', $settings['jeko_api_key_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Identifiant de la clé API">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Mode</label>
-                            <select name="lygos_mode" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                <option value="test" {{ ($settings['lygos_mode'] ?? 'live') === 'test' ? 'selected' : '' }}>Test</option>
-                                <option value="live" {{ ($settings['lygos_mode'] ?? 'live') === 'live' ? 'selected' : '' }}>Production</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                        <div x-data="jekoStores()">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Store ID <span class="text-red-500">*</span></label>
 
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        FusionPay (MoneyFusion)
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-5">Paiements Mobile Money (Wave, Orange, MTN) et transferts vers les restaurants. <a href="https://docs.moneyfusion.net/fr" target="_blank" class="text-primary-600 hover:underline">Documentation</a></p>
-                    <div class="space-y-5">
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
-                            <div>
-                                <span class="font-medium text-neutral-900">Activer FusionPay</span>
-                                <p class="text-sm text-neutral-500">Paiements clients et transferts vers les wallets restaurants</p>
+                            {{-- Sélecteur de store (visible après chargement) --}}
+                            <template x-if="stores.length > 0">
+                                <div class="mb-2">
+                                    <select @change="selectStore($event.target.value)"
+                                            class="w-full h-12 px-4 bg-white border-2 border-primary-400 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">— Choisir un magasin —</option>
+                                        <template x-for="store in stores" :key="store.id">
+                                            <option :value="store.id" :selected="store.id === storeIdInput" x-text="store.name + ' (' + store.id + ')'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </template>
+
+                            <div class="flex gap-2">
+                                <input type="text" name="jeko_store_id" id="jeko_store_id_input"
+                                       value="{{ old('jeko_store_id', $settings['jeko_store_id'] ?? '') }}"
+                                       x-model="storeIdInput"
+                                       class="flex-1 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                       placeholder="59ae202a-f583-4a15-970f-9e99bd1e0baa">
+                                <button type="button" @click="fetchStores"
+                                        :disabled="loading"
+                                        class="h-12 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium flex items-center gap-2 whitespace-nowrap transition-colors">
+                                    <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                    </svg>
+                                    <span x-text="loading ? 'Chargement...' : 'Récupérer mes magasins'"></span>
+                                </button>
                             </div>
-                            <input type="checkbox" name="fusionpay_enabled" value="1" {{ ($settings['fusionpay_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
-                        </label>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">URL API (pay-in)</label>
-                            <input type="url" name="fusionpay_api_url" value="{{ old('fusionpay_api_url', $settings['fusionpay_api_url'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://... (depuis votre tableau de bord)">
-                            <p class="text-xs text-neutral-500 mt-1">Lien API généré dans Money Fusion > API de paiement</p>
+
+                            <p class="text-xs text-neutral-500 mt-1">UUID du magasin Jeko. Cliquez sur "Récupérer mes magasins" après avoir saisi vos clés API.</p>
+                            <p x-show="error" x-text="error" class="text-xs text-red-600 mt-1"></p>
                         </div>
+
+                        @push('scripts')
+                        <script>
+                        function jekoStores() {
+                            return {
+                                stores: [],
+                                loading: false,
+                                error: '',
+                                storeIdInput: '{{ old('jeko_store_id', $settings['jeko_store_id'] ?? '') }}',
+                                fetchStores() {
+                                    this.loading = true;
+                                    this.error = '';
+                                    this.stores = [];
+                                    fetch('{{ route('super-admin.jeko.stores') }}', {
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                                        }
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            this.error = data.error;
+                                        } else {
+                                            this.stores = data.stores ?? [];
+                                            if (this.stores.length === 1) {
+                                                this.storeIdInput = this.stores[0].id;
+                                            }
+                                        }
+                                    })
+                                    .catch(() => { this.error = 'Erreur réseau. Vérifiez vos clés API puis sauvegardez avant de réessayer.'; })
+                                    .finally(() => { this.loading = false; });
+                                },
+                                selectStore(id) {
+                                    if (id) this.storeIdInput = id;
+                                }
+                            }
+                        }
+                        </script>
+                        @endpush
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé privée (pay-out)</label>
-                            <input type="password" name="fusionpay_private_key" value="{{ old('fusionpay_private_key', $settings['fusionpay_private_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Clé API pour les retraits">
-                            <p class="text-xs text-neutral-500 mt-1">Clé API pour l'API de retrait (transferts vers restaurants)</p>
-                            <p class="text-xs text-neutral-500 mt-1">Webhooks : <code class="bg-neutral-200 px-1 rounded">{{ url('/webhooks/fusionpay/payment') }}</code> et <code class="bg-neutral-200 px-1 rounded">{{ url('/webhooks/fusionpay/payout') }}</code></p>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé Secrète Webhook</label>
+                            <input type="password" name="jeko_webhook_secret" value="{{ old('jeko_webhook_secret', $settings['jeko_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Pour vérification HMAC-SHA256">
+                            <p class="text-xs text-neutral-500 mt-1">
+                                URL Webhook à configurer dans Jeko Cockpit :
+                                <code class="bg-neutral-200 px-1 rounded text-xs">{{ url('/webhooks/jeko') }}</code>
+                            </p>
                         </div>
                     </div>
                 </div>

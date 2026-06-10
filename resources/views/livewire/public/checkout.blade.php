@@ -838,36 +838,20 @@
                     </div>
 
                     <!-- Payment Method -->
-                    @if($this->fusionpayPaymentAvailable || $this->waveCheckoutAvailable || $this->onlinePaymentAvailable || $this->cashOnDeliveryAvailable)
+                    @if($this->jekoPaymentAvailable || $this->cashOnDeliveryAvailable)
                         <div class="mb-6 pb-6 border-b border-neutral-200">
                             <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
                             <div class="space-y-2">
-                                {{-- Wave Checkout direct — le restaurant reçoit l'argent instantanément --}}
-                                @if($this->waveCheckoutAvailable)
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'wave_checkout' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                        <input type="radio" wire:model="payment_method" value="wave_checkout" class="text-primary-500 focus:ring-primary-500">
-                                        <x-payment-logo method="wave" />
-                                        <div class="flex-1">
-                                            <span class="font-medium">Wave</span>
-                                            <span class="ml-2 text-xs px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">Paiement direct</span>
+                                @if($this->jekoPaymentAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'jeko' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="jeko" class="text-primary-500 focus:ring-primary-500">
+                                        <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-white text-xs font-bold">J</span>
                                         </div>
-                                        <span class="text-xs text-neutral-500">Rapide & sécurisé</span>
-                                    </label>
-                                @endif
-                                @if($this->fusionpayPaymentAvailable)
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'fusionpay' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                        <input type="radio" wire:model="payment_method" value="fusionpay" class="text-primary-500 focus:ring-primary-500">
-                                        <x-payment-logo method="fusionpay" />
-                                        <span class="font-medium">FusionPay</span>
-                                        <span class="text-xs text-neutral-500">(Wave, Orange, MTN)</span>
-                                    </label>
-                                @endif
-                                @if($this->onlinePaymentAvailable)
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'lygos' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                        <input type="radio" wire:model="payment_method" value="{{ $this->onlinePaymentMethod }}" class="text-primary-500 focus:ring-primary-500">
-                                        <x-payment-logo method="online" />
-                                        <span class="font-medium">Paiement en ligne</span>
-                                        <span class="text-xs text-neutral-500">(Lygos)</span>
+                                        <div class="flex-1">
+                                            <span class="font-medium">Jeko</span>
+                                            <span class="text-xs text-neutral-500 ml-2">(Wave, Orange, MTN, Moov, Djamo, Carte)</span>
+                                        </div>
                                     </label>
                                 @endif
                                 @if($this->cashOnDeliveryAvailable)

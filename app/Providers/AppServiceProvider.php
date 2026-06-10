@@ -21,14 +21,11 @@ use App\Policies\OrderPolicy;
 use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
-use App\Services\LygosGateway;
+use App\Services\JekoGateway;
 use App\Services\MediaUploader;
 use App\Services\PlanLimiter;
 use App\Services\StockManager;
 use App\Services\WalletService;
-use App\Services\WaveCheckoutService;
-use App\Services\WavePayoutService;
-use App\Services\WaveSignatureService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -55,12 +52,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register services as singletons
         $this->app->singleton(MediaUploader::class);
-        $this->app->singleton(LygosGateway::class);
+        $this->app->singleton(JekoGateway::class);
         $this->app->singleton(PlanLimiter::class);
         $this->app->singleton(StockManager::class);
-        $this->app->singleton(WaveSignatureService::class);
-        $this->app->singleton(WaveCheckoutService::class);
-        $this->app->singleton(WavePayoutService::class);
         $this->app->singleton(WalletService::class);
     }
 
@@ -69,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force APP_URL for correct payment redirect URLs (Lygos, Wave)
+        // Force APP_URL for correct payment redirect URLs
         if (config('app.env') === 'production' && $appUrl = config('app.url')) {
             URL::forceRootUrl($appUrl);
         }
