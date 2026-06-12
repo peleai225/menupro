@@ -633,14 +633,14 @@
             <form wire:submit="savePayment" class="max-w-2xl">
             <div class="card p-6 space-y-6">
                 {{-- Modes configurés par la plateforme (Super Admin) --}}
-                @if($this->fusionpayPaymentAvailable)
+                @if($this->jekoPaymentAvailable)
                     <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl mb-6">
                         <h3 class="font-semibold text-neutral-900 mb-2">Modes de paiement activés par la plateforme</h3>
                         <p class="text-sm text-neutral-500 mb-4">Ces options sont proposées à vos clients au checkout. Configuration dans Super Admin.</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
-                                <x-payment-logo method="fusionpay" />
-                                FusionPay
+                                <x-payment-logo method="jeko" />
+                                Jeko
                             </span>
                         </div>
                     </div>

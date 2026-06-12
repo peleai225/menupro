@@ -174,6 +174,17 @@ class Settings extends Component
         return false;
     }
 
+    #[Computed]
+    public function jekoPaymentAvailable(): bool
+    {
+        try {
+            $jeko = app(\App\Services\JekoGateway::class)->forPlatform();
+            return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     public function requestPayout(): void
     {
         session()->flash('error', 'Le service de retrait n\'est pas encore disponible. Contactez le support.');

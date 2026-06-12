@@ -164,8 +164,13 @@ class Checkout extends Component
     #[Computed]
     public function jekoPaymentAvailable(): bool
     {
-        $jeko = app(JekoGateway::class)->forPlatform();
-        return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
+        try {
+            $jeko = app(JekoGateway::class)->forPlatform();
+            return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
+        } catch (\Throwable $e) {
+            \Log::error('Checkout: jekoPaymentAvailable check failed', ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 
     #[Computed]
