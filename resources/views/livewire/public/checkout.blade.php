@@ -495,6 +495,9 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                     this.validateDistance(parseFloat(savedLat), parseFloat(savedLng));
                 }
             });
+        } else {
+            // Auto-demander la localisation dès l'affichage du bloc livraison
+            this.$nextTick(() => this.useMyLocation());
         }
     },
 
