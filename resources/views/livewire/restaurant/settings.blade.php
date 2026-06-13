@@ -657,52 +657,6 @@
                     </button>
                 </div>
 
-                <div class="border-t border-neutral-200 pt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="font-semibold text-neutral-900">Paiement mobile (Lygos)</h3>
-                            <p class="text-sm text-neutral-500">Orange Money, MTN MoMo, Wave...</p>
-                        </div>
-                        <button type="button" wire:click="$toggle('lygos_enabled')"
-                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $lygos_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $lygos_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                        </button>
-                    </div>
-
-                    @if($lygos_enabled)
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé API Lygos <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="lygos_api_key" class="input" placeholder="Votre clé API Lygos">
-                                <p class="text-xs text-neutral-500 mt-1">
-                                    Clé API obtenue sur votre compte Lygos (lygos.ci)
-                                </p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé Secrète Lygos <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
-                                </label>
-                                <input type="password" wire:model="lygos_api_secret" class="input" placeholder="Optionnel - pour webhooks sécurisés">
-                                <p class="text-xs text-neutral-500 mt-1">
-                                    Optionnel : Utilisée uniquement pour la vérification des signatures de webhooks (si fournie par Lygos)
-                                </p>
-                            </div>
-                            
-                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p class="text-xs text-blue-800">
-                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Obtenez votre clé API sur <a href="https://lygos.ci" target="_blank" class="text-blue-600 hover:underline font-medium">lygos.ci</a>
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
                 <!-- Jeko Africa -->
                 <div class="border-t border-neutral-200 pt-6">
                     <div class="flex items-center justify-between mb-4">
