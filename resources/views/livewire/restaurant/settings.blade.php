@@ -718,25 +718,6 @@
                     @endif
                 </div>
 
-                <!-- Comptes marchands (Wave Checkout direct) -->
-                <div class="border-t border-neutral-200 pt-6 mt-6">
-                    <div class="mb-4">
-                        <h3 class="font-semibold text-neutral-900">Comptes marchands</h3>
-                        <p class="text-sm text-neutral-500">Renseignez votre ID marchand Wave pour recevoir les paiements directement sur votre compte Wave Business.</p>
-                    </div>
-
-                    <div class="space-y-4 p-4 bg-neutral-50 rounded-xl">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID Marchand Wave</label>
-                            <input type="text" wire:model="wave_merchant_id" class="input font-mono uppercase" placeholder="CI12345678" maxlength="10">
-                            <p class="text-xs text-neutral-500 mt-1">Format : code pays (2 lettres) + 8 chiffres. Ex : CI12345678 (Côte d'Ivoire), SN12345678 (Sénégal)</p>
-                            @error('wave_merchant_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
                 <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
