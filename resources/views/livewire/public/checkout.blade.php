@@ -1,3 +1,8 @@
+@push('head')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+@endpush
+
 @php
     $primaryColor = $restaurant->primary_color ?? '#f97316';
 @endphp
@@ -248,6 +253,11 @@
                                           class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                           placeholder="Ex: Code portail 1234, 2e etage porte gauche..."></textarea>
                             </div>
+                        </div>
+
+                        {{-- Mini carte Leaflet --}}
+                        <div x-show="userLat && userLng" x-cloak class="mt-4">
+                            <div x-ref="mapContainer" class="w-full h-48 rounded-xl overflow-hidden border border-neutral-200 z-0"></div>
                         </div>
                     </div>
                 @endif
@@ -516,6 +526,11 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     },
 
+    map: null,
+    userMarker: null,
+    restaurantMarker: null,
+    radiusCircle: null,
+
     validateDistance(lat, lng) {
         const distance = this.getDistance(restaurantLat, restaurantLng, lat, lng);
         const inRadius = deliveryRadius === 0 || distance <= deliveryRadius;
@@ -526,7 +541,40 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
             this.statusMsg = '';
             this.errorMsg = `Hors zone de livraison (max: ${deliveryRadius} km). Distance: ${distance.toFixed(1)} km.`;
         }
+        this.updateMap(lat, lng);
         return inRadius;
+    },
+
+    updateMap(lat, lng) {
+        if (typeof L === 'undefined') return;
+        this.$nextTick(() => {
+            const container = this.$refs.mapContainer;
+            if (!container) return;
+
+            if (!this.map) {
+                this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([lat, lng], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(this.map);
+
+                if (deliveryRadius > 0) {
+                    this.radiusCircle = L.circle([restaurantLat, restaurantLng], {
+                        radius: deliveryRadius * 1000,
+                        color: '#f97316', fillColor: '#f9731620', fillOpacity: 0.15, weight: 1
+                    }).addTo(this.map);
+                }
+
+                this.restaurantMarker = L.marker([restaurantLat, restaurantLng], {
+                    icon: L.divIcon({ className: '', html: '<div style="background:#f97316;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>', iconSize: [12,12], iconAnchor: [6,6] })
+                }).addTo(this.map);
+            }
+
+            if (this.userMarker) this.map.removeLayer(this.userMarker);
+            this.userMarker = L.marker([lat, lng], {
+                icon: L.divIcon({ className: '', html: '<div style="background:#3b82f6;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize: [14,14], iconAnchor: [7,7] })
+            }).addTo(this.map);
+
+            const bounds = L.latLngBounds([[lat, lng], [restaurantLat, restaurantLng]]);
+            this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+        });
     },
 
     async searchAddresses(query) {

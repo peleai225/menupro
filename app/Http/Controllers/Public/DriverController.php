@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Enums\DeliveryStatus;
+use App\Events\DriverLocationUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\DeliveryDriver;
@@ -149,6 +150,14 @@ class DriverController extends Controller
                 'driver_longitude' => $request->longitude,
                 'driver_location_at' => now(),
             ]);
+
+            broadcast(new DriverLocationUpdated(
+                deliveryId: $activeDelivery->id,
+                latitude: $request->latitude,
+                longitude: $request->longitude,
+                driverName: $driver->name,
+                status: $activeDelivery->status->value,
+            ));
         }
 
         return response()->json(['success' => true]);

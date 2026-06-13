@@ -105,6 +105,7 @@
         /* Tap highlight supprimé sur mobile */
         * { -webkit-tap-highlight-color: transparent; }
     </style>
+    @stack('head')
 </head>
 <body class="antialiased font-sans">
     {{ $slot }}

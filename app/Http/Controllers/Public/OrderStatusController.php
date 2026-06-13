@@ -114,8 +114,9 @@ class OrderStatusController extends Controller
 
         // Refresh order from database to get latest status
         $order->refresh();
+        $order->load('delivery.driver');
 
-        return response()->json([
+        $response = [
             'status' => $order->status->value,
             'status_label' => $order->status->label(),
             'status_color' => $order->status->color(),
@@ -129,7 +130,15 @@ class OrderStatusController extends Controller
             'review_url' => (!$order->review()->exists() && in_array($order->status->value, ['ready', 'completed']))
                 ? route('r.review.create', [$restaurant->slug, $order->tracking_token])
                 : null,
-        ]);
+        ];
+
+        if ($order->delivery && $order->delivery->driver_latitude) {
+            $response['driver_lat'] = (float) $order->delivery->driver_latitude;
+            $response['driver_lng'] = (float) $order->delivery->driver_longitude;
+            $response['driver_status_label'] = $order->delivery->status->label();
+        }
+
+        return response()->json($response);
     }
 
     /**

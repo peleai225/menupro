@@ -1,3 +1,24 @@
+@push('head')
+@if($order->delivery && $order->delivery->driver && $order->delivery->status->isActive())
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.17.1/dist/echo.iife.js"></script>
+<script>
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+    key: '{{ env("REVERB_APP_KEY") }}',
+    wsHost: '{{ env("REVERB_HOST") }}',
+    wsPort: {{ env("REVERB_PORT", 8080) }},
+    wssPort: {{ env("REVERB_PORT", 8080) }},
+    forceTLS: {{ env("REVERB_SCHEME") === "https" ? "true" : "false" }},
+    enabledTransports: ['ws', 'wss'],
+    disableStats: true,
+});
+</script>
+@endif
+@endpush
+
 <x-layouts.restaurant-public :restaurant="$restaurant" :hide-header="true">
     <div class="min-h-screen bg-neutral-50 py-8">
         <div class="max-w-2xl mx-auto px-4">
@@ -302,12 +323,20 @@
                     </a>
                 </div>
 
-                <div class="bg-white rounded-xl p-3">
+                <div class="bg-white rounded-xl p-3 mb-3">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span class="text-sm font-medium text-blue-700">{{ $order->delivery->status->label() }}</span>
+                        <span class="text-sm font-medium text-blue-700" id="driver-status-label">{{ $order->delivery->status->label() }}</span>
                     </div>
                 </div>
+
+                <!-- Carte suivi livreur en direct -->
+                <div id="driver-map" class="w-full h-56 rounded-xl overflow-hidden border border-blue-200"></div>
+                <p class="text-xs text-neutral-400 text-center mt-2" id="driver-map-time">
+                    @if($order->delivery->driver_location_at)
+                        Dernière mise à jour: {{ $order->delivery->driver_location_at->diffForHumans() }}
+                    @endif
+                </p>
             </div>
             @endif
 
@@ -726,4 +755,75 @@
         animation: fade-out 0.3s ease-out;
     }
 </style>
+
+@if($order->delivery && $order->delivery->driver && $order->delivery->status->isActive())
+<script>
+(function() {
+    const mapEl = document.getElementById('driver-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    const deliveryId = {{ $order->delivery->id }};
+    const deliveryLat = {{ $order->delivery_latitude ?? $order->delivery->delivery_latitude ?? 5.36 }};
+    const deliveryLng = {{ $order->delivery_longitude ?? $order->delivery->delivery_longitude ?? -4.008 }};
+    const driverLat = {{ $order->delivery->driver_latitude ?? $order->delivery->driver->latitude ?? 'null' }};
+    const driverLng = {{ $order->delivery->driver_longitude ?? $order->delivery->driver->longitude ?? 'null' }};
+
+    const map = L.map(mapEl, { zoomControl: false }).setView([deliveryLat, deliveryLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+    // Marqueur destination (client)
+    const destIcon = L.divIcon({ className: '', html: '<div style="background:#10b981;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize: [14,14], iconAnchor: [7,7] });
+    L.marker([deliveryLat, deliveryLng], { icon: destIcon }).addTo(map).bindPopup('Votre adresse');
+
+    // Marqueur livreur
+    const driverIcon = L.divIcon({ className: '', html: '<div style="background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.5)"></div>', iconSize: [16,16], iconAnchor: [8,8] });
+    let driverMarker = null;
+
+    if (driverLat && driverLng) {
+        driverMarker = L.marker([driverLat, driverLng], { icon: driverIcon }).addTo(map);
+        map.fitBounds([[deliveryLat, deliveryLng], [driverLat, driverLng]], { padding: [30, 30], maxZoom: 15 });
+    }
+
+    function updateDriverPosition(lat, lng, status) {
+        if (!driverMarker) {
+            driverMarker = L.marker([lat, lng], { icon: driverIcon }).addTo(map);
+        } else {
+            driverMarker.setLatLng([lat, lng]);
+        }
+        map.fitBounds([[deliveryLat, deliveryLng], [lat, lng]], { padding: [30, 30], maxZoom: 15 });
+        document.getElementById('driver-map-time').textContent = 'Mise à jour: à l\'instant';
+        if (status) {
+            const label = document.getElementById('driver-status-label');
+            if (label) label.textContent = status;
+        }
+    }
+
+    // Polling fallback (quand Reverb n'est pas connecté)
+    const locationPollUrl = '{{ route("r.order.status.json", [$restaurant->slug, $order->tracking_token]) }}';
+    let lastDriverLat = driverLat;
+    let lastDriverLng = driverLng;
+
+    setInterval(function() {
+        fetch(locationPollUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, cache: 'no-cache' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || !data.driver_lat || !data.driver_lng) return;
+                if (data.driver_lat !== lastDriverLat || data.driver_lng !== lastDriverLng) {
+                    lastDriverLat = data.driver_lat;
+                    lastDriverLng = data.driver_lng;
+                    updateDriverPosition(data.driver_lat, data.driver_lng, data.driver_status_label);
+                }
+            }).catch(() => {});
+    }, 10000);
+
+    // Reverb WebSocket (si disponible)
+    if (window.Echo) {
+        window.Echo.channel('delivery.' + deliveryId)
+            .listen('.driver.location', function(e) {
+                updateDriverPosition(e.lat, e.lng, e.status);
+            });
+    }
+})();
+</script>
+@endif
 
