@@ -16,61 +16,36 @@ class GeocodingController extends Controller
     public function search(Request $request): JsonResponse
     {
         $query = $request->input('q', '');
-        
-        Log::info('[Geocoding] Search request received', ['query' => $query]);
-        
+        $userLat = $request->input('lat');
+        $userLon = $request->input('lon');
+
         if (strlen($query) < 3) {
-            Log::info('[Geocoding] Query too short', ['length' => strlen($query)]);
             return response()->json([]);
         }
-        
+
         // Try Geoapify first (best quality, free plan: 3000 requests/day)
         $geoapifyKey = \App\Models\SystemSetting::get('geoapify_api_key', env('GEOAPIFY_API_KEY', ''));
-        
-        Log::info('[Geocoding] Geoapify key status', ['has_key' => !empty($geoapifyKey), 'key_length' => strlen($geoapifyKey ?? '')]);
-        
+
         if (!empty($geoapifyKey)) {
             try {
-                // According to official documentation: https://apidocs.geoapify.com/docs/geocoding/address-autocomplete/
-                // URL: https://api.geoapify.com/v1/geocode/autocomplete?REQUEST_PARAMS
-                // Required: apiKey, text
-                // Optional: type, lang, filter, bias, format (json/xml/geojson - default is geojson)
                 $url = 'https://api.geoapify.com/v1/geocode/autocomplete';
                 $params = [
                     'text' => $query,
                     'apiKey' => $geoapifyKey,
-                    'format' => 'json',  // Explicit JSON format (default is GeoJSON)
-                    'lang' => 'fr',        // Optional: Result language
-                    'filter' => 'countrycode:ci'  // Optional: Filter to Côte d'Ivoire
+                    'format' => 'json',
+                    'lang' => 'fr',
+                    'filter' => 'countrycode:ci'
                 ];
-                
-                // Build URL exactly like documentation example
-                $fullUrl = $url . '?' . http_build_query($params);
-                Log::info('[Geocoding] Calling Geoapify (official documentation format)', [
-                    'url' => $fullUrl,
-                    'text' => $query,
-                    'params' => array_merge($params, ['apiKey' => '***']) // Hide API key in logs
-                ]);
+
+                if ($userLat && $userLon) {
+                    $params['bias'] = "proximity:{$userLon},{$userLat}";
+                }
                 
                 $response = Http::timeout(10)->get($url, $params);
                 
-                Log::info('[Geocoding] Geoapify response', [
-                    'status' => $response->status(),
-                    'successful' => $response->successful()
-                ]);
-                
                 if ($response->successful()) {
                     $data = $response->json();
-                    
-                    Log::info('[Geocoding] Geoapify response parsed', [
-                        'type' => $data['type'] ?? 'unknown',
-                        'has_features' => isset($data['features']),
-                        'features_count' => isset($data['features']) ? count($data['features']) : 0,
-                        'raw_data_preview' => json_encode(array_slice($data, 0, 1))
-                    ]);
-                    
-                    // According to documentation: Response is FeatureCollection (GeoJSON format)
-                    // Even with format=json, structure is still GeoJSON FeatureCollection
+
                     if (isset($data['features']) && is_array($data['features']) && count($data['features']) > 0) {
                         $results = [];
                         
@@ -101,34 +76,15 @@ class GeocodingController extends Controller
                             ];
                         }
                         
-                        Log::info('[Geocoding] Returning Geoapify results', ['count' => count($results)]);
                         return response()->json($results);
-                    } else {
-                        Log::warning('[Geocoding] Geoapify returned no features', [
-                            'data_keys' => array_keys($data ?? []),
-                            'data_type' => gettype($data ?? null),
-                            'full_response' => json_encode($data)
-                        ]);
                     }
-                } else {
-                    Log::error('[Geocoding] Geoapify request failed', [
-                        'status' => $response->status(),
-                        'body' => substr($response->body(), 0, 500)
-                    ]);
                 }
             } catch (\Exception $e) {
-                Log::error('[Geocoding] Geoapify exception', [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ]);
+                Log::warning('[Geocoding] Geoapify failed: ' . $e->getMessage());
             }
-        } else {
-            Log::info('[Geocoding] No Geoapify key, skipping to fallback');
         }
         
         // Fallback to Photon (free, no API key needed)
-        Log::info('[Geocoding] Trying Photon fallback');
         try {
             $url = 'https://photon.komoot.io/api/';
             $params = [
@@ -136,24 +92,17 @@ class GeocodingController extends Controller
                 'limit' => 8,
                 'lang' => 'fr'
             ];
-            
-            Log::info('[Geocoding] Calling Photon', ['url' => $url, 'params' => $params]);
-            
+
+            if ($userLat && $userLon) {
+                $params['lat'] = $userLat;
+                $params['lon'] = $userLon;
+            }
+
             $response = Http::timeout(10)->get($url, $params);
-            
-            Log::info('[Geocoding] Photon response', [
-                'status' => $response->status(),
-                'successful' => $response->successful()
-            ]);
-            
+
             if ($response->successful()) {
                 $data = $response->json();
-                
-                Log::info('[Geocoding] Photon JSON parsed', [
-                    'has_features' => isset($data['features']),
-                    'features_count' => isset($data['features']) ? count($data['features']) : 0
-                ]);
-                
+
                 if (isset($data['features']) && count($data['features']) > 0) {
                     $results = array_map(function ($feature) {
                         $props = $feature['properties'];
@@ -176,26 +125,14 @@ class GeocodingController extends Controller
                         ];
                     }, $data['features']);
                     
-                    Log::info('[Geocoding] Returning Photon results', ['count' => count($results)]);
                     return response()->json($results);
-                } else {
-                    Log::warning('[Geocoding] Photon returned no features');
                 }
-            } else {
-                Log::error('[Geocoding] Photon request failed', [
-                    'status' => $response->status(),
-                    'body' => substr($response->body(), 0, 200)
-                ]);
             }
         } catch (\Exception $e) {
-            Log::error('[Geocoding] Photon exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::warning('[Geocoding] Photon failed: ' . $e->getMessage());
         }
         
         // Final fallback to Nominatim
-        Log::info('[Geocoding] Trying Nominatim fallback');
         try {
             $url = 'https://nominatim.openstreetmap.org/search';
             $params = [
@@ -205,40 +142,28 @@ class GeocodingController extends Controller
                 'limit' => 8,
                 'addressdetails' => 1
             ];
-            
-            Log::info('[Geocoding] Calling Nominatim', ['url' => $url, 'params' => $params]);
-            
+
+            if ($userLat && $userLon) {
+                $lat = (float) $userLat;
+                $lon = (float) $userLon;
+                $params['viewbox'] = ($lon - 0.1) . ',' . ($lat + 0.1) . ',' . ($lon + 0.1) . ',' . ($lat - 0.1);
+                $params['bounded'] = 0;
+            }
+
             $response = Http::timeout(10)->withHeaders([
                 'User-Agent' => 'MenuPro/1.0 (Food Delivery App)'
             ])->get($url, $params);
-            
-            Log::info('[Geocoding] Nominatim response', [
-                'status' => $response->status(),
-                'successful' => $response->successful()
-            ]);
-            
+
             if ($response->successful()) {
                 $data = $response->json();
                 if (is_array($data) && count($data) > 0) {
-                    Log::info('[Geocoding] Returning Nominatim results', ['count' => count($data)]);
                     return response()->json($data);
-                } else {
-                    Log::warning('[Geocoding] Nominatim returned empty array');
                 }
-            } else {
-                Log::error('[Geocoding] Nominatim request failed', [
-                    'status' => $response->status(),
-                    'body' => substr($response->body(), 0, 200)
-                ]);
             }
         } catch (\Exception $e) {
-            Log::error('[Geocoding] Nominatim exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::warning('[Geocoding] Nominatim failed: ' . $e->getMessage());
         }
-        
-        Log::warning('[Geocoding] All geocoding services failed, returning empty array');
+
         return response()->json([]);
     }
     
@@ -248,8 +173,8 @@ class GeocodingController extends Controller
     public function reverse(Request $request): JsonResponse
     {
         $lat = $request->input('lat');
-        $lng = $request->input('lng');
-        
+        $lng = $request->input('lon') ?? $request->input('lng');
+
         if (!$lat || !$lng) {
             return response()->json(['error' => 'Missing coordinates'], 400);
         }

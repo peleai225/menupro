@@ -470,12 +470,19 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
     results: [],
     statusMsg: '',
     errorMsg: '',
+    userLat: null,
+    userLng: null,
 
     init() {
         const savedAddress = localStorage.getItem('menupro_delivery_address');
         const savedCity = localStorage.getItem('menupro_delivery_city');
         const savedLat = localStorage.getItem('menupro_delivery_lat');
         const savedLng = localStorage.getItem('menupro_delivery_lng');
+
+        if (savedLat && savedLng) {
+            this.userLat = parseFloat(savedLat);
+            this.userLng = parseFloat(savedLng);
+        }
 
         if (savedAddress && savedCity) {
             this.$nextTick(() => {
@@ -495,7 +502,6 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                 }
             });
         } else {
-            // Auto-demander la localisation dès l'affichage du bloc livraison
             this.$nextTick(() => this.useMyLocation());
         }
     },
@@ -536,7 +542,11 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
         this.results = [];
 
         try {
-            const response = await fetch(`/api/geocoding/search?q=${encodeURIComponent(query)}`, {
+            let url = `/api/geocoding/search?q=${encodeURIComponent(query)}`;
+            if (this.userLat && this.userLng) {
+                url += `&lat=${this.userLat}&lon=${this.userLng}`;
+            }
+            const response = await fetch(url, {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -591,6 +601,8 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
             async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
+                this.userLat = lat;
+                this.userLng = lng;
                 this.validateDistance(lat, lng);
 
                 try {
