@@ -620,10 +620,10 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                 this.locating = false;
             },
             (error) => {
-                if (error.code === 1) this.errorMsg = 'Autorisez l\'accès à la localisation dans les paramètres du navigateur.';
-                else if (error.code === 2) this.errorMsg = 'Position non disponible.';
-                else if (error.code === 3) this.errorMsg = 'Délai expiré. Réessayez.';
-                else this.errorMsg = 'Erreur de localisation. Recherchez manuellement.';
+                if (error.code === 1) this.errorMsg = 'Position bloquée. Appuyez sur le cadenas (🔒) à gauche de l\'URL → Autorisations → Position → Autoriser, puis rafraîchissez la page. Ou utilisez la recherche ci-dessous.';
+                else if (error.code === 2) this.errorMsg = 'Position non disponible. Activez le GPS de votre téléphone ou utilisez la recherche ci-dessous.';
+                else if (error.code === 3) this.errorMsg = 'Délai expiré. Vérifiez votre GPS et réessayez.';
+                else this.errorMsg = 'Erreur de localisation. Utilisez la recherche ci-dessous.';
                 this.locating = false;
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
