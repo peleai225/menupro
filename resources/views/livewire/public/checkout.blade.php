@@ -226,524 +226,252 @@
                         </div>
                     </div>
                     
-                    @push('scripts')
-                    <script>
-                        (function() {
-                            let searchTimeout = null;
-                            let currentSearchQuery = '';
-                            
-                            // Restaurant coordinates
-                            const restaurantLat = {{ $restaurant->latitude ?? 5.3600 }};
-                            const restaurantLng = {{ $restaurant->longitude ?? -4.0083 }};
-                            const deliveryRadius = {{ $restaurant->delivery_radius_km ?? 10 }};
-                            
-                            console.log('[Address] Script loaded, restaurant:', restaurantLat, restaurantLng);
-                            
-                            // Function to calculate distance
-                            function getDistance(lat1, lon1, lat2, lon2) {
-                                const R = 6371; // Radius of the earth in km
-                                const dLat = deg2rad(lat2 - lat1);
-                                const dLon = deg2rad(lon2 - lon1);
-                                const a = 
-                                    Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-                                    Math.sin(dLon/2) * Math.sin(dLon/2);
-                                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                                return R * c; // Distance in km
+                @endif
+
+                @script
+                <script>
+                    (function() {
+                        let searchTimeout = null;
+                        let currentSearchQuery = '';
+                        let initialized = false;
+
+                        const restaurantLat = @js($restaurant->latitude ?? 5.3600);
+                        const restaurantLng = @js($restaurant->longitude ?? -4.0083);
+                        const deliveryRadius = @js($restaurant->delivery_radius_km ?? 10);
+
+                        function getDistance(lat1, lon1, lat2, lon2) {
+                            const R = 6371;
+                            const dLat = deg2rad(lat2 - lat1);
+                            const dLon = deg2rad(lon2 - lon1);
+                            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                                Math.sin(dLon/2) * Math.sin(dLon/2);
+                            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                            return R * c;
+                        }
+
+                        function deg2rad(deg) { return deg * (Math.PI/180); }
+
+                        function validateDeliveryDistance(lat, lng) {
+                            const distance = getDistance(restaurantLat, restaurantLng, lat, lng);
+                            const isInRadius = deliveryRadius === 0 || distance <= deliveryRadius;
+                            const statusEl = document.getElementById('address-status');
+                            const errorEl = document.getElementById('address-error');
+                            if (!statusEl || !errorEl) return isInRadius;
+
+                            if (isInRadius) {
+                                statusEl.querySelector('span').textContent = `Distance: ${distance.toFixed(2)} km (dans la zone)`;
+                                statusEl.classList.remove('hidden');
+                                errorEl.classList.add('hidden');
+                            } else {
+                                statusEl.classList.add('hidden');
+                                errorEl.textContent = `Hors zone de livraison (max: ${deliveryRadius} km).`;
+                                errorEl.classList.remove('hidden');
                             }
-                            
-                            function deg2rad(deg) {
-                                return deg * (Math.PI/180);
-                            }
-                            
-                            // Function to validate delivery distance
-                            function validateDeliveryDistance(lat, lng) {
-                                const distance = getDistance(restaurantLat, restaurantLng, lat, lng);
-                                const isInRadius = deliveryRadius === 0 || distance <= deliveryRadius;
-                                
-                                const statusEl = document.getElementById('address-status');
-                                const errorEl = document.getElementById('address-error');
-                                
-                                if (isInRadius) {
-                                    statusEl.textContent = `Distance: ${distance.toFixed(2)} km (dans la zone de livraison)`;
-                                    statusEl.className = 'mb-4 text-sm text-emerald-600';
-                                    statusEl.classList.remove('hidden');
-                                    errorEl.classList.add('hidden');
-                                    return true;
-                                } else {
-                                    statusEl.classList.add('hidden');
-                                    errorEl.textContent = `Cette zone est hors de notre zone de livraison (max: ${deliveryRadius} km). Veuillez choisir une adresse plus proche.`;
-                                    errorEl.classList.remove('hidden');
-                                    return false;
-                                }
-                            }
-                            
-                            // Address autocomplete function (like Glovo)
-                            async function searchAddresses(query) {
-                                console.log('[Address] Searching for:', query);
-                                
-                                if (!query || query.length < 3) {
-                                    const autocompleteEl = document.getElementById('address-autocomplete');
-                                    if (autocompleteEl) {
-                                        autocompleteEl.classList.add('hidden');
-                                    }
-                                    return;
-                                }
-                                
-                                currentSearchQuery = query;
-                                
-                                const autocompleteEl = document.getElementById('address-autocomplete');
-                                if (!autocompleteEl) {
-                                    console.error('[Address] Autocomplete element not found');
-                                    return;
-                                }
-                                
-                                // Show loading state
-                                autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Recherche en cours...</div>';
-                                autocompleteEl.classList.remove('hidden');
-                                
-                                try {
-                                    // Use our Laravel API endpoint (avoids CORS issues)
-                                    const url = `{{ route('api.geocoding.search') }}?q=${encodeURIComponent(query)}`;
-                                    console.log('[Address] ====== SEARCH START ======');
-                                    console.log('[Address] Query:', query);
-                                    console.log('[Address] Fetching from:', url);
-                                    console.log('[Address] Timestamp:', new Date().toISOString());
-                                    
-                                    const startTime = Date.now();
-                                    const response = await fetch(url, {
-                                        method: 'GET',
-                                        headers: {
-                                            'Accept': 'application/json',
-                                            'X-Requested-With': 'XMLHttpRequest'
-                                        }
+                            return isInRadius;
+                        }
+
+                        async function searchAddresses(query) {
+                            if (!query || query.length < 3) return;
+                            currentSearchQuery = query;
+                            const autocompleteEl = document.getElementById('address-autocomplete');
+                            if (!autocompleteEl) return;
+
+                            autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Recherche...</div>';
+                            autocompleteEl.classList.remove('hidden');
+
+                            try {
+                                const response = await fetch(`/api/geocoding/search?q=${encodeURIComponent(query)}`, {
+                                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                                });
+                                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                                const data = await response.json();
+                                if (query !== currentSearchQuery) return;
+
+                                if (data && data.length > 0) {
+                                    autocompleteEl.innerHTML = '';
+                                    data.forEach(item => {
+                                        const div = document.createElement('div');
+                                        div.className = 'px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0';
+                                        div.innerHTML = `<div class="flex items-start gap-3"><svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><div class="flex-1 min-w-0"><p class="text-sm font-medium text-neutral-900">${item.display_name.split(',')[0]}</p><p class="text-xs text-neutral-500 mt-0.5">${item.display_name.split(',').slice(1,3).join(', ')}</p></div></div>`;
+                                        div.addEventListener('click', () => selectAddress(item));
+                                        autocompleteEl.appendChild(div);
                                     });
-                                    const endTime = Date.now();
-                                    
-                                    console.log('[Address] Response received in', (endTime - startTime), 'ms');
-                                    console.log('[Address] Response status:', response.status);
-                                    console.log('[Address] Response headers:', Object.fromEntries(response.headers.entries()));
-                                    
-                                    if (!response.ok) {
-                                        const errorText = await response.text();
-                                        console.error('[Address] HTTP error response body:', errorText);
-                                        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText.substring(0, 200)}`);
-                                    }
-                                    
+                                } else {
+                                    autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Aucune adresse trouvée</div>';
+                                }
+                            } catch (error) {
+                                autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-red-500 text-center">Erreur. Réessayez.</div>';
+                            }
+                        }
+
+                        function selectAddress(item) {
+                            const lat = parseFloat(item.lat);
+                            const lng = parseFloat(item.lon);
+                            document.getElementById('address-search').value = item.display_name;
+                            document.getElementById('address-autocomplete').classList.add('hidden');
+                            validateDeliveryDistance(lat, lng);
+
+                            const address = item.address || {};
+                            const street = address.road || address.pedestrian || item.display_name.split(',')[0];
+                            const houseNumber = address.house_number || '';
+                            const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
+                            const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
+
+                            const addressInput = document.getElementById('delivery_address_input');
+                            const cityInput = document.getElementById('delivery_city_input');
+                            if (addressInput) addressInput.value = finalAddress;
+                            if (cityInput) cityInput.value = city;
+
+                            $wire.set('delivery_address', finalAddress);
+                            $wire.set('delivery_city', city);
+                            $wire.set('delivery_latitude', lat);
+                            $wire.set('delivery_longitude', lng);
+
+                            localStorage.setItem('menupro_delivery_address', finalAddress);
+                            localStorage.setItem('menupro_delivery_city', city);
+                            localStorage.setItem('menupro_delivery_lat', lat.toString());
+                            localStorage.setItem('menupro_delivery_lng', lng.toString());
+                        }
+
+                        async function reverseGeocode(lat, lng) {
+                            try {
+                                const response = await fetch(`/api/geocoding/reverse?lat=${lat}&lon=${lng}`, {
+                                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                                });
+                                if (response.ok) {
                                     const data = await response.json();
-                                    console.log('[Address] Received data type:', typeof data);
-                                    console.log('[Address] Received data:', data);
-                                    console.log('[Address] Data is array?', Array.isArray(data));
-                                    console.log('[Address] Data length:', Array.isArray(data) ? data.length : 'N/A');
-                                    
-                                    // Only process if query hasn't changed
-                                    if (query !== currentSearchQuery) {
-                                        console.log('[Address] Query changed, ignoring results');
-                                        return;
+                                    if (data.address || data.city) {
+                                        return { address: data.address || '', city: data.city || 'Côte d\'Ivoire' };
                                     }
-                                    
-                                    if (data && data.length > 0) {
-                                        autocompleteEl.innerHTML = '';
-                                        
-                                        data.forEach((item, index) => {
-                                            const div = document.createElement('div');
-                                            div.className = 'px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0';
-                                            div.innerHTML = `
-                                                <div class="flex items-start gap-3">
-                                                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    </svg>
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-medium text-neutral-900">${item.display_name.split(',')[0]}</p>
-                                                        <p class="text-xs text-neutral-500 mt-0.5">${item.display_name.split(',').slice(1, 3).join(', ')}</p>
-                                                    </div>
-                                                </div>
-                                            `;
-                                            
-                                            div.addEventListener('click', function() {
-                                                selectAddress(item);
-                                            });
-                                            
-                                            autocompleteEl.appendChild(div);
-                                        });
-                                        
-                                        autocompleteEl.classList.remove('hidden');
-                                        console.log('[Address] Displayed', data.length, 'results');
-                                    } else {
-                                        autocompleteEl.innerHTML = `
-                                            <div class="px-4 py-3 text-sm text-neutral-500 text-center">
-                                                Aucune adresse trouvée
-                                            </div>
-                                        `;
-                                        autocompleteEl.classList.remove('hidden');
-                                        console.log('[Address] No results found');
-                                    }
-                                } catch (error) {
-                                    console.error('[Address] Search error:', error);
-                                    autocompleteEl.innerHTML = `
-                                        <div class="px-4 py-3 text-sm text-red-500 text-center">
-                                            Erreur lors de la recherche. Veuillez réessayer.
-                                        </div>
-                                    `;
-                                    autocompleteEl.classList.remove('hidden');
                                 }
+                            } catch (error) {}
+                            return null;
+                        }
+
+                        function useMyLocation() {
+                            const button = document.getElementById('use-my-location');
+                            if (!button) return;
+                            const originalText = button.innerHTML;
+                            button.disabled = true;
+                            button.innerHTML = '<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Localisation...';
+
+                            if (!navigator.geolocation) {
+                                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                                button.disabled = false;
+                                button.innerHTML = originalText;
+                                return;
                             }
-                            
-                            // Select address from autocomplete
-                            function selectAddress(item) {
-                                const lat = parseFloat(item.lat);
-                                const lng = parseFloat(item.lon);
-                                
-                                // Update search input
-                                document.getElementById('address-search').value = item.display_name;
-                                document.getElementById('address-autocomplete').classList.add('hidden');
-                                
-                                // Validate delivery distance
-                                const isValid = validateDeliveryDistance(lat, lng);
-                                
-                                // Extract address components
-                                const address = item.address || {};
-                                const street = address.road || address.pedestrian || item.display_name.split(',')[0];
-                                const houseNumber = address.house_number || '';
-                                const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
-                                
-                                // Update form fields
-                                const addressInput = document.getElementById('delivery_address_input');
-                                const cityInput = document.getElementById('delivery_city_input');
-                                
-                                if (addressInput) {
-                                    addressInput.value = houseNumber ? `${houseNumber} ${street}`.trim() : street;
-                                }
-                                if (cityInput) {
-                                    cityInput.value = city;
-                                }
-                                
-                                // Update Livewire
-                                const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
-                                if (window.Livewire) {
-                                    const component = window.Livewire.find('{{ $this->getId() }}');
-                                    if (component) {
-                                        component.set('delivery_address', finalAddress);
-                                        component.set('delivery_city', city);
-                                        component.set('delivery_latitude', lat);
-                                        component.set('delivery_longitude', lng);
-                                    }
-                                }
-                                // Save for next time
-                                localStorage.setItem('menupro_delivery_address', finalAddress);
-                                localStorage.setItem('menupro_delivery_city', city);
-                                localStorage.setItem('menupro_delivery_lat', lat.toString());
-                                localStorage.setItem('menupro_delivery_lng', lng.toString());
-                            }
-                            
-                            // Function to reverse geocode (get address from coordinates)
-                            async function reverseGeocode(lat, lng) {
-                                try {
-                                    console.log('[Address] Reverse geocoding...');
-                                    // Use our Laravel API endpoint
-                                    const url = `{{ route('api.geocoding.reverse') }}?lat=${lat}&lon=${lng}`;
-                                    console.log('[Address] Reverse URL:', url);
-                                    
-                                    const response = await fetch(url, {
-                                        method: 'GET',
-                                        headers: {
-                                            'Accept': 'application/json',
-                                            'X-Requested-With': 'XMLHttpRequest'
+
+                            navigator.geolocation.getCurrentPosition(
+                                function(position) {
+                                    const lat = position.coords.latitude;
+                                    const lng = position.coords.longitude;
+                                    validateDeliveryDistance(lat, lng);
+
+                                    reverseGeocode(lat, lng).then(addressData => {
+                                        if (addressData) {
+                                            const addressInput = document.getElementById('delivery_address_input');
+                                            const cityInput = document.getElementById('delivery_city_input');
+                                            const searchInput = document.getElementById('address-search');
+                                            if (addressInput) addressInput.value = addressData.address;
+                                            if (cityInput) cityInput.value = addressData.city;
+                                            if (searchInput) searchInput.value = addressData.address + ', ' + addressData.city;
+
+                                            $wire.set('delivery_address', addressData.address);
+                                            $wire.set('delivery_city', addressData.city);
+                                            $wire.set('delivery_latitude', lat);
+                                            $wire.set('delivery_longitude', lng);
+
+                                            localStorage.setItem('menupro_delivery_address', addressData.address);
+                                            localStorage.setItem('menupro_delivery_city', addressData.city);
+                                            localStorage.setItem('menupro_delivery_lat', lat.toString());
+                                            localStorage.setItem('menupro_delivery_lng', lng.toString());
                                         }
+                                        button.disabled = false;
+                                        button.innerHTML = originalText;
+                                    }).catch(() => {
+                                        button.disabled = false;
+                                        button.innerHTML = originalText;
                                     });
-                                    
-                                    if (response.ok) {
-                                        const data = await response.json();
-                                        console.log('[Address] Reverse geocoding result:', data);
-                                        
-                                        if (data.address || data.city) {
-                                            return {
-                                                address: data.address || '',
-                                                city: data.city || 'Côte d\'Ivoire'
-                                            };
-                                        }
-                                    } else {
-                                        console.error('[Address] Reverse geocoding failed:', response.status);
-                                    }
-                                } catch (error) {
-                                    console.error('[Address] Reverse geocoding error:', error);
-                                }
-                                return null;
-                            }
-                            
-                            // Use my location
-                            function useMyLocation() {
-                                console.log('[Address] Use my location clicked');
-                                const button = document.getElementById('use-my-location');
-                                if (!button) {
-                                    console.error('[Address] Button not found');
-                                    return;
-                                }
-                                
-                                const originalText = button.innerHTML;
-                                
-                                button.disabled = true;
-                                button.innerHTML = '<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Localisation...';
-                                
-                                if (navigator.geolocation) {
-                                    console.log('[Address] Requesting geolocation...');
-                                    navigator.geolocation.getCurrentPosition(
-                                        function(position) {
-                                            console.log('[Address] Position received:', position.coords.latitude, position.coords.longitude);
-                                            const lat = position.coords.latitude;
-                                            const lng = position.coords.longitude;
-                                            
-                                            // Validate delivery distance
-                                            const isValid = validateDeliveryDistance(lat, lng);
-                                            
-                                            // Reverse geocode to get address
-                                            console.log('[Address] Reverse geocoding...');
-                                            reverseGeocode(lat, lng).then(addressData => {
-                                                console.log('[Address] Address data:', addressData);
-                                                if (addressData) {
-                                                    const addressInput = document.getElementById('delivery_address_input');
-                                                    const cityInput = document.getElementById('delivery_city_input');
-                                                    const searchInput = document.getElementById('address-search');
-
-                                                    if (addressInput) addressInput.value = addressData.address;
-                                                    if (cityInput) cityInput.value = addressData.city;
-                                                    if (searchInput) searchInput.value = addressData.address + ', ' + addressData.city;
-
-                                                    // Update Livewire
-                                                    if (window.Livewire) {
-                                                        const component = window.Livewire.find('{{ $this->getId() }}');
-                                                        if (component) {
-                                                            component.set('delivery_address', addressData.address);
-                                                            component.set('delivery_city', addressData.city);
-                                                            component.set('delivery_latitude', lat);
-                                                            component.set('delivery_longitude', lng);
-                                                        }
-                                                    }
-                                                    // Save for next time
-                                                    localStorage.setItem('menupro_delivery_address', addressData.address);
-                                                    localStorage.setItem('menupro_delivery_city', addressData.city);
-                                                    localStorage.setItem('menupro_delivery_lat', lat.toString());
-                                                    localStorage.setItem('menupro_delivery_lng', lng.toString());
-                                                }
-                                                
-                                                button.disabled = false;
-                                                button.innerHTML = originalText;
-                                            }).catch(error => {
-                                                console.error('[Address] Reverse geocoding error:', error);
-                                                button.disabled = false;
-                                                button.innerHTML = originalText;
-                                            });
-                                        },
-                                        function(error) {
-                                            console.error('[Address] Geolocation error:', error);
-                                            let errorMessage = 'Impossible d\'obtenir votre position. ';
-                                            if (error.code === error.PERMISSION_DENIED) {
-                                                errorMessage += 'Veuillez autoriser l\'accès à la localisation dans les paramètres de votre navigateur.';
-                                            } else if (error.code === error.POSITION_UNAVAILABLE) {
-                                                errorMessage += 'Votre position n\'est pas disponible.';
-                                            } else if (error.code === error.TIMEOUT) {
-                                                errorMessage += 'La demande de localisation a expiré.';
-                                            } else {
-                                                errorMessage += 'Veuillez rechercher une adresse manuellement.';
-                                            }
-                                            alert(errorMessage);
-                                            button.disabled = false;
-                                            button.innerHTML = originalText;
-                                        },
-                                        {
-                                            enableHighAccuracy: true,
-                                            timeout: 10000,
-                                            maximumAge: 0
-                                        }
-                                    );
-                                } else {
-                                    alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                                },
+                                function(error) {
+                                    let msg = 'Impossible d\'obtenir votre position. ';
+                                    if (error.code === 1) msg += 'Autorisez l\'accès à la localisation.';
+                                    else if (error.code === 2) msg += 'Position non disponible.';
+                                    else if (error.code === 3) msg += 'Délai expiré.';
+                                    else msg += 'Recherchez manuellement.';
+                                    alert(msg);
                                     button.disabled = false;
                                     button.innerHTML = originalText;
-                                }
-                            }
-                            
-                            // Initialize when DOM is ready
-                            let initialized = false;
-                            
-                            function initializeAddressSearch() {
-                                if (initialized) {
-                                    console.log('[Address] Already initialized, skipping...');
-                                    return;
-                                }
-                                
-                                console.log('[Address] Initializing address search...');
-                                
-                                // Setup address search
-                                const addressSearchInput = document.getElementById('address-search');
-                                const useMyLocationBtn = document.getElementById('use-my-location');
-                                const debugEl = document.getElementById('address-debug');
-                                
-                                if (!addressSearchInput) {
-                                    console.error('[Address] Address search input not found');
-                                    if (debugEl) {
-                                        debugEl.textContent = 'Erreur: Champ de recherche non trouvé';
-                                        debugEl.classList.remove('hidden');
-                                    }
-                                    return;
-                                }
-                                
-                                if (!useMyLocationBtn) {
-                                    console.error('[Address] Use my location button not found');
-                                    return;
-                                }
-                                
-                                console.log('[Address] Both elements found, setting up listeners...');
-                                
-                                // Remove existing listeners by cloning
-                                const newInput = addressSearchInput.cloneNode(true);
-                                addressSearchInput.parentNode.replaceChild(newInput, addressSearchInput);
-                                
-                                // Setup address search
-                                newInput.addEventListener('input', function(e) {
-                                    const query = e.target.value.trim();
-                                    
-                                    if (searchTimeout) {
-                                        clearTimeout(searchTimeout);
-                                    }
-                                    
-                                    if (query.length >= 3) {
-                                        searchTimeout = setTimeout(() => {
-                                            searchAddresses(query);
-                                        }, 500); // Debounce 500ms
-                                    } else {
-                                        const autocompleteEl = document.getElementById('address-autocomplete');
-                                        if (autocompleteEl) {
-                                            autocompleteEl.classList.add('hidden');
-                                        }
-                                    }
-                                });
-                                
-                                // Setup use my location button
-                                useMyLocationBtn.addEventListener('click', useMyLocation);
-                                
-                                // Close autocomplete when clicking outside
-                                document.addEventListener('click', function(e) {
-                                    const autocompleteEl = document.getElementById('address-autocomplete');
-                                    if (autocompleteEl && !newInput.contains(e.target) && !autocompleteEl.contains(e.target)) {
-                                        autocompleteEl.classList.add('hidden');
-                                    }
-                                });
-                                
-                                initialized = true;
+                                },
+                                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                            );
+                        }
 
-                                // Auto-detect GPS on load if no address is saved
-                                const savedAddress = localStorage.getItem('menupro_delivery_address');
-                                const savedCity = localStorage.getItem('menupro_delivery_city');
-                                const savedLat = localStorage.getItem('menupro_delivery_lat');
-                                const savedLng = localStorage.getItem('menupro_delivery_lng');
+                        function initializeAddressSearch() {
+                            const addressSearchInput = document.getElementById('address-search');
+                            const useMyLocationBtn = document.getElementById('use-my-location');
+                            if (!addressSearchInput || !useMyLocationBtn) return false;
+                            if (initialized) return true;
 
-                                if (savedAddress && savedCity) {
-                                    // Restore saved address
-                                    const addressInput = document.getElementById('delivery_address_input');
-                                    const cityInput = document.getElementById('delivery_city_input');
-                                    if (addressInput && !addressInput.value) {
-                                        addressInput.value = savedAddress;
-                                        newInput.value = savedAddress + ', ' + savedCity;
-                                    }
-                                    if (cityInput && !cityInput.value) {
-                                        cityInput.value = savedCity;
-                                    }
-                                    if (window.Livewire) {
-                                        const component = window.Livewire.find('{{ $this->getId() }}');
-                                        if (component) {
-                                            if (!component.get('delivery_address')) {
-                                                component.set('delivery_address', savedAddress);
-                                                component.set('delivery_city', savedCity);
-                                                if (savedLat) component.set('delivery_latitude', parseFloat(savedLat));
-                                                if (savedLng) component.set('delivery_longitude', parseFloat(savedLng));
-                                            }
-                                        }
-                                    }
-                                    if (savedLat && savedLng) {
-                                        validateDeliveryDistance(parseFloat(savedLat), parseFloat(savedLng));
-                                    }
-                                } else if (navigator.geolocation) {
-                                    // Auto-trigger GPS silently
-                                    navigator.geolocation.getCurrentPosition(
-                                        function(position) {
-                                            const lat = position.coords.latitude;
-                                            const lng = position.coords.longitude;
-                                            validateDeliveryDistance(lat, lng);
-                                            reverseGeocode(lat, lng).then(addressData => {
-                                                if (addressData) {
-                                                    const addressInput = document.getElementById('delivery_address_input');
-                                                    const cityInput = document.getElementById('delivery_city_input');
-                                                    const searchInput = document.getElementById('address-search');
-                                                    if (addressInput && !addressInput.value) addressInput.value = addressData.address;
-                                                    if (cityInput && !cityInput.value) cityInput.value = addressData.city;
-                                                    if (searchInput && !searchInput.value) searchInput.value = addressData.address + ', ' + addressData.city;
-                                                    if (window.Livewire) {
-                                                        const component = window.Livewire.find('{{ $this->getId() }}');
-                                                        if (component && !component.get('delivery_address')) {
-                                                            component.set('delivery_address', addressData.address);
-                                                            component.set('delivery_city', addressData.city);
-                                                            component.set('delivery_latitude', lat);
-                                                            component.set('delivery_longitude', lng);
-                                                        }
-                                                    }
-                                                    // Save for next time
-                                                    localStorage.setItem('menupro_delivery_address', addressData.address);
-                                                    localStorage.setItem('menupro_delivery_city', addressData.city);
-                                                    localStorage.setItem('menupro_delivery_lat', lat.toString());
-                                                    localStorage.setItem('menupro_delivery_lng', lng.toString());
-                                                }
-                                            });
-                                        },
-                                        function() {}, // Silently fail
-                                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
-                                    );
-                                }
-                            }
-                            
-                            // Initialize immediately and also after Livewire updates
-                            function tryInitialize() {
-                                const addressSearchInput = document.getElementById('address-search');
-                                const useMyLocationBtn = document.getElementById('use-my-location');
-                                
-                                if (addressSearchInput && useMyLocationBtn) {
-                                    initializeAddressSearch();
-                                    return true;
-                                }
-                                return false;
-                            }
-                            
-                            // Try immediately
-                            if (!tryInitialize()) {
-                                // Wait for DOM
-                                if (document.readyState === 'loading') {
-                                    document.addEventListener('DOMContentLoaded', () => {
-                                        setTimeout(() => tryInitialize(), 200);
-                                    });
+                            const newInput = addressSearchInput.cloneNode(true);
+                            addressSearchInput.parentNode.replaceChild(newInput, addressSearchInput);
+
+                            newInput.addEventListener('input', function(e) {
+                                const query = e.target.value.trim();
+                                if (searchTimeout) clearTimeout(searchTimeout);
+                                if (query.length >= 3) {
+                                    searchTimeout = setTimeout(() => searchAddresses(query), 500);
                                 } else {
-                                    setTimeout(() => tryInitialize(), 200);
+                                    const el = document.getElementById('address-autocomplete');
+                                    if (el) el.classList.add('hidden');
                                 }
+                            });
+
+                            useMyLocationBtn.addEventListener('click', useMyLocation);
+
+                            document.addEventListener('click', function(e) {
+                                const el = document.getElementById('address-autocomplete');
+                                if (el && !newInput.contains(e.target) && !el.contains(e.target)) {
+                                    el.classList.add('hidden');
+                                }
+                            });
+
+                            initialized = true;
+
+                            // Restore saved address
+                            const savedAddress = localStorage.getItem('menupro_delivery_address');
+                            const savedCity = localStorage.getItem('menupro_delivery_city');
+                            const savedLat = localStorage.getItem('menupro_delivery_lat');
+                            const savedLng = localStorage.getItem('menupro_delivery_lng');
+
+                            if (savedAddress && savedCity) {
+                                const addressInput = document.getElementById('delivery_address_input');
+                                const cityInput = document.getElementById('delivery_city_input');
+                                if (addressInput && !addressInput.value) addressInput.value = savedAddress;
+                                if (cityInput && !cityInput.value) cityInput.value = savedCity;
+                                if (!newInput.value) newInput.value = savedAddress + ', ' + savedCity;
+                                if (!$wire.get('delivery_address')) {
+                                    $wire.set('delivery_address', savedAddress);
+                                    $wire.set('delivery_city', savedCity);
+                                    if (savedLat) $wire.set('delivery_latitude', parseFloat(savedLat));
+                                    if (savedLng) $wire.set('delivery_longitude', parseFloat(savedLng));
+                                }
+                                if (savedLat && savedLng) validateDeliveryDistance(parseFloat(savedLat), parseFloat(savedLng));
                             }
-                            
-                            // Also initialize after Livewire updates
-                            if (typeof Livewire !== 'undefined') {
-                                document.addEventListener('livewire:init', () => {
-                                    setTimeout(() => tryInitialize(), 300);
-                                    
-                                    Livewire.hook('morph.updated', () => {
-                                        setTimeout(() => tryInitialize(), 300);
-                                    });
-                                });
-                            }
-                            
-                            // Also try after a delay (for Livewire components that load later)
-                            setTimeout(() => tryInitialize(), 1000);
-                                
-                        })();
-                    </script>
-                    @endpush
-                @endif
+                            return true;
+                        }
+
+                        // Try to init immediately and on every Livewire DOM update
+                        initializeAddressSearch();
+                        $wire.$watch('order_type', () => {
+                            initialized = false;
+                            setTimeout(() => initializeAddressSearch(), 150);
+                        });
+                    })();
+                </script>
+                @endscript
 
                 <!-- Notes -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
