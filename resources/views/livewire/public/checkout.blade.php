@@ -459,7 +459,6 @@
             </div>
         </div>
     </div>
-</div>
 
 @script
 <script>
@@ -635,4 +634,5 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
 }));
 </script>
 @endscript
+</div>
 
