@@ -146,18 +146,26 @@
 
                 <!-- Delivery Address (Livraison) -->
                 @if($order_type === 'delivery')
-                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm"
+                         x-data="deliveryAddress(@js($restaurant->latitude ?? 5.3600), @js($restaurant->longitude ?? -4.0083), @js($restaurant->delivery_radius_km ?? 10))"
+                         x-init="init()"
+                         wire:ignore.self>
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
 
-                        {{-- GPS button prominent (Glovo-style) --}}
+                        {{-- GPS button --}}
                         <button type="button"
-                                id="use-my-location"
+                                @click="useMyLocation()"
+                                x-ref="gpsBtn"
                                 class="w-full px-4 py-4 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors flex items-center justify-center gap-3 mb-4 shadow-md">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!locating" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
-                            Utiliser ma position GPS
+                            <svg x-show="locating" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span x-text="locating ? 'Localisation...' : 'Utiliser ma position GPS'"></span>
                         </button>
 
                         <div class="relative flex items-center mb-4">
@@ -170,7 +178,8 @@
                         <div class="mb-4 relative">
                             <div class="relative">
                                 <input type="text"
-                                       id="address-search"
+                                       x-ref="searchInput"
+                                       @input.debounce.500ms="searchAddresses($event.target.value)"
                                        autocomplete="off"
                                        class="w-full px-4 py-3 pr-12 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                        placeholder="Rechercher (quartier, rue, repere...)">
@@ -180,25 +189,41 @@
                             </div>
 
                             {{-- Autocomplete dropdown --}}
-                            <div id="address-autocomplete" class="hidden absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="top: 100%; left: 0;">
+                            <div x-ref="autocomplete" x-show="showResults" x-cloak
+                                 @click.outside="showResults = false"
+                                 class="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="top: 100%; left: 0;">
+                                <template x-for="(item, idx) in results" :key="idx">
+                                    <div @click="selectAddress(item)" class="px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-neutral-900" x-text="item.display_name.split(',')[0]"></p>
+                                                <p class="text-xs text-neutral-500 mt-0.5" x-text="item.display_name.split(',').slice(1,3).join(', ')"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="searching" class="px-4 py-3 text-sm text-neutral-500 text-center">Recherche...</div>
+                                <div x-show="!searching && results.length === 0 && searchDone" class="px-4 py-3 text-sm text-neutral-500 text-center">Aucune adresse trouvée</div>
                             </div>
-
-                            <div id="address-debug" class="mt-2 text-xs text-gray-500 hidden"></div>
                         </div>
 
                         {{-- Status messages --}}
-                        <div id="address-status" class="mb-4 text-sm text-green-600 hidden flex items-center gap-2">
+                        <div x-show="statusMsg" x-cloak class="mb-4 text-sm text-emerald-600 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span></span>
+                            <span x-text="statusMsg"></span>
                         </div>
-                        <div id="address-error" class="mb-4 text-sm text-red-600 hidden"></div>
+                        <div x-show="errorMsg" x-cloak class="mb-4 text-sm text-red-600" x-text="errorMsg"></div>
 
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse *</label>
                                 <input type="text"
                                        wire:model="delivery_address"
-                                       id="delivery_address_input"
+                                       x-ref="addressInput"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_address') border-red-500 @enderror"
                                        placeholder="Rue, quartier, repere...">
                                 @error('delivery_address')
@@ -209,7 +234,7 @@
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Ville *</label>
                                 <input type="text"
                                        wire:model="delivery_city"
-                                       id="delivery_city_input"
+                                       x-ref="cityInput"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_city') border-red-500 @enderror"
                                        placeholder="Ex: Abidjan">
                                 @error('delivery_city')
@@ -225,253 +250,8 @@
                             </div>
                         </div>
                     </div>
-                    
                 @endif
 
-                @script
-                <script>
-                    (function() {
-                        let searchTimeout = null;
-                        let currentSearchQuery = '';
-                        let initialized = false;
-
-                        const restaurantLat = @js($restaurant->latitude ?? 5.3600);
-                        const restaurantLng = @js($restaurant->longitude ?? -4.0083);
-                        const deliveryRadius = @js($restaurant->delivery_radius_km ?? 10);
-
-                        function getDistance(lat1, lon1, lat2, lon2) {
-                            const R = 6371;
-                            const dLat = deg2rad(lat2 - lat1);
-                            const dLon = deg2rad(lon2 - lon1);
-                            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                                Math.sin(dLon/2) * Math.sin(dLon/2);
-                            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                            return R * c;
-                        }
-
-                        function deg2rad(deg) { return deg * (Math.PI/180); }
-
-                        function validateDeliveryDistance(lat, lng) {
-                            const distance = getDistance(restaurantLat, restaurantLng, lat, lng);
-                            const isInRadius = deliveryRadius === 0 || distance <= deliveryRadius;
-                            const statusEl = document.getElementById('address-status');
-                            const errorEl = document.getElementById('address-error');
-                            if (!statusEl || !errorEl) return isInRadius;
-
-                            if (isInRadius) {
-                                statusEl.querySelector('span').textContent = `Distance: ${distance.toFixed(2)} km (dans la zone)`;
-                                statusEl.classList.remove('hidden');
-                                errorEl.classList.add('hidden');
-                            } else {
-                                statusEl.classList.add('hidden');
-                                errorEl.textContent = `Hors zone de livraison (max: ${deliveryRadius} km).`;
-                                errorEl.classList.remove('hidden');
-                            }
-                            return isInRadius;
-                        }
-
-                        async function searchAddresses(query) {
-                            if (!query || query.length < 3) return;
-                            currentSearchQuery = query;
-                            const autocompleteEl = document.getElementById('address-autocomplete');
-                            if (!autocompleteEl) return;
-
-                            autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Recherche...</div>';
-                            autocompleteEl.classList.remove('hidden');
-
-                            try {
-                                const response = await fetch(`/api/geocoding/search?q=${encodeURIComponent(query)}`, {
-                                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                                });
-                                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                                const data = await response.json();
-                                if (query !== currentSearchQuery) return;
-
-                                if (data && data.length > 0) {
-                                    autocompleteEl.innerHTML = '';
-                                    data.forEach(item => {
-                                        const div = document.createElement('div');
-                                        div.className = 'px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0';
-                                        div.innerHTML = `<div class="flex items-start gap-3"><svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><div class="flex-1 min-w-0"><p class="text-sm font-medium text-neutral-900">${item.display_name.split(',')[0]}</p><p class="text-xs text-neutral-500 mt-0.5">${item.display_name.split(',').slice(1,3).join(', ')}</p></div></div>`;
-                                        div.addEventListener('click', () => selectAddress(item));
-                                        autocompleteEl.appendChild(div);
-                                    });
-                                } else {
-                                    autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-neutral-500 text-center">Aucune adresse trouvée</div>';
-                                }
-                            } catch (error) {
-                                autocompleteEl.innerHTML = '<div class="px-4 py-3 text-sm text-red-500 text-center">Erreur. Réessayez.</div>';
-                            }
-                        }
-
-                        function selectAddress(item) {
-                            const lat = parseFloat(item.lat);
-                            const lng = parseFloat(item.lon);
-                            document.getElementById('address-search').value = item.display_name;
-                            document.getElementById('address-autocomplete').classList.add('hidden');
-                            validateDeliveryDistance(lat, lng);
-
-                            const address = item.address || {};
-                            const street = address.road || address.pedestrian || item.display_name.split(',')[0];
-                            const houseNumber = address.house_number || '';
-                            const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
-                            const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
-
-                            const addressInput = document.getElementById('delivery_address_input');
-                            const cityInput = document.getElementById('delivery_city_input');
-                            if (addressInput) addressInput.value = finalAddress;
-                            if (cityInput) cityInput.value = city;
-
-                            $wire.set('delivery_address', finalAddress);
-                            $wire.set('delivery_city', city);
-                            $wire.set('delivery_latitude', lat);
-                            $wire.set('delivery_longitude', lng);
-
-                            localStorage.setItem('menupro_delivery_address', finalAddress);
-                            localStorage.setItem('menupro_delivery_city', city);
-                            localStorage.setItem('menupro_delivery_lat', lat.toString());
-                            localStorage.setItem('menupro_delivery_lng', lng.toString());
-                        }
-
-                        async function reverseGeocode(lat, lng) {
-                            try {
-                                const response = await fetch(`/api/geocoding/reverse?lat=${lat}&lon=${lng}`, {
-                                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                                });
-                                if (response.ok) {
-                                    const data = await response.json();
-                                    if (data.address || data.city) {
-                                        return { address: data.address || '', city: data.city || 'Côte d\'Ivoire' };
-                                    }
-                                }
-                            } catch (error) {}
-                            return null;
-                        }
-
-                        function useMyLocation() {
-                            const button = document.getElementById('use-my-location');
-                            if (!button) return;
-                            const originalText = button.innerHTML;
-                            button.disabled = true;
-                            button.innerHTML = '<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Localisation...';
-
-                            if (!navigator.geolocation) {
-                                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-                                button.disabled = false;
-                                button.innerHTML = originalText;
-                                return;
-                            }
-
-                            navigator.geolocation.getCurrentPosition(
-                                function(position) {
-                                    const lat = position.coords.latitude;
-                                    const lng = position.coords.longitude;
-                                    validateDeliveryDistance(lat, lng);
-
-                                    reverseGeocode(lat, lng).then(addressData => {
-                                        if (addressData) {
-                                            const addressInput = document.getElementById('delivery_address_input');
-                                            const cityInput = document.getElementById('delivery_city_input');
-                                            const searchInput = document.getElementById('address-search');
-                                            if (addressInput) addressInput.value = addressData.address;
-                                            if (cityInput) cityInput.value = addressData.city;
-                                            if (searchInput) searchInput.value = addressData.address + ', ' + addressData.city;
-
-                                            $wire.set('delivery_address', addressData.address);
-                                            $wire.set('delivery_city', addressData.city);
-                                            $wire.set('delivery_latitude', lat);
-                                            $wire.set('delivery_longitude', lng);
-
-                                            localStorage.setItem('menupro_delivery_address', addressData.address);
-                                            localStorage.setItem('menupro_delivery_city', addressData.city);
-                                            localStorage.setItem('menupro_delivery_lat', lat.toString());
-                                            localStorage.setItem('menupro_delivery_lng', lng.toString());
-                                        }
-                                        button.disabled = false;
-                                        button.innerHTML = originalText;
-                                    }).catch(() => {
-                                        button.disabled = false;
-                                        button.innerHTML = originalText;
-                                    });
-                                },
-                                function(error) {
-                                    let msg = 'Impossible d\'obtenir votre position. ';
-                                    if (error.code === 1) msg += 'Autorisez l\'accès à la localisation.';
-                                    else if (error.code === 2) msg += 'Position non disponible.';
-                                    else if (error.code === 3) msg += 'Délai expiré.';
-                                    else msg += 'Recherchez manuellement.';
-                                    alert(msg);
-                                    button.disabled = false;
-                                    button.innerHTML = originalText;
-                                },
-                                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                            );
-                        }
-
-                        function initializeAddressSearch() {
-                            const addressSearchInput = document.getElementById('address-search');
-                            const useMyLocationBtn = document.getElementById('use-my-location');
-                            if (!addressSearchInput || !useMyLocationBtn) return false;
-                            if (initialized) return true;
-
-                            const newInput = addressSearchInput.cloneNode(true);
-                            addressSearchInput.parentNode.replaceChild(newInput, addressSearchInput);
-
-                            newInput.addEventListener('input', function(e) {
-                                const query = e.target.value.trim();
-                                if (searchTimeout) clearTimeout(searchTimeout);
-                                if (query.length >= 3) {
-                                    searchTimeout = setTimeout(() => searchAddresses(query), 500);
-                                } else {
-                                    const el = document.getElementById('address-autocomplete');
-                                    if (el) el.classList.add('hidden');
-                                }
-                            });
-
-                            useMyLocationBtn.addEventListener('click', useMyLocation);
-
-                            document.addEventListener('click', function(e) {
-                                const el = document.getElementById('address-autocomplete');
-                                if (el && !newInput.contains(e.target) && !el.contains(e.target)) {
-                                    el.classList.add('hidden');
-                                }
-                            });
-
-                            initialized = true;
-
-                            // Restore saved address
-                            const savedAddress = localStorage.getItem('menupro_delivery_address');
-                            const savedCity = localStorage.getItem('menupro_delivery_city');
-                            const savedLat = localStorage.getItem('menupro_delivery_lat');
-                            const savedLng = localStorage.getItem('menupro_delivery_lng');
-
-                            if (savedAddress && savedCity) {
-                                const addressInput = document.getElementById('delivery_address_input');
-                                const cityInput = document.getElementById('delivery_city_input');
-                                if (addressInput && !addressInput.value) addressInput.value = savedAddress;
-                                if (cityInput && !cityInput.value) cityInput.value = savedCity;
-                                if (!newInput.value) newInput.value = savedAddress + ', ' + savedCity;
-                                if (!$wire.get('delivery_address')) {
-                                    $wire.set('delivery_address', savedAddress);
-                                    $wire.set('delivery_city', savedCity);
-                                    if (savedLat) $wire.set('delivery_latitude', parseFloat(savedLat));
-                                    if (savedLng) $wire.set('delivery_longitude', parseFloat(savedLng));
-                                }
-                                if (savedLat && savedLng) validateDeliveryDistance(parseFloat(savedLat), parseFloat(savedLng));
-                            }
-                            return true;
-                        }
-
-                        // Try to init immediately and on every Livewire DOM update
-                        initializeAddressSearch();
-                        $wire.$watch('order_type', () => {
-                            initialized = false;
-                            setTimeout(() => initializeAddressSearch(), 150);
-                        });
-                    })();
-                </script>
-                @endscript
 
                 <!-- Notes -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
@@ -672,7 +452,7 @@
                     </button>
 
                     <p class="text-xs text-neutral-500 text-center mt-4">
-                        En passant commande, vous acceptez nos 
+                        En passant commande, vous acceptez nos
                         <a href="{{ route('terms') }}" class="text-primary-500 hover:underline">conditions</a>.
                     </p>
                 </div>
@@ -680,4 +460,176 @@
         </div>
     </div>
 </div>
+
+@script
+<script>
+Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) => ({
+    locating: false,
+    searching: false,
+    searchDone: false,
+    showResults: false,
+    results: [],
+    statusMsg: '',
+    errorMsg: '',
+
+    init() {
+        const savedAddress = localStorage.getItem('menupro_delivery_address');
+        const savedCity = localStorage.getItem('menupro_delivery_city');
+        const savedLat = localStorage.getItem('menupro_delivery_lat');
+        const savedLng = localStorage.getItem('menupro_delivery_lng');
+
+        if (savedAddress && savedCity) {
+            this.$nextTick(() => {
+                if (this.$refs.addressInput && !this.$refs.addressInput.value) {
+                    this.$refs.addressInput.value = savedAddress;
+                    this.$refs.searchInput.value = savedAddress + ', ' + savedCity;
+                    this.$refs.cityInput.value = savedCity;
+                }
+                if (!$wire.get('delivery_address')) {
+                    $wire.set('delivery_address', savedAddress);
+                    $wire.set('delivery_city', savedCity);
+                    if (savedLat) $wire.set('delivery_latitude', parseFloat(savedLat));
+                    if (savedLng) $wire.set('delivery_longitude', parseFloat(savedLng));
+                }
+                if (savedLat && savedLng) {
+                    this.validateDistance(parseFloat(savedLat), parseFloat(savedLng));
+                }
+            });
+        }
+    },
+
+    getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    },
+
+    validateDistance(lat, lng) {
+        const distance = this.getDistance(restaurantLat, restaurantLng, lat, lng);
+        const inRadius = deliveryRadius === 0 || distance <= deliveryRadius;
+        if (inRadius) {
+            this.statusMsg = `Distance: ${distance.toFixed(2)} km (dans la zone)`;
+            this.errorMsg = '';
+        } else {
+            this.statusMsg = '';
+            this.errorMsg = `Hors zone de livraison (max: ${deliveryRadius} km). Distance: ${distance.toFixed(1)} km.`;
+        }
+        return inRadius;
+    },
+
+    async searchAddresses(query) {
+        query = query.trim();
+        if (query.length < 3) {
+            this.showResults = false;
+            this.results = [];
+            return;
+        }
+        this.searching = true;
+        this.searchDone = false;
+        this.showResults = true;
+        this.results = [];
+
+        try {
+            const response = await fetch(`/api/geocoding/search?q=${encodeURIComponent(query)}`, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            this.results = data || [];
+        } catch (e) {
+            this.results = [];
+        }
+        this.searching = false;
+        this.searchDone = true;
+    },
+
+    selectAddress(item) {
+        const lat = parseFloat(item.lat);
+        const lng = parseFloat(item.lon);
+        this.showResults = false;
+        this.validateDistance(lat, lng);
+
+        const address = item.address || {};
+        const street = address.road || address.pedestrian || item.display_name.split(',')[0];
+        const houseNumber = address.house_number || '';
+        const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
+        const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
+
+        this.$refs.searchInput.value = item.display_name;
+        this.$refs.addressInput.value = finalAddress;
+        this.$refs.cityInput.value = city;
+
+        $wire.set('delivery_address', finalAddress);
+        $wire.set('delivery_city', city);
+        $wire.set('delivery_latitude', lat);
+        $wire.set('delivery_longitude', lng);
+
+        localStorage.setItem('menupro_delivery_address', finalAddress);
+        localStorage.setItem('menupro_delivery_city', city);
+        localStorage.setItem('menupro_delivery_lat', lat.toString());
+        localStorage.setItem('menupro_delivery_lng', lng.toString());
+    },
+
+    async useMyLocation() {
+        if (this.locating) return;
+        if (!navigator.geolocation) {
+            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+            return;
+        }
+
+        this.locating = true;
+        this.errorMsg = '';
+        this.statusMsg = '';
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                this.validateDistance(lat, lng);
+
+                try {
+                    const response = await fetch(`/api/geocoding/reverse?lat=${lat}&lon=${lng}`, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.address || data.city) {
+                            const addr = data.address || '';
+                            const city = data.city || 'Côte d\'Ivoire';
+
+                            this.$refs.addressInput.value = addr;
+                            this.$refs.cityInput.value = city;
+                            this.$refs.searchInput.value = addr + ', ' + city;
+
+                            $wire.set('delivery_address', addr);
+                            $wire.set('delivery_city', city);
+                            $wire.set('delivery_latitude', lat);
+                            $wire.set('delivery_longitude', lng);
+
+                            localStorage.setItem('menupro_delivery_address', addr);
+                            localStorage.setItem('menupro_delivery_city', city);
+                            localStorage.setItem('menupro_delivery_lat', lat.toString());
+                            localStorage.setItem('menupro_delivery_lng', lng.toString());
+                        }
+                    }
+                } catch (e) {}
+                this.locating = false;
+            },
+            (error) => {
+                if (error.code === 1) this.errorMsg = 'Autorisez l\'accès à la localisation dans les paramètres du navigateur.';
+                else if (error.code === 2) this.errorMsg = 'Position non disponible.';
+                else if (error.code === 3) this.errorMsg = 'Délai expiré. Réessayez.';
+                else this.errorMsg = 'Erreur de localisation. Recherchez manuellement.';
+                this.locating = false;
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
+}));
+</script>
+@endscript
 
