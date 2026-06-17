@@ -302,7 +302,15 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/extend-subscription', [RestaurantController::class, 'extendSubscription'])->name('restaurants.extend-subscription');
         Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
+        Route::post('restaurants/{restaurant}/toggle-demo', [RestaurantController::class, 'toggleDemo'])->name('restaurants.toggle-demo');
 
+        // Live Orders (all restaurants)
+        Route::get('commandes', [\App\Http\Controllers\SuperAdmin\LiveOrderController::class, 'index'])->name('orders.index');
+        Route::get('api/live-orders', [\App\Http\Controllers\SuperAdmin\LiveOrderController::class, 'liveOrders'])->name('api.live-orders');
+
+        // Deliveries Dashboard
+        Route::get('livraisons', [\App\Http\Controllers\SuperAdmin\DeliveryDashboardController::class, 'index'])->name('deliveries.index');
+        Route::get('api/live-deliveries', [\App\Http\Controllers\SuperAdmin\DeliveryDashboardController::class, 'liveDeliveries'])->name('api.live-deliveries');
 
         // Subscriptions Management
         Route::get('abonnements', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'index'])->name('subscriptions.index');
@@ -372,9 +380,9 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     Route::get('/commander', \App\Livewire\Public\Checkout::class)->name('checkout');
     
     // Order Status (secured with tracking token)
-    Route::get('/commande/{token}', [OrderStatusController::class, 'show'])->name('order.status');
-    Route::get('/commande/{token}/json', [OrderStatusController::class, 'status'])->name('order.status.json');
-    Route::get('/commande/{token}/recu', [OrderStatusController::class, 'receipt'])->name('order.receipt');
+    Route::get('/commande/{token}', [OrderStatusController::class, 'show'])->name('order.status')->middleware('throttle:30,1');
+    Route::get('/commande/{token}/json', [OrderStatusController::class, 'status'])->name('order.status.json')->middleware('throttle:60,1');
+    Route::get('/commande/{token}/recu', [OrderStatusController::class, 'receipt'])->name('order.receipt')->middleware('throttle:15,1');
     
     // Reviews (secured with tracking token)
     Route::get('/commande/{token}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'create'])->name('review.create');
@@ -401,7 +409,7 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('livreur/{token}')->group(function () {
+Route::prefix('livreur/{token}')->middleware('throttle:30,1')->group(function () {
     Route::get('/', [\App\Http\Controllers\Public\DriverController::class, 'dashboard'])->name('driver.dashboard');
     Route::get('/data', [\App\Http\Controllers\Public\DriverController::class, 'data'])->name('driver.data');
     Route::post('/deliveries/{delivery}/status', [\App\Http\Controllers\Public\DriverController::class, 'updateStatus'])->name('driver.update-status');
@@ -414,7 +422,7 @@ Route::prefix('livreur/{token}')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('cuisine/{token}')->group(function () {
+Route::prefix('cuisine/{token}')->middleware('throttle:30,1')->group(function () {
     Route::get('/', [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
     Route::get('/data', [\App\Http\Controllers\Restaurant\KitchenController::class, 'data'])->name('kitchen.data');
     Route::post('/orders/{order}/status', [\App\Http\Controllers\Restaurant\KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
@@ -426,7 +434,7 @@ Route::prefix('cuisine/{token}')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('api/geocoding')->name('api.geocoding.')->group(function () {
+Route::prefix('api/geocoding')->name('api.geocoding.')->middleware('throttle:30,1')->group(function () {
     Route::get('/search', [\App\Http\Controllers\Public\GeocodingController::class, 'search'])->name('search');
     Route::get('/reverse', [\App\Http\Controllers\Public\GeocodingController::class, 'reverse'])->name('reverse');
 });

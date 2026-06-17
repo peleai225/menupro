@@ -76,6 +76,7 @@ class Restaurant extends Model
         'tagline',
         'wave_merchant_id',
         'kitchen_token',
+        'is_demo',
     ];
 
     protected $casts = [
@@ -101,6 +102,7 @@ class Restaurant extends Model
         'verified_at' => 'datetime',
         'delivery_enabled' => 'boolean',
         'cash_on_delivery' => 'boolean',
+        'is_demo' => 'boolean',
     ];
 
     protected $hidden = [
@@ -251,6 +253,16 @@ class Restaurant extends Model
     public function scopeExpired($query)
     {
         return $query->where('status', RestaurantStatus::EXPIRED);
+    }
+
+    public function scopeNotDemo($query)
+    {
+        return $query->where('is_demo', false);
+    }
+
+    public function scopeDemo($query)
+    {
+        return $query->where('is_demo', true);
     }
 
     public function scopeCanAcceptOrders($query)

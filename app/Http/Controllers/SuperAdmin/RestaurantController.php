@@ -327,6 +327,20 @@ class RestaurantController extends Controller
     }
 
     /**
+     * Toggle demo mode for a restaurant.
+     */
+    public function toggleDemo(Restaurant $restaurant): RedirectResponse
+    {
+        $restaurant->update(['is_demo' => !$restaurant->is_demo]);
+
+        $message = $restaurant->is_demo
+            ? 'Restaurant marqué comme compte démo.'
+            : 'Restaurant retiré du mode démo.';
+
+        return back()->with('success', $message);
+    }
+
+    /**
      * Delete a restaurant.
      */
     public function destroy(Restaurant $restaurant): RedirectResponse

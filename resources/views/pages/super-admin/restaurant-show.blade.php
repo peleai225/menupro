@@ -29,6 +29,14 @@
                 <span class="badge {{ $statusColors[$restaurant->status->value] ?? 'bg-neutral-100 text-neutral-600 border border-neutral-200' }}">
                     {{ $statusLabels[$restaurant->status->value] ?? $restaurant->status->value }}
                 </span>
+                @if($restaurant->is_demo)
+                    <span class="badge bg-purple-50 text-purple-700 border border-purple-200">
+                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Démo
+                    </span>
+                @endif
             </div>
             <p class="text-neutral-500 mt-1">Inscrit le {{ $restaurant->created_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
         </div>
@@ -401,6 +409,26 @@
                 @endif
             </div>
 
+            <!-- Demo Mode -->
+            <div class="bg-white border border-purple-200 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-lg font-semibold text-neutral-900">Mode Démo</h2>
+                    @if($restaurant->is_demo)
+                        <span class="badge bg-purple-50 text-purple-700 border border-purple-200">Actif</span>
+                    @endif
+                </div>
+                <p class="text-sm text-neutral-500 mb-4">Les comptes démo sont utilisés par l'équipe pour les démonstrations terrain. Ils sont exclus des statistiques globales.</p>
+                <form method="POST" action="{{ route('super-admin.restaurants.toggle-demo', $restaurant) }}">
+                    @csrf
+                    <button type="submit" class="btn w-full {{ $restaurant->is_demo ? 'btn-outline border-purple-300 text-purple-600 hover:bg-purple-50' : 'bg-purple-600 text-white hover:bg-purple-700' }}">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        {{ $restaurant->is_demo ? 'Désactiver le mode démo' : 'Activer le mode démo' }}
+                    </button>
+                </form>
+            </div>
+
             <!-- Danger Zone -->
             <div class="bg-white border border-red-200 rounded-xl p-6">
                 <h2 class="text-lg font-semibold text-red-600 mb-4">Zone dangereuse</h2>
@@ -411,7 +439,7 @@
                             Connexion en tant que
                         </button>
                     </form>
-                    <form method="POST" action="{{ route('super-admin.restaurants.destroy', $restaurant) }}" 
+                    <form method="POST" action="{{ route('super-admin.restaurants.destroy', $restaurant) }}"
                           onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ? Cette action est irréversible.')">
                         @csrf
                         @method('DELETE')

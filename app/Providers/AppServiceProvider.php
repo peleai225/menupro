@@ -13,7 +13,9 @@ use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\View;
 use App\Observers\ActivityObserver;
+use App\Observers\AdminNotificationObserver;
 use App\Observers\OrderWhatsAppObserver;
+use App\Observers\SubscriptionAdminObserver;
 use App\Policies\CategoryPolicy;
 use App\Policies\DishPolicy;
 use App\Policies\IngredientPolicy;
@@ -115,6 +117,9 @@ class AppServiceProvider extends ServiceProvider
 
         Order::observe(OrderWhatsAppObserver::class);
         Order::observe(\App\Observers\OrderCustomerNotifyObserver::class);
+
+        Restaurant::observe(AdminNotificationObserver::class);
+        Subscription::observe(SubscriptionAdminObserver::class);
     }
 
     /**

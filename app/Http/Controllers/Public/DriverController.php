@@ -41,8 +41,12 @@ class DriverController extends Controller
             'delivery_address' => $d->delivery_address,
             'delivery_phone' => $d->delivery_phone,
             'delivery_instructions' => $d->delivery_instructions,
+            'delivery_latitude' => $d->delivery_latitude,
+            'delivery_longitude' => $d->delivery_longitude,
             'restaurant_name' => $d->restaurant->name ?? '',
             'restaurant_address' => $d->restaurant->address ?? '',
+            'restaurant_latitude' => $d->restaurant->latitude ?? null,
+            'restaurant_longitude' => $d->restaurant->longitude ?? null,
             'assigned_at' => $d->assigned_at?->format('H:i'),
         ])->values();
 
@@ -71,8 +75,12 @@ class DriverController extends Controller
                 'delivery_address' => $d->delivery_address,
                 'delivery_phone' => $d->delivery_phone,
                 'delivery_instructions' => $d->delivery_instructions,
+                'delivery_latitude' => $d->delivery_latitude,
+                'delivery_longitude' => $d->delivery_longitude,
                 'restaurant_name' => $d->restaurant->name ?? '',
                 'restaurant_address' => $d->restaurant->address ?? '',
+                'restaurant_latitude' => $d->restaurant->latitude ?? null,
+                'restaurant_longitude' => $d->restaurant->longitude ?? null,
                 'assigned_at' => $d->assigned_at?->format('H:i'),
             ]);
 

@@ -20,28 +20,33 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        // Key metrics
+        $demoRestaurantIds = Restaurant::where('is_demo', true)->pluck('id');
+
+        // Key metrics (excluding demo accounts)
         $stats = [
             'restaurants' => [
-                'total' => Restaurant::count(),
-                'active' => Restaurant::where('status', RestaurantStatus::ACTIVE)->count(),
+                'total' => Restaurant::notDemo()->count(),
+                'active' => Restaurant::notDemo()->where('status', RestaurantStatus::ACTIVE)->count(),
                 'pending' => Restaurant::where('status', RestaurantStatus::PENDING)->count(),
-                'expired' => Restaurant::where('status', RestaurantStatus::EXPIRED)->count(),
+                'expired' => Restaurant::notDemo()->where('status', RestaurantStatus::EXPIRED)->count(),
             ],
-            'users' => User::count(),
+            'users' => User::when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))->count(),
             'orders' => [
-                'total' => Order::withoutGlobalScope('restaurant')->count(),
-                'today' => Order::withoutGlobalScope('restaurant')->whereDate('created_at', today())->count(),
+                'total' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->count(),
+                'today' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->whereDate('created_at', today())->count(),
                 'this_month' => Order::withoutGlobalScope('restaurant')
+                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
                     ->whereMonth('created_at', now()->month)
                     ->whereYear('created_at', now()->year)
                     ->count(),
             ],
             'revenue' => [
                 'total' => Order::withoutGlobalScope('restaurant')
+                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
                     ->where('payment_status', PaymentStatus::COMPLETED)
                     ->sum('total'),
                 'this_month' => Order::withoutGlobalScope('restaurant')
+                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
                     ->where('payment_status', PaymentStatus::COMPLETED)
                     ->whereMonth('created_at', now()->month)
                     ->whereYear('created_at', now()->year)
@@ -80,9 +85,10 @@ class DashboardController extends Controller
             ->groupBy('plans.name')
             ->get();
 
-        // Top restaurants by orders this month
+        // Top restaurants by orders this month (excluding demo)
         $topRestaurants = Order::withoutGlobalScope('restaurant')
             ->join('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
+            ->where('restaurants.is_demo', false)
             ->where('orders.payment_status', 'completed')
             ->whereMonth('orders.created_at', now()->month)
             ->select(
@@ -402,9 +408,12 @@ class DashboardController extends Controller
      */
     public function liveStats()
     {
-        // Recent orders (last 5 minutes)
+        $demoRestaurantIds = Restaurant::where('is_demo', true)->pluck('id');
+
+        // Recent orders (last 5 minutes, excluding demo)
         $recentOrders = Order::withoutGlobalScope('restaurant')
             ->with('restaurant:id,name')
+            ->whereNotIn('restaurant_id', $demoRestaurantIds)
             ->where('created_at', '>=', now()->subMinutes(5))
             ->latest()
             ->limit(10)
@@ -420,18 +429,20 @@ class DashboardController extends Controller
                 'created_at' => $order->created_at->format('H:i:s'),
             ]);
 
-        // Live stats
+        // Live stats (excluding demo)
         $stats = [
-            'orders_today' => Order::withoutGlobalScope('restaurant')->whereDate('created_at', today())->count(),
+            'orders_today' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->whereDate('created_at', today())->count(),
             'revenue_today' => Order::withoutGlobalScope('restaurant')
+                ->whereNotIn('restaurant_id', $demoRestaurantIds)
                 ->where('payment_status', 'completed')
                 ->whereDate('paid_at', today())
                 ->sum('total'),
             'pending_orders' => Order::withoutGlobalScope('restaurant')
+                ->whereNotIn('restaurant_id', $demoRestaurantIds)
                 ->whereIn('status', ['pending', 'confirmed', 'preparing'])
                 ->count(),
-            'active_restaurants' => Restaurant::where('status', 'active')->count(),
-            'new_registrations_today' => User::whereDate('created_at', today())->count(),
+            'active_restaurants' => Restaurant::notDemo()->where('status', 'active')->count(),
+            'new_registrations_today' => User::when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))->whereDate('created_at', today())->count(),
         ];
 
         // Orders by status (for pie chart)

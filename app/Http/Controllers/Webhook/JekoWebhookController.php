@@ -122,17 +122,21 @@ class JekoWebhookController extends Controller
             $webhookSecret = SystemSetting::get('jeko_webhook_secret', '');
         }
 
-        if ($webhookSecret && $signature) {
-            $expected = hash_hmac('sha256', $rawPayload, $webhookSecret);
-            if (!hash_equals($expected, $signature)) {
-                Log::channel('payments')->warning('Jeko webhook: invalid signature', [
-                    'order_id' => $order?->id,
-                    'subscription_id' => $subscription?->id,
-                ]);
-                if (app()->environment('production')) {
-                    return response()->json(['error' => 'Invalid signature'], 401);
-                }
-            }
+        if (!$webhookSecret || !$signature) {
+            Log::channel('payments')->warning('Jeko webhook: missing secret or signature', [
+                'order_id' => $order?->id,
+                'subscription_id' => $subscription?->id,
+            ]);
+            return response()->json(['error' => 'Missing signature'], 401);
+        }
+
+        $expected = hash_hmac('sha256', $rawPayload, $webhookSecret);
+        if (!hash_equals($expected, $signature)) {
+            Log::channel('payments')->warning('Jeko webhook: invalid signature', [
+                'order_id' => $order?->id,
+                'subscription_id' => $subscription?->id,
+            ]);
+            return response()->json(['error' => 'Invalid signature'], 401);
         }
 
         if ($order) {

@@ -69,7 +69,7 @@ class Orders extends Component
     public function statusCounts(): array
     {
         $restaurantId = auth()->user()->restaurant_id;
-        
+
         if (!$restaurantId) {
             return [
                 'all' => 0,
@@ -79,13 +79,18 @@ class Orders extends Component
                 'ready' => 0,
             ];
         }
-        
+
+        $counts = Order::where('restaurant_id', $restaurantId)
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
         return [
-            'all' => Order::where('restaurant_id', $restaurantId)->count(),
-            'pending' => Order::where('restaurant_id', $restaurantId)->where('status', OrderStatus::PENDING_PAYMENT)->count(),
-            'confirmed' => Order::where('restaurant_id', $restaurantId)->where('status', OrderStatus::CONFIRMED)->count(),
-            'preparing' => Order::where('restaurant_id', $restaurantId)->where('status', OrderStatus::PREPARING)->count(),
-            'ready' => Order::where('restaurant_id', $restaurantId)->where('status', OrderStatus::READY)->count(),
+            'all' => $counts->sum(),
+            'pending' => $counts->get(OrderStatus::PENDING_PAYMENT->value, 0),
+            'confirmed' => $counts->get(OrderStatus::CONFIRMED->value, 0),
+            'preparing' => $counts->get(OrderStatus::PREPARING->value, 0),
+            'ready' => $counts->get(OrderStatus::READY->value, 0),
         ];
     }
 

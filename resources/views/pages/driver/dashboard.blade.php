@@ -71,10 +71,19 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                             </svg>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <p class="text-xs text-gray-500 uppercase font-medium">Recuperer chez</p>
                             <p class="font-semibold text-gray-900" x-text="delivery.restaurant_name"></p>
                             <p class="text-sm text-gray-500" x-text="delivery.restaurant_address"></p>
+                            <a x-show="delivery.restaurant_latitude && delivery.restaurant_longitude"
+                               :href="'https://www.google.com/maps/dir/?api=1&destination=' + delivery.restaurant_latitude + ',' + delivery.restaurant_longitude"
+                               target="_blank"
+                               class="inline-flex items-center gap-1 mt-2 text-sm font-medium text-orange-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                </svg>
+                                Naviguer vers le resto
+                            </a>
                         </div>
                     </div>
 
@@ -95,13 +104,24 @@
                         </div>
                     </div>
 
-                    {{-- Phone --}}
-                    <a :href="'tel:' + delivery.delivery_phone" class="flex items-center gap-3 bg-green-50 rounded-xl p-3">
-                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                        </svg>
-                        <span class="font-medium text-green-700" x-text="delivery.delivery_phone"></span>
-                    </a>
+                    {{-- Navigate + Phone --}}
+                    <div class="flex gap-2">
+                        <a x-show="delivery.delivery_latitude && delivery.delivery_longitude"
+                           :href="'https://www.google.com/maps/dir/?api=1&destination=' + delivery.delivery_latitude + ',' + delivery.delivery_longitude"
+                           target="_blank"
+                           class="flex-1 flex items-center justify-center gap-2 bg-blue-50 rounded-xl p-3">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                            </svg>
+                            <span class="font-medium text-blue-700">Naviguer</span>
+                        </a>
+                        <a :href="'tel:' + delivery.delivery_phone" class="flex-1 flex items-center justify-center gap-2 bg-green-50 rounded-xl p-3">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            <span class="font-medium text-green-700">Appeler</span>
+                        </a>
+                    </div>
 
                     {{-- Action Buttons --}}
                     <div class="pt-2">
