@@ -9,17 +9,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->index('payment_status');
-            $table->index('type');
-            $table->index('tracking_token');
+            if (!Schema::hasIndex('orders', 'orders_payment_status_index')) {
+                $table->index('payment_status');
+            }
+            if (!Schema::hasIndex('orders', 'orders_type_index')) {
+                $table->index('type');
+            }
+            if (!Schema::hasIndex('orders', 'orders_tracking_token_index')) {
+                $table->index('tracking_token');
+            }
         });
 
         Schema::table('deliveries', function (Blueprint $table) {
-            $table->index(['driver_id', 'status']);
+            if (!Schema::hasIndex('deliveries', 'deliveries_driver_id_status_index')) {
+                $table->index(['driver_id', 'status']);
+            }
         });
 
         Schema::table('delivery_drivers', function (Blueprint $table) {
-            $table->index('token');
+            if (!Schema::hasIndex('delivery_drivers', 'delivery_drivers_token_index')) {
+                $table->index('token');
+            }
         });
     }
 
