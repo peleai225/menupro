@@ -1,71 +1,37 @@
-#!/usr/bin/env bash
-# MenuPro — Script de déploiement
-# Usage: bash ~/deploy.sh [branche]
-#   ex: bash deploy.sh                  → branche actuelle
-#   ex: bash deploy.sh main             → merge depuis main
-#   ex: bash deploy.sh claude/qr-code-dimensions-J89Ib
+#!/bin/bash
+# MenuPro — Script de déploiement (cPanel / shared hosting)
+# Usage: bash ~/deploy.sh
+echo " Déploiement MenuPro..."
 
-set -e
+# 1. Pull le dernier code
+cd ~/MenuPro
+git pull origin main
 
-BRANCH="${1:-}"   # branche passée en argument (optionnel)
+# 2. Copier les assets publics vers public_html
+echo " Copie des assets publics..."
+cp -r public/build/* ~/public_html/build/ 2>/dev/null
+cp -r public/images/* ~/public_html/images/ 2>/dev/null
+cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
+mkdir -p ~/public_html/sounds 2>/dev/null
+cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
+cp public/icon-*.png ~/public_html/ 2>/dev/null
+cp public/manifest.json ~/public_html/ 2>/dev/null
+cp public/sw.js ~/public_html/ 2>/dev/null
+cp public/offline.html ~/public_html/ 2>/dev/null
+cp public/favicon.svg ~/public_html/ 2>/dev/null
+cp public/robots.txt ~/public_html/ 2>/dev/null
 
-echo "=== MenuPro — Déploiement ==="
-echo ">> Répertoire : $(pwd)"
+# 3. Migrations
+echo " Migrations..."
+php artisan migrate --force 2>/dev/null || true
 
-# Se placer à la racine du projet
-cd "$(dirname "$0")"
-
-# ─── 1. Récupérer les nouvelles modifications ───────────────────────────────
-echo ""
-echo ">> Git fetch + pull..."
-git fetch origin
-
-if [ -n "$BRANCH" ]; then
-    echo "   Passage sur la branche : $BRANCH"
-    git checkout "$BRANCH"
-fi
-
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo "   Branche active : $CURRENT_BRANCH"
-git pull origin "$CURRENT_BRANCH"
-echo "   Dernier commit : $(git log --oneline -1)"
-
-# ─── 2. Dépendances PHP ─────────────────────────────────────────────────────
-echo ""
-echo ">> Composer install..."
-composer install --no-dev --optimize-autoloader --no-interaction
-
-# ─── 3. Migrations ──────────────────────────────────────────────────────────
-echo ""
-echo ">> Migrations..."
-php artisan migrate --force
-
-# ─── 4. Assets Vite ─────────────────────────────────────────────────────────
-echo ""
-echo ">> Build des assets..."
-npm ci --silent
-npm run build
-
-# ─── 5. Caches Laravel ──────────────────────────────────────────────────────
-echo ""
-echo ">> Nettoyage et recachage..."
-php artisan optimize:clear
-php artisan config:cache
+# 4. Vider les caches Laravel
+echo " Nettoyage cache..."
+php artisan view:clear
+php artisan cache:clear
 php artisan route:cache
-php artisan view:cache
-php artisan event:cache
-
-# ─── 6. Workers queue ───────────────────────────────────────────────────────
-echo ""
-echo ">> Redémarrage des workers..."
-php artisan queue:restart 2>/dev/null || true
-
-# ─── 7. PHP-FPM (vider l'opcache) ───────────────────────────────────────────
-# Décommentez la ligne qui correspond à votre version de PHP :
-# sudo systemctl reload php8.2-fpm
-# sudo systemctl reload php8.3-fpm
+php artisan config:clear
 
 echo ""
-echo "=== Déploiement terminé ==="
-echo "   Branche : $CURRENT_BRANCH"
-echo "   Commit  : $(git log --oneline -1)"
+echo " DÉPLOIEMENT TERMINÉ !"
+echo " $(date)"
