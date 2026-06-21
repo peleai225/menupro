@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Dish;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class MenuController extends Controller
@@ -16,27 +17,39 @@ class MenuController extends Controller
      */
     public function index(string $slug): View
     {
-        $restaurant = Restaurant::where('slug', $slug)
-            ->with(['categories' => fn($q) => $q->active()->ordered()->withCount(['dishes' => fn($d) => $d->active()])])
-            ->firstOrFail();
+        $restaurant = Cache::remember(
+            "menu.restaurant.{$slug}",
+            60,
+            fn() => Restaurant::where('slug', $slug)
+                ->with(['categories' => fn($q) => $q->active()->ordered()->withCount(['dishes' => fn($d) => $d->active()])])
+                ->firstOrFail()
+        );
 
         // Get active categories with active dishes
         $categories = $restaurant->categories
             ->filter(fn($c) => $c->dishes_count > 0);
 
         // Get featured dishes
-        $featuredDishes = Dish::where('restaurant_id', $restaurant->id)
-            ->active()
-            ->featured()
-            ->limit(6)
-            ->get();
+        $featuredDishes = Cache::remember(
+            "menu.{$restaurant->id}.featured",
+            120,
+            fn() => Dish::where('restaurant_id', $restaurant->id)
+                ->active()
+                ->featured()
+                ->limit(6)
+                ->get()
+        );
 
         // Get new dishes
-        $newDishes = Dish::where('restaurant_id', $restaurant->id)
-            ->active()
-            ->new()
-            ->limit(4)
-            ->get();
+        $newDishes = Cache::remember(
+            "menu.{$restaurant->id}.new_dishes",
+            120,
+            fn() => Dish::where('restaurant_id', $restaurant->id)
+                ->active()
+                ->new()
+                ->limit(4)
+                ->get()
+        );
 
         // Check if restaurant is open
         $isOpen = $restaurant->isOpenNow();
@@ -62,10 +75,14 @@ class MenuController extends Controller
             abort(404);
         }
 
-        $dishes = Dish::where('category_id', $category->id)
-            ->active()
-            ->ordered()
-            ->get();
+        $dishes = Cache::remember(
+            "menu.{$restaurant->id}.category.{$category->id}",
+            120,
+            fn() => Dish::where('category_id', $category->id)
+                ->active()
+                ->ordered()
+                ->get()
+        );
 
         return view('pages.restaurant-public.partials.dishes-grid', compact('dishes', 'restaurant'));
     }
@@ -109,4 +126,3 @@ class MenuController extends Controller
         return view('pages.restaurant-public.partials.search-results', compact('dishes', 'restaurant', 'query'));
     }
 }
-

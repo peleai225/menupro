@@ -84,19 +84,18 @@ class StatsController extends Controller
             ->limit(10)
             ->get();
 
-        // Summary stats
+        // Summary stats — single query for orders
+        $orderSummary = DB::table('orders')
+            ->where('created_at', '>=', now()->subDays($period))
+            ->selectRaw("COUNT(*) as total_orders")
+            ->selectRaw("SUM(CASE WHEN payment_status = 'completed' THEN total ELSE 0 END) as total_revenue")
+            ->selectRaw("AVG(CASE WHEN payment_status = 'completed' THEN total ELSE NULL END) as average_order")
+            ->first();
+
         $summary = [
-            'total_revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->where('created_at', '>=', now()->subDays($period))
-                ->sum('total'),
-            'total_orders' => Order::withoutGlobalScope('restaurant')
-                ->where('created_at', '>=', now()->subDays($period))
-                ->count(),
-            'average_order' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->where('created_at', '>=', now()->subDays($period))
-                ->avg('total') ?? 0,
+            'total_revenue' => (int) ($orderSummary->total_revenue ?? 0),
+            'total_orders' => (int) ($orderSummary->total_orders ?? 0),
+            'average_order' => (float) ($orderSummary->average_order ?? 0),
             'new_restaurants' => Restaurant::where('created_at', '>=', now()->subDays($period))->count(),
             'subscription_revenue' => Subscription::where('created_at', '>=', now()->subDays($period))
                 ->where('status', 'active')
@@ -245,27 +244,47 @@ class StatsController extends Controller
                 : ($current > 0 ? 100 : 0);
         }
 
-        // Growth over time (weekly)
+        // Growth over time (weekly) — 2 queries instead of 3 per week
+        $weeklyOrders = DB::table('orders')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("YEARWEEK(created_at, 1) as yw")
+            ->selectRaw("MIN(DATE(created_at)) as week")
+            ->selectRaw("COUNT(*) as orders")
+            ->selectRaw("SUM(CASE WHEN payment_status = 'completed' THEN total ELSE 0 END) as revenue")
+            ->groupBy('yw')
+            ->orderBy('yw')
+            ->get()
+            ->keyBy('yw');
+
+        $weeklyRestaurants = DB::table('restaurants')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("YEARWEEK(created_at, 1) as yw")
+            ->selectRaw("COUNT(*) as restaurants")
+            ->groupBy('yw')
+            ->get()
+            ->keyBy('yw');
+
         $weeklyGrowth = [];
-        $weeks = ceil($period / 7);
-        for ($i = 0; $i < $weeks; $i++) {
-            $weekStart = $startDate->copy()->addWeeks($i);
-            $weekEnd = $weekStart->copy()->addWeek();
-            
-            $weekStats = [
-                'week' => $weekStart->format('Y-m-d'),
-                'restaurants' => Restaurant::whereBetween('created_at', [$weekStart, $weekEnd])->count(),
-                'orders' => Order::withoutGlobalScope('restaurant')
-                    ->whereBetween('created_at', [$weekStart, $weekEnd])
-                    ->count(),
-                'revenue' => Order::withoutGlobalScope('restaurant')
-                    ->where('payment_status', 'completed')
-                    ->whereBetween('created_at', [$weekStart, $weekEnd])
-                    ->sum('total'),
+        foreach ($weeklyOrders as $yw => $row) {
+            $weeklyGrowth[] = [
+                'week' => $row->week,
+                'restaurants' => (int) ($weeklyRestaurants[$yw]->restaurants ?? 0),
+                'orders' => (int) $row->orders,
+                'revenue' => (int) $row->revenue,
             ];
-            
-            $weeklyGrowth[] = $weekStats;
         }
+        // Add weeks with only restaurants but no orders
+        foreach ($weeklyRestaurants as $yw => $row) {
+            if (!isset($weeklyOrders[$yw])) {
+                $weeklyGrowth[] = [
+                    'week' => $startDate->copy()->addWeeks(array_search($yw, array_keys($weeklyRestaurants->toArray())))->format('Y-m-d'),
+                    'restaurants' => (int) $row->restaurants,
+                    'orders' => 0,
+                    'revenue' => 0,
+                ];
+            }
+        }
+        usort($weeklyGrowth, fn($a, $b) => strcmp($a['week'], $b['week']));
 
         return view('pages.super-admin.stats-growth', compact(
             'period',

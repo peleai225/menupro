@@ -158,23 +158,28 @@ class StockManager
 
         foreach ($dish->ingredients as $ingredient) {
             $requiredQuantity = $ingredient->pivot->quantity * $quantity;
-            
+
+            // Lock row to prevent race conditions on concurrent orders
+            $lockedIngredient = \App\Models\Ingredient::lockForUpdate()->find($ingredient->id);
+            if (!$lockedIngredient) {
+                continue;
+            }
+
             $movement = StockMovement::create([
-                'restaurant_id' => $ingredient->restaurant_id,
-                'ingredient_id' => $ingredient->id,
+                'restaurant_id' => $lockedIngredient->restaurant_id,
+                'ingredient_id' => $lockedIngredient->id,
                 'user_id' => auth()->id(),
                 'type' => StockMovementType::EXIT_SALE,
                 'quantity' => -abs($requiredQuantity),
-                'quantity_before' => $ingredient->current_quantity,
-                'quantity_after' => max(0, $ingredient->current_quantity - $requiredQuantity),
+                'quantity_before' => $lockedIngredient->current_quantity,
+                'quantity_after' => max(0, $lockedIngredient->current_quantity - $requiredQuantity),
                 'reference_type' => $reference ? get_class($reference) : null,
                 'reference_id' => $reference?->id,
                 'reason' => "Vente: {$dish->name} x{$quantity}",
             ]);
 
-            // Update ingredient stock
-            $ingredient->current_quantity = max(0, $ingredient->current_quantity - $requiredQuantity);
-            $ingredient->save();
+            $lockedIngredient->current_quantity = max(0, $lockedIngredient->current_quantity - $requiredQuantity);
+            $lockedIngredient->save();
 
             $movements->push($movement);
         }

@@ -92,6 +92,13 @@
                     if (this.autoRefresh) {
                         this.startAutoRefresh();
                     }
+
+                    // Real-time updates via Reverb
+                    if (window.Echo) {
+                        window.Echo.channel('restaurant.{{ auth()->user()->restaurant_id }}.orders')
+                            .listen('.order.created', () => this.refreshData())
+                            .listen('.order.status_changed', () => this.refreshData());
+                    }
                 },
 
                 async refreshData() {
@@ -280,7 +287,7 @@
                 startAutoRefresh() {
                     this.refreshInterval = setInterval(() => {
                         this.refreshData();
-                    }, 8000); // Every 8 seconds
+                    }, 20000); // Every 20 seconds (Reverb handles real-time updates)
                 },
 
                 stopAutoRefresh() {

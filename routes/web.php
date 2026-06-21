@@ -148,10 +148,10 @@ Route::prefix('dashboard')
         Route::get('commandes', \App\Livewire\Restaurant\Orders::class)->name('orders');
         Route::get('commandes/board', [OrderController::class, 'board'])->name('orders.board');
         Route::get('commandes/kanban', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'index'])->name('orders.kanban');
-        Route::get('commandes/kanban/data', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'data'])->name('orders.kanban.data');
+        Route::get('commandes/kanban/data', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'data'])->name('orders.kanban.data')->middleware('throttle:30,1');
         Route::patch('commandes/{order}/kanban/status', [\App\Http\Controllers\Restaurant\OrderBoardController::class, 'updateStatus'])->name('orders.kanban.status');
         Route::get('commandes/rush', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'index'])->name('orders.rush');
-        Route::get('commandes/rush/data', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'data'])->name('orders.rush.data');
+        Route::get('commandes/rush/data', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'data'])->name('orders.rush.data')->middleware('throttle:30,1');
         Route::post('commandes/{order}/rush/confirm', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'confirm'])->name('orders.rush.confirm');
         Route::post('commandes/{order}/rush/prepare', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'startPreparing'])->name('orders.rush.prepare');
         Route::post('commandes/{order}/rush/ready', [\App\Http\Controllers\Restaurant\OrderRushController::class, 'markReady'])->name('orders.rush.ready');
@@ -354,9 +354,9 @@ Route::prefix('admin')
         Route::post('annonces/{announcement}/send-emails', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'sendEmails'])->name('announcements.send-emails');
         
         // Live Dashboard API
-        Route::get('api/live-stats', [SuperAdminDashboardController::class, 'liveStats'])->name('api.live-stats');
+        Route::get('api/live-stats', [SuperAdminDashboardController::class, 'liveStats'])->name('api.live-stats')->middleware('throttle:20,1');
         // Sidebar badges + notifications (polling)
-        Route::get('api/sidebar-badges', [\App\Http\Controllers\SuperAdmin\SidebarApiController::class, 'badges'])->name('api.sidebar-badges');
+        Route::get('api/sidebar-badges', [\App\Http\Controllers\SuperAdmin\SidebarApiController::class, 'badges'])->name('api.sidebar-badges')->middleware('throttle:20,1');
         Route::get('api/notifications', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'index'])->name('api.notifications');
         Route::post('api/notifications/mark-read', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'markAsRead'])->name('api.notifications.mark-read');
         

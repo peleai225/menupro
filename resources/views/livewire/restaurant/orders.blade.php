@@ -1,4 +1,4 @@
-<div wire:poll.5s x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
+<div wire:poll.30s x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
     <!-- Header with gradient background -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"

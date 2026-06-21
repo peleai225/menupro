@@ -3,10 +3,14 @@
 namespace App\Notifications\Admin;
 
 use App\Models\Restaurant;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class NewRestaurantRegisteredNotification extends Notification
+class NewRestaurantRegisteredNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     public function __construct(
         protected Restaurant $restaurant
     ) {}

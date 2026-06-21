@@ -69,17 +69,18 @@ class OrderRushController extends Controller
             ];
         })->toArray();
 
-        // Quick stats
+        // Quick stats — single query
+        $statsRow = \Illuminate\Support\Facades\DB::table('orders')
+            ->where('restaurant_id', $restaurant->id)
+            ->selectRaw("SUM(CASE WHEN status IN ('paid','confirmed') THEN 1 ELSE 0 END) as `new`")
+            ->selectRaw("SUM(CASE WHEN status = 'preparing' THEN 1 ELSE 0 END) as preparing")
+            ->selectRaw("SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as ready")
+            ->first();
+
         $stats = [
-            'new' => Order::where('restaurant_id', $restaurant->id)
-                ->whereIn('status', [OrderStatus::PAID, OrderStatus::CONFIRMED])
-                ->count(),
-            'preparing' => Order::where('restaurant_id', $restaurant->id)
-                ->where('status', OrderStatus::PREPARING)
-                ->count(),
-            'ready' => Order::where('restaurant_id', $restaurant->id)
-                ->where('status', OrderStatus::READY)
-                ->count(),
+            'new' => (int) $statsRow->new,
+            'preparing' => (int) $statsRow->preparing,
+            'ready' => (int) $statsRow->ready,
         ];
 
         return view('pages.restaurant.orders-rush', compact('orders', 'ordersData', 'stats'));

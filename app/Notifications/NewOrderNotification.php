@@ -3,11 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewOrderNotification extends Notification
+class NewOrderNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     public function __construct(
         protected Order $order
     ) {}
@@ -20,7 +24,7 @@ class NewOrderNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("🍽️ Nouvelle commande #{$this->order->reference}")
+            ->subject("Nouvelle commande #{$this->order->reference}")
             ->view('emails.order-new', [
                 'order' => $this->order,
                 'notifiable' => $notifiable,
@@ -41,4 +45,3 @@ class NewOrderNotification extends Notification
         ];
     }
 }
-

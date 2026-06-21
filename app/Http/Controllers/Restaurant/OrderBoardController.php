@@ -17,25 +17,18 @@ class OrderBoardController extends Controller
     public function index(Request $request): View
     {
         $restaurant = auth()->user()->restaurant;
-        
+
         // Get orders grouped by status
         $ordersByStatus = $this->getOrdersByStatus($restaurant->id, $request);
-        
-        // Stats
-        $stats = [
-            'total' => Order::where('restaurant_id', $restaurant->id)
-                ->whereDate('created_at', today())
-                ->count(),
-            'pending' => Order::where('restaurant_id', $restaurant->id)
-                ->whereIn('status', [OrderStatus::PAID, OrderStatus::CONFIRMED])
-                ->count(),
-            'preparing' => Order::where('restaurant_id', $restaurant->id)
-                ->where('status', OrderStatus::PREPARING)
-                ->count(),
-            'ready' => Order::where('restaurant_id', $restaurant->id)
-                ->where('status', OrderStatus::READY)
-                ->count(),
-        ];
+
+        // Stats — single query
+        $stats = \Illuminate\Support\Facades\DB::table('orders')
+            ->where('restaurant_id', $restaurant->id)
+            ->selectRaw("SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as total")
+            ->selectRaw("SUM(CASE WHEN status IN ('paid','confirmed') THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN status = 'preparing' THEN 1 ELSE 0 END) as preparing")
+            ->selectRaw("SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as ready")
+            ->first();
 
         return view('pages.restaurant.orders-kanban', compact('ordersByStatus', 'stats'));
     }
@@ -108,8 +101,9 @@ class OrderBoardController extends Controller
     protected function getOrdersByStatus(int $restaurantId, Request $request): array
     {
         $query = Order::where('restaurant_id', $restaurantId)
-            ->with(['items.dish', 'restaurant'])
-            ->whereNotIn('status', [OrderStatus::CANCELLED, OrderStatus::REFUNDED]);
+            ->with(['items.dish'])
+            ->whereNotIn('status', [OrderStatus::CANCELLED, OrderStatus::REFUNDED])
+            ->where('created_at', '>=', now()->subHours(24));
 
         // Filters
         if ($request->filled('type')) {
@@ -124,8 +118,7 @@ class OrderBoardController extends Controller
             });
         }
 
-        // Group by status
-        $allOrders = $query->get();
+        $allOrders = $query->latest()->limit(200)->get();
 
         return [
             'pending_payment' => $allOrders->where('status', OrderStatus::PENDING_PAYMENT)->values(),

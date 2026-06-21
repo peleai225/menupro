@@ -65,9 +65,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force APP_URL for correct payment redirect URLs
+        // Force APP_URL and HTTPS for correct payment redirect URLs
         if (config('app.env') === 'production' && $appUrl = config('app.url')) {
             URL::forceRootUrl($appUrl);
+            URL::forceScheme('https');
         }
 
         // Register policies
@@ -120,6 +121,9 @@ class AppServiceProvider extends ServiceProvider
 
         Restaurant::observe(AdminNotificationObserver::class);
         Subscription::observe(SubscriptionAdminObserver::class);
+
+        Dish::observe(\App\Observers\MenuCacheObserver::class);
+        Category::observe(\App\Observers\MenuCacheObserver::class);
     }
 
     /**

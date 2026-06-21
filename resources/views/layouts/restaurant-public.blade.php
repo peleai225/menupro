@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ ($restaurant->name ?? 'Restaurant') . ' - Menu' }}</title>
     <meta name="description" content="{{ $restaurant->description ?? 'Découvrez notre menu et commandez en ligne' }}">
+    <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- PWA & Mobile Web App --}}
     <meta name="theme-color" content="{{ $restaurant->primary_color ?? '#f97316' }}">
@@ -16,12 +17,47 @@
     <link rel="manifest" href="/manifest.json">
 
     {{-- Open Graph pour partage WhatsApp / réseaux sociaux --}}
-    <meta property="og:title" content="{{ $restaurant->name ?? 'MenuPro' }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $restaurant->name ?? 'MenuPro' }} - Menu & Commande en ligne">
     <meta property="og:description" content="{{ $restaurant->description ?? 'Commandez en ligne — paiement Mobile Money' }}">
     <meta property="og:type" content="restaurant.restaurant">
+    <meta property="og:locale" content="fr_CI">
     @if($restaurant->banner_path ?? false)
         <meta property="og:image" content="{{ $restaurant->banner_url }}">
+    @elseif($restaurant->logo_path ?? false)
+        <meta property="og:image" content="{{ Storage::url($restaurant->logo_path) }}">
     @endif
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $restaurant->name ?? 'MenuPro' }} - Menu en ligne">
+    <meta name="twitter:description" content="{{ $restaurant->description ?? 'Commandez en ligne — paiement Mobile Money' }}">
+
+    {{-- JSON-LD Structured Data --}}
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Restaurant",
+        "name": "{{ $restaurant->name ?? '' }}",
+        "url": "{{ url()->current() }}",
+        "description": "{{ $restaurant->description ?? '' }}",
+        @if($restaurant->address ?? false)"address": {
+            "@@type": "PostalAddress",
+            "streetAddress": "{{ $restaurant->address }}",
+            "addressLocality": "Abidjan",
+            "addressCountry": "CI"
+        },@endif
+        @if($restaurant->phone ?? false)"telephone": "{{ $restaurant->phone }}",@endif
+        @if($restaurant->logo_path ?? false)"image": "{{ Storage::url($restaurant->logo_path) }}",@endif
+        "servesCuisine": "{{ $restaurant->cuisine_type ?? 'Cuisine africaine' }}",
+        "priceRange": "$$",
+        "acceptsReservations": "true",
+        "hasMenu": {
+            "@@type": "Menu",
+            "url": "{{ url()->current() }}"
+        }
+    }
+    </script>
     
     @php
         $favicon = \App\Models\SystemSetting::get('favicon', '');

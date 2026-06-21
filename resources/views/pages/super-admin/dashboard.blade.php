@@ -429,7 +429,7 @@
                 interval: null,
                 startPolling() {
                     this.fetchData();
-                    this.interval = setInterval(() => this.fetchData(), 10000);
+                    this.interval = setInterval(() => this.fetchData(), 60000);
                 },
                 async fetchData() {
                     try {

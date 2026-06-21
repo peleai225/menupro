@@ -27,7 +27,9 @@ class OrderController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Order::with('items.dish');
+        $restaurantId = auth()->user()->restaurant_id;
+
+        $query = Order::where('restaurant_id', $restaurantId)->with('items.dish');
 
         // Filters
         if ($request->filled('status')) {
@@ -49,13 +51,14 @@ class OrderController extends Controller
         // Default: show recent first, active orders highlighted
         $orders = $query->latest()->paginate(20)->withQueryString();
 
-        // Stats
-        $stats = [
-            'pending' => Order::whereIn('status', [OrderStatus::PAID, OrderStatus::CONFIRMED])->count(),
-            'preparing' => Order::where('status', OrderStatus::PREPARING)->count(),
-            'ready' => Order::where('status', OrderStatus::READY)->count(),
-            'today_total' => Order::today()->where('payment_status', 'completed')->sum('total'),
-        ];
+        // Stats — single query with conditional counts
+        $stats = DB::table('orders')
+            ->where('restaurant_id', $restaurantId)
+            ->selectRaw("SUM(CASE WHEN status IN ('paid','confirmed') THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN status = 'preparing' THEN 1 ELSE 0 END) as preparing")
+            ->selectRaw("SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as ready")
+            ->selectRaw("SUM(CASE WHEN DATE(created_at) = CURDATE() AND payment_status = 'completed' THEN total ELSE 0 END) as today_total")
+            ->first();
 
         return view('pages.restaurant.orders', compact('orders', 'stats'));
     }

@@ -75,7 +75,7 @@
      x-init="requestNotificationPermission()"
      @click.away="open = false" 
      @new-notification-arrived.window="onNewNotification()"
-     wire:poll.5s="checkForNewNotifications">
+     wire:poll.30s="checkForNewNotifications">
     <!-- New Notification Alert Badge -->
     <div x-show="showNewBadge"
          x-transition:enter="transition ease-out duration-300"

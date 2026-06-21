@@ -3,7 +3,7 @@
     $secondaryColor = $restaurant->secondary_color ?? '#1c1917';
 @endphp
 
-<div class="min-h-screen bg-neutral-50" wire:poll.10s="refreshRestaurant">
+<div class="min-h-screen bg-neutral-50" wire:poll.60s="refreshRestaurant">
     <!-- Warning Message -->
     @if(session('warning'))
         <div x-data="{ show: true }" 
@@ -23,8 +23,8 @@
                     </svg>
                     <span class="font-medium text-sm">{{ session('warning') }}</span>
                 </div>
-                <button @click="show = false" class="text-amber-600 hover:text-amber-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="show = false" aria-label="Fermer" class="text-amber-600 hover:text-amber-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
@@ -91,6 +91,8 @@
                      alt="{{ $restaurant->name }}"
                      loading="eager"
                      decoding="async"
+                     width="1200"
+                     height="400"
                      class="absolute inset-0 w-full h-full object-cover object-center">
             @else
                 <div class="absolute inset-0" style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);"></div>
@@ -337,8 +339,8 @@
                            style="--tw-ring-color: {{ $primaryColor }};"
                            placeholder="Rechercher un plat...">
                     @if($searchQuery)
-                        <button wire:click="$set('searchQuery', '')" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-neutral-300 text-white">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <button wire:click="$set('searchQuery', '')" aria-label="Effacer la recherche" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-neutral-300 text-white">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     @endif
                 </div>
@@ -362,9 +364,10 @@
 
                 <!-- Cart Button (Desktop) -->
                 <button wire:click="toggleCart"
+                        aria-label="Voir le panier"
                         class="hidden lg:flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all duration-200 font-semibold relative hover:opacity-90 hover:-translate-y-0.5 flex-shrink-0"
                         style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 12px {{ $primaryColor }}40;">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     Panier
@@ -393,8 +396,9 @@
                        placeholder="Rechercher un plat...">
                 @if($searchQuery)
                     <button wire:click="$set('searchQuery', '')"
+                            aria-label="Effacer la recherche"
                             class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-neutral-200 hover:bg-neutral-300 transition-colors text-neutral-500">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
@@ -430,6 +434,8 @@
                                 <img src="{{ Storage::url($dish->image_path) }}"
                                      alt="{{ $dish->name }}"
                                      loading="lazy"
+                                     width="400"
+                                     height="300"
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                             @else

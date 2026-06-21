@@ -311,7 +311,14 @@
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
-                this.pollInterval = setInterval(() => this.fetchOrders(), 5000);
+                this.pollInterval = setInterval(() => this.fetchOrders(), 15000);
+
+                // Listen for real-time order events via Reverb
+                if (window.Echo) {
+                    window.Echo.channel('restaurant.{{ $restaurant->id }}.orders')
+                        .listen('.order.created', () => this.fetchOrders())
+                        .listen('.order.status_changed', () => this.fetchOrders());
+                }
 
                 // Show tutorial on first visit
                 if (!localStorage.getItem('kitchen_tutorial_seen_{{ $token }}')) {

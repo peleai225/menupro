@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Services\RevenueCalculator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -101,21 +102,25 @@ class Dashboard extends Component
     public function popularDishes()
     {
         $restaurant = auth()->user()->restaurant;
-        
+
         if (!$restaurant) {
             return collect();
         }
 
-        return Dish::where('restaurant_id', $restaurant->id)
-            ->withCount(['orderItems as orders_count' => function ($query) {
-                $query->whereHas('order', function ($q) {
-                    $q->whereNotNull('paid_at')
-                        ->where('created_at', '>=', now()->subDays(30));
-                });
-            }])
-            ->orderByDesc('orders_count')
-            ->limit(5)
-            ->get();
+        return Cache::remember(
+            "restaurant.{$restaurant->id}.popular_dishes",
+            300,
+            fn() => Dish::where('restaurant_id', $restaurant->id)
+                ->withCount(['orderItems as orders_count' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->whereNotNull('paid_at')
+                            ->where('created_at', '>=', now()->subDays(30));
+                    });
+                }])
+                ->orderByDesc('orders_count')
+                ->limit(5)
+                ->get()
+        );
     }
 
     /**

@@ -60,14 +60,14 @@
     <meta property="og:url" content="{{ $canonicalUrl }}">
     <meta property="og:title" content="{{ $title ? $title . ' - ' . $appName : $appName }}">
     <meta property="og:description" content="{{ $description ?? 'La solution SaaS pour digitaliser votre restaurant et recevoir des commandes en ligne.' }}">
-    <meta property="og:image" content="{{ asset('og-image.png') }}">
+    <meta property="og:image" content="{{ asset('images/logo-menupro.png') }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $title ?? 'MenuPro — Votre restaurant en ligne' }}">
     <meta name="twitter:description" content="{{ $description ?? 'Créez le site de commande de votre restaurant en quelques minutes.' }}">
-    <meta name="twitter:image" content="{{ asset('og-image.png') }}">
+    <meta name="twitter:image" content="{{ asset('images/logo-menupro.png') }}">
 
     <!-- PWA -->
     <meta name="theme-color" content="#f97316">

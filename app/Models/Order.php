@@ -302,8 +302,9 @@ class Order extends Model
             return false;
         }
 
+        $oldStatus = $this->status->value;
         $this->status = $newStatus;
-        
+
         // Set timestamps
         match ($newStatus) {
             OrderStatus::CONFIRMED => $this->confirmed_at = now(),
@@ -314,7 +315,13 @@ class Order extends Model
             default => null,
         };
 
-        return $this->save();
+        $saved = $this->save();
+
+        if ($saved) {
+            \App\Events\OrderStatusChanged::dispatch($this, $oldStatus, $newStatus->value);
+        }
+
+        return $saved;
     }
 
     /**
@@ -333,6 +340,7 @@ class Order extends Model
 
         if ($saved) {
             $this->deductDishStock();
+            \App\Events\OrderCreated::dispatch($this);
         }
 
         return $saved;
