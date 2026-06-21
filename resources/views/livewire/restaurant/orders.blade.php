@@ -2,19 +2,41 @@
      x-data="{
         loaded: false,
         soundEnabled: false,
-        audio: null,
+        audioCtx: null,
         enableSound() {
-            this.audio = new Audio('/sounds/new-order.wav');
-            this.audio.volume = 1;
-            this.audio.play().then(() => { this.audio.pause(); this.audio.currentTime = 0; this.soundEnabled = true; }).catch(() => {});
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            this.playBeep();
             if (Notification.permission === 'default') {
                 Notification.requestPermission();
             }
             this.soundEnabled = true;
         },
+        playBeep() {
+            if (!this.audioCtx) return;
+            const ctx = this.audioCtx;
+            const now = ctx.currentTime;
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(880, now);
+            osc1.frequency.setValueAtTime(1100, now + 0.15);
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(660, now + 0.3);
+            osc2.frequency.setValueAtTime(880, now + 0.45);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.setValueAtTime(0.4, now + 0.5);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.3);
+            osc2.start(now + 0.3);
+            osc2.stop(now + 0.7);
+        },
         playAlert() {
-            if (this.audio) { this.audio.currentTime = 0; this.audio.play().catch(() => {}); }
-            else { new Audio('/sounds/new-order.wav').play().catch(() => {}); }
+            this.playBeep();
             if (Notification.permission === 'granted') {
                 new Notification('Nouvelle commande !', { body: 'Une nouvelle commande vient d\'arriver.', icon: '/icon-192.png' });
             }

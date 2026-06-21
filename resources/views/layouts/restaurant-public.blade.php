@@ -172,20 +172,16 @@
                 this._trackVisit();
             },
             _trackVisit() {
-                const key = 'pwa_visits_' + (this.restaurantName || 'global');
-                const count = parseInt(localStorage.getItem(key) || '0') + 1;
-                localStorage.setItem(key, count.toString());
-                if (count >= 2) this._onEngagement();
+                this._onEngagement();
             },
             _onEngagement() {
                 if (this.showBanner) return;
                 if (this.deferredPrompt || /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
-                    setTimeout(() => { this.showBanner = true; }, 800);
+                    setTimeout(() => { this.showBanner = true; }, 3000);
                 }
             },
             _checkTrigger() {
-                const key = 'pwa_visits_' + (this.restaurantName || 'global');
-                if (parseInt(localStorage.getItem(key) || '0') >= 2) this._onEngagement();
+                this._onEngagement();
             },
             async install() {
                 if (this.deferredPrompt) {
