@@ -243,11 +243,7 @@ class Orders extends Component
         $this->lastOrderId = Order::where('restaurant_id', $restaurantId)->max('id') ?? 0;
     }
 
-    /**
-     * Refresh method for polling (called automatically by wire:poll).
-     * Detects new orders and dispatches browser notification.
-     */
-    public function __refresh(): void
+    public function checkNewOrders(): void
     {
         $restaurantId = auth()->user()->restaurant_id;
         $latestId = Order::where('restaurant_id', $restaurantId)->max('id') ?? 0;
@@ -258,7 +254,6 @@ class Orders extends Component
 
         $this->lastOrderId = $latestId;
 
-        // Force refresh of computed properties
         unset($this->orders);
         unset($this->statusCounts);
     }

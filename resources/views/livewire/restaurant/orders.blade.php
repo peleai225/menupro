@@ -1,4 +1,4 @@
-<div wire:poll.10s
+<div wire:poll.10s="checkNewOrders"
      x-data="{
         loaded: false,
         soundEnabled: false,
