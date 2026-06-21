@@ -174,6 +174,22 @@ class RestaurantMenu extends Component
         $this->searchQuery = '';
     }
 
+    public function quickAddToCart(int $dishId): void
+    {
+        $dish = Dish::withCount('optionGroups')->find($dishId);
+
+        if (!$dish || !$dish->is_available) {
+            return;
+        }
+
+        if ($dish->option_groups_count > 0) {
+            $this->selectedDishId = $dishId;
+            return;
+        }
+
+        $this->addToCart($dishId);
+    }
+
     public function openDish(int $dishId): void
     {
         $this->selectedDishId = $dishId;

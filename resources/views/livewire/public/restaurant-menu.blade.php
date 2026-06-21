@@ -469,9 +469,10 @@
                                     {{ number_format($dish->price, 0, ',', ' ') }} F
                                 </span>
                             </div>
-                            {{-- Bouton "+" en overlay (mobile) --}}
+                            {{-- Bouton "+" en overlay (mobile) — ajout rapide --}}
                             @if($dish->is_available)
-                                <button class="absolute bottom-1.5 right-1.5 w-7 h-7 sm:hidden text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform z-20"
+                                <button wire:click.stop="quickAddToCart({{ $dish->id }})"
+                                        class="absolute bottom-1.5 right-1.5 w-7 h-7 sm:hidden text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform z-20"
                                         style="background-color: {{ $primaryColor }};">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"/>
@@ -490,7 +491,8 @@
                             <div class="hidden sm:flex items-center justify-between mt-3">
                                 <span class="text-base font-bold" style="color: {{ $primaryColor }};">{{ number_format($dish->price, 0, ',', ' ') }} F</span>
                                 @if($dish->is_available)
-                                    <button class="w-9 h-9 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                                    <button wire:click.stop="quickAddToCart({{ $dish->id }})"
+                                            class="w-9 h-9 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                                             style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 12px {{ $primaryColor }}50;">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"/>
