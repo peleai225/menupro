@@ -287,7 +287,7 @@
                 startAutoRefresh() {
                     this.refreshInterval = setInterval(() => {
                         this.refreshData();
-                    }, 20000); // Every 20 seconds (Reverb handles real-time updates)
+                    }, 8000); // Every 8 seconds
                 },
 
                 stopAutoRefresh() {

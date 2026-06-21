@@ -1,4 +1,12 @@
-<div wire:poll.30s x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
+<div wire:poll.10s
+     x-data="{ loaded: false }"
+     x-init="setTimeout(() => loaded = true, 100)"
+     x-on:new-order-received.window="
+        new Audio('/sounds/new-order.wav').play().catch(() => {});
+        if (Notification.permission === 'granted') {
+            new Notification('Nouvelle commande !', { body: 'Une nouvelle commande vient d\'arriver.', icon: '/icon-192.png' });
+        }
+     ">
     <!-- Header with gradient background -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"

@@ -235,11 +235,29 @@ class Orders extends Component
         $this->cancellationReason = null;
     }
 
+    public int $lastOrderId = 0;
+
+    public function mount(): void
+    {
+        $restaurantId = auth()->user()->restaurant_id;
+        $this->lastOrderId = Order::where('restaurant_id', $restaurantId)->max('id') ?? 0;
+    }
+
     /**
-     * Refresh method for polling (called automatically by wire:poll)
+     * Refresh method for polling (called automatically by wire:poll).
+     * Detects new orders and dispatches browser notification.
      */
     public function __refresh(): void
     {
+        $restaurantId = auth()->user()->restaurant_id;
+        $latestId = Order::where('restaurant_id', $restaurantId)->max('id') ?? 0;
+
+        if ($latestId > $this->lastOrderId && $this->lastOrderId > 0) {
+            $this->dispatch('new-order-received');
+        }
+
+        $this->lastOrderId = $latestId;
+
         // Force refresh of computed properties
         unset($this->orders);
         unset($this->statusCounts);

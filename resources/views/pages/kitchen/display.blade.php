@@ -311,7 +311,7 @@
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
-                this.pollInterval = setInterval(() => this.fetchOrders(), 15000);
+                this.pollInterval = setInterval(() => this.fetchOrders(), 8000);
 
                 // Listen for real-time order events via Reverb
                 if (window.Echo) {
