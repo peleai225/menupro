@@ -380,12 +380,9 @@ window.Echo = new Echo({
                 <div class="flex flex-col items-center gap-4">
                     @php
                         $trackingUrl = route('r.order.status', [$restaurant->slug, $order->tracking_token]);
-                        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($trackingUrl);
                     @endphp
-                    <div class="p-4 bg-white rounded-xl border-2 border-neutral-200">
-                        <img src="{{ $qrCodeUrl }}" 
-                             alt="QR Code pour le suivi de commande" 
-                             class="w-48 h-48">
+                    <div class="p-4 bg-white rounded-xl border-2 border-neutral-200 w-48 h-48">
+                        {!! SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(180)->margin(1)->errorCorrection('H')->generate($trackingUrl) !!}
                     </div>
                     <div class="w-full">
                         <div class="flex gap-2 mb-2">

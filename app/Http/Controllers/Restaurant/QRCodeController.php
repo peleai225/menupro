@@ -22,10 +22,41 @@ class QRCodeController extends Controller
 
         $publicUrl = route('r.menu', ['slug' => $restaurant->slug]);
 
+        $qrSvg = QrCode::format('svg')
+            ->size(250)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($publicUrl);
+
         return view('pages.restaurant.qrcode', [
             'restaurant' => $restaurant,
             'publicUrl' => $publicUrl,
+            'qrSvg' => $qrSvg,
         ]);
+    }
+
+    /**
+     * Generate QR code image (SVG) — replaces external API dependency.
+     */
+    public function generate(Request $request)
+    {
+        $request->validate([
+            'data' => 'required|string|max:500',
+            'size' => 'nullable|integer|min:50|max:1000',
+        ]);
+
+        $data = $request->input('data');
+        $size = (int) ($request->input('size', 250));
+
+        $qr = QrCode::format('svg')
+            ->size($size)
+            ->margin(1)
+            ->errorCorrection('H')
+            ->generate($data);
+
+        return response($qr, 200)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'public, max-age=86400');
     }
 
     /**

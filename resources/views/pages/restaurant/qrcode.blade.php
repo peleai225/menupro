@@ -35,12 +35,9 @@
                         <h2 class="text-lg font-semibold text-neutral-800 mb-6">QR Code général</h2>
 
                         <div class="inline-block bg-white p-6 rounded-2xl border-2 border-dashed border-neutral-200 mb-6">
-                            <img
-                                :src="'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data={{ urlencode($publicUrl) }}'"
-                                alt="QR Code {{ $restaurant->name }}"
-                                class="mx-auto"
-                                :style="'width: ' + size + 'px; height: ' + size + 'px;'"
-                            >
+                            <div class="mx-auto" style="width: 250px; height: 250px;">
+                                {!! $qrSvg !!}
+                            </div>
                         </div>
 
                         <div class="mb-6">
@@ -53,17 +50,11 @@
                         </div>
 
                         <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&format=png&data={{ urlencode($publicUrl) }}'"
-                               download="{{ Str::slug($restaurant->name) }}-qrcode.png"
+                            <a :href="'{{ route('restaurant.qrcode.generate') }}?data={{ urlencode($publicUrl) }}&size=' + size"
+                               download="{{ Str::slug($restaurant->name) }}-qrcode.svg"
                                class="btn btn-primary">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                PNG
-                            </a>
-                            <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&format=svg&data={{ urlencode($publicUrl) }}'"
-                               download="{{ Str::slug($restaurant->name) }}-qrcode.svg"
-                               class="btn btn-outline">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                SVG
+                                Télécharger SVG
                             </a>
                         </div>
                     </div>

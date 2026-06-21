@@ -200,6 +200,7 @@ Route::prefix('dashboard')
 
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
+        Route::get('qr-code/generate', [App\Http\Controllers\Restaurant\QRCodeController::class, 'generate'])->name('qrcode.generate');
         Route::post('qr-code/tables', [App\Http\Controllers\Restaurant\QRCodeController::class, 'updateTables'])->name('qrcode.update-tables');
         Route::get('qr-code/tables/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadTableQR'])->name('qrcode.download-tables');
         Route::get('qr-code/social/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadSocialCard'])->name('qrcode.download-social');

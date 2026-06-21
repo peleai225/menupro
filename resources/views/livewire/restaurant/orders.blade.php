@@ -1,12 +1,27 @@
 <div wire:poll.10s
-     x-data="{ loaded: false }"
-     x-init="setTimeout(() => loaded = true, 100)"
-     x-on:new-order-received.window="
-        new Audio('/sounds/new-order.wav').play().catch(() => {});
-        if (Notification.permission === 'granted') {
-            new Notification('Nouvelle commande !', { body: 'Une nouvelle commande vient d\'arriver.', icon: '/icon-192.png' });
+     x-data="{
+        loaded: false,
+        soundEnabled: false,
+        audio: null,
+        enableSound() {
+            this.audio = new Audio('/sounds/new-order.wav');
+            this.audio.volume = 1;
+            this.audio.play().then(() => { this.audio.pause(); this.audio.currentTime = 0; this.soundEnabled = true; }).catch(() => {});
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            this.soundEnabled = true;
+        },
+        playAlert() {
+            if (this.audio) { this.audio.currentTime = 0; this.audio.play().catch(() => {}); }
+            else { new Audio('/sounds/new-order.wav').play().catch(() => {}); }
+            if (Notification.permission === 'granted') {
+                new Notification('Nouvelle commande !', { body: 'Une nouvelle commande vient d\'arriver.', icon: '/icon-192.png' });
+            }
         }
-     ">
+     }"
+     x-init="setTimeout(() => loaded = true, 100)"
+     x-on:new-order-received.window="playAlert()">
     <!-- Header with gradient background -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"
@@ -29,7 +44,20 @@
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('restaurant.orders.rush') }}" 
+            <button x-show="!soundEnabled" @click="enableSound()"
+                    class="btn btn-ghost px-3 py-2.5 flex items-center gap-2 text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100 animate-pulse">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+                <span class="hidden sm:inline text-sm font-medium">Activer les alertes</span>
+            </button>
+            <span x-show="soundEnabled" class="px-3 py-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Alertes actives
+            </span>
+            <a href="{{ route('restaurant.orders.rush') }}"
                class="btn btn-primary btn-glow px-4 py-2.5 flex items-center gap-2 group">
                 <span class="px-2 py-0.5 bg-white/20 text-white rounded text-xs font-bold">RUSH</span>
                 <span class="hidden sm:inline">Mode Rush</span>
