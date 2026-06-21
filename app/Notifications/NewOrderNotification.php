@@ -3,29 +3,17 @@
 namespace App\Notifications;
 
 use App\Models\Order;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewOrderNotification extends Notification
 {
-
     public function __construct(
         protected Order $order
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject("Nouvelle commande #{$this->order->reference}")
-            ->view('emails.order-new', [
-                'order' => $this->order,
-                'notifiable' => $notifiable,
-            ]);
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array

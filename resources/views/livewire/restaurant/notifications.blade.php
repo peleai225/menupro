@@ -1,81 +1,73 @@
-<div class="relative" 
-     x-data="{ 
+<div class="relative"
+     x-data="{
          open: @entangle('showDropdown'),
          soundEnabled: localStorage.getItem('notificationSound') !== 'false',
          showNewBadge: false,
+         audioCtx: null,
+         audioUnlocked: false,
+         init() {
+             this.requestNotificationPermission();
+             this.unlockAudio();
+         },
+         unlockAudio() {
+             const unlock = () => {
+                 if (this.audioUnlocked) return;
+                 this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                 if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                 this.audioUnlocked = true;
+                 document.removeEventListener('click', unlock);
+                 document.removeEventListener('touchstart', unlock);
+             };
+             document.addEventListener('click', unlock, { once: true });
+             document.addEventListener('touchstart', unlock, { once: true });
+         },
          onNewNotification() {
-             console.log('New notification received!');
-             // Show visual badge animation
              this.showNewBadge = true;
              setTimeout(() => this.showNewBadge = false, 5000);
-             
-             // Play notification sound if enabled
-             if (this.soundEnabled) {
-                 this.playNotificationSound();
-             }
-             
-             // Show browser notification if permitted
+             if (this.soundEnabled) this.playNotificationSound();
              this.showBrowserNotification();
          },
          playNotificationSound() {
-             // Create and play a notification sound using Web Audio API
              try {
-                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                 
-                 // First chime
-                 const osc1 = audioContext.createOscillator();
-                 const gain1 = audioContext.createGain();
-                 osc1.connect(gain1);
-                 gain1.connect(audioContext.destination);
+                 if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                 if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                 const ctx = this.audioCtx;
+                 const now = ctx.currentTime;
+                 const osc1 = ctx.createOscillator();
+                 const gain1 = ctx.createGain();
+                 osc1.connect(gain1); gain1.connect(ctx.destination);
                  osc1.frequency.value = 880;
-                 gain1.gain.setValueAtTime(0.3, audioContext.currentTime);
-                 gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                 osc1.start(audioContext.currentTime);
-                 osc1.stop(audioContext.currentTime + 0.3);
-                 
-                 // Second chime (higher)
-                 const osc2 = audioContext.createOscillator();
-                 const gain2 = audioContext.createGain();
-                 osc2.connect(gain2);
-                 gain2.connect(audioContext.destination);
+                 gain1.gain.setValueAtTime(0.4, now);
+                 gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                 osc1.start(now); osc1.stop(now + 0.3);
+                 const osc2 = ctx.createOscillator();
+                 const gain2 = ctx.createGain();
+                 osc2.connect(gain2); gain2.connect(ctx.destination);
                  osc2.frequency.value = 1174.66;
-                 gain2.gain.setValueAtTime(0, audioContext.currentTime);
-                 gain2.gain.setValueAtTime(0.3, audioContext.currentTime + 0.15);
-                 gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                 osc2.start(audioContext.currentTime + 0.15);
-                 osc2.stop(audioContext.currentTime + 0.5);
-                 
-                 console.log('Sound played!');
-             } catch (e) {
-                 console.log('Audio playback not available:', e);
-             }
+                 gain2.gain.setValueAtTime(0.4, now + 0.15);
+                 gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                 osc2.start(now + 0.15); osc2.stop(now + 0.5);
+             } catch (e) {}
          },
          showBrowserNotification() {
              if ('Notification' in window && Notification.permission === 'granted') {
-                 new Notification('Nouvelle commande !', {
-                     body: 'Vous avez reçu une nouvelle commande',
-                     icon: '/favicon.svg',
-                     tag: 'new-order'
-                 });
+                 new Notification('Nouvelle commande !', { body: 'Vous avez reçu une nouvelle commande', icon: '/favicon.svg', tag: 'new-order' });
              }
          },
          toggleSound() {
              this.soundEnabled = !this.soundEnabled;
              localStorage.setItem('notificationSound', this.soundEnabled);
-             if (this.soundEnabled) {
-                 this.playNotificationSound();
-             }
+             if (this.soundEnabled) this.playNotificationSound();
          },
          requestNotificationPermission() {
              if ('Notification' in window && Notification.permission === 'default') {
                  Notification.requestPermission();
              }
          }
-     }" 
-     x-init="requestNotificationPermission()"
-     @click.away="open = false" 
+     }"
+     @click.away="open = false"
      @new-notification-arrived.window="onNewNotification()"
-     wire:poll.30s="checkForNewNotifications">
+     wire:poll.10s="checkForNewNotifications">
     <!-- New Notification Alert Badge -->
     <div x-show="showNewBadge"
          x-transition:enter="transition ease-out duration-300"
