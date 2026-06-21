@@ -28,8 +28,8 @@
              this.showBrowserNotification();
          },
          playNotificationSound() {
+             if (!this.audioUnlocked || !this.audioCtx) return;
              try {
-                 if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                  if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
                  const ctx = this.audioCtx;
                  const now = ctx.currentTime;
