@@ -43,6 +43,21 @@
         </div>
 
         <div>
+            <label class="block text-slate-400 text-xs font-medium mb-1.5">Mot de passe</label>
+            <input type="password" wire:model="password" placeholder="Minimum 6 caractères"
+                   class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800/60 text-white text-sm placeholder-slate-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                   autocomplete="new-password">
+            @error('password') <p class="text-red-400 text-[11px] mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label class="block text-slate-400 text-xs font-medium mb-1.5">Confirmer le mot de passe</label>
+            <input type="password" wire:model="password_confirmation" placeholder="Retapez votre mot de passe"
+                   class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800/60 text-white text-sm placeholder-slate-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                   autocomplete="new-password">
+        </div>
+
+        <div>
             <label class="block text-slate-400 text-xs font-medium mb-1.5">Ville</label>
             <input type="text" wire:model="city" placeholder="ex: Abidjan, Daloa, Bouaké..."
                    class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800/60 text-white text-sm placeholder-slate-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">

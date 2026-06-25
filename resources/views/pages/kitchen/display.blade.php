@@ -6,19 +6,7 @@
     <title>Cuisine - {{ $restaurant->name }}</title>
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '{{ $restaurant->primary_color ?? "#f97316" }}',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
         body { user-select: none; }
@@ -26,10 +14,10 @@
         @keyframes cardSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="h-full bg-neutral-900 text-white overflow-hidden" x-data="kitchenDisplay()" x-init="init()">
+<body class="h-full bg-neutral-950 text-white overflow-hidden font-sans" x-data="kitchenDisplay()" x-init="init()">
 
     {{-- Header --}}
-    <header class="h-14 px-4 flex items-center justify-between shrink-0" style="background-color: {{ $restaurant->primary_color ?? '#1f2937' }}">
+    <header class="h-14 px-4 flex items-center justify-between shrink-0 bg-primary-600">
         <div class="flex items-center gap-3">
             @if($restaurant->logo_url)
                 <img src="{{ $restaurant->logo_url }}" alt="" class="w-8 h-8 rounded-full object-cover border border-white/20">
@@ -56,27 +44,27 @@
     <main class="h-[calc(100vh-56px)] flex">
 
         {{-- Colonne Gauche: Nouvelles commandes (a confirmer / a commencer) --}}
-        <div class="flex-1 flex flex-col border-r border-neutral-700 min-w-0">
-            <div class="h-10 flex items-center px-4 bg-orange-500/10 border-b border-neutral-700 shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-orange-500 mr-2"></span>
-                <span class="text-sm font-bold text-orange-400">Nouvelles</span>
-                <span class="ml-auto text-xs text-orange-400/70 font-mono" x-text="counts.new"></span>
+        <div class="flex-1 flex flex-col border-r border-neutral-800 min-w-0">
+            <div class="h-10 flex items-center px-4 bg-primary-500/10 border-b border-neutral-800 shrink-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-primary-500 mr-2"></span>
+                <span class="text-sm font-bold text-primary-400">Nouvelles</span>
+                <span class="ml-auto text-xs text-primary-400/70 font-mono" x-text="counts.new"></span>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-3">
                 <template x-for="order in newOrders" :key="order.id">
-                    <div class="card-enter bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden">
+                    <div class="card-enter bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden">
                         {{-- Card top bar --}}
-                        <div class="flex items-center justify-between px-4 py-2 border-b border-neutral-700/50"
+                        <div class="flex items-center justify-between px-4 py-2 border-b border-neutral-800/50"
                              :class="{
-                                 'bg-orange-500/10': order.status === 'paid',
-                                 'bg-yellow-500/10': order.status === 'confirmed',
+                                 'bg-primary-500/10': order.status === 'paid',
+                                 'bg-warning-500/10': order.status === 'confirmed',
                              }">
                             <div class="flex items-center gap-2">
                                 <span class="text-base font-black text-white" x-text="'#' + order.reference"></span>
                                 <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded"
                                       :class="{
-                                          'bg-orange-500 text-white': order.status === 'paid',
-                                          'bg-yellow-500 text-black': order.status === 'confirmed',
+                                          'bg-primary-500 text-white': order.status === 'paid',
+                                          'bg-warning-500 text-black': order.status === 'confirmed',
                                       }"
                                       x-text="order.status === 'paid' ? 'NOUVELLE' : 'CONFIRMEE'"></span>
                             </div>
@@ -84,8 +72,8 @@
                                 <span x-text="order.created_at"></span>
                                 <span class="font-bold"
                                       :class="{
-                                          'text-red-400': order.minutes_ago > 15,
-                                          'text-yellow-400': order.minutes_ago > 8,
+                                          'text-error-500': order.minutes_ago > 15,
+                                          'text-warning-500': order.minutes_ago > 8,
                                           'text-neutral-400': order.minutes_ago <= 8
                                       }"
                                       x-text="order.minutes_ago + 'min'"></span>
@@ -99,7 +87,7 @@
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-xs text-neutral-500" x-text="order.type"></span>
                                     <template x-if="order.table_number">
-                                        <span class="text-[10px] bg-neutral-700 text-white px-1.5 py-0.5 rounded font-bold" x-text="'T' + order.table_number"></span>
+                                        <span class="text-[10px] bg-neutral-800 text-white px-1.5 py-0.5 rounded font-bold" x-text="'T' + order.table_number"></span>
                                     </template>
                                 </div>
                             </div>
@@ -114,12 +102,12 @@
                                             <template x-if="item.options && item.options.length > 0">
                                                 <div class="flex flex-wrap gap-1 mt-0.5">
                                                     <template x-for="(opt, oi) in item.options" :key="oi">
-                                                        <span class="text-[10px] bg-neutral-700 text-neutral-300 px-1.5 py-0.5 rounded" x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
+                                                        <span class="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded" x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
                                                     </template>
                                                 </div>
                                             </template>
                                             <template x-if="item.instructions">
-                                                <p class="text-[11px] text-yellow-400 mt-0.5" x-text="item.instructions"></p>
+                                                <p class="text-[11px] text-warning-500 mt-0.5" x-text="item.instructions"></p>
                                             </template>
                                         </div>
                                     </div>
@@ -129,13 +117,13 @@
                             {{-- Action --}}
                             <template x-if="order.status === 'paid'">
                                 <button @click="updateOrder(order.id, 'confirm')"
-                                        class="w-full py-3 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
+                                        class="w-full py-3 rounded-lg bg-primary-500 hover:bg-primary-400 text-white font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
                                     Confirmer la commande
                                 </button>
                             </template>
                             <template x-if="order.status === 'confirmed'">
                                 <button @click="updateOrder(order.id, 'prepare')"
-                                        class="w-full py-3 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
+                                        class="w-full py-3 rounded-lg bg-warning-500 hover:bg-warning-600 text-black font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
                                     Commencer la preparation
                                 </button>
                             </template>
@@ -154,25 +142,25 @@
 
         {{-- Colonne Droite: En preparation --}}
         <div class="flex-1 flex flex-col min-w-0">
-            <div class="h-10 flex items-center px-4 bg-blue-500/10 border-b border-neutral-700 shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>
-                <span class="text-sm font-bold text-blue-400">En preparation</span>
-                <span class="ml-auto text-xs text-blue-400/70 font-mono" x-text="counts.preparing"></span>
+            <div class="h-10 flex items-center px-4 bg-info-500/10 border-b border-neutral-800 shrink-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-info-500 mr-2"></span>
+                <span class="text-sm font-bold text-info-500">En preparation</span>
+                <span class="ml-auto text-xs text-info-500/70 font-mono" x-text="counts.preparing"></span>
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-3">
                 <template x-for="order in preparingOrders" :key="order.id">
-                    <div class="card-enter bg-neutral-800 rounded-xl border border-blue-500/30 overflow-hidden">
-                        <div class="flex items-center justify-between px-4 py-2 bg-blue-500/10 border-b border-neutral-700/50">
+                    <div class="card-enter bg-neutral-900 rounded-xl border border-info-500/30 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-2 bg-info-500/10 border-b border-neutral-800/50">
                             <div class="flex items-center gap-2">
                                 <span class="text-base font-black text-white" x-text="'#' + order.reference"></span>
-                                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-blue-500 text-white">EN COURS</span>
+                                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-info-500 text-white">EN COURS</span>
                             </div>
                             <div class="flex items-center gap-2 text-xs">
                                 <span class="font-bold"
                                       :class="{
-                                          'text-red-400': order.minutes_ago > 20,
-                                          'text-yellow-400': order.minutes_ago > 12,
-                                          'text-blue-400': order.minutes_ago <= 12
+                                          'text-error-500': order.minutes_ago > 20,
+                                          'text-warning-500': order.minutes_ago > 12,
+                                          'text-info-500': order.minutes_ago <= 12
                                       }"
                                       x-text="order.minutes_ago + 'min'"></span>
                             </div>
@@ -184,7 +172,7 @@
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-xs text-neutral-500" x-text="order.type"></span>
                                     <template x-if="order.table_number">
-                                        <span class="text-[10px] bg-neutral-700 text-white px-1.5 py-0.5 rounded font-bold" x-text="'T' + order.table_number"></span>
+                                        <span class="text-[10px] bg-neutral-800 text-white px-1.5 py-0.5 rounded font-bold" x-text="'T' + order.table_number"></span>
                                     </template>
                                 </div>
                             </div>
@@ -198,12 +186,12 @@
                                             <template x-if="item.options && item.options.length > 0">
                                                 <div class="flex flex-wrap gap-1 mt-0.5">
                                                     <template x-for="(opt, oi) in item.options" :key="oi">
-                                                        <span class="text-[10px] bg-neutral-700 text-neutral-300 px-1.5 py-0.5 rounded" x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
+                                                        <span class="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded" x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
                                                     </template>
                                                 </div>
                                             </template>
                                             <template x-if="item.instructions">
-                                                <p class="text-[11px] text-yellow-400 mt-0.5" x-text="item.instructions"></p>
+                                                <p class="text-[11px] text-warning-500 mt-0.5" x-text="item.instructions"></p>
                                             </template>
                                         </div>
                                     </div>
@@ -211,7 +199,7 @@
                             </div>
 
                             <button @click="updateOrder(order.id, 'ready')"
-                                    class="w-full py-3 rounded-lg bg-green-500 hover:bg-green-400 text-white font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
+                                    class="w-full py-3 rounded-lg bg-success-500 hover:bg-success-600 text-white font-black text-sm uppercase tracking-wide transition active:scale-[0.97]">
                                 Pret — Servir !
                             </button>
                         </div>
@@ -238,7 +226,7 @@
          x-transition:leave-end="opacity-0 scale-90"
          @click="showAlert = false"
          class="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-        <div class="rounded-3xl p-10 text-center shadow-2xl" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }}">
+        <div class="rounded-3xl p-10 text-center shadow-2xl bg-primary-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto mb-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
             <p class="text-2xl font-black text-white">Nouvelle commande !</p>
             <p class="text-sm mt-2 text-white/60">Touchez pour fermer</p>
@@ -248,8 +236,8 @@
     {{-- Onboarding Tutorial (first visit) --}}
     <div x-show="showTutorial" x-cloak
          class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4">
-        <div class="bg-neutral-800 rounded-2xl max-w-md w-full p-6 text-center border border-neutral-700 shadow-2xl">
-            <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }}">
+        <div class="bg-neutral-900 rounded-2xl max-w-md w-full p-6 text-center border border-neutral-800 shadow-2xl">
+            <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center bg-primary-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
             </div>
             <h2 class="text-xl font-black text-white mb-2">Bienvenue en cuisine !</h2>
@@ -257,21 +245,21 @@
 
             <div class="text-left space-y-4 mb-6">
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
+                    <div class="w-7 h-7 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
                     <div>
                         <p class="text-sm font-bold text-white">Colonne gauche = Nouvelles commandes</p>
-                        <p class="text-xs text-neutral-400">Appuyez sur <span class="text-orange-400 font-bold">CONFIRMER</span> pour accepter, puis <span class="text-yellow-400 font-bold">COMMENCER</span> quand vous la preparez</p>
+                        <p class="text-xs text-neutral-400">Appuyez sur <span class="text-primary-400 font-bold">CONFIRMER</span> pour accepter, puis <span class="text-warning-500 font-bold">COMMENCER</span> quand vous la preparez</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
+                    <div class="w-7 h-7 rounded-full bg-info-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
                     <div>
                         <p class="text-sm font-bold text-white">Colonne droite = En preparation</p>
-                        <p class="text-xs text-neutral-400">Quand le plat est pret, appuyez sur <span class="text-green-400 font-bold">PRET — SERVIR</span></p>
+                        <p class="text-xs text-neutral-400">Quand le plat est pret, appuyez sur <span class="text-success-500 font-bold">PRET — SERVIR</span></p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-neutral-600 text-white text-xs font-bold flex items-center justify-center shrink-0">3</div>
+                    <div class="w-7 h-7 rounded-full bg-neutral-700 text-white text-xs font-bold flex items-center justify-center shrink-0">3</div>
                     <div>
                         <p class="text-sm font-bold text-white">Un son retentit a chaque nouvelle commande</p>
                         <p class="text-xs text-neutral-400">L'ecran se met a jour automatiquement toutes les 5 secondes</p>
@@ -279,7 +267,7 @@
                 </div>
             </div>
 
-            <button @click="closeTutorial()" class="w-full py-3 rounded-xl text-white font-bold text-sm transition active:scale-[0.97]" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }}">
+            <button @click="closeTutorial()" class="w-full py-3 rounded-xl text-white font-bold text-sm transition active:scale-[0.97] bg-primary-500 hover:bg-primary-600">
                 J'ai compris, commencer !
             </button>
         </div>

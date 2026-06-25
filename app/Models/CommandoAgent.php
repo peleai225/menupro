@@ -23,6 +23,7 @@ class CommandoAgent extends Model
         'first_name',
         'last_name',
         'whatsapp',
+        'password',
         'city',
         'statut_metier',
         'status_verification',
@@ -34,6 +35,8 @@ class CommandoAgent extends Model
         'approved_at',
         'balance_cents',
     ];
+
+    protected $hidden = ['password'];
 
     protected function casts(): array
     {

@@ -13,13 +13,9 @@ use App\Notifications\CommandoAgentApprovedNotification;
 use App\Notifications\CommandoAgentRejectedNotification;
 use App\Notifications\CommandoWithdrawalPaidNotification;
 use App\Notifications\CommandoWithdrawalRejectedNotification;
-use App\Services\WhatsAppService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CommandoAgentController extends Controller
 {
@@ -141,45 +137,25 @@ class CommandoAgentController extends Controller
         ]);
 
         $user = $agent->user;
-        $welcomeToken = null;
         if (!$agent->user_id) {
-            $welcomeToken = Str::random(64);
             $user = User::create([
                 'name' => $agent->full_name,
                 'email' => 'agent-' . $agent->uuid . '@commando.menupro.local',
                 'email_verified_at' => now(),
-                'password' => Hash::make(Str::random(32)),
+                'password' => $agent->password,
                 'role' => \App\Enums\UserRole::COMMANDO_AGENT,
                 'phone' => $agent->whatsapp,
                 'is_active' => true,
-                'welcome_token' => $welcomeToken,
             ]);
             $agent->update(['user_id' => $user->id]);
-        } elseif ($agent->user && !$agent->user->welcome_token) {
-            $welcomeToken = Str::random(64);
-            $agent->user->update(['welcome_token' => $welcomeToken]);
-        } else {
-            $welcomeToken = $agent->user?->welcome_token;
         }
-
-        $welcomeUrl = $welcomeToken
-            ? route('commando.welcome', ['token' => $welcomeToken])
-            : null;
 
         if ($user) {
             $user->notify(new CommandoAgentApprovedNotification($agent));
         }
 
-        if ($welcomeUrl && $user) {
-            $sent = app(WhatsAppService::class)->sendAgentWelcome($agent, $welcomeUrl, $user->email);
-            return redirect()->route('super-admin.commando.agents.show', $agent)
-                ->with('success', 'Agent validé avec succès.')
-                ->with('welcome_url', $welcomeUrl)
-                ->with('whatsapp_sent', $sent);
-        }
-
         return redirect()->route('super-admin.commando.agents.show', $agent)
-            ->with('success', 'Agent validé avec succès.');
+            ->with('success', 'Agent validé. Il peut maintenant se connecter avec son numéro et mot de passe.');
     }
 
     public function reject(Request $request, CommandoAgent $agent): RedirectResponse

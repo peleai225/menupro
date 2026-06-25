@@ -4,7 +4,9 @@ namespace App\Livewire\Commando;
 
 use App\Enums\AgentVerificationStatus;
 use App\Models\CommandoAgent;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 
 class RegisterStep1 extends Component
@@ -12,6 +14,8 @@ class RegisterStep1 extends Component
     public string $first_name = '';
     public string $last_name = '';
     public string $whatsapp = '';
+    public string $password = '';
+    public string $password_confirmation = '';
     public string $city = '';
 
     protected function rules(): array
@@ -26,6 +30,7 @@ class RegisterStep1 extends Component
                 'regex:/^\+?[0-9\s\-]+$/',
                 'unique:commando_agents,whatsapp',
             ],
+            'password' => ['required', 'confirmed', Password::min(6)],
             'city' => ['required', 'string', 'max:100'],
         ];
     }
@@ -43,6 +48,7 @@ class RegisterStep1 extends Component
             'first_name' => 'prénom',
             'last_name' => 'nom',
             'whatsapp' => 'numéro WhatsApp',
+            'password' => 'mot de passe',
             'city' => 'ville',
         ];
     }
@@ -62,6 +68,7 @@ class RegisterStep1 extends Component
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'whatsapp' => preg_replace('/\s+/', '', $this->whatsapp),
+            'password' => Hash::make($this->password),
             'city' => $this->city,
             'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
         ]);
