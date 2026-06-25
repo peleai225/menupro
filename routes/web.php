@@ -266,7 +266,7 @@ Route::prefix('dashboard')
 | MenuPro Commando - Dashboard Agent (authentifié)
 |--------------------------------------------------------------------------
 */
-Route::prefix('commando')->name('commando.')->middleware(['auth', 'verified', 'commando.agent'])->group(function () {
+Route::prefix('commando')->name('commando.')->middleware(['auth', 'commando.agent'])->group(function () {
     Route::get('/dashboard', \App\Livewire\Commando\Dashboard::class)->name('dashboard');
     Route::get('/carte', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'card'])->name('card');
     Route::get('/carte/download/pdf', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'downloadPdf'])->name('card.download.pdf');
