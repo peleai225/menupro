@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Models\CommandoAgent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class CommandoAgentApprovedNotification extends Notification implements ShouldQueue
@@ -16,16 +15,7 @@ class CommandoAgentApprovedNotification extends Notification implements ShouldQu
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('[MenuPro Commando] Votre dossier est validé')
-            ->greeting('Bonjour ' . $this->agent->first_name . ',')
-            ->line('Votre dossier agent Commando a été **validé**. Vous avez désormais accès à votre carte digitale, au lien de parrainage et au portefeuille de commissions.')
-            ->action('Accéder à mon centre d\'opérations', route('commando.dashboard'));
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array
