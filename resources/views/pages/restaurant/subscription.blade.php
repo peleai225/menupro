@@ -263,7 +263,7 @@
             </p>
         </div>
 
-        <div class="card p-8 mb-8 border-2 {{ $isCurrentPlan ? 'border-primary-500 bg-primary-50/30' : 'border-neutral-200' }} relative overflow-visible">
+        <div class="card p-8 mb-8 border-2 {{ $isCurrentPlan ? 'border-primary-500 bg-primary-50/30' : 'border-neutral-200' }} relative overflow-visible" x-data="{ billingPeriod: 'monthly' }">
             @if($isCurrentPlan)
                 <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg whitespace-nowrap z-10 border-2 border-white">Plan actuel</span>
             @endif
@@ -275,7 +275,7 @@
             </div>
 
             <!-- Billing Period Selection -->
-            <div class="mb-8" x-data="{ billingPeriod: 'monthly' }">
+            <div class="mb-8">
                 <label class="block text-sm font-medium text-neutral-700 mb-4">Période de facturation</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach([
@@ -396,7 +396,7 @@
             @if($isCurrentPlan && !$canRenew)
                 <button class="btn btn-primary w-full px-6 py-3 flex items-center justify-center gap-2 shadow-sm" disabled>Plan actuel</button>
             @else
-                <form method="POST" action="{{ route('restaurant.subscription.change') }}" x-data="{ billingPeriod: 'monthly' }">
+                <form method="POST" action="{{ route('restaurant.subscription.change') }}">
                     @csrf
                     <input type="hidden" name="plan" value="{{ $featuredPlan->slug }}">
                     <input type="hidden" name="billing_period" :value="billingPeriod">

@@ -509,7 +509,7 @@
                  x-init="init(); formData.plan = '{{ $plan->slug ?? 'pro' }}';">
                 <div class="text-center lg:text-left mb-5 sm:mb-6">
                     <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight">Choisissez votre abonnement</h1>
-                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Economisez jusqu'a 15% sur l'annuel.</p>
+                    <p class="text-neutral-500 mt-1.5 text-sm sm:text-base">Economisez jusqu'a 20% sur l'annuel.</p>
                 </div>
 
                 <!-- Hidden inputs for form submission -->
@@ -658,17 +658,17 @@
                                         <button type="button" @click="billingCycle = 'quarterly'"
                                                 :class="{ 'bg-primary-500 text-white shadow-md': billingCycle === 'quarterly', 'text-neutral-600 hover:bg-neutral-100': billingCycle !== 'quarterly' }"
                                                 class="px-2 py-2 rounded-md text-[11px] font-semibold transition-all">
-                                            Trim. -7%
+                                            Trim. -10%
                                         </button>
                                         <button type="button" @click="billingCycle = 'semiannual'"
                                                 :class="{ 'bg-primary-500 text-white shadow-md': billingCycle === 'semiannual', 'text-neutral-600 hover:bg-neutral-100': billingCycle !== 'semiannual' }"
                                                 class="px-2 py-2 rounded-md text-[11px] font-semibold transition-all">
-                                            Sem. -13%
+                                            Sem. -15%
                                         </button>
                                         <button type="button" @click="billingCycle = 'annual'"
                                                 :class="{ 'bg-primary-500 text-white shadow-md': billingCycle === 'annual', 'text-neutral-600 hover:bg-neutral-100': billingCycle !== 'annual' }"
                                                 class="px-2 py-2 rounded-md text-[11px] font-semibold transition-all">
-                                            Annuel -15%
+                                            Annuel -20%
                                         </button>
                                     </div>
                                 </div>
@@ -942,9 +942,9 @@
                 basePriceMonthly: {{ (int) ($plan->price ?? 25000) }},
                 cycleMeta: [
                     { id: 'monthly', months: 1, discount: 0 },
-                    { id: 'quarterly', months: 3, discount: 7 },
-                    { id: 'semiannual', months: 6, discount: 13 },
-                    { id: 'annual', months: 12, discount: 15 },
+                    { id: 'quarterly', months: 3, discount: 10 },
+                    { id: 'semiannual', months: 6, discount: 15 },
+                    { id: 'annual', months: 12, discount: 20 },
                 ],
                 addonPrices: {
                     priority_support: 5000,
