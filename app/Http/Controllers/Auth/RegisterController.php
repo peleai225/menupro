@@ -43,7 +43,7 @@ class RegisterController extends Controller
             }
         }
 
-        $planSlug = request()->query('plan', 'pro');
+        $planSlug = request()->query('plan', 'essentiel');
 
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
 
@@ -61,7 +61,7 @@ class RegisterController extends Controller
 
     public function store(RegisterRequest $request): RedirectResponse
     {
-        $planSlug = $request->input('plan', $request->query('plan', 'pro'));
+        $planSlug = $request->input('plan', $request->query('plan', 'essentiel'));
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
         if (!$plan) {
             $plan = Plan::where('is_featured', true)->where('is_active', true)->first()

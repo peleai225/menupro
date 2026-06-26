@@ -3,9 +3,8 @@
         try { $authAppName = \App\Models\SystemSetting::get('app_name', config('app.name', 'MenuPro')); } catch (\Throwable $e) { $authAppName = config('app.name', 'MenuPro'); }
     @endphp
     <div class="animate-fade-in">
-        <!-- Success Message -->
         @if (session('success'))
-            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3 shadow-sm">
+            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3">
                 <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -15,24 +14,18 @@
             </div>
         @endif
 
-        <!-- Header -->
-        <div class="text-center lg:text-left mb-8 sm:mb-10">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-primary-50 to-orange-50 text-primary-600 rounded-full text-xs font-bold mb-4 tracking-wide uppercase border border-primary-100">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                Espace restaurateur
-            </div>
+        {{-- Header --}}
+        <div class="mb-8">
             <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
-                Bon retour parmi nous !
+                Connexion
             </h1>
-            <p class="text-neutral-500 mt-2 text-sm sm:text-base">Connectez-vous pour piloter votre restaurant.</p>
+            <p class="text-neutral-500 mt-2 text-sm sm:text-base">Accedez au tableau de bord de votre restaurant.</p>
         </div>
 
         <form method="POST" action="{{ route('login.post') }}" class="space-y-5" x-data="{ loading: false, showPassword: false }" @submit="loading = true">
             @csrf
 
-            <!-- Email ou WhatsApp -->
+            {{-- Email ou WhatsApp --}}
             <div>
                 <label for="login" class="block text-sm font-semibold text-neutral-700 mb-2">
                     Email ou numero WhatsApp
@@ -52,7 +45,7 @@
                         required
                         autofocus
                         autocomplete="username"
-                        class="w-full h-13 pl-12 pr-4 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 @error('login') border-red-400 bg-red-50/50 focus:ring-red-500/10 focus:border-red-500 @enderror"
+                        class="w-full h-13 pl-12 pr-4 bg-neutral-50 border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 @error('login') border-red-400 bg-red-50/50 focus:ring-red-500/10 focus:border-red-500 @enderror"
                     >
                 </div>
                 @error('login')
@@ -65,14 +58,14 @@
                 @enderror
             </div>
 
-            <!-- Password -->
+            {{-- Password --}}
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <label for="password" class="block text-sm font-semibold text-neutral-700">
                         Mot de passe
                     </label>
                     <a href="{{ route('password.request') }}" class="text-xs text-primary-600 hover:text-primary-700 font-semibold hover:underline underline-offset-2 transition-colors">
-                        Oublie ?
+                        Mot de passe oublie ?
                     </a>
                 </div>
                 <div class="relative group">
@@ -85,16 +78,15 @@
                         :type="showPassword ? 'text' : 'password'"
                         id="password"
                         name="password"
-                        placeholder="••••••••"
+                        placeholder="Votre mot de passe"
                         required
                         autocomplete="current-password"
-                        class="w-full h-13 pl-12 pr-12 bg-white border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 @error('password') border-red-400 bg-red-50/50 focus:ring-red-500/10 focus:border-red-500 @enderror"
+                        class="w-full h-13 pl-12 pr-12 bg-neutral-50 border-2 border-neutral-200 rounded-xl text-neutral-900 placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 @error('password') border-red-400 bg-red-50/50 focus:ring-red-500/10 focus:border-red-500 @enderror"
                     >
                     <button
                         type="button"
                         @click="showPassword = !showPassword"
                         class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors p-1 rounded-lg hover:bg-neutral-100"
-                        :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
                     >
                         <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -115,8 +107,8 @@
                 @enderror
             </div>
 
-            <!-- Remember Me -->
-            <label for="remember" class="flex items-center gap-3 p-3 -mx-3 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer select-none group">
+            {{-- Remember --}}
+            <label for="remember" class="flex items-center gap-3 cursor-pointer select-none group">
                 <input
                     type="checkbox"
                     id="remember"
@@ -124,13 +116,13 @@
                     class="w-4.5 h-4.5 rounded-md border-neutral-300 text-primary-600 focus:ring-primary-500 focus:ring-offset-0 transition-colors"
                     {{ old('remember') ? 'checked' : '' }}
                 >
-                <span class="text-sm text-neutral-600 group-hover:text-neutral-800 transition-colors">Se souvenir de moi pendant 30 jours</span>
+                <span class="text-sm text-neutral-600 group-hover:text-neutral-800 transition-colors">Se souvenir de moi</span>
             </label>
 
-            <!-- Submit -->
+            {{-- Submit --}}
             <button
                 type="submit"
-                class="btn btn-primary w-full h-13 text-base font-semibold relative overflow-hidden shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                class="btn btn-primary w-full h-13 text-base font-semibold relative overflow-hidden shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 hover:scale-[1.005] active:scale-[0.995] transition-all duration-200"
                 :disabled="loading"
             >
                 <span :class="{ 'opacity-0': loading }" class="flex items-center justify-center gap-2">
@@ -148,50 +140,23 @@
             </button>
         </form>
 
-        <!-- Divider -->
+        {{-- Divider --}}
         <div class="relative my-8">
             <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-neutral-200"></div>
             </div>
-            <div class="relative flex justify-center text-xs sm:text-sm">
-                <span class="px-4 bg-white text-neutral-400 font-medium">Nouveau sur {{ $authAppName }} ?</span>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-white text-neutral-400">ou</span>
             </div>
         </div>
 
-        <!-- Register CTA -->
-        <a href="{{ route('register') }}" class="flex items-center justify-center gap-2.5 w-full h-13 border-2 border-neutral-200 rounded-xl text-neutral-700 font-semibold hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 hover:shadow-sm active:scale-[0.99] transition-all duration-200 group">
-            <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
+        {{-- Register CTA --}}
+        <a href="{{ route('register') }}" class="flex items-center justify-center gap-2.5 w-full h-13 border-2 border-neutral-200 rounded-xl text-neutral-700 font-semibold hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/30 active:scale-[0.995] transition-all duration-200">
             Creer mon restaurant gratuitement
         </a>
 
-        <!-- Trust Indicators -->
-        <div class="mt-8 pt-6 border-t border-neutral-100">
-            <div class="flex items-center justify-center gap-6 text-xs text-neutral-400">
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                    <span class="text-neutral-500">SSL securise</span>
-                </span>
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <span class="text-neutral-500">Donnees protegees</span>
-                </span>
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    <span class="text-neutral-500">Activation rapide</span>
-                </span>
-            </div>
-        </div>
-
-        <!-- Help Text -->
-        <p class="text-center text-sm text-neutral-500 mt-5">
+        {{-- Help --}}
+        <p class="text-center text-sm text-neutral-400 mt-6">
             Besoin d'aide ?
             <a href="mailto:support@menupro.ci" class="text-primary-600 hover:text-primary-700 font-medium hover:underline underline-offset-2 transition-colors">
                 Contactez-nous

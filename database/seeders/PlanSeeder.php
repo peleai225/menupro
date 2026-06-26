@@ -76,7 +76,6 @@ class PlanSeeder extends Seeder
         Plan::updateOrCreate(['slug' => $pro['slug']], $pro);
         Plan::updateOrCreate(['slug' => $business['slug']], $business);
 
-        // Desactiver les anciens plans (garder pour historique abonnes existants)
         Plan::whereNotIn('slug', ['essentiel', 'pro', 'business'])
             ->update(['is_active' => false]);
 
