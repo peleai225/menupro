@@ -17,26 +17,26 @@
             </div>
 
             {{-- Desktop --}}
-            <div class="hidden sm:flex items-center gap-2">
+            <div class="hidden sm:flex items-center gap-3">
                 @foreach([['n' => 1, 'label' => 'Compte'], ['n' => 2, 'label' => 'Restaurant'], ['n' => 3, 'label' => 'Abonnement']] as $s)
                     @if($s['n'] > 1)
-                        <div class="flex-1 h-[2px] rounded-full bg-neutral-200 overflow-hidden">
+                        <div class="flex-1 h-[3px] rounded-full bg-neutral-200 overflow-hidden">
                             <div class="h-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-700 ease-out"
                                  :style="step > {{ $s['n'] - 1 }} ? 'width: 100%' : 'width: 0%'"></div>
                         </div>
                     @endif
                     <button type="button" @click="step > {{ $s['n'] }} && goToStep({{ $s['n'] }})"
                             :disabled="step < {{ $s['n'] }}"
-                            class="flex items-center gap-2 focus:outline-none transition-all"
-                            :class="step < {{ $s['n'] }} ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-300"
+                            class="flex items-center gap-2.5 focus:outline-none transition-all"
+                            :class="step < {{ $s['n'] }} ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300"
                              :class="step > {{ $s['n'] }}
                                 ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
                                 : (step === {{ $s['n'] }}
                                     ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/40 scale-110'
                                     : 'bg-neutral-100 text-neutral-400 border border-neutral-200')">
                             <template x-if="step > {{ $s['n'] }}">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                             </template>
                             <template x-if="step <= {{ $s['n'] }}"><span>{{ $s['n'] }}</span></template>
                         </div>
@@ -154,8 +154,7 @@
                 </div>
 
                 <button type="button" @click="if(validateStep1()) { step = 2; window.scrollTo({top:0, behavior:'smooth'}) }"
-                        class="w-full h-[52px] mt-8 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
-                        :class="{ 'opacity-50 cursor-not-allowed': !validateStep1() }">
+                        class="w-full h-[52px] mt-8 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200">
                     <span class="flex items-center justify-center gap-2">
                         Continuer
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -269,8 +268,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </button>
                     <button type="button" @click="if(validateStep2()) { step = 3; window.scrollTo({top:0, behavior:'smooth'}) }"
-                            class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
-                            :class="{ 'opacity-50 cursor-not-allowed': !validateStep2() }">
+                            class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200">
                         <span class="flex items-center justify-center gap-2">
                             Continuer
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
