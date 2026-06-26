@@ -1,7 +1,7 @@
 <x-layouts.auth title="Inscription">
     <div x-data="registerForm()" class="animate-fade-in">
         {{-- ═══ Stepper ═══ --}}
-        <div class="mb-7">
+        <div class="mb-8 sm:mb-10">
             {{-- Mobile --}}
             <div class="sm:hidden flex items-center justify-between">
                 <div>
@@ -86,76 +86,76 @@
                  STEP 1 — Account
             ═══════════════════════════════════════ --}}
             <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="mb-6">
+                <div class="mb-8">
                     <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Créez votre compte</h1>
-                    <p class="text-neutral-500 mt-1.5 text-[14px]">Remplissez vos informations personnelles pour commencer.</p>
+                    <p class="text-neutral-500 mt-2 text-[15px]">Remplissez vos informations personnelles pour commencer.</p>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-5">
                     {{-- Name --}}
                     <div>
-                        <label for="name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Nom complet <span class="text-error-500">*</span></label>
+                        <label for="name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Nom complet <span class="text-error-500">*</span></label>
                         <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             </div>
                             <input type="text" id="name" name="name" x-model="formData.name" placeholder="Jean Kouassi" required autocomplete="name"
-                                   class="w-full h-[48px] pl-11 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
 
                     {{-- Email --}}
                     <div>
-                        <label for="email" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Adresse email <span class="text-error-500">*</span></label>
+                        <label for="email" class="block text-[13px] font-semibold text-neutral-700 mb-2">Adresse email <span class="text-error-500">*</span></label>
                         <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             </div>
                             <input type="email" id="email" name="email" x-model="formData.email" placeholder="vous@exemple.com" required autocomplete="email"
-                                   class="w-full h-[48px] pl-11 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
 
                     {{-- Phone --}}
                     <div>
-                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Téléphone WhatsApp <span class="text-error-500">*</span></label>
+                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-2">Téléphone WhatsApp <span class="text-error-500">*</span></label>
                         <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                             </div>
                             <input type="tel" id="phone" name="phone" x-model="formData.phone" placeholder="+225 07 00 00 00 00" required autocomplete="tel"
-                                   class="w-full h-[48px] pl-11 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
 
                     {{-- Password --}}
                     <div>
-                        <label for="reg-password" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Mot de passe <span class="text-error-500">*</span></label>
+                        <label for="reg-password" class="block text-[13px] font-semibold text-neutral-700 mb-2">Mot de passe <span class="text-error-500">*</span></label>
                         <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                             </div>
                             <input :type="showPassword ? 'text' : 'password'" id="reg-password" name="password" x-model="formData.password"
                                    placeholder="Minimum 8 caractères" required minlength="8" autocomplete="new-password"
-                                   class="w-full h-[48px] pl-11 pr-12 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                                   class="w-full h-[52px] pl-12 pr-12 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                             <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-600 rounded-xl hover:bg-neutral-100 transition-all">
+                                    class="absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-600 rounded-xl hover:bg-neutral-100 transition-all">
                                 <svg x-show="!showPassword" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 <svg x-show="showPassword" x-cloak class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                             </button>
                         </div>
-                        <div class="mt-2 flex gap-1">
-                            <div class="h-1 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
-                            <div class="h-1 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
-                            <div class="h-1 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 8 ? 'bg-secondary-500' : 'bg-neutral-200'"></div>
-                            <div class="h-1 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 12 ? 'bg-secondary-600' : 'bg-neutral-200'"></div>
+                        <div class="mt-2.5 flex gap-1.5">
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 8 ? 'bg-secondary-500' : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 12 ? 'bg-secondary-600' : 'bg-neutral-200'"></div>
                         </div>
                     </div>
                 </div>
 
                 <button type="button" @click="if(validateStep1()) { step = 2; window.scrollTo({top:0, behavior:'smooth'}) }"
-                        class="w-full h-[52px] mt-7 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
-                        :class="{ 'opacity-40 cursor-not-allowed saturate-50': !validateStep1() }">
+                        class="w-full h-[52px] mt-8 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
+                        :class="{ 'opacity-50 cursor-not-allowed': !validateStep1() }">
                     <span class="flex items-center justify-center gap-2">
                         Continuer
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -171,30 +171,30 @@
                  STEP 2 — Restaurant
             ═══════════════════════════════════════ --}}
             <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="mb-6">
+                <div class="mb-8">
                     <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Votre restaurant</h1>
-                    <p class="text-neutral-500 mt-1.5 text-[14px]">Décrivez votre établissement — vous pourrez tout modifier après.</p>
+                    <p class="text-neutral-500 mt-2 text-[15px]">Décrivez votre établissement — vous pourrez tout modifier après.</p>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-5">
                     {{-- Restaurant Name --}}
                     <div>
-                        <label for="restaurant_name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Nom de l'établissement <span class="text-error-500">*</span></label>
+                        <label for="restaurant_name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Nom de l'établissement <span class="text-error-500">*</span></label>
                         <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                             </div>
                             <input type="text" id="restaurant_name" name="restaurant_name" x-model="formData.restaurant_name" placeholder="Le Délice" required
-                                   class="w-full h-[48px] pl-11 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
 
                     {{-- Type --}}
                     <div>
-                        <label for="restaurant_type" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Type <span class="text-error-500">*</span></label>
+                        <label for="restaurant_type" class="block text-[13px] font-semibold text-neutral-700 mb-2">Type <span class="text-error-500">*</span></label>
                         <div class="relative group">
                             <select id="restaurant_type" name="restaurant_type" x-model="formData.restaurant_type" required
-                                    class="w-full h-[48px] pl-4 pr-10 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 appearance-none cursor-pointer">
+                                    class="w-full h-[52px] pl-4 pr-10 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 appearance-none cursor-pointer">
                                 <option value="">Sélectionnez un type</option>
                                 @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'] as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
@@ -206,9 +206,9 @@
 
                     {{-- Company (optional) --}}
                     <div>
-                        <label for="company_name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Entreprise <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                        <label for="company_name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Entreprise <span class="text-neutral-400 font-normal">(optionnel)</span></label>
                         <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL Le Délice"
-                               class="w-full h-[48px] px-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                               class="w-full h-[52px] px-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                     </div>
 
                     {{-- RCCM (collapsible) --}}
@@ -263,14 +263,14 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-7">
+                <div class="flex gap-3 mt-8">
                     <button type="button" @click="step = 1; window.scrollTo({top:0, behavior:'smooth'})"
                             class="w-12 h-[52px] flex items-center justify-center border-2 border-neutral-200 rounded-2xl text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition-all flex-shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </button>
                     <button type="button" @click="if(validateStep2()) { step = 3; window.scrollTo({top:0, behavior:'smooth'}) }"
                             class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
-                            :class="{ 'opacity-40 cursor-not-allowed saturate-50': !validateStep2() }">
+                            :class="{ 'opacity-50 cursor-not-allowed': !validateStep2() }">
                         <span class="flex items-center justify-center gap-2">
                             Continuer
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
