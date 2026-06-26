@@ -557,26 +557,37 @@
                                 Tout est inclus
                             </h2>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                @foreach([
-                                    '100 plats & 30 categories',
-                                    '2 000 commandes/mois',
-                                    '5 comptes employes',
-                                    'QR codes par table',
-                                    'Gestion de stock & alertes',
-                                    'Gestion livraison',
-                                    'Statistiques & rapports',
-                                    'Reservations en ligne',
-                                    'Avis clients',
-                                    'Paiement Mobile Money',
-                                    'Dashboard temps reel',
-                                    'Export Excel/PDF',
-                                ] as $f)
-                                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>{{ $f }}</span>
-                                </div>
+                                @foreach($availablePlans as $p)
+                                <template x-if="formData.plan === '{{ $p->slug }}'">
+                                    <div class="contents">
+                                        @foreach($p->features as $f)
+                                        <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span>{{ $f }}</span>
+                                        </div>
+                                        @endforeach
+                                        <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span>QR codes par table</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span>Paiement Mobile Money</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm text-neutral-700">
+                                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span>Dashboard temps reel</span>
+                                        </div>
+                                    </div>
+                                </template>
                                 @endforeach
                             </div>
                         </div>
