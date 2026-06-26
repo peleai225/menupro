@@ -5,7 +5,7 @@
             {{-- Mobile --}}
             <div class="sm:hidden flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-primary-600 uppercase tracking-widest">Etape <span x-text="step"></span>/3</span>
+                    <span class="text-[10px] font-bold text-primary-600 uppercase tracking-widest">Étape <span x-text="step"></span>/3</span>
                     <div class="text-sm font-bold text-neutral-900 mt-0.5" x-text="step === 1 ? 'Votre compte' : (step === 2 ? 'Votre restaurant' : 'Votre abonnement')"></div>
                 </div>
                 <div class="flex gap-1">
@@ -55,7 +55,7 @@
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div>
-                    <p class="text-[13px] font-semibold text-neutral-800">Parraine par {{ $refAgent->full_name }}</p>
+                    <p class="text-[13px] font-semibold text-neutral-800">Parrainé par {{ $refAgent->full_name }}</p>
                     <p class="text-[11px] text-neutral-500">Agent MenuPro — {{ $refAgent->city }}</p>
                 </div>
             </div>
@@ -87,7 +87,7 @@
             ═══════════════════════════════════════ --}}
             <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <div class="mb-6">
-                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Creez votre compte</h1>
+                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Créez votre compte</h1>
                     <p class="text-neutral-500 mt-1.5 text-[14px]">Remplissez vos informations personnelles pour commencer.</p>
                 </div>
 
@@ -118,7 +118,7 @@
 
                     {{-- Phone --}}
                     <div>
-                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Telephone WhatsApp <span class="text-error-500">*</span></label>
+                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Téléphone WhatsApp <span class="text-error-500">*</span></label>
                         <div class="relative group">
                             <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
@@ -136,7 +136,7 @@
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                             </div>
                             <input :type="showPassword ? 'text' : 'password'" id="reg-password" name="password" x-model="formData.password"
-                                   placeholder="Minimum 8 caracteres" required minlength="8" autocomplete="new-password"
+                                   placeholder="Minimum 8 caractères" required minlength="8" autocomplete="new-password"
                                    class="w-full h-[48px] pl-11 pr-12 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                             <button type="button" @click="showPassword = !showPassword"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-600 rounded-xl hover:bg-neutral-100 transition-all">
@@ -163,7 +163,7 @@
                 </button>
 
                 <p class="text-center text-[13px] text-neutral-400 mt-5">
-                    Deja inscrit ? <a href="{{ route('login') }}" class="text-primary-600 font-semibold hover:underline underline-offset-2">Se connecter</a>
+                    Déjà inscrit ? <a href="{{ route('login') }}" class="text-primary-600 font-semibold hover:underline underline-offset-2">Se connecter</a>
                 </p>
             </div>
 
@@ -173,18 +173,18 @@
             <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <div class="mb-6">
                     <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Votre restaurant</h1>
-                    <p class="text-neutral-500 mt-1.5 text-[14px]">Decrivez votre etablissement — vous pourrez tout modifier apres.</p>
+                    <p class="text-neutral-500 mt-1.5 text-[14px]">Décrivez votre établissement — vous pourrez tout modifier après.</p>
                 </div>
 
                 <div class="space-y-4">
                     {{-- Restaurant Name --}}
                     <div>
-                        <label for="restaurant_name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Nom de l'etablissement <span class="text-error-500">*</span></label>
+                        <label for="restaurant_name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Nom de l'établissement <span class="text-error-500">*</span></label>
                         <div class="relative group">
                             <div class="absolute left-0 top-0 bottom-0 w-11 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                             </div>
-                            <input type="text" id="restaurant_name" name="restaurant_name" x-model="formData.restaurant_name" placeholder="Le Delice" required
+                            <input type="text" id="restaurant_name" name="restaurant_name" x-model="formData.restaurant_name" placeholder="Le Délice" required
                                    class="w-full h-[48px] pl-11 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
@@ -195,8 +195,8 @@
                         <div class="relative group">
                             <select id="restaurant_type" name="restaurant_type" x-model="formData.restaurant_type" required
                                     class="w-full h-[48px] pl-4 pr-10 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 appearance-none cursor-pointer">
-                                <option value="">Selectionnez un type</option>
-                                @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Cafe', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Evenementiel'] as $val => $label)
+                                <option value="">Sélectionnez un type</option>
+                                @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'] as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
                                 @endforeach
                             </select>
@@ -207,7 +207,7 @@
                     {{-- Company (optional) --}}
                     <div>
                         <label for="company_name" class="block text-[13px] font-semibold text-neutral-700 mb-1.5">Entreprise <span class="text-neutral-400 font-normal">(optionnel)</span></label>
-                        <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL Le Delice"
+                        <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL Le Délice"
                                class="w-full h-[48px] px-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                     </div>
 
@@ -215,7 +215,7 @@
                     <div x-data="{ open: false }">
                         <button type="button" @click="open = !open" class="flex items-center gap-2 text-[13px] font-medium text-primary-600 hover:text-primary-700 transition-colors py-1">
                             <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            Ajouter un RCCM (badge verifie)
+                            Ajouter un RCCM (badge vérifié)
                         </button>
                         <div x-show="open" x-cloak x-transition class="mt-2.5 p-4 bg-neutral-50 rounded-2xl border border-neutral-200 space-y-3">
                             <input type="text" id="rccm" name="rccm" x-model="formData.rccm" placeholder="CI-ABJ-XX-2024-XXXXX"
@@ -253,7 +253,7 @@
                                         <div class="w-10 h-10 rounded-full bg-neutral-100 group-hover:bg-primary-100 flex items-center justify-center mx-auto transition-colors">
                                             <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         </div>
-                                        <p class="text-[11px] text-neutral-500 font-medium mt-2">Banniere</p>
+                                        <p class="text-[11px] text-neutral-500 font-medium mt-2">Bannière</p>
                                     </div>
                                 </template>
                                 <input type="file" name="banner" accept="image/png,image/jpeg,image/webp" class="absolute inset-0 opacity-0 cursor-pointer"
@@ -318,10 +318,10 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-baseline gap-2">
                                     <span class="font-bold text-neutral-900 text-[15px]">{{ $p->name }}</span>
-                                    <span class="text-[12px] text-neutral-500">{{ $p->max_dishes >= 9999 ? 'Illimite' : $p->max_dishes . ' plats' }}</span>
+                                    <span class="text-[12px] text-neutral-500">{{ $p->max_dishes >= 9999 ? 'Illimité' : $p->max_dishes . ' plats' }}</span>
                                 </div>
                                 <div class="text-[12px] text-neutral-500 mt-0.5">
-                                    {{ $p->max_orders_per_month >= 9999 ? 'Commandes illimitees' : number_format($p->max_orders_per_month) . ' cmd/mois' }}
+                                    {{ $p->max_orders_per_month >= 9999 ? 'Commandes illimitées' : number_format($p->max_orders_per_month) . ' cmd/mois' }}
                                     · {{ $p->max_employees }} compte{{ $p->max_employees > 1 ? 's' : '' }}
                                     @if($p->has_delivery) · Livraison @endif
                                 </div>
@@ -391,7 +391,7 @@
                         </div>
                         <div class="flex items-center justify-between mt-2">
                             <span class="text-[12px] text-neutral-500" x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></span>
-                            <span x-show="billingCycle !== 'monthly'" class="text-[12px] font-semibold text-secondary-400" x-text="'-' + formatPrice(discountAmount) + ' F economises'"></span>
+                            <span x-show="billingCycle !== 'monthly'" class="text-[12px] font-semibold text-secondary-400" x-text="'-' + formatPrice(discountAmount) + ' F économisés'"></span>
                         </div>
                     </div>
                 </div>
@@ -402,7 +402,7 @@
                            class="w-[18px] h-[18px] mt-0.5 rounded-md border-neutral-300 text-primary-500 focus:ring-primary-500/20 focus:ring-offset-0 cursor-pointer">
                     <span class="text-[12px] text-neutral-500 leading-relaxed">
                         J'accepte les <a href="{{ route('terms') }}" target="_blank" class="text-primary-600 font-medium hover:underline">conditions</a>
-                        et la <a href="{{ route('privacy') }}" target="_blank" class="text-primary-600 font-medium hover:underline">politique de confidentialite</a>.
+                        et la <a href="{{ route('privacy') }}" target="_blank" class="text-primary-600 font-medium hover:underline">politique de confidentialité</a>.
                     </span>
                 </label>
 
@@ -424,7 +424,7 @@
                             class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl relative overflow-hidden shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
                             :disabled="loading || submitted">
                         <span :class="{ 'opacity-0': loading }" class="flex items-center justify-center gap-2">
-                            Demarrer l'essai gratuit
+                            Démarrer l'essai gratuit
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center">
@@ -442,7 +442,7 @@
 
         {{-- Login (step 3) --}}
         <div x-show="step === 3" x-cloak class="mt-6 text-center">
-            <span class="text-[13px] text-neutral-400">Deja inscrit ?</span>
+            <span class="text-[13px] text-neutral-400">Déjà inscrit ?</span>
             <a href="{{ route('login') }}" class="text-[13px] text-primary-600 font-semibold hover:underline underline-offset-2 ml-1">Se connecter</a>
         </div>
     </div>

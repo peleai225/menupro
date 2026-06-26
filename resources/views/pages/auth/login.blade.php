@@ -31,7 +31,7 @@
             {{-- Login field --}}
             <div>
                 <label for="login" class="block text-[13px] font-semibold text-neutral-700 mb-2">
-                    Email ou numero WhatsApp
+                    Email ou numéro WhatsApp
                 </label>
                 <div class="relative group">
                     <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
@@ -61,7 +61,7 @@
                 <div class="flex items-center justify-between mb-2">
                     <label for="password" class="block text-[13px] font-semibold text-neutral-700">Mot de passe</label>
                     <a href="{{ route('password.request') }}" class="text-[12px] text-primary-600 hover:text-primary-700 font-semibold hover:underline underline-offset-2 transition-colors">
-                        Mot de passe oublie ?
+                        Mot de passe oublié ?
                     </a>
                 </div>
                 <div class="relative group">
@@ -140,7 +140,7 @@
             <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Creer mon restaurant
+            Créer mon restaurant
         </a>
 
         {{-- Trust --}}

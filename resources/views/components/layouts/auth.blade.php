@@ -67,7 +67,7 @@
                 <div class="max-w-lg">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 glass rounded-full mb-6">
                         <div class="w-2 h-2 rounded-full bg-secondary-400 animate-pulse"></div>
-                        <span class="text-xs font-medium text-neutral-300 tracking-wide">Plateforme N°1 en Cote d'Ivoire</span>
+                        <span class="text-xs font-medium text-neutral-300 tracking-wide">Plateforme N°1 en Côte d'Ivoire</span>
                     </div>
 
                     <h1 class="text-4xl xl:text-5xl font-bold text-white leading-[1.15] tracking-tight">
@@ -76,12 +76,12 @@
                     </h1>
 
                     <p class="text-neutral-400 mt-5 text-base xl:text-lg leading-relaxed max-w-md">
-                        Menu QR code, commandes en ligne, paiement Mobile Money — gerez tout depuis une seule plateforme.
+                        Menu QR code, commandes en ligne, paiement Mobile Money — gérez tout depuis une seule plateforme.
                     </p>
 
                     {{-- Features pills --}}
                     <div class="mt-8 flex flex-wrap gap-2.5">
-                        @foreach(['Menu QR Code', 'Wave & Orange Money', 'Cuisine temps reel', 'Livraison integree'] as $f)
+                        @foreach(['Menu QR Code', 'Wave & Orange Money', 'Cuisine temps réel', 'Livraison intégrée'] as $f)
                         <div class="glass px-3.5 py-2 rounded-xl flex items-center gap-2">
                             <svg class="w-3.5 h-3.5 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
@@ -102,7 +102,7 @@
                         @endfor
                     </div>
                     <p class="text-white/85 text-sm leading-relaxed italic">
-                        "Depuis MenuPro, nos commandes ont augmente de 40%. Les clients adorent commander depuis leur telephone !"
+                        "Depuis MenuPro, nos commandes ont augmenté de 40%. Les clients adorent commander depuis leur téléphone !"
                     </p>
                     <div class="mt-4 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg">
@@ -110,7 +110,7 @@
                         </div>
                         <div>
                             <div class="text-sm font-semibold text-white">Koffi Adjoumani</div>
-                            <div class="text-xs text-neutral-400">Le Delice — Abidjan Cocody</div>
+                            <div class="text-xs text-neutral-400">Le Délice — Abidjan Cocody</div>
                         </div>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
                     <div class="flex flex-wrap items-center justify-center gap-x-4 text-[11px] text-neutral-400">
                         <a href="{{ route('terms') }}" class="hover:text-primary-600 transition-colors">Conditions</a>
                         <span class="text-neutral-200">&bull;</span>
-                        <a href="{{ route('privacy') }}" class="hover:text-primary-600 transition-colors">Confidentialite</a>
+                        <a href="{{ route('privacy') }}" class="hover:text-primary-600 transition-colors">Confidentialité</a>
                         <span class="text-neutral-200">&bull;</span>
                         <a href="{{ route('home') }}" class="hover:text-primary-600 transition-colors">Accueil</a>
                     </div>
