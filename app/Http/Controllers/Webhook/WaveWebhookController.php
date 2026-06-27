@@ -24,7 +24,23 @@ class WaveWebhookController extends Controller
             'has_signature' => !empty($signatureHeader),
         ]);
 
-        if (!$wave->verifyWebhookSignature($rawPayload, $signatureHeader)) {
+        // Vérifier la signature — d'abord avec la clé plateforme,
+        // sinon chercher le restaurant via client_reference
+        $signatureValid = $wave->verifyWebhookSignature($rawPayload, $signatureHeader);
+
+        if (!$signatureValid) {
+            // Tenter avec le secret du restaurant concerné
+            $clientRef = $request->input('data.client_reference', '');
+            $checkoutId = $request->input('data.id', '');
+            $order = $this->findOrder($checkoutId, $clientRef);
+
+            if ($order && $order->restaurant->hasWaveBusiness()) {
+                $restaurantWave = app(WaveGateway::class)->forRestaurant($order->restaurant);
+                $signatureValid = $restaurantWave->verifyWebhookSignature($rawPayload, $signatureHeader);
+            }
+        }
+
+        if (!$signatureValid) {
             Log::channel('payments')->warning('Wave webhook: invalid signature');
             return response()->json(['error' => 'Invalid signature'], 401);
         }
@@ -75,6 +91,9 @@ class WaveWebhookController extends Controller
             return response()->json(['success' => true]);
         }
 
+        // Déterminer le mode : restaurant direct ou plateforme
+        $isDirectMode = ($order->payment_metadata['wave_mode'] ?? '') === 'restaurant_direct';
+
         $order->markAsPaid([
             'reference' => $transactionId ?? $checkoutId,
             'method' => 'wave',
@@ -82,7 +101,7 @@ class WaveWebhookController extends Controller
             'metadata' => $data,
         ]);
 
-        // Créer la PaymentTransaction et créditer le wallet
+        // Enregistrer la transaction
         $payment = PaymentTransaction::create([
             'order_id' => $order->id,
             'restaurant_id' => $order->restaurant_id,
@@ -94,19 +113,24 @@ class WaveWebhookController extends Controller
             'currency' => 'XOF',
             'status' => 'completed',
             'client_reference' => $clientReference,
-            'metadata' => $data,
+            'metadata' => array_merge($data, ['wave_mode' => $isDirectMode ? 'restaurant_direct' : 'platform']),
         ]);
 
-        $walletService->creditWallet($order->restaurant_id, $payment->id);
+        // Mode plateforme : créditer le wallet et déclencher auto-payout
+        // Mode restaurant direct : l'argent est déjà sur le Wave Business du restaurant
+        if (!$isDirectMode) {
+            $walletService->creditWallet($order->restaurant_id, $payment->id);
+        }
 
         // Notifier le restaurant
         $order->restaurant->users()
             ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
             ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
 
-        Log::channel('payments')->info('Wave webhook: order payment confirmed + wallet credited', [
+        Log::channel('payments')->info('Wave webhook: order payment confirmed', [
             'order_id' => $order->id,
             'amount' => $order->total,
+            'mode' => $isDirectMode ? 'restaurant_direct' : 'platform_payout',
         ]);
 
         return response()->json(['success' => true]);

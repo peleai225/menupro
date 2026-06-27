@@ -238,13 +238,14 @@ class CheckoutController extends Controller
             \Log::warning('WhatsApp new order notification failed: ' . $e->getMessage());
         }
 
-        // Priority 1: Wave Checkout
-        if ($this->waveGateway->isConfigured()) {
+        // Priority 1: Wave Checkout (restaurant direct ou plateforme)
+        $wave = $this->resolveWaveGateway($restaurant);
+        if ($wave->isConfigured()) {
             try {
                 $successUrl = route('r.order.success', [$slug, $order]);
                 $errorUrl = route('r.order.cancel', [$slug, $order]);
 
-                $result = $this->waveGateway->createCheckoutSession($order, $successUrl, $errorUrl);
+                $result = $wave->createCheckoutSession($order, $successUrl, $errorUrl);
 
                 if ($result['success']) {
                     $order->update([
@@ -253,6 +254,7 @@ class CheckoutController extends Controller
                         'payment_metadata' => [
                             'wave_checkout_id' => $result['checkout_id'],
                             'wave_launch_url' => $result['wave_launch_url'],
+                            'wave_mode' => $wave->isRestaurantMode() ? 'restaurant_direct' : 'platform',
                         ],
                     ]);
 
@@ -409,5 +411,19 @@ class CheckoutController extends Controller
             'discount_label' => $promoCode->discount_label,
             'message' => "Code promo appliqué : -{$promoCode->discount_label}",
         ]);
+    }
+
+    /**
+     * Résout le gateway Wave à utiliser :
+     * - Si le restaurant a son propre Wave Business → paiement direct au restaurant
+     * - Sinon → paiement sur le wallet plateforme + auto-payout
+     */
+    protected function resolveWaveGateway(Restaurant $restaurant): WaveGateway
+    {
+        if ($restaurant->hasWaveBusiness()) {
+            return app(WaveGateway::class)->forRestaurant($restaurant);
+        }
+
+        return app(WaveGateway::class)->forPlatform();
     }
 }

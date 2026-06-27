@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,8 @@ class WaveGateway
     protected string $apiKey;
     protected string $webhookSecret;
     protected string $currency;
+    protected bool $isRestaurantMode = false;
+    protected ?int $restaurantId = null;
 
     public function __construct()
     {
@@ -23,9 +26,41 @@ class WaveGateway
         $this->currency = config('wave.currency', 'XOF');
     }
 
+    /**
+     * Configure le gateway pour utiliser le Wave Business du restaurant.
+     * L'argent va directement sur le compte Wave Business du restaurant.
+     */
+    public function forRestaurant(Restaurant $restaurant): static
+    {
+        $this->isRestaurantMode = true;
+        $this->restaurantId = $restaurant->id;
+        $this->apiKey = $restaurant->getWaveApiKey() ?? '';
+        $this->webhookSecret = $restaurant->getWaveWebhookSecret() ?? '';
+
+        return $this;
+    }
+
+    /**
+     * Configure le gateway pour le compte plateforme (mode par défaut).
+     */
+    public function forPlatform(): static
+    {
+        $this->isRestaurantMode = false;
+        $this->restaurantId = null;
+        $this->apiKey = SystemSetting::get('wave_api_key', config('wave.api_key', ''));
+        $this->webhookSecret = SystemSetting::get('wave_webhook_secret', config('wave.webhook_secret', ''));
+
+        return $this;
+    }
+
     public function isConfigured(): bool
     {
         return !empty($this->apiKey);
+    }
+
+    public function isRestaurantMode(): bool
+    {
+        return $this->isRestaurantMode;
     }
 
     /**
