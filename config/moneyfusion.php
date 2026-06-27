@@ -2,7 +2,8 @@
 
 return [
 
-    // URL complète obtenue depuis votre tableau de bord MoneyFusion
     'api_url' => env('MONEYFUSION_API_URL', ''),
+
+    'api_key' => env('MONEYFUSION_API_KEY', ''),
 
 ];

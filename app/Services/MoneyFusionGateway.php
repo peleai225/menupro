@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Log;
 class MoneyFusionGateway
 {
     protected ?string $apiUrl = null;
+    protected ?string $apiKey = null;
 
     public function __construct()
     {
-        // Ne pas appeler SystemSetting ici — chargement lazy dans getApiUrl()
+        // Chargement lazy — pas d'appel DB au boot
     }
 
     protected function getApiUrl(): string
@@ -25,6 +26,15 @@ class MoneyFusionGateway
         return $this->apiUrl;
     }
 
+    protected function getApiKey(): string
+    {
+        if ($this->apiKey === null) {
+            $this->apiKey = SystemSetting::get('moneyfusion_api_key', config('moneyfusion.api_key', ''));
+        }
+
+        return $this->apiKey;
+    }
+
     public function isConfigured(): bool
     {
         return !empty($this->getApiUrl());
@@ -32,7 +42,6 @@ class MoneyFusionGateway
 
     /**
      * Initie un paiement pour un abonnement.
-     * Doc: POST {api_url} (URL fournie par le dashboard MoneyFusion)
      */
     public function createPayment(Subscription $subscription, string $returnUrl): array
     {
@@ -48,12 +57,15 @@ class MoneyFusionGateway
             return ['success' => false, 'error' => 'Montant insuffisant'];
         }
 
+        $headers = ['Content-Type' => 'application/json'];
+        if (!empty($this->getApiKey())) {
+            $headers['Authorization'] = 'Bearer ' . $this->getApiKey();
+        }
+
         $webhookUrl = route('webhooks.moneyfusion');
 
         try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])
+            $response = Http::withHeaders($headers)
                 ->timeout(30)
                 ->post($this->getApiUrl(), [
                     'totalPrice' => $amount,
@@ -79,7 +91,6 @@ class MoneyFusionGateway
                     Log::channel('payments')->info('MoneyFusion payment initiated', [
                         'subscription_id' => $subscription->id,
                         'token' => $data['token'] ?? null,
-                        'url' => $data['url'] ?? null,
                     ]);
 
                     return [
@@ -89,10 +100,7 @@ class MoneyFusionGateway
                     ];
                 }
 
-                return [
-                    'success' => false,
-                    'error' => $data['message'] ?? 'Erreur MoneyFusion',
-                ];
+                return ['success' => false, 'error' => $data['message'] ?? 'Erreur MoneyFusion'];
             }
 
             Log::channel('payments')->error('MoneyFusion HTTP error', [
@@ -115,7 +123,7 @@ class MoneyFusionGateway
 
     /**
      * Vérifie le statut d'un paiement via son token.
-     * Doc: GET https://www.pay.moneyfusion.net/paiementNotif/{token}
+     * GET https://www.pay.moneyfusion.net/paiementNotif/{token}
      */
     public function verifyPayment(string $token): array
     {

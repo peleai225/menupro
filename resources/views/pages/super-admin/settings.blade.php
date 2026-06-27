@@ -191,6 +191,13 @@
                                    class="input" placeholder="https://www.pay.moneyfusion.net/...">
                             <p class="text-xs text-neutral-500 mt-1">URL complète disponible dans votre tableau de bord MoneyFusion.</p>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API</label>
+                            <input type="password" name="moneyfusion_api_key"
+                                   value="{{ old('moneyfusion_api_key', $settings['moneyfusion_api_key'] ?? '') }}"
+                                   class="input" placeholder="Votre clé API MoneyFusion">
+                            <p class="text-xs text-neutral-500 mt-1">Disponible dans votre tableau de bord MoneyFusion.</p>
+                        </div>
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                             <p class="text-xs text-blue-800">
                                 <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

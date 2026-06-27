@@ -168,6 +168,7 @@ class DashboardController extends Controller
                 : config('commando.commission_only_first_payment', true),
             // MoneyFusion
             'moneyfusion_api_url' => \App\Models\SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', '')),
+            'moneyfusion_api_key' => \App\Models\SystemSetting::get('moneyfusion_api_key', config('moneyfusion.api_key', '')),
             // Jeko Africa
             'jeko_enabled' => \App\Models\SystemSetting::get('jeko_enabled', false),
             'jeko_api_key' => \App\Models\SystemSetting::get('jeko_api_key', ''),
@@ -203,6 +204,7 @@ class DashboardController extends Controller
             'geoapify_api_key' => ['nullable', 'string'],
             // MoneyFusion
             'moneyfusion_api_url' => ['nullable', 'url'],
+            'moneyfusion_api_key' => ['nullable', 'string'],
             // Jeko Africa
             'jeko_enabled' => ['boolean'],
             'jeko_api_key' => ['nullable', 'string'],
@@ -275,6 +277,9 @@ class DashboardController extends Controller
         // MoneyFusion
         if ($request->filled('moneyfusion_api_url')) {
             \App\Models\SystemSetting::set('moneyfusion_api_url', $request->moneyfusion_api_url, 'string', 'URL API MoneyFusion (depuis le dashboard)');
+        }
+        if ($request->filled('moneyfusion_api_key')) {
+            \App\Models\SystemSetting::set('moneyfusion_api_key', $request->moneyfusion_api_key, 'string', 'Clé API MoneyFusion');
         }
         // Jeko Africa
         \App\Models\SystemSetting::set('jeko_enabled', $request->boolean('jeko_enabled'), 'boolean', 'Activer Jeko Africa (abonnements)');
