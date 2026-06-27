@@ -9,16 +9,25 @@ use Illuminate\Support\Facades\Log;
 
 class MoneyFusionGateway
 {
-    protected string $apiUrl;
+    protected ?string $apiUrl = null;
 
     public function __construct()
     {
-        $this->apiUrl = SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', ''));
+        // Ne pas appeler SystemSetting ici — chargement lazy dans getApiUrl()
+    }
+
+    protected function getApiUrl(): string
+    {
+        if ($this->apiUrl === null) {
+            $this->apiUrl = SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', ''));
+        }
+
+        return $this->apiUrl;
     }
 
     public function isConfigured(): bool
     {
-        return !empty($this->apiUrl);
+        return !empty($this->getApiUrl());
     }
 
     /**
@@ -46,7 +55,7 @@ class MoneyFusionGateway
                 'Content-Type' => 'application/json',
             ])
                 ->timeout(30)
-                ->post($this->apiUrl, [
+                ->post($this->getApiUrl(), [
                     'totalPrice' => $amount,
                     'article' => [
                         ["Abonnement {$plan->name}" => $amount],

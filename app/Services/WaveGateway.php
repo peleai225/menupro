@@ -21,9 +21,10 @@ class WaveGateway
     public function __construct()
     {
         $this->baseUrl = config('wave.base_url', 'https://api.wave.com');
-        $this->apiKey = SystemSetting::get('wave_api_key', config('wave.api_key', ''));
-        $this->webhookSecret = SystemSetting::get('wave_webhook_secret', config('wave.webhook_secret', ''));
         $this->currency = config('wave.currency', 'XOF');
+        // SystemSetting chargé lazy dans forPlatform() pour éviter un appel DB au boot
+        $this->apiKey = '';
+        $this->webhookSecret = '';
     }
 
     /**
@@ -51,8 +52,22 @@ class WaveGateway
         return $this;
     }
 
+    public function loadPlatformConfig(): static
+    {
+        if (empty($this->apiKey)) {
+            $this->apiKey = SystemSetting::get('wave_api_key', config('wave.api_key', ''));
+            $this->webhookSecret = SystemSetting::get('wave_webhook_secret', config('wave.webhook_secret', ''));
+        }
+
+        return $this;
+    }
+
     public function isConfigured(): bool
     {
+        if (empty($this->apiKey)) {
+            $this->loadPlatformConfig();
+        }
+
         return !empty($this->apiKey);
     }
 
