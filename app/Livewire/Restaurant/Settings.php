@@ -341,7 +341,10 @@ class Settings extends Component
             'jeko_webhook_secret' => 'nullable|string|max:255',
             'jeko_store_id' => 'nullable|string|max:100',
             'wave_business_enabled' => 'boolean',
-            'wave_business_phone' => 'nullable|string|max:20',
+            'wave_business_phone' => ['required_if:wave_business_enabled,true', 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s\-]{8,20}$/'],
+        ], [
+            'wave_business_phone.required_if' => 'Le numéro Wave Business est obligatoire.',
+            'wave_business_phone.regex' => 'Format de numéro invalide (ex: +225 07 00 00 00 00).',
         ]);
 
         $data = [
@@ -349,7 +352,7 @@ class Settings extends Component
             'jeko_enabled' => $this->jeko_enabled,
             'jeko_store_id' => $this->jeko_store_id,
             'wave_business_enabled' => $this->wave_business_enabled,
-            'wave_business_phone' => $this->wave_business_phone,
+            'wave_business_phone' => $this->wave_business_enabled ? $this->wave_business_phone : null,
         ];
 
         if ($this->jeko_api_key !== null) {

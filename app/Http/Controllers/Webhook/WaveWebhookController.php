@@ -10,6 +10,7 @@ use App\Notifications\NewOrderNotification;
 use App\Services\WalletService;
 use App\Services\WaveGateway;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class WaveWebhookController extends Controller
@@ -72,38 +73,55 @@ class WaveWebhookController extends Controller
             return response()->json(['error' => 'Record not found'], 404);
         }
 
-        // Idempotence
-        if ($order->is_paid) {
+        // Vérifier le montant reçu vs montant attendu
+        if ($amount > 0 && abs($amount - (int) $order->total) > 1) {
+            Log::channel('payments')->warning('Wave webhook: amount mismatch', [
+                'order_id' => $order->id,
+                'expected' => $order->total,
+                'received' => $amount,
+            ]);
+            return response()->json(['error' => 'Amount mismatch'], 422);
+        }
+
+        // Lock atomique pour éviter le double-traitement en cas de webhook dupliqué
+        $payment = DB::transaction(function () use ($order, $checkoutId, $transactionId, $clientReference, $data) {
+            $order = Order::where('id', $order->id)->lockForUpdate()->first();
+
+            if ($order->is_paid) {
+                return null;
+            }
+
+            $isDirectMode = ($order->payment_metadata['wave_mode'] ?? '') === 'restaurant_direct';
+
+            $order->markAsPaid([
+                'reference' => $transactionId ?? $checkoutId,
+                'method' => 'wave',
+                'transaction_id' => $transactionId,
+                'metadata' => $data,
+            ]);
+
+            return PaymentTransaction::create([
+                'order_id' => $order->id,
+                'restaurant_id' => $order->restaurant_id,
+                'gateway' => 'wave',
+                'gateway_transaction_id' => $transactionId,
+                'wave_checkout_id' => $checkoutId,
+                'wave_payment_id' => $transactionId,
+                'amount' => $order->total,
+                'currency' => 'XOF',
+                'status' => 'completed',
+                'client_reference' => $clientReference,
+                'metadata' => array_merge($data, ['wave_mode' => $isDirectMode ? 'restaurant_direct' : 'platform']),
+            ]);
+        });
+
+        // Idempotence : si la transaction a déjà retourné null, l'ordre était déjà payé
+        if (!$payment) {
             Log::channel('payments')->info('Wave webhook: order already paid', ['order_id' => $order->id]);
             return response()->json(['success' => true]);
         }
 
-        // Déterminer le mode : restaurant direct ou plateforme
-        $isDirectMode = ($order->payment_metadata['wave_mode'] ?? '') === 'restaurant_direct';
-
-        $order->markAsPaid([
-            'reference' => $transactionId ?? $checkoutId,
-            'method' => 'wave',
-            'transaction_id' => $transactionId,
-            'metadata' => $data,
-        ]);
-
-        // Enregistrer la transaction
-        $payment = PaymentTransaction::create([
-            'order_id' => $order->id,
-            'restaurant_id' => $order->restaurant_id,
-            'gateway' => 'wave',
-            'gateway_transaction_id' => $transactionId,
-            'wave_checkout_id' => $checkoutId,
-            'wave_payment_id' => $transactionId,
-            'amount' => $order->total,
-            'currency' => 'XOF',
-            'status' => 'completed',
-            'client_reference' => $clientReference,
-            'metadata' => array_merge($data, ['wave_mode' => $isDirectMode ? 'restaurant_direct' : 'platform']),
-        ]);
-
-        // Dans tous les cas, créditer le wallet (qui déclenche l'auto-payout vers le Wave Business du restaurant)
+        // Créditer le wallet (déclenche l'auto-payout vers le Wave Business du restaurant)
         $walletService->creditWallet($order->restaurant_id, $payment->id);
 
         // Notifier le restaurant
