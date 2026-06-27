@@ -27,15 +27,13 @@ class WaveGateway
     }
 
     /**
-     * Configure le gateway pour utiliser le Wave Business du restaurant.
-     * L'argent va directement sur le compte Wave Business du restaurant.
+     * Configure le gateway en mode restaurant (payout automatique vers le Wave Business du restaurant).
+     * La clé API reste celle de la plateforme, mais le paiement sera reversé au restaurant.
      */
     public function forRestaurant(Restaurant $restaurant): static
     {
         $this->isRestaurantMode = true;
         $this->restaurantId = $restaurant->id;
-        $this->apiKey = $restaurant->getWaveApiKey() ?? '';
-        $this->webhookSecret = $restaurant->getWaveWebhookSecret() ?? '';
 
         return $this;
     }

@@ -75,8 +75,7 @@ class Restaurant extends Model
         'cash_on_delivery',
         'tagline',
         'wave_merchant_id',
-        'wave_api_key',
-        'wave_webhook_secret',
+        'wave_business_phone',
         'wave_business_enabled',
         'kitchen_token',
         'is_demo',
@@ -545,43 +544,9 @@ class Restaurant extends Model
         $this->attributes['jeko_webhook_secret'] = $value ? encrypt($value) : null;
     }
 
-    public function getWaveApiKey(): ?string
-    {
-        if (!$this->wave_api_key) {
-            return null;
-        }
-        try {
-            return decrypt($this->wave_api_key);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
-    }
-
-    public function getWaveWebhookSecret(): ?string
-    {
-        if (!$this->wave_webhook_secret) {
-            return null;
-        }
-        try {
-            return decrypt($this->wave_webhook_secret);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
-    }
-
-    public function setWaveApiKeyAttribute($value): void
-    {
-        $this->attributes['wave_api_key'] = $value ? encrypt($value) : null;
-    }
-
-    public function setWaveWebhookSecretAttribute($value): void
-    {
-        $this->attributes['wave_webhook_secret'] = $value ? encrypt($value) : null;
-    }
-
     public function hasWaveBusiness(): bool
     {
-        return $this->wave_business_enabled && !empty($this->getWaveApiKey());
+        return $this->wave_business_enabled && !empty($this->wave_business_phone);
     }
 
     /**

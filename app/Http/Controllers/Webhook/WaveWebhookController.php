@@ -24,21 +24,8 @@ class WaveWebhookController extends Controller
             'has_signature' => !empty($signatureHeader),
         ]);
 
-        // Vérifier la signature — d'abord avec la clé plateforme,
-        // sinon chercher le restaurant via client_reference
+        // Vérifier la signature avec la clé plateforme (une seule clé API gère tout)
         $signatureValid = $wave->verifyWebhookSignature($rawPayload, $signatureHeader);
-
-        if (!$signatureValid) {
-            // Tenter avec le secret du restaurant concerné
-            $clientRef = $request->input('data.client_reference', '');
-            $checkoutId = $request->input('data.id', '');
-            $order = $this->findOrder($checkoutId, $clientRef);
-
-            if ($order && $order->restaurant->hasWaveBusiness()) {
-                $restaurantWave = app(WaveGateway::class)->forRestaurant($order->restaurant);
-                $signatureValid = $restaurantWave->verifyWebhookSignature($rawPayload, $signatureHeader);
-            }
-        }
 
         if (!$signatureValid) {
             Log::channel('payments')->warning('Wave webhook: invalid signature');
@@ -116,11 +103,8 @@ class WaveWebhookController extends Controller
             'metadata' => array_merge($data, ['wave_mode' => $isDirectMode ? 'restaurant_direct' : 'platform']),
         ]);
 
-        // Mode plateforme : créditer le wallet et déclencher auto-payout
-        // Mode restaurant direct : l'argent est déjà sur le Wave Business du restaurant
-        if (!$isDirectMode) {
-            $walletService->creditWallet($order->restaurant_id, $payment->id);
-        }
+        // Dans tous les cas, créditer le wallet (qui déclenche l'auto-payout vers le Wave Business du restaurant)
+        $walletService->creditWallet($order->restaurant_id, $payment->id);
 
         // Notifier le restaurant
         $order->restaurant->users()

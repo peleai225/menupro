@@ -733,42 +733,24 @@
 
                     @if($wave_business_enabled)
                         <div class="space-y-4">
-                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-2">
-                                <p class="text-xs text-amber-800">
-                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                                    </svg>
-                                    En activant Wave Business, les paiements Wave de vos clients iront directement sur votre compte. La plateforme ne collectera pas ces paiements.
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé API Wave Business <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="wave_api_key" class="input" placeholder="wave_sn_prod_...">
-                                <p class="text-xs text-neutral-500 mt-1">Disponible dans votre tableau de bord Wave Business → API</p>
-                                @error('wave_api_key')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé Secrète Webhook <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
-                                </label>
-                                <input type="password" wire:model="wave_webhook_secret" class="input" placeholder="whsec_...">
-                                <p class="text-xs text-neutral-500 mt-1">Pour vérifier l'authenticité des notifications de paiement</p>
-                            </div>
-
-                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p class="text-xs text-blue-800">
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg mb-2">
+                                <p class="text-xs text-emerald-800">
                                     <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    URL Webhook à configurer dans Wave Business :
-                                    <code class="font-mono bg-blue-100 px-1 rounded">{{ url('/webhooks/wave') }}</code>
+                                    Les paiements seront automatiquement reversés sur votre compte Wave Business après déduction de la commission plateforme.
                                 </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Numéro Wave Business <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" wire:model="wave_business_phone" class="input" placeholder="+225 07 XX XX XX XX">
+                                <p class="text-xs text-neutral-500 mt-1">Le numéro associé à votre compte Wave Business</p>
+                                @error('wave_business_phone')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
                     @endif

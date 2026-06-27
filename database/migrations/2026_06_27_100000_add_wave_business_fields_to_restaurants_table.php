@@ -9,9 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('restaurants', function (Blueprint $table) {
-            $table->text('wave_api_key')->nullable()->after('wave_merchant_id');
-            $table->text('wave_webhook_secret')->nullable()->after('wave_api_key');
-            $table->boolean('wave_business_enabled')->default(false)->after('wave_webhook_secret');
+            $table->string('wave_business_phone', 20)->nullable()->after('wave_merchant_id');
+            $table->boolean('wave_business_enabled')->default(false)->after('wave_business_phone');
         });
     }
 
@@ -19,8 +18,7 @@ return new class extends Migration
     {
         Schema::table('restaurants', function (Blueprint $table) {
             $table->dropColumn([
-                'wave_api_key',
-                'wave_webhook_secret',
+                'wave_business_phone',
                 'wave_business_enabled',
             ]);
         });

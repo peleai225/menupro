@@ -92,7 +92,14 @@ class WalletService
                 return;
             }
 
-            if (empty($wallet->phone)) {
+            $restaurant = $wallet->restaurant;
+
+            // Priorité au numéro Wave Business du restaurant s'il est configuré
+            $payoutPhone = ($restaurant->hasWaveBusiness())
+                ? $restaurant->wave_business_phone
+                : $wallet->phone;
+
+            if (empty($payoutPhone)) {
                 Log::info('Auto-payout ignoré : pas de numéro Mobile Money configuré', [
                     'restaurant_id' => $wallet->restaurant_id,
                 ]);
@@ -119,10 +126,12 @@ class WalletService
                 return;
             }
 
-            $phone = $wallet->prefix . ltrim($wallet->phone, '0');
+            $phone = $restaurant->hasWaveBusiness()
+                ? $payoutPhone
+                : $wallet->prefix . ltrim($wallet->phone, '0');
             $recipientName = $wallet->recipient_name
-                ?? $wallet->restaurant->user->name
-                ?? $wallet->restaurant->name;
+                ?? $restaurant->user->name
+                ?? $restaurant->name;
 
             $uuid = Str::uuid()->toString();
             $amount = (int) floor($balance);

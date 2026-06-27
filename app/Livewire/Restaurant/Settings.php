@@ -71,8 +71,7 @@ class Settings extends Component
 
     // Wave Business
     public bool $wave_business_enabled = false;
-    public ?string $wave_api_key = null;
-    public ?string $wave_webhook_secret = null;
+    public ?string $wave_business_phone = null;
 
     // Appearance / Colors
     #[Rule('nullable|string|regex:/^#[0-9A-Fa-f]{6}$/')]
@@ -142,8 +141,7 @@ class Settings extends Component
         $this->jeko_webhook_secret = $this->restaurant->getJekoWebhookSecret();
         $this->jeko_store_id = $this->restaurant->jeko_store_id;
         $this->wave_business_enabled = $this->restaurant->wave_business_enabled ?? false;
-        $this->wave_api_key = $this->restaurant->getWaveApiKey();
-        $this->wave_webhook_secret = $this->restaurant->getWaveWebhookSecret();
+        $this->wave_business_phone = $this->restaurant->wave_business_phone;
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
         $this->opening_hours = $this->restaurant->opening_hours ?? $this->getDefaultOpeningHours();
@@ -343,8 +341,7 @@ class Settings extends Component
             'jeko_webhook_secret' => 'nullable|string|max:255',
             'jeko_store_id' => 'nullable|string|max:100',
             'wave_business_enabled' => 'boolean',
-            'wave_api_key' => 'nullable|string|max:500',
-            'wave_webhook_secret' => 'nullable|string|max:500',
+            'wave_business_phone' => 'nullable|string|max:20',
         ]);
 
         $data = [
@@ -352,6 +349,7 @@ class Settings extends Component
             'jeko_enabled' => $this->jeko_enabled,
             'jeko_store_id' => $this->jeko_store_id,
             'wave_business_enabled' => $this->wave_business_enabled,
+            'wave_business_phone' => $this->wave_business_phone,
         ];
 
         if ($this->jeko_api_key !== null) {
@@ -362,12 +360,6 @@ class Settings extends Component
         }
         if ($this->jeko_webhook_secret !== null) {
             $data['jeko_webhook_secret'] = $this->jeko_webhook_secret;
-        }
-        if ($this->wave_api_key !== null) {
-            $data['wave_api_key'] = $this->wave_api_key;
-        }
-        if ($this->wave_webhook_secret !== null) {
-            $data['wave_webhook_secret'] = $this->wave_webhook_secret;
         }
 
         $this->restaurant->update($data);
