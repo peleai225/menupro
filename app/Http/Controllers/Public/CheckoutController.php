@@ -12,7 +12,6 @@ use App\Models\PaymentTransaction;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
-use App\Services\JekoGateway;
 use App\Services\WaveGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +22,6 @@ use Illuminate\View\View;
 class CheckoutController extends Controller
 {
     public function __construct(
-        protected JekoGateway $jekoGateway,
         protected WaveGateway $waveGateway,
     ) {}
 
@@ -265,30 +263,6 @@ class CheckoutController extends Controller
             }
         }
 
-        // Priority 2: Jeko fallback
-        $jeko = $this->jekoGateway->forPlatform();
-        $storeId = $jeko->getPlatformStoreId();
-        if ($jeko->isConfigured() && $storeId) {
-            try {
-                $result = $jeko->createOrderPayment($order, $storeId);
-
-                if ($result['success']) {
-                    $order->update([
-                        'payment_reference' => $result['payment_id'],
-                        'payment_method' => 'jeko',
-                        'payment_metadata' => ['payment_url' => $result['payment_url']],
-                    ]);
-
-                    return redirect($result['payment_url']);
-                }
-            } catch (\Exception $e) {
-                \Log::error('Jeko payment exception in CheckoutController', ['order_id' => $order->id, 'error' => $e->getMessage()]);
-            }
-
-            return redirect()->route('r.order.status', [$slug, $order->tracking_token])
-                ->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
-        }
-
         return redirect()->route('r.order.status', [$slug, $order->tracking_token])
             ->with('info', 'Commande créée. Le paiement sera effectué sur place.');
     }
@@ -337,28 +311,6 @@ class CheckoutController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::warning('Wave verify on success fallback failed: ' . $e->getMessage());
-            }
-        }
-
-        // Jeko: verify by payment_reference (paymentLinkId)
-        if (!$order->is_paid && $order->payment_method === 'jeko' && $order->payment_reference) {
-            $jeko = app(JekoGateway::class)->forPlatform();
-            if ($jeko->isConfigured()) {
-                try {
-                    $result = $jeko->verifyPaymentLink($order->payment_reference);
-                    if ($result['success'] && ($result['paid'] ?? false)) {
-                        $order->markAsPaid([
-                            'reference' => $order->payment_reference,
-                            'method' => 'jeko',
-                            'metadata' => $result['data'] ?? [],
-                        ]);
-                        $restaurant->users()
-                            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                            ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('Jeko verify on success fallback failed: ' . $e->getMessage());
-                }
             }
         }
 

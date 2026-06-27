@@ -209,119 +209,38 @@
                         </div>
                     </div>
                 </div>
-                {{-- Jeko Africa --}}
+                {{-- Wave CI --}}
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                        Jeko Africa
+                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        Wave CI
                     </h2>
                     <p class="text-sm text-neutral-500 mb-5">
-                        Paiements Mobile Money multi-opérateurs (Wave, Orange Money, MTN, Moov, Djamo) et cartes bancaires.
-                        <a href="https://developer.jeko.africa" target="_blank" class="text-primary-600 hover:underline">Documentation</a>
+                        Paiements commandes clients via Wave. Les restaurants avec un numéro Wave Business reçoivent leurs fonds automatiquement.
+                        <a href="https://dashboard.wave.com/developers/api" target="_blank" class="text-primary-600 hover:underline">Dashboard Wave</a>
                     </p>
-                    <div class="space-y-5">
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
-                            <div>
-                                <span class="font-medium text-neutral-900">Activer Jeko (paiements abonnements)</span>
-                                <p class="text-sm text-neutral-500">Utilisé pour les abonnements restaurateurs via la plateforme</p>
-                            </div>
-                            <input type="checkbox" name="jeko_enabled" value="1" {{ ($settings['jeko_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
-                        </label>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API (X-API-KEY) <span class="text-red-500">*</span></label>
-                            <input type="password" name="jeko_api_key" value="{{ old('jeko_api_key', $settings['jeko_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Votre clé API Jeko">
-                            <p class="text-xs text-neutral-500 mt-1">Jeko Cockpit → Paramètres → API & Webhooks</p>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API Wave <span class="text-red-500">*</span></label>
+                            <input type="password" name="wave_api_key"
+                                   value="{{ old('wave_api_key', $settings['wave_api_key'] ?? '') }}"
+                                   class="input" placeholder="wave_sn_prod_...">
+                            <p class="text-xs text-neutral-500 mt-1">Bearer token depuis Wave Dashboard → Developers → API Keys.</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID Clé API (X-API-KEY-ID) <span class="text-red-500">*</span></label>
-                            <input type="password" name="jeko_api_key_id" value="{{ old('jeko_api_key_id', $settings['jeko_api_key_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Identifiant de la clé API">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Secret de signature Webhook</label>
+                            <input type="password" name="wave_webhook_secret"
+                                   value="{{ old('wave_webhook_secret', $settings['wave_webhook_secret'] ?? '') }}"
+                                   class="input" placeholder="Secret HMAC-SHA256">
+                            <p class="text-xs text-neutral-500 mt-1">Disponible dans Wave Dashboard → Developers → Webhooks.</p>
                         </div>
-                        <div x-data="jekoStores()">
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Store ID <span class="text-red-500">*</span></label>
-
-                            {{-- Sélecteur de store (visible après chargement) --}}
-                            <template x-if="stores.length > 0">
-                                <div class="mb-2">
-                                    <select @change="selectStore($event.target.value)"
-                                            class="w-full h-12 px-4 bg-white border-2 border-primary-400 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                        <option value="">— Choisir un magasin —</option>
-                                        <template x-for="store in stores" :key="store.id">
-                                            <option :value="store.id" :selected="store.id === storeIdInput" x-text="store.name + ' (' + store.id + ')'"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                            </template>
-
-                            <div class="flex gap-2">
-                                <input type="text" name="jeko_store_id" id="jeko_store_id_input"
-                                       value="{{ old('jeko_store_id', $settings['jeko_store_id'] ?? '') }}"
-                                       x-model="storeIdInput"
-                                       class="flex-1 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                       placeholder="59ae202a-f583-4a15-970f-9e99bd1e0baa">
-                                <button type="button" @click="fetchStores"
-                                        :disabled="loading"
-                                        class="h-12 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium flex items-center gap-2 whitespace-nowrap transition-colors">
-                                    <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                    </svg>
-                                    <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                    </svg>
-                                    <span x-text="loading ? 'Chargement...' : 'Récupérer mes magasins'"></span>
-                                </button>
-                            </div>
-
-                            <p class="text-xs text-neutral-500 mt-1">UUID du magasin Jeko. Cliquez sur "Récupérer mes magasins" après avoir saisi vos clés API.</p>
-                            <p x-show="error" x-text="error" class="text-xs text-red-600 mt-1"></p>
-                        </div>
-
-                        @push('scripts')
-                        <script>
-                        function jekoStores() {
-                            return {
-                                stores: [],
-                                loading: false,
-                                error: '',
-                                storeIdInput: '{{ old('jeko_store_id', $settings['jeko_store_id'] ?? '') }}',
-                                fetchStores() {
-                                    this.loading = true;
-                                    this.error = '';
-                                    this.stores = [];
-                                    fetch('{{ route('super-admin.jeko.stores') }}', {
-                                        headers: {
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'Accept': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
-                                        }
-                                    })
-                                    .then(r => r.json())
-                                    .then(data => {
-                                        if (data.error) {
-                                            this.error = data.error;
-                                        } else {
-                                            this.stores = data.stores ?? [];
-                                            if (this.stores.length === 1) {
-                                                this.storeIdInput = this.stores[0].id;
-                                            }
-                                        }
-                                    })
-                                    .catch(() => { this.error = 'Erreur réseau. Vérifiez vos clés API puis sauvegardez avant de réessayer.'; })
-                                    .finally(() => { this.loading = false; });
-                                },
-                                selectStore(id) {
-                                    if (id) this.storeIdInput = id;
-                                }
-                            }
-                        }
-                        </script>
-                        @endpush
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé Secrète Webhook</label>
-                            <input type="password" name="jeko_webhook_secret" value="{{ old('jeko_webhook_secret', $settings['jeko_webhook_secret'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Pour vérification HMAC-SHA256">
-                            <p class="text-xs text-neutral-500 mt-1">
-                                URL Webhook à configurer dans Jeko Cockpit :
-                                <code class="bg-neutral-200 px-1 rounded text-xs">{{ url('/webhooks/jeko') }}</code>
+                        <div class="p-3 bg-sky-50 border border-sky-200 rounded-lg">
+                            <p class="text-xs text-sky-800">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                URL Webhook à configurer dans Wave Dashboard :
+                                <code class="font-mono bg-sky-100 px-1 rounded">{{ url('/webhooks/wave') }}</code>
                             </p>
                         </div>
                     </div>

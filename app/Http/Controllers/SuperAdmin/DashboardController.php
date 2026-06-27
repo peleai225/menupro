@@ -169,12 +169,9 @@ class DashboardController extends Controller
             // MoneyFusion
             'moneyfusion_api_url' => \App\Models\SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', '')),
             'moneyfusion_api_key' => \App\Models\SystemSetting::get('moneyfusion_api_key', config('moneyfusion.api_key', '')),
-            // Jeko Africa
-            'jeko_enabled' => \App\Models\SystemSetting::get('jeko_enabled', false),
-            'jeko_api_key' => \App\Models\SystemSetting::get('jeko_api_key', ''),
-            'jeko_api_key_id' => \App\Models\SystemSetting::get('jeko_api_key_id', ''),
-            'jeko_store_id' => \App\Models\SystemSetting::get('jeko_store_id', ''),
-            'jeko_webhook_secret' => \App\Models\SystemSetting::get('jeko_webhook_secret', ''),
+            // Wave CI
+            'wave_api_key' => \App\Models\SystemSetting::get('wave_api_key', config('wave.api_key', '')),
+            'wave_webhook_secret' => \App\Models\SystemSetting::get('wave_webhook_secret', config('wave.webhook_secret', '')),
             // WhatsApp Business API
             'whatsapp_enabled' => \App\Models\SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false)),
             'whatsapp_phone_id' => \App\Models\SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', '')),
@@ -205,12 +202,9 @@ class DashboardController extends Controller
             // MoneyFusion
             'moneyfusion_api_url' => ['nullable', 'url'],
             'moneyfusion_api_key' => ['nullable', 'string'],
-            // Jeko Africa
-            'jeko_enabled' => ['boolean'],
-            'jeko_api_key' => ['nullable', 'string'],
-            'jeko_api_key_id' => ['nullable', 'string'],
-            'jeko_store_id' => ['nullable', 'string', 'max:100'],
-            'jeko_webhook_secret' => ['nullable', 'string'],
+            // Wave CI
+            'wave_api_key' => ['nullable', 'string'],
+            'wave_webhook_secret' => ['nullable', 'string'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'smtp_encryption' => ['nullable', 'string', 'in:tls,ssl,'],
@@ -281,19 +275,12 @@ class DashboardController extends Controller
         if ($request->filled('moneyfusion_api_key')) {
             \App\Models\SystemSetting::set('moneyfusion_api_key', $request->moneyfusion_api_key, 'string', 'Clé API MoneyFusion');
         }
-        // Jeko Africa
-        \App\Models\SystemSetting::set('jeko_enabled', $request->boolean('jeko_enabled'), 'boolean', 'Activer Jeko Africa (abonnements)');
-        if ($request->filled('jeko_api_key')) {
-            \App\Models\SystemSetting::set('jeko_api_key', $request->jeko_api_key, 'string', 'Clé API Jeko (X-API-KEY)');
+        // Wave CI
+        if ($request->filled('wave_api_key')) {
+            \App\Models\SystemSetting::set('wave_api_key', $request->wave_api_key, 'string', 'Clé API Wave (Bearer token)');
         }
-        if ($request->filled('jeko_api_key_id')) {
-            \App\Models\SystemSetting::set('jeko_api_key_id', $request->jeko_api_key_id, 'string', 'ID Clé API Jeko (X-API-KEY-ID)');
-        }
-        if ($request->filled('jeko_store_id')) {
-            \App\Models\SystemSetting::set('jeko_store_id', $request->jeko_store_id, 'string', 'Store ID Jeko (plateforme)');
-        }
-        if ($request->filled('jeko_webhook_secret')) {
-            \App\Models\SystemSetting::set('jeko_webhook_secret', $request->jeko_webhook_secret, 'string', 'Secret webhook Jeko');
+        if ($request->filled('wave_webhook_secret')) {
+            \App\Models\SystemSetting::set('wave_webhook_secret', $request->wave_webhook_secret, 'string', 'Secret de signature des webhooks Wave');
         }
 
         // SMTP Configuration
@@ -485,24 +472,5 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Récupère les magasins Jeko via l'API (pour pré-remplir le Store ID).
-     */
-    public function jekoStores(): \Illuminate\Http\JsonResponse
-    {
-        $jeko = app(\App\Services\JekoGateway::class)->forPlatform();
-
-        if (!$jeko->isConfigured()) {
-            return response()->json(['error' => 'Clés API Jeko non configurées.'], 422);
-        }
-
-        $result = $jeko->getStores();
-
-        if (!$result['success']) {
-            return response()->json(['error' => $result['error'] ?? 'Erreur API Jeko'], 422);
-        }
-
-        return response()->json(['stores' => $result['stores']]);
-    }
 }
 

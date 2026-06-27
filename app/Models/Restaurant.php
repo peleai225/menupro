@@ -62,11 +62,6 @@ class Restaurant extends Model
         'lygos_api_key',
         'lygos_api_secret',
         'lygos_enabled',
-        'jeko_api_key',
-        'jeko_api_key_id',
-        'jeko_webhook_secret',
-        'jeko_store_id',
-        'jeko_enabled',
         'settings',
         'verified_at',
         'verified_by',
@@ -99,7 +94,6 @@ class Restaurant extends Model
         'estimated_prep_time' => 'integer',
         'number_of_tables' => 'integer',
         'lygos_enabled' => 'boolean',
-        'jeko_enabled' => 'boolean',
         'settings' => 'array',
         'verified_at' => 'datetime',
         'delivery_enabled' => 'boolean',
@@ -110,9 +104,6 @@ class Restaurant extends Model
     protected $hidden = [
         'lygos_api_key',
         'lygos_api_secret',
-        'jeko_api_key',
-        'jeko_api_key_id',
-        'jeko_webhook_secret',
     ];
 
     // =========================================================================
@@ -491,57 +482,6 @@ class Restaurant extends Model
     public function setLygosApiSecretAttribute($value): void
     {
         $this->attributes['lygos_api_secret'] = $value ? encrypt($value) : null;
-    }
-
-    public function getJekoApiKey(): ?string
-    {
-        if (!$this->jeko_api_key) {
-            return null;
-        }
-        try {
-            return decrypt($this->jeko_api_key);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
-    }
-
-    public function getJekoApiKeyId(): ?string
-    {
-        if (!$this->jeko_api_key_id) {
-            return null;
-        }
-        try {
-            return decrypt($this->jeko_api_key_id);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
-    }
-
-    public function getJekoWebhookSecret(): ?string
-    {
-        if (!$this->jeko_webhook_secret) {
-            return null;
-        }
-        try {
-            return decrypt($this->jeko_webhook_secret);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
-    }
-
-    public function setJekoApiKeyAttribute($value): void
-    {
-        $this->attributes['jeko_api_key'] = $value ? encrypt($value) : null;
-    }
-
-    public function setJekoApiKeyIdAttribute($value): void
-    {
-        $this->attributes['jeko_api_key_id'] = $value ? encrypt($value) : null;
-    }
-
-    public function setJekoWebhookSecretAttribute($value): void
-    {
-        $this->attributes['jeko_webhook_secret'] = $value ? encrypt($value) : null;
     }
 
     public function hasWaveBusiness(): bool

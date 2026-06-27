@@ -62,13 +62,6 @@ class Settings extends Component
     // Payment
     public bool $cash_on_delivery = true;
 
-    // Jeko
-    public bool $jeko_enabled = false;
-    public ?string $jeko_api_key = null;
-    public ?string $jeko_api_key_id = null;
-    public ?string $jeko_webhook_secret = null;
-    public ?string $jeko_store_id = null;
-
     // Wave Business
     public bool $wave_business_enabled = false;
     public ?string $wave_business_phone = null;
@@ -135,11 +128,6 @@ class Settings extends Component
         $this->estimated_prep_time = $this->restaurant->estimated_prep_time ?? 30;
         $this->delivery_zones = $this->restaurant->delivery_zones;
         $this->cash_on_delivery = $this->restaurant->cash_on_delivery ?? true;
-        $this->jeko_enabled = $this->restaurant->jeko_enabled ?? false;
-        $this->jeko_api_key = $this->restaurant->getJekoApiKey();
-        $this->jeko_api_key_id = $this->restaurant->getJekoApiKeyId();
-        $this->jeko_webhook_secret = $this->restaurant->getJekoWebhookSecret();
-        $this->jeko_store_id = $this->restaurant->jeko_store_id;
         $this->wave_business_enabled = $this->restaurant->wave_business_enabled ?? false;
         $this->wave_business_phone = $this->restaurant->wave_business_phone;
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
@@ -178,17 +166,6 @@ class Settings extends Component
     public function payoutAvailable(): bool
     {
         return false;
-    }
-
-    #[Computed]
-    public function jekoPaymentAvailable(): bool
-    {
-        try {
-            $jeko = app(\App\Services\JekoGateway::class)->forPlatform();
-            return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
-        } catch (\Throwable $e) {
-            return false;
-        }
     }
 
     public function requestPayout(): void
@@ -335,11 +312,6 @@ class Settings extends Component
     {
         $this->validate([
             'cash_on_delivery' => 'boolean',
-            'jeko_enabled' => 'boolean',
-            'jeko_api_key' => 'nullable|string|max:255',
-            'jeko_api_key_id' => 'nullable|string|max:255',
-            'jeko_webhook_secret' => 'nullable|string|max:255',
-            'jeko_store_id' => 'nullable|string|max:100',
             'wave_business_enabled' => 'boolean',
             'wave_business_phone' => ['required_if:wave_business_enabled,true', 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s\-]{8,20}$/'],
         ], [
@@ -349,21 +321,9 @@ class Settings extends Component
 
         $data = [
             'cash_on_delivery' => $this->cash_on_delivery,
-            'jeko_enabled' => $this->jeko_enabled,
-            'jeko_store_id' => $this->jeko_store_id,
             'wave_business_enabled' => $this->wave_business_enabled,
             'wave_business_phone' => $this->wave_business_enabled ? $this->wave_business_phone : null,
         ];
-
-        if ($this->jeko_api_key !== null) {
-            $data['jeko_api_key'] = $this->jeko_api_key;
-        }
-        if ($this->jeko_api_key_id !== null) {
-            $data['jeko_api_key_id'] = $this->jeko_api_key_id;
-        }
-        if ($this->jeko_webhook_secret !== null) {
-            $data['jeko_webhook_secret'] = $this->jeko_webhook_secret;
-        }
 
         $this->restaurant->update($data);
 

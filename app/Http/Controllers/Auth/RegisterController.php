@@ -12,7 +12,6 @@ use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
 use App\Models\User;
-use App\Services\JekoGateway;
 use App\Services\MoneyFusionGateway;
 use App\Services\MediaUploader;
 use Illuminate\Auth\Events\Registered;
@@ -26,7 +25,6 @@ class RegisterController extends Controller
 {
     public function __construct(
         protected MediaUploader $mediaUploader,
-        protected JekoGateway $jekoGateway,
         protected MoneyFusionGateway $moneyFusion,
     ) {}
 
@@ -208,20 +206,14 @@ class RegisterController extends Controller
         }
 
         $ref = $subscription->payment_reference;
-        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
 
         if ($ref) {
             $paid = false;
 
-            if ($gateway === 'moneyfusion' && $this->moneyFusion->isConfigured()) {
+            if ($this->moneyFusion->isConfigured()) {
                 $result = $this->moneyFusion->verifyPayment($ref);
                 $paid = $result['success'] && ($result['paid'] ?? false);
-            } else {
-                $jeko = $this->jekoGateway->forPlatform();
-                if ($jeko->isConfigured()) {
-                    $result = $jeko->verifyPaymentLink($ref);
-                    $paid = $result['success'] && ($result['paid'] ?? false);
-                }
             }
 
             if (!$paid) {

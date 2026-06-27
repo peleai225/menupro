@@ -23,7 +23,6 @@ use App\Http\Controllers\SuperAdmin\PlanController;
 use App\Http\Controllers\SuperAdmin\RestaurantController;
 use App\Http\Controllers\SuperAdmin\StatsController;
 use App\Http\Controllers\SuperAdmin\UserController;
-use App\Http\Controllers\Webhook\JekoWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -364,7 +363,6 @@ Route::prefix('admin')
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
-        Route::get('jeko/stores', [SuperAdminDashboardController::class, 'jekoStores'])->name('jeko.stores');
     });
 
 /*
@@ -447,7 +445,6 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->middleware('throttle:30,
 */
 
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
-    Route::post('/jeko', [JekoWebhookController::class, 'handle'])->name('webhooks.jeko');
     Route::post('/wave', [\App\Http\Controllers\Webhook\WaveWebhookController::class, 'handle'])->name('webhooks.wave');
     Route::post('/moneyfusion', [\App\Http\Controllers\Webhook\MoneyFusionWebhookController::class, 'handle'])->name('webhooks.moneyfusion');
 });

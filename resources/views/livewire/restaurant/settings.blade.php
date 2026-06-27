@@ -632,20 +632,6 @@
         <div x-show="activeTab === 'payment'" x-cloak>
             <form wire:submit="savePayment" class="max-w-2xl">
             <div class="card p-6 space-y-6">
-                {{-- Modes configurés par la plateforme (Super Admin) --}}
-                @if($this->jekoPaymentAvailable)
-                    <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl mb-6">
-                        <h3 class="font-semibold text-neutral-900 mb-2">Modes de paiement activés par la plateforme</h3>
-                        <p class="text-sm text-neutral-500 mb-4">Ces options sont proposées à vos clients au checkout. Configuration dans Super Admin.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
-                                <x-payment-logo method="jeko" />
-                                Jeko
-                            </span>
-                        </div>
-                    </div>
-                @endif
-
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-semibold text-neutral-900">Paiement à la livraison</h3>
@@ -655,67 +641,6 @@
                             class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $cash_on_delivery ? 'bg-primary-500' : 'bg-neutral-200' }}">
                         <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $cash_on_delivery ? 'translate-x-6' : 'translate-x-1' }}"></span>
                     </button>
-                </div>
-
-                <!-- Jeko Africa -->
-                <div class="border-t border-neutral-200 pt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="font-semibold text-neutral-900">Paiement mobile (Jeko Africa)</h3>
-                            <p class="text-sm text-neutral-500">Wave, Orange Money, MTN, Moov, Djamo, Carte bancaire</p>
-                        </div>
-                        <button type="button" wire:click="$toggle('jeko_enabled')"
-                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $jeko_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $jeko_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                        </button>
-                    </div>
-
-                    @if($jeko_enabled)
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé API (X-API-KEY) <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="jeko_api_key" class="input" placeholder="Votre clé API Jeko">
-                                <p class="text-xs text-neutral-500 mt-1">Disponible dans Jeko Cockpit → Paramètres → API & Webhooks</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    ID Clé API (X-API-KEY-ID) <span class="text-red-500">*</span>
-                                </label>
-                                <input type="password" wire:model="jeko_api_key_id" class="input" placeholder="L'identifiant de votre clé API">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    ID Magasin (Store ID) <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" wire:model="jeko_store_id" class="input font-mono" placeholder="ex: 59ae202a-f583-4a15-970f-9e99bd1e0baa">
-                                <p class="text-xs text-neutral-500 mt-1">UUID du magasin Jeko qui recevra les paiements</p>
-                                @error('jeko_store_id')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Clé Secrète Webhook <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
-                                </label>
-                                <input type="password" wire:model="jeko_webhook_secret" class="input" placeholder="Pour vérifier les signatures de webhooks">
-                            </div>
-
-                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p class="text-xs text-blue-800">
-                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    URL Webhook à configurer dans Jeko Cockpit :
-                                    <code class="font-mono bg-blue-100 px-1 rounded">{{ url('/webhooks/jeko') }}</code>
-                                </p>
-                            </div>
-                        </div>
-                    @endif
                 </div>
 
                 <!-- Wave Business -->

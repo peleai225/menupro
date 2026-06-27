@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
-use App\Services\JekoGateway;
 use App\Services\MoneyFusionGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +15,6 @@ use Illuminate\View\View;
 class SubscriptionController extends Controller
 {
     public function __construct(
-        protected JekoGateway $jekoGateway,
         protected MoneyFusionGateway $moneyFusion,
     ) {}
 
@@ -150,7 +148,7 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
             ]);
             return redirect($result['payment_url']);
         }
@@ -214,18 +212,13 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
             ]);
             return redirect($result['payment_url']);
         }
 
-        $jeko = $this->jekoGateway->forPlatform();
-        if (!$jeko->isConfigured() || !$jeko->getPlatformStoreId()) {
-            return back()->with('info', 'Votre demande de changement de plan a été enregistrée. Notre équipe vous contactera pour le paiement.');
-        }
-
         $subscription->delete();
-        return back()->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
+        return back()->with('error', 'Erreur lors de la création du paiement. Veuillez contacter le support.');
     }
 
     public function success(Request $request, Subscription $subscription): RedirectResponse
@@ -319,7 +312,7 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
             ]);
             return redirect($result['payment_url']);
         }
@@ -330,48 +323,27 @@ class SubscriptionController extends Controller
 
     private function createSubscriptionPaymentSession(Subscription $subscription): ?array
     {
-        // Priorité 1 : MoneyFusion
-        if ($this->moneyFusion->isConfigured()) {
-            $returnUrl = route('restaurant.subscription.success', $subscription);
-            $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
-
-            \Log::channel('payments')->info('MoneyFusion createPayment result', [
-                'subscription_id' => $subscription->id,
-                'success' => $result['success'],
-                'error' => $result['error'] ?? null,
-                'payment_url' => $result['payment_url'] ?? null,
-            ]);
-
-            if ($result['success']) {
-                return [
-                    'payment_id' => $result['token'],
-                    'payment_url' => $result['payment_url'],
-                    'gateway' => 'moneyfusion',
-                ];
-            }
-        } else {
-            \Log::channel('payments')->warning('MoneyFusion not configured — skipping');
+        if (!$this->moneyFusion->isConfigured()) {
+            \Log::channel('payments')->warning('MoneyFusion not configured');
+            return null;
         }
 
-        // Priorité 2 : Jeko fallback
-        $jeko = $this->jekoGateway->forPlatform();
-        $storeId = $jeko->getPlatformStoreId();
+        $returnUrl = route('restaurant.subscription.success', $subscription);
+        $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
 
-        \Log::channel('payments')->info('Jeko fallback check', [
-            'configured' => $jeko->isConfigured(),
-            'store_id' => $storeId,
+        \Log::channel('payments')->info('MoneyFusion createPayment result', [
+            'subscription_id' => $subscription->id,
+            'success' => $result['success'],
+            'error' => $result['error'] ?? null,
+            'payment_url' => $result['payment_url'] ?? null,
         ]);
 
-        if ($jeko->isConfigured() && $storeId) {
-            $result = $jeko->createSubscriptionPayment($subscription, $storeId);
-
-            if ($result['success']) {
-                return [
-                    'payment_id' => $result['payment_id'],
-                    'payment_url' => $result['payment_url'],
-                    'gateway' => 'jeko',
-                ];
-            }
+        if ($result['success']) {
+            return [
+                'payment_id' => $result['token'],
+                'payment_url' => $result['payment_url'],
+                'gateway' => 'moneyfusion',
+            ];
         }
 
         return null;
@@ -384,22 +356,10 @@ class SubscriptionController extends Controller
             return true;
         }
 
-        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
-
-        if ($gateway === 'moneyfusion' && $this->moneyFusion->isConfigured()) {
+        if ($this->moneyFusion->isConfigured()) {
             $result = $this->moneyFusion->verifyPayment($ref);
             if ($result['success']) {
                 return $result['paid'] ?? false;
-            }
-        }
-
-        if ($gateway === 'jeko') {
-            $jeko = $this->jekoGateway->forPlatform();
-            if ($jeko->isConfigured()) {
-                $result = $jeko->verifyPaymentLink($ref);
-                if ($result['success']) {
-                    return $result['paid'] ?? false;
-                }
             }
         }
 
