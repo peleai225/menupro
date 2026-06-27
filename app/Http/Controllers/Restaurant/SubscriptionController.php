@@ -8,6 +8,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
 use App\Services\JekoGateway;
+use App\Services\MoneyFusionGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,7 +16,8 @@ use Illuminate\View\View;
 class SubscriptionController extends Controller
 {
     public function __construct(
-        protected JekoGateway $jekoGateway
+        protected JekoGateway $jekoGateway,
+        protected MoneyFusionGateway $moneyFusion,
     ) {}
 
     public function index(Request $request): View
@@ -148,7 +150,7 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
             ]);
             return redirect($result['payment_url']);
         }
@@ -212,7 +214,7 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
             ]);
             return redirect($result['payment_url']);
         }
@@ -258,7 +260,7 @@ class SubscriptionController extends Controller
             $subscription->update([
                 'status' => SubscriptionStatus::ACTIVE,
                 'is_trial' => false,
-                'payment_method' => 'jeko',
+                'payment_method' => $subscription->payment_metadata['gateway'] ?? 'moneyfusion',
             ]);
 
             $restaurant->update([
@@ -317,7 +319,7 @@ class SubscriptionController extends Controller
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'] ?? 'jeko'],
             ]);
             return redirect($result['payment_url']);
         }
@@ -328,20 +330,37 @@ class SubscriptionController extends Controller
 
     private function createSubscriptionPaymentSession(Subscription $subscription): ?array
     {
+        // Priorité 1 : MoneyFusion
+        if ($this->moneyFusion->isConfigured()) {
+            $returnUrl = route('subscription.success', $subscription);
+            $cancelUrl = route('subscription.cancel', $subscription);
+
+            $result = $this->moneyFusion->createPayment($subscription, $returnUrl, $cancelUrl);
+
+            if ($result['success']) {
+                return [
+                    'payment_id' => $result['token'],
+                    'payment_url' => $result['payment_url'],
+                    'gateway' => 'moneyfusion',
+                    'reference' => $result['reference'],
+                ];
+            }
+        }
+
+        // Priorité 2 : Jeko fallback
         $jeko = $this->jekoGateway->forPlatform();
         $storeId = $jeko->getPlatformStoreId();
 
-        if (!$jeko->isConfigured() || !$storeId) {
-            return null;
-        }
+        if ($jeko->isConfigured() && $storeId) {
+            $result = $jeko->createSubscriptionPayment($subscription, $storeId);
 
-        $result = $jeko->createSubscriptionPayment($subscription, $storeId);
-
-        if ($result['success']) {
-            return [
-                'payment_id' => $result['payment_id'],
-                'payment_url' => $result['payment_url'],
-            ];
+            if ($result['success']) {
+                return [
+                    'payment_id' => $result['payment_id'],
+                    'payment_url' => $result['payment_url'],
+                    'gateway' => 'jeko',
+                ];
+            }
         }
 
         return null;
@@ -354,11 +373,22 @@ class SubscriptionController extends Controller
             return true;
         }
 
-        $jeko = $this->jekoGateway->forPlatform();
-        if ($jeko->isConfigured()) {
-            $result = $jeko->verifyPaymentLink($ref);
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
+
+        if ($gateway === 'moneyfusion' && $this->moneyFusion->isConfigured()) {
+            $result = $this->moneyFusion->verifyPayment($ref);
             if ($result['success']) {
                 return $result['paid'] ?? false;
+            }
+        }
+
+        if ($gateway === 'jeko') {
+            $jeko = $this->jekoGateway->forPlatform();
+            if ($jeko->isConfigured()) {
+                $result = $jeko->verifyPaymentLink($ref);
+                if ($result['success']) {
+                    return $result['paid'] ?? false;
+                }
             }
         }
 

@@ -13,6 +13,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
 use App\Models\User;
 use App\Services\JekoGateway;
+use App\Services\MoneyFusionGateway;
 use App\Services\MediaUploader;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +26,8 @@ class RegisterController extends Controller
 {
     public function __construct(
         protected MediaUploader $mediaUploader,
-        protected JekoGateway $jekoGateway
+        protected JekoGateway $jekoGateway,
+        protected MoneyFusionGateway $moneyFusion,
     ) {}
 
     public function create(): View
@@ -206,14 +208,25 @@ class RegisterController extends Controller
         }
 
         $ref = $subscription->payment_reference;
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
+
         if ($ref) {
-            $jeko = $this->jekoGateway->forPlatform();
-            if ($jeko->isConfigured()) {
-                $result = $jeko->verifyPaymentLink($ref);
-                if ($result['success'] && !($result['paid'] ?? false)) {
-                    return redirect()->route('restaurant.dashboard')
-                        ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
+            $paid = false;
+
+            if ($gateway === 'moneyfusion' && $this->moneyFusion->isConfigured()) {
+                $result = $this->moneyFusion->verifyPayment($ref);
+                $paid = $result['success'] && ($result['paid'] ?? false);
+            } else {
+                $jeko = $this->jekoGateway->forPlatform();
+                if ($jeko->isConfigured()) {
+                    $result = $jeko->verifyPaymentLink($ref);
+                    $paid = $result['success'] && ($result['paid'] ?? false);
                 }
+            }
+
+            if (!$paid) {
+                return redirect()->route('restaurant.dashboard')
+                    ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
             }
         }
 
@@ -222,7 +235,7 @@ class RegisterController extends Controller
 
             $subscription->update([
                 'status' => SubscriptionStatus::ACTIVE,
-                'payment_method' => 'jeko',
+                'payment_method' => $gateway,
             ]);
 
             $restaurant = $subscription->restaurant;

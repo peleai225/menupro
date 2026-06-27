@@ -449,5 +449,6 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->middleware('throttle:30,
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/jeko', [JekoWebhookController::class, 'handle'])->name('webhooks.jeko');
     Route::post('/wave', [\App\Http\Controllers\Webhook\WaveWebhookController::class, 'handle'])->name('webhooks.wave');
+    Route::post('/moneyfusion', [\App\Http\Controllers\Webhook\MoneyFusionWebhookController::class, 'handle'])->name('webhooks.moneyfusion');
 });
 
