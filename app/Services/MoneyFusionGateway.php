@@ -66,6 +66,7 @@ class MoneyFusionGateway
 
         try {
             $response = Http::withHeaders($headers)
+                ->withoutVerifying()
                 ->timeout(30)
                 ->post($this->getApiUrl(), [
                     'totalPrice' => $amount,
@@ -128,7 +129,8 @@ class MoneyFusionGateway
     public function verifyPayment(string $token): array
     {
         try {
-            $response = Http::timeout(15)
+            $response = Http::withoutVerifying()
+                ->timeout(15)
                 ->get("https://www.pay.moneyfusion.net/paiementNotif/{$token}");
 
             if ($response->successful()) {
