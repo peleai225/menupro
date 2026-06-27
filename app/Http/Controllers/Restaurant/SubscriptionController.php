@@ -265,6 +265,16 @@ class SubscriptionController extends Controller
 
             \DB::commit();
 
+            try {
+                app(\App\Services\CommandoCommissionService::class)
+                    ->creditAgentForRestaurantSubscription($restaurant, $subscription);
+            } catch (\Throwable $e) {
+                \Log::error('Commission error on subscription success', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             $message = $activeTrial
                 ? 'Votre essai a été converti en abonnement payant avec succès !'
                 : 'Votre abonnement a été activé avec succès !';

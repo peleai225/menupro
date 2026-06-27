@@ -240,6 +240,16 @@ class RegisterController extends Controller
 
             DB::commit();
 
+            try {
+                app(\App\Services\CommandoCommissionService::class)
+                    ->creditAgentForRestaurantSubscription($subscription->restaurant, $subscription);
+            } catch (\Throwable $e) {
+                \Log::error('Commission error on register payment success', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return redirect()->route('restaurant.dashboard')
                 ->with('success', 'Félicitations ! Votre abonnement a été activé avec succès !');
 
