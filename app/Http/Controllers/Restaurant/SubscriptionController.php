@@ -332,7 +332,7 @@ class SubscriptionController extends Controller
     {
         // Priorité 1 : MoneyFusion
         if ($this->moneyFusion->isConfigured()) {
-            $returnUrl = route('subscription.success', $subscription);
+            $returnUrl = route('restaurant.subscription.success', $subscription);
 
             $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
 
