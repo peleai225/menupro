@@ -718,6 +718,62 @@
                     @endif
                 </div>
 
+                <!-- Wave Business -->
+                <div class="border-t border-neutral-200 pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-neutral-900">Wave Business (paiement direct)</h3>
+                            <p class="text-sm text-neutral-500">Recevez les paiements clients directement sur votre compte Wave Business</p>
+                        </div>
+                        <button type="button" wire:click="$toggle('wave_business_enabled')"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $wave_business_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $wave_business_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </div>
+
+                    @if($wave_business_enabled)
+                        <div class="space-y-4">
+                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-2">
+                                <p class="text-xs text-amber-800">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                    </svg>
+                                    En activant Wave Business, les paiements Wave de vos clients iront directement sur votre compte. La plateforme ne collectera pas ces paiements.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Clé API Wave Business <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" wire:model="wave_api_key" class="input" placeholder="wave_sn_prod_...">
+                                <p class="text-xs text-neutral-500 mt-1">Disponible dans votre tableau de bord Wave Business → API</p>
+                                @error('wave_api_key')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                    Clé Secrète Webhook <span class="text-xs text-neutral-400 font-normal">(Optionnel)</span>
+                                </label>
+                                <input type="password" wire:model="wave_webhook_secret" class="input" placeholder="whsec_...">
+                                <p class="text-xs text-neutral-500 mt-1">Pour vérifier l'authenticité des notifications de paiement</p>
+                            </div>
+
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-xs text-blue-800">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    URL Webhook à configurer dans Wave Business :
+                                    <code class="font-mono bg-blue-100 px-1 rounded">{{ url('/webhooks/wave') }}</code>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
                 <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
