@@ -333,16 +333,14 @@ class SubscriptionController extends Controller
         // Priorité 1 : MoneyFusion
         if ($this->moneyFusion->isConfigured()) {
             $returnUrl = route('subscription.success', $subscription);
-            $cancelUrl = route('subscription.cancel', $subscription);
 
-            $result = $this->moneyFusion->createPayment($subscription, $returnUrl, $cancelUrl);
+            $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
 
             if ($result['success']) {
                 return [
                     'payment_id' => $result['token'],
                     'payment_url' => $result['payment_url'],
                     'gateway' => 'moneyfusion',
-                    'reference' => $result['reference'],
                 ];
             }
         }
