@@ -333,8 +333,14 @@ class SubscriptionController extends Controller
         // Priorité 1 : MoneyFusion
         if ($this->moneyFusion->isConfigured()) {
             $returnUrl = route('restaurant.subscription.success', $subscription);
-
             $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
+
+            \Log::channel('payments')->info('MoneyFusion createPayment result', [
+                'subscription_id' => $subscription->id,
+                'success' => $result['success'],
+                'error' => $result['error'] ?? null,
+                'payment_url' => $result['payment_url'] ?? null,
+            ]);
 
             if ($result['success']) {
                 return [
@@ -343,11 +349,18 @@ class SubscriptionController extends Controller
                     'gateway' => 'moneyfusion',
                 ];
             }
+        } else {
+            \Log::channel('payments')->warning('MoneyFusion not configured — skipping');
         }
 
         // Priorité 2 : Jeko fallback
         $jeko = $this->jekoGateway->forPlatform();
         $storeId = $jeko->getPlatformStoreId();
+
+        \Log::channel('payments')->info('Jeko fallback check', [
+            'configured' => $jeko->isConfigured(),
+            'store_id' => $storeId,
+        ]);
 
         if ($jeko->isConfigured() && $storeId) {
             $result = $jeko->createSubscriptionPayment($subscription, $storeId);
