@@ -8,10 +8,12 @@ use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Dish;
 use App\Models\Order;
+use App\Models\PaymentTransaction;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
 use App\Services\JekoGateway;
+use App\Services\WaveGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,8 @@ use Illuminate\View\View;
 class CheckoutController extends Controller
 {
     public function __construct(
-        protected JekoGateway $jekoGateway
+        protected JekoGateway $jekoGateway,
+        protected WaveGateway $waveGateway,
     ) {}
 
     public function index(string $slug): View
@@ -235,7 +238,32 @@ class CheckoutController extends Controller
             \Log::warning('WhatsApp new order notification failed: ' . $e->getMessage());
         }
 
-        // Redirect to Jeko payment if configured
+        // Priority 1: Wave Checkout
+        if ($this->waveGateway->isConfigured()) {
+            try {
+                $successUrl = route('r.order.success', [$slug, $order]);
+                $errorUrl = route('r.order.cancel', [$slug, $order]);
+
+                $result = $this->waveGateway->createCheckoutSession($order, $successUrl, $errorUrl);
+
+                if ($result['success']) {
+                    $order->update([
+                        'payment_reference' => $result['checkout_id'],
+                        'payment_method' => 'wave',
+                        'payment_metadata' => [
+                            'wave_checkout_id' => $result['checkout_id'],
+                            'wave_launch_url' => $result['wave_launch_url'],
+                        ],
+                    ]);
+
+                    return redirect($result['wave_launch_url']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Wave checkout exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        // Priority 2: Jeko fallback
         $jeko = $this->jekoGateway->forPlatform();
         $storeId = $jeko->getPlatformStoreId();
         if ($jeko->isConfigured() && $storeId) {
@@ -272,8 +300,46 @@ class CheckoutController extends Controller
                 ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
         }
 
+        // Wave: verify checkout session status
+        if ($order->payment_method === 'wave' && $order->payment_reference) {
+            try {
+                $wave = app(WaveGateway::class);
+                $result = $wave->getCheckoutSession($order->payment_reference);
+                if ($result['success'] && ($result['data']['payment_status'] ?? '') === 'succeeded') {
+                    $order->markAsPaid([
+                        'reference' => $result['data']['transaction_id'] ?? $order->payment_reference,
+                        'method' => 'wave',
+                        'transaction_id' => $result['data']['transaction_id'] ?? null,
+                        'metadata' => $result['data'],
+                    ]);
+
+                    $payment = PaymentTransaction::create([
+                        'order_id' => $order->id,
+                        'restaurant_id' => $order->restaurant_id,
+                        'gateway' => 'wave',
+                        'gateway_transaction_id' => $result['data']['transaction_id'] ?? null,
+                        'wave_checkout_id' => $order->payment_reference,
+                        'wave_payment_id' => $result['data']['transaction_id'] ?? null,
+                        'amount' => $order->total,
+                        'currency' => 'XOF',
+                        'status' => 'completed',
+                        'client_reference' => $result['data']['client_reference'] ?? null,
+                        'metadata' => $result['data'],
+                    ]);
+
+                    app(\App\Services\WalletService::class)->creditWallet($order->restaurant_id, $payment->id);
+
+                    $restaurant->users()
+                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                        ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Wave verify on success fallback failed: ' . $e->getMessage());
+            }
+        }
+
         // Jeko: verify by payment_reference (paymentLinkId)
-        if ($order->payment_reference) {
+        if (!$order->is_paid && $order->payment_method === 'jeko' && $order->payment_reference) {
             $jeko = app(JekoGateway::class)->forPlatform();
             if ($jeko->isConfigured()) {
                 try {
