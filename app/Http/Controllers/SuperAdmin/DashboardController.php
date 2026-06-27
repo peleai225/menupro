@@ -166,6 +166,8 @@ class DashboardController extends Controller
             'commando_commission_only_first_payment' => \App\Models\SystemSetting::has('commando_commission_only_first_payment')
                 ? \App\Models\SystemSetting::get('commando_commission_only_first_payment', true)
                 : config('commando.commission_only_first_payment', true),
+            // MoneyFusion
+            'moneyfusion_api_url' => \App\Models\SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', '')),
             // Jeko Africa
             'jeko_enabled' => \App\Models\SystemSetting::get('jeko_enabled', false),
             'jeko_api_key' => \App\Models\SystemSetting::get('jeko_api_key', ''),
@@ -199,6 +201,8 @@ class DashboardController extends Controller
             'maintenance_mode' => ['boolean'],
             'registrations_open' => ['boolean'],
             'geoapify_api_key' => ['nullable', 'string'],
+            // MoneyFusion
+            'moneyfusion_api_url' => ['nullable', 'url'],
             // Jeko Africa
             'jeko_enabled' => ['boolean'],
             'jeko_api_key' => ['nullable', 'string'],
@@ -267,6 +271,10 @@ class DashboardController extends Controller
         \App\Models\SystemSetting::set('registrations_open', $request->boolean('registrations_open'), 'boolean', 'Inscriptions ouvertes');
         if ($request->filled('geoapify_api_key')) {
             \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');
+        }
+        // MoneyFusion
+        if ($request->filled('moneyfusion_api_url')) {
+            \App\Models\SystemSetting::set('moneyfusion_api_url', $request->moneyfusion_api_url, 'string', 'URL API MoneyFusion (depuis le dashboard)');
         }
         // Jeko Africa
         \App\Models\SystemSetting::set('jeko_enabled', $request->boolean('jeko_enabled'), 'boolean', 'Activer Jeko Africa (abonnements)');

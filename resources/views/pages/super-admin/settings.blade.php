@@ -173,6 +173,35 @@
                 <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
                 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {{-- MoneyFusion --}}
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                        MoneyFusion
+                    </h2>
+                    <p class="text-sm text-neutral-500 mb-5">
+                        Paiements des abonnements via MoneyFusion (Orange Money, MTN, Wave, Moov).
+                        <a href="https://docs.moneyfusion.net" target="_blank" class="text-primary-600 hover:underline">Documentation</a>
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">URL API <span class="text-red-500">*</span></label>
+                            <input type="url" name="moneyfusion_api_url"
+                                   value="{{ old('moneyfusion_api_url', $settings['moneyfusion_api_url'] ?? '') }}"
+                                   class="input" placeholder="https://www.pay.moneyfusion.net/...">
+                            <p class="text-xs text-neutral-500 mt-1">URL complète disponible dans votre tableau de bord MoneyFusion.</p>
+                        </div>
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-xs text-blue-800">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                URL Webhook à configurer dans MoneyFusion :
+                                <code class="font-mono bg-blue-100 px-1 rounded">{{ url('/webhooks/moneyfusion') }}</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
                 {{-- Jeko Africa --}}
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">

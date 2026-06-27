@@ -5,54 +5,46 @@ namespace App\Http\Controllers\Webhook;
 use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
-use App\Services\MoneyFusionGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MoneyFusionWebhookController extends Controller
 {
-    public function handle(Request $request, MoneyFusionGateway $moneyFusion)
+    public function handle(Request $request)
     {
         $payload = $request->all();
 
+        $event = $payload['event'] ?? null;
+        $tokenPay = $payload['tokenPay'] ?? null;
+        $personalInfo = $payload['personal_Info'] ?? [];
+
         Log::channel('payments')->info('MoneyFusion webhook received', [
-            'status' => $payload['statut'] ?? null,
-            'reference' => $payload['reference'] ?? null,
-            'token' => $payload['token'] ?? null,
+            'event' => $event,
+            'tokenPay' => $tokenPay,
         ]);
 
-        $status = $payload['statut'] ?? null;
-        $reference = $payload['reference'] ?? null;
-        $token = $payload['token'] ?? null;
-
-        if (!$reference && !$token) {
-            return response()->json(['error' => 'Missing reference'], 400);
+        if (!$tokenPay) {
+            return response()->json(['error' => 'Missing tokenPay'], 400);
         }
 
-        // Trouver l'abonnement via le token (payment_reference) ou la reference dans metadata
-        $subscription = $this->findSubscription($token, $reference);
+        $subscription = $this->findSubscription($tokenPay, $personalInfo);
 
         if (!$subscription) {
             Log::channel('payments')->warning('MoneyFusion webhook: subscription not found', [
-                'token' => $token,
-                'reference' => $reference,
+                'tokenPay' => $tokenPay,
             ]);
             return response()->json(['error' => 'Subscription not found'], 404);
         }
 
-        if ($status === 'paid') {
-            return $this->handlePaid($subscription, $payload);
-        }
-
-        if (in_array($status, ['failed', 'cancelled', 'expired'])) {
-            return $this->handleFailed($subscription, $payload);
-        }
-
-        return response()->json(['success' => true]);
+        return match ($event) {
+            'payin.session.completed' => $this->handleCompleted($subscription, $payload),
+            'payin.session.cancelled' => $this->handleCancelled($subscription, $payload),
+            default => response()->json(['success' => true]), // pending ou inconnu : ignorer
+        };
     }
 
-    protected function handlePaid(Subscription $subscription, array $payload)
+    protected function handleCompleted(Subscription $subscription, array $payload)
     {
         $activated = DB::transaction(function () use ($subscription, $payload) {
             $subscription = Subscription::where('id', $subscription->id)
@@ -68,7 +60,7 @@ class MoneyFusionWebhookController extends Controller
                 'payment_method' => 'moneyfusion',
                 'payment_metadata' => array_merge(
                     $subscription->payment_metadata ?? [],
-                    ['moneyfusion_callback' => $payload]
+                    ['moneyfusion_event' => $payload]
                 ),
             ]);
 
@@ -96,48 +88,50 @@ class MoneyFusionWebhookController extends Controller
                         $subscription
                     );
             } catch (\Throwable $e) {
-                Log::channel('payments')->error('MoneyFusion webhook: commando commission error', [
+                Log::channel('payments')->error('MoneyFusion webhook: commission error', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
             }
         }
 
-        Log::channel('payments')->info('MoneyFusion webhook: subscription activated', [
+        Log::channel('payments')->info('MoneyFusion: subscription activated', [
             'subscription_id' => $subscription->id,
         ]);
 
         return response()->json(['success' => true]);
     }
 
-    protected function handleFailed(Subscription $subscription, array $payload)
+    protected function handleCancelled(Subscription $subscription, array $payload)
     {
         if ($subscription->status !== SubscriptionStatus::ACTIVE) {
             $subscription->update([
                 'payment_metadata' => array_merge(
                     $subscription->payment_metadata ?? [],
-                    ['moneyfusion_failure' => $payload]
+                    ['moneyfusion_cancelled' => $payload]
                 ),
             ]);
         }
 
-        Log::channel('payments')->warning('MoneyFusion payment failed/cancelled', [
+        Log::channel('payments')->warning('MoneyFusion payment cancelled', [
             'subscription_id' => $subscription->id,
-            'status' => $payload['statut'] ?? null,
         ]);
 
         return response()->json(['success' => true]);
     }
 
-    protected function findSubscription(?string $token, ?string $reference): ?Subscription
+    protected function findSubscription(string $tokenPay, array $personalInfo): ?Subscription
     {
-        if ($token) {
-            $sub = Subscription::where('payment_reference', $token)->first();
-            if ($sub) return $sub;
-        }
+        // 1. Chercher via payment_reference (token stocké à l'initiation)
+        $sub = Subscription::where('payment_reference', $tokenPay)->first();
+        if ($sub) return $sub;
 
-        if ($reference && preg_match('/^SUB-(\d+)-/', $reference, $matches)) {
-            return Subscription::find($matches[1]);
+        // 2. Chercher via personal_Info.subscription_id
+        foreach ($personalInfo as $info) {
+            if (!empty($info['subscription_id'])) {
+                $sub = Subscription::find($info['subscription_id']);
+                if ($sub) return $sub;
+            }
         }
 
         return null;
