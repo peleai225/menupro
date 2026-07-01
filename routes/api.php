@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\PlatformAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\PlatformRestaurantController;
 use App\Http\Controllers\Api\V1\Client\AddressController;
 use App\Http\Controllers\Api\V1\Client\AuthController;
+use App\Http\Controllers\Api\V1\Client\GeocodingController;
 use App\Http\Controllers\Api\V1\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Api\V1\Client\PaymentController;
 use App\Http\Controllers\Api\V1\Client\RestaurantController;
@@ -191,5 +192,15 @@ Route::prefix('v1')
             Route::get('/{id}',                   [RestaurantController::class, 'show'])->name('show');
             Route::get('/{id}/menu',              [RestaurantController::class, 'menu'])->name('menu');
             Route::get('/{id}/delivery-estimate', [RestaurantController::class, 'estimateDelivery'])->name('delivery-estimate');
+        });
+
+    // -----------------------------------------------------------------------
+    // GEOCODING — API publique (géocodage inversé + recherche d'adresse)
+    // -----------------------------------------------------------------------
+    Route::prefix('geocoding')->name('geocoding.')
+        ->middleware('throttle:api.public')
+        ->group(function () {
+            Route::get('/reverse', [GeocodingController::class, 'reverse'])->name('reverse');
+            Route::get('/search',  [GeocodingController::class, 'search'])->name('search');
         });
 });

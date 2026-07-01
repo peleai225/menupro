@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+
 class GeocodingService
 {
     private const EARTH_RADIUS_KM = 6371;
+    private const NOMINATIM_URL   = 'https://nominatim.openstreetmap.org';
 
     /**
      * Calcule la distance en km entre deux points GPS (formule Haversine).
@@ -47,6 +51,114 @@ class GeocodingService
         float $radiusKm
     ): bool {
         return $this->distanceKm($centerLat, $centerLng, $pointLat, $pointLng) <= $radiusKm;
+    }
+
+    /**
+     * Géocodage inversé — convertit des coordonnées GPS en adresse lisible.
+     * Utilise Nominatim (OpenStreetMap) — gratuit, sans clé API.
+     * Résultat mis en cache 24h pour éviter les requêtes répétées.
+     *
+     * @return array{ address: string, road: string, neighbourhood: string, city: string, country: string }
+     */
+    public function reverseGeocode(float $lat, float $lng): array
+    {
+        $cacheKey = 'geocode:' . round($lat, 4) . ':' . round($lng, 4);
+
+        return Cache::remember($cacheKey, 86400, function () use ($lat, $lng) {
+            try {
+                $response = Http::withHeaders([
+                    'User-Agent' => 'MenuPro/1.0 (menupro.ci)',
+                    'Accept-Language' => 'fr',
+                ])->timeout(5)->get(self::NOMINATIM_URL . '/reverse', [
+                    'lat'    => $lat,
+                    'lon'    => $lng,
+                    'format' => 'json',
+                    'addressdetails' => 1,
+                    'zoom'   => 18,
+                ]);
+
+                if (!$response->ok()) {
+                    return $this->fallbackAddress($lat, $lng);
+                }
+
+                $data    = $response->json();
+                $address = $data['address'] ?? [];
+
+                $road         = $address['road'] ?? $address['pedestrian'] ?? $address['path'] ?? '';
+                $neighbourhood = $address['neighbourhood'] ?? $address['suburb'] ?? $address['quarter'] ?? '';
+                $city         = $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['county'] ?? 'Abidjan';
+                $country      = $address['country'] ?? 'Côte d\'Ivoire';
+
+                // Construire une adresse lisible
+                $parts = array_filter([$road, $neighbourhood, $city]);
+                $readable = implode(', ', $parts) ?: $data['display_name'] ?? "Lat: $lat, Lng: $lng";
+
+                return [
+                    'address'       => $readable,
+                    'road'          => $road,
+                    'neighbourhood' => $neighbourhood,
+                    'city'          => $city,
+                    'country'       => $country,
+                    'display_name'  => $data['display_name'] ?? $readable,
+                ];
+            } catch (\Throwable) {
+                return $this->fallbackAddress($lat, $lng);
+            }
+        });
+    }
+
+    /**
+     * Recherche d'adresse par texte (autocomplete).
+     * Limité à la Côte d'Ivoire.
+     */
+    public function searchAddress(string $query, string $city = 'Abidjan'): array
+    {
+        if (strlen(trim($query)) < 3) {
+            return [];
+        }
+
+        $cacheKey = 'geocode:search:' . md5($query . $city);
+
+        return Cache::remember($cacheKey, 3600, function () use ($query, $city) {
+            try {
+                $response = Http::withHeaders([
+                    'User-Agent'      => 'MenuPro/1.0 (menupro.ci)',
+                    'Accept-Language' => 'fr',
+                ])->timeout(5)->get(self::NOMINATIM_URL . '/search', [
+                    'q'              => $query . ', ' . $city . ', Côte d\'Ivoire',
+                    'format'         => 'json',
+                    'addressdetails' => 1,
+                    'limit'          => 5,
+                    'countrycodes'   => 'ci',
+                ]);
+
+                if (!$response->ok()) {
+                    return [];
+                }
+
+                return collect($response->json())->map(fn($r) => [
+                    'display_name' => $r['display_name'],
+                    'lat'          => (float) $r['lat'],
+                    'lng'          => (float) $r['lon'],
+                    'address'      => ($r['address']['road'] ?? '') . ', ' . ($r['address']['suburb'] ?? $r['address']['city'] ?? ''),
+                    'city'         => $r['address']['city'] ?? $r['address']['town'] ?? $city,
+                ])->values()->all();
+            } catch (\Throwable) {
+                return [];
+            }
+        });
+    }
+
+    private function fallbackAddress(float $lat, float $lng): array
+    {
+        return [
+            'address'       => "Position GPS ($lat, $lng)",
+            'road'          => '',
+            'neighbourhood' => '',
+            'city'          => 'Abidjan',
+            'country'       => 'Côte d\'Ivoire',
+            'display_name'  => "Position GPS ($lat, $lng)",
+        ];
     }
 
     /**
