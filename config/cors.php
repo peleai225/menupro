@@ -11,12 +11,14 @@ return [
         'https://www.menupro.ci',
         'https://delivery.menupro.ci',
         'https://driver.menupro.ci',
-        // Développement local
         'http://localhost:3000',
         'http://localhost:3001',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://.*\.replit\.dev$#',
+        '#^https://.*\.replit\.app$#',
+    ],
 
     'allowed_headers' => ['*'],
 
