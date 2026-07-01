@@ -179,6 +179,8 @@ class DashboardController extends Controller
             // Mapbox
             'mapbox_public_token' => \App\Models\SystemSetting::get('mapbox_public_token', config('services.mapbox.public_token', '')),
             'mapbox_style' => \App\Models\SystemSetting::get('mapbox_style', 'streets-v12'),
+            // Firebase FCM
+            'firebase_server_key' => \App\Models\SystemSetting::get('firebase_server_key', ''),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -245,6 +247,8 @@ class DashboardController extends Controller
             // Mapbox
             'mapbox_public_token' => ['nullable', 'string', 'regex:/^pk\./'],
             'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
+            // Firebase FCM
+            'firebase_server_key' => ['nullable', 'string'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -378,6 +382,10 @@ class DashboardController extends Controller
         }
         if ($request->filled('mapbox_style')) {
             \App\Models\SystemSetting::set('mapbox_style', $request->mapbox_style, 'string', 'Style de carte Mapbox');
+        }
+        // Firebase FCM
+        if ($request->filled('firebase_server_key')) {
+            \App\Models\SystemSetting::set('firebase_server_key', $request->firebase_server_key, 'string', 'Clé serveur Firebase Cloud Messaging (push notifications livreurs)');
         }
 
         // Marketing – bannière promotionnelle + Facebook Pixel + Google Analytics

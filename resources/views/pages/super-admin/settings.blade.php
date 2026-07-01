@@ -338,6 +338,43 @@
 
                 </div>
 
+                {{-- Firebase FCM --}}
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Firebase — Notifications Push
+                    </h2>
+                    <p class="text-sm text-neutral-500 mb-4">
+                        Envoi de notifications push aux livreurs (FCM — Firebase Cloud Messaging).
+                        Gratuit jusqu'à une large limite.
+                        <a href="https://console.firebase.google.com/" target="_blank" class="text-primary-600 hover:underline">Firebase Console</a>
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                Server Key (Legacy API)
+                                <span class="text-xs text-neutral-400">(Paramètres du projet → Cloud Messaging)</span>
+                            </label>
+                            <input type="password" name="firebase_server_key"
+                                   value="{{ old('firebase_server_key', $settings['firebase_server_key'] ?? '') }}"
+                                   class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+                                   placeholder="AAAAxxxxxxxxxxxxxxxx...">
+                            <p class="text-xs text-neutral-500 mt-1">Clé secrète — ne jamais exposer côté client. Utilisée uniquement en backend pour envoyer les push.</p>
+                        </div>
+                        @if(!empty($settings['firebase_server_key']))
+                        <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Firebase configuré — notifications push actives.
+                        </div>
+                        @else
+                        <div class="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-700">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Clé non configurée — les notifications push ne seront pas envoyées aux livreurs.
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="flex justify-end">
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>

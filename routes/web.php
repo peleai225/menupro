@@ -360,6 +360,28 @@ Route::prefix('admin')
         Route::get('api/notifications', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'index'])->name('api.notifications');
         Route::post('api/notifications/mark-read', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'markAsRead'])->name('api.notifications.mark-read');
         
+        // Livreurs
+        Route::get('livreurs', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'index'])->name('drivers.index');
+        Route::get('livreurs/{driver}', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'show'])->name('drivers.show');
+        Route::post('livreurs/{driver}/approve', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'approve'])->name('drivers.approve');
+        Route::post('livreurs/{driver}/reject', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'reject'])->name('drivers.reject');
+        Route::post('livreurs/{driver}/suspend', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'suspend'])->name('drivers.suspend');
+        Route::post('livreurs/{driver}/reactivate', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'reactivate'])->name('drivers.reactivate');
+
+        // Clients
+        Route::get('clients', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');
+
+        // Zones de livraison
+        Route::get('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'index'])->name('delivery-zones.index');
+        Route::post('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'store'])->name('delivery-zones.store');
+        Route::put('zones-livraison/{zone}', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'update'])->name('delivery-zones.update');
+        Route::delete('zones-livraison/{zone}', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'destroy'])->name('delivery-zones.destroy');
+        Route::post('zones-livraison/{zone}/toggle', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'toggle'])->name('delivery-zones.toggle');
+
+        // Notifications Push
+        Route::get('push-notifications', [\App\Http\Controllers\SuperAdmin\PushNotificationController::class, 'index'])->name('push.index');
+        Route::post('push-notifications/send', [\App\Http\Controllers\SuperAdmin\PushNotificationController::class, 'send'])->name('push.send');
+
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
