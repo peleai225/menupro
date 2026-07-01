@@ -21,11 +21,15 @@ date-fns (dates)
 
 ---
 
-## BACKEND API
+## BACKEND API — PRODUCTION
 
-Toutes les requêtes vont sur : `https://menupro.ci/api/v1`
-Header obligatoire : `Authorization: Bearer {token}` pour les routes protégées
-Format : JSON — `Accept: application/json`
+**Base URL :** `https://menupro.ci/api/v1`
+**Header obligatoire :** `Authorization: Bearer {token}` pour les routes protégées
+**Format :** `Accept: application/json` + `Content-Type: application/json`
+
+> ✅ L'API est en ligne et fonctionnelle. Les restaurants existants sont automatiquement disponibles avec leurs menus complets (plats, catégories, photos).
+
+---
 
 ### AUTH CLIENT
 ```
@@ -36,7 +40,18 @@ POST /client/auth/logout
 PATCH /client/auth/profile    body: { name?, email?, city? }
 ```
 
+Réponse login/register :
+```json
+{
+  "token": "1|xxxxxxxxxxxxxxxx",
+  "customer": { "id": 1, "name": "Kouassi Amed", "phone": "0708121520", "city": "Abidjan", "total_orders": 0 }
+}
+```
+
+---
+
 ### RESTAURANTS (public, sans auth)
+
 ```
 GET /restaurants                         query: city?, category?, lat?, lng?, open_now?
 GET /restaurants/nearby                  query: lat, lng, radius_km?
@@ -47,23 +62,64 @@ GET /restaurants/{id}/delivery-estimate  query: lat, lng
 
 Réponse restaurant :
 ```json
-{ "id": 1, "name": "Maquis Le Bon Coin", "category": "restaurant", "city": "Abidjan",
-  "address": "Cocody Angré", "logo_url": "...", "is_open": true, "avg_prep_time": 20,
-  "latitude": "5.3812", "longitude": "-3.9561", "distance_km": 2.3, "delivery_fee": 77000 }
+{
+  "id": 1,
+  "name": "Maquis Le Bon Coin",
+  "slug": "maquis-le-bon-coin",
+  "category": "restaurant",
+  "city": "Abidjan",
+  "address": "Cocody Angré",
+  "phone": "0709123456",
+  "logo_url": "https://menupro.ci/storage/restaurants/logo.jpg",
+  "banner_url": "https://menupro.ci/storage/restaurants/banner.jpg",
+  "is_open": true,
+  "min_order_amount": 0,
+  "avg_prep_time": 20,
+  "latitude": "5.3812",
+  "longitude": "-3.9561",
+  "distance_km": 2.3,
+  "delivery_fee": 77000
+}
 ```
 
-Réponse menu :
+Réponse menu (plats réels des restaurants MenuPro) :
 ```json
-{ "categories": [{ "name": "Entrées", "dishes": [
-  { "id": 10, "name": "Attieké poisson", "price": 300000, "image_url": "...", "is_available": true }
-]}]}
+{
+  "restaurant_id": 1,
+  "currency": "XOF",
+  "categories": [
+    {
+      "id": 1,
+      "name": "Plats principaux",
+      "dishes": [
+        {
+          "id": 10,
+          "name": "Attieké poisson braisé",
+          "description": "Attieké frais accompagné de poisson braisé",
+          "price": 300000,
+          "compare_price": null,
+          "image_url": "https://menupro.ci/storage/dishes/attiéké.jpg",
+          "is_available": true,
+          "is_featured": true,
+          "is_spicy": false,
+          "is_vegetarian": false,
+          "prep_time": 15,
+          "calories": null
+        }
+      ]
+    }
+  ]
+}
 ```
 
-Réponse estimate :
+Réponse delivery-estimate :
 ```json
 { "deliverable": true, "delivery_fee": 95000, "distance_km": 3.2,
-  "estimated_minutes": 38, "is_peak_hour": false }
+  "estimated_minutes": 38, "is_peak_hour": false,
+  "breakdown": { "base_fee": 50000, "distance_fee": 48000, "peak_surcharge": 0, "prep_minutes": 20, "transit_minutes": 18 } }
 ```
+
+---
 
 ### ADRESSES CLIENT
 ```
@@ -73,6 +129,8 @@ PATCH  /client/addresses/{id}
 DELETE /client/addresses/{id}
 ```
 
+---
+
 ### COMMANDES
 ```
 POST /client/orders
@@ -81,8 +139,29 @@ body: {
   delivery_lat, delivery_lng, delivery_address, delivery_city,
   delivery_instructions?, payment_method: "wave"
 }
-réponse: { order: { id, reference, tracking_token, status, total, delivery_fee, estimated_minutes }, payment_url }
+```
 
+Réponse 201 :
+```json
+{
+  "order": {
+    "id": 42,
+    "reference": "PLT-AB3CD4EF",
+    "tracking_token": "xxxxxxxxxxxxxxxxxxx",
+    "status": "pending_payment",
+    "payment_method": "wave",
+    "subtotal": 600000,
+    "delivery_fee": 95000,
+    "total": 695000,
+    "estimated_minutes": 38,
+    "items": [{ "name": "Attieké poisson braisé", "quantity": 2, "unit_price": 300000, "total": 600000 }]
+  },
+  "tracking_token": "xxxxxxxxxxxxxxxxxxx",
+  "payment_url": "/api/v1/client/payment/42/initiate"
+}
+```
+
+```
 GET  /client/orders/history
 GET  /client/orders/track/{tracking_token}   ← PUBLIC, sans auth
 POST /client/orders/{id}/cancel
@@ -90,17 +169,34 @@ POST /client/orders/{id}/cancel
 
 Réponse tracking :
 ```json
-{ "order_status": "delivering", "estimated_minutes": 12,
-  "delivery": { "status": "delivering", "driver": { "name": "Ibrahim", "phone": "...", "latitude": 5.33, "longitude": -4.00 } },
-  "timeline": { "ordered_at": "...", "confirmed_at": "...", "picked_up_at": "...", "completed_at": null } }
+{
+  "order_status": "delivering",
+  "estimated_minutes": 12,
+  "delivery": {
+    "status": "delivering",
+    "status_label": "En livraison",
+    "driver": { "name": "Ibrahim Koné", "phone": "0707654321", "latitude": 5.33, "longitude": -4.00, "rating": "4.80" }
+  },
+  "timeline": {
+    "ordered_at": "2026-07-01T10:30:00Z",
+    "confirmed_at": "2026-07-01T10:33:00Z",
+    "preparing_at": "2026-07-01T10:35:00Z",
+    "ready_at": "2026-07-01T10:55:00Z",
+    "driver_assigned_at": "2026-07-01T10:56:00Z",
+    "picked_up_at": "2026-07-01T11:05:00Z",
+    "completed_at": null
+  }
+}
 ```
+
+---
 
 ### PAIEMENT
 ```
-POST /client/payment/{orderId}/initiate   → retourne { payment_url }   (rediriger vers payment_url)
-GET  /client/payment/{orderId}/status     → retourne { payment_status, order_status }
-GET  /client/payment/success              ← callback Wave (rediriger vers page tracking)
-GET  /client/payment/error               ← callback Wave (afficher erreur)
+POST /client/payment/{orderId}/initiate   → { payment_url }   ← rediriger l'utilisateur ici
+GET  /client/payment/{orderId}/status     → { payment_status, order_status }
+GET  /client/payment/success              ← callback Wave → rediriger vers /orders/track/{token}
+GET  /client/payment/error               ← callback Wave → afficher erreur + bouton réessayer
 ```
 
 ---
@@ -108,128 +204,176 @@ GET  /client/payment/error               ← callback Wave (afficher erreur)
 ## WEBSOCKET TEMPS RÉEL (Laravel Reverb)
 
 ```javascript
-// Config Echo
 broadcaster: 'reverb'
 key: process.env.NEXT_PUBLIC_REVERB_APP_KEY
 wsHost: process.env.NEXT_PUBLIC_REVERB_HOST
+wsPort: 443
+forceTLS: true
 ```
 
 Canal public `order.{tracking_token}` — écouter :
-- `.driver.assigned`       → { driver: { name, phone, latitude, longitude, rating } }
+- `.driver.assigned`         → { driver: { name, phone, latitude, longitude, rating }, assigned_at }
 - `.delivery.status_changed` → { new_status, status_label, estimated_minutes }
-- `.driver.location`       → { lat, lng }
+- `.driver.location`         → { lat, lng, status }
 
 ---
 
 ## PAGES À CRÉER
 
 ### `/` — Accueil
-- Demander la position GPS (fallback : Abidjan 5.3542, -3.9827)
-- Afficher les restaurants proches avec leurs frais de livraison
-- Barre de recherche par nom
-- Filtres : catégorie (fast food, restaurant, pizza, poulet, grillades...)
-- Skeleton loading pendant le chargement
+- Demander la position GPS du navigateur (fallback si refusé : Abidjan 5.3542, -3.9827)
+- Appeler `GET /restaurants/nearby?lat=...&lng=...` pour afficher les restaurants proches
+- Appeler aussi `GET /restaurants` (sans coordonnées) pour les restaurants sans GPS
+- Chaque card restaurant : logo, nom, catégorie, distance, frais livraison, temps estimé, badge ouvert/fermé
+- Barre de recherche filtrante par nom (côté client, pas d'API dédiée)
+- Filtres rapides : Tous / Fast Food / Restaurant / Pizza / Poulet / Grillades
+- Skeleton loading 4 cards pendant le chargement
 
 ### `/restaurants` — Explorer
-- Liste complète avec filtres ville + catégorie
-- Tri par distance / popularité
+- Liste complète `GET /restaurants` avec filtres :
+  - Ville (Abidjan, Bouaké, Yamoussoukro...)
+  - Catégorie
+  - Ouvert maintenant (toggle)
+- Tri par distance si GPS disponible
 
 ### `/restaurants/[id]` — Détail restaurant
-- Photo de couverture, logo, infos (horaires, note, temps préparation)
-- Indicateur ouvert/fermé
-- Frais de livraison estimés (appel delivery-estimate avec position GPS)
-- Bouton "Voir le menu"
+- Photo bannière en haut (plein largeur)
+- Logo + nom + catégorie + adresse
+- Badges : ouvert/fermé, temps préparation moyen, frais de livraison
+- Estimation livraison en temps réel avec position GPS client
+- Bouton "Commander" → navigue vers le menu
+- Si fermé : afficher les horaires d'ouverture
 
-### `/restaurants/[id]/menu` — Menu
-- Onglets par catégorie
-- Cards plats avec photo, nom, description, prix en FCFA
-- Bouton +/- quantité sur chaque plat
-- **CartFAB** : bouton flottant "Voir le panier (N articles — XXX FCFA)" fixé en bas
-- Si on ajoute un plat d'un autre restaurant : dialog de confirmation "Vider le panier et changer de restaurant ?"
+### `/restaurants/[id]/menu` — Menu + Panier
+- Onglets sticky par catégorie (scroll horizontal)
+- Cards plats : photo, nom, description courte, prix en FCFA
+- Si `is_available = false` : card grisée, bouton désactivé
+- Bouton `+` pour ajouter au panier, `−` et `+` si déjà dans le panier
+- Si plat d'un autre restaurant déjà dans le panier → dialog : "Vider le panier et commander ici ?"
+- **CartFAB** : bouton orange fixé en bas "🛒 Voir le panier · N articles · XXX FCFA"
 
 ### `/cart` — Panier
-- Liste des articles avec modification quantité
-- Nom du restaurant
-- Sélection adresse de livraison (liste adresses sauvegardées ou nouvelle)
-- Estimation frais en temps réel (appel delivery-estimate)
-- Récapitulatif : sous-total + frais livraison + total
-- Bouton "Commander et payer"
+- Liste articles avec photo miniature, nom, prix unitaire, boutons − / quantité / +
+- Bouton supprimer chaque article
+- Section adresse de livraison :
+  - Si connecté : afficher adresses sauvegardées + option "Nouvelle adresse"
+  - Si non connecté : formulaire adresse simple
+- Estimation frais livraison (appel delivery-estimate avec l'adresse saisie)
+- Récapitulatif : sous-total / frais livraison / **total**
+- Si panier vide : illustration + bouton "Explorer les restaurants"
+- Bouton "Commander" → redirige vers /checkout (pousse vers /login si non connecté)
 
-### `/checkout` — Paiement
-- Récap commande
-- Seul moyen de paiement : Wave (bouton orange prominent)
-- Au clic → POST /client/orders → récupérer tracking_token → POST payment/initiate → rediriger vers Wave
+### `/checkout` — Confirmation + Paiement
+- Récap commande (restaurant, articles, adresse livraison, frais)
+- **Un seul moyen de paiement : Wave** — bouton orange `Payer avec Wave · XXX FCFA`
+- Loader pendant `POST /client/orders` puis `POST /client/payment/{id}/initiate`
+- Redirection automatique vers `payment_url` Wave
+- En cas d'erreur API : toast rouge + bouton réessayer
 
-### `/orders/track/[token]` — Suivi en temps réel
-- **ACCESSIBLE SANS CONNEXION**
-- Carte Leaflet plein écran (60% de la page) avec position livreur en direct
-- Timeline verticale des étapes (commandé → confirmé → en préparation → livreur assigné → récupéré → en livraison → livré)
-- Info livreur : nom, véhicule, note, bouton téléphone
-- Temps restant estimé
-- Mise à jour auto via WebSocket
+### `/orders/track/[token]` — Suivi temps réel
+- **Page publique, accessible sans connexion**
+- Carte Leaflet en haut (60% hauteur écran) :
+  - Marqueur 🛵 pour le livreur (mis à jour en temps réel)
+  - Marqueur 📍 pour l'adresse de livraison
+  - Tuiles OpenStreetMap (gratuit, sans clé)
+- Timeline verticale en bas :
+  - ✅ Commandé
+  - ✅ Confirmé par le restaurant
+  - ✅ En préparation
+  - ✅ Livreur assigné (affiche nom + photo + note)
+  - ✅ Commande récupérée
+  - 🔄 En livraison (animé)
+  - ⬜ Livré
+- Info livreur (quand assigné) : nom, véhicule, note ⭐, bouton appel téléphone
+- Temps restant estimé en haut
+- Mise à jour 100% WebSocket (pas de polling)
 
 ### `/orders` — Historique
-- Liste commandes (protégé, auth requise)
-- Statut coloré, date, montant, nom restaurant
-- Bouton "Suivre" si en cours
+- Auth requise (rediriger vers /login si non connecté)
+- Liste paginée `GET /client/orders/history`
+- Chaque card : nom restaurant, date, montant total, statut coloré
+  - `pending_payment` → orange
+  - `confirmed/preparing` → bleu
+  - `delivering` → violet (avec bouton "Suivre")
+  - `completed` → vert
+  - `cancelled` → rouge
+- Bouton "Suivre" sur les commandes en cours → `/orders/track/{token}`
 
 ### `/profile` — Profil
-- Infos utilisateur modifiables
-- Lien vers mes adresses
+- Auth requise
+- Nom, téléphone, email, ville — modifiables via `PATCH /client/auth/profile`
+- Lien "Mes adresses"
+- Bouton déconnexion (rouge)
 
-### `/profile/addresses` — Adresses
-- Liste avec label (Maison, Bureau...)
-- Ajouter / modifier / supprimer
-- Sélection adresse par défaut
+### `/profile/addresses` — Adresses sauvegardées
+- `GET /client/addresses` → liste
+- Ajouter : formulaire avec label (Maison/Bureau/Autre), adresse texte, ville, instructions optionnelles
+- Modifier / Supprimer
+- Étoile pour marquer l'adresse par défaut
 
 ### `/login` et `/register`
-- Formulaires simples avec validation Zod
-- Champs register : nom, téléphone (format ivoirien 07/05/01...), email (optionnel), mot de passe, ville
-- Pas de redirection forcée — laisser browseR sans compte, juste pousser à se connecter au moment de commander
+- Design épuré, logo MenuPro en haut
+- Register : nom complet, téléphone ivoirien (ex: 07 08 12 15 20), mot de passe, ville (optionnel)
+- Validation Zod : téléphone format CI (commence par 01/05/07), mot de passe min 8 chars
+- Pas de redirection forcée depuis l'accueil — l'utilisateur peut explorer sans compte
+- Redirection vers /login uniquement au moment de commander
 
 ---
 
 ## NAVIGATION
 
-Bottom navigation fixe (mobile) avec 4 onglets :
-- Accueil (Home icon)
-- Explorer (Search icon)
-- Commandes (ShoppingBag icon) + badge nombre articles panier
-- Profil (User icon)
+Bottom navigation fixe (hauteur 64px, z-index élevé) :
+- **Accueil** (Home) → `/`
+- **Explorer** (Search) → `/restaurants`
+- **Panier** (ShoppingBag) → `/cart` + badge rouge avec nombre d'articles
+- **Profil** (User) → `/profile` (ou `/login` si non connecté)
 
 ---
 
-## PANIER — LOGIQUE ZUSTAND
+## PANIER — LOGIQUE ZUSTAND (persist localStorage)
 
 ```typescript
-// Persister dans localStorage
 store: {
   restaurantId: number | null
   restaurantName: string | null
-  items: { dishId, name, price, quantity, notes? }[]
-  addItem(restaurantId, restaurantName, item)  // Si autre restaurant → demander confirmation
-  updateQuantity(dishId, quantity)
+  items: { dishId: number, name: string, price: number, quantity: number, notes?: string }[]
+
+  addItem(restaurantId, restaurantName, item)
+  // → si restaurantId différent du courant : demander confirmation avant de vider
+  // → si même restaurant : incrémenter la quantité si le plat existe déjà
+
+  updateQuantity(dishId, quantity)  // quantity <= 0 → removeItem
   removeItem(dishId)
   clear()
-  subtotal()   // somme price*quantity
-  itemCount()  // somme quantities
+  subtotal(): number   // centimes
+  itemCount(): number
 }
 ```
 
 ---
 
-## DESIGN
+## DESIGN SYSTEM
 
 - **Couleur principale** : Orange `#f97316` (orange-500 Tailwind)
-- **Fond** : blanc, cartes légèrement ombragées
+- **Secondaire** : Slate `#1e293b`
+- **Fond** : blanc `#ffffff`, surface `#f8fafc`
 - **Typographie** : Inter (Google Fonts)
-- **Arrondis** : `rounded-2xl` pour les cards, `rounded-full` pour les badges
-- **Mobile first** : max-width 480px centré, padding bottom 80px (bottom nav)
-- **Monnaie** : tous les prix sont en centimes XOF dans l'API → diviser par 100 → afficher en FCFA avec séparateur milliers
-  - Ex : `300000` → `3 000 FCFA`
-- Distances : `< 1km` → afficher en mètres, sinon en km avec 1 décimale
-- **Skeleton loading** sur toutes les pages avec données asynchrones
-- **États vides** illustrés (pas de restaurants, panier vide, aucune commande)
+- **Arrondis** : `rounded-2xl` cards, `rounded-full` badges et boutons pill
+- **Ombres** : `shadow-sm` cartes, `shadow-lg` FAB et bottom nav
+- **Mobile first** : max-width 480px, centré sur desktop, padding bottom 80px
+- **Transitions** : Framer Motion `AnimatePresence` entre les pages (slide)
+
+**Formatage prix :**
+- Tous les prix API sont en **centimes XOF** → diviser par 100
+- Afficher avec séparateur milliers : `3 000 FCFA` (pas de décimales)
+
+**Formatage distance :**
+- `< 1km` → `800 m`
+- `>= 1km` → `3.2 km`
+
+**Skeleton loading :** obligatoire sur toutes les pages avec données async (4 cards restaurants, liste plats, etc.)
+
+**États vides :** illustration + message + CTA (pas de page blanche)
 
 ---
 
@@ -248,17 +392,22 @@ NEXT_PUBLIC_APP_NAME=MenuPro Delivery
 
 ## PWA
 
-- `manifest.ts` : name "MenuPro Delivery", short_name "MenuPro", theme_color "#f97316", display "standalone"
-- `next-pwa` : cache offline pour la liste restaurants (5min) et les menus (10min)
-- Icons : générer des placeholders orange avec le logo M
+- `manifest.ts` : name "MenuPro Delivery", short_name "MenuPro", theme_color "#f97316", display "standalone", lang "fr"
+- Service worker `next-pwa` :
+  - Cache offline : liste restaurants (5 min), menus (10 min), tuiles carte (7 jours), images storage (30 jours)
+- Générer des icônes orange 192x192 et 512x512 avec la lettre M
 
 ---
 
-## CONTRAINTES IMPORTANTES
+## CONTRAINTES TECHNIQUES IMPORTANTES
 
-1. Leaflet ne fonctionne pas côté serveur → utiliser `dynamic(() => import('react-leaflet'), { ssr: false })`
-2. Les prix viennent de l'API en **centimes** (300000 = 3000 FCFA)
-3. Le tracking est public (sans connexion), mais commander nécessite un compte
-4. Axios interceptor : si réponse 401 → supprimer le token et rediriger vers `/login`
-5. TanStack Query : staleTime 5min pour restaurants, 10min pour menus
-6. Toutes les erreurs API affichées via `sonner` toast (pas d'alert natif)
+1. **Leaflet SSR** → toujours `dynamic(() => import(...), { ssr: false })` pour MapContainer, TileLayer, Marker
+2. **Prix en centimes** → `price / 100` avant affichage, jamais stocker en FCFA
+3. **Tracking public** → page `/orders/track/[token]` ne requiert aucun token auth
+4. **Axios interceptor** → réponse 401 : `localStorage.removeItem('token')` + `router.push('/login')`
+5. **TanStack Query staleTime** → 5 min restaurants, 10 min menus, 0 pour commandes
+6. **Toasts** → toutes les erreurs et succès API passent par `sonner`, jamais `alert()` natif
+7. **CORS** → l'API accepte les domaines `*.replit.dev` et `*.replit.app` en développement
+8. **Plats indisponibles** → `is_available: false` → card grisée, bouton désactivé (ne pas masquer)
+9. **GPS refusé** → fallback silencieux sur Abidjan centre (5.3542, -3.9827), pas d'erreur affichée
+10. **Panier multi-restaurant** → toujours demander confirmation avant de vider, ne jamais vider silencieusement
