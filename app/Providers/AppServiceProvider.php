@@ -23,6 +23,8 @@ use App\Policies\OrderPolicy;
 use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
+use App\Events\NewDeliveryAvailable;
+use App\Listeners\NotifyDriversOnNewDelivery;
 use App\Services\DeliveryPricingService;
 use App\Services\DriverAssignmentService;
 use App\Services\GeocodingService;
@@ -31,6 +33,7 @@ use App\Services\MediaUploader;
 use App\Services\PlanLimiter;
 use App\Services\StockManager;
 use App\Services\WalletService;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -103,6 +106,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Load dynamic mail configuration from SystemSetting
         $this->loadDynamicMailConfig();
+
+        // Platform delivery events
+        Event::listen(NewDeliveryAvailable::class, NotifyDriversOnNewDelivery::class);
     }
 
     /**

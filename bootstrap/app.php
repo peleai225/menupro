@@ -1,7 +1,5 @@
 <?php
 
-use App\Events\NewDeliveryAvailable;
-use App\Listeners\NotifyDriversOnNewDelivery;
 use App\Providers\RateLimitServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -43,11 +41,6 @@ return Application::configure(basePath: dirname(__DIR__))
             // \App\Http\Middleware\CleanJsonResponse::class, // Temporarily disabled - causes issues
         ]);
     })
-    ->withEvents(listen: [
-        NewDeliveryAvailable::class => [
-            NotifyDriversOnNewDelivery::class,
-        ],
-    ])
     ->withExceptions(function (Exceptions $exceptions): void {
 
         // Réponses JSON uniformes pour toutes les erreurs sur /api/v1/*
