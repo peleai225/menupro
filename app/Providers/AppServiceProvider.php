@@ -23,6 +23,9 @@ use App\Policies\OrderPolicy;
 use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
+use App\Services\DeliveryPricingService;
+use App\Services\DriverAssignmentService;
+use App\Services\GeocodingService;
 use App\Services\JekoGateway;
 use App\Services\MediaUploader;
 use App\Services\PlanLimiter;
@@ -58,6 +61,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PlanLimiter::class);
         $this->app->singleton(StockManager::class);
         $this->app->singleton(WalletService::class);
+        $this->app->singleton(GeocodingService::class);
+        $this->app->singleton(DeliveryPricingService::class);
+        $this->app->singleton(DriverAssignmentService::class);
     }
 
     /**

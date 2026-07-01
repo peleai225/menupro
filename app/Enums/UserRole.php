@@ -8,6 +8,8 @@ enum UserRole: string
     case RESTAURANT_ADMIN = 'restaurant_admin';
     case EMPLOYEE = 'employee';
     case COMMANDO_AGENT = 'commando_agent';
+    case CUSTOMER = 'customer';
+    case DELIVERY_DRIVER = 'delivery_driver';
 
     public function label(): string
     {
@@ -16,6 +18,8 @@ enum UserRole: string
             self::RESTAURANT_ADMIN => 'Administrateur Restaurant',
             self::EMPLOYEE => 'Employé',
             self::COMMANDO_AGENT => 'Agent Commando',
+            self::CUSTOMER => 'Client',
+            self::DELIVERY_DRIVER => 'Livreur',
         };
     }
 
@@ -26,6 +30,8 @@ enum UserRole: string
             self::RESTAURANT_ADMIN => 'blue',
             self::EMPLOYEE => 'gray',
             self::COMMANDO_AGENT => 'orange',
+            self::CUSTOMER => 'green',
+            self::DELIVERY_DRIVER => 'yellow',
         };
     }
 

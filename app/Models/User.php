@@ -69,6 +69,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(CommandoAgent::class);
     }
 
+    public function customer(): HasOne
+    {
+        return $this->hasOne(Customer::class);
+    }
+
+    public function deliveryDriver(): HasOne
+    {
+        return $this->hasOne(DeliveryDriver::class);
+    }
+
     // =========================================================================
     // SCOPES
     // =========================================================================
@@ -157,6 +167,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCommandoAgent(): bool
     {
         return $this->role === UserRole::COMMANDO_AGENT;
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === UserRole::CUSTOMER;
+    }
+
+    public function isDeliveryDriver(): bool
+    {
+        return $this->role === UserRole::DELIVERY_DRIVER;
     }
 
     public function belongsToRestaurant(int $restaurantId): bool
