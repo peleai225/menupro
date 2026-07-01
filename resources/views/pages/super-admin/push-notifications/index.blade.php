@@ -35,7 +35,7 @@
         <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
             <h2 class="font-semibold text-neutral-900 mb-5">Envoyer une notification push</h2>
 
-            <form id="push-send-form" action="{{ route('super-admin.push.send') }}" class="space-y-5">
+            <form id="push-send-form" method="POST" action="{{ route('super-admin.push.send') }}" class="space-y-5">
                 @csrf
 
                 <div>
