@@ -24,6 +24,8 @@ use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
 use App\Events\NewDeliveryAvailable;
+use App\Events\OrderStatusChanged;
+use App\Listeners\NotifyCustomerOnOrderStatusChange;
 use App\Listeners\NotifyDriversOnNewDelivery;
 use App\Services\DeliveryPricingService;
 use App\Services\DriverAssignmentService;
@@ -109,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Platform delivery events
         Event::listen(NewDeliveryAvailable::class, NotifyDriversOnNewDelivery::class);
+        Event::listen(OrderStatusChanged::class, NotifyCustomerOnOrderStatusChange::class);
     }
 
     /**

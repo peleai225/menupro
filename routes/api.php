@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Admin\PlatformAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\PlatformRestaurantController;
 use App\Http\Controllers\Api\V1\Client\AddressController;
 use App\Http\Controllers\Api\V1\Client\AuthController;
+use App\Http\Controllers\Api\V1\Client\FcmController as ClientFcmController;
 use App\Http\Controllers\Api\V1\Client\GeocodingController;
 use App\Http\Controllers\Api\V1\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Api\V1\Client\PaymentController;
@@ -66,6 +67,10 @@ Route::prefix('v1')
             Route::get('/auth/me',        [AuthController::class, 'me'])->name('auth.me');
             Route::post('/auth/logout',   [AuthController::class, 'logout'])->name('auth.logout');
             Route::patch('/auth/profile', [AuthController::class, 'updateProfile'])->name('auth.profile');
+
+            // Push notifications
+            Route::patch('/auth/fcm-token',  [ClientFcmController::class, 'update'])->name('auth.fcm-token');
+            Route::delete('/auth/fcm-token', [ClientFcmController::class, 'clear'])->name('auth.fcm-token.clear');
 
             // Adresses
             Route::get('/addresses',         [AddressController::class, 'index'])->name('addresses.index');

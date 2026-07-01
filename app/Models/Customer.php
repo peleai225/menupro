@@ -19,6 +19,7 @@ class Customer extends Model
         'is_active',
         'total_orders',
         'last_order_at',
+        'fcm_token',
     ];
 
     protected $casts = [
