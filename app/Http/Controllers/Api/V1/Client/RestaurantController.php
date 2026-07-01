@@ -30,8 +30,8 @@ class RestaurantController extends Controller
             'open_now' => 'nullable|boolean',
         ]);
 
-        $query = Restaurant::where('is_on_platform', true)
-            ->where('status', 'active')
+        $query = Restaurant::where('status', 'active')
+            ->where('is_on_platform', true)
             ->with('activeSubscription');
 
         if ($request->filled('city')) {
