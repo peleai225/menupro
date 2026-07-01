@@ -734,5 +734,25 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Activer AJAX sur tous les formulaires de settings
+            document.querySelectorAll('form[action*="parametres"]').forEach(function (form) {
+                // Formulaire apparence (multipart/form-data) : AJAX avec FormData OK
+                ajaxForm(form, {
+                    onSuccess: function (data) {
+                        // Rafraîchir les logos si image uploadée (appearance form)
+                        if (form.enctype && form.enctype.includes('multipart')) {
+                            // Recharger la page silencieusement pour montrer les nouvelles images
+                            setTimeout(function () { window.location.reload(); }, 1500);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layouts.admin-super>
 

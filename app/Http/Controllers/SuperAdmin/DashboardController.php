@@ -421,6 +421,10 @@ class DashboardController extends Controller
             );
         }
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Paramètres mis à jour avec succès.']);
+        }
+
         return back()->with('success', 'Paramètres mis à jour avec succès.');
     }
 

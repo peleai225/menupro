@@ -564,6 +564,95 @@
     </div>
 
     @push('scripts')
+    {{-- Toast notification système global --}}
+    <div id="admin-toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" style="max-width:360px"></div>
+
+    <script>
+        // Toast helper — accessible globalement : adminToast('msg', 'success'|'error')
+        function adminToast(message, type) {
+            type = type || 'success';
+            var container = document.getElementById('admin-toast-container');
+            var toast = document.createElement('div');
+            var colors = type === 'success'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                : 'bg-red-50 border-red-300 text-red-800';
+            var icon = type === 'success'
+                ? '<svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+                : '<svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+            toast.className = 'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-sm transition-all duration-300 ' + colors;
+            toast.style.cssText = 'opacity:0;transform:translateX(20px)';
+            toast.innerHTML = icon + '<span>' + message + '</span>';
+            container.appendChild(toast);
+            // Fade in
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(0)';
+                });
+            });
+            // Auto-remove
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 4000);
+        }
+
+        // ajaxForm(form, options) — soumet un formulaire en AJAX sans rechargement
+        // options: { onSuccess, onError, btnText }
+        function ajaxForm(form, options) {
+            options = options || {};
+            var btn = form.querySelector('[type="submit"]');
+            var originalText = btn ? btn.innerHTML : '';
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg class="animate-spin w-4 h-4 inline mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Enregistrement...';
+                }
+                var formData = new FormData(form);
+                // Ajouter _method si présent
+                var methodInput = form.querySelector('input[name="_method"]');
+                var method = methodInput ? methodInput.value.toUpperCase() : form.method.toUpperCase();
+
+                fetch(form.action, {
+                    method: method === 'GET' ? 'GET' : 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : formData.get('_token')
+                    },
+                    body: method === 'GET' ? null : formData
+                })
+                .then(function(r) {
+                    if (!r.ok) throw r;
+                    return r.json();
+                })
+                .then(function(data) {
+                    adminToast(data.message || 'Enregistré avec succès.', 'success');
+                    if (options.onSuccess) options.onSuccess(data);
+                })
+                .catch(function(err) {
+                    if (err && err.json) {
+                        err.json().then(function(body) {
+                            var msg = (body.errors ? Object.values(body.errors).flat()[0] : null) || body.message || 'Une erreur est survenue.';
+                            adminToast(msg, 'error');
+                        }).catch(function() { adminToast('Erreur réseau.', 'error'); });
+                    } else {
+                        adminToast('Erreur réseau.', 'error');
+                    }
+                })
+                .finally(function() {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                });
+            });
+        }
+    </script>
+
     <script>
         (function() {
             var url = @json(route('super-admin.api.sidebar-badges'));

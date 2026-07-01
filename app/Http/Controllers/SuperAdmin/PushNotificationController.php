@@ -37,7 +37,11 @@ class PushNotificationController extends Controller
         ]);
 
         if (!$this->fcm->isConfigured()) {
-            return back()->with('error', 'Firebase non configuré. Ajoutez la clé serveur dans Paramètres → Livraison & Cartes.');
+            $msg = 'Firebase non configuré. Ajoutez la clé serveur dans Paramètres → Livraison & Cartes.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
         $tokens = match ($request->audience) {
@@ -51,7 +55,11 @@ class PushNotificationController extends Controller
         };
 
         if (empty($tokens)) {
-            return back()->with('error', 'Aucun token push disponible pour cette audience.');
+            $msg = 'Aucun token push disponible pour cette audience.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
         $data = [];
@@ -61,6 +69,10 @@ class PushNotificationController extends Controller
 
         $result = $this->fcm->sendToMultiple($tokens, $request->title, $request->body, $data);
 
-        return back()->with('success', "Envoyé à {$result['success']} appareil(s). Échecs : {$result['failure']}.");
+        $msg = "Envoyé à {$result['success']} appareil(s). Échecs : {$result['failure']}.";
+        if ($request->wantsJson()) {
+            return response()->json(['message' => $msg]);
+        }
+        return back()->with('success', $msg);
     }
 }

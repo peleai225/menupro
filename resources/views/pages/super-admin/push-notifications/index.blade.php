@@ -1,18 +1,5 @@
 <x-layouts.admin-super title="Notifications Push">
-    <div class="space-y-6 max-w-3xl">
-
-        @if(session('success'))
-            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                {{ session('error') }}
-            </div>
-        @endif
+    <div class="space-y-6 max-w-3xl" x-data="{ pushSending: false }">
 
         {{-- Statut Firebase --}}
         <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5">
@@ -48,7 +35,7 @@
         <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
             <h2 class="font-semibold text-neutral-900 mb-5">Envoyer une notification push</h2>
 
-            <form method="POST" action="{{ route('super-admin.push.send') }}" class="space-y-5">
+            <form id="push-send-form" action="{{ route('super-admin.push.send') }}" class="space-y-5">
                 @csrf
 
                 <div>
@@ -137,4 +124,19 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('push-send-form');
+            if (form) {
+                ajaxForm(form, {
+                    onSuccess: function () {
+                        form.reset();
+                    }
+                });
+            }
+        });
+    </script>
+    @endpush
 </x-layouts.admin-super>
