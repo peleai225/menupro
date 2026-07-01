@@ -256,11 +256,57 @@
                             <label class="block text-sm font-medium text-neutral-700 mb-2">API Key Geoapify</label>
                             <input type="text" name="geoapify_api_key" value="{{ old('geoapify_api_key', $settings['geoapify_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Votre clé API Geoapify">
                             <p class="text-xs text-neutral-500 mt-1">
-                                Clé API pour l'autocomplétion d'adresses. 
+                                Clé API pour l'autocomplétion d'adresses.
                                 <a href="https://www.geoapify.com/get-started-with-maps-api" target="_blank" class="text-primary-600 hover:underline">Obtenir une clé gratuite (3000 requêtes/jour)</a>
                             </p>
                             <p class="text-xs text-neutral-500 mt-1">Si non configuré, le système utilisera Photon (gratuit, sans clé API) comme alternative.</p>
                         </div>
+                    </div>
+                </div>
+
+                {{-- Mapbox --}}
+                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6 xl:col-span-2">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        Mapbox (Cartes & Livraison)
+                    </h2>
+                    <p class="text-sm text-neutral-500 mb-4">
+                        Utilisé pour les cartes interactives de l'app de livraison (clients et livreurs) ainsi que le géocodage d'adresses.
+                        Gratuit jusqu'à 50 000 chargements/mois.
+                        <a href="https://account.mapbox.com/access-tokens/" target="_blank" class="text-primary-600 hover:underline">Créer un token → account.mapbox.com</a>
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Access Token public <span class="text-xs text-neutral-400">(commence par pk.)</span></label>
+                            <input type="text" name="mapbox_public_token"
+                                   value="{{ old('mapbox_public_token', $settings['mapbox_public_token'] ?? '') }}"
+                                   class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+                                   placeholder="pk.eyJ1Ijoixxxxx...">
+                            <p class="text-xs text-neutral-500 mt-1">Token public visible côté client — utilisé pour afficher les cartes. Restrict à votre domaine dans le dashboard Mapbox.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Style de carte <span class="text-xs text-neutral-400">(optionnel)</span></label>
+                            <select name="mapbox_style" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                @php $currentStyle = $settings['mapbox_style'] ?? 'streets-v12'; @endphp
+                                <option value="streets-v12"      {{ $currentStyle === 'streets-v12'      ? 'selected' : '' }}>Streets (défaut)</option>
+                                <option value="light-v11"        {{ $currentStyle === 'light-v11'        ? 'selected' : '' }}>Light</option>
+                                <option value="dark-v11"         {{ $currentStyle === 'dark-v11'         ? 'selected' : '' }}>Dark</option>
+                                <option value="satellite-v9"     {{ $currentStyle === 'satellite-v9'     ? 'selected' : '' }}>Satellite</option>
+                                <option value="navigation-day-v1" {{ $currentStyle === 'navigation-day-v1' ? 'selected' : '' }}>Navigation (jour)</option>
+                                <option value="navigation-night-v1" {{ $currentStyle === 'navigation-night-v1' ? 'selected' : '' }}>Navigation (nuit)</option>
+                            </select>
+                        </div>
+                        @if(!empty($settings['mapbox_public_token']))
+                        <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Token configuré — les cartes sont actives sur l'app de livraison.
+                        </div>
+                        @else
+                        <div class="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-700">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Aucun token — l'app de livraison utilisera OpenStreetMap en fallback.
+                        </div>
+                        @endif
                     </div>
                 </div>
                 </div>

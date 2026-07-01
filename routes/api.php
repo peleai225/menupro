@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\PayoutController;
+use App\Http\Controllers\Api\V1\ConfigController;
 use App\Http\Controllers\Api\V1\Admin\DriverManagementController;
 use App\Http\Controllers\Api\V1\Admin\PlatformAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\PlatformRestaurantController;
@@ -193,6 +194,13 @@ Route::prefix('v1')
             Route::get('/{id}/menu',              [RestaurantController::class, 'menu'])->name('menu');
             Route::get('/{id}/delivery-estimate', [RestaurantController::class, 'estimateDelivery'])->name('delivery-estimate');
         });
+
+    // -----------------------------------------------------------------------
+    // CONFIG — Configuration publique de la plateforme (tokens frontend)
+    // -----------------------------------------------------------------------
+    Route::get('/config', [ConfigController::class, 'public'])
+        ->name('config.public')
+        ->middleware('throttle:api.public');
 
     // -----------------------------------------------------------------------
     // GEOCODING — API publique (géocodage inversé + recherche d'adresse)

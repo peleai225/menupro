@@ -176,6 +176,9 @@ class DashboardController extends Controller
             'whatsapp_enabled' => \App\Models\SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false)),
             'whatsapp_phone_id' => \App\Models\SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', '')),
             'whatsapp_api_key' => \App\Models\SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', '')),
+            // Mapbox
+            'mapbox_public_token' => \App\Models\SystemSetting::get('mapbox_public_token', config('services.mapbox.public_token', '')),
+            'mapbox_style' => \App\Models\SystemSetting::get('mapbox_style', 'streets-v12'),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -239,6 +242,9 @@ class DashboardController extends Controller
             'whatsapp_enabled' => ['boolean'],
             'whatsapp_phone_id' => ['nullable', 'string', 'max:255'],
             'whatsapp_api_key' => ['nullable', 'string'],
+            // Mapbox
+            'mapbox_public_token' => ['nullable', 'string', 'regex:/^pk\./'],
+            'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -365,6 +371,13 @@ class DashboardController extends Controller
         }
         if ($request->filled('whatsapp_api_key')) {
             \App\Models\SystemSetting::set('whatsapp_api_key', $request->whatsapp_api_key, 'string', 'Token d\'accès permanent WhatsApp Business API');
+        }
+        // Mapbox
+        if ($request->filled('mapbox_public_token')) {
+            \App\Models\SystemSetting::set('mapbox_public_token', $request->mapbox_public_token, 'string', 'Token public Mapbox (cartes app livraison)');
+        }
+        if ($request->filled('mapbox_style')) {
+            \App\Models\SystemSetting::set('mapbox_style', $request->mapbox_style, 'string', 'Style de carte Mapbox');
         }
 
         // Marketing – bannière promotionnelle + Facebook Pixel + Google Analytics
