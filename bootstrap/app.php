@@ -49,6 +49,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null; // Laisser le handler par défaut gérer le reste
             }
 
+            // HttpResponseException (rate limiter custom response, etc.) → retourner la réponse directement
+            if ($e instanceof \Illuminate\Http\Exceptions\HttpResponseException) {
+                return $e->getResponse();
+            }
+
             if ($e instanceof \Illuminate\Validation\ValidationException) {
                 return response()->json([
                     'message' => 'Données invalides.',
