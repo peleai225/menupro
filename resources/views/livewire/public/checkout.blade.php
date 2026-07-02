@@ -157,28 +157,6 @@
                          wire:ignore.self>
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
 
-                        {{-- GPS button --}}
-                        <button type="button"
-                                @click="useMyLocation()"
-                                x-ref="gpsBtn"
-                                class="w-full px-4 py-4 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors flex items-center justify-center gap-3 mb-4 shadow-md">
-                            <svg x-show="!locating" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            <svg x-show="locating" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span x-text="locating ? 'Localisation...' : 'Utiliser ma position GPS'"></span>
-                        </button>
-
-                        <div class="relative flex items-center mb-4">
-                            <div class="flex-1 border-t border-neutral-200"></div>
-                            <span class="px-3 text-xs text-neutral-400 uppercase">ou rechercher</span>
-                            <div class="flex-1 border-t border-neutral-200"></div>
-                        </div>
-
                         {{-- Address Search --}}
                         <div class="mb-4 relative">
                             <div class="relative">
@@ -215,6 +193,19 @@
                                 <div x-show="!searching && results.length === 0 && searchDone" class="px-4 py-3 text-sm text-neutral-500 text-center">Aucune adresse trouvée</div>
                             </div>
                         </div>
+
+                        {{-- GPS secondaire (surtout utile sur mobile) --}}
+                        <button type="button" @click="useMyLocation()"
+                                class="mb-4 inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 transition-colors">
+                            <svg x-show="!locating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            </svg>
+                            <svg x-show="locating" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span x-text="locating ? 'Localisation...' : 'Ou utiliser mon GPS (mobile)'"></span>
+                        </button>
 
                         {{-- Status messages --}}
                         <div x-show="statusMsg" x-cloak class="mb-4 text-sm text-emerald-600 flex items-center gap-2">
@@ -511,8 +502,6 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                     this.validateDistance(parseFloat(savedLat), parseFloat(savedLng));
                 }
             });
-        } else {
-            this.$nextTick(() => this.useMyLocation());
         }
     },
 
