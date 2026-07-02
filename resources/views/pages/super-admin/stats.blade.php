@@ -13,8 +13,8 @@
             '90' => '90 jours',
             '365' => '1 an',
         ] as $value => $label)
-            <button type="submit" 
-                    name="period" 
+            <button type="submit"
+                    name="period"
                     value="{{ $value }}"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-white' : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50' }}">
                 {{ $label }}
@@ -59,168 +59,362 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
+    <!-- Charts Row 1: Revenue trend + Weekly trend -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Revenue Chart -->
+        <!-- Graphique 1 — Line chart "Évolution des revenus" -->
         <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Évolution des revenus</h3>
-            @if($revenueData->isNotEmpty())
-                <div class="space-y-3">
-                    @foreach($revenueData->take(10) as $data)
-                        @php
-                            $maxRevenue = $revenueData->max('revenue') ?: 1;
-                            $percent = ($data->revenue / $maxRevenue) * 100;
-                        @endphp
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-neutral-500">{{ \Carbon\Carbon::parse($data->date)->format('d M') }}</span>
-                                <span class="text-neutral-900 font-medium">{{ number_format($data->revenue, 0, ',', ' ') }} F</span>
-                            </div>
-                            <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-primary-500 rounded-full" style="width: {{ $percent }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="h-64 bg-neutral-100/50 rounded-xl flex items-center justify-center">
-                    <p class="text-neutral-500">Aucune donnée disponible</p>
-                </div>
-            @endif
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-neutral-900">Évolution des revenus</h3>
+                <span class="text-xs text-neutral-400">{{ $period }} jours</span>
+            </div>
+            <div class="relative h-64">
+                <canvas id="revenueLineChart"></canvas>
+            </div>
         </div>
 
-        <!-- New Restaurants Chart -->
+        <!-- Graphique 3 — Line chart "Tendance des commandes" -->
         <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Inscriptions par jour</h3>
-            @if($newRestaurants->isNotEmpty())
-                <div class="space-y-3">
-                    @foreach($newRestaurants->take(10) as $data)
-                        @php
-                            $maxCount = $newRestaurants->max('count') ?: 1;
-                            $percent = ($data->count / $maxCount) * 100;
-                        @endphp
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-neutral-500">{{ \Carbon\Carbon::parse($data->date)->format('d M') }}</span>
-                                <span class="text-neutral-900 font-medium">{{ $data->count }} inscriptions</span>
-                            </div>
-                            <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-secondary-500 rounded-full" style="width: {{ $percent }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="h-64 bg-neutral-100/50 rounded-xl flex items-center justify-center">
-                    <p class="text-neutral-500">Aucune donnée disponible</p>
-                </div>
-            @endif
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-neutral-900">Tendance des commandes</h3>
+                <span class="text-xs text-neutral-400">{{ $period }} jours</span>
+            </div>
+            <div class="relative h-64">
+                <canvas id="trendChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <!-- Additional Stats -->
+    <!-- Charts Row 2: Top days + City donut -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Graphique 1 — Bar chart horizontal "Top jours d'activité" -->
+        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-neutral-900">Top jours d'activité</h3>
+                <span class="text-xs text-neutral-400">{{ $period }} jours — top 10</span>
+            </div>
+            <div class="relative h-72">
+                <canvas id="topDaysChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Graphique 2 — Donut "Répartition par ville" -->
+        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-neutral-900">Répartition par ville</h3>
+                <span class="text-xs text-neutral-400">restaurants actifs</span>
+            </div>
+            <div class="relative h-72">
+                <canvas id="cityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats Row: Plan distribution + Orders by type + Subscription revenue -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Plan Distribution -->
+        <!-- Plan Distribution — donut -->
         <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
             <h3 class="text-lg font-semibold text-neutral-900 mb-4">Répartition par plan</h3>
-            @if($planDistribution->isNotEmpty())
-                <div class="space-y-4">
-                    @php
-                        $colors = ['bg-primary-500', 'bg-secondary-500', 'bg-accent-500', 'bg-blue-500'];
-                        $total = $planDistribution->sum('count');
-                    @endphp
-                    @foreach($planDistribution as $index => $plan)
-                        @php $percent = $total > 0 ? ($plan->count / $total) * 100 : 0; @endphp
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-neutral-600">{{ $plan->name }}</span>
-                                <span class="text-neutral-500">{{ $plan->count }} ({{ round($percent) }}%)</span>
-                            </div>
-                            <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                <div class="h-full {{ $colors[$index % count($colors)] }} rounded-full" style="width: {{ $percent }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-neutral-500 text-center py-8">Aucune donnée</p>
-            @endif
+            <div class="relative h-56">
+                <canvas id="planChart"></canvas>
+            </div>
         </div>
 
-        <!-- Orders by Type -->
+        <!-- Orders by Type — donut -->
         <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
             <h3 class="text-lg font-semibold text-neutral-900 mb-4">Commandes par type</h3>
-            @if($ordersByType->isNotEmpty())
-                <div class="space-y-4">
-                    @php
-                        $typeLabels = ['dine_in' => 'Sur place', 'takeaway' => 'À emporter', 'delivery' => 'Livraison'];
-                        $typeColors = ['dine_in' => 'bg-blue-500', 'takeaway' => 'bg-accent-500', 'delivery' => 'bg-primary-500'];
-                        $total = $ordersByType->sum('count');
-                    @endphp
-                    @foreach($ordersByType as $type)
-                        @php $percent = $total > 0 ? ($type->count / $total) * 100 : 0; @endphp
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-neutral-600">{{ $typeLabels[$type->type->value ?? $type->type] ?? $type->type }}</span>
-                                <span class="text-neutral-500">{{ number_format($type->count) }}</span>
-                            </div>
-                            <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                <div class="h-full {{ $typeColors[$type->type->value ?? $type->type] ?? 'bg-neutral-500' }} rounded-full" style="width: {{ $percent }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-neutral-500 text-center py-8">Aucune donnée</p>
-            @endif
-        </div>
-
-        <!-- Top Cities -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Top villes</h3>
-            @if($topCities->isNotEmpty())
-                <div class="space-y-3">
-                    @foreach($topCities->take(5) as $index => $city)
-                        <div class="flex items-center gap-3">
-                            <span class="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600">
-                                {{ $index + 1 }}
-                            </span>
-                            <span class="flex-1 text-neutral-600">{{ $city->city }}</span>
-                            <span class="text-neutral-500 text-sm">{{ $city->count }} restaurants</span>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="text-neutral-500 text-center py-8">Aucune donnée</p>
-            @endif
-        </div>
-    </div>
-
-    <!-- Subscription Revenue -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-neutral-900">Revenus abonnements</h3>
-            <span class="text-2xl font-bold text-secondary-400">
-                {{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F
-            </span>
-        </div>
-        @if($subscriptionRevenue->isNotEmpty())
-            <div class="grid grid-cols-7 gap-2">
-                @foreach($subscriptionRevenue->take(7) as $data)
-                    @php
-                        $maxRevenue = $subscriptionRevenue->max('revenue') ?: 1;
-                        $percent = ($data->revenue / $maxRevenue) * 100;
-                    @endphp
-                    <div class="text-center">
-                        <div class="h-24 bg-neutral-100 rounded-lg relative overflow-hidden">
-                            <div class="absolute bottom-0 left-0 right-0 bg-secondary-500 rounded-b-lg" style="height: {{ $percent }}%"></div>
-                        </div>
-                        <p class="text-xs text-neutral-500 mt-2">{{ \Carbon\Carbon::parse($data->date)->format('d/m') }}</p>
-                    </div>
-                @endforeach
+            <div class="relative h-56">
+                <canvas id="orderTypeChart"></canvas>
             </div>
-        @else
-            <p class="text-neutral-500 text-center py-8">Aucune donnée d'abonnement</p>
-        @endif
+        </div>
+
+        <!-- Subscription Revenue — bar chart -->
+        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-neutral-900">Revenus abonnements</h3>
+                <span class="text-xl font-bold text-secondary-400">
+                    {{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F
+                </span>
+            </div>
+            <div class="relative h-44">
+                <canvas id="subscriptionChart"></canvas>
+            </div>
+        </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // ── Shared defaults ──────────────────────────────────────────────
+        const gridColor = 'rgba(209, 213, 219, 0.5)';
+        const tickColor = '#6b7280';
+
+        // ── 1. Évolution des revenus (line) ──────────────────────────────
+        new Chart(document.getElementById('revenueLineChart'), {
+            type: 'line',
+            data: {
+                labels: @json($revenueData->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))),
+                datasets: [{
+                    label: 'Revenus (F)',
+                    data: @json($revenueData->pluck('revenue')),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: tickColor, callback: v => (v / 1000).toFixed(0) + 'K' },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: tickColor, maxTicksLimit: 10 },
+                        grid: { color: gridColor }
+                    }
+                }
+            }
+        });
+
+        // ── 2. Tendance des commandes (line — emerald, fill) ─────────────
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: @json($weeklyTrend->pluck('week_start')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))),
+                datasets: [{
+                    label: 'Commandes',
+                    data: @json($weeklyTrend->pluck('orders')),
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.parsed.y + ' commandes'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: tickColor },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: tickColor, maxTicksLimit: 10 },
+                        grid: { color: gridColor }
+                    }
+                }
+            }
+        });
+
+        // ── 3. Top jours d'activité (horizontal bar) ─────────────────────
+        new Chart(document.getElementById('topDaysChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($topDays->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->isoFormat('ddd D MMM'))),
+                datasets: [{
+                    label: 'Commandes',
+                    data: @json($topDays->pluck('orders')),
+                    backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.parsed.x + ' commandes'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { color: tickColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        ticks: { color: tickColor },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // ── 4. Répartition par ville (donut) ─────────────────────────────
+        @php
+            $cityLabels = $topCities->take(8)->pluck('city');
+            $cityCounts = $topCities->take(8)->pluck('count');
+        @endphp
+        new Chart(document.getElementById('cityChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($cityLabels),
+                datasets: [{
+                    data: @json($cityCounts),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(20, 184, 166, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: tickColor, boxWidth: 12, padding: 12 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.label + ' — ' + ctx.parsed + ' restaurants'
+                        }
+                    }
+                }
+            }
+        });
+
+        // ── 5. Répartition par plan (donut) ──────────────────────────────
+        new Chart(document.getElementById('planChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($planDistribution->pluck('name')),
+                datasets: [{
+                    data: @json($planDistribution->pluck('count')),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: tickColor, boxWidth: 12, padding: 10 }
+                    }
+                }
+            }
+        });
+
+        // ── 6. Commandes par type (donut) ─────────────────────────────────
+        @php
+            $typeLabels = ['dine_in' => 'Sur place', 'takeaway' => 'À emporter', 'delivery' => 'Livraison'];
+            $typeColors = [
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+            ];
+            $mappedTypeLabels = $ordersByType->map(fn($t) => $typeLabels[$t->type->value ?? $t->type] ?? ($t->type->value ?? $t->type));
+        @endphp
+        new Chart(document.getElementById('orderTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($mappedTypeLabels->values()),
+                datasets: [{
+                    data: @json($ordersByType->pluck('count')),
+                    backgroundColor: @json($typeColors),
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: tickColor, boxWidth: 12, padding: 10 }
+                    }
+                }
+            }
+        });
+
+        // ── 7. Revenus abonnements (bar) ──────────────────────────────────
+        new Chart(document.getElementById('subscriptionChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($subscriptionRevenue->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m'))),
+                datasets: [{
+                    label: 'Revenus (F)',
+                    data: @json($subscriptionRevenue->pluck('revenue')),
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: tickColor, callback: v => (v / 1000).toFixed(0) + 'K' },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: tickColor },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+    @endpush
 </x-layouts.admin-super>

@@ -99,6 +99,31 @@
         </div>
     </div>
 
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+        <!-- Line Chart: Commandes & Revenus (7 jours) — 60% -->
+        <div class="lg:col-span-3 bg-white rounded-2xl border border-neutral-200/80 p-5">
+            <div class="mb-4">
+                <h2 class="font-semibold text-neutral-900 text-sm">Commandes &amp; Revenus</h2>
+                <p class="text-xs text-neutral-400 mt-0.5">7 derniers jours</p>
+            </div>
+            <div class="relative" style="height: 220px;">
+                <canvas id="ordersChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Donut Chart: Commandes par statut — 40% -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-neutral-200/80 p-5">
+            <div class="mb-4">
+                <h2 class="font-semibold text-neutral-900 text-sm">Commandes par statut</h2>
+                <p class="text-xs text-neutral-400 mt-0.5">Toutes les commandes</p>
+            </div>
+            <div class="relative" style="height: 220px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Recent Restaurants -->
@@ -396,6 +421,7 @@
     </div>
 
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         function liveDashboard() {
             return {
@@ -446,6 +472,163 @@
                 }
             }
         }
+
+        // --- Chart.js : données injectées depuis le controller ---
+        const ordersChartData = @json($ordersByDay);
+        const statusChartData = @json($ordersByStatus);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Graphique 1 — Courbe commandes & revenus (double axe Y)
+            const ordersCtx = document.getElementById('ordersChart');
+            if (ordersCtx) {
+                new Chart(ordersCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ordersChartData.labels,
+                        datasets: [
+                            {
+                                label: 'Commandes',
+                                data: ordersChartData.counts,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#3b82f6',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                tension: 0.4,
+                                fill: false,
+                                yAxisID: 'yLeft',
+                            },
+                            {
+                                label: 'Revenus (FCFA)',
+                                data: ordersChartData.revenues,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#10b981',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                tension: 0.4,
+                                fill: true,
+                                yAxisID: 'yRight',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    color: '#6b7280',
+                                    font: { size: 11, family: 'inherit' },
+                                    boxWidth: 12,
+                                    padding: 12,
+                                },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        if (ctx.dataset.yAxisID === 'yRight') {
+                                            return ' ' + ctx.dataset.label + ': ' + new Intl.NumberFormat('fr-FR').format(ctx.raw) + ' F';
+                                        }
+                                        return ' ' + ctx.dataset.label + ': ' + ctx.raw;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            yLeft: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: { color: '#6b7280', font: { size: 11, family: 'inherit' }, precision: 0 },
+                                grid: { color: 'rgba(209, 213, 219, 0.4)' },
+                                title: { display: false },
+                            },
+                            yRight: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#10b981',
+                                    font: { size: 11, family: 'inherit' },
+                                    callback: function (v) {
+                                        return v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v;
+                                    },
+                                },
+                                grid: { drawOnChartArea: false },
+                            },
+                            x: {
+                                ticks: { color: '#6b7280', font: { size: 11, family: 'inherit' } },
+                                grid: { color: 'rgba(209, 213, 219, 0.4)' },
+                            },
+                        },
+                    },
+                });
+            }
+
+            // Graphique 2 — Donut commandes par statut
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                const statusColorMap = {
+                    'En attente':       '#f59e0b',
+                    'Confirmée':        '#3b82f6',
+                    'En préparation':   '#8b5cf6',
+                    'Prête':            '#06b6d4',
+                    'Livrée':           '#10b981',
+                    'Terminée':         '#059669',
+                    'Annulée':          '#ef4444',
+                };
+                const bgColors = statusChartData.labels.map(function (l) {
+                    return statusColorMap[l] || '#9ca3af';
+                });
+
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusChartData.labels,
+                        datasets: [{
+                            data: statusChartData.counts,
+                            backgroundColor: bgColors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverBorderColor: '#ffffff',
+                            hoverOffset: 6,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    color: '#6b7280',
+                                    font: { size: 11, family: 'inherit' },
+                                    boxWidth: 10,
+                                    padding: 10,
+                                },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const total = ctx.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                                        const pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
+                                        return ' ' + ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+        });
     </script>
     @endpush
 </x-layouts.admin-super>

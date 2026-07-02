@@ -59,7 +59,7 @@
                 Filtrer
             </button>
             @if(request()->hasAny(['restaurant_id', 'status']))
-                <a href="{{ route('super-admin.orders.index') }}" class="h-10 px-4 flex items-center bg-neutral-100 text-neutral-600 rounded-lg font-medium hover:bg-neutral-200 transition-colors">
+                <a href="{{ route('super-admin.orders.live') }}" class="h-10 px-4 flex items-center bg-neutral-100 text-neutral-600 rounded-lg font-medium hover:bg-neutral-200 transition-colors">
                     Réinitialiser
                 </a>
             @endif

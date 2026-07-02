@@ -58,6 +58,28 @@ class StatsController extends Controller
             ->orderBy('date')
             ->get();
 
+        // Top 10 days by order count (all statuses) for bar chart
+        $topDays = Order::withoutGlobalScope('restaurant')
+            ->where('created_at', '>=', now()->subDays($period))
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as orders')
+            )
+            ->groupBy('date')
+            ->orderByDesc('orders')
+            ->limit(10)
+            ->get();
+
+        // Weekly order trend for line chart
+        $weeklyTrend = DB::table('orders')
+            ->where('created_at', '>=', now()->subDays($period))
+            ->selectRaw("YEARWEEK(created_at, 1) as yw")
+            ->selectRaw("MIN(DATE(created_at)) as week_start")
+            ->selectRaw("COUNT(*) as orders")
+            ->groupBy('yw')
+            ->orderBy('yw')
+            ->get();
+
         // Subscription revenue
         $subscriptionRevenue = Subscription::where('created_at', '>=', now()->subDays($period))
             ->where('status', 'active')
@@ -111,7 +133,9 @@ class StatsController extends Controller
             'subscriptionRevenue',
             'planDistribution',
             'topCities',
-            'summary'
+            'summary',
+            'topDays',
+            'weeklyTrend'
         ));
     }
 

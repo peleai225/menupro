@@ -304,8 +304,12 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
         Route::post('restaurants/{restaurant}/toggle-demo', [RestaurantController::class, 'toggleDemo'])->name('restaurants.toggle-demo');
 
-        // Live Orders (all restaurants)
-        Route::get('commandes', [\App\Http\Controllers\SuperAdmin\LiveOrderController::class, 'index'])->name('orders.index');
+        // Orders
+        Route::get('commandes', [\App\Http\Controllers\SuperAdmin\OrderController::class, 'index'])->name('orders.index');
+        Route::get('commandes/{id}', [\App\Http\Controllers\SuperAdmin\OrderController::class, 'show'])->name('orders.show');
+
+        // Live Orders feed
+        Route::get('commandes-live', [\App\Http\Controllers\SuperAdmin\LiveOrderController::class, 'index'])->name('orders.live');
         Route::get('api/live-orders', [\App\Http\Controllers\SuperAdmin\LiveOrderController::class, 'liveOrders'])->name('api.live-orders');
 
         // Deliveries Dashboard
@@ -370,6 +374,7 @@ Route::prefix('admin')
 
         // Clients
         Route::get('clients', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');
+        Route::get('clients/{id}', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'show'])->name('customers.show');
 
         // Villes de livraison
         Route::get('villes-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'index'])->name('delivery-cities.index');

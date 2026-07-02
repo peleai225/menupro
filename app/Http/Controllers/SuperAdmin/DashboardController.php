@@ -103,13 +103,60 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Orders by day (last 7 days) for line chart
+        $ordersByDayRaw = DB::table('orders')
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count, SUM(total) as revenue')
+            ->whereNotIn('restaurant_id', $demoRestaurantIds)
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get();
+
+        $daysFr = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+        $dataMap = $ordersByDayRaw->keyBy('day');
+        $ordersByDay = ['labels' => [], 'counts' => [], 'revenues' => []];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $dayOfWeek = (int) now()->subDays($i)->format('w');
+            $ordersByDay['labels'][] = $daysFr[$dayOfWeek];
+            $dayData = $dataMap->get($date);
+            $ordersByDay['counts'][] = $dayData ? (int) $dayData->count : 0;
+            $ordersByDay['revenues'][] = $dayData ? (float) $dayData->revenue : 0.0;
+        }
+
+        // Orders by status (all time) for donut chart
+        $ordersByStatusRaw = DB::table('orders')
+            ->selectRaw('status, COUNT(*) as count')
+            ->whereNotIn('restaurant_id', $demoRestaurantIds)
+            ->groupBy('status')
+            ->get();
+
+        $statusLabelsMap = [
+            'pending'   => 'En attente',
+            'confirmed' => 'Confirmée',
+            'preparing' => 'En préparation',
+            'ready'     => 'Prête',
+            'delivered' => 'Livrée',
+            'completed' => 'Terminée',
+            'cancelled' => 'Annulée',
+        ];
+
+        $ordersByStatus = ['labels' => [], 'counts' => []];
+        foreach ($ordersByStatusRaw as $item) {
+            $ordersByStatus['labels'][] = $statusLabelsMap[$item->status] ?? ucfirst($item->status);
+            $ordersByStatus['counts'][] = (int) $item->count;
+        }
+
         return view('pages.super-admin.dashboard', compact(
             'stats',
             'recentRestaurants',
             'pendingRestaurants',
             'expiringSubscriptions',
             'revenueByPlan',
-            'topRestaurants'
+            'topRestaurants',
+            'ordersByDay',
+            'ordersByStatus'
         ));
     }
 
