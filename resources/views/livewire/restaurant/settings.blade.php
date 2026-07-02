@@ -191,8 +191,8 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
-                                    <select wire:model="city" class="input"
-                                            @change="onCitySelect($event.target.value)">
+                                    <select wire:model.live="city" class="input"
+                                            x-on:change="onCitySelect($event.target.value)">
                                         <option value="">-- Choisir --</option>
                                         @foreach(\App\Models\DeliveryCity::active()->orderBy('name')->get() as $dc)
                                             <option value="{{ $dc->name }}">{{ $dc->name }}</option>
@@ -1101,10 +1101,7 @@ function restaurantLocationPicker(initLat, initLng, hasExistingCoords, cityCoord
 
         onCitySelect(cityName) {
             if (!cityName || !this.cityCoords[cityName]) return;
-            if (this.hasCoords) return;
             const c = this.cityCoords[cityName];
-            this.lat = c.lat;
-            this.lng = c.lng;
             if (this.map) {
                 this.map.setView([c.lat, c.lng], 13);
             }
