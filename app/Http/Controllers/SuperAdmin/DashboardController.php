@@ -230,6 +230,10 @@ class DashboardController extends Controller
             'firebase_server_key' => \App\Models\SystemSetting::get('firebase_server_key', ''),
             'firebase_project_id' => \App\Models\SystemSetting::get('firebase_project_id', ''),
             'firebase_service_account_json' => \App\Models\SystemSetting::get('firebase_service_account_json', ''),
+            'firebase_api_key' => \App\Models\SystemSetting::get('firebase_api_key', ''),
+            'firebase_app_id' => \App\Models\SystemSetting::get('firebase_app_id', ''),
+            'firebase_sender_id' => \App\Models\SystemSetting::get('firebase_sender_id', ''),
+            'firebase_vapid_key' => \App\Models\SystemSetting::get('firebase_vapid_key', ''),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
