@@ -291,18 +291,12 @@ class Settings extends Component
     {
         $this->validate([
             'delivery_enabled' => 'boolean',
-            'delivery_fee' => 'integer|min:0',
-            'min_order_amount' => 'integer|min:0',
             'estimated_prep_time' => 'integer|min:1',
-            'delivery_zones' => 'nullable|string|max:1000',
         ]);
 
         $this->restaurant->update([
             'delivery_enabled' => $this->delivery_enabled,
-            'delivery_fee' => $this->delivery_fee,
-            'min_order_amount' => $this->min_order_amount,
             'estimated_prep_time' => $this->estimated_prep_time,
-            'delivery_zones' => $this->delivery_zones,
         ]);
 
         session()->flash('success', 'Paramètres de livraison mis à jour.');

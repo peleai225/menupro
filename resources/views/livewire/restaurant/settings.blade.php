@@ -595,25 +595,21 @@
                 @if($delivery_enabled)
                     <div class="border-t border-neutral-200 pt-6 space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Frais de livraison (FCFA)</label>
-                            <input type="number" wire:model="delivery_fee" class="input w-48" min="0" step="100">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Commande minimum (FCFA)</label>
-                            <input type="number" wire:model="min_order_amount" class="input w-48" min="0" step="100">
-                        </div>
-
-                        <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">Temps de préparation estimé (minutes)</label>
                             <input type="number" wire:model="estimated_prep_time" class="input w-32" min="1">
+                            <p class="text-xs text-neutral-500 mt-1">Temps moyen pour préparer une commande</p>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Zones de livraison</label>
-                            <textarea wire:model="delivery_zones" rows="3" class="input" 
-                                      placeholder="Ex: Cocody, Plateau, Marcory..."></textarea>
-                            <p class="text-xs text-neutral-500 mt-1">Listez les zones que vous desservez</p>
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-blue-900">Tarification gérée par la plateforme</p>
+                                    <p class="text-xs text-blue-700 mt-1">Les frais de livraison et les zones de couverture sont configurés par MenuPro pour garantir une expérience cohérente à vos clients.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 @endif

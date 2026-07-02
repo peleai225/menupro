@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
+use App\Services\DeliveryPricingService;
 use App\Services\JekoGateway;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
@@ -112,10 +113,34 @@ class Checkout extends Component
     #[Computed]
     public function deliveryFee(): int
     {
-        if ($this->order_type === 'delivery') {
-            return $this->restaurant->delivery_fee ?? 0;
+        if ($this->order_type !== 'delivery') {
+            return 0;
         }
+
+        if ($this->delivery_latitude && $this->delivery_longitude) {
+            $pricing = app(DeliveryPricingService::class);
+            $result = $pricing->calculate($this->restaurant, $this->delivery_latitude, $this->delivery_longitude);
+            return $result['within_range'] ? $result['fee'] : 0;
+        }
+
         return 0;
+    }
+
+    #[Computed]
+    public function deliveryZoneName(): ?string
+    {
+        if ($this->order_type !== 'delivery' || !$this->delivery_latitude || !$this->delivery_longitude) {
+            return null;
+        }
+
+        $pricing = app(DeliveryPricingService::class);
+        $result = $pricing->calculate($this->restaurant, $this->delivery_latitude, $this->delivery_longitude);
+
+        if ($result['zone_name']) {
+            return $result['zone_name'];
+        }
+
+        return $result['city_name'];
     }
 
     #[Computed]
@@ -317,24 +342,15 @@ class Checkout extends Component
             }
         }
 
-        // Validate delivery radius if delivery type
+        // Validate delivery zone via platform city-based pricing
         if ($this->order_type === 'delivery' && $this->delivery_latitude && $this->delivery_longitude) {
-            $restaurantLat = $this->restaurant->latitude ?? 5.3600;
-            $restaurantLng = $this->restaurant->longitude ?? -4.0083;
-            $deliveryRadius = $this->restaurant->delivery_radius_km ?? 10;
+            $pricing = app(DeliveryPricingService::class);
+            $deliveryResult = $pricing->calculate($this->restaurant, $this->delivery_latitude, $this->delivery_longitude);
 
-            if ($deliveryRadius > 0) {
-                $distance = $this->calculateDistance(
-                    $restaurantLat,
-                    $restaurantLng,
-                    $this->delivery_latitude,
-                    $this->delivery_longitude
-                );
-
-                if ($distance > $deliveryRadius) {
-                    session()->flash('error', "Cette adresse est hors de notre zone de livraison (max: {$deliveryRadius} km). Distance: " . number_format($distance, 2) . " km.");
-                    return;
-                }
+            if (!$deliveryResult['within_range']) {
+                $distance = $deliveryResult['distance_km'];
+                session()->flash('error', "Cette adresse est hors de notre zone de livraison. Distance: {$distance} km.");
+                return;
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\DeliveryCity;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
@@ -147,6 +148,35 @@ class GeocodingService
                 return [];
             }
         });
+    }
+
+    /**
+     * Détecte la ville de livraison active la plus proche des coordonnées.
+     */
+    public function detectDeliveryCity(float $lat, float $lng): ?DeliveryCity
+    {
+        $cities = Cache::remember('delivery_cities:active', 3600, function () {
+            return DeliveryCity::active()->get();
+        });
+
+        $closest = null;
+        $closestDistance = PHP_FLOAT_MAX;
+
+        foreach ($cities as $city) {
+            $distance = $this->distanceKm(
+                (float) $city->center_latitude,
+                (float) $city->center_longitude,
+                $lat,
+                $lng
+            );
+
+            if ($distance <= $city->coverage_radius_km && $distance < $closestDistance) {
+                $closest = $city;
+                $closestDistance = $distance;
+            }
+        }
+
+        return $closest;
     }
 
     private function fallbackAddress(float $lat, float $lng): array

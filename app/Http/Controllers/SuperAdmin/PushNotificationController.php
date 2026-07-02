@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryDriver;
 use App\Models\Customer;
 use App\Services\FcmService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -26,7 +27,7 @@ class PushNotificationController extends Controller
         return view('pages.super-admin.push-notifications.index', compact('stats'));
     }
 
-    public function send(Request $request): RedirectResponse
+    public function send(Request $request): JsonResponse|RedirectResponse
     {
         $request->validate([
             'title'    => 'required|string|max:100',
@@ -44,35 +45,44 @@ class PushNotificationController extends Controller
             return back()->with('error', $msg);
         }
 
-        $tokens = match ($request->audience) {
-            'all_drivers'    => DeliveryDriver::whereNotNull('fcm_token')->where('verification_status', 'approved')->pluck('fcm_token')->toArray(),
-            'online_drivers' => DeliveryDriver::whereNotNull('fcm_token')->where('is_active', true)->where('is_available', true)->where('verification_status', 'approved')->pluck('fcm_token')->toArray(),
-            'all_customers'  => Customer::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
-            'all'            => array_merge(
-                DeliveryDriver::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
-                Customer::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
-            ),
-        };
+        try {
+            $tokens = match ($request->audience) {
+                'all_drivers'    => DeliveryDriver::whereNotNull('fcm_token')->where('verification_status', 'approved')->pluck('fcm_token')->toArray(),
+                'online_drivers' => DeliveryDriver::whereNotNull('fcm_token')->where('is_active', true)->where('is_available', true)->where('verification_status', 'approved')->pluck('fcm_token')->toArray(),
+                'all_customers'  => Customer::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
+                'all'            => array_merge(
+                    DeliveryDriver::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
+                    Customer::whereNotNull('fcm_token')->pluck('fcm_token')->toArray(),
+                ),
+            };
 
-        if (empty($tokens)) {
-            $msg = 'Aucun token push disponible pour cette audience.';
+            if (empty($tokens)) {
+                $msg = 'Aucun token push disponible pour cette audience.';
+                if ($request->wantsJson()) {
+                    return response()->json(['message' => $msg], 422);
+                }
+                return back()->with('error', $msg);
+            }
+
+            $data = [];
+            if ($request->filled('data_key') && $request->filled('data_val')) {
+                $data[$request->data_key] = $request->data_val;
+            }
+
+            $result = $this->fcm->sendToMultiple($tokens, $request->title, $request->body, $data);
+
+            $msg = "Envoyé à {$result['success']} appareil(s). Échecs : {$result['failure']}.";
             if ($request->wantsJson()) {
-                return response()->json(['message' => $msg], 422);
+                return response()->json(['message' => $msg]);
+            }
+            return back()->with('success', $msg);
+        } catch (\Throwable $e) {
+            \Log::error('[Push] Exception lors de l\'envoi', ['error' => $e->getMessage()]);
+            $msg = 'Erreur lors de l\'envoi : ' . $e->getMessage();
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $msg], 500);
             }
             return back()->with('error', $msg);
         }
-
-        $data = [];
-        if ($request->filled('data_key') && $request->filled('data_val')) {
-            $data[$request->data_key] = $request->data_val;
-        }
-
-        $result = $this->fcm->sendToMultiple($tokens, $request->title, $request->body, $data);
-
-        $msg = "Envoyé à {$result['success']} appareil(s). Échecs : {$result['failure']}.";
-        if ($request->wantsJson()) {
-            return response()->json(['message' => $msg]);
-        }
-        return back()->with('success', $msg);
     }
 }

@@ -371,7 +371,17 @@ Route::prefix('admin')
         // Clients
         Route::get('clients', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');
 
-        // Zones de livraison
+        // Villes de livraison
+        Route::get('villes-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'index'])->name('delivery-cities.index');
+        Route::post('villes-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'store'])->name('delivery-cities.store');
+        Route::get('villes-livraison/{city}', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'show'])->name('delivery-cities.show');
+        Route::put('villes-livraison/{city}', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'update'])->name('delivery-cities.update');
+        Route::delete('villes-livraison/{city}', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'destroy'])->name('delivery-cities.destroy');
+        Route::post('villes-livraison/{city}/toggle', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'toggle'])->name('delivery-cities.toggle');
+        Route::post('villes-livraison/{city}/zones', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'storeZone'])->name('delivery-cities.zones.store');
+        Route::post('villes-livraison/zones/{zone}/toggle', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'toggleZone'])->name('delivery-cities.zones.toggle');
+
+        // Zones de livraison (legacy)
         Route::get('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'index'])->name('delivery-zones.index');
         Route::post('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'store'])->name('delivery-zones.store');
         Route::put('zones-livraison/{zone}', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'update'])->name('delivery-zones.update');

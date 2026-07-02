@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             SuperAdminSeeder::class,
             DemoRestaurantSeeder::class,
+            DeliveryCitySeeder::class,
+            DeliveryZoneSeeder::class,
         ]);
     }
 }

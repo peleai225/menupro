@@ -19,8 +19,8 @@ return new class extends Migration
             ->where('status', 'active')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->where('latitude', '!=', '')
-            ->where('longitude', '!=', '')
+            ->where('latitude', '!=', 0)
+            ->where('longitude', '!=', 0)
             ->update([
                 'is_on_platform'    => true,
                 'platform_category' => DB::raw("COALESCE(NULLIF(platform_category, ''), 'restaurant')"),

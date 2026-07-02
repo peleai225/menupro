@@ -181,6 +181,8 @@ class DashboardController extends Controller
             'mapbox_style' => \App\Models\SystemSetting::get('mapbox_style', 'streets-v12'),
             // Firebase FCM
             'firebase_server_key' => \App\Models\SystemSetting::get('firebase_server_key', ''),
+            'firebase_project_id' => \App\Models\SystemSetting::get('firebase_project_id', ''),
+            'firebase_service_account_json' => \App\Models\SystemSetting::get('firebase_service_account_json', ''),
         ];
 
         return view('pages.super-admin.settings', compact('settings'));
@@ -249,6 +251,8 @@ class DashboardController extends Controller
             'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
             // Firebase FCM
             'firebase_server_key' => ['nullable', 'string'],
+            'firebase_project_id' => ['nullable', 'string', 'max:100'],
+            'firebase_service_account_json' => ['nullable', 'string'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -385,7 +389,17 @@ class DashboardController extends Controller
         }
         // Firebase FCM
         if ($request->filled('firebase_server_key')) {
-            \App\Models\SystemSetting::set('firebase_server_key', $request->firebase_server_key, 'string', 'Clé serveur Firebase Cloud Messaging (push notifications livreurs)');
+            \App\Models\SystemSetting::set('firebase_server_key', $request->firebase_server_key, 'string', 'Clé serveur Firebase legacy (désactivée)');
+        }
+        if ($request->filled('firebase_project_id')) {
+            \App\Models\SystemSetting::set('firebase_project_id', $request->firebase_project_id, 'string', 'Firebase Project ID (FCM v1)');
+        }
+        if ($request->filled('firebase_service_account_json')) {
+            // Valider que c'est du JSON valide
+            $decoded = json_decode($request->firebase_service_account_json, true);
+            if (is_array($decoded) && isset($decoded['client_email'], $decoded['private_key'])) {
+                \App\Models\SystemSetting::set('firebase_service_account_json', $request->firebase_service_account_json, 'string', 'Service Account JSON Firebase (FCM v1)');
+            }
         }
 
         // Marketing – bannière promotionnelle + Facebook Pixel + Google Analytics

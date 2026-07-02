@@ -126,13 +126,13 @@
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Clients</span>
                 </a>
 
-                <a href="{{ route('super-admin.delivery-zones.index') }}"
-                   class="nav-item {{ request()->routeIs('super-admin.delivery-zones*') ? 'nav-active' : '' }}" title="Zones de livraison">
+                <a href="{{ route('super-admin.delivery-cities.index') }}"
+                   class="nav-item {{ request()->routeIs('super-admin.delivery-cities*') ? 'nav-active' : '' }}" title="Villes & Livraison">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Zones livraison</span>
+                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Villes livraison</span>
                 </a>
 
                 <a href="{{ route('super-admin.push.index') }}"
@@ -656,10 +656,18 @@
     <script>
         (function() {
             var url = @json(route('super-admin.api.sidebar-badges'));
+            var intervalId = null;
             function updateBadges() {
                 fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(function(r) { return r.json(); })
+                    .then(function(r) {
+                        if (r.status === 401 || r.status === 419) {
+                            if (intervalId) { clearInterval(intervalId); intervalId = null; }
+                            return null;
+                        }
+                        return r.ok ? r.json() : null;
+                    })
                     .then(function(data) {
+                        if (!data) return;
                         var r = data.pending_restaurants || 0;
                         var c = data.pending_commando_agents || 0;
                         var d = data.pending_drivers || 0;
@@ -679,7 +687,7 @@
                     .catch(function() {});
             }
             updateBadges();
-            setInterval(updateBadges, 45000);
+            intervalId = setInterval(updateBadges, 45000);
         })();
     </script>
     @endpush

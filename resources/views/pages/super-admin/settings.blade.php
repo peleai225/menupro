@@ -342,36 +342,67 @@
                 <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        Firebase — Notifications Push
+                        Firebase — Notifications Push (FCM v1)
                     </h2>
                     <p class="text-sm text-neutral-500 mb-4">
-                        Envoi de notifications push aux livreurs (FCM — Firebase Cloud Messaging).
-                        Gratuit jusqu'à une large limite.
+                        Envoi de notifications push aux livreurs et clients (FCM HTTP v1 API — méthode actuelle recommandée).
                         <a href="https://console.firebase.google.com/" target="_blank" class="text-primary-600 hover:underline">Firebase Console</a>
                     </p>
+
+                    @php
+                        $fcmV1Ok = !empty($settings['firebase_project_id'] ?? '') && !empty($settings['firebase_service_account_json'] ?? '');
+                    @endphp
+
+                    @if($fcmV1Ok)
+                    <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700 mb-4">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Firebase FCM v1 configuré — notifications push actives.
+                    </div>
+                    @else
+                    <div class="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 mb-4">
+                        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <p class="font-medium">Non configuré — les push ne seront pas envoyés.</p>
+                            <p class="mt-1 text-xs">Dans Firebase Console → Paramètres du projet → Comptes de service → Générer une nouvelle clé privée (JSON).</p>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                Server Key (Legacy API)
-                                <span class="text-xs text-neutral-400">(Paramètres du projet → Cloud Messaging)</span>
+                                Project ID
+                                <span class="text-xs text-neutral-400">(Firebase Console → Paramètres du projet)</span>
                             </label>
-                            <input type="password" name="firebase_server_key"
-                                   value="{{ old('firebase_server_key', $settings['firebase_server_key'] ?? '') }}"
-                                   class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
-                                   placeholder="AAAAxxxxxxxxxxxxxxxx...">
-                            <p class="text-xs text-neutral-500 mt-1">Clé secrète — ne jamais exposer côté client. Utilisée uniquement en backend pour envoyer les push.</p>
+                            <input type="text" name="firebase_project_id"
+                                   value="{{ old('firebase_project_id', $settings['firebase_project_id'] ?? '') }}"
+                                   class="w-full h-11 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+                                   placeholder="mon-projet-firebase">
                         </div>
-                        @if(!empty($settings['firebase_server_key']))
-                        <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Firebase configuré — notifications push actives.
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                Service Account JSON
+                                <span class="text-xs text-neutral-400">(Comptes de service → Générer une clé privée)</span>
+                            </label>
+                            <textarea name="firebase_service_account_json" rows="4"
+                                   class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-xs resize-none"
+                                   placeholder='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"-----BEGIN RSA PRIVATE KEY-----\n...","client_email":"firebase-adminsdk-xxx@projet.iam.gserviceaccount.com",...}'>{{ old('firebase_service_account_json', $settings['firebase_service_account_json'] ?? '') }}</textarea>
+                            <p class="text-xs text-neutral-500 mt-1">Collez ici le contenu complet du fichier JSON téléchargé depuis Firebase.</p>
                         </div>
-                        @else
-                        <div class="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-700">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Clé non configurée — les notifications push ne seront pas envoyées aux livreurs.
-                        </div>
-                        @endif
+
+                        {{-- Legacy (archivé) --}}
+                        <details class="text-sm">
+                            <summary class="cursor-pointer text-neutral-400 hover:text-neutral-600">
+                                Ancienne clé serveur Legacy (désactivée par Google depuis juin 2024)
+                            </summary>
+                            <div class="mt-3">
+                                <input type="password" name="firebase_server_key"
+                                       value="{{ old('firebase_server_key', $settings['firebase_server_key'] ?? '') }}"
+                                       class="w-full h-11 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+                                       placeholder="AAAAxxxxxxxxxxxxxxxx...">
+                                <p class="text-xs text-red-500 mt-1">Cette API est désactivée. Migrez vers FCM v1 ci-dessus.</p>
+                            </div>
+                        </details>
                     </div>
                 </div>
 
