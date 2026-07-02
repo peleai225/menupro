@@ -294,12 +294,16 @@ class DashboardController extends Controller
             'whatsapp_phone_id' => ['nullable', 'string', 'max:255'],
             'whatsapp_api_key' => ['nullable', 'string'],
             // Mapbox
-            'mapbox_public_token' => ['nullable', 'string', 'regex:/^pk\./'],
+            'mapbox_public_token' => ['nullable', 'string'],
             'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
             // Firebase FCM
             'firebase_server_key' => ['nullable', 'string'],
             'firebase_project_id' => ['nullable', 'string', 'max:100'],
             'firebase_service_account_json' => ['nullable', 'string'],
+            'firebase_api_key' => ['nullable', 'string', 'max:255'],
+            'firebase_app_id' => ['nullable', 'string', 'max:255'],
+            'firebase_sender_id' => ['nullable', 'string', 'max:100'],
+            'firebase_vapid_key' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Save settings (only if provided, otherwise keep existing or use defaults)
@@ -442,11 +446,22 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('firebase_project_id', $request->firebase_project_id, 'string', 'Firebase Project ID (FCM v1)');
         }
         if ($request->filled('firebase_service_account_json')) {
-            // Valider que c'est du JSON valide
             $decoded = json_decode($request->firebase_service_account_json, true);
             if (is_array($decoded) && isset($decoded['client_email'], $decoded['private_key'])) {
                 \App\Models\SystemSetting::set('firebase_service_account_json', $request->firebase_service_account_json, 'string', 'Service Account JSON Firebase (FCM v1)');
             }
+        }
+        if ($request->filled('firebase_api_key')) {
+            \App\Models\SystemSetting::set('firebase_api_key', $request->firebase_api_key, 'string', 'Firebase API Key (Web)');
+        }
+        if ($request->filled('firebase_app_id')) {
+            \App\Models\SystemSetting::set('firebase_app_id', $request->firebase_app_id, 'string', 'Firebase App ID');
+        }
+        if ($request->filled('firebase_sender_id')) {
+            \App\Models\SystemSetting::set('firebase_sender_id', $request->firebase_sender_id, 'string', 'Firebase Sender ID (Messaging)');
+        }
+        if ($request->filled('firebase_vapid_key')) {
+            \App\Models\SystemSetting::set('firebase_vapid_key', $request->firebase_vapid_key, 'string', 'VAPID Public Key (Web Push)');
         }
 
         // Marketing – bannière promotionnelle + Facebook Pixel + Google Analytics
