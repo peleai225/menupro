@@ -1,10 +1,11 @@
 <x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'">
-    <div x-data="sidebar()" class="min-h-screen bg-neutral-100">
+    <div x-data="sidebar()" class="super-admin-layout min-h-screen" style="background: var(--sa-bg);">
         <!-- Sidebar Desktop -->
         <aside :class="expanded ? 'w-64' : 'w-[72px]'"
-               class="fixed left-0 top-0 h-full bg-neutral-900 z-40 transition-all duration-300 hidden lg:flex flex-col shadow-xl">
+               class="fixed left-0 top-0 h-full z-40 transition-all duration-300 hidden lg:flex flex-col shadow-xl"
+               style="background: var(--sa-sidebar);">
             <!-- Logo -->
-            <div class="h-16 flex items-center px-4 border-b border-neutral-800">
+            <div class="h-16 flex items-center px-4 border-b" style="border-color: var(--sa-sidebar-border);">
                 <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-3 w-full">
                     <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,8 +219,8 @@
             </nav>
 
             <!-- System Status -->
-            <div x-show="expanded" x-transition.opacity class="p-3 border-t border-neutral-800">
-                <div class="bg-neutral-800/80 rounded-xl p-3">
+            <div x-show="expanded" x-transition.opacity class="p-3 border-t" style="border-color: var(--sa-sidebar-border);">
+                <div class="rounded-xl p-3" style="background: color-mix(in oklch, var(--sa-sidebar-accent) 60%, transparent);">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                         <span class="text-xs font-medium text-emerald-400">Système opérationnel</span>
@@ -235,7 +236,10 @@
 
             <!-- Toggle Button -->
             <button @click="toggle()"
-                    class="hidden lg:flex items-center justify-center h-11 border-t border-neutral-800 text-neutral-500 hover:text-white hover:bg-neutral-800 transition-colors">
+                    class="hidden lg:flex items-center justify-center h-11 transition-colors"
+                    style="border-top: 1px solid var(--sa-sidebar-border); color: var(--sa-sidebar-fg); opacity: 0.6;"
+                    onmouseover="this.style.opacity='1'; this.style.background='var(--sa-sidebar-accent)'"
+                    onmouseout="this.style.opacity='0.6'; this.style.background='transparent'">
                 <svg :class="expanded ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                 </svg>
@@ -246,8 +250,8 @@
         <div x-show="mobileOpen" x-transition:enter="transition-opacity ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="mobileOpen = false" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" x-cloak></div>
 
         <!-- Sidebar mobile -->
-        <aside x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed left-0 top-0 h-full w-72 bg-neutral-900 z-40 lg:hidden flex flex-col shadow-2xl" x-cloak>
-            <div class="h-16 flex items-center justify-between px-4 border-b border-neutral-800">
+        <aside x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed left-0 top-0 h-full w-72 z-40 lg:hidden flex flex-col shadow-2xl" style="background: var(--sa-sidebar);" x-cloak>
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color: var(--sa-sidebar-border);">
                 <a href="{{ route('super-admin.dashboard') }}" class="flex items-center gap-3" @click="mobileOpen = false">
                     <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,109 +295,110 @@
         </aside>
 
         <!-- Main Content -->
-        <div :class="expanded ? 'lg:ml-64' : 'lg:ml-[72px]'" class="transition-all duration-300 ml-0">
-            <!-- Top Bar -->
-            <header class="sticky top-0 z-20 bg-white border-b border-neutral-200/80 shadow-sm">
-                <div class="flex items-center justify-between h-14 sm:h-16 px-4 lg:px-8 gap-3">
-                    <!-- Mobile Menu Button -->
-                    <button @click="toggleMobile()" class="lg:hidden p-2.5 -ml-1 rounded-xl hover:bg-neutral-100 text-neutral-600 min-h-[44px] min-w-[44px] flex items-center justify-center">
+        <div :class="expanded ? 'lg:ml-64' : 'lg:ml-[72px]'" class="transition-all duration-300 ml-0" style="background: var(--sa-bg);">
+            <!-- Topbar -->
+            <header class="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b px-4 lg:px-6 backdrop-blur"
+                    style="border-color: var(--sa-border); background: color-mix(in oklch, var(--sa-card) 80%, transparent);">
+                <!-- Mobile Menu Button + Page Title -->
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <button @click="toggleMobile()" class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg transition"
+                            style="border: 1px solid var(--sa-border); color: var(--sa-muted-fg);" aria-label="Menu">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
+                    <h1 class="text-xl font-bold truncate" style="color: var(--sa-fg);" id="sa-page-title">{{ $title ?? 'Administration' }}</h1>
+                </div>
 
-                    <!-- Page Title -->
-                    <div class="flex-1 min-w-0">
-                        <h1 class="text-lg sm:text-xl font-bold text-neutral-900 truncate">{{ $title ?? 'Administration' }}</h1>
+                <div class="flex items-center gap-3">
+                    <!-- Search -->
+                    <div class="relative hidden md:block">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                        </svg>
+                        <input type="search" placeholder="Rechercher..." class="h-10 w-64 rounded-lg pl-9 pr-3 text-sm outline-none transition"
+                               style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent); color: var(--sa-fg);"
+                               onfocus="this.style.borderColor='var(--sa-primary)'" onblur="this.style.borderColor='var(--sa-border)'">
                     </div>
 
-                    <!-- Right Section -->
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <!-- Search (desktop) -->
-                        <div class="hidden lg:block relative">
-                            <input type="text"
-                                   placeholder="Rechercher..."
-                                   class="w-56 pl-9 pr-4 py-2 bg-neutral-100 border border-transparent rounded-xl text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:bg-white focus:border-neutral-300 focus:ring-2 focus:ring-primary-500/10 transition-all">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <!-- Notifications bell -->
+                    <div class="relative" x-data="notificationBell()" @click.outside="open = false">
+                        <button type="button" @click="open = !open; if(open) loadNotifications()"
+                                class="relative flex size-10 items-center justify-center rounded-lg transition"
+                                style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent); color: var(--sa-muted-fg);"
+                                aria-label="Notifications">
+                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
-                        </div>
-
-                        <!-- Notifications -->
-                        <div class="relative" x-data="notificationBell()" @click.outside="open = false">
-                            <button type="button" @click="open = !open; if(open) loadNotifications()" class="relative p-2 rounded-xl hover:bg-neutral-100 text-neutral-500 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                </svg>
-                                <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full ring-2 ring-white" x-cloak></span>
-                            </button>
-                            <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden bg-white rounded-2xl shadow-xl border border-neutral-200 flex flex-col z-50">
-                                <div class="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
-                                    <span class="font-semibold text-neutral-900 text-sm">Notifications</span>
-                                    <span x-show="unreadCount > 0" class="text-xs text-primary-600 font-medium" x-text="unreadCount + ' non lue(s)'"></span>
-                                </div>
-                                <div class="overflow-y-auto flex-1">
-                                    <template x-if="loading">
-                                        <div class="p-6 text-center text-neutral-400 text-sm">Chargement...</div>
-                                    </template>
-                                    <template x-if="!loading && items.length === 0">
-                                        <div class="p-6 text-center">
-                                            <svg class="w-8 h-8 text-neutral-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                            <p class="text-neutral-400 text-sm">Aucune notification</p>
-                                        </div>
-                                    </template>
-                                    <template x-if="!loading && items.length > 0">
-                                        <ul class="py-1">
-                                            <template x-for="n in items" :key="n.id">
-                                                <li>
-                                                    <a :href="n.url" class="block px-4 py-3 hover:bg-neutral-50 transition-colors border-b border-neutral-50 last:border-0" :class="n.read_at ? 'opacity-60' : ''">
-                                                        <p class="text-sm text-neutral-800" x-text="n.message"></p>
-                                                        <p class="text-xs text-neutral-400 mt-1" x-text="formatDate(n.created_at)"></p>
-                                                    </a>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </template>
-                                </div>
+                            <span x-show="unreadCount > 0" x-text="unreadCount"
+                                  class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-white text-[10px] font-bold rounded-full ring-2"
+                                  style="background: var(--sa-primary); ring-color: var(--sa-card);" x-cloak></span>
+                        </button>
+                        <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden bg-white rounded-2xl shadow-xl border border-neutral-200 flex flex-col z-50">
+                            <div class="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+                                <span class="font-semibold text-neutral-900 text-sm">Notifications</span>
+                                <span x-show="unreadCount > 0" class="text-xs text-primary-600 font-medium" x-text="unreadCount + ' non lue(s)'"></span>
+                            </div>
+                            <div class="overflow-y-auto flex-1">
+                                <template x-if="loading">
+                                    <div class="p-6 text-center text-neutral-400 text-sm">Chargement...</div>
+                                </template>
+                                <template x-if="!loading && items.length === 0">
+                                    <div class="p-6 text-center">
+                                        <svg class="w-8 h-8 text-neutral-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                        <p class="text-neutral-400 text-sm">Aucune notification</p>
+                                    </div>
+                                </template>
+                                <template x-if="!loading && items.length > 0">
+                                    <ul class="py-1">
+                                        <template x-for="n in items" :key="n.id">
+                                            <li>
+                                                <a :href="n.url" class="block px-4 py-3 hover:bg-neutral-50 transition-colors border-b border-neutral-50 last:border-0" :class="n.read_at ? 'opacity-60' : ''">
+                                                    <p class="text-sm text-neutral-800" x-text="n.message"></p>
+                                                    <p class="text-xs text-neutral-400 mt-1" x-text="formatDate(n.created_at)"></p>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Profile Dropdown -->
-                        <div x-data="dropdown()" class="relative">
-                            <button @click="toggle()" class="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl hover:bg-neutral-100 transition-colors">
-                                <div class="w-8 h-8 bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                                    {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
-                                </div>
-                                <span class="hidden md:block text-sm font-medium text-neutral-700">
-                                    {{ auth()->user()->name ?? 'Admin' }}
-                                </span>
-                                <svg class="w-3.5 h-3.5 text-neutral-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    <!-- User / Profile Dropdown -->
+                    <div x-data="dropdown()" class="relative">
+                        <button @click="toggle()"
+                                class="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-3 transition"
+                                style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent);">
+                            <span class="flex size-8 items-center justify-center rounded-md text-sm font-semibold text-white"
+                                  style="background: var(--sa-sidebar);">{{ substr(auth()->user()->name ?? 'S', 0, 1) }}</span>
+                            <span class="hidden text-sm font-medium sm:block" style="color: var(--sa-fg);">{{ auth()->user()->name ?? 'Super Admin' }}</span>
+                            <svg class="size-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-transition @click.outside="close()" class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50" x-cloak>
+                            <div class="px-4 py-3 border-b border-neutral-100">
+                                <p class="font-semibold text-neutral-900 text-sm">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs text-neutral-500 mt-0.5">Super Administrateur</p>
+                            </div>
+                            <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                            </button>
-
-                            <div x-show="open" x-transition @click.outside="close()" class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50" x-cloak>
-                                <div class="px-4 py-3 border-b border-neutral-100">
-                                    <p class="font-semibold text-neutral-900 text-sm">{{ auth()->user()->name ?? 'Admin' }}</p>
-                                    <p class="text-xs text-neutral-500 mt-0.5">Super Administrateur</p>
-                                </div>
-                                <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors">
+                                Mon profil
+                            </a>
+                            <hr class="my-1.5 border-neutral-100">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                     </svg>
-                                    Mon profil
-                                </a>
-                                <hr class="my-1.5 border-neutral-100">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                        </svg>
-                                        Déconnexion
-                                    </button>
-                                </form>
-                            </div>
+                                    Déconnexion
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

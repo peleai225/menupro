@@ -1,141 +1,215 @@
 <x-layouts.admin-super title="Statistiques">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-neutral-900">Statistiques</h1>
-        <p class="text-neutral-500 mt-1">Vue d'ensemble des performances de la plateforme.</p>
+    <!-- Header + Period Filter -->
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Statistiques</h1>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Analyse de la performance globale de la plateforme</p>
+        </div>
+        <form method="GET" class="flex flex-wrap gap-2">
+            @foreach([
+                '7'   => '7 jours',
+                '30'  => '30 jours',
+                '90'  => '90 jours',
+                '365' => '1 an',
+            ] as $value => $label)
+                <button type="submit" name="period" value="{{ $value }}"
+                        class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                        style="{{ $period == $value
+                            ? 'background:var(--sa-primary);color:var(--sa-primary-fg);'
+                            : 'background:var(--sa-card);color:var(--sa-muted-fg);border:1px solid var(--sa-border);' }}">
+                    {{ $label }}
+                </button>
+            @endforeach
+        </form>
     </div>
 
-    <!-- Period Filter -->
-    <form method="GET" class="flex gap-2 mb-8">
-        @foreach([
-            '7' => '7 jours',
-            '30' => '30 jours',
-            '90' => '90 jours',
-            '365' => '1 an',
-        ] as $value => $label)
-            <button type="submit"
-                    name="period"
-                    value="{{ $value }}"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-white' : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50' }}">
-                {{ $label }}
-            </button>
-        @endforeach
-    </form>
-
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <p class="text-sm text-neutral-500 mb-1">Revenus totaux</p>
-            <p class="text-3xl font-bold text-neutral-900">
+    <!-- 4 StatCards -->
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Revenus totaux -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">
                 @if($summary['total_revenue'] >= 1000000)
-                    {{ number_format($summary['total_revenue'] / 1000000, 1, ',', ' ') }}M
+                    {{ number_format($summary['total_revenue'] / 1000000, 1, ',', ' ') }}M F
                 @else
-                    {{ number_format($summary['total_revenue'] / 1000, 0, ',', ' ') }}K
+                    {{ number_format($summary['total_revenue'] / 1000, 0, ',', ' ') }}K F
                 @endif
-                <span class="text-lg font-normal text-neutral-500">F</span>
             </p>
-            <p class="text-sm text-neutral-500 mt-2">Sur les {{ $period }} derniers jours</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus totaux</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <p class="text-sm text-neutral-500 mb-1">Nouveaux restaurants</p>
-            <p class="text-3xl font-bold text-neutral-900">{{ number_format($summary['new_restaurants']) }}</p>
-            <p class="text-sm text-neutral-500 mt-2">Sur les {{ $period }} derniers jours</p>
-        </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <p class="text-sm text-neutral-500 mb-1">Commandes traitées</p>
-            <p class="text-3xl font-bold text-neutral-900">
+
+        <!-- Commandes traitées -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">
                 @if($summary['total_orders'] >= 1000)
                     {{ number_format($summary['total_orders'] / 1000, 1, ',', ' ') }}K
                 @else
                     {{ number_format($summary['total_orders']) }}
                 @endif
             </p>
-            <p class="text-sm text-neutral-500 mt-2">Sur les {{ $period }} derniers jours</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Commandes traitées</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <p class="text-sm text-neutral-500 mb-1">Panier moyen</p>
-            <p class="text-3xl font-bold text-neutral-900">{{ number_format($summary['average_order'], 0, ',', ' ') }} <span class="text-lg font-normal text-neutral-500">F</span></p>
-            <p class="text-sm text-neutral-500 mt-2">Par commande</p>
+
+        <!-- Revenus abonnements -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+            </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus abonnements</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
+        </div>
+
+        <!-- Panier moyen -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($summary['average_order'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Panier moyen</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Par commande</p>
         </div>
     </div>
 
-    <!-- Charts Row 1: Revenue trend + Weekly trend -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Graphique 1 — Line chart "Évolution des revenus" -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900">Évolution des revenus</h3>
-                <span class="text-xs text-neutral-400">{{ $period }} jours</span>
+    <!-- Row 1: OrdersTrend (2/3) + PaymentSplit donut (1/3) -->
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="rounded-2xl border p-5 shadow-sm lg:col-span-2" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Tendance des commandes</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} derniers jours</p>
+                </div>
             </div>
-            <div class="relative h-64">
+            <div style="height:280px;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Modes de commande</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Répartition</p>
+                </div>
+            </div>
+            <div style="height:280px;">
+                <canvas id="orderTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: RevenueByPlan + Top villes ranking -->
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Répartition par plan</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs par abonnement</p>
+                </div>
+            </div>
+            <div style="height:280px;">
+                <canvas id="planChart"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Top villes</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Par nombre de restaurants</p>
+                </div>
+            </div>
+            @php $maxCityCount = $topCities->max('count') ?: 1; @endphp
+            <ul class="flex flex-col gap-4">
+                @foreach($topCities->take(6) as $city)
+                @php $pct = round(($city->count / $maxCityCount) * 100); @endphp
+                <li class="flex items-center gap-3">
+                    <span class="flex size-7 shrink-0 items-center justify-center rounded-lg text-sm font-bold"
+                          style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                        {{ $loop->iteration }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="truncate font-medium" style="color:var(--sa-fg);">{{ $city->city }}</span>
+                            <span class="text-sm font-semibold" style="color:var(--sa-fg);">{{ $city->count }} rest.</span>
+                        </div>
+                        <div class="mt-1.5 h-2 overflow-hidden rounded-full" style="background:var(--sa-muted);">
+                            <div class="h-full rounded-full" style="background:var(--sa-primary);width:{{ $pct }}%;"></div>
+                        </div>
+                    </div>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+
+    <!-- Row 3: Évolution des revenus + Répartition par ville -->
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Évolution des revenus</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} derniers jours</p>
+                </div>
+            </div>
+            <div style="height:280px;">
                 <canvas id="revenueLineChart"></canvas>
             </div>
         </div>
 
-        <!-- Graphique 3 — Line chart "Tendance des commandes" -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900">Tendance des commandes</h3>
-                <span class="text-xs text-neutral-400">{{ $period }} jours</span>
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Répartition par ville</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
+                </div>
             </div>
-            <div class="relative h-64">
-                <canvas id="trendChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row 2: Top days + City donut -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Graphique 1 — Bar chart horizontal "Top jours d'activité" -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900">Top jours d'activité</h3>
-                <span class="text-xs text-neutral-400">{{ $period }} jours — top 10</span>
-            </div>
-            <div class="relative h-72">
-                <canvas id="topDaysChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Graphique 2 — Donut "Répartition par ville" -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900">Répartition par ville</h3>
-                <span class="text-xs text-neutral-400">restaurants actifs</span>
-            </div>
-            <div class="relative h-72">
+            <div style="height:280px;">
                 <canvas id="cityChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Additional Stats Row: Plan distribution + Orders by type + Subscription revenue -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Plan Distribution — donut -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Répartition par plan</h3>
-            <div class="relative h-56">
-                <canvas id="planChart"></canvas>
+    <!-- Row 4: Top jours d'activité + Revenus abonnements -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Top jours d'activité</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} jours — top 10</p>
+                </div>
+            </div>
+            <div style="height:280px;">
+                <canvas id="topDaysChart"></canvas>
             </div>
         </div>
 
-        <!-- Orders by Type — donut -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Commandes par type</h3>
-            <div class="relative h-56">
-                <canvas id="orderTypeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Subscription Revenue — bar chart -->
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900">Revenus abonnements</h3>
-                <span class="text-xl font-bold text-secondary-400">
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Revenus abonnements</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Évolution sur la période</p>
+                </div>
+                <span class="text-xl font-bold" style="color:var(--sa-success);">
                     {{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F
                 </span>
             </div>
-            <div class="relative h-44">
+            <div style="height:240px;">
                 <canvas id="subscriptionChart"></canvas>
             </div>
         </div>
@@ -145,8 +219,11 @@
     <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         // ── Shared defaults ──────────────────────────────────────────────
-        const gridColor = 'rgba(209, 213, 219, 0.5)';
-        const tickColor = '#6b7280';
+        const cs = getComputedStyle(document.documentElement);
+        const gridColor = cs.getPropertyValue('--sa-border').trim() || 'rgba(209,213,219,0.5)';
+        const tickColor = cs.getPropertyValue('--sa-muted-fg').trim() || '#6b7280';
+        const primaryColor = cs.getPropertyValue('--sa-primary').trim() || 'rgb(59,130,246)';
+        const successColor = cs.getPropertyValue('--sa-success').trim() || 'rgb(16,185,129)';
 
         // ── 1. Évolution des revenus (line) ──────────────────────────────
         new Chart(document.getElementById('revenueLineChart'), {
@@ -169,11 +246,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F'
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
                 },
                 scales: {
                     y: {
@@ -210,11 +283,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.parsed.y + ' commandes'
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' commandes' } }
                 },
                 scales: {
                     y: {
@@ -250,11 +319,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.parsed.x + ' commandes'
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ctx.parsed.x + ' commandes' } }
                 },
                 scales: {
                     x: {
@@ -304,11 +369,7 @@
                         position: 'right',
                         labels: { color: tickColor, boxWidth: 12, padding: 12 }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.label + ' — ' + ctx.parsed + ' restaurants'
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ctx.label + ' — ' + ctx.parsed + ' restaurants' } }
                 }
             }
         });
@@ -396,11 +457,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F'
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
                 },
                 scales: {
                     y: {

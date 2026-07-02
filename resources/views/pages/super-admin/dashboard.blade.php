@@ -1,214 +1,290 @@
 <x-layouts.admin-super title="Dashboard">
-    <!-- Dashboard Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+
+    {{-- ── Page Intro ─────────────────────────────────────────────────────── --}}
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Dashboard</h1>
-            <p class="text-neutral-500 text-sm mt-1">Vue d'ensemble de la plateforme MenuPro</p>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Dashboard</h1>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Vue d'ensemble de la plateforme MenuPro</p>
         </div>
-        <div class="flex items-center gap-3" x-data="liveDashboard()" x-init="startPolling()">
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span class="text-xs font-medium text-emerald-700">Live</span>
-                <span class="text-[10px] text-emerald-600/70" x-text="lastUpdate"></span>
-            </div>
-            <button @click="toggleLive()" :class="isLive ? 'bg-emerald-500 text-white shadow-sm' : 'bg-neutral-200 text-neutral-600'"
-                    class="p-2 rounded-lg transition-all" title="Mode live">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-2" x-data="liveDashboard()" x-init="startPolling()">
+            <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium"
+                  style="border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-success);"></span>
+                Live
+                <span class="text-[10px] opacity-70" x-text="lastUpdate"></span>
+            </span>
+            <button @click="toggleLive()"
+                    :style="isLive ? 'background:var(--sa-success);color:#fff;' : 'background:var(--sa-muted);color:var(--sa-muted-fg);'"
+                    class="flex size-9 items-center justify-center rounded-lg transition"
+                    aria-label="Rafraîchir">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
             </button>
         </div>
     </div>
 
-    <!-- KPI Cards -->
+    {{-- ── KPI Cards ────────────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Restaurants actifs -->
-        <div class="bg-white rounded-2xl border border-neutral-200/80 p-5 hover:shadow-md transition-shadow group">
-            <div class="flex items-start justify-between mb-3">
-                <div class="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        {{-- Restaurants actifs --}}
+        <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
+             style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex items-start justify-between">
+                <span class="flex size-11 items-center justify-center rounded-xl"
+                      style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
-                </div>
-                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+{{ $stats['restaurants']['total'] }}</span>
+                </span>
+                <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                    +{{ $stats['restaurants']['total'] }}
+                </span>
             </div>
-            <p class="text-2xl font-bold text-neutral-900">{{ number_format($stats['restaurants']['active']) }}</p>
-            <p class="text-xs text-neutral-500 mt-1">Restaurants actifs</p>
+            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['restaurants']['active']) }}</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
         </div>
 
-        <!-- Revenus mensuels -->
-        <div class="bg-white rounded-2xl border border-neutral-200/80 p-5 hover:shadow-md transition-shadow group">
-            <div class="flex items-start justify-between mb-3">
-                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- Revenus mensuels --}}
+        <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
+             style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex items-start justify-between">
+                <span class="flex size-11 items-center justify-center rounded-xl"
+                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </div>
-                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                </span>
+                <span class="rounded-full px-2 py-0.5 text-xs font-semibold flex items-center gap-1"
+                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                    <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                     MRR
                 </span>
             </div>
-            <p class="text-2xl font-bold text-neutral-900">
+            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">
                 @if($stats['revenue']['this_month'] >= 1000000)
                     {{ number_format($stats['revenue']['this_month'] / 1000000, 1, ',', ' ') }}M
                 @else
                     {{ number_format($stats['revenue']['this_month'] / 1000, 0, ',', ' ') }}K
                 @endif
-                <span class="text-sm font-normal text-neutral-400">FCFA</span>
+                <span class="text-sm font-normal" style="color:var(--sa-muted-fg);">FCFA</span>
             </p>
-            <p class="text-xs text-neutral-500 mt-1">Revenus ce mois</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
         </div>
 
-        <!-- Commandes -->
-        <div class="bg-white rounded-2xl border border-neutral-200/80 p-5 hover:shadow-md transition-shadow group">
-            <div class="flex items-start justify-between mb-3">
-                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- Commandes --}}
+        <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
+             style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex items-start justify-between">
+                <span class="flex size-11 items-center justify-center rounded-xl"
+                      style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                </div>
-                <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">+{{ number_format($stats['orders']['this_month']) }}</span>
+                </span>
+                <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                      style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                    +{{ number_format($stats['orders']['this_month']) }}
+                </span>
             </div>
-            <p class="text-2xl font-bold text-neutral-900">
+            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">
                 @if($stats['orders']['total'] >= 1000)
                     {{ number_format($stats['orders']['total'] / 1000, 1, ',', ' ') }}K
                 @else
                     {{ number_format($stats['orders']['total']) }}
                 @endif
             </p>
-            <p class="text-xs text-neutral-500 mt-1">Commandes totales</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Commandes totales</p>
         </div>
 
-        <!-- En attente -->
-        <div class="bg-white rounded-2xl border border-neutral-200/80 p-5 hover:shadow-md transition-shadow group {{ $stats['restaurants']['pending'] > 0 ? 'border-amber-200 bg-amber-50/30' : '' }}">
-            <div class="flex items-start justify-between mb-3">
-                <div class="w-10 h-10 {{ $stats['restaurants']['pending'] > 0 ? 'bg-amber-100' : 'bg-neutral-100' }} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 {{ $stats['restaurants']['pending'] > 0 ? 'text-amber-600' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- En attente --}}
+        <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
+             style="border-color:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 30%,transparent)' : 'var(--sa-border)' }};background:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 5%,transparent)' : 'var(--sa-card)' }};">
+            <div class="flex items-start justify-between">
+                <span class="flex size-11 items-center justify-center rounded-xl"
+                      style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </div>
+                </span>
                 @if($stats['restaurants']['pending'] > 0)
-                    <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                    <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-warning);margin-top:0.35rem;"></span>
+                @else
+                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style="background:var(--sa-muted);color:var(--sa-muted-fg);">OK</span>
                 @endif
             </div>
-            <p class="text-2xl font-bold text-neutral-900">{{ $stats['restaurants']['pending'] }}</p>
-            <p class="text-xs {{ $stats['restaurants']['pending'] > 0 ? 'text-amber-600 font-medium' : 'text-neutral-500' }} mt-1">
+            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['restaurants']['pending'] }}</p>
+            <p class="mt-1 text-sm font-{{ $stats['restaurants']['pending'] > 0 ? 'semibold' : 'normal' }}"
+               style="color:{{ $stats['restaurants']['pending'] > 0 ? 'var(--sa-warning)' : 'var(--sa-muted-fg)' }};">
                 {{ $stats['restaurants']['pending'] > 0 ? 'En attente de validation' : 'Aucun en attente' }}
             </p>
         </div>
     </div>
 
-    <!-- Charts Section -->
+    {{-- ── Charts Section ───────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-        <!-- Line Chart: Commandes & Revenus (7 jours) — 60% -->
-        <div class="lg:col-span-3 bg-white rounded-2xl border border-neutral-200/80 p-5">
-            <div class="mb-4">
-                <h2 class="font-semibold text-neutral-900 text-sm">Commandes &amp; Revenus</h2>
-                <p class="text-xs text-neutral-400 mt-0.5">7 derniers jours</p>
+
+        {{-- Line Chart: Commandes & Revenus (7 jours) — 60% --}}
+        <div class="lg:col-span-3 rounded-2xl border p-5 shadow-sm"
+             style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes &amp; Revenus</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">7 derniers jours</p>
+                </div>
             </div>
-            <div class="relative" style="height: 220px;">
+            <div class="relative" style="height:220px;">
                 <canvas id="ordersChart"></canvas>
             </div>
         </div>
 
-        <!-- Donut Chart: Commandes par statut — 40% -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-neutral-200/80 p-5">
-            <div class="mb-4">
-                <h2 class="font-semibold text-neutral-900 text-sm">Commandes par statut</h2>
-                <p class="text-xs text-neutral-400 mt-0.5">Toutes les commandes</p>
+        {{-- Donut Chart: Commandes par statut — 40% --}}
+        <div class="lg:col-span-2 rounded-2xl border p-5 shadow-sm"
+             style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes par statut</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Toutes les commandes</p>
+                </div>
             </div>
-            <div class="relative" style="height: 220px;">
+            <div class="relative" style="height:220px;">
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Main Grid -->
+    {{-- ── Main Grid ────────────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Recent Restaurants -->
+
+        {{-- Left: Recent + Pending Restaurants --}}
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-2xl border border-neutral-200/80 overflow-hidden">
-                <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
-                    <h2 class="font-semibold text-neutral-900">Restaurants récents</h2>
-                    <a href="{{ route('super-admin.restaurants.index') }}" class="text-primary-600 hover:text-primary-700 text-xs font-medium flex items-center gap-1">
+
+            {{-- Restaurants récents --}}
+            <div class="rounded-2xl border shadow-sm overflow-hidden"
+                 style="border-color:var(--sa-border);background:var(--sa-card);">
+                <div class="px-5 py-4 flex items-start justify-between gap-4"
+                     style="border-bottom:1px solid var(--sa-border);">
+                    <div>
+                        <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Restaurants récents</h2>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">Derniers ajouts sur la plateforme</p>
+                    </div>
+                    <a href="{{ route('super-admin.restaurants.index') }}"
+                       class="inline-flex items-center gap-1 text-sm font-medium shrink-0 mt-0.5"
+                       style="color:var(--sa-primary);">
                         Voir tout
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
                     </a>
                 </div>
-                <div class="divide-y divide-neutral-100">
-                    @forelse($recentRestaurants as $restaurant)
-                        <a href="{{ route('super-admin.restaurants.show', $restaurant) }}" class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 hover:bg-neutral-50 transition-colors">
-                            <div class="flex items-center gap-3 min-w-0">
-                                @if($restaurant->logo_path)
-                                    <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-xl object-cover border border-neutral-200 flex-shrink-0">
-                                @else
-                                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm">
-                                        {{ strtoupper(substr($restaurant->name, 0, 2)) }}
-                                    </div>
-                                @endif
-                                <div class="min-w-0">
-                                    <p class="text-sm font-medium text-neutral-900 truncate">{{ $restaurant->name }}</p>
-                                    <p class="text-xs text-neutral-500">{{ $restaurant->owner?->name ?? 'N/A' }} · {{ $restaurant->created_at->format('d M') }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-lg">
-                                    {{ $restaurant->currentPlan?->name ?? 'Aucun' }}
-                                </span>
-                                @php
-                                    $statusColors = [
-                                        'active' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                        'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                        'suspended' => 'bg-red-50 text-red-700 border-red-200',
-                                        'expired' => 'bg-neutral-100 text-neutral-600 border-neutral-200',
-                                    ];
-                                    $statusLabels = [
-                                        'active' => 'Actif',
-                                        'pending' => 'En attente',
-                                        'suspended' => 'Suspendu',
-                                        'expired' => 'Expiré',
-                                    ];
-                                @endphp
-                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md border {{ $statusColors[$restaurant->status->value] ?? 'bg-neutral-100 text-neutral-600 border-neutral-200' }}">
-                                    {{ $statusLabels[$restaurant->status->value] ?? $restaurant->status->value }}
-                                </span>
-                            </div>
-                        </a>
-                    @empty
-                        <div class="p-8 text-center">
-                            <svg class="w-10 h-10 text-neutral-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
-                            <p class="text-sm text-neutral-400">Aucun restaurant récent</p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
 
-            <!-- Pending Restaurants -->
-            @if($pendingRestaurants->isNotEmpty())
-                <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-amber-100 bg-amber-50/50 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
-                        <h2 class="font-semibold text-neutral-900 text-sm">{{ $pendingRestaurants->count() }} restaurant(s) en attente de validation</h2>
-                    </div>
-                    <div class="divide-y divide-neutral-100">
-                        @foreach($pendingRestaurants as $restaurant)
-                            <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 hover:bg-amber-50/40 transition-colors">
+                <ul class="flex flex-col divide-y" style="--tw-divide-opacity:1;border-color:var(--sa-border);">
+                    @forelse($recentRestaurants as $restaurant)
+                        @php
+                            $statusStyles = [
+                                'active'    => ['bg' => 'color-mix(in oklch,var(--sa-success) 10%,transparent)', 'fg' => 'var(--sa-success)'],
+                                'pending'   => ['bg' => 'color-mix(in oklch,var(--sa-warning) 10%,transparent)', 'fg' => 'var(--sa-warning)'],
+                                'suspended' => ['bg' => 'color-mix(in oklch,var(--sa-danger) 10%,transparent)',  'fg' => 'var(--sa-danger)'],
+                                'expired'   => ['bg' => 'var(--sa-muted)', 'fg' => 'var(--sa-muted-fg)'],
+                            ];
+                            $statusLabels = [
+                                'active'    => 'Actif',
+                                'pending'   => 'En attente',
+                                'suspended' => 'Suspendu',
+                                'expired'   => 'Expiré',
+                            ];
+                            $sv = $restaurant->status->value;
+                            $sBg = $statusStyles[$sv]['bg'] ?? 'var(--sa-muted)';
+                            $sFg = $statusStyles[$sv]['fg'] ?? 'var(--sa-muted-fg)';
+                            $sLabel = $statusLabels[$sv] ?? $sv;
+                        @endphp
+                        <li>
+                            <a href="{{ route('super-admin.restaurants.show', $restaurant) }}"
+                               class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 transition"
+                               onmouseover="this.style.background='var(--sa-muted)'"
+                               onmouseout="this.style.background='transparent'">
                                 <div class="flex items-center gap-3 min-w-0">
                                     @if($restaurant->logo_path)
-                                        <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-9 h-9 rounded-lg object-cover border border-amber-200 flex-shrink-0">
+                                        <img src="{{ Storage::url($restaurant->logo_path) }}"
+                                             alt="{{ $restaurant->name }}"
+                                             class="size-10 rounded-full object-cover flex-shrink-0"
+                                             style="border:1px solid var(--sa-border);">
                                     @else
-                                        <div class="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-sm font-bold flex-shrink-0">
+                                        <span class="flex size-10 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
+                                              style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
                                             {{ strtoupper(substr($restaurant->name, 0, 2)) }}
-                                        </div>
+                                        </span>
                                     @endif
                                     <div class="min-w-0">
-                                        <p class="text-sm font-medium text-neutral-900 truncate">{{ $restaurant->name }}</p>
-                                        <p class="text-xs text-neutral-500 truncate">{{ $restaurant->owner?->email ?? 'N/A' }}</p>
+                                        <p class="truncate font-medium" style="color:var(--sa-fg);">{{ $restaurant->name }}</p>
+                                        <p class="truncate text-sm" style="color:var(--sa-muted-fg);">
+                                            {{ $restaurant->owner?->name ?? 'N/A' }} · {{ $restaurant->created_at->format('d M') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="rounded-md px-2 py-0.5 text-xs font-medium"
+                                          style="background:var(--sa-muted);color:var(--sa-muted-fg);">
+                                        {{ $restaurant->currentPlan?->name ?? 'Aucun' }}
+                                    </span>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                                          style="background:{{ $sBg }};color:{{ $sFg }};">
+                                        {{ $sLabel }}
+                                    </span>
+                                </div>
+                            </a>
+                        </li>
+                    @empty
+                        <li class="p-8 text-center">
+                            <svg class="size-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 style="color:var(--sa-muted-fg);opacity:.4;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+                            </svg>
+                            <p class="text-sm" style="color:var(--sa-muted-fg);">Aucun restaurant récent</p>
+                        </li>
+                    @endforelse
+                </ul>
+            </div>
+
+            {{-- Pending Restaurants --}}
+            @if($pendingRestaurants->isNotEmpty())
+                <div class="rounded-2xl border shadow-sm overflow-hidden"
+                     style="border-color:color-mix(in oklch,var(--sa-warning) 30%,transparent);background:var(--sa-card);">
+                    <div class="px-5 py-4 flex items-center gap-2"
+                         style="border-bottom:1px solid color-mix(in oklch,var(--sa-warning) 15%,transparent);background:color-mix(in oklch,var(--sa-warning) 5%,transparent);">
+                        <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-warning);"></span>
+                        <h2 class="font-semibold text-sm" style="color:var(--sa-fg);">
+                            {{ $pendingRestaurants->count() }} restaurant(s) en attente de validation
+                        </h2>
+                    </div>
+                    <div class="flex flex-col divide-y" style="border-color:var(--sa-border);">
+                        @foreach($pendingRestaurants as $restaurant)
+                            <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 transition"
+                                 onmouseover="this.style.background='color-mix(in oklch,var(--sa-warning) 5%,transparent)'"
+                                 onmouseout="this.style.background='transparent'">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    @if($restaurant->logo_path)
+                                        <img src="{{ Storage::url($restaurant->logo_path) }}"
+                                             alt="{{ $restaurant->name }}"
+                                             class="size-9 rounded-full object-cover flex-shrink-0"
+                                             style="border:1px solid color-mix(in oklch,var(--sa-warning) 30%,transparent);">
+                                    @else
+                                        <span class="flex size-9 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
+                                              style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                                            {{ strtoupper(substr($restaurant->name, 0, 2)) }}
+                                        </span>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium truncate" style="color:var(--sa-fg);">{{ $restaurant->name }}</p>
+                                        <p class="text-xs truncate" style="color:var(--sa-muted-fg);">{{ $restaurant->owner?->email ?? 'N/A' }}</p>
                                     </div>
                                 </div>
                                 <a href="{{ route('super-admin.restaurants.show', $restaurant) }}"
-                                   class="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 transition-colors shadow-sm">
+                                   class="px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm text-white transition"
+                                   style="background:var(--sa-warning);"
+                                   onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
                                     Examiner
                                 </a>
                             </div>
@@ -218,52 +294,64 @@
             @endif
         </div>
 
-        <!-- Right Column -->
+        {{-- ── Right Column ─────────────────────────────────────────────────── --}}
         <div class="space-y-6">
-            <!-- Revenue by Plan -->
-            <div class="bg-white rounded-2xl border border-neutral-200/80 p-5">
-                <h2 class="font-semibold text-neutral-900 text-sm mb-4">Revenus par plan</h2>
+
+            {{-- Revenue by Plan --}}
+            <div class="rounded-2xl border p-5 shadow-sm"
+                 style="border-color:var(--sa-border);background:var(--sa-card);">
+                <div class="mb-5">
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Revenus par plan</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Ce mois-ci</p>
+                </div>
                 <div class="space-y-4">
+                    @php $barColors = ['var(--sa-primary)', 'var(--sa-success)', 'var(--sa-info)']; @endphp
                     @forelse($revenueByPlan as $plan)
                         @php
                             $maxRevenue = $revenueByPlan->max('total') ?: 1;
                             $percent = ($plan->total / $maxRevenue) * 100;
-                            $colors = ['bg-primary-500', 'bg-emerald-500', 'bg-blue-500'];
                         @endphp
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <span class="text-xs font-medium text-neutral-700">{{ $plan->name }}</span>
-                                <span class="text-xs font-semibold text-neutral-900">{{ number_format($plan->total, 0, ',', ' ') }} F</span>
+                                <span class="text-xs font-medium" style="color:var(--sa-fg);">{{ $plan->name }}</span>
+                                <span class="text-xs font-semibold" style="color:var(--sa-fg);">{{ number_format($plan->total, 0, ',', ' ') }} F</span>
                             </div>
-                            <div class="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                                <div class="h-full {{ $colors[$loop->index % 3] }} rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
+                            <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--sa-muted);">
+                                <div class="h-full rounded-full transition-all duration-500"
+                                     style="width:{{ $percent }}%;background:{{ $barColors[$loop->index % 3] }};"></div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-neutral-400 text-xs text-center py-4">Aucune donnée ce mois</p>
+                        <p class="text-xs text-center py-4" style="color:var(--sa-muted-fg);">Aucune donnée ce mois</p>
                     @endforelse
                 </div>
             </div>
 
-            <!-- Expiring Subscriptions -->
+            {{-- Expiring Subscriptions --}}
             @if($expiringSubscriptions->isNotEmpty())
-                <div class="bg-white rounded-2xl border border-red-200 p-5">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="rounded-2xl border p-5 shadow-sm"
+                     style="border-color:color-mix(in oklch,var(--sa-danger) 30%,transparent);background:var(--sa-card);">
+                    <div class="mb-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Expirent bientôt</h2>
+                            <p class="text-sm" style="color:var(--sa-muted-fg);">Abonnements à renouveler</p>
+                        </div>
+                        <span class="flex size-9 items-center justify-center rounded-xl flex-shrink-0"
+                              style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
-                        </div>
-                        <h2 class="font-semibold text-neutral-900 text-sm">Expirent bientôt</h2>
+                        </span>
                     </div>
                     <div class="space-y-2.5">
                         @foreach($expiringSubscriptions as $subscription)
-                            <div class="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-xl">
+                            <div class="flex items-center justify-between p-3 rounded-xl"
+                                 style="background:color-mix(in oklch,var(--sa-danger) 5%,transparent);border:1px solid color-mix(in oklch,var(--sa-danger) 15%,transparent);">
                                 <div class="min-w-0">
-                                    <p class="text-xs font-medium text-neutral-900 truncate">{{ $subscription->restaurant->name }}</p>
-                                    <p class="text-[10px] text-neutral-500">{{ $subscription->plan->name }}</p>
+                                    <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $subscription->restaurant->name }}</p>
+                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan->name }}</p>
                                 </div>
-                                <span class="text-[10px] text-red-600 font-semibold whitespace-nowrap ml-2">
+                                <span class="text-[10px] font-semibold whitespace-nowrap ml-2" style="color:var(--sa-danger);">
                                     {{ $subscription->ends_at->diffForHumans() }}
                                 </span>
                             </div>
@@ -272,22 +360,27 @@
                 </div>
             @endif
 
-            <!-- Top Restaurants -->
+            {{-- Top Restaurants --}}
             @if($topRestaurants->isNotEmpty())
-                <div class="bg-white rounded-2xl border border-neutral-200/80 p-5">
-                    <h2 class="font-semibold text-neutral-900 text-sm mb-4">Top restaurants ce mois</h2>
+                <div class="rounded-2xl border p-5 shadow-sm"
+                     style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="mb-5">
+                        <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Top restaurants ce mois</h2>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">Par volume de commandes</p>
+                    </div>
                     <div class="space-y-2.5">
                         @foreach($topRestaurants as $index => $restaurant)
-                            <div class="flex items-center gap-3 p-2.5 rounded-xl {{ $index === 0 ? 'bg-amber-50/50 border border-amber-100' : 'hover:bg-neutral-50' }}">
-                                <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0
-                                    {{ $index === 0 ? 'bg-amber-100 text-amber-700' : ($index === 1 ? 'bg-neutral-200 text-neutral-700' : ($index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-neutral-100 text-neutral-500')) }}">
+                            <div class="flex items-center gap-3 p-2.5 rounded-xl"
+                                 style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 8%,transparent);border:1px solid color-mix(in oklch,var(--sa-warning) 20%,transparent);' : 'background:transparent;' }}">
+                                <span class="flex size-7 items-center justify-center rounded-lg font-bold text-xs flex-shrink-0"
+                                      style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 15%,transparent);color:var(--sa-warning);' : ($index === 1 ? 'background:var(--sa-muted);color:var(--sa-muted-fg);' : ($index === 2 ? 'background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);' : 'background:var(--sa-muted);color:var(--sa-muted-fg);')) }}">
                                     {{ $index + 1 }}
                                 </span>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-medium text-neutral-900 truncate">{{ $restaurant->name }}</p>
-                                    <p class="text-[10px] text-neutral-500">{{ $restaurant->orders_count }} cmd</p>
+                                    <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $restaurant->name }}</p>
+                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $restaurant->orders_count }} cmd</p>
                                 </div>
-                                <span class="text-xs font-bold text-emerald-600 whitespace-nowrap">
+                                <span class="text-xs font-bold whitespace-nowrap" style="color:var(--sa-success);">
                                     {{ number_format($restaurant->revenue, 0, ',', ' ') }} F
                                 </span>
                             </div>
@@ -296,79 +389,113 @@
                 </div>
             @endif
 
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-2xl border border-neutral-200/80 p-5">
-                <h2 class="font-semibold text-neutral-900 text-sm mb-3">Actions rapides</h2>
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ route('super-admin.restaurants.index') }}" class="flex flex-col items-center gap-1.5 p-3 bg-neutral-50 hover:bg-primary-50 rounded-xl transition-colors border border-transparent hover:border-primary-200 group">
-                        <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {{-- Quick Actions --}}
+            <div class="rounded-2xl border p-5 shadow-sm"
+                 style="border-color:var(--sa-border);background:var(--sa-card);">
+                <div class="mb-5">
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Actions rapides</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Accès directs</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{{ route('super-admin.restaurants.index') }}"
+                       class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
+                       style="border-color:var(--sa-border);background:var(--sa-bg);"
+                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
+                        <svg class="size-6 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             style="color:var(--sa-muted-fg);"
+                             onmouseover="this.style.color='var(--sa-primary)'" onmouseout="this.style.color='var(--sa-muted-fg)'">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                         </svg>
-                        <span class="text-[10px] font-medium text-neutral-600 group-hover:text-primary-700">Restaurants</span>
+                        <span class="text-sm font-medium" style="color:var(--sa-fg);">Restaurants</span>
                     </a>
-                    <a href="{{ route('super-admin.plans.index') }}" class="flex flex-col items-center gap-1.5 p-3 bg-neutral-50 hover:bg-emerald-50 rounded-xl transition-colors border border-transparent hover:border-emerald-200 group">
-                        <svg class="w-5 h-5 text-neutral-400 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('super-admin.plans.index') }}"
+                       class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
+                       style="border-color:var(--sa-border);background:var(--sa-bg);"
+                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
+                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                         </svg>
-                        <span class="text-[10px] font-medium text-neutral-600 group-hover:text-emerald-700">Plans</span>
+                        <span class="text-sm font-medium" style="color:var(--sa-fg);">Plans</span>
                     </a>
-                    <a href="{{ route('super-admin.utilisateurs.index') }}" class="flex flex-col items-center gap-1.5 p-3 bg-neutral-50 hover:bg-blue-50 rounded-xl transition-colors border border-transparent hover:border-blue-200 group">
-                        <svg class="w-5 h-5 text-neutral-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('super-admin.utilisateurs.index') }}"
+                       class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
+                       style="border-color:var(--sa-border);background:var(--sa-bg);"
+                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
+                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                         </svg>
-                        <span class="text-[10px] font-medium text-neutral-600 group-hover:text-blue-700">Utilisateurs</span>
+                        <span class="text-sm font-medium" style="color:var(--sa-fg);">Utilisateurs</span>
                     </a>
-                    <a href="{{ route('super-admin.stats') }}" class="flex flex-col items-center gap-1.5 p-3 bg-neutral-50 hover:bg-purple-50 rounded-xl transition-colors border border-transparent hover:border-purple-200 group">
-                        <svg class="w-5 h-5 text-neutral-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('super-admin.stats') }}"
+                       class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
+                       style="border-color:var(--sa-border);background:var(--sa-bg);"
+                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
+                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        <span class="text-[10px] font-medium text-neutral-600 group-hover:text-purple-700">Statistiques</span>
+                        <span class="text-sm font-medium" style="color:var(--sa-fg);">Statistiques</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Live Orders Section -->
+    {{-- ── Live Orders Section ──────────────────────────────────────────────── --}}
     <div class="mt-6" x-data="liveOrders()" x-init="startPolling()">
-        <div class="bg-neutral-900 rounded-2xl overflow-hidden shadow-lg">
-            <div class="px-5 py-4 border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3">
-                <h2 class="font-semibold text-white text-sm flex items-center gap-2.5">
-                    <span class="relative flex h-2.5 w-2.5">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        <div class="rounded-2xl overflow-hidden shadow-lg" style="background:var(--sa-sidebar);">
+
+            <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3"
+                 style="border-bottom:1px solid var(--sa-sidebar-border);">
+                <h2 class="font-semibold text-sm flex items-center gap-2.5" style="color:var(--sa-sidebar-fg);">
+                    <span class="relative flex size-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                              style="background:var(--sa-success);"></span>
+                        <span class="relative inline-flex rounded-full size-2.5"
+                              style="background:var(--sa-success);"></span>
                     </span>
                     Commandes en temps réel
                 </h2>
                 <div class="flex items-center gap-4 text-xs">
-                    <span class="text-neutral-400"><span class="text-white font-semibold" x-text="stats.orders_today"></span> commandes</span>
-                    <span class="text-emerald-400 font-semibold"><span x-text="formatCurrency(stats.revenue_today)"></span> F</span>
+                    <span style="color:var(--sa-sidebar-accent);">
+                        <span class="font-semibold" style="color:var(--sa-sidebar-fg);" x-text="stats.orders_today"></span> commandes
+                    </span>
+                    <span class="font-semibold" style="color:var(--sa-success);">
+                        <span x-text="formatCurrency(stats.revenue_today)"></span> F
+                    </span>
                 </div>
             </div>
 
-            <!-- Live Orders Feed -->
-            <div class="divide-y divide-neutral-800/50 max-h-80 overflow-y-auto">
+            {{-- Live Orders Feed --}}
+            <div class="divide-y max-h-80 overflow-y-auto" style="border-color:var(--sa-sidebar-border);">
                 <template x-for="order in orders" :key="order.id">
-                    <div class="px-5 py-3 hover:bg-neutral-800/40 transition-colors">
+                    <div class="px-5 py-3 transition" style="border-color:var(--sa-sidebar-border);"
+                         onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='transparent'">
                         <div class="flex items-center justify-between gap-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                <div class="size-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                      :class="{
                                         'bg-amber-500/15 text-amber-400': order.status === 'pending',
                                         'bg-blue-500/15 text-blue-400': order.status === 'confirmed',
-                                        'bg-primary-500/15 text-primary-400': order.status === 'preparing',
+                                        'bg-violet-500/15 text-violet-400': order.status === 'preparing',
                                         'bg-emerald-500/15 text-emerald-400': order.status === 'ready' || order.status === 'completed',
                                         'bg-red-500/15 text-red-400': order.status === 'cancelled',
                                      }">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                                     </svg>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-sm text-white truncate">
-                                        <span class="text-neutral-500 font-mono text-xs">#</span><span x-text="order.reference"></span>
+                                    <p class="text-sm truncate" style="color:var(--sa-sidebar-fg);">
+                                        <span class="font-mono text-xs" style="color:var(--sa-sidebar-accent);">#</span><span x-text="order.reference"></span>
                                     </p>
-                                    <p class="text-xs text-neutral-500 truncate" x-text="order.restaurant"></p>
+                                    <p class="text-xs truncate" style="color:var(--sa-sidebar-accent);" x-text="order.restaurant"></p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 flex-shrink-0">
@@ -376,44 +503,45 @@
                                       :class="{
                                         'bg-amber-500/15 text-amber-400': order.status === 'pending',
                                         'bg-blue-500/15 text-blue-400': order.status === 'confirmed',
-                                        'bg-primary-500/15 text-primary-400': order.status === 'preparing',
+                                        'bg-violet-500/15 text-violet-400': order.status === 'preparing',
                                         'bg-emerald-500/15 text-emerald-400': order.status === 'ready' || order.status === 'completed',
                                         'bg-red-500/15 text-red-400': order.status === 'cancelled',
                                       }"
                                       x-text="order.status_label"></span>
-                                <span class="text-xs font-semibold text-white" x-text="formatCurrency(order.total) + ' F'"></span>
-                                <span class="text-[10px] text-neutral-600" x-text="order.created_at"></span>
+                                <span class="text-xs font-semibold" style="color:var(--sa-sidebar-fg);" x-text="formatCurrency(order.total) + ' F'"></span>
+                                <span class="text-[10px]" style="color:var(--sa-sidebar-accent);" x-text="order.created_at"></span>
                             </div>
                         </div>
                     </div>
                 </template>
 
                 <div x-show="orders.length === 0" class="p-8 text-center">
-                    <svg class="w-8 h-8 text-neutral-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="size-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                         style="color:var(--sa-sidebar-accent);opacity:.4;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
-                    <p class="text-neutral-500 text-xs">Les nouvelles commandes apparaîtront ici</p>
+                    <p class="text-xs" style="color:var(--sa-sidebar-accent);">Les nouvelles commandes apparaîtront ici</p>
                 </div>
             </div>
 
-            <!-- Stats Footer -->
-            <div class="px-5 py-3 border-t border-neutral-800 bg-neutral-950/50">
+            {{-- Stats Footer --}}
+            <div class="px-5 py-3" style="border-top:1px solid var(--sa-sidebar-border);background:rgba(0,0,0,.2);">
                 <div class="grid grid-cols-4 gap-4 text-center">
                     <div>
-                        <p class="text-lg font-bold text-white" x-text="stats.pending_orders || 0"></p>
-                        <p class="text-[10px] text-neutral-500">En attente</p>
+                        <p class="text-lg font-bold" style="color:var(--sa-sidebar-fg);" x-text="stats.pending_orders || 0"></p>
+                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">En attente</p>
                     </div>
                     <div>
-                        <p class="text-lg font-bold text-emerald-400" x-text="stats.active_restaurants || 0"></p>
-                        <p class="text-[10px] text-neutral-500">Actifs</p>
+                        <p class="text-lg font-bold" style="color:var(--sa-success);" x-text="stats.active_restaurants || 0"></p>
+                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">Actifs</p>
                     </div>
                     <div>
-                        <p class="text-lg font-bold text-blue-400" x-text="stats.new_registrations_today || 0"></p>
-                        <p class="text-[10px] text-neutral-500">Nouveaux</p>
+                        <p class="text-lg font-bold" style="color:var(--sa-info);" x-text="stats.new_registrations_today || 0"></p>
+                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">Nouveaux</p>
                     </div>
                     <div>
-                        <p class="text-lg font-bold text-primary-400" x-text="stats.orders_today || 0"></p>
-                        <p class="text-[10px] text-neutral-500">Aujourd'hui</p>
+                        <p class="text-lg font-bold" style="color:var(--sa-primary);" x-text="stats.orders_today || 0"></p>
+                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">Aujourd'hui</p>
                     </div>
                 </div>
             </div>

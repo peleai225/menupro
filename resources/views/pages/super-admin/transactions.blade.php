@@ -1,198 +1,216 @@
 <x-layouts.admin-super title="Transactions">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Transactions & Paiements</h1>
-            <p class="text-neutral-500 mt-1">Suivi de tous les flux financiers de la plateforme.</p>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Transactions</h1>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Suivi des paiements et commissions perçues</p>
         </div>
-        <a href="{{ route('super-admin.transactions.export') }}" class="btn btn-outline border-neutral-200 text-neutral-700 hover:bg-neutral-50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('super-admin.transactions.export') }}"
+           class="inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium shadow-sm transition-colors"
+           style="border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             Exporter CSV
         </a>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gradient-to-br from-emerald-50 to-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-emerald-700">Revenus totaux</p>
-                    <p class="text-2xl font-bold text-neutral-900 mt-1">{{ number_format($stats['total_revenue'], 0, ',', ' ') }} F</p>
-                </div>
-                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+    <!-- 4 StatCards -->
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Volume traité (primary) -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                </svg>
             </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['total_revenue'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Volume traité</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Abonnements + Commandes</p>
         </div>
 
-        <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-neutral-500">Ce mois</p>
-                    <p class="text-2xl font-bold text-neutral-900 mt-1">{{ number_format($stats['this_month_revenue'], 0, ',', ' ') }} F</p>
-                </div>
-                <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
+        <!-- Ce mois (success) -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['this_month_revenue'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Transactions réussies</p>
         </div>
 
-        <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-neutral-500">Abonnements</p>
-                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ number_format($stats['subscriptions_revenue'], 0, ',', ' ') }} F</p>
-                </div>
-                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                </div>
+        <!-- En attente (warning) -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['pending_payments'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">En attente</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Paiements en cours</p>
         </div>
 
-        <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-neutral-500">Commandes</p>
-                    <p class="text-2xl font-bold text-accent-600 mt-1">{{ number_format($stats['orders_revenue'], 0, ',', ' ') }} F</p>
-                </div>
-                <div class="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                </div>
+        <!-- Commissions (info) -->
+        <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
+                <svg class="size-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
             </div>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['orders_revenue'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus commandes</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Hors abonnements</p>
         </div>
     </div>
 
-    <!-- Chart -->
-    <div class="bg-white border border-neutral-200 rounded-2xl p-6 mb-8 shadow-sm">
-        <h3 class="text-lg font-semibold text-neutral-900 mb-4">Revenus des 30 derniers jours</h3>
-        <div class="h-64" x-data="revenueChart()" x-init="init()">
+    <!-- Revenue Chart -->
+    <div class="mb-6 rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+        <div class="mb-5 flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Revenus des 30 derniers jours</h2>
+                <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes + abonnements</p>
+            </div>
+        </div>
+        <div style="height:260px;" x-data="revenueChart()" x-init="init()">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
 
-    <!-- Filters -->
-    <form method="GET" class="bg-white border border-neutral-200 rounded-xl p-4 mb-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row gap-4">
-            <div class="flex-1">
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Rechercher par référence, restaurant..." 
-                           class="w-full h-10 pl-10 pr-4 bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                </div>
+    <!-- FilterTabs + Search + Type/Status filters -->
+    <div class="mb-4">
+        <!-- Status tabs -->
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+            @php
+                $tabDefs = [
+                    ''          => 'Toutes',
+                    'completed' => 'Réussies',
+                    'pending'   => 'En attente',
+                    'failed'    => 'Échouées',
+                    'refund'    => 'Remboursements',
+                ];
+            @endphp
+            @foreach($tabDefs as $tabStatus => $tabLabel)
+            <a href="?{{ http_build_query(array_merge($filters, ['status' => $tabStatus, 'page' => 1])) }}"
+               class="rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors"
+               style="{{ $filters['status'] === $tabStatus
+                    ? 'background:var(--sa-primary);color:var(--sa-primary-fg);'
+                    : 'background:var(--sa-card);color:var(--sa-muted-fg);border:1px solid var(--sa-border);' }}">
+                {{ $tabLabel }}
+            </a>
+            @endforeach
+        </div>
+
+        <!-- Search + Type + Date filters -->
+        <form method="GET" class="flex flex-wrap gap-3">
+            <input type="hidden" name="status" value="{{ $filters['status'] }}">
+            <div class="relative flex-1 min-w-48">
+                <svg class="absolute left-3 top-1/2 size-4 -translate-y-1/2" style="color:var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Référence, restaurant..."
+                       class="h-10 w-full rounded-lg pl-9 pr-3 text-sm outline-none transition"
+                       style="border:1px solid var(--sa-border);background:var(--sa-bg);color:var(--sa-fg);">
             </div>
-            <select name="type" class="h-10 px-4 bg-white border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select name="type" class="h-10 rounded-lg px-3 text-sm outline-none transition"
+                    style="border:1px solid var(--sa-border);background:var(--sa-bg);color:var(--sa-fg);">
                 <option value="all" {{ $filters['type'] === 'all' ? 'selected' : '' }}>Tous les types</option>
                 <option value="subscription" {{ $filters['type'] === 'subscription' ? 'selected' : '' }}>Abonnements</option>
                 <option value="order" {{ $filters['type'] === 'order' ? 'selected' : '' }}>Commandes</option>
                 <option value="refund" {{ $filters['type'] === 'refund' ? 'selected' : '' }}>Remboursements</option>
             </select>
-            <select name="status" class="h-10 px-4 bg-white border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <option value="" {{ empty($filters['status']) ? 'selected' : '' }}>Tous les statuts</option>
-                <option value="completed" {{ $filters['status'] === 'completed' ? 'selected' : '' }}>Complété</option>
-                <option value="pending" {{ $filters['status'] === 'pending' ? 'selected' : '' }}>En attente</option>
-                <option value="failed" {{ $filters['status'] === 'failed' ? 'selected' : '' }}>Échoué</option>
-            </select>
-            <input type="date" name="date_from" value="{{ $filters['date_from'] }}" 
-                   class="h-10 px-4 bg-white border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <input type="date" name="date_to" value="{{ $filters['date_to'] }}" 
-                   class="h-10 px-4 bg-white border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <button type="submit" class="h-10 px-6 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors">
+            <input type="date" name="date_from" value="{{ $filters['date_from'] }}"
+                   class="h-10 rounded-lg px-3 text-sm outline-none transition"
+                   style="border:1px solid var(--sa-border);background:var(--sa-bg);color:var(--sa-fg);">
+            <input type="date" name="date_to" value="{{ $filters['date_to'] }}"
+                   class="h-10 rounded-lg px-3 text-sm outline-none transition"
+                   style="border:1px solid var(--sa-border);background:var(--sa-bg);color:var(--sa-fg);">
+            <button type="submit"
+                    class="h-10 rounded-lg px-5 text-sm font-medium transition-colors"
+                    style="background:var(--sa-primary);color:var(--sa-primary-fg);">
                 Filtrer
             </button>
-        </div>
-    </form>
+        </form>
+    </div>
 
     <!-- Transactions Table -->
-    <div class="bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm">
+    <div class="rounded-2xl border shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
         <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-neutral-50 border-b border-neutral-200">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Type</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Restaurant</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Description</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Montant</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Méthode</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Statut</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase">Date</th>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--sa-border);">
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Référence</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Restaurant</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Type</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Méthode</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Montant</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Date</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Statut</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-neutral-100">
+                <tbody>
                     @forelse($transactions as $transaction)
-                        <tr class="hover:bg-neutral-50 transition-colors">
-                            <td class="px-6 py-4">
-                                <span class="font-mono text-sm text-neutral-700">{{ $transaction['id'] }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $typeColors = [
-                                        'subscription' => 'bg-blue-500/20 text-blue-400',
-                                        'order' => 'bg-accent-500/20 text-accent-400',
-                                        'refund' => 'bg-red-500/20 text-red-400',
-                                    ];
-                                @endphp
-                                <span class="px-2.5 py-1 rounded-lg text-xs font-medium {{ $typeColors[$transaction['type']] ?? 'bg-neutral-500/20 text-neutral-400' }}">
-                                    {{ $transaction['type_label'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                @if($transaction['restaurant'])
-                                    <a href="{{ route('super-admin.restaurants.show', $transaction['restaurant']) }}" class="text-neutral-900 hover:text-primary-700 transition-colors">
-                                        {{ $transaction['restaurant_name'] }}
-                                    </a>
-                                @else
-                                    <span class="text-neutral-500">N/A</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-neutral-700">{{ $transaction['description'] }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="font-semibold {{ $transaction['amount'] < 0 ? 'text-red-400' : 'text-secondary-400' }}">
-                                    {{ $transaction['amount'] < 0 ? '-' : '+' }}{{ number_format(abs($transaction['amount']), 0, ',', ' ') }} F
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-neutral-600 text-sm">{{ $transaction['payment_method'] }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $statusColors = [
-                                        'active' => 'bg-secondary-500/20 text-secondary-400',
-                                        'completed' => 'bg-secondary-500/20 text-secondary-400',
-                                        'pending' => 'bg-yellow-500/20 text-yellow-400',
-                                        'failed' => 'bg-red-500/20 text-red-400',
-                                        'cancelled' => 'bg-red-500/20 text-red-400',
-                                        'expired' => 'bg-neutral-500/20 text-neutral-400',
-                                    ];
-                                @endphp
-                                <span class="px-2.5 py-1 rounded-lg text-xs font-medium {{ $statusColors[$transaction['status']] ?? 'bg-neutral-500/20 text-neutral-400' }}">
-                                    {{ $transaction['status_label'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-neutral-600 text-sm">{{ $transaction['created_at']->format('d/m/Y H:i') }}</span>
-                            </td>
-                        </tr>
+                    @php
+                        $statusStyles = [
+                            'active'    => 'background:color-mix(in oklch,var(--sa-success) 15%,transparent);color:var(--sa-success);',
+                            'completed' => 'background:color-mix(in oklch,var(--sa-success) 15%,transparent);color:var(--sa-success);',
+                            'pending'   => 'background:color-mix(in oklch,var(--sa-warning) 15%,transparent);color:var(--sa-warning);',
+                            'failed'    => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
+                            'cancelled' => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
+                            'expired'   => 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);',
+                        ];
+                        $typeStyles = [
+                            'subscription' => 'background:color-mix(in oklch,var(--sa-info) 15%,transparent);color:var(--sa-info);',
+                            'order'        => 'background:color-mix(in oklch,var(--sa-primary) 15%,transparent);color:var(--sa-primary);',
+                            'refund'       => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
+                        ];
+                    @endphp
+                    <tr style="border-bottom:1px solid var(--sa-border);">
+                        <td class="px-5 py-3.5">
+                            <span class="font-mono text-sm font-medium" style="color:var(--sa-fg);">{{ $transaction['id'] }}</span>
+                        </td>
+                        <td class="px-5 py-3.5">
+                            @if($transaction['restaurant'])
+                                <a href="{{ route('super-admin.restaurants.show', $transaction['restaurant']) }}"
+                                   class="font-medium transition-colors hover:underline" style="color:var(--sa-fg);">
+                                    {{ $transaction['restaurant_name'] }}
+                                </a>
+                            @else
+                                <span style="color:var(--sa-muted-fg);">N/A</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <span class="rounded-md px-2 py-0.5 text-xs font-medium"
+                                  style="{{ $typeStyles[$transaction['type']] ?? 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);' }}">
+                                {{ $transaction['type_label'] }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <span style="color:var(--sa-muted-fg);">{{ $transaction['payment_method'] }}</span>
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <span class="font-semibold" style="color:{{ $transaction['amount'] < 0 ? 'var(--sa-danger)' : 'var(--sa-fg)' }};">
+                                {{ $transaction['amount'] < 0 ? '−' : '+' }}{{ number_format(abs($transaction['amount']), 0, ',', ' ') }} F
+                            </span>
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <span style="color:var(--sa-muted-fg);">{{ $transaction['created_at']->format('d/m/Y H:i') }}</span>
+                        </td>
+                        <td class="px-5 py-3.5">
+                            <span class="rounded-md px-2 py-0.5 text-xs font-medium"
+                                  style="{{ $statusStyles[$transaction['status']] ?? 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);' }}">
+                                {{ $transaction['status_label'] }}
+                            </span>
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-neutral-500">
-                                Aucune transaction trouvée.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-sm" style="color:var(--sa-muted-fg);">
+                            Aucune transaction trouvée.
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -200,28 +218,30 @@
 
         <!-- Pagination -->
         @if($pagination['last_page'] > 1)
-            <div class="px-6 py-4 border-t border-neutral-200 flex items-center justify-between">
-                <span class="text-sm text-neutral-600">
-                    {{ $pagination['total'] }} transaction(s) au total
+        <div class="flex items-center justify-between px-6 py-4" style="border-top:1px solid var(--sa-border);">
+            <span class="text-sm" style="color:var(--sa-muted-fg);">
+                {{ $pagination['total'] }} transaction(s)
+            </span>
+            <div class="flex items-center gap-2">
+                @if($pagination['current_page'] > 1)
+                    <a href="?page={{ $pagination['current_page'] - 1 }}&{{ http_build_query($filters) }}"
+                       class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                       style="border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                        Précédent
+                    </a>
+                @endif
+                <span class="text-sm" style="color:var(--sa-muted-fg);">
+                    Page {{ $pagination['current_page'] }} / {{ $pagination['last_page'] }}
                 </span>
-                <div class="flex items-center gap-2">
-                    @if($pagination['current_page'] > 1)
-                        <a href="?page={{ $pagination['current_page'] - 1 }}&{{ http_build_query($filters) }}" 
-                           class="px-3 py-1.5 bg-neutral-100 text-neutral-800 rounded-lg hover:bg-neutral-200 transition-colors border border-neutral-200">
-                            Précédent
-                        </a>
-                    @endif
-                    <span class="text-neutral-600">
-                        Page {{ $pagination['current_page'] }} / {{ $pagination['last_page'] }}
-                    </span>
-                    @if($pagination['current_page'] < $pagination['last_page'])
-                        <a href="?page={{ $pagination['current_page'] + 1 }}&{{ http_build_query($filters) }}" 
-                           class="px-3 py-1.5 bg-neutral-100 text-neutral-800 rounded-lg hover:bg-neutral-200 transition-colors border border-neutral-200">
-                            Suivant
-                        </a>
-                    @endif
-                </div>
+                @if($pagination['current_page'] < $pagination['last_page'])
+                    <a href="?page={{ $pagination['current_page'] + 1 }}&{{ http_build_query($filters) }}"
+                       class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                       style="border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                        Suivant
+                    </a>
+                @endif
             </div>
+        </div>
         @endif
     </div>
 
@@ -233,7 +253,6 @@
                 init() {
                     const ctx = document.getElementById('revenueChart').getContext('2d');
                     const chartData = @json($chartData);
-                    
                     new Chart(ctx, {
                         type: 'line',
                         data: {
@@ -246,6 +265,7 @@
                                     backgroundColor: 'rgba(34, 197, 94, 0.1)',
                                     fill: true,
                                     tension: 0.4,
+                                    pointRadius: 2,
                                 },
                                 {
                                     label: 'Commandes',
@@ -253,6 +273,7 @@
                                     borderColor: 'rgb(139, 92, 246)',
                                     borderDash: [5, 5],
                                     tension: 0.4,
+                                    pointRadius: 2,
                                 },
                                 {
                                     label: 'Abonnements',
@@ -260,6 +281,7 @@
                                     borderColor: 'rgb(59, 130, 246)',
                                     borderDash: [5, 5],
                                     tension: 0.4,
+                                    pointRadius: 2,
                                 }
                             ]
                         },
@@ -267,23 +289,18 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: {
-                                    labels: { color: '#374151' }
-                                }
+                                legend: { labels: { color: '#6b7280', boxWidth: 12 } },
+                                tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
                             },
                             scales: {
                                 x: {
-                                    ticks: { color: '#6b7280' },
-                                    grid: { color: 'rgba(229, 231, 235, 1)' }
+                                    ticks: { color: '#6b7280', maxTicksLimit: 10 },
+                                    grid: { color: 'rgba(209,213,219,0.5)' }
                                 },
                                 y: {
-                                    ticks: { 
-                                        color: '#6b7280',
-                                        callback: function(value) {
-                                            return value.toLocaleString() + ' F';
-                                        }
-                                    },
-                                    grid: { color: 'rgba(229, 231, 235, 1)' }
+                                    beginAtZero: true,
+                                    ticks: { color: '#6b7280', callback: v => (v / 1000).toFixed(0) + 'K' },
+                                    grid: { color: 'rgba(209,213,219,0.5)' }
                                 }
                             }
                         }
