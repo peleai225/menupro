@@ -1376,7 +1376,9 @@ section {
    Super Admin — Design Tokens (scoped, n'affecte pas les autres thèmes)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.super-admin-layout {
+/* Super admin — always light, never affected by .dark class */
+.super-admin-layout,
+.dark .super-admin-layout {
   --sa-bg: #faf9f7;
   --sa-fg: #1e1c18;
   --sa-card: #ffffff;
@@ -1395,6 +1397,7 @@ section {
   --sa-sidebar-accent: #2e2a26;
   --sa-sidebar-border: #3a3530;
   --sa-radius: 0.75rem;
+  color-scheme: light;
 }
 
 /* Nav items scoped overrides */

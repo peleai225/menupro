@@ -1,5 +1,5 @@
 <x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'">
-    <div x-data="sidebar()" class="super-admin-layout min-h-screen" style="background: var(--sa-bg);">
+    <div x-data="sidebar()" x-init="document.documentElement.classList.remove('dark'); document.body.classList.remove('dark');" class="super-admin-layout min-h-screen" style="background: var(--sa-bg);" data-theme="light">
         <!-- Sidebar Desktop -->
         <aside :class="expanded ? 'w-64' : 'w-[72px]'"
                class="fixed left-0 top-0 h-full z-40 transition-all duration-300 hidden lg:flex flex-col shadow-xl"
