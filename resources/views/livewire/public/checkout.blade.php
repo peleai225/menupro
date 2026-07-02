@@ -249,6 +249,11 @@
                         <div x-show="errorMsg" x-cloak class="mb-4 text-sm text-red-600" x-text="errorMsg"></div>
 
                         {{-- Champs de détail --}}
+                        {{-- Champs cachés pour sync Livewire --}}
+                        <input type="hidden" wire:model="delivery_city" x-bind:value="cities.find(c => c.id.toString() === selectedCityId)?.name || ''">
+                        <input type="hidden" wire:model="delivery_latitude">
+                        <input type="hidden" wire:model="delivery_longitude">
+
                         <div x-show="selectedCityId" x-cloak class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse / Quartier *</label>

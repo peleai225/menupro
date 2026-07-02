@@ -299,6 +299,22 @@ class Checkout extends Component
 
     public function placeOrder()
     {
+        try {
+            return $this->processOrder();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            \Log::error('Checkout placeOrder failed', [
+                'restaurant' => $this->restaurant->id,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile() . ':' . $e->getLine(),
+            ]);
+            session()->flash('error', 'Une erreur est survenue. Veuillez réessayer.');
+        }
+    }
+
+    private function processOrder()
+    {
         $rules = [
             'customer_name' => 'required|string|max:100',
             'customer_phone' => 'required|string|min:8|max:20',

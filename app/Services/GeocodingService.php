@@ -155,9 +155,13 @@ class GeocodingService
      */
     public function detectDeliveryCity(float $lat, float $lng): ?DeliveryCity
     {
-        $cities = Cache::remember('delivery_cities:active', 3600, function () {
-            return DeliveryCity::active()->get();
-        });
+        try {
+            $cities = Cache::remember('delivery_cities:active', 3600, function () {
+                return DeliveryCity::active()->get();
+            });
+        } catch (\Throwable) {
+            $cities = DeliveryCity::active()->get();
+        }
 
         $closest = null;
         $closestDistance = PHP_FLOAT_MAX;
