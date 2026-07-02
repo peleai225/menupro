@@ -9,7 +9,7 @@
         <div class="flex items-center gap-3">
             @if($stats['pending'] > 0)
                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                      style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);border-color:color-mix(in oklch,var(--sa-warning) 20%,transparent);">
+                      style="background:rgba(217,119,6,0.10);color:var(--sa-warning);border-color:rgba(217,119,6,0.20);">
                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                     {{ $stats['pending'] }} en cours
                 </span>
@@ -22,7 +22,7 @@
 
         {{-- Total commandes --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
@@ -33,7 +33,7 @@
 
         {{-- Aujourd'hui --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -44,7 +44,7 @@
 
         {{-- En cours --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(59,111,212,0.10);color:var(--sa-info);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l1 1h2m10-11h2l3 4v4h-5V5z"/>
@@ -56,7 +56,7 @@
 
         {{-- Revenus du mois --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -70,18 +70,18 @@
     {{-- Status Badge Map (for table rows) --}}
     @php
         $orderStatusMap = [
-            'draft'           => ['label' => 'Brouillon',      'bg' => 'color-mix(in oklch,var(--sa-muted) 50%,transparent)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
-            'pending_payment' => ['label' => 'Paiement att.',  'bg' => 'color-mix(in oklch,var(--sa-warning) 10%,transparent)', 'color' => 'var(--sa-warning)',  'border' => 'color-mix(in oklch,var(--sa-warning) 20%,transparent)'],
-            'paid'            => ['label' => 'Payée',          'bg' => 'color-mix(in oklch,var(--sa-info) 10%,transparent)',    'color' => 'var(--sa-info)',     'border' => 'color-mix(in oklch,var(--sa-info) 20%,transparent)'],
-            'confirmed'       => ['label' => 'Confirmée',      'bg' => 'color-mix(in oklch,var(--sa-info) 10%,transparent)',    'color' => 'var(--sa-info)',     'border' => 'color-mix(in oklch,var(--sa-info) 20%,transparent)'],
-            'preparing'       => ['label' => 'En préparation', 'bg' => 'color-mix(in oklch,var(--sa-warning) 10%,transparent)', 'color' => 'var(--sa-warning)',  'border' => 'color-mix(in oklch,var(--sa-warning) 20%,transparent)'],
-            'ready'           => ['label' => 'Prête',          'bg' => 'color-mix(in oklch,var(--sa-info) 10%,transparent)',    'color' => 'var(--sa-info)',     'border' => 'color-mix(in oklch,var(--sa-info) 20%,transparent)'],
-            'delivering'      => ['label' => 'En livraison',   'bg' => 'color-mix(in oklch,var(--sa-info) 10%,transparent)',    'color' => 'var(--sa-info)',     'border' => 'color-mix(in oklch,var(--sa-info) 20%,transparent)'],
-            'completed'       => ['label' => 'Livrée',         'bg' => 'color-mix(in oklch,var(--sa-success) 10%,transparent)', 'color' => 'var(--sa-success)', 'border' => 'color-mix(in oklch,var(--sa-success) 20%,transparent)'],
-            'cancelled'       => ['label' => 'Annulée',        'bg' => 'color-mix(in oklch,var(--sa-danger) 10%,transparent)',  'color' => 'var(--sa-danger)',  'border' => 'color-mix(in oklch,var(--sa-danger) 20%,transparent)'],
-            'refunded'        => ['label' => 'Remboursée',     'bg' => 'color-mix(in oklch,var(--sa-muted) 50%,transparent)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
+            'draft'           => ['label' => 'Brouillon',      'bg' => 'rgba(243,242,239,0.60)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
+            'pending_payment' => ['label' => 'Paiement att.',  'bg' => 'rgba(217,119,6,0.10)', 'color' => 'var(--sa-warning)',  'border' => 'rgba(217,119,6,0.20)'],
+            'paid'            => ['label' => 'Payée',          'bg' => 'rgba(59,111,212,0.10)',    'color' => 'var(--sa-info)',     'border' => 'rgba(59,111,212,0.20)'],
+            'confirmed'       => ['label' => 'Confirmée',      'bg' => 'rgba(59,111,212,0.10)',    'color' => 'var(--sa-info)',     'border' => 'rgba(59,111,212,0.20)'],
+            'preparing'       => ['label' => 'En préparation', 'bg' => 'rgba(217,119,6,0.10)', 'color' => 'var(--sa-warning)',  'border' => 'rgba(217,119,6,0.20)'],
+            'ready'           => ['label' => 'Prête',          'bg' => 'rgba(59,111,212,0.10)',    'color' => 'var(--sa-info)',     'border' => 'rgba(59,111,212,0.20)'],
+            'delivering'      => ['label' => 'En livraison',   'bg' => 'rgba(59,111,212,0.10)',    'color' => 'var(--sa-info)',     'border' => 'rgba(59,111,212,0.20)'],
+            'completed'       => ['label' => 'Livrée',         'bg' => 'rgba(61,158,98,0.10)', 'color' => 'var(--sa-success)', 'border' => 'rgba(61,158,98,0.20)'],
+            'cancelled'       => ['label' => 'Annulée',        'bg' => 'rgba(220,38,38,0.10)',  'color' => 'var(--sa-danger)',  'border' => 'rgba(220,38,38,0.20)'],
+            'refunded'        => ['label' => 'Remboursée',     'bg' => 'rgba(243,242,239,0.60)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
         ];
-        $orderBadgeFallback = ['label' => '—', 'bg' => 'color-mix(in oklch,var(--sa-muted) 50%,transparent)', 'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'];
+        $orderBadgeFallback = ['label' => '—', 'bg' => 'rgba(243,242,239,0.60)', 'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'];
 
         // "En cours" statuses for tab highlight
         $enCoursStatuses = ['paid','confirmed','preparing','ready','delivering'];
@@ -180,7 +180,7 @@
                         $badge = $orderStatusMap[$sv] ?? $orderBadgeFallback;
                     @endphp
                     <tr class="transition-colors" style="border-bottom:1px solid var(--sa-border);"
-                        onmouseover="this.style.background='color-mix(in oklch,var(--sa-muted) 50%,transparent)'"
+                        onmouseover="this.style.background='rgba(243,242,239,0.60)'"
                         onmouseout="this.style.background='transparent'">
 
                         {{-- Référence --}}
@@ -238,7 +238,7 @@
                 @empty
                     <tr>
                         <td colspan="8" class="px-5 py-16 text-center">
-                            <svg class="mx-auto mb-3 w-12 h-12" style="color:color-mix(in oklch,var(--sa-muted-fg) 40%,transparent);"
+                            <svg class="mx-auto mb-3 w-12 h-12" style="color:rgba(107,101,96,0.40);"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>

@@ -10,7 +10,7 @@
             @if(isset($stats['pending_verification']) && $stats['pending_verification'] > 0)
                 <a href="{{ route('super-admin.restaurants.index', array_merge(request()->only(['search', 'plan', 'status']), ['verification' => 'pending_verification'])) }}"
                    class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                   style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);border-color:color-mix(in oklch,var(--sa-warning) 20%,transparent);">
+                   style="background:rgba(217,119,6,0.10);color:var(--sa-warning);border-color:rgba(217,119,6,0.20);">
                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                     {{ $stats['pending_verification'] }} RCCM à vérifier
                 </a>
@@ -31,7 +31,7 @@
 
         {{-- Total --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10"/>
@@ -43,7 +43,7 @@
 
         {{-- Actifs --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -54,7 +54,7 @@
 
         {{-- Suspendus --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(220,38,38,0.10);color:var(--sa-danger);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -65,7 +65,7 @@
 
         {{-- En attente --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -104,7 +104,7 @@
                    style="{{ $isActive ? 'background:var(--sa-primary);color:var(--sa-primary-fg);' : 'color:var(--sa-muted-fg);' }}">
                     {{ $tab['label'] }}
                     <span class="rounded-full px-1.5 text-xs font-semibold"
-                          style="{{ $isActive ? 'background:rgba(255,255,255,0.2);color:var(--sa-primary-fg);' : 'background:color-mix(in oklch,var(--sa-muted) 80%,transparent);color:var(--sa-muted-fg);' }}">
+                          style="{{ $isActive ? 'background:rgba(255,255,255,0.2);color:var(--sa-primary-fg);' : 'background:rgba(243,242,239,0.80);color:var(--sa-muted-fg);' }}">
                         {{ number_format($tab['count']) }}
                     </span>
                 </a>
@@ -158,12 +158,12 @@
     {{-- Status Badge Map --}}
     @php
         $statusMap = [
-            'active'    => ['label' => 'Actif',      'bg' => 'color-mix(in oklch,var(--sa-success) 10%,transparent)', 'color' => 'var(--sa-success)',  'border' => 'color-mix(in oklch,var(--sa-success) 20%,transparent)'],
-            'pending'   => ['label' => 'En attente', 'bg' => 'color-mix(in oklch,var(--sa-warning) 10%,transparent)', 'color' => 'var(--sa-warning)',  'border' => 'color-mix(in oklch,var(--sa-warning) 20%,transparent)'],
-            'suspended' => ['label' => 'Suspendu',   'bg' => 'color-mix(in oklch,var(--sa-danger) 10%,transparent)',  'color' => 'var(--sa-danger)',   'border' => 'color-mix(in oklch,var(--sa-danger) 20%,transparent)'],
-            'expired'   => ['label' => 'Expiré',     'bg' => 'color-mix(in oklch,var(--sa-muted) 50%,transparent)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
+            'active'    => ['label' => 'Actif',      'bg' => 'rgba(61,158,98,0.10)', 'color' => 'var(--sa-success)',  'border' => 'rgba(61,158,98,0.20)'],
+            'pending'   => ['label' => 'En attente', 'bg' => 'rgba(217,119,6,0.10)', 'color' => 'var(--sa-warning)',  'border' => 'rgba(217,119,6,0.20)'],
+            'suspended' => ['label' => 'Suspendu',   'bg' => 'rgba(220,38,38,0.10)',  'color' => 'var(--sa-danger)',   'border' => 'rgba(220,38,38,0.20)'],
+            'expired'   => ['label' => 'Expiré',     'bg' => 'rgba(243,242,239,0.60)',   'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'],
         ];
-        $badgeFallback = ['label' => '—', 'bg' => 'color-mix(in oklch,var(--sa-muted) 50%,transparent)', 'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'];
+        $badgeFallback = ['label' => '—', 'bg' => 'rgba(243,242,239,0.60)', 'color' => 'var(--sa-muted-fg)', 'border' => 'var(--sa-border)'];
     @endphp
 
     {{-- Table --}}
@@ -186,7 +186,7 @@
                         $badge = $statusMap[$sv] ?? $badgeFallback;
                     @endphp
                     <tr class="transition-colors" style="border-bottom:1px solid var(--sa-border);"
-                        onmouseover="this.style.background='color-mix(in oklch,var(--sa-muted) 50%,transparent)'"
+                        onmouseover="this.style.background='rgba(243,242,239,0.60)'"
                         onmouseout="this.style.background='transparent'">
 
                         {{-- Restaurant name + avatar --}}
@@ -199,7 +199,7 @@
                                          style="border:1px solid var(--sa-border);">
                                 @else
                                     <span class="flex w-10 h-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
-                                          style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                                          style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                                         {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                     </span>
                                 @endif
@@ -236,7 +236,7 @@
                         {{-- Plan --}}
                         <td class="px-5 py-4">
                             <span class="rounded-md px-2 py-0.5 text-xs font-medium"
-                                  style="background:color-mix(in oklch,var(--sa-muted) 80%,transparent);color:var(--sa-muted-fg);">
+                                  style="background:rgba(243,242,239,0.80);color:var(--sa-muted-fg);">
                                 {{ $restaurant->currentPlan?->name ?? 'Aucun' }}
                             </span>
                         </td>
@@ -278,7 +278,7 @@
                 @empty
                     <tr>
                         <td colspan="6" class="px-5 py-16 text-center">
-                            <svg class="mx-auto mb-3 w-12 h-12" style="color:color-mix(in oklch,var(--sa-muted-fg) 40%,transparent);"
+                            <svg class="mx-auto mb-3 w-12 h-12" style="color:rgba(107,101,96,0.40);"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                             </svg>

@@ -5,8 +5,8 @@
         <div x-show="flash.message" x-transition
              class="flex items-center gap-3 px-4 py-3 rounded-xl border text-sm"
              :style="flash.type === 'success'
-                ? 'background:color-mix(in oklch,var(--sa-success) 10%,transparent);border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);color:var(--sa-success);'
-                : 'background:color-mix(in oklch,var(--sa-danger) 10%,transparent);border-color:color-mix(in oklch,var(--sa-danger) 20%,transparent);color:var(--sa-danger);'"
+                ? 'background:rgba(61,158,98,0.10);border-color:rgba(61,158,98,0.20);color:var(--sa-success);'
+                : 'background:rgba(220,38,38,0.10);border-color:rgba(220,38,38,0.20);color:var(--sa-danger);'"
              x-cloak>
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path x-show="flash.type === 'success'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -20,7 +20,7 @@
             {{-- Villes actives --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </span>
                 </div>
@@ -30,7 +30,7 @@
             {{-- Livreurs déployés --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8h4l3 5v3h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
                     </span>
                 </div>
@@ -40,7 +40,7 @@
             {{-- Restaurants --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(59,111,212,0.10);color:var(--sa-info);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     </span>
                 </div>
@@ -50,7 +50,7 @@
             {{-- Commandes livrées --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </span>
                 </div>
@@ -83,55 +83,55 @@
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Nom de la ville *</label>
                     <input type="text" x-model="form.name" required placeholder="ex: Abidjan"
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Latitude centre *</label>
                     <input type="number" x-model="form.center_latitude" step="0.0000001" required placeholder="5.3600"
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Longitude centre *</label>
                     <input type="number" x-model="form.center_longitude" step="0.0000001" required placeholder="-4.0083"
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Rayon de couverture (km) *</label>
                     <input type="number" x-model="form.coverage_radius_km" min="1" max="100" required
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Frais de base (FCFA) *</label>
                     <input type="number" x-model="form.delivery_base_fee" min="0" required
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Frais par km (FCFA) *</label>
                     <input type="number" x-model="form.delivery_fee_per_km" min="0" required
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Distance max resto→client (km) *</label>
                     <input type="number" x-model="form.max_delivery_distance_km" min="1" max="50" required
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Surcharge heures pointe (%)</label>
                     <input type="number" x-model="form.peak_hour_surcharge_percent" min="0" max="100"
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Commande minimum (FCFA)</label>
                     <input type="number" x-model="form.min_order_amount" min="0"
                            class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none"
-                           style="background:color-mix(in oklch,var(--sa-muted) 30%,transparent);border-color:var(--sa-border);color:var(--sa-fg);">
+                           style="background:rgba(243,242,239,0.50);border-color:var(--sa-border);color:var(--sa-fg);">
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 flex gap-3">
                     <button type="submit" :disabled="saving"
@@ -142,7 +142,7 @@
                     </button>
                     <button type="button" @click="showForm = false"
                             class="h-10 px-4 rounded-xl text-sm"
-                            style="background:color-mix(in oklch,var(--sa-muted) 50%,transparent);color:var(--sa-fg);">Annuler</button>
+                            style="background:rgba(243,242,239,0.60);color:var(--sa-fg);">Annuler</button>
                 </div>
             </form>
         </div>
@@ -153,7 +153,7 @@
                 <div class="rounded-2xl border flex flex-col gap-4 p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center gap-3">
-                            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </span>
                             <div>
@@ -165,21 +165,21 @@
                         <div class="flex items-center gap-2">
                             <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
                                   :style="city.is_active
-                                    ? 'background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);'
-                                    : 'background:color-mix(in oklch,var(--sa-muted-fg) 10%,transparent);color:var(--sa-muted-fg);border-color:color-mix(in oklch,var(--sa-muted-fg) 20%,transparent);'">
+                                    ? 'background:rgba(61,158,98,0.10);color:var(--sa-success);border-color:rgba(61,158,98,0.20);'
+                                    : 'background:rgba(107,101,96,0.10);color:var(--sa-muted-fg);border-color:rgba(107,101,96,0.20);'">
                                 <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                 <span x-text="city.is_active ? 'Active' : 'Inactive'"></span>
                             </span>
                             <button @click="toggleCity(city)"
                                     class="relative w-11 h-6 rounded-full transition-colors duration-200"
-                                    :style="city.is_active ? 'background:var(--sa-success);' : 'background:color-mix(in oklch,var(--sa-muted-fg) 40%,transparent);'">
+                                    :style="city.is_active ? 'background:var(--sa-success);' : 'background:rgba(107,101,96,0.40);'">
                                 <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
                                       :class="city.is_active ? 'translate-x-5' : ''"></span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2 rounded-xl p-3 text-center" style="background:color-mix(in oklch,var(--sa-muted) 50%,transparent);">
+                    <div class="grid grid-cols-3 gap-2 rounded-xl p-3 text-center" style="background:rgba(243,242,239,0.60);">
                         <div>
                             <p class="text-lg font-bold" style="color:var(--sa-fg);" x-text="city.zones_count || 0"></p>
                             <p class="text-xs" style="color:var(--sa-muted-fg);">Zones</p>
@@ -201,9 +201,9 @@
 
                     <a :href="'{{ url('/admin/villes-livraison') }}/' + city.id"
                        class="block w-full text-center h-9 leading-9 rounded-xl text-sm font-medium transition-colors"
-                       style="background:color-mix(in oklch,var(--sa-muted) 50%,transparent);color:var(--sa-fg);"
-                       onmouseover="this.style.background='color-mix(in oklch,var(--sa-primary) 10%,transparent)';this.style.color='var(--sa-primary)';"
-                       onmouseout="this.style.background='color-mix(in oklch,var(--sa-muted) 50%,transparent)';this.style.color='var(--sa-fg)';">
+                       style="background:rgba(243,242,239,0.60);color:var(--sa-fg);"
+                       onmouseover="this.style.background='rgba(194,98,31,0.10)';this.style.color='var(--sa-primary)';"
+                       onmouseout="this.style.background='rgba(243,242,239,0.60)';this.style.color='var(--sa-fg)';">
                         Configurer
                     </a>
                 </div>

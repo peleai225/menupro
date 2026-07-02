@@ -19,7 +19,7 @@
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Volume traité (primary) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.12);">
                 <svg class="w-5 h-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                 </svg>
@@ -31,7 +31,7 @@
 
         <!-- Ce mois (success) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 12%,transparent);">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.12);">
                 <svg class="w-5 h-5" style="color:var(--sa-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -43,7 +43,7 @@
 
         <!-- En attente (warning) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 12%,transparent);">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:rgba(217,119,6,0.12);">
                 <svg class="w-5 h-5" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -55,7 +55,7 @@
 
         <!-- Commissions (info) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:rgba(59,111,212,0.12);">
                 <svg class="w-5 h-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
@@ -154,17 +154,17 @@
                     @forelse($transactions as $transaction)
                     @php
                         $statusStyles = [
-                            'active'    => 'background:color-mix(in oklch,var(--sa-success) 15%,transparent);color:var(--sa-success);',
-                            'completed' => 'background:color-mix(in oklch,var(--sa-success) 15%,transparent);color:var(--sa-success);',
-                            'pending'   => 'background:color-mix(in oklch,var(--sa-warning) 15%,transparent);color:var(--sa-warning);',
-                            'failed'    => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
-                            'cancelled' => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
-                            'expired'   => 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);',
+                            'active'    => 'background:rgba(61,158,98,0.15);color:var(--sa-success);',
+                            'completed' => 'background:rgba(61,158,98,0.15);color:var(--sa-success);',
+                            'pending'   => 'background:rgba(217,119,6,0.15);color:var(--sa-warning);',
+                            'failed'    => 'background:rgba(220,38,38,0.15);color:var(--sa-danger);',
+                            'cancelled' => 'background:rgba(220,38,38,0.15);color:var(--sa-danger);',
+                            'expired'   => 'background:rgba(107,101,96,0.15);color:var(--sa-muted-fg);',
                         ];
                         $typeStyles = [
-                            'subscription' => 'background:color-mix(in oklch,var(--sa-info) 15%,transparent);color:var(--sa-info);',
-                            'order'        => 'background:color-mix(in oklch,var(--sa-primary) 15%,transparent);color:var(--sa-primary);',
-                            'refund'       => 'background:color-mix(in oklch,var(--sa-danger) 15%,transparent);color:var(--sa-danger);',
+                            'subscription' => 'background:rgba(59,111,212,0.15);color:var(--sa-info);',
+                            'order'        => 'background:rgba(194,98,31,0.15);color:var(--sa-primary);',
+                            'refund'       => 'background:rgba(220,38,38,0.15);color:var(--sa-danger);',
                         ];
                     @endphp
                     <tr style="border-bottom:1px solid var(--sa-border);">
@@ -183,7 +183,7 @@
                         </td>
                         <td class="px-5 py-3.5">
                             <span class="rounded-md px-2 py-0.5 text-xs font-medium"
-                                  style="{{ $typeStyles[$transaction['type']] ?? 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);' }}">
+                                  style="{{ $typeStyles[$transaction['type']] ?? 'background:rgba(107,101,96,0.15);color:var(--sa-muted-fg);' }}">
                                 {{ $transaction['type_label'] }}
                             </span>
                         </td>
@@ -200,7 +200,7 @@
                         </td>
                         <td class="px-5 py-3.5">
                             <span class="rounded-md px-2 py-0.5 text-xs font-medium"
-                                  style="{{ $statusStyles[$transaction['status']] ?? 'background:color-mix(in oklch,var(--sa-muted-fg) 15%,transparent);color:var(--sa-muted-fg);' }}">
+                                  style="{{ $statusStyles[$transaction['status']] ?? 'background:rgba(107,101,96,0.15);color:var(--sa-muted-fg);' }}">
                                 {{ $transaction['status_label'] }}
                             </span>
                         </td>

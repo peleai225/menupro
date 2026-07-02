@@ -6,7 +6,7 @@
             {{-- Livreurs actifs --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v4m0 0a4 4 0 100 8 4 4 0 000-8zM4 16s0-4 8-4 8 4 8 4"/><circle cx="12" cy="8" r="2" fill="currentColor"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20h14"/></svg>
                     </span>
                 </div>
@@ -16,7 +16,7 @@
             {{-- Disponibles --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </span>
                 </div>
@@ -26,7 +26,7 @@
             {{-- En course --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(59,111,212,0.10);color:var(--sa-info);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8h4l3 5v3h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
                     </span>
                 </div>
@@ -36,7 +36,7 @@
             {{-- Livraisons totales --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
-                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                    <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                     </span>
                 </div>
@@ -48,7 +48,7 @@
         {{-- FilterTabs + Search --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             {{-- Tabs --}}
-            <div class="flex items-center gap-1 rounded-xl p-1" style="background:color-mix(in oklch,var(--sa-muted) 50%,transparent);">
+            <div class="flex items-center gap-1 rounded-xl p-1" style="background:rgba(243,242,239,0.60);">
                 @php $currentStatus = request('status', 'tous'); @endphp
                 @foreach([
                     ['key'=>'tous',     'label'=>'Tous'],
@@ -58,7 +58,7 @@
                 ] as $tab)
                 <a href="{{ request()->fullUrlWithQuery(['status' => $tab['key'] === 'tous' ? null : $tab['key'], 'page' => null]) }}"
                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                   style="{{ ($currentStatus === $tab['key'] || ($tab['key']==='tous' && !request('status'))) ? 'background:var(--sa-card);color:var(--sa-fg);box-shadow:0 1px 3px color-mix(in oklch,var(--sa-fg) 10%,transparent);' : 'color:var(--sa-muted-fg);' }}">
+                   style="{{ ($currentStatus === $tab['key'] || ($tab['key']==='tous' && !request('status'))) ? 'background:var(--sa-card);color:var(--sa-fg);box-shadow:0 1px 3px rgba(30,28,24,0.10);' : 'color:var(--sa-muted-fg);' }}">
                     {{ $tab['label'] }}
                 </a>
                 @endforeach
@@ -105,12 +105,12 @@
                 <tbody>
                     @forelse($drivers as $driver)
                     <tr class="transition-colors" style="border-bottom:1px solid var(--sa-border);"
-                        onmouseover="this.style.background='color-mix(in oklch,var(--sa-muted) 50%,transparent)'"
+                        onmouseover="this.style.background='rgba(243,242,239,0.60)'"
                         onmouseout="this.style.background='transparent'">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
                                 <span class="flex w-9 h-9 items-center justify-center rounded-xl text-sm font-bold text-white flex-shrink-0"
-                                      style="background:linear-gradient(135deg,var(--sa-primary),color-mix(in oklch,var(--sa-primary) 70%,var(--sa-info)));">
+                                      style="background:linear-gradient(135deg,var(--sa-primary),#7c5c9e);">
                                     {{ strtoupper(substr($driver->name, 0, 1)) }}
                                 </span>
                                 <div>
@@ -140,27 +140,27 @@
                         <td class="px-5 py-3.5">
                             @if($driver->verification_status === 'approved' && $driver->is_active && $driver->is_available)
                                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);">
+                                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);border-color:rgba(61,158,98,0.20);">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Disponible
                                 </span>
                             @elseif($driver->verification_status === 'approved' && $driver->is_active)
                                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                                      style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);border-color:color-mix(in oklch,var(--sa-info) 20%,transparent);">
+                                      style="background:rgba(59,111,212,0.10);color:var(--sa-info);border-color:rgba(59,111,212,0.20);">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>En course
                                 </span>
                             @elseif($driver->verification_status === 'pending')
                                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                                      style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);border-color:color-mix(in oklch,var(--sa-warning) 20%,transparent);">
+                                      style="background:rgba(217,119,6,0.10);color:var(--sa-warning);border-color:rgba(217,119,6,0.20);">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>En attente
                                 </span>
                             @elseif($driver->verification_status === 'rejected')
                                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                                      style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);border-color:color-mix(in oklch,var(--sa-danger) 20%,transparent);">
+                                      style="background:rgba(220,38,38,0.10);color:var(--sa-danger);border-color:rgba(220,38,38,0.20);">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Rejeté
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
-                                      style="background:color-mix(in oklch,var(--sa-muted-fg) 10%,transparent);color:var(--sa-muted-fg);border-color:color-mix(in oklch,var(--sa-muted-fg) 20%,transparent);">
+                                      style="background:rgba(107,101,96,0.10);color:var(--sa-muted-fg);border-color:rgba(107,101,96,0.20);">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Hors ligne
                                 </span>
                             @endif
@@ -169,9 +169,9 @@
                             <div class="flex items-center gap-1">
                                 <a href="{{ route('super-admin.drivers.show', $driver) }}"
                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-                                   style="background:color-mix(in oklch,var(--sa-muted) 50%,transparent);color:var(--sa-fg);"
-                                   onmouseover="this.style.background='color-mix(in oklch,var(--sa-primary) 10%,transparent)';this.style.color='var(--sa-primary)';"
-                                   onmouseout="this.style.background='color-mix(in oklch,var(--sa-muted) 50%,transparent)';this.style.color='var(--sa-fg)';">
+                                   style="background:rgba(243,242,239,0.60);color:var(--sa-fg);"
+                                   onmouseover="this.style.background='rgba(194,98,31,0.10)';this.style.color='var(--sa-primary)';"
+                                   onmouseout="this.style.background='rgba(243,242,239,0.60)';this.style.color='var(--sa-fg)';">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     Voir
                                 </a>
@@ -179,7 +179,7 @@
                                     <form method="POST" action="{{ route('super-admin.drivers.approve', $driver) }}">@csrf
                                         <button type="submit" class="p-1.5 rounded-lg transition-colors"
                                                 style="color:var(--sa-success);"
-                                                onmouseover="this.style.background='color-mix(in oklch,var(--sa-success) 10%,transparent)'"
+                                                onmouseover="this.style.background='rgba(61,158,98,0.10)'"
                                                 onmouseout="this.style.background='transparent'"
                                                 title="Approuver">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -188,7 +188,7 @@
                                     <form method="POST" action="{{ route('super-admin.drivers.reject', $driver) }}">@csrf
                                         <button type="submit" class="p-1.5 rounded-lg transition-colors"
                                                 style="color:var(--sa-danger);"
-                                                onmouseover="this.style.background='color-mix(in oklch,var(--sa-danger) 10%,transparent)'"
+                                                onmouseover="this.style.background='rgba(220,38,38,0.10)'"
                                                 onmouseout="this.style.background='transparent'"
                                                 title="Rejeter">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -198,7 +198,7 @@
                                     <form method="POST" action="{{ route('super-admin.drivers.suspend', $driver) }}">@csrf
                                         <button type="submit" class="p-1.5 rounded-lg transition-colors"
                                                 style="color:var(--sa-warning);"
-                                                onmouseover="this.style.background='color-mix(in oklch,var(--sa-warning) 10%,transparent)'"
+                                                onmouseover="this.style.background='rgba(217,119,6,0.10)'"
                                                 onmouseout="this.style.background='transparent'"
                                                 title="Suspendre">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/></svg>
@@ -208,7 +208,7 @@
                                     <form method="POST" action="{{ route('super-admin.drivers.reactivate', $driver) }}">@csrf
                                         <button type="submit" class="p-1.5 rounded-lg transition-colors"
                                                 style="color:var(--sa-success);"
-                                                onmouseover="this.style.background='color-mix(in oklch,var(--sa-success) 10%,transparent)'"
+                                                onmouseover="this.style.background='rgba(61,158,98,0.10)'"
                                                 onmouseout="this.style.background='transparent'"
                                                 title="Réactiver">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>

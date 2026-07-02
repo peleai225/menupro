@@ -8,7 +8,7 @@
         </div>
         <div class="flex items-center gap-2" x-data="liveDashboard()" x-init="startPolling()">
             <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium"
-                  style="border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                  style="border-color:rgba(61,158,98,0.20);background:rgba(61,158,98,0.10);color:var(--sa-success);">
                 <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--sa-success);"></span>
                 Live
                 <span class="text-[10px] opacity-70" x-text="lastUpdate"></span>
@@ -32,13 +32,13 @@
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
                 <span class="flex w-11 h-11 items-center justify-center rounded-xl"
-                      style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                      style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                     +{{ $stats['restaurants']['total'] }}
                 </span>
             </div>
@@ -51,13 +51,13 @@
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
                 <span class="flex w-11 h-11 items-center justify-center rounded-xl"
-                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold flex items-center gap-1"
-                      style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                     MRR
                 </span>
@@ -78,13 +78,13 @@
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
                 <span class="flex w-11 h-11 items-center justify-center rounded-xl"
-                      style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                      style="background:rgba(59,111,212,0.10);color:var(--sa-info);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
+                      style="background:rgba(59,111,212,0.10);color:var(--sa-info);">
                     +{{ number_format($stats['orders']['this_month']) }}
                 </span>
             </div>
@@ -100,10 +100,10 @@
 
         {{-- En attente --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
-             style="border-color:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 30%,transparent)' : 'var(--sa-border)' }};background:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 5%,transparent)' : 'var(--sa-card)' }};">
+             style="border-color:{{ $stats['restaurants']['pending'] > 0 ? 'rgba(217,119,6,0.30)' : 'var(--sa-border)' }};background:{{ $stats['restaurants']['pending'] > 0 ? 'rgba(217,119,6,0.05)' : 'var(--sa-card)' }};">
             <div class="flex items-start justify-between">
                 <span class="flex w-11 h-11 items-center justify-center rounded-xl"
-                      style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                      style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -184,9 +184,9 @@
                     @forelse($recentRestaurants as $restaurant)
                         @php
                             $statusStyles = [
-                                'active'    => ['bg' => 'color-mix(in oklch,var(--sa-success) 10%,transparent)', 'fg' => 'var(--sa-success)'],
-                                'pending'   => ['bg' => 'color-mix(in oklch,var(--sa-warning) 10%,transparent)', 'fg' => 'var(--sa-warning)'],
-                                'suspended' => ['bg' => 'color-mix(in oklch,var(--sa-danger) 10%,transparent)',  'fg' => 'var(--sa-danger)'],
+                                'active'    => ['bg' => 'rgba(61,158,98,0.10)', 'fg' => 'var(--sa-success)'],
+                                'pending'   => ['bg' => 'rgba(217,119,6,0.10)', 'fg' => 'var(--sa-warning)'],
+                                'suspended' => ['bg' => 'rgba(220,38,38,0.10)',  'fg' => 'var(--sa-danger)'],
                                 'expired'   => ['bg' => 'var(--sa-muted)', 'fg' => 'var(--sa-muted-fg)'],
                             ];
                             $statusLabels = [
@@ -213,7 +213,7 @@
                                              style="border:1px solid var(--sa-border);">
                                     @else
                                         <span class="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
-                                              style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                                              style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
                                             {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                         </span>
                                     @endif
@@ -251,9 +251,9 @@
             {{-- Pending Restaurants --}}
             @if($pendingRestaurants->isNotEmpty())
                 <div class="rounded-2xl border shadow-sm overflow-hidden"
-                     style="border-color:color-mix(in oklch,var(--sa-warning) 30%,transparent);background:var(--sa-card);">
+                     style="border-color:rgba(217,119,6,0.30);background:var(--sa-card);">
                     <div class="px-5 py-4 flex items-center gap-2"
-                         style="border-bottom:1px solid color-mix(in oklch,var(--sa-warning) 15%,transparent);background:color-mix(in oklch,var(--sa-warning) 5%,transparent);">
+                         style="border-bottom:1px solid rgba(217,119,6,0.15);background:rgba(217,119,6,0.05);">
                         <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--sa-warning);"></span>
                         <h2 class="font-semibold text-sm" style="color:var(--sa-fg);">
                             {{ $pendingRestaurants->count() }} restaurant(s) en attente de validation
@@ -262,17 +262,17 @@
                     <div class="flex flex-col divide-y" style="border-color:var(--sa-border);">
                         @foreach($pendingRestaurants as $restaurant)
                             <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 transition"
-                                 onmouseover="this.style.background='color-mix(in oklch,var(--sa-warning) 5%,transparent)'"
+                                 onmouseover="this.style.background='rgba(217,119,6,0.05)'"
                                  onmouseout="this.style.background='transparent'">
                                 <div class="flex items-center gap-3 min-w-0">
                                     @if($restaurant->logo_path)
                                         <img src="{{ Storage::url($restaurant->logo_path) }}"
                                              alt="{{ $restaurant->name }}"
                                              class="w-9 h-9 rounded-full object-cover flex-shrink-0"
-                                             style="border:1px solid color-mix(in oklch,var(--sa-warning) 30%,transparent);">
+                                             style="border:1px solid rgba(217,119,6,0.30);">
                                     @else
                                         <span class="flex w-9 h-9 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
-                                              style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                                              style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
                                             {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                         </span>
                                     @endif
@@ -330,14 +330,14 @@
             {{-- Expiring Subscriptions --}}
             @if($expiringSubscriptions->isNotEmpty())
                 <div class="rounded-2xl border p-5 shadow-sm"
-                     style="border-color:color-mix(in oklch,var(--sa-danger) 30%,transparent);background:var(--sa-card);">
+                     style="border-color:rgba(220,38,38,0.30);background:var(--sa-card);">
                     <div class="mb-5 flex items-start justify-between gap-4">
                         <div>
                             <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Expirent bientôt</h2>
                             <p class="text-sm" style="color:var(--sa-muted-fg);">Abonnements à renouveler</p>
                         </div>
                         <span class="flex w-9 h-9 items-center justify-center rounded-xl flex-shrink-0"
-                              style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
+                              style="background:rgba(220,38,38,0.10);color:var(--sa-danger);">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
@@ -346,7 +346,7 @@
                     <div class="space-y-2.5">
                         @foreach($expiringSubscriptions as $subscription)
                             <div class="flex items-center justify-between p-3 rounded-xl"
-                                 style="background:color-mix(in oklch,var(--sa-danger) 5%,transparent);border:1px solid color-mix(in oklch,var(--sa-danger) 15%,transparent);">
+                                 style="background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.15);">
                                 <div class="min-w-0">
                                     <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $subscription->restaurant->name }}</p>
                                     <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan->name }}</p>
@@ -371,9 +371,9 @@
                     <div class="space-y-2.5">
                         @foreach($topRestaurants as $index => $restaurant)
                             <div class="flex items-center gap-3 p-2.5 rounded-xl"
-                                 style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 8%,transparent);border:1px solid color-mix(in oklch,var(--sa-warning) 20%,transparent);' : 'background:transparent;' }}">
+                                 style="{{ $index === 0 ? 'background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.20);' : 'background:transparent;' }}">
                                 <span class="flex w-7 h-7 items-center justify-center rounded-lg font-bold text-xs flex-shrink-0"
-                                      style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 15%,transparent);color:var(--sa-warning);' : ($index === 1 ? 'background:var(--sa-muted);color:var(--sa-muted-fg);' : ($index === 2 ? 'background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);' : 'background:var(--sa-muted);color:var(--sa-muted-fg);')) }}">
+                                      style="{{ $index === 0 ? 'background:rgba(217,119,6,0.15);color:var(--sa-warning);' : ($index === 1 ? 'background:var(--sa-muted);color:var(--sa-muted-fg);' : ($index === 2 ? 'background:rgba(217,119,6,0.10);color:var(--sa-warning);' : 'background:var(--sa-muted);color:var(--sa-muted-fg);')) }}">
                                     {{ $index + 1 }}
                                 </span>
                                 <div class="flex-1 min-w-0">
@@ -400,7 +400,7 @@
                     <a href="{{ route('super-admin.restaurants.index') }}"
                        class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
-                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseover="this.style.borderColor='rgba(194,98,31,0.40)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
                         <svg class="w-6 h-6 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);"
@@ -412,7 +412,7 @@
                     <a href="{{ route('super-admin.plans.index') }}"
                        class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
-                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseover="this.style.borderColor='rgba(194,98,31,0.40)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
@@ -423,7 +423,7 @@
                     <a href="{{ route('super-admin.utilisateurs.index') }}"
                        class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
-                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseover="this.style.borderColor='rgba(194,98,31,0.40)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
@@ -434,7 +434,7 @@
                     <a href="{{ route('super-admin.stats') }}"
                        class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition"
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
-                       onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
+                       onmouseover="this.style.borderColor='rgba(194,98,31,0.40)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
