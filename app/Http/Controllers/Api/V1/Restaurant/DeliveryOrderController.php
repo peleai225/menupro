@@ -8,7 +8,9 @@ use App\Events\DeliveryStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\Order;
+use App\Services\DeliveryPricingService;
 use App\Services\DriverAssignmentService;
+use App\Services\GeocodingService;
 use App\Services\StockManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +21,7 @@ class DeliveryOrderController extends Controller
     public function __construct(
         private DriverAssignmentService $driverAssignment,
         private StockManager $stockManager,
+        private GeocodingService $geo,
     ) {}
 
     /**
@@ -113,14 +116,23 @@ class DeliveryOrderController extends Controller
     {
         $restaurant = $request->user()->restaurant;
 
+        $city = ($restaurant->latitude && $restaurant->longitude)
+            ? $this->geo->detectDeliveryCity((float) $restaurant->latitude, (float) $restaurant->longitude)
+            : null;
+
         return response()->json([
-            'is_on_platform'            => $restaurant->is_on_platform,
-            'delivery_base_fee'         => $restaurant->delivery_base_fee ?? 50000,
-            'delivery_fee_per_km'       => $restaurant->delivery_fee_per_km ?? 15000,
-            'max_delivery_distance_km'  => $restaurant->max_delivery_distance_km ?? 10,
-            'avg_prep_time_minutes'     => $restaurant->avg_prep_time_minutes ?? 20,
-            'platform_commission_rate'  => $restaurant->platform_commission_rate ?? 12.00,
-            'platform_category'         => $restaurant->platform_category,
+            'is_on_platform'           => $restaurant->is_on_platform,
+            'avg_prep_time_minutes'    => $restaurant->avg_prep_time_minutes ?? 20,
+            'platform_commission_rate' => $restaurant->platform_commission_rate ?? 12.00,
+            'platform_category'        => $restaurant->platform_category,
+            'city_pricing' => $city ? [
+                'city_name'               => $city->name,
+                'delivery_base_fee'       => $city->delivery_base_fee,
+                'delivery_fee_per_km'     => $city->delivery_fee_per_km,
+                'max_delivery_distance_km'=> $city->max_delivery_distance_km,
+                'peak_surcharge_percent'  => $city->peak_hour_surcharge_percent,
+                'is_active'               => $city->is_active,
+            ] : null,
         ]);
     }
 
@@ -130,11 +142,8 @@ class DeliveryOrderController extends Controller
     public function updateDeliverySettings(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'delivery_base_fee'        => 'sometimes|integer|min:0',
-            'delivery_fee_per_km'      => 'sometimes|integer|min:0',
-            'max_delivery_distance_km' => 'sometimes|integer|min:1|max:30',
-            'avg_prep_time_minutes'    => 'sometimes|integer|min:5|max:120',
-            'platform_category'        => 'sometimes|nullable|string|max:50',
+            'avg_prep_time_minutes' => 'sometimes|integer|min:5|max:120',
+            'platform_category'     => 'sometimes|nullable|string|max:50',
         ]);
 
         $request->user()->restaurant->update($data);

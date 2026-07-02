@@ -167,10 +167,10 @@ class RestaurantController extends Controller
 
         if (!$estimate['within_range']) {
             return response()->json([
-                'deliverable'   => false,
-                'message'       => 'Ce restaurant ne livre pas à cette adresse.',
-                'distance_km'   => $estimate['distance_km'],
-                'max_distance'  => $restaurant->max_delivery_distance_km ?? 10,
+                'deliverable'  => false,
+                'message'      => 'Ce restaurant ne livre pas à cette adresse.',
+                'distance_km'  => $estimate['distance_km'],
+                'city_covered' => $estimate['city_name'] !== null,
             ], 422);
         }
 
@@ -207,9 +207,15 @@ class RestaurantController extends Controller
             $data['description']   = $r->description;
             $data['tagline']       = $r->tagline;
             $data['opening_hours'] = $r->opening_hours;
-            $data['delivery_base_fee']   = $r->delivery_base_fee ?? 50000;
-            $data['delivery_fee_per_km'] = $r->delivery_fee_per_km ?? 15000;
-            $data['max_delivery_km']     = $r->max_delivery_distance_km ?? 10;
+
+            $city = ($r->latitude && $r->longitude)
+                ? $this->geo->detectDeliveryCity((float) $r->latitude, (float) $r->longitude)
+                : null;
+
+            $data['delivery_base_fee']   = $city?->delivery_base_fee ?? 50000;
+            $data['delivery_fee_per_km'] = $city?->delivery_fee_per_km ?? 15000;
+            $data['max_delivery_km']     = $city?->max_delivery_distance_km ?? 10;
+            $data['delivery_city_name']  = $city?->name;
         }
 
         return $data;

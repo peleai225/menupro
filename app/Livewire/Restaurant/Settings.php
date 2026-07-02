@@ -4,6 +4,7 @@ namespace App\Livewire\Restaurant;
 
 use App\Models\Restaurant;
 use App\Models\RestaurantWallet;
+use App\Services\GeocodingService;
 use App\Services\MediaUploader;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Storage;
@@ -45,6 +46,13 @@ class Settings extends Component
 
     #[Rule('nullable|string|max:20')]
     public ?string $postal_code = null;
+
+    // GPS — set via Leaflet map click or auto-geocoded on address save
+    #[Rule('nullable|numeric|between:-90,90')]
+    public ?float $latitude = null;
+
+    #[Rule('nullable|numeric|between:-180,180')]
+    public ?float $longitude = null;
 
     // Images
     public $logo = null;
@@ -120,6 +128,8 @@ class Settings extends Component
         $this->address = $this->restaurant->address;
         $this->city = $this->restaurant->city;
         $this->postal_code = $this->restaurant->postal_code;
+        $this->latitude = $this->restaurant->latitude ? (float) $this->restaurant->latitude : null;
+        $this->longitude = $this->restaurant->longitude ? (float) $this->restaurant->longitude : null;
         $this->existingLogo = $this->restaurant->logo_path;
         $this->existingBanner = $this->restaurant->banner_path;
         $this->delivery_enabled = $this->restaurant->delivery_enabled ?? false;
@@ -217,30 +227,50 @@ class Settings extends Component
     {
         try {
             $this->validate([
-                'name' => 'required|string|max:100',
+                'name'        => 'required|string|max:100',
                 'description' => 'nullable|string|max:500',
-                'tagline' => 'nullable|string|max:200',
-                'phone' => 'nullable|string|max:20',
-                'email' => 'nullable|email|max:255',
-                'website' => 'nullable|url|max:255',
-                'address' => 'nullable|string|max:255',
-                'city' => 'nullable|string|max:100',
+                'tagline'     => 'nullable|string|max:200',
+                'phone'       => 'nullable|string|max:20',
+                'email'       => 'nullable|email|max:255',
+                'website'     => 'nullable|url|max:255',
+                'address'     => 'nullable|string|max:255',
+                'city'        => 'nullable|string|max:100',
                 'postal_code' => 'nullable|string|max:20',
-                'logo' => 'nullable|image|max:2048',
-                'banner' => 'nullable|image|max:5120',
+                'latitude'    => 'nullable|numeric|between:-90,90',
+                'longitude'   => 'nullable|numeric|between:-180,180',
+                'logo'        => 'nullable|image|max:2048',
+                'banner'      => 'nullable|image|max:5120',
             ]);
 
             $data = [
-            'name' => $this->name,
-            'description' => $this->description,
-            'tagline' => $this->tagline,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'website' => $this->website,
-            'address' => $this->address,
-            'city' => $this->city,
-            'postal_code' => $this->postal_code,
-        ];
+                'name'        => $this->name,
+                'description' => $this->description,
+                'tagline'     => $this->tagline,
+                'phone'       => $this->phone,
+                'email'       => $this->email,
+                'website'     => $this->website,
+                'address'     => $this->address,
+                'city'        => $this->city,
+                'postal_code' => $this->postal_code,
+                'latitude'    => $this->latitude,
+                'longitude'   => $this->longitude,
+            ];
+
+            // Auto-géocode si adresse remplie mais coordonnées toujours nulles
+            if (!$this->latitude && !$this->longitude && $this->address && $this->city) {
+                try {
+                    $geo = app(GeocodingService::class);
+                    $results = $geo->searchAddress($this->address . ', ' . $this->city, $this->city ?? 'Abidjan');
+                    if (!empty($results)) {
+                        $data['latitude']  = $results[0]['lat'];
+                        $data['longitude'] = $results[0]['lng'];
+                        $this->latitude    = $results[0]['lat'];
+                        $this->longitude   = $results[0]['lng'];
+                    }
+                } catch (\Throwable) {
+                    // Géocodage optionnel — ne bloque pas la sauvegarde
+                }
+            }
 
         // Handle logo upload
         if ($this->logo) {

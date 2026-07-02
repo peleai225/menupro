@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Services\GeocodingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PlatformRestaurantController extends Controller
 {
+    public function __construct(private GeocodingService $geo) {}
+
     /**
      * Liste des restaurants MenuPro — activer/désactiver sur la plateforme.
      */
@@ -106,6 +109,10 @@ class PlatformRestaurantController extends Controller
 
     private function formatRestaurant(Restaurant $r): array
     {
+        $city = ($r->latitude && $r->longitude)
+            ? $this->geo->detectDeliveryCity((float) $r->latitude, (float) $r->longitude)
+            : null;
+
         return [
             'id'                       => $r->id,
             'name'                     => $r->name,
@@ -114,9 +121,10 @@ class PlatformRestaurantController extends Controller
             'is_on_platform'           => $r->is_on_platform,
             'platform_category'        => $r->platform_category,
             'platform_commission_rate' => $r->platform_commission_rate,
-            'delivery_base_fee'        => $r->delivery_base_fee,
-            'delivery_fee_per_km'      => $r->delivery_fee_per_km,
-            'max_delivery_distance_km' => $r->max_delivery_distance_km,
+            'delivery_city_name'       => $city?->name,
+            'delivery_base_fee'        => $city?->delivery_base_fee,
+            'delivery_fee_per_km'      => $city?->delivery_fee_per_km,
+            'max_delivery_distance_km' => $city?->max_delivery_distance_km,
             'has_gps'                  => !empty($r->latitude) && !empty($r->longitude),
             'latitude'                 => $r->latitude,
             'longitude'                => $r->longitude,

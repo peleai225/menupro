@@ -173,9 +173,9 @@
                     </div>
 
                     <!-- Address -->
-                    <div class="card p-6">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse</h2>
-                        
+                    <div class="card p-6" x-data="restaurantLocationPicker(@js((float)($restaurant->latitude ?: 5.3600)), @js((float)($restaurant->longitude ?: -4.0083)), @js((bool)$restaurant->latitude))">
+                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse & Localisation</h2>
+
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
@@ -191,6 +191,43 @@
                                     <label class="block text-sm font-medium text-neutral-700 mb-2">Code postal</label>
                                     <input type="text" wire:model="postal_code" class="input" placeholder="00000">
                                 </div>
+                            </div>
+
+                            {{-- GPS Section --}}
+                            <div class="pt-2">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-medium text-neutral-700">
+                                        Position GPS
+                                        <span x-show="hasCoords" class="ml-2 inline-flex items-center gap-1 text-xs text-emerald-600 font-normal">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            Localisé
+                                        </span>
+                                        <span x-show="!hasCoords" class="ml-2 inline-flex items-center gap-1 text-xs text-amber-600 font-normal">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            Non localisé — livraison impossible
+                                        </span>
+                                    </label>
+                                    <button type="button" @click="detectGps()" :disabled="detecting"
+                                            class="flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50">
+                                        <svg x-show="!detecting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <svg x-show="detecting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                        <span x-text="detecting ? 'Localisation...' : 'Ma position'"></span>
+                                    </button>
+                                </div>
+
+                                {{-- Carte Leaflet --}}
+                                <div id="restaurant-location-map" class="w-full h-52 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 z-0"></div>
+                                <p class="mt-1.5 text-xs text-neutral-400">Cliquez sur la carte ou utilisez "Ma position" pour placer le pin de votre restaurant.</p>
+
+                                {{-- Coordonnées en lecture --}}
+                                <div x-show="hasCoords" class="mt-2 flex items-center gap-3 text-xs text-neutral-500">
+                                    <span>Lat : <span class="font-mono font-medium text-neutral-700" x-text="lat.toFixed(6)"></span></span>
+                                    <span>Lng : <span class="font-mono font-medium text-neutral-700" x-text="lng.toFixed(6)"></span></span>
+                                </div>
+
+                                {{-- Champs cachés Livewire --}}
+                                <input type="hidden" wire:model="latitude" x-bind:value="hasCoords ? lat : ''">
+                                <input type="hidden" wire:model="longitude" x-bind:value="hasCoords ? lng : ''">
                             </div>
                         </div>
                     </div>
@@ -1013,7 +1050,7 @@ function copyLink() {
     const input = document.getElementById('public-link');
     input.select();
     input.setSelectionRange(0, 99999); // For mobile devices
-    
+
     navigator.clipboard.writeText(input.value).then(function() {
         // Show success message
         const button = event.target.closest('button');
@@ -1021,7 +1058,7 @@ function copyLink() {
         button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copié !';
         button.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
         button.classList.remove('bg-primary-500', 'hover:bg-primary-600');
-        
+
         setTimeout(() => {
             button.innerHTML = originalText;
             button.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
@@ -1032,6 +1069,101 @@ function copyLink() {
         alert('Erreur lors de la copie du lien');
     });
 }
+
+// ──────────────────────────────────────────────
+// Restaurant location picker (Leaflet)
+// ──────────────────────────────────────────────
+function restaurantLocationPicker(initLat, initLng, hasExistingCoords) {
+    return {
+        lat: initLat,
+        lng: initLng,
+        hasCoords: hasExistingCoords,
+        detecting: false,
+        map: null,
+        marker: null,
+
+        init() {
+            this.loadLeaflet().then(() => this.$nextTick(() => this.initMap()));
+        },
+
+        loadLeaflet() {
+            if (typeof L !== 'undefined') return Promise.resolve();
+            return new Promise((resolve) => {
+                if (!document.getElementById('leaflet-css')) {
+                    const css = document.createElement('link');
+                    css.id = 'leaflet-css';
+                    css.rel = 'stylesheet';
+                    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                    document.head.appendChild(css);
+                }
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                script.onload = resolve;
+                document.head.appendChild(script);
+            });
+        },
+
+        initMap() {
+            if (typeof L === 'undefined') return;
+
+            const center = [this.lat, this.lng];
+            this.map = L.map('restaurant-location-map', { zoomControl: true }).setView(center, this.hasCoords ? 15 : 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19,
+            }).addTo(this.map);
+
+            if (this.hasCoords) {
+                this.placeMarker(this.lat, this.lng);
+            }
+
+            this.map.on('click', (e) => {
+                this.setPosition(e.latlng.lat, e.latlng.lng);
+            });
+        },
+
+        placeMarker(lat, lng) {
+            const icon = L.divIcon({
+                html: `<div style="width:28px;height:28px;background:#f97316;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 28],
+                className: '',
+            });
+            if (this.marker) this.map.removeLayer(this.marker);
+            this.marker = L.marker([lat, lng], { icon, draggable: true }).addTo(this.map);
+            this.marker.on('dragend', (e) => {
+                const p = e.target.getLatLng();
+                this.setPosition(p.lat, p.lng);
+            });
+        },
+
+        setPosition(lat, lng) {
+            this.lat = lat;
+            this.lng = lng;
+            this.hasCoords = true;
+            this.placeMarker(lat, lng);
+            this.map.setView([lat, lng], Math.max(this.map.getZoom(), 15));
+            // Sync Livewire
+            this.$wire.set('latitude', lat);
+            this.$wire.set('longitude', lng);
+        },
+
+        detectGps() {
+            if (!navigator.geolocation) return;
+            this.detecting = true;
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    this.detecting = false;
+                    this.setPosition(pos.coords.latitude, pos.coords.longitude);
+                },
+                () => { this.detecting = false; },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        },
+    };
+}
 </script>
+
 @endpush
 
