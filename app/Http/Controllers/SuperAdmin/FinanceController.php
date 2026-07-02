@@ -8,6 +8,7 @@ use App\Models\PaymentTransaction;
 use App\Models\PayoutTransaction;
 use App\Models\CommissionLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
 {
@@ -43,7 +44,32 @@ class FinanceController extends Controller
             ->limit(10)
             ->get();
 
-        return view('pages.super-admin.finance', compact('stats', 'wallets', 'recentPayouts', 'recentCommissions'));
+        // Chart data — 6 derniers mois
+        $months = collect(range(5, 0))->map(fn($i) => now()->subMonths($i));
+        $monthLabels = $months->map(fn($m) => $m->isoFormat('MMM YY'))->toArray();
+
+        $collectByMonth = PaymentTransaction::where('status', 'completed')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+            ->groupBy('ym')->pluck('total', 'ym');
+
+        $withdrawByMonth = PayoutTransaction::where('status', 'completed')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+            ->groupBy('ym')->pluck('total', 'ym');
+
+        $commissionByMonth = CommissionLog::where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+            ->groupBy('ym')->pluck('total', 'ym');
+
+        $chartData = [
+            'labels'      => $monthLabels,
+            'collects'    => $months->map(fn($m) => (float)($collectByMonth[$m->format('Y-m')] ?? 0))->toArray(),
+            'withdrawals' => $months->map(fn($m) => (float)($withdrawByMonth[$m->format('Y-m')] ?? 0))->toArray(),
+            'commissions' => $months->map(fn($m) => (float)($commissionByMonth[$m->format('Y-m')] ?? 0))->toArray(),
+        ];
+
+        return view('pages.super-admin.finance', compact('stats', 'wallets', 'recentPayouts', 'recentCommissions', 'chartData'));
     }
 
     public function payouts(Request $request)

@@ -93,11 +93,11 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Flux financiers</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Collectes et retraits dans le temps</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Collectes et retraits — 6 derniers mois</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="financeAreaChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="financeAreaChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -108,23 +108,23 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Répartition</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="payoutSplitChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="payoutSplitChart" style="display:block;"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Charts Row 2: Commissions bar + Monthly detail table -->
+    <!-- Charts Row 2: Commissions bar + Recent activity -->
     <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commissions mensuelles</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Évolution des commissions perçues</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">6 derniers mois — données réelles</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="commissionsBarChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="commissionsBarChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -247,108 +247,96 @@
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
-        const saGridColor = 'rgba(209,213,219,0.5)';
-        const saTickColor = '#6b7280';
+        const _financeData = @json($chartData);
 
-        // ── FinanceArea: line chart (wallets balance vs withdrawn) ────────
-        // We approximate 6 monthly data points from available stats
-        new Chart(document.getElementById('financeAreaChart'), {
-            type: 'line',
-            data: {
-                labels: ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'Ce mois'],
-                datasets: [
-                    {
-                        label: 'Collectes (F)',
-                        data: [0, 0, 0, 0, 0, {{ $stats['total_collected'] }}],
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 3,
-                    },
-                    {
-                        label: 'Retraits (F)',
-                        data: [0, 0, 0, 0, 0, {{ $stats['total_withdrawn'] }}],
-                        borderColor: 'rgb(245, 158, 11)',
-                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 3,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: saTickColor, boxWidth: 12 } },
-                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
+        window.addEventListener('chartjs:ready', function () {
+            const gridColor = 'rgba(209,213,219,0.4)';
+            const tickColor = '#6b7280';
+            const fmtF = v => new Intl.NumberFormat('fr-FR').format(v) + ' F';
+
+            // ── Flux financiers (line area) ───────────────────────────────
+            new Chart(document.getElementById('financeAreaChart'), {
+                type: 'line',
+                data: {
+                    labels: _financeData.labels,
+                    datasets: [
+                        {
+                            label: 'Collectes',
+                            data: _financeData.collects,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.10)',
+                            tension: 0.4, fill: true, pointRadius: 4, borderWidth: 2,
+                        },
+                        {
+                            label: 'Retraits',
+                            data: _financeData.withdrawals,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245,158,11,0.08)',
+                            tension: 0.4, fill: true, pointRadius: 4, borderWidth: 2,
+                        },
+                    ],
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: saTickColor, callback: v => (v / 1000).toFixed(0) + 'K' },
-                        grid: { color: saGridColor }
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 12, padding: 12, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ' : ' + fmtF(ctx.raw) } },
                     },
-                    x: { ticks: { color: saTickColor }, grid: { color: saGridColor } }
-                }
-            }
-        });
-
-        // ── PayoutSplit: doughnut (pending / completed / failed) ──────────
-        new Chart(document.getElementById('payoutSplitChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['En attente', 'Complétés'],
-                datasets: [{
-                    data: [{{ $stats['pending_payouts'] }}, {{ $stats['completed_payouts'] }}],
-                    backgroundColor: ['rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '60%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { color: saTickColor, boxWidth: 12, padding: 12 } }
-                }
-            }
-        });
-
-        // ── CommissionsBar: monthly commissions approximation ─────────────
-        new Chart(document.getElementById('commissionsBarChart'), {
-            type: 'bar',
-            data: {
-                labels: ['M-5', 'M-4', 'M-3', 'M-2', 'M-1', 'Ce mois'],
-                datasets: [{
-                    label: 'Commissions (F)',
-                    data: [0, 0, 0, 0, 0, {{ $stats['commissions_this_month'] }}],
-                    backgroundColor: 'rgba(139, 92, 246, 0.75)',
-                    borderColor: 'rgb(139, 92, 246)',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: ctx => ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: tickColor, callback: v => v >= 1000 ? (v/1000).toFixed(0)+'K' : v }, grid: { color: gridColor } },
+                        x: { ticks: { color: tickColor }, grid: { color: gridColor } },
+                    },
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: saTickColor, callback: v => (v / 1000).toFixed(0) + 'K' },
-                        grid: { color: saGridColor }
+            });
+
+            // ── Statut des retraits (doughnut) ────────────────────────────
+            new Chart(document.getElementById('payoutSplitChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['En attente', 'Complétés'],
+                    datasets: [{
+                        data: [{{ $stats['pending_payouts'] }}, {{ $stats['completed_payouts'] }}],
+                        backgroundColor: ['rgba(245,158,11,0.85)', 'rgba(16,185,129,0.85)'],
+                        borderWidth: 2, borderColor: 'var(--sa-card)',
+                    }],
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '62%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 12, padding: 12, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ' : ' + ctx.raw } },
                     },
-                    x: { ticks: { color: saTickColor }, grid: { display: false } }
-                }
-            }
+                },
+            });
+
+            // ── Commissions mensuelles (bar) ──────────────────────────────
+            new Chart(document.getElementById('commissionsBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: _financeData.labels,
+                    datasets: [{
+                        label: 'Commissions',
+                        data: _financeData.commissions,
+                        backgroundColor: 'rgba(139,92,246,0.75)',
+                        borderColor: 'rgb(139,92,246)',
+                        borderWidth: 1, borderRadius: 6,
+                    }],
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ' ' + fmtF(ctx.raw) } },
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: tickColor, callback: v => v >= 1000 ? (v/1000).toFixed(0)+'K' : v }, grid: { color: gridColor } },
+                        x: { ticks: { color: tickColor }, grid: { display: false } },
+                    },
+                },
+            });
         });
     </script>
     @endpush
