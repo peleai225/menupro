@@ -135,8 +135,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">7 derniers jours</p>
                 </div>
             </div>
-            <div class="relative" style="height:220px;">
-                <canvas id="ordersChart"></canvas>
+            <div style="position:relative;height:220px;width:100%;">
+                <canvas id="ordersChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -149,8 +149,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Toutes les commandes</p>
                 </div>
             </div>
-            <div class="relative" style="height:220px;">
-                <canvas id="statusChart"></canvas>
+            <div style="position:relative;height:220px;width:100%;">
+                <canvas id="statusChart" style="display:block;"></canvas>
             </div>
         </div>
     </div>

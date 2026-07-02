@@ -219,18 +219,16 @@
             </nav>
 
             <!-- System Status -->
-            <div x-show="expanded" x-transition.opacity class="p-3 border-t" style="border-color: var(--sa-sidebar-border);">
-                <div class="rounded-xl p-3" style="background: color-mix(in oklch, var(--sa-sidebar-accent) 60%, transparent);">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                        <span class="text-xs font-medium text-emerald-400">Système opérationnel</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5 text-[10px]">
-                        <div class="text-neutral-500">API <span class="text-emerald-400">OK</span></div>
-                        <div class="text-neutral-500">DB <span class="text-emerald-400">OK</span></div>
-                        <div class="text-neutral-500">Cache <span class="text-emerald-400">OK</span></div>
-                        <div class="text-neutral-500">Queue <span class="text-emerald-400">OK</span></div>
-                    </div>
+            <div x-show="expanded" x-transition.opacity class="mx-3 mb-3 rounded-xl p-3 flex-shrink-0" style="background:var(--sa-sidebar-accent);">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full animate-pulse" style="background:#34d399;"></span>
+                    <span class="text-xs font-medium" style="color:#34d399;">Système opérationnel</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1 text-[10px]" style="color:var(--sa-sidebar-fg);opacity:0.6;">
+                    <span>API <span style="color:#34d399;opacity:1;">OK</span></span>
+                    <span>DB <span style="color:#34d399;opacity:1;">OK</span></span>
+                    <span>Cache <span style="color:#34d399;opacity:1;">OK</span></span>
+                    <span>Queue <span style="color:#34d399;opacity:1;">OK</span></span>
                 </div>
             </div>
 
