@@ -1,782 +1,790 @@
 <x-layouts.admin-super title="Paramètres">
-    <div class="max-w-5xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-neutral-900">Paramètres système</h1>
-            <p class="text-neutral-500 mt-1">Configuration générale de la plateforme MenuPro.</p>
+
+    {{-- ── Page Intro ─────────────────────────────────────────────────────── --}}
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Paramètres système</h1>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Configuration générale de la plateforme MenuPro</p>
+        </div>
+    </div>
+
+    {{-- ── Flash Messages ───────────────────────────────────────────────────── --}}
+    @if(session('success'))
+        <div class="mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm"
+             style="background:rgba(61,158,98,0.08);border-color:rgba(61,158,98,0.25);color:var(--sa-success);">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm"
+             style="background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25);color:var(--sa-danger);">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ session('error') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-5 rounded-xl border px-4 py-3 text-sm"
+             style="background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25);color:var(--sa-danger);">
+            <ul class="space-y-1 list-disc list-inside">
+                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- ── Tabs + Content ──────────────────────────────────────────────────── --}}
+    <div x-data="{ tab: '{{ old('_tab', 'general') }}' }">
+
+        {{-- Tab Bar --}}
+        <div class="flex gap-1 overflow-x-auto mb-6 rounded-xl border p-1"
+             style="border-color:var(--sa-border);background:var(--sa-muted);">
+            @php
+                $tabs = [
+                    'general'    => ['icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', 'label' => 'Général'],
+                    'payment'    => ['icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'label' => 'Paiements'],
+                    'email'      => ['icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'label' => 'Emails'],
+                    'security'   => ['icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'label' => 'Sécurité'],
+                    'appearance' => ['icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'label' => 'Apparence'],
+                    'marketing'  => ['icon' => 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z', 'label' => 'Marketing'],
+                    'commando'   => ['icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', 'label' => 'Commando'],
+                    'whatsapp'   => ['icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', 'label' => 'WhatsApp'],
+                    'delivery'   => ['icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7', 'label' => 'Livraison & Cartes'],
+                ];
+            @endphp
+            @foreach($tabs as $key => $tab)
+                <button @click="tab = '{{ $key }}'"
+                        :class="tab === '{{ $key }}' ? 'shadow-sm' : 'hover:opacity-80'"
+                        :style="tab === '{{ $key }}' ? 'background:var(--sa-card);color:var(--sa-primary);' : 'background:transparent;color:var(--sa-muted-fg);'"
+                        class="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $tab['icon'] }}"/>
+                    </svg>
+                    <span>{{ $tab['label'] }}</span>
+                </button>
+            @endforeach
         </div>
 
-        <!-- Flash Messages -->
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if($errors->any())
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <ul class="list-disc list-inside text-red-600 space-y-1">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <!-- Tabs -->
-        <div x-data="{ tab: 'general' }" class="space-y-6">
-            <div class="flex gap-1 overflow-x-auto border-b border-neutral-200 pb-px scrollbar-thin scrollbar-thumb-neutral-300">
-                <button @click="tab = 'general'" 
-                        :class="tab === 'general' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Général
-                </button>
-                <button @click="tab = 'payment'" 
-                        :class="tab === 'payment' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Paiements
-                </button>
-                <button @click="tab = 'email'" 
-                        :class="tab === 'email' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Emails
-                </button>
-                <button @click="tab = 'security'" 
-                        :class="tab === 'security' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Sécurité
-                </button>
-                <button @click="tab = 'appearance'" 
-                        :class="tab === 'appearance' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Apparence
-                </button>
-                <button @click="tab = 'marketing'"
-                        :class="tab === 'marketing' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Marketing
-                </button>
-                <button @click="tab = 'commando'"
-                        :class="tab === 'commando' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    Commando
-                </button>
-                <button @click="tab = 'whatsapp'"
-                        :class="tab === 'whatsapp' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    WhatsApp
-                </button>
-                <button @click="tab = 'delivery'"
-                        :class="tab === 'delivery' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
-                        class="px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base">
-                    🗺 Livraison & Cartes
-                </button>
-            </div>
-
-            <!-- General Settings -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'general'" class="space-y-6">
+        {{-- ─── GÉNÉRAL ────────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'general'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Informations plateforme</h2>
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nom de la plateforme <span class="text-red-600">*</span></label>
-                            <input type="text" name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'MenuPro') }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="MenuPro">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">URL de base <span class="text-red-600">*</span></label>
-                            <input type="url" name="app_url" value="{{ old('app_url', $settings['app_url'] ?? 'http://127.0.0.1:8000') }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://menupro.ci">
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Email de contact <span class="text-red-600">*</span></label>
-                                <input type="email" name="contact_email" value="{{ old('contact_email', $settings['contact_email'] ?? 'contact@menupro.ci') }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="contact@menupro.ci">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone de contact</label>
-                                <input type="text" name="contact_phone" value="{{ old('contact_phone', $settings['contact_phone'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="+225 07 00 00 00 00">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <input type="hidden" name="_tab" value="general">
 
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Réseaux sociaux</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Ces liens seront affichés sur la page Contact et dans le footer du site public.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
-                                Facebook
-                            </label>
-                            <input type="url" name="social_facebook" value="{{ old('social_facebook', $settings['social_facebook'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://facebook.com/menupro">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                                Instagram
-                            </label>
-                            <input type="url" name="social_instagram" value="{{ old('social_instagram', $settings['social_instagram'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://instagram.com/menupro">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-                                Twitter / X
-                            </label>
-                            <input type="url" name="social_twitter" value="{{ old('social_twitter', $settings['social_twitter'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://twitter.com/menupro">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                LinkedIn
-                            </label>
-                            <input type="url" name="social_linkedin" value="{{ old('social_linkedin', $settings['social_linkedin'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://linkedin.com/company/menupro">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Options</h2>
+                {{-- Informations plateforme --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Informations plateforme</h2>
                     <div class="space-y-4">
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <span class="font-medium text-neutral-900">Mode maintenance</span>
-                                <p class="text-sm text-neutral-500">Désactiver temporairement l'accès public</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Nom de la plateforme <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'MenuPro') }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition focus:ring-2"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="MenuPro">
                             </div>
-                            <input type="checkbox" name="maintenance_mode" value="1" {{ $settings['maintenance_mode'] ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
-                        </label>
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
                             <div>
-                                <span class="font-medium text-neutral-900">Inscriptions ouvertes</span>
-                                <p class="text-sm text-neutral-500">Autoriser les nouvelles inscriptions</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">URL de base <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="url" name="app_url" value="{{ old('app_url', $settings['app_url'] ?? '') }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition focus:ring-2"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="https://menupro.ci">
                             </div>
-                            <input type="checkbox" name="registrations_open" value="1" {{ $settings['registrations_open'] ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Email de contact <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="email" name="contact_email" value="{{ old('contact_email', $settings['contact_email'] ?? '') }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition focus:ring-2"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="contact@menupro.ci">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Téléphone de contact</label>
+                                <input type="text" name="contact_phone" value="{{ old('contact_phone', $settings['contact_phone'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition focus:ring-2"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="+225 07 00 00 00 00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Réseaux sociaux --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Réseaux sociaux</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Affichés sur la page Contact et dans le footer du site public.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach([
+                            ['name' => 'social_facebook',  'label' => 'Facebook',    'ph' => 'https://facebook.com/menupro'],
+                            ['name' => 'social_instagram', 'label' => 'Instagram',   'ph' => 'https://instagram.com/menupro'],
+                            ['name' => 'social_twitter',   'label' => 'Twitter / X', 'ph' => 'https://twitter.com/menupro'],
+                            ['name' => 'social_linkedin',  'label' => 'LinkedIn',    'ph' => 'https://linkedin.com/company/menupro'],
+                        ] as $s)
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">{{ $s['label'] }}</label>
+                            <input type="url" name="{{ $s['name'] }}" value="{{ old($s['name'], $settings[$s['name']] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition focus:ring-2"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="{{ $s['ph'] }}">
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Options --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Options</h2>
+                    <div class="space-y-3">
+                        @foreach([
+                            ['name' => 'maintenance_mode',   'label' => 'Mode maintenance',     'desc' => 'Désactiver temporairement l\'accès public'],
+                            ['name' => 'registrations_open', 'label' => 'Inscriptions ouvertes', 'desc' => 'Autoriser les nouvelles inscriptions'],
+                        ] as $opt)
+                        <label class="flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition"
+                               style="background:var(--sa-muted);border:1px solid var(--sa-border);">
+                            <div>
+                                <p class="text-sm font-medium" style="color:var(--sa-fg);">{{ $opt['label'] }}</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">{{ $opt['desc'] }}</p>
+                            </div>
+                            <div class="relative flex-shrink-0 ml-4">
+                                <input type="hidden" name="{{ $opt['name'] }}" value="0">
+                                <input type="checkbox" name="{{ $opt['name'] }}" value="1"
+                                       {{ $settings[$opt['name']] ? 'checked' : '' }}
+                                       class="sr-only peer">
+                                <div class="w-10 h-5 rounded-full peer transition-colors"
+                                     style="background:var(--sa-border);"
+                                     x-bind:style="$el.previousElementSibling.checked ? 'background:var(--sa-primary)' : 'background:var(--sa-border)'"></div>
+                                <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></div>
+                            </div>
                         </label>
+                        @endforeach
                     </div>
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Payment Settings -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'payment'" x-cloak class="space-y-6">
+        {{-- ─── PAIEMENTS ──────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'payment'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
-                <!-- Hidden fields to preserve existing values -->
-                <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
-                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
-                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
-                <input type="hidden" name="contact_phone" value="{{ $settings['contact_phone'] ?? '' }}">
-                <input type="hidden" name="social_facebook" value="{{ $settings['social_facebook'] ?? '' }}">
-                <input type="hidden" name="social_instagram" value="{{ $settings['social_instagram'] ?? '' }}">
-                <input type="hidden" name="social_twitter" value="{{ $settings['social_twitter'] ?? '' }}">
-                <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
-                
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {{-- MoneyFusion --}}
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                        MoneyFusion
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-5">
-                        Paiements des abonnements via MoneyFusion (Orange Money, MTN, Wave, Moov).
-                        <a href="https://docs.moneyfusion.net" target="_blank" class="text-primary-600 hover:underline">Documentation</a>
-                    </p>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">URL API <span class="text-red-500">*</span></label>
-                            <input type="url" name="moneyfusion_api_url"
-                                   value="{{ old('moneyfusion_api_url', $settings['moneyfusion_api_url'] ?? '') }}"
-                                   class="input" placeholder="https://www.pay.moneyfusion.net/...">
-                            <p class="text-xs text-neutral-500 mt-1">URL complète disponible dans votre tableau de bord MoneyFusion.</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API</label>
-                            <input type="password" name="moneyfusion_api_key"
-                                   value="{{ old('moneyfusion_api_key', $settings['moneyfusion_api_key'] ?? '') }}"
-                                   class="input" placeholder="Votre clé API MoneyFusion">
-                            <p class="text-xs text-neutral-500 mt-1">Disponible dans votre tableau de bord MoneyFusion.</p>
-                        </div>
-                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <p class="text-xs text-blue-800">
-                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                URL Webhook à configurer dans MoneyFusion :
-                                <code class="font-mono bg-blue-100 px-1 rounded">{{ url('/webhooks/moneyfusion') }}</code>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                {{-- Wave CI --}}
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-                        Wave CI
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-5">
-                        Paiements commandes clients via Wave. Les restaurants avec un numéro Wave Business reçoivent leurs fonds automatiquement.
-                        <a href="https://dashboard.wave.com/developers/api" target="_blank" class="text-primary-600 hover:underline">Dashboard Wave</a>
-                    </p>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Clé API Wave <span class="text-red-500">*</span></label>
-                            <input type="password" name="wave_api_key"
-                                   value="{{ old('wave_api_key', $settings['wave_api_key'] ?? '') }}"
-                                   class="input" placeholder="wave_sn_prod_...">
-                            <p class="text-xs text-neutral-500 mt-1">Bearer token depuis Wave Dashboard → Developers → API Keys.</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Secret de signature Webhook</label>
-                            <input type="password" name="wave_webhook_secret"
-                                   value="{{ old('wave_webhook_secret', $settings['wave_webhook_secret'] ?? '') }}"
-                                   class="input" placeholder="Secret HMAC-SHA256">
-                            <p class="text-xs text-neutral-500 mt-1">Disponible dans Wave Dashboard → Developers → Webhooks.</p>
-                        </div>
-                        <div class="p-3 bg-sky-50 border border-sky-200 rounded-lg">
-                            <p class="text-xs text-sky-800">
-                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                URL Webhook à configurer dans Wave Dashboard :
-                                <code class="font-mono bg-sky-100 px-1 rounded">{{ url('/webhooks/wave') }}</code>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
-
-            <!-- Livraison & Cartes -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'delivery'" x-cloak class="space-y-6">
-                @csrf
+                <input type="hidden" name="_tab" value="payment">
                 <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
                 <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? '' }}">
                 <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-                    {{-- Mapbox --}}
-                    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                        <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                            Mapbox — Cartes interactives
-                        </h2>
-                        <p class="text-sm text-neutral-500 mb-4">
-                            Cartes pour l'app de livraison (clients &amp; livreurs).
-                            Gratuit jusqu'à 50 000 chargements/mois.
-                            <a href="https://account.mapbox.com/access-tokens/" target="_blank" class="text-primary-600 hover:underline">Créer un token</a>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                    {{-- MoneyFusion --}}
+                    <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full" style="background:#2563eb;"></span>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">MoneyFusion</h2>
+                        </div>
+                        <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                            Paiements abonnements (Orange Money, MTN, Wave, Moov).
+                            <a href="https://docs.moneyfusion.net" target="_blank" class="underline" style="color:var(--sa-primary);">Documentation</a>
                         </p>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                    Access Token public
-                                    <span class="text-xs text-neutral-400">(commence par pk.)</span>
-                                </label>
-                                <input type="text" name="mapbox_public_token"
-                                       value="{{ old('mapbox_public_token', $settings['mapbox_public_token'] ?? '') }}"
-                                       class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
-                                       placeholder="pk.eyJ1Ijoixxxxx...">
-                                <p class="text-xs text-neutral-500 mt-1">Token visible côté client — restreindre à votre domaine dans Mapbox Dashboard.</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">URL API <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="url" name="moneyfusion_api_url" value="{{ old('moneyfusion_api_url', $settings['moneyfusion_api_url'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="https://www.pay.moneyfusion.net/...">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Style de carte</label>
-                                <select name="mapbox_style" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    @php $currentStyle = $settings['mapbox_style'] ?? 'streets-v12'; @endphp
-                                    <option value="streets-v12"         {{ $currentStyle === 'streets-v12'         ? 'selected' : '' }}>Streets (défaut)</option>
-                                    <option value="light-v11"           {{ $currentStyle === 'light-v11'           ? 'selected' : '' }}>Light</option>
-                                    <option value="dark-v11"            {{ $currentStyle === 'dark-v11'            ? 'selected' : '' }}>Dark</option>
-                                    <option value="satellite-v9"        {{ $currentStyle === 'satellite-v9'        ? 'selected' : '' }}>Satellite</option>
-                                    <option value="navigation-day-v1"   {{ $currentStyle === 'navigation-day-v1'   ? 'selected' : '' }}>Navigation (jour)</option>
-                                    <option value="navigation-night-v1" {{ $currentStyle === 'navigation-night-v1' ? 'selected' : '' }}>Navigation (nuit)</option>
-                                </select>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Clé API</label>
+                                <input type="password" name="moneyfusion_api_key" value="{{ old('moneyfusion_api_key', $settings['moneyfusion_api_key'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Votre clé API">
                             </div>
-                            @if(!empty($settings['mapbox_public_token']))
-                            <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                Token configuré — cartes actives sur l'app de livraison.
+                            <div class="rounded-lg border px-3 py-2.5 text-xs"
+                                 style="background:rgba(59,111,212,0.06);border-color:rgba(59,111,212,0.20);color:var(--sa-info);">
+                                Webhook : <code class="font-mono">{{ url('/webhooks/moneyfusion') }}</code>
                             </div>
-                            @else
-                            <div class="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-700">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Aucun token — fallback sur OpenStreetMap.
-                            </div>
-                            @endif
                         </div>
                     </div>
 
-                    {{-- Geoapify --}}
-                    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                        <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-                            Geoapify — Géocodage d'adresses
-                        </h2>
-                        <p class="text-sm text-neutral-500 mb-4">
-                            Autocomplétion d'adresses dans le dashboard restaurant.
-                            <a href="https://www.geoapify.com/get-started-with-maps-api" target="_blank" class="text-primary-600 hover:underline">Clé gratuite (3 000 req/jour)</a>
+                    {{-- Wave CI --}}
+                    <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full" style="background:#0ea5e9;"></span>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Wave CI</h2>
+                        </div>
+                        <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                            Paiements commandes clients. Les restaurants avec Wave Business reçoivent leurs fonds automatiquement.
                         </p>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">API Key Geoapify</label>
-                            <input type="text" name="geoapify_api_key"
-                                   value="{{ old('geoapify_api_key', $settings['geoapify_api_key'] ?? '') }}"
-                                   class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                   placeholder="Votre clé API Geoapify">
-                            <p class="text-xs text-neutral-500 mt-1">Si non configuré, Nominatim/OpenStreetMap est utilisé en fallback (gratuit, sans clé).</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                {{-- Firebase FCM --}}
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        Firebase — Notifications Push (FCM v1)
-                    </h2>
-                    <p class="text-sm text-neutral-500 mb-4">
-                        Envoi de notifications push aux livreurs et clients (FCM HTTP v1 API — méthode actuelle recommandée).
-                        <a href="https://console.firebase.google.com/" target="_blank" class="text-primary-600 hover:underline">Firebase Console</a>
-                    </p>
-
-                    @php
-                        $fcmV1Ok = !empty($settings['firebase_project_id'] ?? '') && !empty($settings['firebase_service_account_json'] ?? '');
-                    @endphp
-
-                    @if($fcmV1Ok)
-                    <div class="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-sm text-green-700 mb-4">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Firebase FCM v1 configuré — notifications push actives.
-                    </div>
-                    @else
-                    <div class="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 mb-4">
-                        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <div>
-                            <p class="font-medium">Non configuré — les push ne seront pas envoyés.</p>
-                            <p class="mt-1 text-xs">Dans Firebase Console → Paramètres du projet → Comptes de service → Générer une nouvelle clé privée (JSON).</p>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                Project ID
-                                <span class="text-xs text-neutral-400">(Firebase Console → Paramètres du projet)</span>
-                            </label>
-                            <input type="text" name="firebase_project_id"
-                                   value="{{ old('firebase_project_id', $settings['firebase_project_id'] ?? '') }}"
-                                   class="w-full h-11 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
-                                   placeholder="mon-projet-firebase">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">
-                                Service Account JSON
-                                <span class="text-xs text-neutral-400">(Comptes de service → Générer une clé privée)</span>
-                            </label>
-                            <textarea name="firebase_service_account_json" rows="4"
-                                   class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-xs resize-none"
-                                   placeholder='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"-----BEGIN RSA PRIVATE KEY-----\n...","client_email":"firebase-adminsdk-xxx@projet.iam.gserviceaccount.com",...}'>{{ old('firebase_service_account_json', $settings['firebase_service_account_json'] ?? '') }}</textarea>
-                            <p class="text-xs text-neutral-500 mt-1">Collez ici le contenu complet du fichier JSON téléchargé depuis Firebase.</p>
-                        </div>
-
-                        {{-- Legacy (archivé) --}}
-                        <details class="text-sm">
-                            <summary class="cursor-pointer text-neutral-400 hover:text-neutral-600">
-                                Ancienne clé serveur Legacy (désactivée par Google depuis juin 2024)
-                            </summary>
-                            <div class="mt-3">
-                                <input type="password" name="firebase_server_key"
-                                       value="{{ old('firebase_server_key', $settings['firebase_server_key'] ?? '') }}"
-                                       class="w-full h-11 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
-                                       placeholder="AAAAxxxxxxxxxxxxxxxx...">
-                                <p class="text-xs text-red-500 mt-1">Cette API est désactivée. Migrez vers FCM v1 ci-dessus.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Clé API Wave <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="password" name="wave_api_key" value="{{ old('wave_api_key', $settings['wave_api_key'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="wave_sn_prod_...">
                             </div>
-                        </details>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Secret Webhook</label>
+                                <input type="password" name="wave_webhook_secret" value="{{ old('wave_webhook_secret', $settings['wave_webhook_secret'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Secret HMAC-SHA256">
+                            </div>
+                            <div class="rounded-lg border px-3 py-2.5 text-xs"
+                                 style="background:rgba(14,165,233,0.06);border-color:rgba(14,165,233,0.20);color:var(--sa-info);">
+                                Webhook : <code class="font-mono">{{ url('/webhooks/wave') }}</code>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Email Settings -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'email'" x-cloak class="space-y-6">
+        {{-- ─── EMAILS ─────────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'email'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Configuration SMTP</h2>
-                    <p class="text-sm text-neutral-500 mb-6">Configurez les paramètres SMTP pour l'envoi d'emails. Ces paramètres remplaceront ceux du fichier .env.</p>
-                    <div class="space-y-5">
-                        <div class="grid grid-cols-2 gap-5">
+                <input type="hidden" name="_tab" value="email">
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Configuration SMTP</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Ces paramètres remplaceront ceux du fichier .env.</p>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Serveur SMTP <span class="text-red-600">*</span></label>
-                                <input type="text" name="smtp_host" value="{{ $settings['smtp_host'] ?? '' }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="smtp.gmail.com">
-                                <p class="text-xs text-neutral-500 mt-1">Ex: smtp.gmail.com, smtp.mailgun.org</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Serveur SMTP <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="smtp_host" value="{{ $settings['smtp_host'] ?? '' }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="smtp.gmail.com">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Port <span class="text-red-600">*</span></label>
-                                <input type="number" name="smtp_port" value="{{ $settings['smtp_port'] ?? 587 }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="587">
-                                <p class="text-xs text-neutral-500 mt-1">587 (TLS) ou 465 (SSL)</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Port <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="number" name="smtp_port" value="{{ $settings['smtp_port'] ?? 587 }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="587">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Chiffrement</label>
-                            <select name="smtp_encryption" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Chiffrement</label>
+                            <select name="smtp_encryption" class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                    style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                                 <option value="tls" {{ ($settings['smtp_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS (recommandé)</option>
                                 <option value="ssl" {{ ($settings['smtp_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL</option>
                                 <option value="" {{ empty($settings['smtp_encryption'] ?? '') ? 'selected' : '' }}>Aucun</option>
                             </select>
                         </div>
-                        <div class="grid grid-cols-2 gap-5">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nom d'utilisateur <span class="text-red-600">*</span></label>
-                                <input type="text" name="smtp_username" value="{{ $settings['smtp_username'] ?? '' }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="votre-email@gmail.com">
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Nom d'utilisateur <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="smtp_username" value="{{ $settings['smtp_username'] ?? '' }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="votre-email@gmail.com">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Mot de passe <span class="text-red-600">*</span></label>
-                                <input type="password" name="smtp_password" value="" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Laissez vide pour ne pas modifier">
-                                <p class="text-xs text-neutral-500 mt-1">Laissez vide pour conserver le mot de passe actuel</p>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Mot de passe</label>
+                                <input type="password" name="smtp_password" value=""
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Laisser vide pour ne pas modifier">
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-5">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Email expéditeur <span class="text-red-600">*</span></label>
-                                <input type="email" name="smtp_from_address" value="{{ $settings['smtp_from_address'] ?? '' }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="noreply@menupro.ci">
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Email expéditeur <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="email" name="smtp_from_address" value="{{ $settings['smtp_from_address'] ?? '' }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="noreply@menupro.ci">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nom expéditeur <span class="text-red-600">*</span></label>
-                                <input type="text" name="smtp_from_name" value="{{ $settings['smtp_from_name'] ?? '' }}" required class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="MenuPro">
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Nom expéditeur <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="smtp_from_name" value="{{ $settings['smtp_from_name'] ?? '' }}" required
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="MenuPro">
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="flex justify-end gap-3">
-                    <button type="button" onclick="testEmail()" class="btn btn-ghost">Tester l'envoi</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="button" onclick="if(confirm('Envoyer un email de test ?')) alert('Enregistrez d\'abord la configuration.');"
+                            class="inline-flex h-9 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition"
+                            style="border-color:var(--sa-border);color:var(--sa-muted-fg);">
+                        Tester l'envoi
+                    </button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <script>
-                function testEmail() {
-                    if (confirm('Voulez-vous envoyer un email de test à votre adresse ?')) {
-                        // TODO: Implémenter l'envoi d'email de test
-                        alert('Fonctionnalité de test à venir. Enregistrez d\'abord la configuration.');
-                    }
-                }
-            </script>
-
-            <!-- Security Settings -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'security'" x-cloak class="space-y-6">
+        {{-- ─── SÉCURITÉ ───────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'security'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Sécurité</h2>
-                    <div class="space-y-4">
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
+                <input type="hidden" name="_tab" value="security">
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Sécurité</h2>
+                    <div class="space-y-3">
+                        @foreach([
+                            ['name' => 'require_2fa', 'label' => 'Double authentification obligatoire', 'desc' => 'Forcer le 2FA pour les admins'],
+                            ['name' => 'log_logins',  'label' => 'Log des connexions',                  'desc' => 'Enregistrer toutes les connexions'],
+                        ] as $opt)
+                        <label class="flex items-center justify-between p-3.5 rounded-xl cursor-pointer"
+                               style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                             <div>
-                                <span class="font-medium text-neutral-900">Double authentification obligatoire</span>
-                                <p class="text-sm text-neutral-500">Forcer le 2FA pour les admins</p>
+                                <p class="text-sm font-medium" style="color:var(--sa-fg);">{{ $opt['label'] }}</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">{{ $opt['desc'] }}</p>
                             </div>
-                            <input type="checkbox" name="require_2fa" value="1" {{ $settings['require_2fa'] ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                            <input type="hidden" name="{{ $opt['name'] }}" value="0">
+                            <input type="checkbox" name="{{ $opt['name'] }}" value="1"
+                                   {{ $settings[$opt['name']] ? 'checked' : '' }}
+                                   class="w-4 h-4 rounded border"
+                                   style="accent-color:var(--sa-primary);">
                         </label>
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
-                            <div>
-                                <span class="font-medium text-neutral-900">Log des connexions</span>
-                                <p class="text-sm text-neutral-500">Enregistrer toutes les connexions</p>
-                            </div>
-                            <input type="checkbox" name="log_logins" value="1" {{ $settings['log_logins'] ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
-                        </label>
+                        @endforeach
                     </div>
                 </div>
-
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Appearance Settings -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" enctype="multipart/form-data" x-show="tab === 'appearance'" x-cloak class="space-y-6">
+        {{-- ─── APPARENCE ──────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'appearance'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" enctype="multipart/form-data" class="space-y-5">
                 @csrf
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Logo et Favicon</h2>
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Logo</label>
-                            <div class="flex items-center gap-4">
-                                @if(!empty($settings['logo'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['logo']))
-                                    <img src="{{ asset('storage/' . ltrim($settings['logo'], '/')) }}" alt="Logo" class="h-16 w-auto object-contain bg-white p-2 rounded-lg">
-                                @endif
-                                <input type="file" name="logo" accept="image/*" class="flex-1 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-neutral-900 hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                            </div>
-                            <p class="text-xs text-neutral-500 mt-1">Format recommandé: PNG, SVG. Taille max: 2MB</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Favicon</label>
-                            <div class="flex items-center gap-4">
-                                @if(!empty($settings['favicon'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['favicon']))
-                                    <img src="{{ asset('storage/' . ltrim($settings['favicon'], '/')) }}" alt="Favicon" class="h-8 w-8 object-contain bg-white p-1 rounded">
-                                @endif
-                                <input type="file" name="favicon" accept="image/*" class="flex-1 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-neutral-900 hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                            </div>
-                            <p class="text-xs text-neutral-500 mt-1">Format recommandé: ICO, PNG. Taille max: 512KB</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Image Hero (Page d'accueil)</label>
-                            <div class="flex items-center gap-4">
-                                @if(!empty($settings['hero_image'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['hero_image']))
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($settings['hero_image']) }}" alt="Image Hero" class="h-32 w-auto object-contain bg-white p-2 rounded-lg">
-                                @endif
-                                <input type="file" name="hero_image" accept="image/*" class="flex-1 h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-neutral-900 hover:file:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                            </div>
-                            <p class="text-xs text-neutral-500 mt-1">Image affichée à la place du mockup de téléphone. Format recommandé: PNG, JPG, WebP. Taille max: 5MB</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hidden fields to preserve social network values from General tab -->
+                <input type="hidden" name="_tab" value="appearance">
                 <input type="hidden" name="social_facebook" value="{{ $settings['social_facebook'] ?? '' }}">
                 <input type="hidden" name="social_twitter" value="{{ $settings['social_twitter'] ?? '' }}">
                 <input type="hidden" name="social_instagram" value="{{ $settings['social_instagram'] ?? '' }}">
                 <input type="hidden" name="social_linkedin" value="{{ $settings['social_linkedin'] ?? '' }}">
                 <input type="hidden" name="contact_phone" value="{{ $settings['contact_phone'] ?? '' }}">
 
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Footer</h2>
-                    <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">Texte du footer</label>
-                        <input type="text" name="footer_text" value="{{ old('footer_text', $settings['footer_text'] ?? '© ' . date('Y') . ' MenuPro. Tous droits réservés.') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="© 2026 MenuPro. Tous droits réservés.">
-                        <p class="text-xs text-neutral-500 mt-1">Texte affiché en bas de page sur le site public</p>
+                {{-- Logo & Favicon --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Logo et Favicon</h2>
+                    <div class="space-y-5">
+                        @foreach([
+                            ['name' => 'logo',       'label' => 'Logo',    'accept' => 'image/*',       'hint' => 'PNG, SVG. Max 2 MB'],
+                            ['name' => 'favicon',    'label' => 'Favicon', 'accept' => 'image/*',       'hint' => 'ICO, PNG. Max 512 KB'],
+                            ['name' => 'hero_image', 'label' => 'Image Hero (page d\'accueil)', 'accept' => 'image/*', 'hint' => 'PNG, JPG, WebP. Max 5 MB'],
+                        ] as $f)
+                        <div>
+                            <label class="block text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">{{ $f['label'] }}</label>
+                            <div class="flex items-center gap-3">
+                                @if($f['name'] === 'logo' && !empty($settings['logo'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['logo']))
+                                    <img src="{{ asset('storage/' . ltrim($settings['logo'], '/')) }}" alt="Logo" class="h-12 w-auto object-contain rounded-lg p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
+                                @elseif($f['name'] === 'favicon' && !empty($settings['favicon'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['favicon']))
+                                    <img src="{{ asset('storage/' . ltrim($settings['favicon'], '/')) }}" alt="Favicon" class="h-8 w-8 object-contain rounded p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
+                                @elseif($f['name'] === 'hero_image' && !empty($settings['hero_image'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['hero_image']))
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($settings['hero_image']) }}" alt="Hero" class="h-20 w-auto object-contain rounded-lg p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
+                                @endif
+                                <input type="file" name="{{ $f['name'] }}" accept="{{ $f['accept'] }}"
+                                       class="flex-1 h-10 rounded-xl border text-sm px-3 py-2"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                            </div>
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">{{ $f['hint'] }}</p>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Vidéos page d'accueil</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Vidéos tutoriels affichées sur la page d'accueil pour expliquer MenuPro. Collez le lien YouTube (ex: https://youtube.com/watch?v=xxx ou https://youtu.be/xxx). Laisser l'URL vide pour ne pas afficher une vidéo.</p>
+                {{-- Footer --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Footer</h2>
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Texte du footer</label>
+                        <input type="text" name="footer_text" value="{{ old('footer_text', $settings['footer_text'] ?? '© ' . date('Y') . ' MenuPro. Tous droits réservés.') }}"
+                               class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="© 2026 MenuPro.">
+                    </div>
+                </div>
+
+                {{-- Vidéos page d'accueil --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Vidéos page d'accueil</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Tutoriels YouTube. Laissez l'URL vide pour masquer un slot.</p>
                     @php
-                        $homeVideos = $settings['home_videos'] ?? [];
-                        $maxSlots = 5;
-                        $videoSlots = array_pad($homeVideos, $maxSlots, ['title' => '', 'url' => '', 'description' => '']);
+                        $homeVideos  = $settings['home_videos'] ?? [];
+                        $videoSlots  = array_pad($homeVideos, 5, ['title' => '', 'url' => '', 'description' => '']);
                     @endphp
-                    <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($videoSlots as $i => $video)
-                        <div class="p-4 bg-neutral-100/50 rounded-xl border border-neutral-300">
-                            <h3 class="text-sm font-medium text-neutral-700 mb-4">Vidéo {{ $i + 1 }}</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-xs font-medium text-neutral-500 mb-1">Titre</label>
-                                    <input type="text" name="home_videos[{{ $i }}][title]" value="{{ old("home_videos.{$i}.title", $video['title'] ?? '') }}" class="w-full h-10 px-3 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Comment fonctionne MenuPro ?">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-neutral-500 mb-1">Lien de la vidéo <span class="text-primary-600">*</span></label>
-                                    <input type="url" name="home_videos[{{ $i }}][url]" value="{{ old("home_videos.{$i}.url", $video['url'] ?? '') }}" class="w-full h-10 px-3 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://www.youtube.com/watch?v=xxx ou https://youtu.be/xxx">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-neutral-500 mb-1">Description (optionnel)</label>
-                                    <textarea name="home_videos[{{ $i }}][description]" rows="2" class="w-full px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Courte description de la vidéo">{{ old("home_videos.{$i}.description", $video['description'] ?? '') }}</textarea>
-                                </div>
-                            </div>
+                        <div class="rounded-xl border p-4 space-y-3" style="background:var(--sa-muted);border-color:var(--sa-border);">
+                            <p class="text-xs font-semibold" style="color:var(--sa-fg);">Vidéo {{ $i + 1 }}</p>
+                            <input type="text" name="home_videos[{{ $i }}][title]" value="{{ old("home_videos.{$i}.title", $video['title'] ?? '') }}"
+                                   class="w-full h-9 px-3 rounded-lg border text-sm outline-none"
+                                   style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Titre">
+                            <input type="url" name="home_videos[{{ $i }}][url]" value="{{ old("home_videos.{$i}.url", $video['url'] ?? '') }}"
+                                   class="w-full h-9 px-3 rounded-lg border text-sm outline-none"
+                                   style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="https://youtube.com/watch?v=...">
+                            <textarea name="home_videos[{{ $i }}][description]" rows="2"
+                                   class="w-full px-3 py-2 rounded-lg border text-sm outline-none resize-none"
+                                   style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Description courte">{{ old("home_videos.{$i}.description", $video['description'] ?? '') }}</textarea>
                         </div>
                         @endforeach
                     </div>
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Marketing - Bannière + Facebook Pixel -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'marketing'" x-cloak class="space-y-6">
+        {{-- ─── MARKETING ──────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'marketing'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
+                <input type="hidden" name="_tab" value="marketing">
                 <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
-                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
-                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? '' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
 
-                <!-- Bannière promotionnelle -->
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Bannière promotionnelle</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Affiche une bannière en haut du site public pour annoncer promos, nouveautés, etc.</p>
-
+                {{-- Bannière --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Bannière promotionnelle</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Affiche une bannière en haut du site public.</p>
                     <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="hidden" name="banner_enabled" value="0">
-                                <input type="checkbox" name="banner_enabled" value="1" class="sr-only peer" {{ ($settings['banner_enabled'] ?? false) ? 'checked' : '' }}>
-                                <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
-                            </label>
-                            <span class="text-sm font-medium text-neutral-700">Activer la bannière</span>
-                        </div>
-
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="hidden" name="banner_enabled" value="0">
+                            <input type="checkbox" name="banner_enabled" value="1" {{ ($settings['banner_enabled'] ?? false) ? 'checked' : '' }}
+                                   class="w-4 h-4 rounded" style="accent-color:var(--sa-primary);">
+                            <span class="text-sm font-medium" style="color:var(--sa-fg);">Activer la bannière</span>
+                        </label>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Texte de la bannière</label>
-                            <input type="text" name="banner_text" value="{{ old('banner_text', $settings['banner_text'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Nouveau : Commandez en ligne avec Mobile Money !">
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Texte</label>
+                            <input type="text" name="banner_text" value="{{ old('banner_text', $settings['banner_text'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Nouveau : Commandez en ligne avec Mobile Money !">
                         </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Lien (optionnel)</label>
-                            <input type="url" name="banner_link" value="{{ old('banner_link', $settings['banner_link'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://menupro.ci/tarifs">
-                            <p class="text-xs text-neutral-500 mt-1">Si rempli, le texte devient un lien cliquable</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Couleur</label>
-                            <select name="banner_color" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                <option value="primary" {{ ($settings['banner_color'] ?? 'primary') === 'primary' ? 'selected' : '' }}>Orange (principal)</option>
-                                <option value="success" {{ ($settings['banner_color'] ?? '') === 'success' ? 'selected' : '' }}>Vert (succès)</option>
-                                <option value="warning" {{ ($settings['banner_color'] ?? '') === 'warning' ? 'selected' : '' }}>Jaune (attention)</option>
-                                <option value="dark" {{ ($settings['banner_color'] ?? '') === 'dark' ? 'selected' : '' }}>Noir (sobre)</option>
-                            </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Lien (optionnel)</label>
+                                <input type="url" name="banner_link" value="{{ old('banner_link', $settings['banner_link'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="https://...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Couleur</label>
+                                <select name="banner_color" class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                        style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                                    <option value="primary" {{ ($settings['banner_color'] ?? 'primary') === 'primary' ? 'selected' : '' }}>Orange</option>
+                                    <option value="success" {{ ($settings['banner_color'] ?? '') === 'success' ? 'selected' : '' }}>Vert</option>
+                                    <option value="warning" {{ ($settings['banner_color'] ?? '') === 'warning' ? 'selected' : '' }}>Jaune</option>
+                                    <option value="dark"    {{ ($settings['banner_color'] ?? '') === 'dark'    ? 'selected' : '' }}>Noir</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Facebook Pixel -->
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Facebook Pixel</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Permet de suivre les conversions de vos campagnes Facebook Ads. L'ID se trouve dans Facebook Business Manager → Événements → Pixel.</p>
-
+                {{-- Facebook Pixel --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Facebook Pixel</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Suivi conversions campagnes Facebook Ads.</p>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">ID du Pixel Facebook</label>
-                            <input type="text" name="facebook_pixel_id" value="{{ old('facebook_pixel_id', $settings['facebook_pixel_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono" placeholder="Ex: 123456789012345">
-                            <p class="text-xs text-neutral-500 mt-1">Laissez vide pour désactiver le tracking Facebook</p>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">ID Pixel</label>
+                            <input type="text" name="facebook_pixel_id" value="{{ old('facebook_pixel_id', $settings['facebook_pixel_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="123456789012345">
                         </div>
-
-                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                            <h3 class="text-sm font-semibold text-blue-800 mb-2">Événements trackés automatiquement :</h3>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li><strong>PageView</strong> — Chaque visite de page</li>
-                                <li><strong>Lead</strong> — Inscription d'un restaurant</li>
-                                <li><strong>AddToCart</strong> — Ajout d'un plat au panier</li>
-                                <li><strong>InitiateCheckout</strong> — Début de commande</li>
-                                <li><strong>Purchase</strong> — Paiement validé</li>
-                            </ul>
+                        <div class="rounded-lg border px-3 py-2.5 text-xs" style="background:rgba(59,111,212,0.06);border-color:rgba(59,111,212,0.20);color:var(--sa-info);">
+                            <strong>Événements trackés :</strong> PageView · Lead · AddToCart · InitiateCheckout · Purchase
                         </div>
                     </div>
                 </div>
 
-                <!-- Google Analytics (future) -->
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">Google Analytics</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Suivez le trafic de votre site avec Google Analytics 4.</p>
-
+                {{-- GA4 --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Google Analytics 4</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Suivez le trafic de votre site.</p>
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">ID de mesure Google Analytics (GA4)</label>
-                        <input type="text" name="google_analytics_id" value="{{ old('google_analytics_id', $settings['google_analytics_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono" placeholder="Ex: G-XXXXXXXXXX">
-                        <p class="text-xs text-neutral-500 mt-1">Laissez vide pour désactiver</p>
+                        <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">ID de mesure GA4</label>
+                        <input type="text" name="google_analytics_id" value="{{ old('google_analytics_id', $settings['google_analytics_id'] ?? '') }}"
+                               class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="G-XXXXXXXXXX">
                     </div>
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Commando - Commissions -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'commando'" x-cloak class="space-y-6">
+        {{-- ─── COMMANDO ───────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'commando'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
+                <input type="hidden" name="_tab" value="commando">
                 <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
-                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
-                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-4">Commissions agents Commando</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Montant crédité à l'agent quand un restaurant inscrit via son lien de parrainage paie son premier abonnement.</p>
-                    <div class="space-y-5">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? '' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
+
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Commissions agents Commando</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Montant crédité à l'agent quand un restaurant inscrit via son lien paie son premier abonnement.</p>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Commission au premier paiement (FCFA)</label>
-                            <input type="number" name="commando_commission_fcfa_first_payment" value="{{ old('commando_commission_fcfa_first_payment', ($settings['commando_commission_cents_first_payment'] ?? 500000) / 100) }}" min="0" step="1" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="5000">
-                            <p class="text-xs text-neutral-500 mt-1">Montant crédité à l'agent quand un restaurant parrainé paie son 1er abonnement.</p>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Commission au premier paiement (FCFA)</label>
+                            <input type="number" name="commando_commission_fcfa_first_payment"
+                                   value="{{ old('commando_commission_fcfa_first_payment', ($settings['commando_commission_cents_first_payment'] ?? 500000) / 100) }}"
+                                   min="0" step="1"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="5000">
                         </div>
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
+                        <label class="flex items-center justify-between p-3.5 rounded-xl cursor-pointer"
+                               style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                             <div>
-                                <span class="font-medium text-neutral-900">Commission uniquement au 1er paiement</span>
-                                <p class="text-sm text-neutral-500">Si coché, l'agent ne reçoit qu'une seule commission par restaurant parrainé (au premier abonnement payé). Sinon, une commission à chaque paiement.</p>
+                                <p class="text-sm font-medium" style="color:var(--sa-fg);">Commission uniquement au 1er paiement</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Si coché, une seule commission par restaurant parrainé.</p>
                             </div>
-                            <input type="checkbox" name="commando_commission_only_first_payment" value="1" {{ ($settings['commando_commission_only_first_payment'] ?? true) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                            <input type="hidden" name="commando_commission_only_first_payment" value="0">
+                            <input type="checkbox" name="commando_commission_only_first_payment" value="1"
+                                   {{ ($settings['commando_commission_only_first_payment'] ?? true) ? 'checked' : '' }}
+                                   class="w-4 h-4 rounded" style="accent-color:var(--sa-primary);">
                         </label>
                     </div>
                 </div>
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
-            <!-- WhatsApp Business API -->
-            <form method="POST" action="{{ route('super-admin.settings.update') }}" x-show="tab === 'whatsapp'" x-cloak class="space-y-6">
+        </div>
+
+        {{-- ─── WHATSAPP ───────────────────────────────────────────────────── --}}
+        <div x-show="tab === 'whatsapp'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
                 @csrf
+                <input type="hidden" name="_tab" value="whatsapp">
                 <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
-                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? 'http://127.0.0.1:8000' }}">
-                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? 'contact@menupro.ci' }}">
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1">WhatsApp Business API</h2>
-                    <p class="text-sm text-neutral-500 mb-5">Notifications automatiques aux clients et restaurateurs via WhatsApp (confirmation de commande, changement de statut, etc.).</p>
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? '' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
 
-                    <div class="space-y-5">
-                        <!-- Activer WhatsApp -->
-                        <label class="flex items-center justify-between p-4 bg-neutral-100/50 rounded-xl cursor-pointer">
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">WhatsApp Business API</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Notifications automatiques aux clients et restaurateurs (confirmation, changement de statut…).</p>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between p-3.5 rounded-xl cursor-pointer"
+                               style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                             <div>
-                                <span class="font-medium text-neutral-900">Activer les notifications WhatsApp</span>
-                                <p class="text-sm text-neutral-500">Les messages seront envoyés automatiquement lors des changements de statut de commande.</p>
+                                <p class="text-sm font-medium" style="color:var(--sa-fg);">Activer les notifications WhatsApp</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Envoi automatique lors des changements de statut.</p>
                             </div>
-                            <input type="checkbox" name="whatsapp_enabled" value="1" {{ ($settings['whatsapp_enabled'] ?? false) ? 'checked' : '' }} class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-200">
+                            <input type="hidden" name="whatsapp_enabled" value="0">
+                            <input type="checkbox" name="whatsapp_enabled" value="1"
+                                   {{ ($settings['whatsapp_enabled'] ?? false) ? 'checked' : '' }}
+                                   class="w-4 h-4 rounded" style="accent-color:var(--sa-primary);">
                         </label>
-
-                        <!-- Phone Number ID -->
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Phone Number ID</label>
-                            <input type="text" name="whatsapp_phone_id" value="{{ old('whatsapp_phone_id', $settings['whatsapp_phone_id'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789012345">
-                            <p class="text-xs text-neutral-500 mt-1">L'identifiant du numéro de téléphone dans votre compte Meta Business. Se trouve dans <strong>Meta Business Suite &gt; WhatsApp &gt; Paramètres du compte</strong>.</p>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Phone Number ID</label>
+                            <input type="text" name="whatsapp_phone_id" value="{{ old('whatsapp_phone_id', $settings['whatsapp_phone_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="123456789012345">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Meta Business Suite &rarr; WhatsApp &rarr; Paramètres du compte</p>
                         </div>
-
-                        <!-- Access Token -->
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Token d'accès permanent</label>
-                            <input type="password" name="whatsapp_api_key" value="{{ old('whatsapp_api_key', $settings['whatsapp_api_key'] ?? '') }}" class="w-full h-12 px-4 bg-neutral-100 border border-neutral-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="EAAxxxxxxx...">
-                            <p class="text-xs text-neutral-500 mt-1">Token permanent généré dans <strong>Meta for Developers &gt; Votre App &gt; WhatsApp &gt; Configuration</strong>. Ne partagez jamais ce token.</p>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Token d'accès permanent</label>
+                            <input type="password" name="whatsapp_api_key" value="{{ old('whatsapp_api_key', $settings['whatsapp_api_key'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="EAAxxxxxxx...">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Meta for Developers &rarr; Votre App &rarr; WhatsApp &rarr; Configuration</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Guide de configuration -->
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
-                    <h3 class="font-semibold text-amber-900 mb-3">Comment configurer WhatsApp Business API ?</h3>
-                    <ol class="text-sm text-amber-800 space-y-2 list-decimal list-inside">
+                {{-- Guide de configuration --}}
+                <div class="rounded-2xl border p-5" style="background:rgba(217,119,6,0.06);border-color:rgba(217,119,6,0.25);">
+                    <h3 class="text-sm font-semibold mb-3" style="color:var(--sa-warning);">Comment configurer WhatsApp Business API ?</h3>
+                    <ol class="text-xs space-y-2 list-decimal list-inside" style="color:var(--sa-fg);">
                         <li>Créez une app sur <strong>developers.facebook.com</strong> (type : Business)</li>
                         <li>Ajoutez le produit <strong>WhatsApp</strong> à votre app</li>
-                        <li>Dans <strong>WhatsApp &gt; Configuration</strong>, copiez le <strong>Phone Number ID</strong></li>
-                        <li>Générez un <strong>token d'accès permanent</strong> (System User dans Business Settings)</li>
+                        <li>Copiez le <strong>Phone Number ID</strong> dans WhatsApp → Configuration</li>
+                        <li>Générez un <strong>token permanent</strong> (System User dans Business Settings)</li>
                         <li>Collez les valeurs ci-dessus et activez les notifications</li>
                     </ol>
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
                 </div>
             </form>
         </div>
+
+        {{-- ─── LIVRAISON & CARTES ─────────────────────────────────────────── --}}
+        <div x-show="tab === 'delivery'" x-cloak>
+            <form method="POST" action="{{ route('super-admin.settings.update') }}" class="space-y-5">
+                @csrf
+                <input type="hidden" name="_tab" value="delivery">
+                <input type="hidden" name="app_name" value="{{ $settings['app_name'] ?? 'MenuPro' }}">
+                <input type="hidden" name="app_url" value="{{ $settings['app_url'] ?? '' }}">
+                <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                    {{-- Mapbox --}}
+                    <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full" style="background:#6366f1;"></span>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Mapbox — Cartes interactives</h2>
+                        </div>
+                        <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                            Cartes pour l'app livraison. Gratuit jusqu'à 50 000 chargements/mois.
+                            <a href="https://account.mapbox.com/access-tokens/" target="_blank" class="underline" style="color:var(--sa-primary);">Créer un token</a>
+                        </p>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Access Token public <span class="opacity-60">(commence par pk.)</span></label>
+                                <input type="text" name="mapbox_public_token" value="{{ old('mapbox_public_token', $settings['mapbox_public_token'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="pk.eyJ1Ijoixxxxx...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Style de carte</label>
+                                <select name="mapbox_style" class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                        style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                                    @php $currentStyle = $settings['mapbox_style'] ?? 'streets-v12'; @endphp
+                                    @foreach(['streets-v12' => 'Streets (défaut)', 'light-v11' => 'Light', 'dark-v11' => 'Dark', 'satellite-v9' => 'Satellite', 'navigation-day-v1' => 'Navigation (jour)', 'navigation-night-v1' => 'Navigation (nuit)'] as $val => $lbl)
+                                        <option value="{{ $val }}" {{ $currentStyle === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @if(!empty($settings['mapbox_public_token']))
+                                <div class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+                                     style="background:rgba(61,158,98,0.06);border-color:rgba(61,158,98,0.25);color:var(--sa-success);">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Token configuré — cartes actives.
+                                </div>
+                            @else
+                                <div class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+                                     style="background:rgba(217,119,6,0.06);border-color:rgba(217,119,6,0.25);color:var(--sa-warning);">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Aucun token — fallback OpenStreetMap.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Geoapify --}}
+                    <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full" style="background:#0ea5e9;"></span>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Geoapify — Géocodage</h2>
+                        </div>
+                        <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                            Autocomplétion d'adresses dans le dashboard restaurant.
+                            <a href="https://www.geoapify.com/get-started-with-maps-api" target="_blank" class="underline" style="color:var(--sa-primary);">Clé gratuite (3 000 req/jour)</a>
+                        </p>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">API Key Geoapify</label>
+                            <input type="text" name="geoapify_api_key" value="{{ old('geoapify_api_key', $settings['geoapify_api_key'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Votre clé API">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Si non configuré, Nominatim/OpenStreetMap est utilisé en fallback.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Firebase FCM --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    @php $fcmV1Ok = !empty($settings['firebase_project_id'] ?? '') && !empty($settings['firebase_service_account_json'] ?? ''); @endphp
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full" style="background:#f59e0b;"></span>
+                                <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Firebase — Notifications Push (FCM v1)</h2>
+                            </div>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">
+                                Envoi push aux livreurs et clients.
+                                <a href="https://console.firebase.google.com/" target="_blank" class="underline" style="color:var(--sa-primary);">Firebase Console</a>
+                            </p>
+                        </div>
+                        @if($fcmV1Ok)
+                            <span class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shrink-0"
+                                  style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Configuré
+                            </span>
+                        @else
+                            <span class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shrink-0"
+                                  style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
+                                Non configuré
+                            </span>
+                        @endif
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Project ID</label>
+                            <input type="text" name="firebase_project_id" value="{{ old('firebase_project_id', $settings['firebase_project_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="mon-projet-firebase">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Service Account JSON</label>
+                            <textarea name="firebase_service_account_json" rows="4"
+                                   class="w-full px-3 py-2 rounded-xl border text-xs outline-none font-mono resize-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder='{"type":"service_account","project_id":"..."}'>{{ old('firebase_service_account_json', $settings['firebase_service_account_json'] ?? '') }}</textarea>
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Contenu complet du fichier JSON depuis Firebase → Comptes de service → Générer une clé privée.</p>
+                        </div>
+                        <details class="text-xs">
+                            <summary class="cursor-pointer" style="color:var(--sa-muted-fg);">Ancienne clé serveur Legacy (désactivée par Google depuis juin 2024)</summary>
+                            <div class="mt-3">
+                                <input type="password" name="firebase_server_key" value="{{ old('firebase_server_key', $settings['firebase_server_key'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="AAAAxxxxxxxxxxxxxxxx...">
+                                <p class="mt-1" style="color:var(--sa-danger);">Cette API est désactivée. Migrez vers FCM v1 ci-dessus.</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+
     </div>
 
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Activer AJAX sur tous les formulaires de settings
             document.querySelectorAll('form[action*="parametres"]').forEach(function (form) {
-                // Formulaire apparence (multipart/form-data) : AJAX avec FormData OK
                 ajaxForm(form, {
                     onSuccess: function (data) {
-                        // Rafraîchir les logos si image uploadée (appearance form)
                         if (form.enctype && form.enctype.includes('multipart')) {
-                            // Recharger la page silencieusement pour montrer les nouvelles images
                             setTimeout(function () { window.location.reload(); }, 1500);
                         }
                     }
@@ -785,5 +793,5 @@
         });
     </script>
     @endpush
-</x-layouts.admin-super>
 
+</x-layouts.admin-super>

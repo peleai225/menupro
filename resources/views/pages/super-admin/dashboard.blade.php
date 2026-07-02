@@ -605,7 +605,7 @@
         const ordersChartData = @json($ordersByDay);
         const statusChartData = @json($ordersByStatus);
 
-        document.addEventListener('DOMContentLoaded', function () {
+        (function initCharts() {
             // Graphique 1 — Courbe commandes & revenus (double axe Y)
             const ordersCtx = document.getElementById('ordersChart');
             if (ordersCtx) {
@@ -756,7 +756,7 @@
                     },
                 });
             }
-        });
+        })();
     </script>
     @endpush
 </x-layouts.admin-super>
