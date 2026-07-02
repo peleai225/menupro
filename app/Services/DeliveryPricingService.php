@@ -31,14 +31,17 @@ class DeliveryPricingService
         float $customerLat,
         float $customerLng
     ): array {
-        $deliveryCity = $this->geo->detectDeliveryCity($customerLat, $customerLng);
+        $restaurantLat = (float) $restaurant->latitude;
+        $restaurantLng = (float) $restaurant->longitude;
+
+        // Détecte la ville via le restaurant (pas le client) pour éviter
+        // que des clients en périphérie soient rejetés à tort
+        $deliveryCity = $this->geo->detectDeliveryCity($restaurantLat, $restaurantLng)
+            ?? $this->geo->detectDeliveryCity($customerLat, $customerLng);
 
         if (!$deliveryCity) {
             return $this->outOfRange($restaurant, $customerLat, $customerLng);
         }
-
-        $restaurantLat = (float) $restaurant->latitude;
-        $restaurantLng = (float) $restaurant->longitude;
 
         $distanceKm = $this->geo->distanceKm(
             $restaurantLat, $restaurantLng,
