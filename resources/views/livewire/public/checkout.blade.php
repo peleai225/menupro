@@ -534,13 +534,13 @@ Alpine.data('deliveryAddress', () => ({
                         const lat = parseFloat(savedLat);
                         const lng = parseFloat(savedLng);
                         this.placePin(lat, lng, false);
-                        if (!$wire.get('delivery_address')) {
-                            $wire.set('delivery_address', savedAddress || '');
-                            $wire.set('delivery_city', savedCity);
-                            $wire.set('delivery_latitude', lat);
-                            $wire.set('delivery_longitude', lng);
-                        }
+                        $wire.set('delivery_address', savedAddress || '');
+                        $wire.set('delivery_city', savedCity);
+                        $wire.set('delivery_latitude', lat);
+                        $wire.set('delivery_longitude', lng);
                         if (this.$refs.addressInput) this.$refs.addressInput.value = savedAddress || '';
+                    } else {
+                        $wire.set('delivery_city', savedCity);
                     }
                 });
             }

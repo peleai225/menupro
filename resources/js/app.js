@@ -424,5 +424,5 @@ import { initFcm } from './firebase-messaging.js';
 // Les modules ES s'exécutent après le DOM — pas besoin de DOMContentLoaded
 // Guarde sur auth-type : uniquement pour les utilisateurs connectés
 if (document.querySelector('meta[name="auth-type"]')) {
-    initFcm();
+    initFcm().catch(() => {});
 }

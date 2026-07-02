@@ -25,18 +25,23 @@ export async function initFcm() {
 
     // Enregistre le service worker Firebase et lui envoie la config
     if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        const sw = reg.active ?? reg.waiting ?? reg.installing;
-        if (sw) {
-            sw.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
-        } else {
-            reg.addEventListener('updatefound', () => {
-                reg.installing?.addEventListener('statechange', (e) => {
-                    if (e.target.state === 'activated') {
-                        e.target.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
-                    }
+        try {
+            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const sw = reg.active ?? reg.waiting ?? reg.installing;
+            if (sw) {
+                sw.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
+            } else {
+                reg.addEventListener('updatefound', () => {
+                    reg.installing?.addEventListener('statechange', (e) => {
+                        if (e.target.state === 'activated') {
+                            e.target.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
+                        }
+                    });
                 });
-            });
+            }
+        } catch (e) {
+            console.warn('[FCM] Service worker registration failed:', e.message);
+            return;
         }
     }
 
