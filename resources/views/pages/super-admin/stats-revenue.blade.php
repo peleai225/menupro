@@ -3,8 +3,8 @@
     <div class="mb-8">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-neutral-900">Revenus détaillés</h1>
-                <p class="text-neutral-500 mt-1">Analyse détaillée des revenus de la plateforme.</p>
+                <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Revenus détaillés</h1>
+                <p class="mt-1" style="color:var(--sa-muted-fg);">Analyse détaillée des revenus de la plateforme.</p>
             </div>
             <a href="{{ route('super-admin.stats') }}" class="btn btn-neutral">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,10 +23,11 @@
             '90' => '90 jours',
             '365' => '1 an',
         ] as $value => $label)
-            <button type="submit" 
-                    name="period" 
+            <button type="submit"
+                    name="period"
                     value="{{ $value }}"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-neutral-900' : 'bg-neutral-50 text-neutral-600 hover:bg-neutral-200' }}">
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-neutral-900' : '' }}"
+                    @if($period != $value) style="background:var(--sa-muted);color:var(--sa-muted-fg);" @endif>
                 {{ $label }}
             </button>
         @endforeach
@@ -34,50 +35,50 @@
 
     <!-- Summary Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Revenus totaux</p>
-            <p class="text-2xl font-bold text-neutral-900 mt-1">{{ number_format($totalRevenue / 100, 0, ',', ' ') }} FCFA</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus totaux</p>
+            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($totalRevenue / 100, 0, ',', ' ') }} FCFA</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Commandes totales</p>
-            <p class="text-2xl font-bold text-neutral-900 mt-1">{{ number_format($totalOrders) }}</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes totales</p>
+            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($totalOrders) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Panier moyen</p>
-            <p class="text-2xl font-bold text-neutral-900 mt-1">{{ number_format($averageOrder / 100, 0, ',', ' ') }} FCFA</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Panier moyen</p>
+            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($averageOrder / 100, 0, ',', ' ') }} FCFA</p>
         </div>
     </div>
 
     <!-- Revenue Chart -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Évolution des revenus</h2>
+    <div class="border shadow-sm rounded-xl p-6 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Évolution des revenus</h2>
         <div class="relative h-64">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
 
     <!-- Revenue by Restaurant -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Revenus par restaurant</h2>
+    <div class="border shadow-sm rounded-xl p-6 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Revenus par restaurant</h2>
         <div class="table-responsive">
             <table class="w-full min-w-[500px]">
                 <thead>
-                    <tr class="border-b border-neutral-200">
-                        <th class="text-left py-3 px-4 text-neutral-500 font-medium">Restaurant</th>
-                        <th class="text-right py-3 px-4 text-neutral-500 font-medium">Revenus</th>
-                        <th class="text-right py-3 px-4 text-neutral-500 font-medium">Commandes</th>
+                    <tr style="border-bottom:1px solid var(--sa-border);">
+                        <th class="text-left py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Restaurant</th>
+                        <th class="text-right py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Revenus</th>
+                        <th class="text-right py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Commandes</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($revenueByRestaurant as $restaurant)
-                        <tr class="border-b border-neutral-200/50 hover:bg-neutral-200/30">
-                            <td class="py-3 px-4 text-neutral-900">{{ $restaurant->name }}</td>
-                            <td class="py-3 px-4 text-right text-neutral-900 font-medium">{{ number_format($restaurant->revenue / 100, 0, ',', ' ') }} FCFA</td>
-                            <td class="py-3 px-4 text-right text-neutral-600">{{ $restaurant->orders }}</td>
+                        <tr style="border-bottom:1px solid var(--sa-border);">
+                            <td class="py-3 px-4" style="color:var(--sa-fg);">{{ $restaurant->name }}</td>
+                            <td class="py-3 px-4 text-right font-medium" style="color:var(--sa-fg);">{{ number_format($restaurant->revenue / 100, 0, ',', ' ') }} FCFA</td>
+                            <td class="py-3 px-4 text-right" style="color:var(--sa-muted-fg);">{{ $restaurant->orders }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="py-8 text-center text-neutral-500">Aucun revenu pour cette période</td>
+                            <td colspan="3" class="py-8 text-center" style="color:var(--sa-muted-fg);">Aucun revenu pour cette période</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -86,19 +87,19 @@
     </div>
 
     <!-- Revenue by Payment Method -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Revenus par méthode de paiement</h2>
+    <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Revenus par méthode de paiement</h2>
         <div class="space-y-3">
             @forelse($revenueByPayment as $payment)
-                <div class="flex items-center justify-between p-4 bg-neutral-100 rounded-lg">
-                    <span class="text-neutral-900 font-medium">{{ ucfirst($payment->payment_method ?? 'Non spécifié') }}</span>
+                <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--sa-muted);">
+                    <span class="font-medium" style="color:var(--sa-fg);">{{ ucfirst($payment->payment_method ?? 'Non spécifié') }}</span>
                     <div class="text-right">
-                        <p class="text-neutral-900 font-bold">{{ number_format($payment->revenue / 100, 0, ',', ' ') }} FCFA</p>
-                        <p class="text-sm text-neutral-500">{{ $payment->orders }} commande(s)</p>
+                        <p class="font-bold" style="color:var(--sa-fg);">{{ number_format($payment->revenue / 100, 0, ',', ' ') }} FCFA</p>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $payment->orders }} commande(s)</p>
                     </div>
                 </div>
             @empty
-                <p class="text-neutral-500 text-center py-8">Aucun revenu pour cette période</p>
+                <p class="text-center py-8" style="color:var(--sa-muted-fg);">Aucun revenu pour cette période</p>
             @endforelse
         </div>
     </div>
@@ -159,4 +160,3 @@
     </script>
     @endpush
 </x-layouts.admin-super>
-

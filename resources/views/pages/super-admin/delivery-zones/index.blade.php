@@ -16,35 +16,45 @@
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
             {{-- Formulaire création --}}
-            <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
-                <h2 class="font-semibold text-neutral-900 mb-4">Nouvelle zone</h2>
+            <div class="rounded-2xl border shadow-sm p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="font-semibold mb-4" style="color:var(--sa-fg);">Nouvelle zone</h2>
                 <form @submit.prevent="createZone" class="space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-xs font-medium text-neutral-600 mb-1">Nom de la zone *</label>
-                        <input type="text" x-model="form.name" required placeholder="ex: Cocody" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Nom de la zone *</label>
+                        <input type="text" x-model="form.name" required placeholder="ex: Cocody"
+                               class="w-full h-10 px-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-neutral-600 mb-1">Ville *</label>
-                        <input type="text" x-model="form.city" required placeholder="ex: Abidjan" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Ville *</label>
+                        <input type="text" x-model="form.city" required placeholder="ex: Abidjan"
+                               class="w-full h-10 px-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-neutral-600 mb-1">Rayon (km) *</label>
-                        <input type="number" x-model="form.radius_km" value="5" min="1" max="50" required class="w-full h-10 px-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Rayon (km) *</label>
+                        <input type="number" x-model="form.radius_km" value="5" min="1" max="50" required
+                               class="w-full h-10 px-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-neutral-600 mb-1">Latitude centre</label>
-                            <input type="number" x-model="form.center_latitude" step="0.0000001" placeholder="5.3542" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Latitude centre</label>
+                            <input type="number" x-model="form.center_latitude" step="0.0000001" placeholder="5.3542"
+                                   class="w-full h-10 px-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-neutral-600 mb-1">Longitude centre</label>
-                            <input type="number" x-model="form.center_longitude" step="0.0000001" placeholder="-3.9827" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Longitude centre</label>
+                            <input type="number" x-model="form.center_longitude" step="0.0000001" placeholder="-3.9827"
+                                   class="w-full h-10 px-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                         </div>
                     </div>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" x-model="form.is_active" class="w-4 h-4 rounded text-primary-500">
-                        <span class="text-sm text-neutral-700">Zone active</span>
+                        <span class="text-sm" style="color:var(--sa-fg);">Zone active</span>
                     </label>
                     <button type="submit" :disabled="saving" class="w-full h-10 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 disabled:opacity-50 flex items-center justify-center gap-2">
                         <svg x-show="saving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -54,17 +64,17 @@
             </div>
 
             {{-- Liste des zones --}}
-            <div class="xl:col-span-2 bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
-                    <h2 class="font-semibold text-neutral-900"><span x-text="zones.length"></span> zone(s)</h2>
+            <div class="xl:col-span-2 rounded-2xl border shadow-sm overflow-hidden" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <div class="px-5 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--sa-border);">
+                    <h2 class="font-semibold" style="color:var(--sa-fg);"><span x-text="zones.length"></span> zone(s)</h2>
                 </div>
-                <div class="divide-y divide-neutral-100">
+                <div>
                     <template x-if="zones.length === 0">
-                        <div class="px-5 py-12 text-center text-neutral-400">Aucune zone configurée. Créez votre première zone.</div>
+                        <div class="px-5 py-12 text-center" style="color:var(--sa-muted-fg);">Aucune zone configurée. Créez votre première zone.</div>
                     </template>
 
                     <template x-for="zone in zones" :key="zone.id">
-                        <div class="px-5 py-4">
+                        <div class="px-5 py-4" style="border-bottom:1px solid var(--sa-border);">
                             {{-- Vue normale --}}
                             <div x-show="zone._editing !== true" class="flex items-center justify-between gap-4">
                                 <div class="flex items-center gap-3">
@@ -73,14 +83,14 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-neutral-900" x-text="zone.name"></p>
-                                        <p class="text-xs text-neutral-500"><span x-text="zone.city"></span> · Rayon : <span x-text="zone.radius_km"></span> km</p>
+                                        <p class="font-semibold" style="color:var(--sa-fg);" x-text="zone.name"></p>
+                                        <p class="text-xs" style="color:var(--sa-muted-fg);"><span x-text="zone.city"></span> · Rayon : <span x-text="zone.radius_km"></span> km</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
                                     <span x-show="zone.is_active" class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 font-medium">Active</span>
-                                    <span x-show="!zone.is_active" class="px-2 py-0.5 text-xs rounded-full bg-neutral-100 text-neutral-500 font-medium">Inactive</span>
-                                    <button @click="startEdit(zone)" class="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500" title="Modifier">
+                                    <span x-show="!zone.is_active" class="px-2 py-0.5 text-xs rounded-full font-medium" style="background:var(--sa-muted);color:var(--sa-muted-fg);">Inactive</span>
+                                    <button @click="startEdit(zone)" class="p-1.5 rounded-lg" style="color:var(--sa-muted-fg);" title="Modifier">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
                                     <button @click="toggleZone(zone)" class="p-1.5 rounded-lg hover:bg-amber-50 text-amber-600" :title="zone.is_active ? 'Désactiver' : 'Activer'">
@@ -96,20 +106,28 @@
                             <div x-show="zone._editing === true" class="space-y-3">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs font-medium text-neutral-600 mb-1">Nom</label>
-                                        <input type="text" x-model="zone._edit.name" required class="w-full h-9 px-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Nom</label>
+                                        <input type="text" x-model="zone._edit.name" required
+                                               class="w-full h-9 px-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-neutral-600 mb-1">Ville</label>
-                                        <input type="text" x-model="zone._edit.city" required class="w-full h-9 px-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Ville</label>
+                                        <input type="text" x-model="zone._edit.city" required
+                                               class="w-full h-9 px-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-neutral-600 mb-1">Rayon (km)</label>
-                                        <input type="number" x-model="zone._edit.radius_km" min="1" max="50" class="w-full h-9 px-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Rayon (km)</label>
+                                        <input type="number" x-model="zone._edit.radius_km" min="1" max="50"
+                                               class="w-full h-9 px-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-neutral-600 mb-1">Latitude centre</label>
-                                        <input type="number" x-model="zone._edit.center_latitude" step="0.0000001" class="w-full h-9 px-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Latitude centre</label>
+                                        <input type="number" x-model="zone._edit.center_latitude" step="0.0000001"
+                                               class="w-full h-9 px-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
@@ -118,7 +136,7 @@
                                         <svg x-show="zone._saving" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                         <span x-text="zone._saving ? 'Enregistrement...' : 'Enregistrer'"></span>
                                     </button>
-                                    <button type="button" @click="zone._editing = false" class="px-4 h-9 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200">Annuler</button>
+                                    <button type="button" @click="zone._editing = false" class="px-4 h-9 rounded-lg text-sm" style="background:var(--sa-muted);color:var(--sa-fg);">Annuler</button>
                                 </div>
                             </div>
                         </div>

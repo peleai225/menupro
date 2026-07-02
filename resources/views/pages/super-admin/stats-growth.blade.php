@@ -3,8 +3,8 @@
     <div class="mb-8">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-neutral-900">Analyse de croissance</h1>
-                <p class="text-neutral-500 mt-1">Comparaison des performances entre périodes.</p>
+                <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Analyse de croissance</h1>
+                <p class="mt-1" style="color:var(--sa-muted-fg);">Comparaison des performances entre périodes.</p>
             </div>
             <a href="{{ route('super-admin.stats') }}" class="btn btn-neutral">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,10 +23,11 @@
             '180' => '6 mois',
             '365' => '1 an',
         ] as $value => $label)
-            <button type="submit" 
-                    name="period" 
+            <button type="submit"
+                    name="period"
                     value="{{ $value }}"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-neutral-900' : 'bg-neutral-50 text-neutral-600 hover:bg-neutral-200' }}">
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $period == $value ? 'bg-primary-500 text-neutral-900' : '' }}"
+                    @if($period != $value) style="background:var(--sa-muted);color:var(--sa-muted-fg);" @endif>
                 {{ $label }}
             </button>
         @endforeach
@@ -34,88 +35,88 @@
 
     <!-- Comparison Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Restaurants</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants</p>
             <div class="flex items-end justify-between mt-2">
-                <p class="text-2xl font-bold text-neutral-900">{{ number_format($currentStats['restaurants']) }}</p>
+                <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($currentStats['restaurants']) }}</p>
                 @if(isset($growth['restaurants']))
                     <span class="text-sm {{ $growth['restaurants'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
                         {{ $growth['restaurants'] >= 0 ? '+' : '' }}{{ number_format($growth['restaurants'], 1) }}%
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-neutral-500 mt-1">vs période précédente: {{ $previousStats['restaurants'] }}</p>
+            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">vs période précédente: {{ $previousStats['restaurants'] }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Commandes</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes</p>
             <div class="flex items-end justify-between mt-2">
-                <p class="text-2xl font-bold text-neutral-900">{{ number_format($currentStats['orders']) }}</p>
+                <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($currentStats['orders']) }}</p>
                 @if(isset($growth['orders']))
                     <span class="text-sm {{ $growth['orders'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
                         {{ $growth['orders'] >= 0 ? '+' : '' }}{{ number_format($growth['orders'], 1) }}%
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-neutral-500 mt-1">vs période précédente: {{ $previousStats['orders'] }}</p>
+            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">vs période précédente: {{ $previousStats['orders'] }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Revenus</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus</p>
             <div class="flex items-end justify-between mt-2">
-                <p class="text-2xl font-bold text-neutral-900">{{ number_format($currentStats['revenue'] / 100, 0, ',', ' ') }} F</p>
+                <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($currentStats['revenue'] / 100, 0, ',', ' ') }} F</p>
                 @if(isset($growth['revenue']))
                     <span class="text-sm {{ $growth['revenue'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
                         {{ $growth['revenue'] >= 0 ? '+' : '' }}{{ number_format($growth['revenue'], 1) }}%
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-neutral-500 mt-1">vs période précédente: {{ number_format($previousStats['revenue'] / 100, 0, ',', ' ') }} F</p>
+            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">vs période précédente: {{ number_format($previousStats['revenue'] / 100, 0, ',', ' ') }} F</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <p class="text-sm text-neutral-500">Abonnements</p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Abonnements</p>
             <div class="flex items-end justify-between mt-2">
-                <p class="text-2xl font-bold text-neutral-900">{{ number_format($currentStats['subscriptions']) }}</p>
+                <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($currentStats['subscriptions']) }}</p>
                 @if(isset($growth['subscriptions']))
                     <span class="text-sm {{ $growth['subscriptions'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
                         {{ $growth['subscriptions'] >= 0 ? '+' : '' }}{{ number_format($growth['subscriptions'], 1) }}%
                     </span>
                 @endif
             </div>
-            <p class="text-xs text-neutral-500 mt-1">vs période précédente: {{ $previousStats['subscriptions'] }}</p>
+            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">vs période précédente: {{ $previousStats['subscriptions'] }}</p>
         </div>
     </div>
 
     <!-- Growth Chart -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Évolution hebdomadaire</h2>
+    <div class="border shadow-sm rounded-xl p-6 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Évolution hebdomadaire</h2>
         <div class="relative h-64">
             <canvas id="growthChart"></canvas>
         </div>
     </div>
 
     <!-- Weekly Growth Table -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Détail par semaine</h2>
+    <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Détail par semaine</h2>
         <div class="table-responsive">
             <table class="w-full min-w-[600px]">
                 <thead>
-                    <tr class="border-b border-neutral-200">
-                        <th class="text-left py-3 px-4 text-neutral-500 font-medium">Semaine</th>
-                        <th class="text-right py-3 px-4 text-neutral-500 font-medium">Restaurants</th>
-                        <th class="text-right py-3 px-4 text-neutral-500 font-medium">Commandes</th>
-                        <th class="text-right py-3 px-4 text-neutral-500 font-medium">Revenus</th>
+                    <tr style="border-bottom:1px solid var(--sa-border);">
+                        <th class="text-left py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Semaine</th>
+                        <th class="text-right py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Restaurants</th>
+                        <th class="text-right py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Commandes</th>
+                        <th class="text-right py-3 px-4 font-medium" style="color:var(--sa-muted-fg);">Revenus</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($weeklyGrowth as $week)
-                        <tr class="border-b border-neutral-200/50 hover:bg-neutral-200/30">
-                            <td class="py-3 px-4 text-neutral-900">{{ $week['week'] }}</td>
-                            <td class="py-3 px-4 text-right text-neutral-900">{{ $week['restaurants'] }}</td>
-                            <td class="py-3 px-4 text-right text-neutral-900">{{ $week['orders'] }}</td>
-                            <td class="py-3 px-4 text-right text-neutral-900 font-medium">{{ number_format($week['revenue'] / 100, 0, ',', ' ') }} FCFA</td>
+                        <tr style="border-bottom:1px solid var(--sa-border);">
+                            <td class="py-3 px-4" style="color:var(--sa-fg);">{{ $week['week'] }}</td>
+                            <td class="py-3 px-4 text-right" style="color:var(--sa-fg);">{{ $week['restaurants'] }}</td>
+                            <td class="py-3 px-4 text-right" style="color:var(--sa-fg);">{{ $week['orders'] }}</td>
+                            <td class="py-3 px-4 text-right font-medium" style="color:var(--sa-fg);">{{ number_format($week['revenue'] / 100, 0, ',', ' ') }} FCFA</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-neutral-500">Aucune donnée pour cette période</td>
+                            <td colspan="4" class="py-8 text-center" style="color:var(--sa-muted-fg);">Aucune donnée pour cette période</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -202,4 +203,3 @@
     </script>
     @endpush
 </x-layouts.admin-super>
-

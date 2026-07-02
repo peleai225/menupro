@@ -18,7 +18,7 @@
             <p class="text-amber-200 text-sm font-medium mb-2">Lien pour que l'agent définisse son mot de passe :</p>
             <div class="flex gap-2 flex-wrap">
                 <input type="text" readonly value="{{ session('welcome_url') }}" id="welcome-url"
-                       class="flex-1 min-w-0 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-900 text-sm">
+                       class="flex-1 min-w-0 px-3 py-2 border rounded-lg text-sm" style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
                 <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('welcome-url').value); this.textContent='Copié !'; setTimeout(() => this.textContent='Copier', 2000)"
                         class="px-4 py-2 rounded-lg bg-amber-500 text-neutral-900 text-sm font-medium">Copier</button>
             </div>
@@ -31,7 +31,7 @@
             @php $welcomeUrl = route('commando.welcome', ['token' => $agent->user->welcome_token]); @endphp
             <div class="flex gap-2 flex-wrap">
                 <input type="text" readonly value="{{ $welcomeUrl }}" id="welcome-url-persist"
-                       class="flex-1 min-w-0 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-900 text-sm">
+                       class="flex-1 min-w-0 px-3 py-2 border rounded-lg text-sm" style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
                 <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('welcome-url-persist').value); this.textContent='Copié !'; setTimeout(() => this.textContent='Copier', 2000)"
                         class="px-4 py-2 rounded-lg bg-primary-500 text-neutral-900 text-sm font-medium">Copier</button>
             </div>
@@ -44,56 +44,60 @@
     @endif
 
     <div class="grid lg:grid-cols-2 gap-6">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-900 mb-4">Profil</h2>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Profil</h2>
             <dl class="space-y-3 text-sm">
                 <div>
-                    <dt class="text-neutral-500">Nom complet</dt>
-                    <dd class="text-neutral-900 font-medium">{{ $agent->full_name }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">Nom complet</dt>
+                    <dd class="font-medium" style="color:var(--sa-fg);">{{ $agent->full_name }}</dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">WhatsApp</dt>
-                    <dd class="text-neutral-900">{{ $agent->whatsapp }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">WhatsApp</dt>
+                    <dd style="color:var(--sa-fg);">{{ $agent->whatsapp }}</dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">Ville</dt>
-                    <dd class="text-neutral-900">{{ $agent->city ?? '–' }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">Ville</dt>
+                    <dd style="color:var(--sa-fg);">{{ $agent->city ?? '–' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">Badge ID</dt>
-                    <dd class="text-neutral-900 font-mono">{{ $agent->badge_id_display }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">Badge ID</dt>
+                    <dd class="font-mono" style="color:var(--sa-fg);">{{ $agent->badge_id_display }}</dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">Statut métier</dt>
-                    <dd class="text-neutral-900">{{ $agent->statut_metier ?? '–' }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">Statut métier</dt>
+                    <dd style="color:var(--sa-fg);">{{ $agent->statut_metier ?? '–' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">Statut vérification</dt>
+                    <dt style="color:var(--sa-muted-fg);">Statut vérification</dt>
                     <dd>
-                        <span class="px-2 py-1 rounded-lg text-xs font-medium
-                            @if($agent->status_verification->value === 'pending_review') bg-amber-50 text-amber-700
-                            @elseif($agent->status_verification->value === 'valide') bg-emerald-50 text-emerald-700
-                            @elseif(in_array($agent->status_verification->value, ['rejete','banni'])) bg-red-50 text-red-700
-                            @else bg-neutral-100 text-neutral-600
-                            @endif">
-                            {{ $agent->status_verification->label() }}
+                        @php
+                            $sv = $agent->status_verification;
+                            $svStyle = match(true) {
+                                $sv->value === 'pending_review' => 'background:rgba(217,119,6,0.15);color:var(--sa-warning);',
+                                $sv->value === 'valide' => 'background:rgba(61,158,98,0.15);color:var(--sa-success);',
+                                in_array($sv->value, ['rejete','banni']) => 'background:rgba(220,38,38,0.15);color:var(--sa-danger);',
+                                default => 'background:rgba(107,101,96,0.15);color:var(--sa-muted-fg);',
+                            };
+                        @endphp
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium" style="{{ $svStyle }}">
+                            {{ $sv->label() }}
                         </span>
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-neutral-500">Inscrit le</dt>
-                    <dd class="text-neutral-900">{{ $agent->created_at->format('d/m/Y H:i') }}</dd>
+                    <dt style="color:var(--sa-muted-fg);">Inscrit le</dt>
+                    <dd style="color:var(--sa-fg);">{{ $agent->created_at->format('d/m/Y H:i') }}</dd>
                 </div>
                 @if($agent->rejection_reason)
                     <div>
-                        <dt class="text-neutral-500">Motif rejet</dt>
+                        <dt style="color:var(--sa-muted-fg);">Motif rejet</dt>
                         <dd class="text-amber-400">{{ $agent->rejection_reason }}</dd>
                     </div>
                 @endif
             </dl>
             @if($agent->relationLoaded('verifyScans') && $agent->verifyScans->isNotEmpty())
-                <div class="mt-4 pt-4 border-t border-neutral-200">
-                    <dt class="text-neutral-500 mb-1">Derniers scans QR</dt>
+                <div class="mt-4 pt-4" style="border-top:1px solid var(--sa-border);">
+                    <dt style="color:var(--sa-muted-fg);" class="mb-1">Derniers scans QR</dt>
                     <dd class="text-slate-400 text-xs">
                         {{ $agent->verifyScans->count() }} scan(s) enregistré(s). Dernier : {{ $agent->verifyScans->first()->created_at->diffForHumans() }}
                     </dd>
@@ -102,13 +106,17 @@
         </div>
 
         {{-- Wallet --}}
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-900 mb-4">Wallet</h2>
-            <p class="text-2xl font-bold text-neutral-900 mb-4">{{ number_format($agent->balance, 0, ',', ' ') }} <span class="text-neutral-500 text-base font-normal">FCFA</span></p>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Wallet</h2>
+            <p class="text-2xl font-bold mb-4" style="color:var(--sa-fg);">{{ number_format($agent->balance, 0, ',', ' ') }} <span class="text-base font-normal" style="color:var(--sa-muted-fg);">FCFA</span></p>
             <form method="POST" action="{{ route('super-admin.commando.agents.commission', $agent) }}" class="flex flex-wrap gap-2 mb-4">
                 @csrf
-                <input type="number" name="amount" step="1" min="1" placeholder="Montant (FCFA)" required class="px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 text-sm w-32">
-                <input type="text" name="description" placeholder="Description (optionnel)" class="flex-1 min-w-0 px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 text-sm">
+                <input type="number" name="amount" step="1" min="1" placeholder="Montant (FCFA)" required
+                       class="px-3 py-2 border rounded-lg text-sm w-32"
+                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                <input type="text" name="description" placeholder="Description (optionnel)"
+                       class="flex-1 min-w-0 px-3 py-2 border rounded-lg text-sm"
+                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                 <button type="submit" class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-neutral-900 text-sm font-medium">Ajouter commission</button>
             </form>
             @if($pendingWithdrawals->isNotEmpty())
@@ -116,8 +124,8 @@
                     <p class="text-amber-400 text-sm font-medium mb-2">Demandes de retrait en attente</p>
                     <ul class="space-y-2">
                         @foreach($pendingWithdrawals as $tx)
-                            <li class="flex items-center justify-between py-2 px-3 rounded-lg bg-neutral-100/50 border border-neutral-300 text-sm">
-                                <span class="text-neutral-900">{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA – {{ $tx->created_at->format('d/m/Y H:i') }}</span>
+                            <li class="flex items-center justify-between py-2 px-3 rounded-lg border text-sm" style="background:var(--sa-muted);border-color:var(--sa-border);">
+                                <span style="color:var(--sa-fg);">{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA – {{ $tx->created_at->format('d/m/Y H:i') }}</span>
                                 <span class="flex gap-2">
                                     <form method="POST" action="{{ route('super-admin.commando.agents.withdrawal.pay', [$agent, $tx]) }}" class="inline">
                                         @csrf
@@ -133,21 +141,21 @@
                     </ul>
                 </div>
             @endif
-            <p class="text-neutral-500 text-xs mb-2">Historique (50 derniers)</p>
+            <p class="text-xs mb-2" style="color:var(--sa-muted-fg);">Historique (50 derniers)</p>
             <ul class="space-y-1 max-h-48 overflow-y-auto text-sm">
                 @forelse($agent->commissionTransactions as $tx)
-                    <li class="flex justify-between items-center py-1.5 px-2 rounded text-neutral-600">
-                        <span>{{ $tx->type->label() }} – {{ $tx->created_at->format('d/m H:i') }} <span class="text-neutral-500">({{ $tx->status->label() }})</span></span>
-                        <span class="@if($tx->amount_cents > 0) text-green-400 @else text-neutral-500 @endif">{{ $tx->amount_cents > 0 ? '+' : '' }}{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA</span>
+                    <li class="flex justify-between items-center py-1.5 px-2 rounded" style="color:var(--sa-muted-fg);">
+                        <span>{{ $tx->type->label() }} – {{ $tx->created_at->format('d/m H:i') }} <span style="color:var(--sa-muted-fg);">({{ $tx->status->label() }})</span></span>
+                        <span class="@if($tx->amount_cents > 0) text-green-400 @endif">{{ $tx->amount_cents > 0 ? '+' : '' }}{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA</span>
                     </li>
                 @empty
-                    <li class="text-neutral-500 py-2">Aucune transaction</li>
+                    <li class="py-2" style="color:var(--sa-muted-fg);">Aucune transaction</li>
                 @endforelse
             </ul>
         </div>
 
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-900 mb-4">Pièce d'identité</h2>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Pièce d'identité</h2>
             @if($agent->id_document_path && $agent->id_document_url)
                 @if(str_ends_with(strtolower($agent->id_document_path), '.pdf'))
                     <a href="{{ $agent->id_document_url }}" target="_blank" rel="noopener"
@@ -159,22 +167,22 @@
                     </a>
                 @else
                     <a href="{{ $agent->id_document_url }}" target="_blank" rel="noopener" class="block">
-                        <img src="{{ $agent->id_document_url }}" alt="Pièce d'identité" class="rounded-lg max-h-80 object-contain border border-neutral-300">
+                        <img src="{{ $agent->id_document_url }}" alt="Pièce d'identité" class="rounded-lg max-h-80 object-contain" style="border:1px solid var(--sa-border);">
                     </a>
                 @endif
             @else
-                <p class="text-neutral-500 text-sm">Aucun document.</p>
+                <p class="text-sm" style="color:var(--sa-muted-fg);">Aucun document.</p>
             @endif
         </div>
     </div>
 
     <div class="mt-6 grid lg:grid-cols-2 gap-6">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-900 mb-4">Déploiements ({{ $agent->deployments->count() }})</h2>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Déploiements ({{ $agent->deployments->count() }})</h2>
             <ul class="space-y-2 max-h-48 overflow-y-auto text-sm">
                 @forelse($agent->deployments as $d)
-                    <li class="flex justify-between items-center py-2 px-3 rounded-lg bg-neutral-100/30 border border-neutral-300">
-                        <span class="text-neutral-900">{{ $d->restaurant_name }}</span>
+                    <li class="flex justify-between items-center py-2 px-3 rounded-lg border" style="background:var(--sa-muted);border-color:var(--sa-border);">
+                        <span style="color:var(--sa-fg);">{{ $d->restaurant_name }}</span>
                         <span class="px-2 py-0.5 rounded text-xs
                             @if($d->status->value === 'actif') bg-emerald-50 text-emerald-700
                             @elseif($d->status->value === 'en_attente_paiement') bg-sky-500/20 text-sky-400
@@ -182,20 +190,20 @@
                             @endif">{{ $d->status->label() }}</span>
                     </li>
                 @empty
-                    <li class="text-neutral-500">Aucun déploiement</li>
+                    <li style="color:var(--sa-muted-fg);">Aucun déploiement</li>
                 @endforelse
             </ul>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-            <h2 class="text-lg font-semibold text-neutral-900 mb-4">Restaurants parrainés ({{ $agent->referredRestaurants->count() }})</h2>
+        <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Restaurants parrainés ({{ $agent->referredRestaurants->count() }})</h2>
             <ul class="space-y-2 max-h-48 overflow-y-auto text-sm">
                 @forelse($agent->referredRestaurants as $r)
-                    <li class="py-2 px-3 rounded-lg bg-neutral-100/30 border border-neutral-300">
+                    <li class="py-2 px-3 rounded-lg border" style="background:var(--sa-muted);border-color:var(--sa-border);">
                         <a href="{{ route('super-admin.restaurants.show', $r) }}" class="text-orange-400 hover:text-orange-300">{{ $r->name }}</a>
-                        <span class="text-neutral-500 text-xs block">{{ $r->created_at->format('d/m/Y') }}</span>
+                        <span class="text-xs block" style="color:var(--sa-muted-fg);">{{ $r->created_at->format('d/m/Y') }}</span>
                     </li>
                 @empty
-                    <li class="text-neutral-500">Aucun restaurant parrainé</li>
+                    <li style="color:var(--sa-muted-fg);">Aucun restaurant parrainé</li>
                 @endforelse
             </ul>
         </div>
@@ -213,15 +221,15 @@
             <button type="button" @click="$refs.rejectModal.showModal()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-neutral-900 font-medium">
                 Rejeter
             </button>
-            <dialog x-ref="rejectModal" class="bg-white border border-neutral-300 rounded-xl p-6 max-w-md w-full backdrop:bg-black/60">
+            <dialog x-ref="rejectModal" class="rounded-xl p-6 max-w-md w-full backdrop:bg-black/60" style="background:var(--sa-card);border:1px solid var(--sa-border);">
                 <form method="POST" action="{{ route('super-admin.commando.agents.reject', $agent) }}">
                     @csrf
-                    <h3 class="text-lg font-semibold text-neutral-900 mb-2">Rejeter l'agent</h3>
-                    <label class="block text-sm text-neutral-500 mb-2">Motif (optionnel)</label>
-                    <textarea name="reason" rows="3" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 mb-4" placeholder="Raison du rejet..."></textarea>
+                    <h3 class="text-lg font-semibold mb-2" style="color:var(--sa-fg);">Rejeter l'agent</h3>
+                    <label class="block text-sm mb-2" style="color:var(--sa-muted-fg);">Motif (optionnel)</label>
+                    <textarea name="reason" rows="3" class="w-full px-4 py-2 border rounded-lg mb-4" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Raison du rejet..."></textarea>
                     <div class="flex gap-2 justify-end">
-                        <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 rounded-lg bg-neutral-600 text-neutral-900">Annuler</button>
-                        <button type="submit" class="px-4 py-2 rounded-lg bg-red-500 text-neutral-900">Rejeter</button>
+                        <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 rounded-lg" style="background:var(--sa-muted);color:var(--sa-fg);">Annuler</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-red-500 text-white">Rejeter</button>
                     </div>
                 </form>
             </dialog>
@@ -240,7 +248,7 @@
               onsubmit="return confirm('Supprimer définitivement cet agent ({{ addslashes($agent->full_name) }}) ? Cette action est irréversible.');">
             @csrf
             @method('DELETE')
-            <button type="submit" class="px-4 py-2 rounded-lg bg-neutral-600 hover:bg-neutral-100 text-red-600 hover:text-red-300 font-medium border border-red-500/30">
+            <button type="submit" class="px-4 py-2 rounded-lg text-red-600 hover:text-red-300 font-medium" style="background:var(--sa-muted);border:1px solid rgba(220,38,38,0.30);">
                 Supprimer l'agent
             </button>
         </form>

@@ -1,36 +1,36 @@
 <x-layouts.admin-super title="Agents Commando">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Agents Commando</h1>
-            <p class="text-neutral-500 mt-1">Inscriptions et vérification des agents.</p>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Agents Commando</h1>
+            <p class="mt-1" style="color:var(--sa-muted-fg);">Inscriptions et vérification des agents.</p>
         </div>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <a href="{{ route('super-admin.commando.agents.index', ['status' => 'pending_review']) }}"
-           class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 hover:border-amber-500/50 transition-colors">
-            <p class="text-sm text-neutral-500">En attente</p>
+           class="border shadow-sm rounded-xl p-4 hover:border-amber-500/50 transition-colors" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente</p>
             <p class="text-2xl font-bold text-amber-400">{{ $counts['pending'] }}</p>
         </a>
         <a href="{{ route('super-admin.commando.agents.index', ['status' => 'valide']) }}"
-           class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 hover:border-green-500/50 transition-colors">
-            <p class="text-sm text-neutral-500">Valides</p>
+           class="border shadow-sm rounded-xl p-4 hover:border-green-500/50 transition-colors" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Valides</p>
             <p class="text-2xl font-bold text-green-400">{{ $counts['valide'] }}</p>
         </a>
         <a href="{{ route('super-admin.commando.agents.index', ['status' => 'banni']) }}"
-           class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 hover:border-red-500/50 transition-colors">
-            <p class="text-sm text-neutral-500">Bannis</p>
+           class="border shadow-sm rounded-xl p-4 hover:border-red-500/50 transition-colors" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Bannis</p>
             <p class="text-2xl font-bold text-red-600">{{ $counts['banni'] }}</p>
         </a>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Total</p>
-            <p class="text-2xl font-bold text-neutral-900">{{ $agents->total() }}</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Total</p>
+            <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ $agents->total() }}</p>
         </div>
     </div>
 
-    <form method="GET" class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 mb-6">
+    <form method="GET" class="border shadow-sm rounded-xl p-4 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
         <div class="flex flex-col sm:flex-row gap-4">
-            <select name="status" class="h-10 px-4 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900">
+            <select name="status" class="h-10 px-4 border rounded-lg" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                 <option value="">Tous les statuts</option>
                 <option value="shadow" {{ request('status') === 'shadow' ? 'selected' : '' }}>Shadow</option>
                 <option value="pending_review" {{ request('status') === 'pending_review' ? 'selected' : '' }}>En attente</option>
@@ -39,44 +39,47 @@
                 <option value="banni" {{ request('status') === 'banni' ? 'selected' : '' }}>Banni</option>
             </select>
             <input type="text" name="city" value="{{ request('city') }}" placeholder="Ville..."
-                   class="h-10 px-4 bg-neutral-100 border border-neutral-300 rounded-lg text-neutral-900 placeholder-neutral-500">
-            <button type="submit" class="h-10 px-6 bg-primary-500 text-neutral-900 rounded-lg font-medium hover:bg-primary-600">Filtrer</button>
+                   class="h-10 px-4 border rounded-lg" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+            <button type="submit" class="h-10 px-6 bg-primary-500 rounded-lg font-medium hover:bg-primary-600" style="color:var(--sa-fg);">Filtrer</button>
         </div>
     </form>
 
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl overflow-hidden">
+    <div class="border shadow-sm rounded-xl overflow-hidden" style="background:var(--sa-card);border-color:var(--sa-border);">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[600px]">
-                <thead class="bg-neutral-100/50 border-b border-neutral-300">
+                <thead style="background:var(--sa-muted);border-bottom:1px solid var(--sa-border);">
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Agent</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">WhatsApp</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Ville</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Statut</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Inscrit le</th>
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-neutral-500 uppercase">Actions</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">Agent</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">WhatsApp</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">Ville</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">Statut</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">Inscrit le</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold uppercase" style="color:var(--sa-muted-fg);">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-neutral-200">
+                <tbody>
                     @forelse($agents as $a)
-                        <tr class="hover:bg-neutral-100/30">
+                        @php
+                            $status = $a->status_verification;
+                            $badgeStyle = match(true) {
+                                $status->value === 'pending_review' => 'background:rgba(217,119,6,0.15);color:var(--sa-warning);',
+                                $status->value === 'valide' => 'background:rgba(61,158,98,0.15);color:var(--sa-success);',
+                                in_array($status->value, ['rejete', 'banni']) => 'background:rgba(220,38,38,0.15);color:var(--sa-danger);',
+                                default => 'background:rgba(107,101,96,0.15);color:var(--sa-muted-fg);',
+                            };
+                        @endphp
+                        <tr style="border-bottom:1px solid var(--sa-border);">
                             <td class="px-6 py-4">
-                                <span class="font-medium text-neutral-900">{{ $a->full_name }}</span>
+                                <span class="font-medium" style="color:var(--sa-fg);">{{ $a->full_name }}</span>
                             </td>
-                            <td class="px-6 py-4 text-neutral-600">{{ $a->whatsapp }}</td>
-                            <td class="px-6 py-4 text-neutral-500">{{ $a->city ?? '–' }}</td>
+                            <td class="px-6 py-4" style="color:var(--sa-muted-fg);">{{ $a->whatsapp }}</td>
+                            <td class="px-6 py-4" style="color:var(--sa-muted-fg);">{{ $a->city ?? '–' }}</td>
                             <td class="px-6 py-4">
-                                @php $status = $a->status_verification; @endphp
-                                <span class="px-2 py-1 rounded-lg text-xs font-medium
-                                    @if($status->value === 'pending_review') bg-amber-50 text-amber-700
-                                    @elseif($status->value === 'valide') bg-emerald-50 text-emerald-700
-                                    @elseif($status->value === 'rejete' || $status->value === 'banni') bg-red-50 text-red-700
-                                    @else bg-neutral-100 text-neutral-600
-                                    @endif">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium" style="{{ $badgeStyle }}">
                                     {{ $status->label() }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-neutral-500 text-sm">{{ $a->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-6 py-4 text-sm" style="color:var(--sa-muted-fg);">{{ $a->created_at->format('d/m/Y H:i') }}</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3">
                                     <a href="{{ route('super-admin.commando.agents.show', $a) }}"
@@ -92,14 +95,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-neutral-500">Aucun agent.</td>
+                            <td colspan="6" class="px-6 py-12 text-center text-sm" style="color:var(--sa-muted-fg);">Aucun agent.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($agents->hasPages())
-            <div class="px-6 py-4 border-t border-neutral-200">
+            <div class="px-6 py-4" style="border-top:1px solid var(--sa-border);">
                 {{ $agents->links() }}
             </div>
         @endif
