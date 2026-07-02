@@ -8,7 +8,7 @@
         <a href="{{ route('super-admin.transactions.export') }}"
            class="inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium shadow-sm transition-colors"
            style="border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
-            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             Exporter CSV
@@ -19,8 +19,8 @@
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Volume traité (primary) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                 </svg>
             </div>
@@ -31,8 +31,8 @@
 
         <!-- Ce mois (success) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-success);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
@@ -43,8 +43,8 @@
 
         <!-- En attente (warning) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
@@ -55,8 +55,8 @@
 
         <!-- Commissions (info) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
             </div>
@@ -107,7 +107,7 @@
         <form method="GET" class="flex flex-wrap gap-3">
             <input type="hidden" name="status" value="{{ $filters['status'] }}">
             <div class="relative flex-1 min-w-48">
-                <svg class="absolute left-3 top-1/2 size-4 -translate-y-1/2" style="color:var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2" style="color:var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Référence, restaurant..."

@@ -9,8 +9,8 @@
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <!-- Tokens livreurs (primary) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
             </div>
@@ -21,8 +21,8 @@
 
         <!-- Livreurs en ligne (info) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
-                <svg class="size-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-info) 12%,transparent);">
+                <svg class="w-5 h-5" style="color:var(--sa-info);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
@@ -33,9 +33,9 @@
 
         <!-- FCM Status (success / warning) -->
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <div class="flex size-10 items-center justify-center rounded-xl"
+            <div class="flex w-10 h-10 items-center justify-center rounded-xl"
                  style="background:color-mix(in oklch,{{ $stats['fcm_configured'] ? 'var(--sa-success)' : 'var(--sa-warning)' }} 12%,transparent);">
-                <svg class="size-5" style="color:{{ $stats['fcm_configured'] ? 'var(--sa-success)' : 'var(--sa-warning)' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5" style="color:{{ $stats['fcm_configured'] ? 'var(--sa-success)' : 'var(--sa-warning)' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M12 12a1 1 0 110-2 1 1 0 010 2z"/>
                 </svg>
             </div>
@@ -51,7 +51,7 @@
     <!-- Firebase warning banner -->
     <div class="mb-6 flex items-start gap-3 rounded-xl border p-4"
          style="border-color:color-mix(in oklch,var(--sa-warning) 40%,transparent);background:color-mix(in oklch,var(--sa-warning) 8%,transparent);">
-        <svg class="mt-0.5 size-5 shrink-0" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mt-0.5 w-5 h-5 shrink-0" style="color:var(--sa-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
         <div>
@@ -134,7 +134,7 @@
                             {{ !$stats['fcm_configured'] ? 'disabled' : '' }}
                             class="inline-flex flex-1 h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
                             style="background:var(--sa-primary);color:var(--sa-primary-fg);">
-                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
                         Envoyer maintenant
@@ -154,7 +154,7 @@
             <div class="mb-4 flex flex-wrap gap-3">
                 <div class="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm"
                      style="border:1px solid {{ $stats['fcm_configured'] ? 'color-mix(in oklch,var(--sa-success) 40%,transparent)' : 'color-mix(in oklch,var(--sa-warning) 40%,transparent)' }};background:{{ $stats['fcm_configured'] ? 'color-mix(in oklch,var(--sa-success) 8%,transparent)' : 'color-mix(in oklch,var(--sa-warning) 8%,transparent)' }};">
-                    <span class="size-2.5 rounded-full {{ $stats['fcm_configured'] ? 'animate-pulse' : '' }}"
+                    <span class="w-2.5 h-2.5 rounded-full {{ $stats['fcm_configured'] ? 'animate-pulse' : '' }}"
                           style="background:{{ $stats['fcm_configured'] ? 'var(--sa-success)' : 'var(--sa-warning)' }};"></span>
                     <span class="font-medium" style="color:{{ $stats['fcm_configured'] ? 'var(--sa-success)' : 'var(--sa-warning)' }};">
                         Firebase {{ $stats['fcm_configured'] ? 'actif' : 'inactif' }}
@@ -177,9 +177,9 @@
                 {{-- If push notification history model exists, loop here --}}
                 {{-- Example static/empty state --}}
                 <li class="flex items-start gap-3 rounded-xl border p-4" style="border-color:var(--sa-border);">
-                    <span class="flex size-10 shrink-0 items-center justify-center rounded-lg"
+                    <span class="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg"
                           style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
-                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                     </span>

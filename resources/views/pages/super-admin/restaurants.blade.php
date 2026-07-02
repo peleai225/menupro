@@ -11,14 +11,14 @@
                 <a href="{{ route('super-admin.restaurants.index', array_merge(request()->only(['search', 'plan', 'status']), ['verification' => 'pending_verification'])) }}"
                    class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
                    style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);border-color:color-mix(in oklch,var(--sa-warning) 20%,transparent);">
-                    <span class="size-1.5 rounded-full bg-current"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                     {{ $stats['pending_verification'] }} RCCM à vérifier
                 </a>
             @endif
             <a href="{{ route('super-admin.restaurants.export', request()->only(['search', 'status', 'plan'])) }}"
                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium shadow-sm transition"
                style="background:var(--sa-success);color:#fff;">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 Exporter Excel
@@ -31,8 +31,8 @@
 
         {{-- Total --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex size-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
-                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10"/>
                 </svg>
@@ -43,8 +43,8 @@
 
         {{-- Actifs --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex size-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
-                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </span>
@@ -54,8 +54,8 @@
 
         {{-- Suspendus --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex size-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
-                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </span>
@@ -65,8 +65,8 @@
 
         {{-- En attente --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
-            <span class="flex size-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
-                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </span>
@@ -195,10 +195,10 @@
                                 @if($restaurant->logo_path)
                                     <img src="{{ Storage::url($restaurant->logo_path) }}"
                                          alt="{{ $restaurant->name }}"
-                                         class="size-10 shrink-0 rounded-full object-cover"
+                                         class="w-10 h-10 shrink-0 rounded-full object-cover"
                                          style="border:1px solid var(--sa-border);">
                                 @else
-                                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+                                    <span class="flex w-10 h-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
                                           style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
                                         {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                     </span>
@@ -208,13 +208,13 @@
                                         <span class="font-medium" style="color:var(--sa-fg);">{{ $restaurant->name }}</span>
                                         @if($restaurant->is_verified)
                                             <span title="RCCM vérifié" style="color:var(--sa-info);">
-                                                <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                                 </svg>
                                             </span>
                                         @elseif($restaurant->has_pending_verification)
                                             <span title="RCCM à vérifier" style="color:var(--sa-warning);">
-                                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                                 </svg>
                                             </span>
@@ -245,7 +245,7 @@
                         <td class="px-5 py-4">
                             <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
                                   style="background:{{ $badge['bg'] }};color:{{ $badge['color'] }};border-color:{{ $badge['border'] }};">
-                                <span class="size-1.5 rounded-full bg-current"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                 {{ $badge['label'] }}
                             </span>
                         </td>
@@ -278,7 +278,7 @@
                 @empty
                     <tr>
                         <td colspan="6" class="px-5 py-16 text-center">
-                            <svg class="mx-auto mb-3 size-12" style="color:color-mix(in oklch,var(--sa-muted-fg) 40%,transparent);"
+                            <svg class="mx-auto mb-3 w-12 h-12" style="color:color-mix(in oklch,var(--sa-muted-fg) 40%,transparent);"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                             </svg>

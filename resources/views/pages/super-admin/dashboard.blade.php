@@ -9,15 +9,15 @@
         <div class="flex items-center gap-2" x-data="liveDashboard()" x-init="startPolling()">
             <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium"
                   style="border-color:color-mix(in oklch,var(--sa-success) 20%,transparent);background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
-                <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-success);"></span>
+                <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--sa-success);"></span>
                 Live
                 <span class="text-[10px] opacity-70" x-text="lastUpdate"></span>
             </span>
             <button @click="toggleLive()"
                     :style="isLive ? 'background:var(--sa-success);color:#fff;' : 'background:var(--sa-muted);color:var(--sa-muted-fg);'"
-                    class="flex size-9 items-center justify-center rounded-lg transition"
+                    class="flex w-9 h-9 items-center justify-center rounded-lg transition"
                     aria-label="Rafraîchir">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
             </button>
@@ -31,9 +31,9 @@
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
-                <span class="flex size-11 items-center justify-center rounded-xl"
+                <span class="flex w-11 h-11 items-center justify-center rounded-xl"
                       style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </span>
@@ -50,15 +50,15 @@
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
-                <span class="flex size-11 items-center justify-center rounded-xl"
+                <span class="flex w-11 h-11 items-center justify-center rounded-xl"
                       style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold flex items-center gap-1"
                       style="background:color-mix(in oklch,var(--sa-success) 10%,transparent);color:var(--sa-success);">
-                    <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                     MRR
                 </span>
             </div>
@@ -77,9 +77,9 @@
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
-                <span class="flex size-11 items-center justify-center rounded-xl"
+                <span class="flex w-11 h-11 items-center justify-center rounded-xl"
                       style="background:color-mix(in oklch,var(--sa-info) 10%,transparent);color:var(--sa-info);">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </span>
@@ -102,14 +102,14 @@
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 30%,transparent)' : 'var(--sa-border)' }};background:{{ $stats['restaurants']['pending'] > 0 ? 'color-mix(in oklch,var(--sa-warning) 5%,transparent)' : 'var(--sa-card)' }};">
             <div class="flex items-start justify-between">
-                <span class="flex size-11 items-center justify-center rounded-xl"
+                <span class="flex w-11 h-11 items-center justify-center rounded-xl"
                       style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </span>
                 @if($stats['restaurants']['pending'] > 0)
-                    <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-warning);margin-top:0.35rem;"></span>
+                    <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--sa-warning);margin-top:0.35rem;"></span>
                 @else
                     <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
                           style="background:var(--sa-muted);color:var(--sa-muted-fg);">OK</span>
@@ -174,7 +174,7 @@
                        class="inline-flex items-center gap-1 text-sm font-medium shrink-0 mt-0.5"
                        style="color:var(--sa-primary);">
                         Voir tout
-                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </a>
@@ -209,10 +209,10 @@
                                     @if($restaurant->logo_path)
                                         <img src="{{ Storage::url($restaurant->logo_path) }}"
                                              alt="{{ $restaurant->name }}"
-                                             class="size-10 rounded-full object-cover flex-shrink-0"
+                                             class="w-10 h-10 rounded-full object-cover flex-shrink-0"
                                              style="border:1px solid var(--sa-border);">
                                     @else
-                                        <span class="flex size-10 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
+                                        <span class="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
                                               style="background:color-mix(in oklch,var(--sa-primary) 10%,transparent);color:var(--sa-primary);">
                                             {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                         </span>
@@ -238,7 +238,7 @@
                         </li>
                     @empty
                         <li class="p-8 text-center">
-                            <svg class="size-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                  style="color:var(--sa-muted-fg);opacity:.4;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                             </svg>
@@ -254,7 +254,7 @@
                      style="border-color:color-mix(in oklch,var(--sa-warning) 30%,transparent);background:var(--sa-card);">
                     <div class="px-5 py-4 flex items-center gap-2"
                          style="border-bottom:1px solid color-mix(in oklch,var(--sa-warning) 15%,transparent);background:color-mix(in oklch,var(--sa-warning) 5%,transparent);">
-                        <span class="size-2 rounded-full animate-pulse" style="background:var(--sa-warning);"></span>
+                        <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--sa-warning);"></span>
                         <h2 class="font-semibold text-sm" style="color:var(--sa-fg);">
                             {{ $pendingRestaurants->count() }} restaurant(s) en attente de validation
                         </h2>
@@ -268,10 +268,10 @@
                                     @if($restaurant->logo_path)
                                         <img src="{{ Storage::url($restaurant->logo_path) }}"
                                              alt="{{ $restaurant->name }}"
-                                             class="size-9 rounded-full object-cover flex-shrink-0"
+                                             class="w-9 h-9 rounded-full object-cover flex-shrink-0"
                                              style="border:1px solid color-mix(in oklch,var(--sa-warning) 30%,transparent);">
                                     @else
-                                        <span class="flex size-9 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
+                                        <span class="flex w-9 h-9 items-center justify-center rounded-full text-sm font-bold flex-shrink-0"
                                               style="background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);">
                                             {{ strtoupper(substr($restaurant->name, 0, 2)) }}
                                         </span>
@@ -336,9 +336,9 @@
                             <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Expirent bientôt</h2>
                             <p class="text-sm" style="color:var(--sa-muted-fg);">Abonnements à renouveler</p>
                         </div>
-                        <span class="flex size-9 items-center justify-center rounded-xl flex-shrink-0"
+                        <span class="flex w-9 h-9 items-center justify-center rounded-xl flex-shrink-0"
                               style="background:color-mix(in oklch,var(--sa-danger) 10%,transparent);color:var(--sa-danger);">
-                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </span>
@@ -372,7 +372,7 @@
                         @foreach($topRestaurants as $index => $restaurant)
                             <div class="flex items-center gap-3 p-2.5 rounded-xl"
                                  style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 8%,transparent);border:1px solid color-mix(in oklch,var(--sa-warning) 20%,transparent);' : 'background:transparent;' }}">
-                                <span class="flex size-7 items-center justify-center rounded-lg font-bold text-xs flex-shrink-0"
+                                <span class="flex w-7 h-7 items-center justify-center rounded-lg font-bold text-xs flex-shrink-0"
                                       style="{{ $index === 0 ? 'background:color-mix(in oklch,var(--sa-warning) 15%,transparent);color:var(--sa-warning);' : ($index === 1 ? 'background:var(--sa-muted);color:var(--sa-muted-fg);' : ($index === 2 ? 'background:color-mix(in oklch,var(--sa-warning) 10%,transparent);color:var(--sa-warning);' : 'background:var(--sa-muted);color:var(--sa-muted-fg);')) }}">
                                     {{ $index + 1 }}
                                 </span>
@@ -402,7 +402,7 @@
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
                        onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
-                        <svg class="size-6 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);"
                              onmouseover="this.style.color='var(--sa-primary)'" onmouseout="this.style.color='var(--sa-muted-fg)'">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
@@ -414,7 +414,7 @@
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
                        onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
-                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                         </svg>
@@ -425,7 +425,7 @@
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
                        onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
-                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                         </svg>
@@ -436,7 +436,7 @@
                        style="border-color:var(--sa-border);background:var(--sa-bg);"
                        onmouseover="this.style.borderColor='color-mix(in oklch,var(--sa-primary) 40%,transparent)';this.style.background='var(--sa-muted)';"
                        onmouseout="this.style.borderColor='var(--sa-border)';this.style.background='var(--sa-bg)';">
-                        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                              style="color:var(--sa-muted-fg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
@@ -454,10 +454,10 @@
             <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3"
                  style="border-bottom:1px solid var(--sa-sidebar-border);">
                 <h2 class="font-semibold text-sm flex items-center gap-2.5" style="color:var(--sa-sidebar-fg);">
-                    <span class="relative flex size-2.5">
+                    <span class="relative flex w-2.5 h-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
                               style="background:var(--sa-success);"></span>
-                        <span class="relative inline-flex rounded-full size-2.5"
+                        <span class="relative inline-flex rounded-full w-2.5 h-2.5"
                               style="background:var(--sa-success);"></span>
                     </span>
                     Commandes en temps réel
@@ -479,7 +479,7 @@
                          onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='transparent'">
                         <div class="flex items-center justify-between gap-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="size-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                      :class="{
                                         'bg-amber-500/15 text-amber-400': order.status === 'pending',
                                         'bg-blue-500/15 text-blue-400': order.status === 'confirmed',
@@ -487,7 +487,7 @@
                                         'bg-emerald-500/15 text-emerald-400': order.status === 'ready' || order.status === 'completed',
                                         'bg-red-500/15 text-red-400': order.status === 'cancelled',
                                      }">
-                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                                     </svg>
                                 </div>
@@ -516,7 +516,7 @@
                 </template>
 
                 <div x-show="orders.length === 0" class="p-8 text-center">
-                    <svg class="size-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                          style="color:var(--sa-sidebar-accent);opacity:.4;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>

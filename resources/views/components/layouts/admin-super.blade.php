@@ -313,7 +313,7 @@
                 <div class="flex items-center gap-3">
                     <!-- Search -->
                     <div class="relative hidden md:block">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
                         </svg>
                         <input type="search" placeholder="Rechercher..." class="h-10 w-64 rounded-lg pl-9 pr-3 text-sm outline-none transition"
@@ -324,10 +324,10 @@
                     <!-- Notifications bell -->
                     <div class="relative" x-data="notificationBell()" @click.outside="open = false">
                         <button type="button" @click="open = !open; if(open) loadNotifications()"
-                                class="relative flex size-10 items-center justify-center rounded-lg transition"
+                                class="relative flex w-10 h-10 items-center justify-center rounded-lg transition"
                                 style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent); color: var(--sa-muted-fg);"
                                 aria-label="Notifications">
-                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
                             <span x-show="unreadCount > 0" x-text="unreadCount"
@@ -370,10 +370,10 @@
                         <button @click="toggle()"
                                 class="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-3 transition"
                                 style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent);">
-                            <span class="flex size-8 items-center justify-center rounded-md text-sm font-semibold text-white"
+                            <span class="flex w-8 h-8 items-center justify-center rounded-md text-sm font-semibold text-white"
                                   style="background: var(--sa-sidebar);">{{ substr(auth()->user()->name ?? 'S', 0, 1) }}</span>
                             <span class="hidden text-sm font-medium sm:block" style="color: var(--sa-fg);">{{ auth()->user()->name ?? 'Super Admin' }}</span>
-                            <svg class="size-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
