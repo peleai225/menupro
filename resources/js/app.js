@@ -28,12 +28,17 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('sidebar', () => ({
         expanded: localStorage.getItem('sidebar_expanded') !== 'false',
         mobileOpen: false,
+        saIsDark: localStorage.getItem('sa-dark') === '1',
         toggle() {
             this.expanded = !this.expanded;
             localStorage.setItem('sidebar_expanded', this.expanded);
         },
         toggleMobile() {
             this.mobileOpen = !this.mobileOpen;
+        },
+        toggleDark() {
+            this.saIsDark = !this.saIsDark;
+            localStorage.setItem('sa-dark', this.saIsDark ? '1' : '0');
         }
     }));
 

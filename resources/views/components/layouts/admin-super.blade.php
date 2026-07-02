@@ -1,5 +1,14 @@
 <x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'">
-    <div x-data="sidebar()" x-init="document.documentElement.classList.remove('dark'); document.body.classList.remove('dark');" class="super-admin-layout min-h-screen" style="background: var(--sa-bg);" data-theme="light">
+    <div x-data="sidebar()"
+         x-init="
+           document.documentElement.classList.remove('dark');
+           document.body.classList.remove('dark');
+           if(localStorage.getItem('sa-dark')==='1') { $el.classList.add('sa-dark'); saIsDark=true; }
+         "
+         :class="saIsDark ? 'sa-dark' : ''"
+         class="super-admin-layout min-h-screen"
+         :style="'background:'+getComputedStyle($el).getPropertyValue('--sa-bg')"
+         data-theme="light">
         <!-- Sidebar Desktop -->
         <aside :class="expanded ? 'w-64' : 'w-[72px]'"
                class="fixed left-0 top-0 h-full z-40 transition-all duration-300 hidden lg:flex flex-col shadow-xl"
@@ -296,7 +305,8 @@
         <div :class="expanded ? 'lg:ml-64' : 'lg:ml-[72px]'" class="transition-all duration-300 ml-0" style="background: var(--sa-bg);">
             <!-- Topbar -->
             <header class="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b px-4 lg:px-6 backdrop-blur"
-                    style="border-color: var(--sa-border); background: color-mix(in oklch, var(--sa-card) 80%, transparent);">
+                    style="border-color: var(--sa-border);"
+                    :style="'border-color:var(--sa-border);background:' + (saIsDark ? 'rgba(28,26,23,0.92)' : 'rgba(255,255,255,0.88)')">
                 <!-- Mobile Menu Button + Page Title -->
                 <div class="flex items-center gap-3 flex-1 min-w-0">
                     <button @click="toggleMobile()" class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg transition"
@@ -315,15 +325,28 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
                         </svg>
                         <input type="search" placeholder="Rechercher..." class="h-10 w-64 rounded-lg pl-9 pr-3 text-sm outline-none transition"
-                               style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent); color: var(--sa-fg);"
+                               style="border: 1px solid var(--sa-border); background: var(--sa-bg); color: var(--sa-fg);"
                                onfocus="this.style.borderColor='var(--sa-primary)'" onblur="this.style.borderColor='var(--sa-border)'">
                     </div>
+
+                    <!-- Dark Mode Toggle -->
+                    <button @click="toggleDark()"
+                            class="relative flex w-10 h-10 items-center justify-center rounded-lg transition"
+                            style="border: 1px solid var(--sa-border); color: var(--sa-muted-fg);"
+                            :title="saIsDark ? 'Passer en mode clair' : 'Passer en mode sombre'">
+                        <svg x-show="!saIsDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                        <svg x-show="saIsDark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </button>
 
                     <!-- Notifications bell -->
                     <div class="relative" x-data="notificationBell()" @click.outside="open = false">
                         <button type="button" @click="open = !open; if(open) loadNotifications()"
                                 class="relative flex w-10 h-10 items-center justify-center rounded-lg transition"
-                                style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent); color: var(--sa-muted-fg);"
+                                style="border: 1px solid var(--sa-border); background: var(--sa-bg); color: var(--sa-muted-fg);"
                                 aria-label="Notifications">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -332,28 +355,31 @@
                                   class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-white text-[10px] font-bold rounded-full ring-2"
                                   style="background: var(--sa-primary); ring-color: var(--sa-card);" x-cloak></span>
                         </button>
-                        <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden bg-white rounded-2xl shadow-xl border border-neutral-200 flex flex-col z-50">
-                            <div class="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
-                                <span class="font-semibold text-neutral-900 text-sm">Notifications</span>
-                                <span x-show="unreadCount > 0" class="text-xs text-primary-600 font-medium" x-text="unreadCount + ' non lue(s)'"></span>
+                        <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden rounded-2xl shadow-xl flex flex-col z-50"
+                             style="background:var(--sa-card);border:1px solid var(--sa-border);">
+                            <div class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--sa-border);">
+                                <span class="font-semibold text-sm" style="color:var(--sa-fg);">Notifications</span>
+                                <span x-show="unreadCount > 0" class="text-xs font-medium" style="color:var(--sa-primary);" x-text="unreadCount + ' non lue(s)'"></span>
                             </div>
                             <div class="overflow-y-auto flex-1">
                                 <template x-if="loading">
-                                    <div class="p-6 text-center text-neutral-400 text-sm">Chargement...</div>
+                                    <div class="p-6 text-center text-sm" style="color:var(--sa-muted-fg);">Chargement...</div>
                                 </template>
                                 <template x-if="!loading && items.length === 0">
                                     <div class="p-6 text-center">
-                                        <svg class="w-8 h-8 text-neutral-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                        <p class="text-neutral-400 text-sm">Aucune notification</p>
+                                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--sa-border);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                        <p class="text-sm" style="color:var(--sa-muted-fg);">Aucune notification</p>
                                     </div>
                                 </template>
                                 <template x-if="!loading && items.length > 0">
                                     <ul class="py-1">
                                         <template x-for="n in items" :key="n.id">
                                             <li>
-                                                <a :href="n.url" class="block px-4 py-3 hover:bg-neutral-50 transition-colors border-b border-neutral-50 last:border-0" :class="n.read_at ? 'opacity-60' : ''">
-                                                    <p class="text-sm text-neutral-800" x-text="n.message"></p>
-                                                    <p class="text-xs text-neutral-400 mt-1" x-text="formatDate(n.created_at)"></p>
+                                                <a :href="n.url" class="block px-4 py-3 transition-colors" :class="n.read_at ? 'opacity-60' : ''"
+                                                   style="border-bottom:1px solid var(--sa-border);"
+                                                   onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
+                                                    <p class="text-sm" style="color:var(--sa-fg);" x-text="n.message"></p>
+                                                    <p class="text-xs mt-1" style="color:var(--sa-muted-fg);" x-text="formatDate(n.created_at)"></p>
                                                 </a>
                                             </li>
                                         </template>
@@ -367,7 +393,7 @@
                     <div x-data="dropdown()" class="relative">
                         <button @click="toggle()"
                                 class="flex items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-3 transition"
-                                style="border: 1px solid var(--sa-border); background: color-mix(in oklch, var(--sa-bg) 100%, transparent);">
+                                style="border: 1px solid var(--sa-border); background: var(--sa-bg);">
                             <span class="flex w-8 h-8 items-center justify-center rounded-md text-sm font-semibold text-white"
                                   style="background: var(--sa-sidebar);">{{ substr(auth()->user()->name ?? 'S', 0, 1) }}</span>
                             <span class="hidden text-sm font-medium sm:block" style="color: var(--sa-fg);">{{ auth()->user()->name ?? 'Super Admin' }}</span>
@@ -376,21 +402,26 @@
                             </svg>
                         </button>
 
-                        <div x-show="open" x-transition @click.outside="close()" class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50" x-cloak>
-                            <div class="px-4 py-3 border-b border-neutral-100">
-                                <p class="font-semibold text-neutral-900 text-sm">{{ auth()->user()->name ?? 'Admin' }}</p>
-                                <p class="text-xs text-neutral-500 mt-0.5">Super Administrateur</p>
+                        <div x-show="open" x-transition @click.outside="close()" class="absolute right-0 mt-2 w-56 rounded-2xl shadow-xl py-2 z-50" x-cloak
+                             style="background:var(--sa-card);border:1px solid var(--sa-border);">
+                            <div class="px-4 py-3" style="border-bottom:1px solid var(--sa-border);">
+                                <p class="font-semibold text-sm" style="color:var(--sa-fg);">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Super Administrateur</p>
                             </div>
-                            <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors">
+                            <a href="{{ route('super-admin.settings') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                               style="color:var(--sa-muted-fg);"
+                               onmouseover="this.style.background='var(--sa-muted)';this.style.color='var(--sa-fg)'" onmouseout="this.style.background='transparent';this.style.color='var(--sa-muted-fg)'">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
                                 Mon profil
                             </a>
-                            <hr class="my-1.5 border-neutral-100">
+                            <hr class="my-1.5" style="border-color:var(--sa-border);">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full transition-colors">
+                                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm w-full transition-colors"
+                                        style="color:var(--sa-danger);"
+                                        onmouseover="this.style.background='rgba(220,38,38,0.06)'" onmouseout="this.style.background='transparent'">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                     </svg>
@@ -409,8 +440,9 @@
         </div>
 
         {{-- Bottom Navigation Bar (Mobile) — Style app mobile --}}
-        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
-             x-data="{ more: false }">
+        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t shadow-[0_-4px_20px_rgba(0,0,0,0.12)]"
+             x-data="{ more: false }"
+             :style="'background:var(--sa-card);border-color:var(--sa-border);'">
             <div class="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
                 {{-- Dashboard --}}
                 <a href="{{ route('super-admin.dashboard') }}"
@@ -473,7 +505,8 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 translate-y-4"
                  @click.outside="more = false"
-                 class="absolute bottom-full left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-2xl px-4 pt-4 pb-3"
+                 :style="'background:var(--sa-card);border-top:1px solid var(--sa-border);'"
+                 class="absolute bottom-full left-0 right-0 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] rounded-t-2xl px-4 pt-4 pb-3"
                  x-cloak>
                 <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
                 <div class="grid grid-cols-4 gap-3 mb-3">
