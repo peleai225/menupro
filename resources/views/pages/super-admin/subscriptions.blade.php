@@ -2,12 +2,14 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Gestion des Abonnements</h1>
-            <p class="text-neutral-500 mt-1">Suivez tous les abonnements et paiements de la plateforme.</p>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Gestion des Abonnements</h1>
+            <p class="mt-1" style="color:var(--sa-muted-fg);">Suivez tous les abonnements et paiements de la plateforme.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('super-admin.subscriptions.export', request()->all()) }}" 
-               class="btn btn-outline btn-sm border-neutral-200 text-neutral-700 hover:bg-neutral-50 flex items-center gap-2">
+            <a href="{{ route('super-admin.subscriptions.export', request()->all()) }}"
+               class="btn btn-outline btn-sm flex items-center gap-2"
+               style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+               onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -18,73 +20,76 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Total</p>
-            <p class="text-2xl font-bold text-neutral-900">{{ number_format($stats['total']) }}</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Total</p>
+            <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['total']) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Actifs</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Actifs</p>
             <p class="text-2xl font-bold text-emerald-600">{{ number_format($stats['active']) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Expirés</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Expirés</p>
             <p class="text-2xl font-bold text-red-600">{{ number_format($stats['expired']) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">En attente</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente</p>
             <p class="text-2xl font-bold text-amber-600">{{ number_format($stats['pending']) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Expirent bientôt</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Expirent bientôt</p>
             <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['expiring_soon']) }}</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Revenus totaux</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus totaux</p>
             <p class="text-lg font-bold text-emerald-600">{{ number_format($stats['total_revenue'], 0, ',', ' ') }} F</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Revenus ce mois</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
             <p class="text-lg font-bold text-emerald-600">{{ number_format($stats['monthly_revenue'], 0, ',', ' ') }} F</p>
         </div>
     </div>
 
     <!-- Retention Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Durée moyenne</p>
-            <p class="text-xl font-bold text-neutral-900">
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Durée moyenne</p>
+            <p class="text-xl font-bold" style="color:var(--sa-fg);">
                 {{ $retentionStats['average_duration'] ? round($retentionStats['average_duration']) . ' jours' : 'N/A' }}
             </p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Taux de renouvellement</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Taux de renouvellement</p>
             <p class="text-xl font-bold text-emerald-600">{{ $retentionStats['renewal_rate'] }}%</p>
         </div>
-        <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-            <p class="text-sm text-neutral-500">Taux de désabonnement</p>
+        <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Taux de désabonnement</p>
             <p class="text-xl font-bold text-red-600">{{ $retentionStats['churn_rate'] }}%</p>
         </div>
     </div>
 
     <!-- Filters -->
-    <form method="GET" class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 mb-6">
+    <form method="GET" class="border shadow-sm rounded-xl p-4 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Recherche</label>
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Recherche</label>
                 <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--sa-muted-fg);">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" 
-                           name="search" 
+                    <input type="text"
+                           name="search"
                            value="{{ request('search') }}"
                            placeholder="Restaurant, email, référence..."
-                           class="w-full pl-10 pr-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                           class="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                           style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Statut</label>
-                <select name="status" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Statut</label>
+                <select name="status"
+                        class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous les statuts</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
                     <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Expiré</option>
@@ -92,8 +97,10 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Plan</label>
-                <select name="plan" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Plan</label>
+                <select name="plan"
+                        class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous les plans</option>
                     @foreach($plans as $plan)
                         <option value="{{ $plan->id }}" {{ request('plan') == $plan->id ? 'selected' : '' }}>{{ $plan->name }}</option>
@@ -101,8 +108,10 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Période de facturation</label>
-                <select name="billing_period" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Période de facturation</label>
+                <select name="billing_period"
+                        class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Toutes les périodes</option>
                     <option value="monthly" {{ request('billing_period') === 'monthly' ? 'selected' : '' }}>Mensuel</option>
                     <option value="quarterly" {{ request('billing_period') === 'quarterly' ? 'selected' : '' }}>Trimestriel</option>
@@ -111,8 +120,10 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Restaurant</label>
-                <select name="restaurant" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Restaurant</label>
+                <select name="restaurant"
+                        class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous les restaurants</option>
                     @foreach($restaurants as $restaurant)
                         <option value="{{ $restaurant->id }}" {{ request('restaurant') == $restaurant->id ? 'selected' : '' }}>{{ $restaurant->name }}</option>
@@ -120,44 +131,53 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Expiration</label>
-                <select name="expiring" class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Expiration</label>
+                <select name="expiring"
+                        class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous</option>
                     <option value="soon" {{ request('expiring') === 'soon' ? 'selected' : '' }}>Expirent bientôt</option>
                     <option value="expired" {{ request('expiring') === 'expired' ? 'selected' : '' }}>Déjà expirés</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Date de début</label>
-                <input type="date" 
-                       name="date_from" 
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Date de début</label>
+                <input type="date"
+                       name="date_from"
                        value="{{ request('date_from') }}"
-                       class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                       class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                       style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
             </div>
             <div>
-                <label class="block text-sm font-medium text-neutral-600 mb-2">Date de fin</label>
-                <input type="date" 
-                       name="date_to" 
+                <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Date de fin</label>
+                <input type="date"
+                       name="date_to"
                        value="{{ request('date_to') }}"
-                       class="w-full px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                       class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                       style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
             </div>
         </div>
         <div class="flex items-center gap-3 mt-4">
             <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
-            <a href="{{ route('super-admin.subscriptions.index') }}" class="btn btn-outline btn-sm border-neutral-200 text-neutral-700 hover:bg-neutral-50">Réinitialiser</a>
+            <a href="{{ route('super-admin.subscriptions.index') }}"
+               class="btn btn-outline btn-sm"
+               style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+               onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
+                Réinitialiser
+            </a>
         </div>
     </form>
 
     <!-- Revenue by Period -->
     @if($revenueByPeriod->isNotEmpty())
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4 mb-6">
-        <h3 class="text-lg font-semibold text-neutral-900 mb-4">Revenus par période</h3>
+    <div class="border shadow-sm rounded-xl p-4 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+        <h3 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Revenus par période</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @foreach($revenueByPeriod as $period)
                 <div class="text-center">
-                    <p class="text-sm text-neutral-500 capitalize">{{ $period->billing_period ?? 'N/A' }}</p>
+                    <p class="text-sm capitalize" style="color:var(--sa-muted-fg);">{{ $period->billing_period ?? 'N/A' }}</p>
                     <p class="text-xl font-bold text-emerald-600">{{ number_format($period->total, 0, ',', ' ') }} F</p>
-                    <p class="text-xs text-neutral-500">{{ $period->count }} abonnement(s)</p>
+                    <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $period->count }} abonnement(s)</p>
                 </div>
             @endforeach
         </div>
@@ -165,49 +185,54 @@
     @endif
 
     <!-- Subscriptions Table -->
-    <div class="bg-white border border-neutral-200 shadow-sm rounded-xl overflow-hidden">
+    <div class="border shadow-sm rounded-xl overflow-hidden" style="background:var(--sa-card);border-color:var(--sa-border);">
         <div class="table-responsive">
             <table class="w-full min-w-[600px]">
-                <thead class="bg-neutral-50">
+                <thead style="background:var(--sa-muted);">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Restaurant</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Plan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Statut</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Période</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Montant</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Dates</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Paiement</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Restaurant</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Plan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Période</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Montant</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Dates</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Paiement</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style="color:var(--sa-muted-fg);">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-neutral-200">
+                <tbody>
                     @forelse($subscriptions as $subscription)
-                        <tr class="hover:bg-neutral-50 transition-colors">
+                        <tr class="transition-colors border-b"
+                            style="border-color:var(--sa-border);"
+                            onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($subscription->restaurant)
                                     <div class="flex items-center gap-3">
                                         @if($subscription->restaurant->logo_path)
-                                            <img src="{{ Storage::url($subscription->restaurant->logo_path) }}" 
-                                                 alt="{{ $subscription->restaurant->name }}" 
-                                                 class="w-10 h-10 rounded-xl object-cover border border-neutral-200">
+                                            <img src="{{ Storage::url($subscription->restaurant->logo_path) }}"
+                                                 alt="{{ $subscription->restaurant->name }}"
+                                                 class="w-10 h-10 rounded-xl object-cover"
+                                                 style="border:1px solid var(--sa-border);">
                                         @else
-                                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-neutral-900 font-bold text-sm">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center font-bold text-sm" style="color:var(--sa-fg);">
                                                 {{ strtoupper(substr($subscription->restaurant->name, 0, 2)) }}
                                             </div>
                                         @endif
                                         <div>
-                                            <a href="{{ route('super-admin.restaurants.show', $subscription->restaurant) }}" class="text-sm font-medium text-neutral-900 hover:text-primary-400 transition-colors">
+                                            <a href="{{ route('super-admin.restaurants.show', $subscription->restaurant) }}"
+                                               class="text-sm font-medium hover:text-primary-400 transition-colors"
+                                               style="color:var(--sa-fg);">
                                                 {{ $subscription->restaurant->name }}
                                             </a>
-                                            <div class="text-xs text-neutral-500">{{ $subscription->restaurant->owner?->email ?? 'N/A' }}</div>
+                                            <div class="text-xs" style="color:var(--sa-muted-fg);">{{ $subscription->restaurant->owner?->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 @else
-                                    <span class="text-sm text-neutral-500 italic">Restaurant supprimé</span>
+                                    <span class="text-sm italic" style="color:var(--sa-muted-fg);">Restaurant supprimé</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-neutral-600">{{ $subscription->plan?->name ?? 'N/A' }}</span>
+                                <span class="text-sm" style="color:var(--sa-muted-fg);">{{ $subscription->plan?->name ?? 'N/A' }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($subscription->status->value === 'active')
@@ -219,40 +244,41 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-neutral-600 capitalize">{{ $subscription->billing_period ?? 'N/A' }}</div>
+                                <div class="text-sm capitalize" style="color:var(--sa-muted-fg);">{{ $subscription->billing_period ?? 'N/A' }}</div>
                                 @if($subscription->discount_percentage)
                                     <div class="text-xs text-emerald-600">-{{ $subscription->discount_percentage }}%</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-neutral-900">{{ number_format($subscription->amount_paid, 0, ',', ' ') }} FCFA</div>
+                                <div class="text-sm font-medium" style="color:var(--sa-fg);">{{ number_format($subscription->amount_paid, 0, ',', ' ') }} FCFA</div>
                                 @if($subscription->addons->isNotEmpty())
-                                    <div class="text-xs text-neutral-500">+ {{ $subscription->addons->count() }} add-on(s)</div>
+                                    <div class="text-xs" style="color:var(--sa-muted-fg);">+ {{ $subscription->addons->count() }} add-on(s)</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-neutral-600">
+                                <div class="text-sm" style="color:var(--sa-muted-fg);">
                                     <div>Début: {{ $subscription->starts_at->format('d/m/Y') }}</div>
                                     <div>Fin: {{ $subscription->ends_at->format('d/m/Y') }}</div>
                                     @if($subscription->status->value === 'active')
-                                        <div class="text-xs {{ $subscription->ends_at->diffInDays(now()) <= 7 ? 'text-orange-600' : 'text-neutral-500' }}">
+                                        <div class="text-xs {{ $subscription->ends_at->diffInDays(now()) <= 7 ? 'text-orange-600' : '' }}"
+                                             @if($subscription->ends_at->diffInDays(now()) > 7) style="color:var(--sa-muted-fg);" @endif>
                                             {{ $subscription->ends_at->diffInDays(now()) }} jour(s) restant(s)
                                         </div>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-neutral-600">
+                                <div class="text-sm" style="color:var(--sa-muted-fg);">
                                     @if($subscription->payment_reference)
                                         <div class="text-xs font-mono">{{ Str::limit($subscription->payment_reference, 15) }}</div>
                                     @endif
                                     @if($subscription->payment_method)
-                                        <div class="text-xs text-neutral-500 capitalize">{{ $subscription->payment_method }}</div>
+                                        <div class="text-xs capitalize" style="color:var(--sa-muted-fg);">{{ $subscription->payment_method }}</div>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <a href="{{ route('super-admin.subscriptions.show', $subscription) }}" 
+                                <a href="{{ route('super-admin.subscriptions.show', $subscription) }}"
                                    class="text-primary-400 hover:text-primary-300 text-sm font-medium">
                                     Voir détails
                                 </a>
@@ -261,17 +287,17 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="text-neutral-500">Aucun abonnement trouvé.</div>
+                                <div style="color:var(--sa-muted-fg);">Aucun abonnement trouvé.</div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         @if($subscriptions->hasPages())
-            <div class="px-6 py-4 border-t border-neutral-200">
+            <div class="px-6 py-4 border-t" style="border-color:var(--sa-border);">
                 {{ $subscriptions->links() }}
             </div>
         @endif

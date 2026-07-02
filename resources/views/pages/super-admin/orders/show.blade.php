@@ -18,7 +18,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ route('super-admin.orders.index') }}"
-               class="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-700 transition-colors">
+               class="inline-flex items-center gap-1.5 text-sm transition-colors"
+               style="color:var(--sa-muted-fg);"
+               onmouseover="this.style.color='var(--sa-fg)'" onmouseout="this.style.color='var(--sa-muted-fg)'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -33,8 +35,8 @@
     </div>
 
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-neutral-900">Commande {{ $order->reference }}</h1>
-        <p class="text-neutral-500 mt-1">Passée le {{ $order->created_at->format('d M Y à H:i') }}</p>
+        <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Commande {{ $order->reference }}</h1>
+        <p class="mt-1" style="color:var(--sa-muted-fg);">Passée le {{ $order->created_at->format('d M Y à H:i') }}</p>
     </div>
 
     <!-- Two-column layout -->
@@ -44,36 +46,36 @@
         <div class="lg:col-span-2 space-y-6">
 
             <!-- Restaurant & Client info -->
-            <div class="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                <h2 class="text-base font-semibold text-neutral-900 mb-4">Informations générales</h2>
+            <div class="border rounded-xl p-6 shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Informations générales</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Restaurant</p>
-                        <p class="text-neutral-900 font-medium">{{ $order->restaurant?->name ?? '—' }}</p>
+                        <p class="text-xs font-medium uppercase tracking-wider mb-1" style="color:var(--sa-muted-fg);">Restaurant</p>
+                        <p class="font-medium" style="color:var(--sa-fg);">{{ $order->restaurant?->name ?? '—' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Type</p>
-                        <p class="text-neutral-900">{{ $order->type->value === 'delivery' ? 'Livraison' : ($order->type->value === 'pickup' ? 'À emporter' : 'Sur place') }}</p>
+                        <p class="text-xs font-medium uppercase tracking-wider mb-1" style="color:var(--sa-muted-fg);">Type</p>
+                        <p style="color:var(--sa-fg);">{{ $order->type->value === 'delivery' ? 'Livraison' : ($order->type->value === 'pickup' ? 'À emporter' : 'Sur place') }}</p>
                     </div>
                     <div>
-                        <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Client</p>
-                        <p class="text-neutral-900 font-medium">{{ $order->customer_name ?? '—' }}</p>
+                        <p class="text-xs font-medium uppercase tracking-wider mb-1" style="color:var(--sa-muted-fg);">Client</p>
+                        <p class="font-medium" style="color:var(--sa-fg);">{{ $order->customer_name ?? '—' }}</p>
                         @if($order->customer_phone)
-                            <p class="text-sm text-neutral-500">{{ $order->customer_phone }}</p>
+                            <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $order->customer_phone }}</p>
                         @endif
                         @if($order->customer_email)
-                            <p class="text-sm text-neutral-500">{{ $order->customer_email }}</p>
+                            <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $order->customer_email }}</p>
                         @endif
                     </div>
                     @if($order->delivery_address)
                         <div>
-                            <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Adresse de livraison</p>
-                            <p class="text-neutral-900">{{ $order->delivery_address }}</p>
+                            <p class="text-xs font-medium uppercase tracking-wider mb-1" style="color:var(--sa-muted-fg);">Adresse de livraison</p>
+                            <p style="color:var(--sa-fg);">{{ $order->delivery_address }}</p>
                             @if($order->delivery_city)
-                                <p class="text-sm text-neutral-500">{{ $order->delivery_city }}</p>
+                                <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $order->delivery_city }}</p>
                             @endif
                             @if($order->delivery_instructions)
-                                <p class="text-xs text-neutral-400 italic mt-1">{{ $order->delivery_instructions }}</p>
+                                <p class="text-xs italic mt-1" style="color:var(--sa-muted-fg);">{{ $order->delivery_instructions }}</p>
                             @endif
                         </div>
                     @endif
@@ -81,31 +83,31 @@
             </div>
 
             <!-- Order items -->
-            <div class="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-                <div class="px-6 py-4 border-b border-neutral-100">
-                    <h2 class="text-base font-semibold text-neutral-900">Articles commandés</h2>
+            <div class="border rounded-xl overflow-hidden shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <div class="px-6 py-4 border-b" style="border-color:var(--sa-border);">
+                    <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Articles commandés</h2>
                 </div>
-                <div class="divide-y divide-neutral-100">
+                <div class="flex flex-col">
                     @forelse($order->items as $item)
-                        <div class="px-6 py-4 flex items-start justify-between gap-4">
+                        <div class="px-6 py-4 flex items-start justify-between gap-4 border-b" style="border-color:var(--sa-border);">
                             <div class="flex-1">
-                                <p class="font-medium text-neutral-900">
-                                    <span class="text-neutral-500 mr-2">{{ $item->quantity }}×</span>{{ $item->dish_name }}
+                                <p class="font-medium" style="color:var(--sa-fg);">
+                                    <span class="mr-2" style="color:var(--sa-muted-fg);">{{ $item->quantity }}×</span>{{ $item->dish_name }}
                                 </p>
                                 @if($item->selected_options_summary)
-                                    <p class="text-xs text-neutral-500 mt-0.5">{{ $item->selected_options_summary }}</p>
+                                    <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">{{ $item->selected_options_summary }}</p>
                                 @endif
                                 @if($item->special_instructions)
-                                    <p class="text-xs text-neutral-400 italic mt-0.5">{{ $item->special_instructions }}</p>
+                                    <p class="text-xs italic mt-0.5" style="color:var(--sa-muted-fg);">{{ $item->special_instructions }}</p>
                                 @endif
                             </div>
                             <div class="text-right flex-shrink-0">
-                                <p class="font-semibold text-neutral-900">{{ number_format($item->total_price, 0, ',', ' ') }} FCFA</p>
-                                <p class="text-xs text-neutral-500">{{ number_format($item->unit_price, 0, ',', ' ') }} / unité</p>
+                                <p class="font-semibold" style="color:var(--sa-fg);">{{ number_format($item->total_price, 0, ',', ' ') }} FCFA</p>
+                                <p class="text-xs" style="color:var(--sa-muted-fg);">{{ number_format($item->unit_price, 0, ',', ' ') }} / unité</p>
                             </div>
                         </div>
                     @empty
-                        <div class="px-6 py-8 text-center text-neutral-400">Aucun article</div>
+                        <div class="px-6 py-8 text-center" style="color:var(--sa-muted-fg);">Aucun article</div>
                     @endforelse
                 </div>
             </div>
@@ -113,7 +115,7 @@
             @if($order->customer_notes)
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <p class="text-xs font-medium text-amber-700 uppercase tracking-wider mb-1">Note du client</p>
-                    <p class="text-neutral-800">{{ $order->customer_notes }}</p>
+                    <p style="color:var(--sa-fg);">{{ $order->customer_notes }}</p>
                 </div>
             @endif
         </div>
@@ -122,15 +124,15 @@
         <div class="space-y-6">
 
             <!-- Amounts -->
-            <div class="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                <h2 class="text-base font-semibold text-neutral-900 mb-4">Récapitulatif</h2>
+            <div class="border rounded-xl p-6 shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Récapitulatif</h2>
                 <div class="space-y-2 text-sm">
-                    <div class="flex justify-between text-neutral-600">
+                    <div class="flex justify-between" style="color:var(--sa-muted-fg);">
                         <span>Sous-total</span>
                         <span>{{ number_format($order->subtotal, 0, ',', ' ') }} FCFA</span>
                     </div>
                     @if($order->delivery_fee > 0)
-                        <div class="flex justify-between text-neutral-600">
+                        <div class="flex justify-between" style="color:var(--sa-muted-fg);">
                             <span>Frais de livraison</span>
                             <span>{{ number_format($order->delivery_fee, 0, ',', ' ') }} FCFA</span>
                         </div>
@@ -142,48 +144,48 @@
                         </div>
                     @endif
                     @if($order->tax_amount > 0)
-                        <div class="flex justify-between text-neutral-600">
+                        <div class="flex justify-between" style="color:var(--sa-muted-fg);">
                             <span>Taxes</span>
                             <span>{{ number_format($order->tax_amount, 0, ',', ' ') }} FCFA</span>
                         </div>
                     @endif
                     @if($order->service_fee > 0)
-                        <div class="flex justify-between text-neutral-600">
+                        <div class="flex justify-between" style="color:var(--sa-muted-fg);">
                             <span>Frais de service</span>
                             <span>{{ number_format($order->service_fee, 0, ',', ' ') }} FCFA</span>
                         </div>
                     @endif
-                    <div class="pt-2 border-t border-neutral-200 flex justify-between font-bold text-neutral-900 text-base">
+                    <div class="pt-2 flex justify-between font-bold text-base border-t" style="color:var(--sa-fg);border-color:var(--sa-border);">
                         <span>Total</span>
                         <span>{{ number_format($order->total, 0, ',', ' ') }} FCFA</span>
                     </div>
                 </div>
-                <div class="mt-4 pt-4 border-t border-neutral-100">
-                    <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">Paiement</p>
-                    <p class="text-sm text-neutral-700">{{ $order->payment_status->label() }}</p>
+                <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
+                    <p class="text-xs font-medium uppercase tracking-wider mb-1" style="color:var(--sa-muted-fg);">Paiement</p>
+                    <p class="text-sm" style="color:var(--sa-fg);">{{ $order->payment_status->label() }}</p>
                     @if($order->payment_method)
-                        <p class="text-xs text-neutral-500 mt-0.5">{{ $order->payment_method }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">{{ $order->payment_method }}</p>
                     @endif
                 </div>
             </div>
 
             <!-- Delivery driver -->
             @if($order->delivery)
-                <div class="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                    <h2 class="text-base font-semibold text-neutral-900 mb-4">Livreur assigné</h2>
+                <div class="border rounded-xl p-6 shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Livreur assigné</h2>
                     @if($order->delivery->driver)
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                                 {{ strtoupper(substr($order->delivery->driver->name, 0, 1)) }}
                             </div>
                             <div>
-                                <p class="font-medium text-neutral-900">{{ $order->delivery->driver->name }}</p>
+                                <p class="font-medium" style="color:var(--sa-fg);">{{ $order->delivery->driver->name }}</p>
                                 @if($order->delivery->driver->phone)
-                                    <p class="text-sm text-neutral-500">{{ $order->delivery->driver->phone }}</p>
+                                    <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $order->delivery->driver->phone }}</p>
                                 @endif
                             </div>
                         </div>
-                        <div class="mt-3 pt-3 border-t border-neutral-100 text-sm text-neutral-600 space-y-1">
+                        <div class="mt-3 pt-3 border-t text-sm space-y-1" style="border-color:var(--sa-border);color:var(--sa-muted-fg);">
                             <div class="flex justify-between">
                                 <span>Statut livraison</span>
                                 <span>{{ $order->delivery->status->value }}</span>
@@ -208,55 +210,55 @@
                             @endif
                         </div>
                     @else
-                        <p class="text-neutral-400 text-sm">Aucun livreur assigné</p>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">Aucun livreur assigné</p>
                     @endif
                 </div>
             @endif
 
             <!-- Status timeline -->
-            <div class="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                <h2 class="text-base font-semibold text-neutral-900 mb-4">Historique de statuts</h2>
-                <ol class="relative border-l border-neutral-200 space-y-4 ml-2">
+            <div class="border rounded-xl p-6 shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Historique de statuts</h2>
+                <ol class="relative space-y-4 ml-2 border-l" style="border-color:var(--sa-border);">
                     <li class="ml-4">
-                        <span class="absolute -left-1.5 w-3 h-3 bg-neutral-300 rounded-full border border-white"></span>
-                        <p class="text-sm font-medium text-neutral-700">Commande créée</p>
-                        <p class="text-xs text-neutral-400">{{ $order->created_at->format('d M Y à H:i') }}</p>
+                        <span class="absolute -left-1.5 w-3 h-3 rounded-full border-2" style="background:var(--sa-border);border-color:var(--sa-card);"></span>
+                        <p class="text-sm font-medium" style="color:var(--sa-fg);">Commande créée</p>
+                        <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->created_at->format('d M Y à H:i') }}</p>
                     </li>
                     @if($order->confirmed_at)
                         <li class="ml-4">
                             <span class="absolute -left-1.5 w-3 h-3 bg-indigo-400 rounded-full border border-white"></span>
-                            <p class="text-sm font-medium text-neutral-700">Confirmée</p>
-                            <p class="text-xs text-neutral-400">{{ $order->confirmed_at->format('d M Y à H:i') }}</p>
+                            <p class="text-sm font-medium" style="color:var(--sa-fg);">Confirmée</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->confirmed_at->format('d M Y à H:i') }}</p>
                         </li>
                     @endif
                     @if($order->preparing_at)
                         <li class="ml-4">
                             <span class="absolute -left-1.5 w-3 h-3 bg-violet-400 rounded-full border border-white"></span>
-                            <p class="text-sm font-medium text-neutral-700">En préparation</p>
-                            <p class="text-xs text-neutral-400">{{ $order->preparing_at->format('d M Y à H:i') }}</p>
+                            <p class="text-sm font-medium" style="color:var(--sa-fg);">En préparation</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->preparing_at->format('d M Y à H:i') }}</p>
                         </li>
                     @endif
                     @if($order->ready_at)
                         <li class="ml-4">
                             <span class="absolute -left-1.5 w-3 h-3 bg-cyan-400 rounded-full border border-white"></span>
-                            <p class="text-sm font-medium text-neutral-700">Prête</p>
-                            <p class="text-xs text-neutral-400">{{ $order->ready_at->format('d M Y à H:i') }}</p>
+                            <p class="text-sm font-medium" style="color:var(--sa-fg);">Prête</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->ready_at->format('d M Y à H:i') }}</p>
                         </li>
                     @endif
                     @if($order->completed_at)
                         <li class="ml-4">
                             <span class="absolute -left-1.5 w-3 h-3 bg-emerald-400 rounded-full border border-white"></span>
-                            <p class="text-sm font-medium text-neutral-700">Terminée</p>
-                            <p class="text-xs text-neutral-400">{{ $order->completed_at->format('d M Y à H:i') }}</p>
+                            <p class="text-sm font-medium" style="color:var(--sa-fg);">Terminée</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->completed_at->format('d M Y à H:i') }}</p>
                         </li>
                     @endif
                     @if($order->cancelled_at)
                         <li class="ml-4">
                             <span class="absolute -left-1.5 w-3 h-3 bg-red-400 rounded-full border border-white"></span>
-                            <p class="text-sm font-medium text-neutral-700">Annulée</p>
-                            <p class="text-xs text-neutral-400">{{ $order->cancelled_at->format('d M Y à H:i') }}</p>
+                            <p class="text-sm font-medium" style="color:var(--sa-fg);">Annulée</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $order->cancelled_at->format('d M Y à H:i') }}</p>
                             @if($order->cancellation_reason)
-                                <p class="text-xs text-neutral-400 italic mt-0.5">{{ $order->cancellation_reason }}</p>
+                                <p class="text-xs italic mt-0.5" style="color:var(--sa-muted-fg);">{{ $order->cancellation_reason }}</p>
                             @endif
                         </li>
                     @endif

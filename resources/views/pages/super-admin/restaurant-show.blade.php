@@ -1,8 +1,10 @@
 <x-layouts.admin-super title="{{ $restaurant->name }}">
     <!-- Header -->
     <div class="flex items-center gap-4 mb-8">
-        <a href="{{ route('super-admin.restaurants.index') }}" class="p-2 hover:bg-neutral-100 rounded-lg">
-            <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('super-admin.restaurants.index') }}"
+           class="p-2 rounded-lg"
+           onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--sa-muted-fg);">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
             </svg>
         </a>
@@ -11,23 +13,27 @@
                 @if($restaurant->logo_path)
                     <img src="{{ Storage::url($restaurant->logo_path) }}" alt="{{ $restaurant->name }}" class="w-10 h-10 rounded-xl object-cover">
                 @endif
-                <h1 class="text-2xl font-bold text-neutral-900">{{ $restaurant->name }}</h1>
+                <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">{{ $restaurant->name }}</h1>
                 @php
-                    $statusColors = [
-                        'active' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                        'pending' => 'bg-amber-50 text-amber-700 border border-amber-200',
-                        'suspended' => 'bg-red-50 text-red-700 border border-red-200',
-                        'expired' => 'bg-neutral-100 text-neutral-600 border border-neutral-200',
-                    ];
+                    $sv = $restaurant->status->value;
+                    $statusBadgeClass = [
+                        'active'    => 'badge bg-emerald-50 text-emerald-700 border border-emerald-200',
+                        'pending'   => 'badge bg-amber-50 text-amber-700 border border-amber-200',
+                        'suspended' => 'badge bg-red-50 text-red-700 border border-red-200',
+                        'expired'   => 'badge',
+                    ][$sv] ?? 'badge';
+                    $statusBadgeStyle = in_array($sv, ['active', 'pending', 'suspended'])
+                        ? ''
+                        : 'background:var(--sa-muted);color:var(--sa-muted-fg);';
                     $statusLabels = [
-                        'active' => 'Actif',
-                        'pending' => 'En attente',
+                        'active'    => 'Actif',
+                        'pending'   => 'En attente',
                         'suspended' => 'Suspendu',
-                        'expired' => 'Expiré',
+                        'expired'   => 'Expiré',
                     ];
                 @endphp
-                <span class="badge {{ $statusColors[$restaurant->status->value] ?? 'bg-neutral-100 text-neutral-600 border border-neutral-200' }}">
-                    {{ $statusLabels[$restaurant->status->value] ?? $restaurant->status->value }}
+                <span class="{{ $statusBadgeClass }}" style="{{ $statusBadgeStyle }}">
+                    {{ $statusLabels[$sv] ?? $sv }}
                 </span>
                 @if($restaurant->is_demo)
                     <span class="badge bg-purple-50 text-purple-700 border border-purple-200">
@@ -38,7 +44,7 @@
                     </span>
                 @endif
             </div>
-            <p class="text-neutral-500 mt-1">Inscrit le {{ $restaurant->created_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
+            <p class="mt-1" style="color:var(--sa-muted-fg);">Inscrit le {{ $restaurant->created_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
         </div>
         <div class="flex items-center gap-3">
             @if($restaurant->status->value === 'pending')
@@ -88,18 +94,22 @@
     <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('deleteModal').classList.add('hidden')"></div>
-            <div class="relative w-full max-w-md bg-white border border-red-200 rounded-2xl shadow-xl">
-                <div class="p-6 border-b border-neutral-200">
+            <div class="relative w-full max-w-md rounded-2xl shadow-xl border border-red-200"
+                 style="background:var(--sa-card);">
+                <div class="p-6 border-b" style="border-color:var(--sa-border);">
                     <h2 class="text-xl font-bold text-red-600">Supprimer le restaurant</h2>
-                    <p class="text-neutral-500 text-sm mt-2">Cette action est irréversible. Le restaurant « {{ $restaurant->name }} » sera supprimé et n'apparaîtra plus dans la liste. Les utilisateurs associés perdront l'accès à ce restaurant.</p>
+                    <p class="text-sm mt-2" style="color:var(--sa-muted-fg);">Cette action est irréversible. Le restaurant « {{ $restaurant->name }} » sera supprimé et n'apparaîtra plus dans la liste. Les utilisateurs associés perdront l'accès à ce restaurant.</p>
                 </div>
                 <form method="POST" action="{{ route('super-admin.restaurants.destroy', $restaurant) }}" class="p-6 flex gap-3">
                     @csrf
                     @method('DELETE')
-                    <button type="button" onclick="document.getElementById('deleteModal').classList.add('hidden')" class="flex-1 h-10 px-4 bg-neutral-100 text-neutral-900 rounded-lg font-medium hover:bg-neutral-200 transition-colors">
+                    <button type="button" onclick="document.getElementById('deleteModal').classList.add('hidden')"
+                            class="flex-1 h-10 px-4 rounded-lg font-medium transition-colors"
+                            style="background:var(--sa-muted);color:var(--sa-fg);"
+                            onmouseover="this.style.background='var(--sa-border)'" onmouseout="this.style.background='var(--sa-muted)'">
                         Annuler
                     </button>
-                    <button type="submit" class="flex-1 h-10 px-4 bg-red-500 text-neutral-900 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                    <button type="submit" class="flex-1 h-10 px-4 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors">
                         Supprimer définitivement
                     </button>
                 </form>
@@ -124,13 +134,13 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-                    <p class="text-sm text-neutral-500">Commandes</p>
-                    <p class="text-2xl font-bold text-neutral-900">{{ number_format($stats['orders_count'] ?? 0) }}</p>
+                <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes</p>
+                    <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['orders_count'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-                    <p class="text-sm text-neutral-500">CA Total</p>
-                    <p class="text-2xl font-bold text-neutral-900">
+                <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">CA Total</p>
+                    <p class="text-2xl font-bold" style="color:var(--sa-fg);">
                         @if(($stats['total_revenue'] ?? 0) >= 1000000)
                             {{ number_format(($stats['total_revenue'] ?? 0) / 1000000, 1) }}M F
                         @else
@@ -138,59 +148,59 @@
                         @endif
                     </p>
                 </div>
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-                    <p class="text-sm text-neutral-500">Plats</p>
-                    <p class="text-2xl font-bold text-neutral-900">{{ number_format($stats['dishes_count'] ?? 0) }}</p>
+                <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Plats</p>
+                    <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['dishes_count'] ?? 0) }}</p>
                 </div>
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-                    <p class="text-sm text-neutral-500">Catégories</p>
-                    <p class="text-2xl font-bold text-neutral-900">{{ number_format($stats['categories_count'] ?? 0) }}</p>
+                <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Catégories</p>
+                    <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['categories_count'] ?? 0) }}</p>
                 </div>
             </div>
 
             <!-- Restaurant Info -->
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-neutral-900 mb-4">Informations</h2>
+            <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Informations</h2>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p class="text-neutral-500">Email</p>
-                        <p class="text-neutral-900">{{ $restaurant->email ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Email</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->email ?? '-' }}</p>
                     </div>
                     <div>
-                        <p class="text-neutral-500">Téléphone</p>
-                        <p class="text-neutral-900">{{ $restaurant->phone ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Téléphone</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->phone ?? '-' }}</p>
                     </div>
                     <div>
-                        <p class="text-neutral-500">Adresse</p>
-                        <p class="text-neutral-900">{{ $restaurant->address ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Adresse</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->address ?? '-' }}</p>
                     </div>
                     <div>
-                        <p class="text-neutral-500">Ville</p>
-                        <p class="text-neutral-900">{{ $restaurant->city ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Ville</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->city ?? '-' }}</p>
                     </div>
                     <div class="col-span-2">
-                        <p class="text-neutral-500">Description</p>
-                        <p class="text-neutral-900">{{ $restaurant->description ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Description</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->description ?? '-' }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Orders -->
             @if(isset($stats['recent_orders']) && $stats['recent_orders']->isNotEmpty())
-                <div class="bg-white border border-neutral-200 shadow-sm rounded-xl">
-                    <div class="p-6 border-b border-neutral-200">
-                        <h2 class="text-lg font-semibold text-neutral-900">Commandes récentes</h2>
+                <div class="border shadow-sm rounded-xl overflow-hidden" style="background:var(--sa-card);border-color:var(--sa-border);">
+                    <div class="p-6 border-b" style="border-color:var(--sa-border);">
+                        <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes récentes</h2>
                     </div>
-                    <div class="divide-y divide-neutral-200">
+                    <div class="flex flex-col">
                         @foreach($stats['recent_orders'] as $order)
-                            <div class="p-4 flex items-center justify-between">
+                            <div class="p-4 flex items-center justify-between border-b" style="border-color:var(--sa-border);">
                                 <div>
-                                    <span class="text-neutral-900 font-medium">{{ $order->reference }}</span>
-                                    <span class="text-neutral-500 text-sm ml-2">{{ $order->customer_name }}</span>
+                                    <span class="font-medium" style="color:var(--sa-fg);">{{ $order->reference }}</span>
+                                    <span class="text-sm ml-2" style="color:var(--sa-muted-fg);">{{ $order->customer_name }}</span>
                                 </div>
                                 <div class="text-right">
-                                    <span class="font-semibold text-neutral-900">{{ number_format($order->total, 0, ',', ' ') }} F</span>
-                                    <span class="text-neutral-500 text-sm block">{{ $order->created_at->locale('fr')->diffForHumans() }}</span>
+                                    <span class="font-semibold" style="color:var(--sa-fg);">{{ number_format($order->total, 0, ',', ' ') }} F</span>
+                                    <span class="text-sm block" style="color:var(--sa-muted-fg);">{{ $order->created_at->locale('fr')->diffForHumans() }}</span>
                                 </div>
                             </div>
                         @endforeach
@@ -202,9 +212,9 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- RCCM Verification -->
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
+            <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-neutral-900">Vérification RCCM</h2>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Vérification RCCM</h2>
                     @if($restaurant->is_verified)
                         <span class="badge bg-blue-50 text-blue-700 border border-blue-200">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -213,26 +223,26 @@
                             Vérifié
                         </span>
                     @else
-                        <span class="badge bg-neutral-100 text-neutral-600 border border-neutral-200">Non vérifié</span>
+                        <span class="badge" style="background:var(--sa-muted);color:var(--sa-muted-fg);">Non vérifié</span>
                     @endif
                 </div>
 
                 <div class="space-y-4 text-sm">
                     <!-- Company Name -->
                     <div>
-                        <p class="text-neutral-500">Nom entreprise</p>
-                        <p class="text-neutral-900">{{ $restaurant->company_name ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Nom entreprise</p>
+                        <p style="color:var(--sa-fg);">{{ $restaurant->company_name ?? '-' }}</p>
                     </div>
 
                     <!-- RCCM Number -->
                     <div>
-                        <p class="text-neutral-500">Numéro RCCM</p>
-                        <p class="text-neutral-900 font-mono">{{ $restaurant->rccm ?? '-' }}</p>
+                        <p style="color:var(--sa-muted-fg);">Numéro RCCM</p>
+                        <p class="font-mono" style="color:var(--sa-fg);">{{ $restaurant->rccm ?? '-' }}</p>
                     </div>
 
                     <!-- RCCM Document -->
                     <div>
-                        <p class="text-neutral-500 mb-2">Document RCCM</p>
+                        <p class="mb-2" style="color:var(--sa-muted-fg);">Document RCCM</p>
                         @if($restaurant->rccm_document_path)
                             @php
                                 $documentUrl = Storage::url($restaurant->rccm_document_path);
@@ -241,21 +251,29 @@
                             @endphp
                             <div class="flex flex-col gap-2">
                                 @if($isPdf)
-                                    <a href="{{ $documentUrl }}" target="_blank" class="flex items-center gap-2 p-3 bg-neutral-50 border border-neutral-200 rounded-lg hover:bg-neutral-100 transition-colors">
+                                    <a href="{{ $documentUrl }}" target="_blank"
+                                       class="flex items-center gap-2 p-3 rounded-lg transition-colors"
+                                       style="background:var(--sa-muted);border:1px solid var(--sa-border);"
+                                       onmouseover="this.style.background='var(--sa-border)'" onmouseout="this.style.background='var(--sa-muted)'">
                                         <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                         </svg>
                                         <div>
-                                            <span class="text-neutral-900 font-medium">Document PDF</span>
-                                            <span class="block text-xs text-neutral-500">Cliquez pour ouvrir</span>
+                                            <span class="font-medium" style="color:var(--sa-fg);">Document PDF</span>
+                                            <span class="block text-xs" style="color:var(--sa-muted-fg);">Cliquez pour ouvrir</span>
                                         </div>
                                     </a>
                                 @else
                                     <a href="{{ $documentUrl }}" target="_blank" class="block">
-                                        <img src="{{ $documentUrl }}" alt="Document RCCM" class="w-full rounded-lg border border-neutral-300 hover:opacity-80 transition-opacity">
+                                        <img src="{{ $documentUrl }}" alt="Document RCCM"
+                                             class="w-full rounded-lg hover:opacity-80 transition-opacity"
+                                             style="border:1px solid var(--sa-border);">
                                     </a>
                                 @endif
-                                <a href="{{ $documentUrl }}" download class="btn btn-outline btn-sm border-neutral-300 text-neutral-600 hover:bg-neutral-100">
+                                <a href="{{ $documentUrl }}" download
+                                   class="btn btn-outline btn-sm"
+                                   style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+                                   onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                     </svg>
@@ -263,14 +281,14 @@
                                 </a>
                             </div>
                         @else
-                            <p class="text-neutral-500 italic">Aucun document fourni</p>
+                            <p class="italic" style="color:var(--sa-muted-fg);">Aucun document fourni</p>
                         @endif
                     </div>
                 </div>
 
                 @if($restaurant->is_verified)
-                    <div class="mt-4 pt-4 border-t border-neutral-200">
-                        <p class="text-xs text-neutral-500 mb-2">
+                    <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
+                        <p class="text-xs mb-2" style="color:var(--sa-muted-fg);">
                             Vérifié le {{ $restaurant->verified_at->format('d/m/Y à H:i') }}
                             @if($restaurant->verifiedBy)
                                 par {{ $restaurant->verifiedBy->name }}
@@ -278,7 +296,10 @@
                         </p>
                         <form method="POST" action="{{ route('super-admin.restaurants.unverify', $restaurant) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer la vérification ?')">
                             @csrf
-                            <button type="submit" class="btn btn-ghost w-full text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100">
+                            <button type="submit"
+                                    class="btn btn-ghost w-full"
+                                    style="color:var(--sa-muted-fg);"
+                                    onmouseover="this.style.color='var(--sa-fg)';this.style.background='var(--sa-muted)'" onmouseout="this.style.color='var(--sa-muted-fg)';this.style.background='transparent'">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -287,8 +308,8 @@
                         </form>
                     </div>
                 @elseif($restaurant->rccm && $restaurant->rccm_document_path)
-                    <div class="mt-4 pt-4 border-t border-neutral-200">
-                        <p class="text-xs text-neutral-500 mb-3">Après vérification du document, vous pouvez marquer ce restaurant comme vérifié.</p>
+                    <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
+                        <p class="text-xs mb-3" style="color:var(--sa-muted-fg);">Après vérification du document, vous pouvez marquer ce restaurant comme vérifié.</p>
                         <form method="POST" action="{{ route('super-admin.restaurants.verify', $restaurant) }}">
                             @csrf
                             <button type="submit" class="btn btn-success w-full">
@@ -303,27 +324,27 @@
             </div>
 
             <!-- Owner Info -->
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h2>
+            <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Propriétaire</h2>
                 @if($restaurant->owner)
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-neutral-900 font-bold">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center font-bold" style="color:var(--sa-fg);">
                             {{ strtoupper(substr($restaurant->owner->name, 0, 1)) }}
                         </div>
                         <div>
-                            <p class="font-medium text-neutral-900">{{ $restaurant->owner->name }}</p>
-                            <p class="text-sm text-neutral-500">Administrateur</p>
+                            <p class="font-medium" style="color:var(--sa-fg);">{{ $restaurant->owner->name }}</p>
+                            <p class="text-sm" style="color:var(--sa-muted-fg);">Administrateur</p>
                         </div>
                     </div>
                     <div class="space-y-3 text-sm">
-                        <div class="flex items-center gap-3 text-neutral-500">
+                        <div class="flex items-center gap-3" style="color:var(--sa-muted-fg);">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                             {{ $restaurant->owner->email }}
                         </div>
                         @if($restaurant->owner->phone)
-                            <div class="flex items-center gap-3 text-neutral-500">
+                            <div class="flex items-center gap-3" style="color:var(--sa-muted-fg);">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                 </svg>
@@ -332,39 +353,41 @@
                         @endif
                     </div>
                 @else
-                    <p class="text-neutral-500">Aucun propriétaire assigné</p>
+                    <p style="color:var(--sa-muted-fg);">Aucun propriétaire assigné</p>
                 @endif
             </div>
 
             <!-- Subscription -->
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-                <h2 class="text-lg font-semibold text-neutral-900 mb-4">Abonnement</h2>
+            <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h2 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Abonnement</h2>
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-neutral-500">Plan</span>
-                        <span class="font-medium text-neutral-900">{{ $restaurant->currentPlan?->name ?? 'Aucun' }}</span>
+                        <span style="color:var(--sa-muted-fg);">Plan</span>
+                        <span class="font-medium" style="color:var(--sa-fg);">{{ $restaurant->currentPlan?->name ?? 'Aucun' }}</span>
                     </div>
                     @if($restaurant->currentPlan)
                         <div class="flex items-center justify-between">
-                            <span class="text-neutral-500">Montant</span>
-                            <span class="font-medium text-neutral-900">{{ number_format($restaurant->currentPlan->price, 0, ',', ' ') }} F/mois</span>
+                            <span style="color:var(--sa-muted-fg);">Montant</span>
+                            <span class="font-medium" style="color:var(--sa-fg);">{{ number_format($restaurant->currentPlan->price, 0, ',', ' ') }} F/mois</span>
                         </div>
                     @endif
                     @if($restaurant->subscription_ends_at)
                         <div class="flex items-center justify-between">
-                            <span class="text-neutral-500">Expire le</span>
-                            <span class="font-medium text-neutral-900">{{ $restaurant->subscription_ends_at->format('d M Y') }}</span>
+                            <span style="color:var(--sa-muted-fg);">Expire le</span>
+                            <span class="font-medium" style="color:var(--sa-fg);">{{ $restaurant->subscription_ends_at->format('d M Y') }}</span>
                         </div>
                     @endif
                 </div>
 
                 <!-- Change Plan -->
                 @if($plans->isNotEmpty())
-                    <div class="mt-4 pt-4 border-t border-neutral-200">
+                    <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
                         <form method="POST" action="{{ route('super-admin.restaurants.update', $restaurant) }}" class="space-y-3">
                             @csrf
                             @method('PUT')
-                            <select name="current_plan_id" class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <select name="current_plan_id"
+                                    class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                                 <option value="">Aucun plan</option>
                                 @foreach($plans as $plan)
                                     <option value="{{ $plan->id }}" {{ $restaurant->current_plan_id == $plan->id ? 'selected' : '' }}>
@@ -372,20 +395,25 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <button type="submit" class="btn btn-outline w-full border-neutral-300 text-neutral-600 hover:bg-neutral-100">
+                            <button type="submit"
+                                    class="btn btn-outline w-full"
+                                    style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+                                    onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
                                 Changer le plan
                             </button>
                         </form>
                     </div>
 
                     <!-- Prolonger / Renouveler l'abonnement (sans Lygos) -->
-                    <div class="mt-4 pt-4 border-t border-neutral-200">
-                        <p class="text-sm text-neutral-500 mb-3">Lygos indisponible ? Prolongez l'abonnement manuellement (paiement hors ligne).</p>
+                    <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
+                        <p class="text-sm mb-3" style="color:var(--sa-muted-fg);">Lygos indisponible ? Prolongez l'abonnement manuellement (paiement hors ligne).</p>
                         <form method="POST" action="{{ route('super-admin.restaurants.extend-subscription', $restaurant) }}" class="space-y-3">
                             @csrf
                             <div>
-                                <label class="block text-xs font-medium text-neutral-500 mb-1">Plan</label>
-                                <select name="plan_id" required class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Plan</label>
+                                <select name="plan_id" required
+                                        class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                                     @foreach($plans as $plan)
                                         <option value="{{ $plan->id }}" {{ $restaurant->current_plan_id == $plan->id ? 'selected' : '' }}>
                                             {{ $plan->name }} ({{ number_format($plan->price, 0, ',', ' ') }} F)
@@ -394,12 +422,18 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-neutral-500 mb-1">Durée (jours)</label>
-                                <input type="number" name="days" min="1" max="365" value="30" required class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="30">
+                                <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Durée (jours)</label>
+                                <input type="number" name="days" min="1" max="365" value="30" required
+                                       class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                       style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
+                                       placeholder="30">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-neutral-500 mb-1">Raison (obligatoire)</label>
-                                <input type="text" name="reason" required maxlength="255" class="w-full h-10 px-4 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Ex: Renouvellement manuel, Lygos indisponible">
+                                <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Raison (obligatoire)</label>
+                                <input type="text" name="reason" required maxlength="255"
+                                       class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                       style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
+                                       placeholder="Ex: Renouvellement manuel, Lygos indisponible">
                             </div>
                             <button type="submit" class="btn btn-primary w-full">
                                 Prolonger l'abonnement
@@ -410,14 +444,14 @@
             </div>
 
             <!-- Demo Mode -->
-            <div class="bg-white border border-purple-200 rounded-xl p-6">
+            <div class="border border-purple-200 rounded-xl p-6" style="background:var(--sa-card);">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-semibold text-neutral-900">Mode Démo</h2>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Mode Démo</h2>
                     @if($restaurant->is_demo)
                         <span class="badge bg-purple-50 text-purple-700 border border-purple-200">Actif</span>
                     @endif
                 </div>
-                <p class="text-sm text-neutral-500 mb-4">Les comptes démo sont utilisés par l'équipe pour les démonstrations terrain. Ils sont exclus des statistiques globales.</p>
+                <p class="text-sm mb-4" style="color:var(--sa-muted-fg);">Les comptes démo sont utilisés par l'équipe pour les démonstrations terrain. Ils sont exclus des statistiques globales.</p>
                 <form method="POST" action="{{ route('super-admin.restaurants.toggle-demo', $restaurant) }}">
                     @csrf
                     <button type="submit" class="btn w-full {{ $restaurant->is_demo ? 'btn-outline border-purple-300 text-purple-600 hover:bg-purple-50' : 'bg-purple-600 text-white hover:bg-purple-700' }}">
@@ -430,12 +464,15 @@
             </div>
 
             <!-- Danger Zone -->
-            <div class="bg-white border border-red-200 rounded-xl p-6">
+            <div class="border border-red-200 rounded-xl p-6" style="background:var(--sa-card);">
                 <h2 class="text-lg font-semibold text-red-600 mb-4">Zone dangereuse</h2>
                 <div class="space-y-3">
                     <form method="POST" action="{{ route('super-admin.restaurants.impersonate', $restaurant) }}">
                         @csrf
-                        <button type="submit" class="btn btn-outline w-full border-neutral-300 text-neutral-600 hover:bg-neutral-100">
+                        <button type="submit"
+                                class="btn btn-outline w-full"
+                                style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+                                onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
                             Connexion en tant que
                         </button>
                     </form>
@@ -456,21 +493,28 @@
     <div id="suspendModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('suspendModal').classList.add('hidden')"></div>
-            <div class="relative w-full max-w-md bg-white border border-neutral-200 rounded-2xl shadow-xl">
-                <div class="p-6 border-b border-neutral-200">
-                    <h2 class="text-xl font-bold text-neutral-900">Suspendre le restaurant</h2>
+            <div class="relative w-full max-w-md rounded-2xl shadow-xl border" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <div class="p-6 border-b" style="border-color:var(--sa-border);">
+                    <h2 class="text-xl font-bold" style="color:var(--sa-fg);">Suspendre le restaurant</h2>
                 </div>
                 <form method="POST" action="{{ route('super-admin.restaurants.suspend', $restaurant) }}" class="p-6 space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-sm font-medium text-neutral-600 mb-2">Raison de la suspension *</label>
-                        <textarea name="reason" required rows="4" class="w-full px-4 py-2 bg-neutral-50 border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Expliquez pourquoi ce restaurant est suspendu..."></textarea>
+                        <label class="block text-sm font-medium mb-2" style="color:var(--sa-muted-fg);">Raison de la suspension *</label>
+                        <textarea name="reason" required rows="4"
+                                  class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                  style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
+                                  placeholder="Expliquez pourquoi ce restaurant est suspendu..."></textarea>
                     </div>
                     <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('suspendModal').classList.add('hidden')" class="flex-1 h-10 px-4 bg-neutral-100 text-neutral-900 rounded-lg font-medium hover:bg-neutral-200 transition-colors">
+                        <button type="button"
+                                onclick="document.getElementById('suspendModal').classList.add('hidden')"
+                                class="flex-1 h-10 px-4 rounded-lg font-medium transition-colors"
+                                style="background:var(--sa-muted);color:var(--sa-fg);"
+                                onmouseover="this.style.background='var(--sa-border)'" onmouseout="this.style.background='var(--sa-muted)'">
                             Annuler
                         </button>
-                        <button type="submit" class="flex-1 h-10 px-4 bg-yellow-500 text-neutral-900 rounded-lg font-medium hover:bg-yellow-600 transition-colors">
+                        <button type="submit" class="flex-1 h-10 px-4 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors">
                             Suspendre
                         </button>
                     </div>
