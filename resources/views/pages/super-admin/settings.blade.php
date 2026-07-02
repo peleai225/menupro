@@ -754,6 +754,32 @@
                                    placeholder='{"type":"service_account","project_id":"..."}'>{{ old('firebase_service_account_json', $settings['firebase_service_account_json'] ?? '') }}</textarea>
                             <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Contenu complet du fichier JSON depuis Firebase → Comptes de service → Générer une clé privée.</p>
                         </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Firebase API Key (Web)</label>
+                            <input type="text" name="firebase_api_key" value="{{ old('firebase_api_key', $settings['firebase_api_key'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="AIzaSy...">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Clé API Web depuis Firebase Console → Paramètres du projet → Applications Web.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Firebase App ID</label>
+                            <input type="text" name="firebase_app_id" value="{{ old('firebase_app_id', $settings['firebase_app_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="1:123456789:web:abc123...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Firebase Sender ID (Messaging)</label>
+                            <input type="text" name="firebase_sender_id" value="{{ old('firebase_sender_id', $settings['firebase_sender_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="123456789012">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">VAPID Public Key (Web Push)</label>
+                            <input type="text" name="firebase_vapid_key" value="{{ old('firebase_vapid_key', $settings['firebase_vapid_key'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="BNxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Depuis Firebase Console → Cloud Messaging → Configuration Web → Paire de clés Web Push.</p>
+                        </div>
                         <details class="text-xs">
                             <summary class="cursor-pointer" style="color:var(--sa-muted-fg);">Ancienne clé serveur Legacy (désactivée par Google depuis juin 2024)</summary>
                             <div class="mt-3">

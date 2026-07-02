@@ -127,6 +127,24 @@
 
     @stack('head')
 
+    <!-- Firebase FCM Web config -->
+    @php
+        $fbProjectId  = \App\Models\SystemSetting::get('firebase_project_id');
+        $fbApiKey     = \App\Models\SystemSetting::get('firebase_api_key');
+        $fbAppId      = \App\Models\SystemSetting::get('firebase_app_id');
+        $fbVapidKey   = \App\Models\SystemSetting::get('firebase_vapid_key');
+        $fbConfig = $fbProjectId ? json_encode([
+            'projectId'         => $fbProjectId,
+            'apiKey'            => $fbApiKey ?? '',
+            'appId'             => $fbAppId ?? '',
+            'messagingSenderId' => \App\Models\SystemSetting::get('firebase_sender_id') ?? '',
+        ]) : null;
+    @endphp
+    @if($fbConfig)
+    <meta name="firebase-config" content="{{ $fbConfig }}">
+    <meta name="firebase-vapid-key" content="{{ $fbVapidKey ?? '' }}">
+    @endif
+
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
