@@ -330,7 +330,7 @@
 
     @push('scripts')
         @if($reportType === 'sales' && !empty($data['sales_by_day']))
-            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+            <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const ctx = document.getElementById('salesChart');

@@ -142,7 +142,7 @@
     </div>
 
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         // ── Shared defaults ──────────────────────────────────────────────
         const gridColor = 'rgba(209, 213, 219, 0.5)';
