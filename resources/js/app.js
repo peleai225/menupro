@@ -421,7 +421,8 @@ document.addEventListener('livewire:init', () => {
 
 import { initFcm } from './firebase-messaging.js';
 
-// Lance FCM uniquement si l'utilisateur est authentifié (présence du meta tag)
-if (document.querySelector('meta[name="firebase-config"]')) {
-    document.addEventListener('DOMContentLoaded', () => initFcm());
+// Les modules ES s'exécutent après le DOM — pas besoin de DOMContentLoaded
+// Guarde sur auth-type : uniquement pour les utilisateurs connectés
+if (document.querySelector('meta[name="auth-type"]')) {
+    initFcm();
 }

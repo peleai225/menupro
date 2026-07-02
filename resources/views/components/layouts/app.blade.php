@@ -143,6 +143,9 @@
     @if($fbConfig)
     <meta name="firebase-config" content="{{ $fbConfig }}">
     <meta name="firebase-vapid-key" content="{{ $fbVapidKey ?? '' }}">
+    @auth
+    <meta name="auth-type" content="customer">
+    @endauth
     @endif
 
     <!-- Styles & Scripts -->

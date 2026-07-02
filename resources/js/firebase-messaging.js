@@ -23,10 +23,21 @@ export async function initFcm() {
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
-    // Envoie la config au service worker Firebase
+    // Enregistre le service worker Firebase et lui envoie la config
     if ('serviceWorker' in navigator) {
         const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        reg.active?.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
+        const sw = reg.active ?? reg.waiting ?? reg.installing;
+        if (sw) {
+            sw.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
+        } else {
+            reg.addEventListener('updatefound', () => {
+                reg.installing?.addEventListener('statechange', (e) => {
+                    if (e.target.state === 'activated') {
+                        e.target.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
+                    }
+                });
+            });
+        }
     }
 
     // Demande permission et obtient le token
