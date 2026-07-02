@@ -322,11 +322,11 @@ Route::prefix('admin')
         Route::get('abonnements/export/csv', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'export'])->name('subscriptions.export');
         
         // Plans Management
-        Route::resource('plans', PlanController::class);
+        Route::resource('plans', PlanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('plans/reorder', [PlanController::class, 'reorder'])->name('plans.reorder');
-        
+
         // Users Management
-        Route::resource('utilisateurs', UserController::class)->parameters(['utilisateurs' => 'user']);
+        Route::resource('utilisateurs', UserController::class)->parameters(['utilisateurs' => 'user'])->only(['index', 'store', 'update', 'destroy']);
         Route::post('utilisateurs/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         Route::post('utilisateurs/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
         Route::post('utilisateurs/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
@@ -354,7 +354,7 @@ Route::prefix('admin')
         Route::get('finances/commissions', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'commissions'])->name('finances.commissions');
         
         // Announcements
-        Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements');
+        Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements')->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         Route::post('annonces/{announcement}/send-emails', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'sendEmails'])->name('announcements.send-emails');
         
         // Live Dashboard API

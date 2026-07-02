@@ -172,6 +172,30 @@ class UserController extends Controller
     }
 
     /**
+     * Suspend user (set is_active to false).
+     */
+    public function suspend(User $user): RedirectResponse
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Vous ne pouvez pas suspendre votre propre compte.');
+        }
+
+        $user->update(['is_active' => false]);
+
+        return back()->with('success', 'Utilisateur suspendu.');
+    }
+
+    /**
+     * Reactivate user (set is_active to true).
+     */
+    public function reactivate(User $user): RedirectResponse
+    {
+        $user->update(['is_active' => true]);
+
+        return back()->with('success', 'Utilisateur réactivé.');
+    }
+
+    /**
      * Delete user.
      */
     public function destroy(User $user): RedirectResponse

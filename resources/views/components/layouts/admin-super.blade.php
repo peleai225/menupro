@@ -586,6 +586,9 @@
     </div>
 
     @push('scripts')
+    {{-- Super-admin JS global (charts, helpers) --}}
+    @vite('resources/js/super-admin.js')
+
     {{-- Toast notification système global --}}
     <div id="admin-toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" style="max-width:360px"></div>
 
