@@ -152,7 +152,7 @@
                 <!-- Delivery Address (Livraison) -->
                 @if($order_type === 'delivery')
                     <div class="bg-white rounded-2xl p-6 shadow-sm"
-                         x-data="deliveryAddress(@js($restaurant->latitude ?? 5.3600), @js($restaurant->longitude ?? -4.0083), @js($restaurant->delivery_radius_km ?? 10))"
+                         x-data="deliveryAddress(@js($restaurant->latitude), @js($restaurant->longitude), @js($restaurant->delivery_radius_km ?? 10))"
                          x-init="init()"
                          wire:ignore.self>
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
@@ -532,6 +532,15 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
     radiusCircle: null,
 
     validateDistance(lat, lng) {
+        // Si le restaurant n'a pas de coordonnées GPS en base, on ne peut pas valider
+        // côté client — le backend (DeliveryPricingService) tranche via la ville.
+        const hasRestaurantCoords = restaurantLat !== null && restaurantLng !== null;
+        if (!hasRestaurantCoords) {
+            this.errorMsg = '';
+            this.statusMsg = '';
+            this.updateMap(lat, lng);
+            return true;
+        }
         const distance = this.getDistance(restaurantLat, restaurantLng, lat, lng);
         const inRadius = deliveryRadius === 0 || distance <= deliveryRadius;
         if (inRadius) {
@@ -555,16 +564,19 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                 this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([lat, lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(this.map);
 
-                if (deliveryRadius > 0) {
+                const hasCoords = restaurantLat !== null && restaurantLng !== null;
+                if (hasCoords && deliveryRadius > 0) {
                     this.radiusCircle = L.circle([restaurantLat, restaurantLng], {
                         radius: deliveryRadius * 1000,
                         color: '#f97316', fillColor: '#f9731620', fillOpacity: 0.15, weight: 1
                     }).addTo(this.map);
                 }
 
-                this.restaurantMarker = L.marker([restaurantLat, restaurantLng], {
-                    icon: L.divIcon({ className: '', html: '<div style="background:#f97316;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>', iconSize: [12,12], iconAnchor: [6,6] })
-                }).addTo(this.map);
+                if (hasCoords) {
+                    this.restaurantMarker = L.marker([restaurantLat, restaurantLng], {
+                        icon: L.divIcon({ className: '', html: '<div style="background:#f97316;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>', iconSize: [12,12], iconAnchor: [6,6] })
+                    }).addTo(this.map);
+                }
             }
 
             if (this.userMarker) this.map.removeLayer(this.userMarker);
@@ -572,8 +584,12 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
                 icon: L.divIcon({ className: '', html: '<div style="background:#3b82f6;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize: [14,14], iconAnchor: [7,7] })
             }).addTo(this.map);
 
-            const bounds = L.latLngBounds([[lat, lng], [restaurantLat, restaurantLng]]);
-            this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+            if (restaurantLat !== null && restaurantLng !== null) {
+                const bounds = L.latLngBounds([[lat, lng], [restaurantLat, restaurantLng]]);
+                this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+            } else {
+                this.map.setView([lat, lng], 14);
+            }
         });
     },
 

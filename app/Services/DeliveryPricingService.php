@@ -33,18 +33,30 @@ class DeliveryPricingService
     ): array {
         $restaurantLat = (float) $restaurant->latitude;
         $restaurantLng = (float) $restaurant->longitude;
+        $hasValidCoords = $restaurantLat !== 0.0 || $restaurantLng !== 0.0;
 
-        // Détecte la ville via le restaurant (pas le client) pour éviter
-        // que des clients en périphérie soient rejetés à tort
-        $deliveryCity = $this->geo->detectDeliveryCity($restaurantLat, $restaurantLng)
-            ?? $this->geo->detectDeliveryCity($customerLat, $customerLng);
+        // Si le restaurant a des coords GPS valides, on détecte sa ville via ses coords.
+        // Sinon, on recherche la ville par le nom du champ `city` du restaurant,
+        // puis on tombe en fallback sur les coords du client.
+        if ($hasValidCoords) {
+            $deliveryCity = $this->geo->detectDeliveryCity($restaurantLat, $restaurantLng)
+                ?? $this->geo->detectDeliveryCity($customerLat, $customerLng);
+        } else {
+            $deliveryCity = $this->detectCityByName($restaurant->city)
+                ?? $this->geo->detectDeliveryCity($customerLat, $customerLng);
+        }
 
         if (!$deliveryCity) {
             return $this->outOfRange($restaurant, $customerLat, $customerLng);
         }
 
+        // Quand les coords du restaurant sont absentes, utiliser le centre de la ville
+        // comme point de référence pour le calcul de distance (plutôt que (0, 0))
+        $fromLat = $hasValidCoords ? $restaurantLat : (float) $deliveryCity->center_latitude;
+        $fromLng = $hasValidCoords ? $restaurantLng : (float) $deliveryCity->center_longitude;
+
         $distanceKm = $this->geo->distanceKm(
-            $restaurantLat, $restaurantLng,
+            $fromLat, $fromLng,
             $customerLat, $customerLng
         );
 
@@ -105,6 +117,20 @@ class DeliveryPricingService
         return $this->calculate($restaurant, $lat, $lng)['within_range'];
     }
 
+    private function detectCityByName(?string $cityName): ?DeliveryCity
+    {
+        if (!$cityName) {
+            return null;
+        }
+
+        return DeliveryCity::active()
+            ->where(function ($q) use ($cityName) {
+                $q->whereRaw('LOWER(name) = ?', [mb_strtolower($cityName)])
+                  ->orWhereRaw('LOWER(slug) = ?', [mb_strtolower($cityName)]);
+            })
+            ->first();
+    }
+
     private function detectZoneName(DeliveryCity $city, float $lat, float $lng): ?string
     {
         $zones = $city->zones()->active()->get();
@@ -122,11 +148,11 @@ class DeliveryPricingService
     {
         $restaurantLat = (float) $restaurant->latitude;
         $restaurantLng = (float) $restaurant->longitude;
+        $hasValidCoords = $restaurantLat !== 0.0 || $restaurantLng !== 0.0;
 
-        $distanceKm = $this->geo->distanceKm(
-            $restaurantLat, $restaurantLng,
-            $customerLat, $customerLng
-        );
+        $distanceKm = $hasValidCoords
+            ? $this->geo->distanceKm($restaurantLat, $restaurantLng, $customerLat, $customerLng)
+            : 0.0;
 
         return [
             'fee' => 0,
