@@ -173,7 +173,12 @@
                     </div>
 
                     <!-- Address -->
-                    <div class="card p-6" x-data="restaurantLocationPicker(@js((float)($restaurant->latitude ?: 5.3600)), @js((float)($restaurant->longitude ?: -4.0083)), @js((bool)$restaurant->latitude))">
+                    @php
+                        $defaultCenter = \App\Models\DeliveryCity::where('name', $restaurant->city)->first();
+                        $defaultLat = (float) ($restaurant->latitude ?: ($defaultCenter?->center_latitude ?? 5.3600));
+                        $defaultLng = (float) ($restaurant->longitude ?: ($defaultCenter?->center_longitude ?? -4.0083));
+                    @endphp
+                    <div class="card p-6" x-data="restaurantLocationPicker(@js($defaultLat), @js($defaultLng), @js((bool)$restaurant->latitude))">
                         <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse & Localisation</h2>
 
                         <div class="space-y-4">
