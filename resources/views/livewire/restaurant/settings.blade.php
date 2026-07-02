@@ -191,11 +191,12 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
-                                    <select wire:model.live="city" class="input"
-                                            x-on:change="onCitySelect($event.target.value)">
+                                    <select class="input"
+                                            x-model="selectedCity"
+                                            x-on:change="onCitySelect($event.target.value); $wire.set('city', $event.target.value)">
                                         <option value="">-- Choisir --</option>
                                         @foreach(\App\Models\DeliveryCity::active()->orderBy('name')->get() as $dc)
-                                            <option value="{{ $dc->name }}">{{ $dc->name }}</option>
+                                            <option value="{{ $dc->name }}" @selected($restaurant->city === $dc->name)>{{ $dc->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -228,7 +229,7 @@
                                 </div>
 
                                 {{-- Carte Leaflet --}}
-                                <div id="restaurant-location-map" class="w-full h-52 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 z-0"></div>
+                                <div wire:ignore id="restaurant-location-map" class="w-full h-52 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 z-0"></div>
                                 <p class="mt-1.5 text-xs text-neutral-400">Cliquez sur la carte ou utilisez "Ma position" pour placer le pin de votre restaurant.</p>
 
                                 {{-- Coordonnées en lecture --}}
@@ -1094,6 +1095,7 @@ function restaurantLocationPicker(initLat, initLng, hasExistingCoords, cityCoord
         map: null,
         marker: null,
         cityCoords: cityCoords || {},
+        selectedCity: '',
 
         init() {
             this.loadLeaflet().then(() => this.$nextTick(() => this.initMap()));
