@@ -13,5 +13,11 @@
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
+  },
+  "resources/js/super-admin.js": {
+    "file": "assets/super-admin-yK6TtYxX.js",
+    "name": "super-admin",
+    "src": "resources/js/super-admin.js",
+    "isEntry": true
   }
 }

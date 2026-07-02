@@ -549,7 +549,7 @@
     </div>
 
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
         function liveDashboard() {
             return {
@@ -605,7 +605,7 @@
         const ordersChartData = @json($ordersByDay);
         const statusChartData = @json($ordersByStatus);
 
-        (function initCharts() {
+        window.addEventListener('chartjs:ready', function initCharts() {
             // Graphique 1 — Courbe commandes & revenus (double axe Y)
             const ordersCtx = document.getElementById('ordersChart');
             if (ordersCtx) {
@@ -756,7 +756,7 @@
                     },
                 });
             }
-        })();
+        });
     </script>
     @endpush
 </x-layouts.admin-super>
