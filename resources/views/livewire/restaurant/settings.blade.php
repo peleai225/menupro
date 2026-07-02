@@ -174,11 +174,12 @@
 
                     <!-- Address -->
                     @php
-                        $defaultCenter = \App\Models\DeliveryCity::where('name', $restaurant->city)->first();
+                        $deliveryCities = \App\Models\DeliveryCity::active()->get(['name','center_latitude','center_longitude']);
+                        $defaultCenter = $deliveryCities->firstWhere('name', $restaurant->city);
                         $defaultLat = (float) ($restaurant->latitude ?: ($defaultCenter?->center_latitude ?? 5.3600));
                         $defaultLng = (float) ($restaurant->longitude ?: ($defaultCenter?->center_longitude ?? -4.0083));
                     @endphp
-                    <div class="card p-6" x-data="restaurantLocationPicker(@js($defaultLat), @js($defaultLng), @js((bool)$restaurant->latitude))">
+                    <div class="card p-6" x-data="restaurantLocationPicker(@js($defaultLat), @js($defaultLng), @js((bool)$restaurant->latitude), @js($deliveryCities->keyBy('name')->map(fn($c) => ['lat' => (float)$c->center_latitude, 'lng' => (float)$c->center_longitude])))">
                         <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse & Localisation</h2>
 
                         <div class="space-y-4">
@@ -190,7 +191,13 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
-                                    <input type="text" wire:model="city" class="input" placeholder="Abidjan">
+                                    <select wire:model="city" class="input"
+                                            @change="onCitySelect($event.target.value)">
+                                        <option value="">-- Choisir --</option>
+                                        @foreach(\App\Models\DeliveryCity::active()->orderBy('name')->get() as $dc)
+                                            <option value="{{ $dc->name }}">{{ $dc->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-neutral-700 mb-2">Code postal</label>
@@ -1078,7 +1085,7 @@ function copyLink() {
 // ──────────────────────────────────────────────
 // Restaurant location picker (Leaflet)
 // ──────────────────────────────────────────────
-function restaurantLocationPicker(initLat, initLng, hasExistingCoords) {
+function restaurantLocationPicker(initLat, initLng, hasExistingCoords, cityCoords) {
     return {
         lat: initLat,
         lng: initLng,
@@ -1086,9 +1093,21 @@ function restaurantLocationPicker(initLat, initLng, hasExistingCoords) {
         detecting: false,
         map: null,
         marker: null,
+        cityCoords: cityCoords || {},
 
         init() {
             this.loadLeaflet().then(() => this.$nextTick(() => this.initMap()));
+        },
+
+        onCitySelect(cityName) {
+            if (!cityName || !this.cityCoords[cityName]) return;
+            if (this.hasCoords) return;
+            const c = this.cityCoords[cityName];
+            this.lat = c.lat;
+            this.lng = c.lng;
+            if (this.map) {
+                this.map.setView([c.lat, c.lng], 13);
+            }
         },
 
         loadLeaflet() {
