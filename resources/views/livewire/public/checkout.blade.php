@@ -665,6 +665,15 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
             async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy; // en mètres
+
+                // Sur PC, la géoloc se fait par IP → précision > 5km = peu fiable
+                if (accuracy > 5000) {
+                    this.errorMsg = 'Position imprécise (géolocalisation par IP, ' + Math.round(accuracy / 1000) + ' km de marge). Entrez votre adresse manuellement pour une livraison correcte.';
+                    this.locating = false;
+                    return;
+                }
+
                 this.userLat = lat;
                 this.userLng = lng;
                 this.validateDistance(lat, lng);
