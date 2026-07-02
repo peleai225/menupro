@@ -1,8 +1,8 @@
 <x-layouts.admin-super title="Livraisons">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Livraisons en cours</h1>
-            <p class="text-neutral-500 text-sm mt-1">Suivi global des livraisons tous restaurants confondus</p>
+            <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Livraisons en cours</h1>
+            <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Suivi global des livraisons tous restaurants confondus</p>
         </div>
         <div class="flex items-center gap-3">
             <div class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
@@ -23,19 +23,19 @@
             ];
         @endphp
         @foreach($statuses as $key => $info)
-            <div class="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+            <div class="rounded-xl border p-4 text-center" style="background:var(--sa-card);border-color:var(--sa-border);">
                 <p class="text-2xl font-bold text-{{ $info['color'] }}-600">{{ $statusCounts[$key] ?? 0 }}</p>
-                <p class="text-xs text-neutral-500 mt-1">{{ $info['label'] }}</p>
+                <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">{{ $info['label'] }}</p>
             </div>
         @endforeach
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-xl border border-neutral-200 p-4 mb-6">
+    <div class="rounded-xl border p-4 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
         <form method="GET" class="flex flex-wrap gap-3 items-end">
             <div class="flex-1 min-w-[180px]">
-                <label class="block text-xs font-medium text-neutral-500 mb-1">Restaurant</label>
-                <select name="restaurant_id" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Restaurant</label>
+                <select name="restaurant_id" class="w-full h-10 px-3 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous</option>
                     @foreach($restaurants as $r)
                         <option value="{{ $r->id }}" {{ request('restaurant_id') == $r->id ? 'selected' : '' }}>{{ $r->name }}</option>
@@ -43,8 +43,8 @@
                 </select>
             </div>
             <div class="min-w-[150px]">
-                <label class="block text-xs font-medium text-neutral-500 mb-1">Statut</label>
-                <select name="status" class="w-full h-10 px-3 bg-neutral-50 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
+                <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Statut</label>
+                <select name="status" class="w-full h-10 px-3 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
                     <option value="">Tous</option>
                     @foreach($statuses as $key => $info)
                         <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $info['label'] }}</option>
@@ -55,7 +55,7 @@
                 Filtrer
             </button>
             @if(request()->hasAny(['restaurant_id', 'status']))
-                <a href="{{ route('super-admin.deliveries.index') }}" class="h-10 px-4 flex items-center bg-neutral-100 text-neutral-600 rounded-lg font-medium hover:bg-neutral-200 transition-colors">
+                <a href="{{ route('super-admin.deliveries.index') }}" class="h-10 px-4 flex items-center rounded-lg font-medium transition-colors" style="background:var(--sa-muted);color:var(--sa-fg);">
                     Réinitialiser
                 </a>
             @endif
@@ -63,45 +63,45 @@
     </div>
 
     <!-- Deliveries Table -->
-    <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+    <div class="rounded-xl border overflow-hidden" style="background:var(--sa-card);border-color:var(--sa-border);">
         @if($deliveries->isEmpty())
             <div class="p-12 text-center">
-                <svg class="w-16 h-16 mx-auto text-neutral-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-16 h-16 mx-auto mb-4" style="color:var(--sa-border);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                 </svg>
-                <p class="text-neutral-500 text-lg">Aucune livraison active</p>
-                <p class="text-neutral-400 text-sm mt-1">Les livraisons en cours apparaîtront ici</p>
+                <p class="text-lg" style="color:var(--sa-muted-fg);">Aucune livraison active</p>
+                <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Les livraisons en cours apparaîtront ici</p>
             </div>
         @else
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
-                    <thead class="bg-neutral-50 border-b border-neutral-200">
+                    <thead style="background:var(--sa-muted);border-bottom:1px solid var(--sa-border);">
                         <tr>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Commande</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Restaurant</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Livreur</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Client</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Adresse</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Statut</th>
-                            <th class="text-left px-4 py-3 font-medium text-neutral-500">Depuis</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Commande</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Restaurant</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Livreur</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Client</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Adresse</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Statut</th>
+                            <th class="text-left px-4 py-3 font-medium" style="color:var(--sa-muted-fg);">Depuis</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-100">
+                    <tbody>
                         @foreach($deliveries as $delivery)
-                            <tr class="hover:bg-neutral-50 transition-colors">
+                            <tr style="border-bottom:1px solid var(--sa-border);">
                                 <td class="px-4 py-3">
-                                    <span class="font-mono font-medium text-neutral-900">{{ $delivery->order?->reference ?? '-' }}</span>
+                                    <span class="font-mono font-medium" style="color:var(--sa-fg);">{{ $delivery->order?->reference ?? '-' }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-neutral-900">{{ $delivery->restaurant?->name ?? '-' }}</td>
+                                <td class="px-4 py-3" style="color:var(--sa-fg);">{{ $delivery->restaurant?->name ?? '-' }}</td>
                                 <td class="px-4 py-3">
                                     @if($delivery->driver)
-                                        <span class="text-neutral-900">{{ $delivery->driver->name }}</span>
+                                        <span style="color:var(--sa-fg);">{{ $delivery->driver->name }}</span>
                                     @else
-                                        <span class="text-neutral-400 italic">Non assigné</span>
+                                        <span class="italic" style="color:var(--sa-muted-fg);">Non assigné</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-neutral-600">{{ $delivery->order?->customer_name ?? '-' }}</td>
-                                <td class="px-4 py-3 text-neutral-500 max-w-[200px] truncate">{{ $delivery->delivery_address ?? '-' }}</td>
+                                <td class="px-4 py-3" style="color:var(--sa-muted-fg);">{{ $delivery->order?->customer_name ?? '-' }}</td>
+                                <td class="px-4 py-3 max-w-[200px] truncate" style="color:var(--sa-muted-fg);">{{ $delivery->delivery_address ?? '-' }}</td>
                                 <td class="px-4 py-3">
                                     @php
                                         $colors = [
@@ -116,7 +116,7 @@
                                         {{ $delivery->status->label() }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-neutral-500">
+                                <td class="px-4 py-3" style="color:var(--sa-muted-fg);">
                                     {{ $delivery->created_at->diffForHumans(short: true) }}
                                 </td>
                             </tr>
@@ -124,7 +124,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-4 py-3 border-t border-neutral-200">
+            <div class="px-4 py-3" style="border-top:1px solid var(--sa-border);">
                 {{ $deliveries->links() }}
             </div>
         @endif
