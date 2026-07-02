@@ -95,8 +95,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} derniers jours</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="trendChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="trendChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -107,8 +107,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Répartition</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="orderTypeChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="orderTypeChart" style="display:block;"></canvas>
             </div>
         </div>
     </div>
@@ -122,8 +122,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs par abonnement</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="planChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="planChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -167,8 +167,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} derniers jours</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="revenueLineChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="revenueLineChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -179,8 +179,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="cityChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="cityChart" style="display:block;"></canvas>
             </div>
         </div>
     </div>
@@ -194,8 +194,8 @@
                     <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} jours — top 10</p>
                 </div>
             </div>
-            <div style="height:280px;">
-                <canvas id="topDaysChart"></canvas>
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="topDaysChart" style="display:block;"></canvas>
             </div>
         </div>
 
@@ -209,21 +209,18 @@
                     {{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F
                 </span>
             </div>
-            <div style="height:240px;">
-                <canvas id="subscriptionChart"></canvas>
+            <div style="position:relative;height:240px;width:100%;">
+                <canvas id="subscriptionChart" style="display:block;"></canvas>
             </div>
         </div>
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
-        // ── Shared defaults ──────────────────────────────────────────────
-        const cs = getComputedStyle(document.documentElement);
-        const gridColor = cs.getPropertyValue('--sa-border').trim() || 'rgba(209,213,219,0.5)';
-        const tickColor = cs.getPropertyValue('--sa-muted-fg').trim() || '#6b7280';
-        const primaryColor = cs.getPropertyValue('--sa-primary').trim() || 'rgb(59,130,246)';
-        const successColor = cs.getPropertyValue('--sa-success').trim() || 'rgb(16,185,129)';
+        window.addEventListener('chartjs:ready', function () {
+        const gridColor = 'rgba(209,213,219,0.45)';
+        const tickColor = '#6b7280';
 
         // ── 1. Évolution des revenus (line) ──────────────────────────────
         new Chart(document.getElementById('revenueLineChart'), {
@@ -472,6 +469,7 @@
                 }
             }
         });
+        }); // chartjs:ready
     </script>
     @endpush
 </x-layouts.admin-super>

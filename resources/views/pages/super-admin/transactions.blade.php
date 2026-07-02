@@ -74,8 +74,8 @@
                 <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes + abonnements</p>
             </div>
         </div>
-        <div style="height:260px;" x-data="revenueChart()" x-init="init()">
-            <canvas id="revenueChart"></canvas>
+        <div style="position:relative;height:260px;width:100%;">
+            <canvas id="revenueChart" style="display:block;"></canvas>
         </div>
     </div>
 
@@ -246,68 +246,63 @@
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
-        function revenueChart() {
-            return {
-                init() {
-                    const ctx = document.getElementById('revenueChart').getContext('2d');
-                    const chartData = @json($chartData);
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: chartData.map(d => d.date),
-                            datasets: [
-                                {
-                                    label: 'Total',
-                                    data: chartData.map(d => d.total),
-                                    borderColor: 'rgb(34, 197, 94)',
-                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                    fill: true,
-                                    tension: 0.4,
-                                    pointRadius: 2,
-                                },
-                                {
-                                    label: 'Commandes',
-                                    data: chartData.map(d => d.orders),
-                                    borderColor: 'rgb(139, 92, 246)',
-                                    borderDash: [5, 5],
-                                    tension: 0.4,
-                                    pointRadius: 2,
-                                },
-                                {
-                                    label: 'Abonnements',
-                                    data: chartData.map(d => d.subscriptions),
-                                    borderColor: 'rgb(59, 130, 246)',
-                                    borderDash: [5, 5],
-                                    tension: 0.4,
-                                    pointRadius: 2,
-                                }
-                            ]
+        window.addEventListener('chartjs:ready', function () {
+            const chartData = @json($chartData);
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: chartData.map(d => d.total),
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2,
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { labels: { color: '#6b7280', boxWidth: 12 } },
-                                tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
-                            },
-                            scales: {
-                                x: {
-                                    ticks: { color: '#6b7280', maxTicksLimit: 10 },
-                                    grid: { color: 'rgba(209,213,219,0.5)' }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: { color: '#6b7280', callback: v => (v / 1000).toFixed(0) + 'K' },
-                                    grid: { color: 'rgba(209,213,219,0.5)' }
-                                }
-                            }
+                        {
+                            label: 'Commandes',
+                            data: chartData.map(d => d.orders),
+                            borderColor: 'rgb(139, 92, 246)',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'Abonnements',
+                            data: chartData.map(d => d.subscriptions),
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointRadius: 2,
                         }
-                    });
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#6b7280', boxWidth: 12 } },
+                        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' F' } }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#6b7280', maxTicksLimit: 10 },
+                            grid: { color: 'rgba(209,213,219,0.5)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#6b7280', callback: v => (v / 1000).toFixed(0) + 'K' },
+                            grid: { color: 'rgba(209,213,219,0.5)' }
+                        }
+                    }
                 }
-            }
-        }
+            });
+        });
     </script>
     @endpush
 </x-layouts.admin-super>

@@ -124,8 +124,9 @@
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
+        window.addEventListener('chartjs:ready', function () {
         const growthCtx = document.getElementById('growthChart');
         new Chart(growthCtx, {
             type: 'bar',
@@ -197,6 +198,7 @@
                 }
             }
         });
+        }); // chartjs:ready
     </script>
     @endpush
 </x-layouts.admin-super>

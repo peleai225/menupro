@@ -104,8 +104,9 @@
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @vite('resources/js/super-admin.js')
     <script>
+        window.addEventListener('chartjs:ready', function () {
         const revenueCtx = document.getElementById('revenueChart');
         new Chart(revenueCtx, {
             type: 'line',
@@ -154,6 +155,7 @@
                 }
             }
         });
+        }); // chartjs:ready
     </script>
     @endpush
 </x-layouts.admin-super>
