@@ -473,6 +473,7 @@ Route::prefix('cuisine/{token}')->middleware('throttle:30,1')->group(function ()
 Route::prefix('api/geocoding')->name('api.geocoding.')->middleware('throttle:30,1')->group(function () {
     Route::get('/search', [\App\Http\Controllers\Public\GeocodingController::class, 'search'])->name('search');
     Route::get('/reverse', [\App\Http\Controllers\Public\GeocodingController::class, 'reverse'])->name('reverse');
+    Route::get('/delivery-cities', [\App\Http\Controllers\Public\GeocodingController::class, 'deliveryCities'])->name('delivery-cities');
 });
 
 /*

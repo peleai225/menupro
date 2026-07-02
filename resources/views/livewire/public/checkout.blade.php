@@ -149,38 +149,70 @@
                     </div>
                 @endif
 
-                <!-- Delivery Address (Livraison) -->
+                <!-- Delivery Address (Livraison) — Style Glovo -->
                 @if($order_type === 'delivery')
                     <div class="bg-white rounded-2xl p-6 shadow-sm"
-                         x-data="deliveryAddress(@js($restaurant->latitude), @js($restaurant->longitude), @js($restaurant->delivery_radius_km ?? 10))"
+                         x-data="deliveryAddress()"
                          x-init="init()"
                          wire:ignore.self>
                         <h2 class="text-lg font-bold text-neutral-900 mb-4">Adresse de livraison</h2>
 
-                        {{-- Address Search --}}
-                        <div class="mb-4 relative">
+                        {{-- Étape 1 : Choisir la ville --}}
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Ville de livraison *</label>
+                            <div class="relative">
+                                <select x-ref="citySelect" x-model="selectedCityId" @change="onCityChange()"
+                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none bg-white">
+                                    <option value="">-- Choisir votre ville --</option>
+                                    <template x-for="city in cities" :key="city.id">
+                                        <option :value="city.id" x-text="city.name"></option>
+                                    </template>
+                                </select>
+                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                            <p x-show="cities.length === 0 && !loadingCities" x-cloak class="mt-2 text-sm text-red-500">Aucune ville de livraison disponible.</p>
+                            <p x-show="loadingCities" class="mt-2 text-sm text-neutral-400">Chargement des villes...</p>
+                        </div>
+
+                        {{-- Étape 2 : Carte interactive (cliquable) --}}
+                        <div x-show="selectedCityId" x-cloak class="mb-4">
+                            <p class="text-sm text-neutral-500 mb-2">Cliquez sur la carte pour indiquer votre position exacte :</p>
+                            <div x-ref="mapContainer" class="w-full h-56 rounded-xl overflow-hidden border border-neutral-200 z-0 cursor-crosshair"></div>
+                            <p x-show="pinPlaced" x-cloak class="mt-2 text-sm text-emerald-600 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Position confirmée</span>
+                            </p>
+                        </div>
+
+                        {{-- Ou rechercher une adresse --}}
+                        <div x-show="selectedCityId" x-cloak class="mb-4 relative">
+                            <div class="relative flex items-center mb-2">
+                                <div class="flex-1 border-t border-neutral-200"></div>
+                                <span class="px-3 text-xs text-neutral-400 uppercase">ou rechercher</span>
+                                <div class="flex-1 border-t border-neutral-200"></div>
+                            </div>
                             <div class="relative">
                                 <input type="text"
                                        x-ref="searchInput"
                                        @input.debounce.500ms="searchAddresses($event.target.value)"
                                        autocomplete="off"
                                        class="w-full px-4 py-3 pr-12 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                       placeholder="Rechercher (quartier, rue, repere...)">
-                                <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       placeholder="Quartier, rue, repere...">
+                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
 
                             {{-- Autocomplete dropdown --}}
-                            <div x-ref="autocomplete" x-show="showResults" x-cloak
-                                 @click.outside="showResults = false"
+                            <div x-show="showResults" x-cloak @click.outside="showResults = false"
                                  class="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-60 overflow-y-auto" style="top: 100%; left: 0;">
                                 <template x-for="(item, idx) in results" :key="idx">
                                     <div @click="selectAddress(item)" class="px-4 py-3 hover:bg-neutral-50 cursor-pointer border-b border-neutral-100 last:border-b-0">
                                         <div class="flex items-start gap-3">
                                             <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             </svg>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-medium text-neutral-900" x-text="item.display_name.split(',')[0]"></p>
@@ -194,46 +226,38 @@
                             </div>
                         </div>
 
-                        {{-- GPS secondaire (surtout utile sur mobile) --}}
-                        <button type="button" @click="useMyLocation()"
-                                class="mb-4 inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 transition-colors">
-                            <svg x-show="!locating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            </svg>
-                            <svg x-show="locating" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span x-text="locating ? 'Localisation...' : 'Ou utiliser mon GPS (mobile)'"></span>
-                        </button>
+                        {{-- GPS mobile --}}
+                        <div x-show="selectedCityId" x-cloak class="mb-4">
+                            <button type="button" @click="useMyLocation()"
+                                    class="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 transition-colors">
+                                <svg x-show="!locating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                                </svg>
+                                <svg x-show="locating" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="locating ? 'Localisation GPS...' : 'Utiliser mon GPS (mobile)'"></span>
+                            </button>
+                        </div>
 
-                        {{-- Status messages --}}
+                        {{-- Status / Error --}}
                         <div x-show="statusMsg" x-cloak class="mb-4 text-sm text-emerald-600 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span x-text="statusMsg"></span>
                         </div>
                         <div x-show="errorMsg" x-cloak class="mb-4 text-sm text-red-600" x-text="errorMsg"></div>
 
-                        <div class="space-y-4">
+                        {{-- Champs de détail --}}
+                        <div x-show="selectedCityId" x-cloak class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse *</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse / Quartier *</label>
                                 <input type="text"
                                        wire:model="delivery_address"
                                        x-ref="addressInput"
                                        class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_address') border-red-500 @enderror"
-                                       placeholder="Rue, quartier, repere...">
+                                       placeholder="Quartier, rue, repere...">
                                 @error('delivery_address')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Ville *</label>
-                                <input type="text"
-                                       wire:model="delivery_city"
-                                       x-ref="cityInput"
-                                       class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('delivery_city') border-red-500 @enderror"
-                                       placeholder="Ex: Abidjan">
-                                @error('delivery_city')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -244,11 +268,6 @@
                                           class="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                           placeholder="Ex: Code portail 1234, 2e etage porte gauche..."></textarea>
                             </div>
-                        </div>
-
-                        {{-- Mini carte Leaflet --}}
-                        <div x-show="userLat && userLng" x-cloak class="mt-4">
-                            <div x-ref="mapContainer" class="w-full h-48 rounded-xl overflow-hidden border border-neutral-200 z-0"></div>
                         </div>
                     </div>
                 @endif
@@ -463,7 +482,10 @@
 
 @script
 <script>
-Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) => ({
+Alpine.data('deliveryAddress', () => ({
+    cities: [],
+    loadingCities: true,
+    selectedCityId: '',
     locating: false,
     searching: false,
     searchDone: false,
@@ -471,235 +493,213 @@ Alpine.data('deliveryAddress', (restaurantLat, restaurantLng, deliveryRadius) =>
     results: [],
     statusMsg: '',
     errorMsg: '',
-    userLat: null,
-    userLng: null,
+    pinPlaced: false,
+    map: null,
+    userMarker: null,
+    coverageCircle: null,
 
-    init() {
-        const savedAddress = localStorage.getItem('menupro_delivery_address');
+    async init() {
+        await this.loadCities();
+        this.restoreFromStorage();
+    },
+
+    async loadCities() {
+        try {
+            const r = await fetch('/api/geocoding/delivery-cities', {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (r.ok) this.cities = await r.json();
+        } catch (e) {}
+        this.loadingCities = false;
+    },
+
+    restoreFromStorage() {
         const savedCity = localStorage.getItem('menupro_delivery_city');
+        const savedAddress = localStorage.getItem('menupro_delivery_address');
         const savedLat = localStorage.getItem('menupro_delivery_lat');
         const savedLng = localStorage.getItem('menupro_delivery_lng');
 
-        if (savedLat && savedLng) {
-            this.userLat = parseFloat(savedLat);
-            this.userLng = parseFloat(savedLng);
-        }
-
-        if (savedAddress && savedCity) {
-            this.$nextTick(() => {
-                if (this.$refs.addressInput && !this.$refs.addressInput.value) {
-                    this.$refs.addressInput.value = savedAddress;
-                    this.$refs.searchInput.value = savedAddress + ', ' + savedCity;
-                    this.$refs.cityInput.value = savedCity;
-                }
-                if (!$wire.get('delivery_address')) {
-                    $wire.set('delivery_address', savedAddress);
-                    $wire.set('delivery_city', savedCity);
-                    if (savedLat) $wire.set('delivery_latitude', parseFloat(savedLat));
-                    if (savedLng) $wire.set('delivery_longitude', parseFloat(savedLng));
-                }
-                if (savedLat && savedLng) {
-                    this.validateDistance(parseFloat(savedLat), parseFloat(savedLng));
-                }
-            });
+        if (savedCity && this.cities.length) {
+            const match = this.cities.find(c => c.name.toLowerCase() === savedCity.toLowerCase());
+            if (match) {
+                this.selectedCityId = match.id.toString();
+                this.$nextTick(() => {
+                    this.initMap(parseFloat(match.center_latitude), parseFloat(match.center_longitude));
+                    if (savedLat && savedLng) {
+                        const lat = parseFloat(savedLat);
+                        const lng = parseFloat(savedLng);
+                        this.placePin(lat, lng, false);
+                        if (!$wire.get('delivery_address')) {
+                            $wire.set('delivery_address', savedAddress || '');
+                            $wire.set('delivery_city', savedCity);
+                            $wire.set('delivery_latitude', lat);
+                            $wire.set('delivery_longitude', lng);
+                        }
+                        if (this.$refs.addressInput) this.$refs.addressInput.value = savedAddress || '';
+                    }
+                });
+            }
         }
     },
 
-    getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    },
+    onCityChange() {
+        const city = this.cities.find(c => c.id.toString() === this.selectedCityId);
+        if (!city) return;
 
-    map: null,
-    userMarker: null,
-    restaurantMarker: null,
-    radiusCircle: null,
+        $wire.set('delivery_city', city.name);
+        localStorage.setItem('menupro_delivery_city', city.name);
+        this.pinPlaced = false;
+        this.statusMsg = '';
+        this.errorMsg = '';
 
-    validateDistance(lat, lng) {
-        // Si le restaurant n'a pas de coordonnées GPS en base, on ne peut pas valider
-        // côté client — le backend (DeliveryPricingService) tranche via la ville.
-        const hasRestaurantCoords = restaurantLat !== null && restaurantLng !== null;
-        if (!hasRestaurantCoords) {
-            this.errorMsg = '';
-            this.statusMsg = '';
-            this.updateMap(lat, lng);
-            return true;
-        }
-        const distance = this.getDistance(restaurantLat, restaurantLng, lat, lng);
-        const inRadius = deliveryRadius === 0 || distance <= deliveryRadius;
-        if (inRadius) {
-            this.statusMsg = `Distance: ${distance.toFixed(2)} km (dans la zone)`;
-            this.errorMsg = '';
-        } else {
-            this.statusMsg = '';
-            this.errorMsg = `Hors zone de livraison (max: ${deliveryRadius} km). Distance: ${distance.toFixed(1)} km.`;
-        }
-        this.updateMap(lat, lng);
-        return inRadius;
-    },
-
-    updateMap(lat, lng) {
-        if (typeof L === 'undefined') return;
         this.$nextTick(() => {
-            const container = this.$refs.mapContainer;
-            if (!container) return;
-
-            if (!this.map) {
-                this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(this.map);
-
-                const hasCoords = restaurantLat !== null && restaurantLng !== null;
-                if (hasCoords && deliveryRadius > 0) {
-                    this.radiusCircle = L.circle([restaurantLat, restaurantLng], {
-                        radius: deliveryRadius * 1000,
-                        color: '#f97316', fillColor: '#f9731620', fillOpacity: 0.15, weight: 1
-                    }).addTo(this.map);
-                }
-
-                if (hasCoords) {
-                    this.restaurantMarker = L.marker([restaurantLat, restaurantLng], {
-                        icon: L.divIcon({ className: '', html: '<div style="background:#f97316;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>', iconSize: [12,12], iconAnchor: [6,6] })
-                    }).addTo(this.map);
-                }
-            }
-
-            if (this.userMarker) this.map.removeLayer(this.userMarker);
-            this.userMarker = L.marker([lat, lng], {
-                icon: L.divIcon({ className: '', html: '<div style="background:#3b82f6;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize: [14,14], iconAnchor: [7,7] })
-            }).addTo(this.map);
-
-            if (restaurantLat !== null && restaurantLng !== null) {
-                const bounds = L.latLngBounds([[lat, lng], [restaurantLat, restaurantLng]]);
-                this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
-            } else {
-                this.map.setView([lat, lng], 14);
-            }
+            this.initMap(parseFloat(city.center_latitude), parseFloat(city.center_longitude));
         });
+    },
+
+    initMap(centerLat, centerLng) {
+        if (typeof L === 'undefined') return;
+
+        const container = this.$refs.mapContainer;
+        if (!container) return;
+
+        if (this.map) {
+            this.map.remove();
+            this.map = null;
+            this.userMarker = null;
+            this.coverageCircle = null;
+        }
+
+        this.map = L.map(container, { zoomControl: true, attributionControl: false }).setView([centerLat, centerLng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(this.map);
+
+        const city = this.cities.find(c => c.id.toString() === this.selectedCityId);
+        if (city) {
+            this.coverageCircle = L.circle([centerLat, centerLng], {
+                radius: city.coverage_radius_km * 1000,
+                color: '#10b981', fillColor: '#10b98120', fillOpacity: 0.1, weight: 1, dashArray: '5,5'
+            }).addTo(this.map);
+        }
+
+        this.map.on('click', (e) => {
+            this.placePin(e.latlng.lat, e.latlng.lng, true);
+        });
+    },
+
+    placePin(lat, lng, doReverse) {
+        if (!this.map) return;
+
+        if (this.userMarker) this.map.removeLayer(this.userMarker);
+        this.userMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: '',
+                html: '<div style="background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+                iconSize: [16, 16], iconAnchor: [8, 8]
+            }),
+            draggable: true
+        }).addTo(this.map);
+
+        this.userMarker.on('dragend', (e) => {
+            const pos = e.target.getLatLng();
+            this.commitPosition(pos.lat, pos.lng, true);
+        });
+
+        this.map.setView([lat, lng], 15);
+        this.commitPosition(lat, lng, doReverse);
+    },
+
+    async commitPosition(lat, lng, doReverse) {
+        this.pinPlaced = true;
+        this.errorMsg = '';
+        $wire.set('delivery_latitude', lat);
+        $wire.set('delivery_longitude', lng);
+        localStorage.setItem('menupro_delivery_lat', lat.toString());
+        localStorage.setItem('menupro_delivery_lng', lng.toString());
+
+        if (doReverse) {
+            try {
+                const r = await fetch(`/api/geocoding/reverse?lat=${lat}&lon=${lng}`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    const addr = data.address || '';
+                    if (addr && this.$refs.addressInput) {
+                        this.$refs.addressInput.value = addr;
+                        $wire.set('delivery_address', addr);
+                        localStorage.setItem('menupro_delivery_address', addr);
+                    }
+                }
+            } catch (e) {}
+        }
     },
 
     async searchAddresses(query) {
         query = query.trim();
-        if (query.length < 3) {
-            this.showResults = false;
-            this.results = [];
-            return;
-        }
+        if (query.length < 3) { this.showResults = false; this.results = []; return; }
         this.searching = true;
         this.searchDone = false;
         this.showResults = true;
         this.results = [];
 
+        const city = this.cities.find(c => c.id.toString() === this.selectedCityId);
         try {
             let url = `/api/geocoding/search?q=${encodeURIComponent(query)}`;
-            if (this.userLat && this.userLng) {
-                url += `&lat=${this.userLat}&lon=${this.userLng}`;
-            }
-            const response = await fetch(url, {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            this.results = data || [];
-        } catch (e) {
-            this.results = [];
-        }
+            if (city) url += `&lat=${city.center_latitude}&lon=${city.center_longitude}`;
+            const r = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+            if (r.ok) this.results = await r.json() || [];
+        } catch (e) { this.results = []; }
         this.searching = false;
         this.searchDone = true;
     },
 
     selectAddress(item) {
         const lat = parseFloat(item.lat);
-        const lng = parseFloat(item.lon);
+        const lng = parseFloat(item.lon || item.lng);
         this.showResults = false;
-        this.validateDistance(lat, lng);
+        this.placePin(lat, lng, false);
 
         const address = item.address || {};
         const street = address.road || address.pedestrian || item.display_name.split(',')[0];
         const houseNumber = address.house_number || '';
-        const city = address.city || address.town || address.village || address.municipality || address.state || 'Côte d\'Ivoire';
         const finalAddress = houseNumber ? `${houseNumber} ${street}`.trim() : street;
 
-        this.$refs.searchInput.value = item.display_name;
-        this.$refs.addressInput.value = finalAddress;
-        this.$refs.cityInput.value = city;
+        if (this.$refs.searchInput) this.$refs.searchInput.value = item.display_name;
+        if (this.$refs.addressInput) this.$refs.addressInput.value = finalAddress;
 
         $wire.set('delivery_address', finalAddress);
-        $wire.set('delivery_city', city);
         $wire.set('delivery_latitude', lat);
         $wire.set('delivery_longitude', lng);
 
         localStorage.setItem('menupro_delivery_address', finalAddress);
-        localStorage.setItem('menupro_delivery_city', city);
         localStorage.setItem('menupro_delivery_lat', lat.toString());
         localStorage.setItem('menupro_delivery_lng', lng.toString());
     },
 
     async useMyLocation() {
         if (this.locating) return;
-        if (!navigator.geolocation) {
-            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-            return;
-        }
-
+        if (!navigator.geolocation) { this.errorMsg = 'Géolocalisation non supportée.'; return; }
         this.locating = true;
         this.errorMsg = '';
-        this.statusMsg = '';
 
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                const accuracy = position.coords.accuracy; // en mètres
+                const accuracy = position.coords.accuracy;
 
-                // Sur PC, la géoloc se fait par IP → précision > 5km = peu fiable
                 if (accuracy > 5000) {
-                    this.errorMsg = 'Position imprécise (géolocalisation par IP, ' + Math.round(accuracy / 1000) + ' km de marge). Entrez votre adresse manuellement pour une livraison correcte.';
+                    this.errorMsg = 'Position GPS imprécise (' + Math.round(accuracy / 1000) + ' km de marge). Cliquez sur la carte pour indiquer votre position.';
                     this.locating = false;
                     return;
                 }
 
-                this.userLat = lat;
-                this.userLng = lng;
-                this.validateDistance(lat, lng);
-
-                try {
-                    const response = await fetch(`/api/geocoding/reverse?lat=${lat}&lon=${lng}`, {
-                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.address || data.city) {
-                            const addr = data.address || '';
-                            const city = data.city || 'Côte d\'Ivoire';
-
-                            this.$refs.addressInput.value = addr;
-                            this.$refs.cityInput.value = city;
-                            this.$refs.searchInput.value = addr + ', ' + city;
-
-                            $wire.set('delivery_address', addr);
-                            $wire.set('delivery_city', city);
-                            $wire.set('delivery_latitude', lat);
-                            $wire.set('delivery_longitude', lng);
-
-                            localStorage.setItem('menupro_delivery_address', addr);
-                            localStorage.setItem('menupro_delivery_city', city);
-                            localStorage.setItem('menupro_delivery_lat', lat.toString());
-                            localStorage.setItem('menupro_delivery_lng', lng.toString());
-                        }
-                    }
-                } catch (e) {}
+                this.placePin(lat, lng, true);
                 this.locating = false;
             },
             (error) => {
-                if (error.code === 1) this.errorMsg = 'Position bloquée. Appuyez sur le cadenas (🔒) à gauche de l\'URL → Autorisations → Position → Autoriser, puis rafraîchissez la page. Ou utilisez la recherche ci-dessous.';
-                else if (error.code === 2) this.errorMsg = 'Position non disponible. Activez le GPS de votre téléphone ou utilisez la recherche ci-dessous.';
-                else if (error.code === 3) this.errorMsg = 'Délai expiré. Vérifiez votre GPS et réessayez.';
-                else this.errorMsg = 'Erreur de localisation. Utilisez la recherche ci-dessous.';
+                if (error.code === 1) this.errorMsg = 'Position bloquée par le navigateur. Cliquez sur la carte.';
+                else this.errorMsg = 'GPS indisponible. Cliquez sur la carte pour indiquer votre position.';
                 this.locating = false;
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }

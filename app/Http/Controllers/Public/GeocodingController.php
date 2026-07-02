@@ -273,6 +273,18 @@ class GeocodingController extends Controller
     }
     
     /**
+     * Liste les villes de livraison actives (pour le select dans le checkout)
+     */
+    public function deliveryCities(): JsonResponse
+    {
+        $cities = \App\Models\DeliveryCity::active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'center_latitude', 'center_longitude', 'coverage_radius_km', 'max_delivery_distance_km']);
+
+        return response()->json($cities);
+    }
+
+    /**
      * Format display name from Photon properties
      */
     private function formatDisplayName(array $props): string
