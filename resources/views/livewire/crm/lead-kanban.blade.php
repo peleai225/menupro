@@ -34,7 +34,7 @@
             {{-- Column header --}}
             <div class="flex items-center justify-between mb-3 px-1">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-{{ $column['status']->color() }}-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full" style="background: {{ $column['status']->color() }}"></span>
                     <h3 class="text-sm font-semibold text-gray-200">{{ $column['status']->label() }}</h3>
                 </div>
                 <span class="text-xs font-medium text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">

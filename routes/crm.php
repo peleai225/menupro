@@ -33,4 +33,4 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
 
 Route::get('/crm/verify/{uuid}', function (string $uuid) {
     return view('pages.crm.verify', ['uuid' => $uuid]);
-})->name('crm.verify');
+})->middleware('throttle:10,1')->name('crm.verify');

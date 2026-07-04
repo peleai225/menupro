@@ -42,6 +42,14 @@ class LeadForm extends Component
     {
         if ($leadId) {
             $this->lead = Lead::findOrFail($leadId);
+
+            $user = auth()->user();
+            $canEdit = in_array($user->role->value, ['super_admin', 'team_leader'])
+                || $this->lead->assigned_to === $user->id;
+            if (!$canEdit) {
+                abort(403);
+            }
+
             $this->fill($this->lead->only([
                 'restaurant_name', 'manager_name', 'phone', 'email',
                 'address', 'city', 'latitude', 'longitude',

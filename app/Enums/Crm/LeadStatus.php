@@ -30,6 +30,20 @@ enum LeadStatus: string
     public function color(): string
     {
         return match ($this) {
+            self::NOUVEAU => '#38bdf8',
+            self::CONTACTE => '#818cf8',
+            self::DEMONSTRATION => '#a78bfa',
+            self::RELANCE => '#fbbf24',
+            self::SIGNATURE => '#34d399',
+            self::INSTALLATION => '#60a5fa',
+            self::ACTIF => '#22c55e',
+            self::PERDU => '#ef4444',
+        };
+    }
+
+    public function tailwindColor(): string
+    {
+        return match ($this) {
             self::NOUVEAU => 'sky',
             self::CONTACTE => 'indigo',
             self::DEMONSTRATION => 'violet',

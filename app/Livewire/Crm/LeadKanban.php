@@ -18,9 +18,20 @@ class LeadKanban extends Component
     public function moveToStatus(int $leadId, string $status): void
     {
         $lead = Lead::findOrFail($leadId);
-        $newStatus = LeadStatus::from($status);
+        $user = auth()->user();
 
-        app(LeadPipelineService::class)->changeStatus($lead, $newStatus, auth()->user());
+        $canMove = match ($user->role->value) {
+            'super_admin', 'team_leader' => true,
+            'commercial' => $lead->assigned_to === $user->id,
+            default => false,
+        };
+
+        if (!$canMove) {
+            abort(403, 'Vous ne pouvez déplacer que vos propres leads.');
+        }
+
+        $newStatus = LeadStatus::from($status);
+        app(LeadPipelineService::class)->changeStatus($lead, $newStatus, $user);
     }
 
     #[On('echo:crm.leads,lead.created')]

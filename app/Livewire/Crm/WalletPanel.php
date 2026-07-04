@@ -7,6 +7,7 @@ use App\Enums\Crm\WithdrawalStatus;
 use App\Models\Crm\Commission;
 use App\Models\Crm\Wallet;
 use App\Models\Crm\Withdrawal;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -58,30 +59,37 @@ class WalletPanel extends Component
     {
         $amountCents = $this->withdrawAmount * 100;
 
-        if (!$this->wallet->canWithdraw($amountCents)) {
-            $this->addError('withdrawAmount', 'Solde insuffisant ou montant minimum non atteint.');
-            return;
-        }
+        DB::transaction(function () use ($amountCents) {
+            $wallet = Wallet::where('user_id', auth()->id())->lockForUpdate()->first();
 
-        $weeklyCount = Withdrawal::where('user_id', auth()->id())
-            ->where('created_at', '>=', now()->subWeek())
-            ->count();
+            if (!$wallet || !$wallet->canWithdraw($amountCents)) {
+                $this->addError('withdrawAmount', 'Solde insuffisant ou montant minimum non atteint.');
+                return;
+            }
 
-        if ($weeklyCount >= config('crm.withdrawal.max_per_week')) {
-            $this->addError('withdrawAmount', 'Limite de retraits hebdomadaires atteinte.');
-            return;
-        }
+            $weeklyCount = Withdrawal::where('user_id', auth()->id())
+                ->where('created_at', '>=', now()->subWeek())
+                ->count();
 
-        Withdrawal::create([
-            'wallet_id' => $this->wallet->id,
-            'user_id' => auth()->id(),
-            'amount_cents' => $amountCents,
-            'status' => WithdrawalStatus::PENDING,
-            'payment_method' => $this->paymentMethod,
-        ]);
+            if ($weeklyCount >= config('crm.withdrawal.max_per_week')) {
+                $this->addError('withdrawAmount', 'Limite de retraits hebdomadaires atteinte.');
+                return;
+            }
+
+            Withdrawal::create([
+                'wallet_id' => $wallet->id,
+                'user_id' => auth()->id(),
+                'amount_cents' => $amountCents,
+                'status' => WithdrawalStatus::PENDING,
+                'payment_method' => $this->paymentMethod,
+            ]);
+
+            $wallet->decrement('balance_cents', $amountCents);
+        });
 
         $this->showWithdrawModal = false;
         $this->withdrawAmount = 0;
+        unset($this->wallet);
         $this->dispatch('withdrawal-requested');
     }
 
