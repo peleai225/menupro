@@ -5,7 +5,12 @@ echo " Déploiement MenuPro..."
 
 # 1. Pull le dernier code
 cd ~/MenuPro
+git stash -q 2>/dev/null
 git pull origin main
+git stash pop -q 2>/dev/null || true
+
+# 1b. Installer/mettre à jour les dépendances PHP
+composer install --no-dev --no-interaction --optimize-autoloader 2>/dev/null || true
 
 # 2. Copier les assets publics vers public_html
 echo " Copie des assets publics..."
