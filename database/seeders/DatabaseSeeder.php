@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             DemoRestaurantSeeder::class,
             DeliveryCitySeeder::class,
             DeliveryZoneSeeder::class,
+            CrmSeeder::class,
         ]);
     }
 }
