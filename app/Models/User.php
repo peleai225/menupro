@@ -3,9 +3,20 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Models\Crm\CommercialProfile;
+use App\Models\Crm\Commission;
+use App\Models\Crm\Installation;
+use App\Models\Crm\Lead;
+use App\Models\Crm\PerformanceSnapshot;
+use App\Models\Crm\Team;
+use App\Models\Crm\TechnicianProfile;
+use App\Models\Crm\UserGrade;
+use App\Models\Crm\Wallet;
+use App\Models\Crm\Withdrawal;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,6 +89,66 @@ class User extends Authenticatable implements MustVerifyEmail
     public function deliveryDriver(): HasOne
     {
         return $this->hasOne(DeliveryDriver::class);
+    }
+
+    // =========================================================================
+    // CRM RELATIONSHIPS
+    // =========================================================================
+
+    public function commercialProfile(): HasOne
+    {
+        return $this->hasOne(CommercialProfile::class);
+    }
+
+    public function technicianProfile(): HasOne
+    {
+        return $this->hasOne(TechnicianProfile::class);
+    }
+
+    public function crmWallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function crmGrade(): HasOne
+    {
+        return $this->hasOne(UserGrade::class);
+    }
+
+    public function crmLeadsAssigned(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'assigned_to');
+    }
+
+    public function crmInstallations(): HasMany
+    {
+        return $this->hasMany(Installation::class, 'technician_id');
+    }
+
+    public function crmCommissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
+    public function crmWithdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
+    public function crmPerformanceSnapshots(): HasMany
+    {
+        return $this->hasMany(PerformanceSnapshot::class);
+    }
+
+    public function crmTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'crm_team_members')
+            ->withPivot('role_in_team', 'joined_at');
+    }
+
+    public function ledTeams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'leader_id');
     }
 
     // =========================================================================
@@ -226,6 +297,32 @@ class User extends Authenticatable implements MustVerifyEmail
             UserRole::SUPER_ADMIN => 'super-admin.dashboard',
             UserRole::RESTAURANT_ADMIN, UserRole::EMPLOYEE => 'restaurant.dashboard',
             UserRole::COMMANDO_AGENT => 'commando.dashboard',
+            UserRole::COMMERCIAL, UserRole::TECHNICIAN, UserRole::TEAM_LEADER => 'crm.dashboard',
+            default => 'home',
         };
+    }
+
+    public function isCrmUser(): bool
+    {
+        return in_array($this->role, [
+            UserRole::COMMERCIAL,
+            UserRole::TECHNICIAN,
+            UserRole::TEAM_LEADER,
+        ]);
+    }
+
+    public function isCommercial(): bool
+    {
+        return $this->role === UserRole::COMMERCIAL;
+    }
+
+    public function isTechnician(): bool
+    {
+        return $this->role === UserRole::TECHNICIAN;
+    }
+
+    public function isTeamLeader(): bool
+    {
+        return $this->role === UserRole::TEAM_LEADER;
     }
 }

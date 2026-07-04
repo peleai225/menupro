@@ -8,6 +8,9 @@ enum UserRole: string
     case RESTAURANT_ADMIN = 'restaurant_admin';
     case EMPLOYEE = 'employee';
     case COMMANDO_AGENT = 'commando_agent';
+    case COMMERCIAL = 'commercial';
+    case TECHNICIAN = 'technician';
+    case TEAM_LEADER = 'team_leader';
     case CUSTOMER = 'customer';
     case DELIVERY_DRIVER = 'delivery_driver';
 
@@ -18,6 +21,9 @@ enum UserRole: string
             self::RESTAURANT_ADMIN => 'Administrateur Restaurant',
             self::EMPLOYEE => 'Employé',
             self::COMMANDO_AGENT => 'Agent Commando',
+            self::COMMERCIAL => 'Commercial',
+            self::TECHNICIAN => 'Technicien',
+            self::TEAM_LEADER => 'Team Leader',
             self::CUSTOMER => 'Client',
             self::DELIVERY_DRIVER => 'Livreur',
         };
@@ -30,6 +36,9 @@ enum UserRole: string
             self::RESTAURANT_ADMIN => 'blue',
             self::EMPLOYEE => 'gray',
             self::COMMANDO_AGENT => 'orange',
+            self::COMMERCIAL => 'orange',
+            self::TECHNICIAN => 'cyan',
+            self::TEAM_LEADER => 'emerald',
             self::CUSTOMER => 'green',
             self::DELIVERY_DRIVER => 'yellow',
         };

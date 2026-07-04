@@ -4,6 +4,7 @@ use App\Providers\RateLimitServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
+        then: function () {
+            Route::middleware('web')->group(base_path('routes/crm.php'));
+        },
     )
     ->withProviders([
         RateLimitServiceProvider::class,
@@ -26,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
             'delivery.driver' => \App\Http\Middleware\EnsureDeliveryDriver::class,
+            'crm.role' => \App\Http\Middleware\EnsureCrmRole::class,
             'api.json' => \App\Http\Middleware\ForceJsonResponse::class,
             'api.sanitize' => \App\Http\Middleware\SanitizeApiInput::class,
             'api.security' => \App\Http\Middleware\ApiSecurityHeaders::class,

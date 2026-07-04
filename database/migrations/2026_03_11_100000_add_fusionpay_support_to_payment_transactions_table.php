@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('payment_transactions', function (Blueprint $table) {
-            $table->string('gateway', 20)->default('cinetpay')->after('restaurant_id');
-            $table->string('gateway_transaction_id', 100)->nullable()->after('gateway');
+            if (!Schema::hasColumn('payment_transactions', 'gateway')) {
+                $table->string('gateway', 20)->default('cinetpay')->after('restaurant_id');
+            }
+            if (!Schema::hasColumn('payment_transactions', 'gateway_transaction_id')) {
+                $table->string('gateway_transaction_id', 100)->nullable()->after('gateway');
+            }
         });
 
         \Illuminate\Support\Facades\DB::statement('UPDATE payment_transactions SET gateway_transaction_id = cinetpay_transaction_id WHERE cinetpay_transaction_id IS NOT NULL');
