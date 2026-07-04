@@ -323,14 +323,3 @@ class="space-y-6">
     </div>
 </div>
 
-{{-- Chart.js CDN --}}
-@script
-<script>
-    if (!document.querySelector('script[src*="chart.js"]')) {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
-        s.onload = () => $wire.dispatch('period-changed');
-        document.head.appendChild(s);
-    }
-</script>
-@endscript

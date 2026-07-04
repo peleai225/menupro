@@ -1,6 +1,10 @@
 {
+  "_auto-sRkgK8jz.js": {
+    "file": "assets/auto-sRkgK8jz.js",
+    "name": "auto"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-DDvOTj_9.css",
+    "file": "assets/app-DhZg4PBj.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,15 +13,21 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Bxeu9a5L.js",
+    "file": "assets/app-CF-0LSll.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
   },
   "resources/js/super-admin.js": {
-    "file": "assets/super-admin-yK6TtYxX.js",
+    "file": "assets/super-admin-CgHsmlHT.js",
     "name": "super-admin",
     "src": "resources/js/super-admin.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
   }
 }

@@ -1,4 +1,6 @@
 import './bootstrap';
+import Chart from 'chart.js/auto';
+window.Chart = Chart;
 
 // Wait for Livewire's Alpine to be available, then register our custom components
 document.addEventListener('alpine:init', () => {

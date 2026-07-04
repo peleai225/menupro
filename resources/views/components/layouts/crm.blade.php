@@ -15,9 +15,8 @@
         {{-- Sidebar --}}
         <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-gray-900 border-r border-gray-800/50">
             {{-- Logo --}}
-            <div class="flex items-center h-16 px-6 border-b border-gray-800/50">
-                <span class="text-lg font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">MenuPro</span>
-                <span class="ml-2 text-xs font-medium text-gray-500 uppercase tracking-wider">CRM</span>
+            <div class="flex items-center h-16 px-4 border-b border-gray-800/50">
+                <img src="{{ asset('images/logo-crm-ambassadeurs.png') }}" alt="MenuPro Ambassadeurs" class="h-9 w-auto">
             </div>
 
             {{-- Navigation --}}
