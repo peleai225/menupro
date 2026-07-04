@@ -49,17 +49,29 @@ class PerformanceChart extends Component
     #[Computed]
     public function weeklyData(): array
     {
+        $userId = auth()->id();
+        $startDate = now()->subDays(6)->startOfDay();
+
+        $leads = Lead::where('assigned_to', $userId)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupByRaw('DATE(created_at)')
+            ->pluck('count', 'day');
+
+        $conversions = Lead::where('assigned_to', $userId)
+            ->where('converted_at', '>=', $startDate)
+            ->selectRaw('DATE(converted_at) as day, COUNT(*) as count')
+            ->groupByRaw('DATE(converted_at)')
+            ->pluck('count', 'day');
+
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
+            $key = $date->format('Y-m-d');
             $data[] = [
                 'label' => $date->format('D'),
-                'leads' => Lead::where('assigned_to', auth()->id())
-                    ->whereDate('created_at', $date)
-                    ->count(),
-                'converted' => Lead::where('assigned_to', auth()->id())
-                    ->whereDate('converted_at', $date)
-                    ->count(),
+                'leads' => $leads[$key] ?? 0,
+                'converted' => $conversions[$key] ?? 0,
             ];
         }
         return $data;

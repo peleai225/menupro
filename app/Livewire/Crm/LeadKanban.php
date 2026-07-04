@@ -21,7 +21,8 @@ class LeadKanban extends Component
         $user = auth()->user();
 
         $canMove = match ($user->role->value) {
-            'super_admin', 'team_leader' => true,
+            'super_admin' => true,
+            'team_leader' => $user->ledTeams()->where('id', $lead->team_id)->exists(),
             'commercial' => $lead->assigned_to === $user->id,
             default => false,
         };
@@ -66,7 +67,7 @@ class LeadKanban extends Component
             $query->forTeam($this->filterTeam);
         }
 
-        $leads = $query->with(['assignedUser', 'activities' => fn ($q) => $q->latest()->limit(1)])
+        $leads = $query->with(['assignedUser', 'activities' => fn ($q) => $q->latest()])
             ->get()
             ->groupBy(fn ($lead) => $lead->status->value);
 

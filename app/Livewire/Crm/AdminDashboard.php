@@ -84,8 +84,28 @@ class AdminDashboard extends Component
     {
         $start = $this->periodStart();
         $days = $this->period === 'week' ? 7 : ($this->period === 'month' ? 30 : ($this->period === 'quarter' ? 90 : 365));
-        $interval = $days <= 30 ? '1 day' : ($days <= 90 ? '1 week' : '1 month');
+        $groupBy = $days <= 30 ? 'DATE(created_at)' : ($days <= 90 ? 'YEARWEEK(created_at, 1)' : 'DATE_FORMAT(created_at, "%Y-%m")');
+        $groupByConv = $days <= 30 ? 'DATE(converted_at)' : ($days <= 90 ? 'YEARWEEK(converted_at, 1)' : 'DATE_FORMAT(converted_at, "%Y-%m")');
 
+        $leadsRaw = Lead::where('created_at', '>=', $start)
+            ->selectRaw("{$groupBy} as period_key, COUNT(*) as cnt")
+            ->groupByRaw($groupBy)
+            ->pluck('cnt', 'period_key');
+
+        $conversionsRaw = Lead::where('status', LeadStatus::ACTIF)
+            ->where('converted_at', '>=', $start)
+            ->selectRaw("{$groupByConv} as period_key, COUNT(*) as cnt")
+            ->groupByRaw($groupByConv)
+            ->pluck('cnt', 'period_key');
+
+        $revenueGroupBy = str_replace('created_at', 'created_at', $groupBy);
+        $revenueRaw = Commission::where('status', CommissionStatus::VALIDATED)
+            ->where('created_at', '>=', $start)
+            ->selectRaw("{$revenueGroupBy} as period_key, SUM(amount_cents) as total")
+            ->groupByRaw($revenueGroupBy)
+            ->pluck('total', 'period_key');
+
+        $interval = $days <= 30 ? '1 day' : ($days <= 90 ? '1 week' : '1 month');
         $period = CarbonPeriod::create($start, $interval, now());
         $labels = [];
         $leadsData = [];
@@ -93,16 +113,16 @@ class AdminDashboard extends Component
         $revenueData = [];
 
         foreach ($period as $date) {
-            $end = match ($interval) {
-                '1 day' => $date->copy()->endOfDay(),
-                '1 week' => $date->copy()->endOfWeek(),
-                '1 month' => $date->copy()->endOfMonth(),
+            $key = match ($interval) {
+                '1 day' => $date->format('Y-m-d'),
+                '1 week' => $date->format('oW'),
+                '1 month' => $date->format('Y-m'),
             };
 
             $labels[] = $days <= 30 ? $date->format('d/m') : ($days <= 90 ? $date->format('d/m') : $date->format('M'));
-            $leadsData[] = Lead::whereBetween('created_at', [$date, $end])->count();
-            $conversionsData[] = Lead::where('status', LeadStatus::ACTIF)->whereBetween('converted_at', [$date, $end])->count();
-            $revenueData[] = (int) round(Commission::where('status', CommissionStatus::VALIDATED)->whereBetween('created_at', [$date, $end])->sum('amount_cents') / 100);
+            $leadsData[] = (int) ($leadsRaw[$key] ?? 0);
+            $conversionsData[] = (int) ($conversionsRaw[$key] ?? 0);
+            $revenueData[] = (int) round(($revenueRaw[$key] ?? 0) / 100);
         }
 
         return [

@@ -75,7 +75,9 @@ class Withdrawal extends Model
             'processed_at' => now(),
         ]);
 
-        $this->wallet->debit($this->amount_cents);
+        // Balance déjà débitée au moment de la demande (requestWithdrawal)
+        // On met seulement à jour le total retiré
+        $this->wallet->increment('total_withdrawn_cents', $this->amount_cents);
     }
 
     public function reject(int $processedBy, string $reason): void
@@ -86,5 +88,8 @@ class Withdrawal extends Model
             'processed_at' => now(),
             'rejection_reason' => $reason,
         ]);
+
+        // Rembourser le solde (déjà débité à la demande)
+        $this->wallet->increment('balance_cents', $this->amount_cents);
     }
 }
