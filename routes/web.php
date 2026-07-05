@@ -326,7 +326,7 @@ Route::prefix('admin')
         Route::post('plans/reorder', [PlanController::class, 'reorder'])->name('plans.reorder');
 
         // Users Management
-        Route::resource('utilisateurs', UserController::class)->parameters(['utilisateurs' => 'user'])->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('utilisateurs', UserController::class)->parameters(['utilisateurs' => 'user'])->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::post('utilisateurs/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
         Route::post('utilisateurs/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
         Route::post('utilisateurs/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
