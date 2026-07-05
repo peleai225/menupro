@@ -3,7 +3,12 @@
 namespace App\Livewire\Commando;
 
 use App\Enums\AgentVerificationStatus;
+use App\Enums\UserRole;
 use App\Models\CommandoAgent;
+use App\Models\Crm\CommercialProfile;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
@@ -29,6 +34,7 @@ class RegisterStep1 extends Component
                 'max:20',
                 'regex:/^\+?[0-9\s\-]+$/',
                 'unique:commando_agents,whatsapp',
+                'unique:users,phone',
             ],
             'password' => ['required', 'confirmed', Password::min(6)],
             'city' => ['required', 'string', 'max:100'],
@@ -64,16 +70,47 @@ class RegisterStep1 extends Component
         }
         RateLimiter::hit($key, 60);
 
-        $agent = CommandoAgent::create([
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'whatsapp' => preg_replace('/\s+/', '', $this->whatsapp),
-            'password' => Hash::make($this->password),
-            'city' => $this->city,
-            'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
-        ]);
+        $whatsapp = preg_replace('/\s+/', '', $this->whatsapp);
+        $hashedPassword = Hash::make($this->password);
 
-        return redirect()->route('commando.register.success');
+        $user = DB::transaction(function () use ($whatsapp, $hashedPassword) {
+            // 1. Créer le User unifié
+            $user = User::create([
+                'name'              => trim($this->first_name . ' ' . $this->last_name),
+                'email'             => $whatsapp . '@ambassadeur.menupro.ci',
+                'phone'             => $whatsapp,
+                'password'          => $hashedPassword,
+                'role'              => UserRole::COMMERCIAL,
+                'is_active'         => false,
+                'email_verified_at' => null,
+            ]);
+
+            // 2. Créer le CommercialProfile lié
+            CommercialProfile::create([
+                'user_id'             => $user->id,
+                'city'                => $this->city,
+                'verification_status' => 'pending_review',
+            ]);
+
+            // 3. Créer le CommandoAgent pour rétrocompatibilité (QR card, etc.)
+            CommandoAgent::create([
+                'first_name'          => $this->first_name,
+                'last_name'           => $this->last_name,
+                'whatsapp'            => $whatsapp,
+                'password'            => $hashedPassword,
+                'city'                => $this->city,
+                'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
+                'user_id'             => $user->id,
+            ]);
+
+            return $user;
+        });
+
+        // 4. Connecter automatiquement l'utilisateur
+        Auth::login($user);
+
+        // 5. Rediriger vers l'espace CRM
+        return redirect('/crm');
     }
 
     public function render()

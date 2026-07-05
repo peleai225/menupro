@@ -16,7 +16,8 @@ class EnsureCommandoAgent
             return redirect()->route('login');
         }
 
-        if (!$user->isCommandoAgent()) {
+        // Accept both commando_agent (legacy) and commercial (new merged role)
+        if (!$user->isCommandoAgent() && !$user->isCommercial()) {
             return redirect()->route($user->getDashboardRoute())
                 ->with('error', 'Accès réservé aux agents Commando.');
         }

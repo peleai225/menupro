@@ -21,12 +21,14 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
         Route::get('/teams', [DashboardController::class, 'teams'])->name('teams.index');
         Route::get('/wallet', [DashboardController::class, 'wallet'])->name('wallet');
         Route::get('/performance', [DashboardController::class, 'performance'])->name('performance');
+        Route::get('/report', [DashboardController::class, 'dailyReport'])->name('report');
 
         // Admin-only
         Route::middleware('crm.role:super_admin')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/agents', [DashboardController::class, 'adminAgents'])->name('agents');
             Route::get('/agents/{agent}', [\App\Http\Controllers\Crm\AgentController::class, 'show'])->name('agents.show');
             Route::get('/withdrawals', [DashboardController::class, 'adminWithdrawals'])->name('withdrawals');
+            Route::get('/reports', [DashboardController::class, 'adminReports'])->name('reports');
         });
 
         // Verification publique (pas auth nécessaire)

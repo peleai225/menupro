@@ -112,15 +112,28 @@
                                         'super_admin' => 'bg-accent-500/20 text-accent-400',
                                         'restaurant_admin' => 'bg-primary-500/20 text-primary-400',
                                         'employee' => 'bg-neutral-600 text-neutral-300',
+                                        'commando_agent' => 'bg-orange-500/20 text-orange-400',
+                                        'commercial' => 'bg-orange-500/20 text-orange-400',
+                                        'technician' => 'bg-cyan-500/20 text-cyan-400',
+                                        'team_leader' => 'bg-emerald-500/20 text-emerald-400',
+                                        'customer' => 'bg-green-500/20 text-green-400',
+                                        'delivery_driver' => 'bg-yellow-500/20 text-yellow-400',
                                     ];
                                     $roleLabels = [
                                         'super_admin' => 'Super Admin',
                                         'restaurant_admin' => 'Admin Restaurant',
                                         'employee' => 'Employé',
+                                        'commando_agent' => 'Agent Commando',
+                                        'commercial' => 'Commercial',
+                                        'technician' => 'Technicien',
+                                        'team_leader' => 'Team Leader',
+                                        'customer' => 'Client',
+                                        'delivery_driver' => 'Livreur',
                                     ];
+                                    $roleValue = $user->role?->value ?? 'unknown';
                                 @endphp
-                                <span class="badge {{ $roleColors[$user->role->value] ?? 'bg-neutral-600 text-neutral-300' }}">
-                                    {{ $roleLabels[$user->role->value] ?? $user->role->value }}
+                                <span class="badge {{ $roleColors[$roleValue] ?? 'bg-neutral-600 text-neutral-300' }}">
+                                    {{ $roleLabels[$roleValue] ?? $roleValue }}
                                 </span>
                             </td>
                             <td class="px-6 py-4" style="color:var(--sa-muted-fg);">
@@ -134,7 +147,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4" style="color:var(--sa-muted-fg);">
-                                {{ $user->created_at->format('d M Y') }}
+                                {{ $user->created_at?->format('d M Y') ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3">

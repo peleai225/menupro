@@ -53,6 +53,12 @@
                     Performance
                 </x-crm-nav-link>
 
+                @if(in_array($role, ['commercial', 'technician']))
+                <x-crm-nav-link href="{{ route('crm.report') }}" icon="document-text" :active="request()->routeIs('crm.report')">
+                    Rapport terrain
+                </x-crm-nav-link>
+                @endif
+
                 @if($role === 'super_admin')
                 <div class="pt-4 mt-4 border-t border-gray-800/50">
                     <p class="px-3 text-[10px] uppercase tracking-wider text-gray-600 font-semibold mb-2">Admin</p>
@@ -61,6 +67,9 @@
                     </x-crm-nav-link>
                     <x-crm-nav-link href="{{ route('crm.admin.withdrawals') }}" icon="arrow-up-tray" :active="request()->routeIs('crm.admin.withdrawals')">
                         Retraits
+                    </x-crm-nav-link>
+                    <x-crm-nav-link href="{{ route('crm.admin.reports') }}" icon="clipboard-document-list" :active="request()->routeIs('crm.admin.reports')">
+                        Rapports terrain
                     </x-crm-nav-link>
                 </div>
                 @endif
@@ -134,6 +143,12 @@
                     Performance
                 </x-crm-nav-link>
 
+                @if(in_array($role, ['commercial', 'technician']))
+                <x-crm-nav-link href="{{ route('crm.report') }}" icon="document-text" :active="request()->routeIs('crm.report')">
+                    Rapport terrain
+                </x-crm-nav-link>
+                @endif
+
                 @if($role === 'super_admin')
                 <div class="pt-4 mt-4 border-t border-gray-800/50">
                     <p class="px-3 text-[10px] uppercase tracking-wider text-gray-600 font-semibold mb-2">Admin</p>
@@ -142,6 +157,9 @@
                     </x-crm-nav-link>
                     <x-crm-nav-link href="{{ route('crm.admin.withdrawals') }}" icon="arrow-up-tray" :active="request()->routeIs('crm.admin.withdrawals')">
                         Retraits
+                    </x-crm-nav-link>
+                    <x-crm-nav-link href="{{ route('crm.admin.reports') }}" icon="clipboard-document-list" :active="request()->routeIs('crm.admin.reports')">
+                        Rapports terrain
                     </x-crm-nav-link>
                 </div>
                 @endif

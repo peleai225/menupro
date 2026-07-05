@@ -85,7 +85,11 @@
 
     <!-- Facebook Pixel (deferred) -->
     @php
-        $fbPixelId = \App\Models\SystemSetting::get('facebook_pixel_id', '');
+        try {
+            $fbPixelId = \App\Models\SystemSetting::get('facebook_pixel_id', '');
+        } catch (\Throwable $e) {
+            $fbPixelId = '';
+        }
     @endphp
     @if($fbPixelId)
     <script>
@@ -107,7 +111,11 @@
 
     <!-- Google Analytics (deferred) -->
     @php
-        $gaId = \App\Models\SystemSetting::get('google_analytics_id', '');
+        try {
+            $gaId = \App\Models\SystemSetting::get('google_analytics_id', '');
+        } catch (\Throwable $e) {
+            $gaId = '';
+        }
     @endphp
     @if($gaId)
     <script>
@@ -129,16 +137,22 @@
 
     <!-- Firebase FCM Web config -->
     @php
-        $fbProjectId  = \App\Models\SystemSetting::get('firebase_project_id');
-        $fbApiKey     = \App\Models\SystemSetting::get('firebase_api_key');
-        $fbAppId      = \App\Models\SystemSetting::get('firebase_app_id');
-        $fbVapidKey   = \App\Models\SystemSetting::get('firebase_vapid_key');
-        $fbConfig = $fbProjectId ? json_encode([
-            'projectId'         => $fbProjectId,
-            'apiKey'            => $fbApiKey ?? '',
-            'appId'             => $fbAppId ?? '',
-            'messagingSenderId' => \App\Models\SystemSetting::get('firebase_sender_id') ?? '',
-        ]) : null;
+        try {
+            $fbProjectId  = \App\Models\SystemSetting::get('firebase_project_id');
+            $fbApiKey     = \App\Models\SystemSetting::get('firebase_api_key');
+            $fbAppId      = \App\Models\SystemSetting::get('firebase_app_id');
+            $fbVapidKey   = \App\Models\SystemSetting::get('firebase_vapid_key');
+            $fbConfig = $fbProjectId ? json_encode([
+                'projectId'         => $fbProjectId,
+                'apiKey'            => $fbApiKey ?? '',
+                'appId'             => $fbAppId ?? '',
+                'messagingSenderId' => \App\Models\SystemSetting::get('firebase_sender_id') ?? '',
+            ]) : null;
+        } catch (\Throwable $e) {
+            $fbProjectId = null;
+            $fbVapidKey = null;
+            $fbConfig = null;
+        }
     @endphp
     @if($fbConfig)
     <meta name="firebase-config" content="{{ $fbConfig }}">

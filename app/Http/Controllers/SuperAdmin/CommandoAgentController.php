@@ -143,7 +143,7 @@ class CommandoAgentController extends Controller
                 'email' => 'agent-' . $agent->uuid . '@commando.menupro.local',
                 'email_verified_at' => now(),
                 'password' => $agent->password,
-                'role' => \App\Enums\UserRole::COMMANDO_AGENT,
+                'role' => \App\Enums\UserRole::COMMERCIAL,
                 'phone' => $agent->whatsapp,
                 'is_active' => true,
             ]);

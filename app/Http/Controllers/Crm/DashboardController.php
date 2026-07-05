@@ -57,4 +57,14 @@ class DashboardController extends Controller
     {
         return view('pages.crm.admin-withdrawals');
     }
+
+    public function dailyReport()
+    {
+        return view('pages.crm.daily-report');
+    }
+
+    public function adminReports()
+    {
+        return view('pages.crm.admin-reports');
+    }
 }
