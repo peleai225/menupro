@@ -5,6 +5,7 @@ namespace App\Livewire\Crm;
 use App\Enums\Crm\LeadSource;
 use App\Models\Crm\Lead;
 use App\Services\Crm\LeadPipelineService;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LeadForm extends Component
@@ -38,6 +39,7 @@ class LeadForm extends Component
         ];
     }
 
+    #[On('open-lead-form')]
     public function open(?int $leadId = null): void
     {
         if ($leadId) {

@@ -78,6 +78,11 @@ class DailyReportForm extends Component
             ->count();
     }
 
+    public function incrementVisits(): void { $this->visits_count = min(999, $this->visits_count + 1); }
+    public function decrementVisits(): void { $this->visits_count = max(0, $this->visits_count - 1); }
+    public function incrementDemos(): void  { $this->demos_count  = min(999, $this->demos_count  + 1); }
+    public function decrementDemos(): void  { $this->demos_count  = max(0, $this->demos_count  - 1); }
+
     public function startEditing(): void
     {
         $this->editing = true;

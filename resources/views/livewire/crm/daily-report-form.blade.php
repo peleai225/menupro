@@ -85,11 +85,11 @@
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Nombre de visites terrain</label>
                 <div class="flex items-center gap-3">
-                    <button type="button" wire:click="$set('visits_count', max(0, visits_count - 1))"
+                    <button type="button" wire:click="decrementVisits"
                             class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700 transition text-lg font-bold">−</button>
-                    <input type="number" wire:model="visits_count" min="0" max="100"
+                    <input type="number" wire:model="visits_count" min="0" max="999"
                            class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-center placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition">
-                    <button type="button" wire:click="$set('visits_count', min(100, visits_count + 1))"
+                    <button type="button" wire:click="incrementVisits"
                             class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700 transition text-lg font-bold">+</button>
                 </div>
                 @error('visits_count') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
@@ -99,11 +99,11 @@
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Nombre de démos effectuées</label>
                 <div class="flex items-center gap-3">
-                    <button type="button" wire:click="$set('demos_count', max(0, demos_count - 1))"
+                    <button type="button" wire:click="decrementDemos"
                             class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700 transition text-lg font-bold">−</button>
-                    <input type="number" wire:model="demos_count" min="0" max="100"
+                    <input type="number" wire:model="demos_count" min="0" max="999"
                            class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-center placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition">
-                    <button type="button" wire:click="$set('demos_count', min(100, demos_count + 1))"
+                    <button type="button" wire:click="incrementDemos"
                             class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700 transition text-lg font-bold">+</button>
                 </div>
                 @error('demos_count') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
