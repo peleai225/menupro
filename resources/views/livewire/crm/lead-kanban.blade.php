@@ -28,6 +28,16 @@
             @endforeach
         </select>
 
+        @if(in_array(auth()->user()->role->value, ['super_admin', 'team_leader']))
+        <select wire:model.live="filterTeam"
+                class="bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition">
+            <option value="">Toutes les équipes</option>
+            @foreach(\App\Models\Crm\Team::orderBy('name')->get() as $team)
+                <option value="{{ $team->id }}">{{ $team->name }}</option>
+            @endforeach
+        </select>
+        @endif
+
         {{-- Desktop button (hidden on mobile) --}}
         <button wire:click="$dispatch('open-lead-form')"
                 class="hidden lg:inline-flex ml-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 active:scale-95">

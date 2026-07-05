@@ -10,14 +10,12 @@ use App\Events\Crm\LeadStatusChanged;
 use App\Models\Crm\Lead;
 use App\Models\Crm\Team;
 use App\Models\User;
-use Illuminate\Support\Str;
 
 class LeadPipelineService
 {
     public function createLead(array $data, ?User $creator = null): Lead
     {
         $lead = Lead::create([
-            'uuid' => Str::uuid()->toString(),
             'restaurant_name' => $data['restaurant_name'],
             'manager_name' => $data['manager_name'] ?? null,
             'phone' => $data['phone'] ?? null,

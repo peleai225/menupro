@@ -19,7 +19,7 @@
         <h4 class="text-sm font-medium text-gray-100 {{ $compact ? 'truncate' : 'line-clamp-1' }}">
             {{ $lead->restaurant_name }}
         </h4>
-        <span class="shrink-0 w-5 h-5 rounded-full bg-{{ $lead->source->value === 'referral' ? 'purple' : 'gray' }}-500/20 flex items-center justify-center">
+        <span class="shrink-0 w-5 h-5 rounded-full bg-{{ $lead->source === \App\Enums\Crm\LeadSource::REFERRAL ? 'purple' : 'gray' }}-500/20 flex items-center justify-center">
             <span class="text-[10px] text-gray-400">{{ substr($lead->source->label(), 0, 1) }}</span>
         </span>
     </div>

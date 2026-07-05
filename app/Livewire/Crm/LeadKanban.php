@@ -37,9 +37,11 @@ class LeadKanban extends Component
 
     #[On('echo:crm.leads,lead.created')]
     #[On('echo:crm.leads,lead.status_changed')]
+    #[On('lead-created')]
+    #[On('lead-updated')]
     public function refreshLeads(): void
     {
-        // Livewire re-renders automatically
+        unset($this->columns);
     }
 
     #[Computed]

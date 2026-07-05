@@ -2,6 +2,7 @@
 
 namespace App\Models\Crm;
 
+use App\Enums\Crm\ActivityType;
 use App\Enums\Crm\LeadSource;
 use App\Enums\Crm\LeadStatus;
 use App\Models\Restaurant;
@@ -142,7 +143,7 @@ class Lead extends Model
 
         $this->activities()->create([
             'user_id' => $userId ?? auth()->id(),
-            'type' => 'status_change',
+            'type' => ActivityType::STATUS_CHANGE,
             'description' => "Statut changé de {$oldStatus->label()} à {$newStatus->label()}",
             'metadata' => [
                 'from' => $oldStatus->value,
