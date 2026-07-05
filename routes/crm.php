@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_leader'])
+Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_leader,commando_agent'])
     ->prefix('crm')
     ->name('crm.')
     ->group(function () {
