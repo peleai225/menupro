@@ -67,4 +67,9 @@ class DashboardController extends Controller
     {
         return view('pages.crm.admin-reports');
     }
+
+    public function profile()
+    {
+        return view('pages.crm.profile');
+    }
 }

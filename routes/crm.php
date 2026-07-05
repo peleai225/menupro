@@ -22,6 +22,7 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
         Route::get('/wallet', [DashboardController::class, 'wallet'])->name('wallet');
         Route::get('/performance', [DashboardController::class, 'performance'])->name('performance');
         Route::get('/report', [DashboardController::class, 'dailyReport'])->name('report');
+        Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
 
         // Admin-only
         Route::middleware('crm.role:super_admin')->prefix('admin')->name('admin.')->group(function () {

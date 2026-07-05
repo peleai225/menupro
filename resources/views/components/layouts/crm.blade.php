@@ -59,6 +59,10 @@
                 </x-crm-nav-link>
                 @endif
 
+                <x-crm-nav-link href="{{ route('crm.profile') }}" icon="user-circle" :active="request()->routeIs('crm.profile')">
+                    Mon profil
+                </x-crm-nav-link>
+
                 @if($role === 'super_admin')
                 <div class="pt-4 mt-4 border-t border-gray-800/50">
                     <p class="px-3 text-[10px] uppercase tracking-wider text-gray-600 font-semibold mb-2">Admin</p>
@@ -78,14 +82,16 @@
             {{-- User footer --}}
             <div class="p-4 border-t border-gray-800/50">
                 <div class="flex items-center gap-3">
-                    <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-lg object-cover ring-2 ring-gray-800" alt="">
+                    <a href="{{ route('crm.profile') }}" class="shrink-0">
+                        <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-lg object-cover ring-2 ring-gray-800 hover:ring-orange-500 transition" alt="">
+                    </a>
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-gray-200 truncate">{{ auth()->user()->name }}</p>
+                        <a href="{{ route('crm.profile') }}" class="block text-sm font-medium text-gray-200 truncate hover:text-orange-400 transition">{{ auth()->user()->name }}</a>
                         <p class="text-xs text-gray-500">{{ auth()->user()->role->label() }}</p>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="p-1.5 text-gray-500 hover:text-red-400 transition rounded-lg hover:bg-red-500/10">
+                        <button type="submit" title="Se déconnecter" class="p-1.5 text-gray-500 hover:text-red-400 transition rounded-lg hover:bg-red-500/10">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         </button>
                     </form>
@@ -148,6 +154,10 @@
                     Rapport terrain
                 </x-crm-nav-link>
                 @endif
+
+                <x-crm-nav-link href="{{ route('crm.profile') }}" icon="user-circle" :active="request()->routeIs('crm.profile')">
+                    Mon profil
+                </x-crm-nav-link>
 
                 @if($role === 'super_admin')
                 <div class="pt-4 mt-4 border-t border-gray-800/50">

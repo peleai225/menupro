@@ -135,6 +135,49 @@
                 @error('notes') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
+            {{-- Photos terrain --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    Photos terrain
+                    <span class="text-gray-500 font-normal text-xs ml-1">(optionnel · max 5 photos · 5 Mo chacune)</span>
+                </label>
+                <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-orange-500/50 hover:bg-orange-500/5 transition">
+                    <svg class="w-7 h-7 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="text-xs text-gray-500">Cliquez ou glissez vos photos</span>
+                    <input type="file" wire:model="uploadedPhotos" multiple accept="image/*" class="hidden">
+                </label>
+                @error('uploadedPhotos.*') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+
+                {{-- Preview des photos sélectionnées --}}
+                @if(count($uploadedPhotos) > 0)
+                <div class="flex flex-wrap gap-2 mt-3">
+                    @foreach($uploadedPhotos as $i => $photo)
+                    <div class="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-700">
+                        <img src="{{ $photo->temporaryUrl() }}" class="w-full h-full object-cover">
+                        <button type="button" wire:click="$set('uploadedPhotos.{{ $i }}', null)"
+                                class="absolute top-1 right-1 w-5 h-5 bg-black/70 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-500 transition">×</button>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+
+                {{-- Photos déjà sauvegardées --}}
+                @if($todayReport && count($todayReport->photos ?? []) > 0)
+                <div class="mt-3">
+                    <p class="text-xs text-gray-500 mb-2">Photos déjà soumises :</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($todayReport->photos as $photoPath)
+                        <a href="{{ Storage::url($photoPath) }}" target="_blank" class="block w-20 h-20 rounded-xl overflow-hidden border border-gray-700 hover:border-orange-500 transition">
+                            <img src="{{ Storage::url($photoPath) }}" class="w-full h-full object-cover">
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+
             {{-- Submit button --}}
             <button type="submit"
                     wire:loading.attr="disabled"
