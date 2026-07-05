@@ -218,6 +218,15 @@
                     <option value="banni">Banni</option>
                 </select>
 
+                {{-- Verification Filter --}}
+                <select wire:model.live="verificationFilter"
+                        class="px-3 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                    <option value="">Toutes vérifications</option>
+                    <option value="pending">En attente</option>
+                    <option value="verified">Vérifiés</option>
+                    <option value="rejected">Rejetés</option>
+                </select>
+
                 {{-- Team Filter --}}
                 <select wire:model.live="teamFilter"
                         class="px-3 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
@@ -227,7 +236,7 @@
                     @endforeach
                 </select>
 
-                @if($search || $roleFilter || $cityFilter || $gradeFilter || $statusFilter || $teamFilter)
+                @if($search || $roleFilter || $cityFilter || $gradeFilter || $statusFilter || $teamFilter || $verificationFilter)
                     <button wire:click="clearFilters"
                             class="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400 hover:bg-red-500/20 transition-all">
                         Réinitialiser
@@ -347,7 +356,7 @@
                                          x-transition:leave-end="opacity-0 scale-95"
                                          class="absolute right-0 mt-2 w-56 rounded-xl bg-gray-800 border border-gray-700 shadow-xl z-50 overflow-hidden">
 
-                                        @if($agent->commercialProfile && $agent->commercialProfile->verification_status === 'pending')
+                                        @if($agent->commercialProfile && in_array($agent->commercialProfile->verification_status, ['pending', 'pending_review', 'rejected']))
                                             <button wire:click="verifyAgent({{ $agent->id }})"
                                                     class="w-full px-4 py-2.5 text-left text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -470,7 +479,7 @@
 
                 {{-- Actions --}}
                 <div class="flex gap-2 pt-4 border-t border-gray-800 flex-wrap">
-                    @if($agent->commercialProfile && $agent->commercialProfile->verification_status === 'pending')
+                    @if($agent->commercialProfile && in_array($agent->commercialProfile->verification_status, ['pending', 'pending_review', 'rejected']))
                         <button wire:click="verifyAgent({{ $agent->id }})"
                                 class="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
                             Vérifier

@@ -39,8 +39,11 @@ class LoginController extends Controller
             ['email' => $request->user()->email]
         );
 
-        // Agents Commando approuvés : pas de vérification email (compte créé à l'approbation)
-        if (!$request->user()->isCommandoAgent()) {
+        // Les agents CRM utilisent un email synthétique non vérifiable — bypass email
+        $crmAgentRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
+        $isCrmAgent = in_array($request->user()->role->value, $crmAgentRoles);
+
+        if (!$isCrmAgent) {
             if (!$request->user()->hasVerifiedEmail()) {
                 $request->user()->sendEmailVerificationNotification();
                 return redirect()->route('verification.notice')
@@ -52,8 +55,7 @@ class LoginController extends Controller
         $route = $request->user()->getDashboardRoute();
 
         // Flag CRM agents for welcome sound/animation on first page load
-        $crmRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
-        if (in_array($request->user()->role->value, $crmRoles)) {
+        if ($isCrmAgent) {
             session()->flash('crm_login_success', true);
         }
 

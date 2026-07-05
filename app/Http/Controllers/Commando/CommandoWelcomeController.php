@@ -23,7 +23,7 @@ class CommandoWelcomeController extends Controller
         }
 
         $user = User::where('welcome_token', $token)->first();
-        if (!$user || !$user->isCommandoAgent()) {
+        if (!$user || !$this->isCrmAgent($user)) {
             return redirect()->route('login')->with('error', 'Lien expiré ou invalide.');
         }
 
@@ -41,7 +41,7 @@ class CommandoWelcomeController extends Controller
         ]);
 
         $user = User::where('welcome_token', $request->token)->first();
-        if (!$user || !$user->isCommandoAgent()) {
+        if (!$user || !$this->isCrmAgent($user)) {
             return redirect()->route('login')->with('error', 'Lien expiré ou invalide.');
         }
 
@@ -54,5 +54,11 @@ class CommandoWelcomeController extends Controller
 
         return redirect()->route('login')
             ->with('success', 'Mot de passe défini ! Connectez-vous avec : ' . $loginHint);
+    }
+
+    private function isCrmAgent(User $user): bool
+    {
+        $crmRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
+        return in_array($user->role->value, $crmRoles);
     }
 }

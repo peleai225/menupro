@@ -1,14 +1,14 @@
 <div class="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-    <p class="text-amber-200 text-sm font-medium mb-1">{{ $isResubmit ? 'Nouvelle piece d\'identite' : 'Completez votre profil' }}</p>
-    <p class="text-slate-400 text-xs mb-3">Piece d'identite (CNI, passeport) pour activer votre carte. JPG, PNG ou PDF, max 5 Mo.</p>
+    <p class="text-amber-200 text-sm font-medium mb-1">{{ $isResubmit ? "Nouvelle pièce d'identité" : 'Complétez votre profil' }}</p>
+    <p class="text-slate-400 text-xs mb-3">Pièce d'identité (CNI, passeport) pour activer votre carte. JPG, PNG ou PDF, max 5 Mo.</p>
 
     <form wire:submit="submit" class="space-y-3">
         <select wire:model="statut_metier"
                 class="w-full h-10 px-3 rounded-lg border border-slate-600 bg-slate-900/60 text-white text-sm focus:ring-1 focus:ring-orange-500 transition">
             <option value="">Statut professionnel...</option>
-            <option value="etudiant">Etudiant</option>
+            <option value="etudiant">Étudiant</option>
             <option value="auto_entrepreneur">Auto-entrepreneur</option>
-            <option value="salarie">Salarie</option>
+            <option value="salarie">Salarié</option>
             <option value="autre">Autre</option>
         </select>
         @error('statut_metier') <p class="text-red-400 text-[11px]">{{ $message }}</p> @enderror

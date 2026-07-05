@@ -2,18 +2,15 @@
 
 namespace App\Livewire\Commando;
 
-use App\Enums\AgentVerificationStatus;
-use App\Models\CommandoAgent;
+use App\Models\Crm\CommercialProfile;
 use App\Services\MediaUploader;
-use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class RegisterStep2 extends Component
 {
     use WithFileUploads;
-
-    public ?CommandoAgent $agent = null;
 
     public string $statut_metier = '';
     public $id_document = null;
@@ -22,31 +19,57 @@ class RegisterStep2 extends Component
     {
         return [
             'statut_metier' => ['required', 'string', 'in:etudiant,auto_entrepreneur,salarie,autre'],
-            'id_document' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'id_document'   => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
 
     protected function validationAttributes(): array
     {
         return [
-            'statut_metier' => 'statut',
-            'id_document' => 'pièce d\'identité',
+            'statut_metier' => 'statut professionnel',
+            'id_document'   => 'pièce d\'identité',
         ];
     }
 
-    public function mount(CommandoAgent $agent): void
+    protected function messages(): array
     {
-        if ($agent->status_verification !== AgentVerificationStatus::SHADOW) {
-            abort(403, 'Cette étape d\'inscription n\'est plus disponible.');
+        return [
+            'id_document.required' => 'Veuillez sélectionner un fichier et attendre la fin du chargement avant d\'envoyer.',
+            'id_document.mimes'    => 'Format non accepté. Utilisez une image (JPG, PNG) ou un PDF.',
+            'id_document.max'      => 'Le fichier est trop lourd. Taille maximum : 5 Mo.',
+        ];
+    }
+
+    public function mount(): void
+    {
+        $user = auth()->user();
+
+        // Accessible uniquement pour les agents en attente de vérification
+        $profile = $user?->commercialProfile;
+        if (!$profile || !in_array($profile->verification_status, ['pending', 'rejected'])) {
+            abort(403, 'Cette étape n\'est pas disponible pour votre compte.');
         }
-        $this->agent = $agent;
+
+        if ($profile->statut_metier) {
+            $this->statut_metier = $profile->statut_metier;
+        }
+    }
+
+    #[Computed]
+    public function profile(): CommercialProfile
+    {
+        return auth()->user()->commercialProfile;
     }
 
     public function submit(MediaUploader $uploader): mixed
     {
         $this->validate();
 
-        $folder = 'commando/agents/' . $this->agent->id . '/id';
+        $profile = auth()->user()->commercialProfile;
+        if (!$profile) return null;
+
+        $userId = auth()->id();
+        $folder = "crm/agents/{$userId}/id";
         $ext = strtolower($this->id_document->getClientOriginalExtension());
 
         if ($ext === 'pdf') {
@@ -59,10 +82,11 @@ class RegisterStep2 extends Component
             );
         }
 
-        $this->agent->update([
-            'statut_metier' => $this->statut_metier,
-            'id_document_path' => $path,
-            'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
+        $profile->update([
+            'statut_metier'       => $this->statut_metier,
+            'id_document_path'    => $path,
+            'verification_status' => 'pending',
+            'rejection_reason'    => null,
         ]);
 
         return redirect()->route('commando.register.success');

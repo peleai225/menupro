@@ -32,11 +32,12 @@ class RegisterStep1 extends Component
                 'required',
                 'string',
                 'max:20',
-                'regex:/^\+?[0-9\s\-]+$/',
+                // Numéros ivoiriens : 07/05/01/04/... avec ou sans +225, espaces acceptés
+                'regex:/^(\+?225[\s\-]?)?0[0-9][\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/',
                 'unique:commando_agents,whatsapp',
                 'unique:users,phone',
             ],
-            'password' => ['required', 'confirmed', Password::min(6)],
+            'password' => ['required', 'confirmed', Password::min(8)],
             'city' => ['required', 'string', 'max:100'],
         ];
     }
@@ -44,7 +45,9 @@ class RegisterStep1 extends Component
     protected function messages(): array
     {
         return [
-            'whatsapp.unique' => 'Ce numéro WhatsApp est déjà enregistré. Contactez l\'équipe MenuPro si c\'est le vôtre.',
+            'whatsapp.unique'  => 'Ce numéro WhatsApp est déjà enregistré. Contactez l\'équipe MenuPro si c\'est le vôtre.',
+            'whatsapp.regex'   => 'Numéro invalide. Format attendu : 07 00 00 00 00 ou +225 07 00 00 00 00.',
+            'password.min'     => 'Le mot de passe doit contenir au moins 8 caractères.',
         ];
     }
 
@@ -89,7 +92,7 @@ class RegisterStep1 extends Component
             CommercialProfile::create([
                 'user_id'             => $user->id,
                 'city'                => $this->city,
-                'verification_status' => 'pending_review',
+                'verification_status' => 'pending',
             ]);
 
             // 3. Créer le CommandoAgent pour rétrocompatibilité (QR card, etc.)
@@ -109,8 +112,8 @@ class RegisterStep1 extends Component
         // 4. Connecter automatiquement l'utilisateur
         Auth::login($user);
 
-        // 5. Rediriger vers l'espace CRM
-        return redirect('/crm');
+        // 5. Rediriger vers la page de confirmation
+        return redirect()->route('commando.register.success');
     }
 
     public function render()

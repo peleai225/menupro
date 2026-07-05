@@ -96,7 +96,7 @@ class AdminAgents extends Component
 
         $verified = CommercialProfile::where('verification_status', 'verified')->count();
 
-        $pending = CommercialProfile::where('verification_status', 'pending')->count();
+        $pending = CommercialProfile::whereIn('verification_status', ['pending', 'pending_review'])->count();
 
         $activeThisWeek = User::whereIn('role', $crmRoles)
             ->where('last_login_at', '>=', now()->startOfWeek())
@@ -155,7 +155,12 @@ class AdminAgents extends Component
         // Verification status filter
         if ($this->verificationFilter) {
             $query->whereHas('commercialProfile', function ($q) {
-                $q->where('verification_status', $this->verificationFilter);
+                // 'pending' couvre aussi l'ancien 'pending_review' hérité
+                if ($this->verificationFilter === 'pending') {
+                    $q->whereIn('verification_status', ['pending', 'pending_review']);
+                } else {
+                    $q->where('verification_status', $this->verificationFilter);
+                }
             });
         }
 
@@ -207,8 +212,8 @@ class AdminAgents extends Component
         if ($user->commercialProfile) {
             $user->commercialProfile->update([
                 'verification_status' => 'verified',
-                'approved_at' => now(),
-                'rejection_reason' => null,
+                'approved_at'         => now(),
+                'rejection_reason'    => null,
             ]);
 
             session()->flash('message', 'Agent vérifié avec succès.');

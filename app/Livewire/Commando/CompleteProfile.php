@@ -3,7 +3,7 @@
 namespace App\Livewire\Commando;
 
 use App\Enums\AgentVerificationStatus;
-use App\Models\CommandoAgent;
+use App\Models\Crm\CommercialProfile;
 use App\Services\MediaUploader;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -15,7 +15,6 @@ class CompleteProfile extends Component
     public string $statut_metier = '';
     public $id_document = null;
 
-    /** true si l'agent a été rejeté et resoumet une nouvelle pièce */
     public bool $isResubmit = false;
 
     protected function rules(): array
@@ -46,7 +45,20 @@ class CompleteProfile extends Component
 
     public function mount(): void
     {
-        $agent = auth()->user()->commandoAgent;
+        $user = auth()->user();
+
+        // Priorité : CommercialProfile (nouveau flow CRM)
+        $crmProfile = $user?->commercialProfile;
+        if ($crmProfile) {
+            if ($crmProfile->statut_metier) {
+                $this->statut_metier = $crmProfile->statut_metier;
+            }
+            $this->isResubmit = $crmProfile->verification_status === 'rejected';
+            return;
+        }
+
+        // Fallback : CommandoAgent (anciens agents)
+        $agent = $user?->commandoAgent;
         if ($agent) {
             if ($agent->statut_metier) {
                 $this->statut_metier = $agent->statut_metier;
@@ -57,7 +69,41 @@ class CompleteProfile extends Component
 
     public function submit(MediaUploader $uploader): mixed
     {
-        $agent = auth()->user()->commandoAgent;
+        $this->validate();
+
+        $user = auth()->user();
+
+        // Chemin 1 : agent CRM avec CommercialProfile
+        $crmProfile = $user->commercialProfile;
+        if ($crmProfile) {
+            $allowed = ['pending', 'pending_review', 'rejected'];
+            if (!in_array($crmProfile->verification_status, $allowed)) {
+                return null;
+            }
+
+            $folder = 'crm/agents/' . $user->id . '/id';
+            $ext = strtolower($this->id_document->getClientOriginalExtension());
+            $path = $ext === 'pdf'
+                ? $this->id_document->store($folder, 'public')
+                : $uploader->upload($this->id_document, $folder, ['width' => 1200, 'height' => 1200]);
+
+            $crmProfile->update([
+                'statut_metier'       => $this->statut_metier,
+                'id_document_path'    => $path,
+                'verification_status' => 'pending',
+                'rejection_reason'    => null,
+            ]);
+
+            $message = $this->isResubmit
+                ? 'Nouvelle pièce envoyée. L\'équipe va la vérifier sous peu.'
+                : 'Profil complété. L\'équipe va vérifier votre pièce d\'identité.';
+
+            $this->dispatch('profileCompleted', $message);
+            return null;
+        }
+
+        // Chemin 2 : CommandoAgent (anciens agents)
+        $agent = $user->commandoAgent;
         if (!$agent) {
             return null;
         }
@@ -67,28 +113,19 @@ class CompleteProfile extends Component
             return null;
         }
 
-        $this->validate();
-
         $folder = 'commando/agents/' . $agent->id . '/id';
         $ext = strtolower($this->id_document->getClientOriginalExtension());
-
-        if ($ext === 'pdf') {
-            $path = $this->id_document->store($folder, 'public');
-        } else {
-            $path = $uploader->upload(
-                $this->id_document,
-                $folder,
-                ['width' => 1200, 'height' => 1200]
-            );
-        }
+        $path = $ext === 'pdf'
+            ? $this->id_document->store($folder, 'public')
+            : $uploader->upload($this->id_document, $folder, ['width' => 1200, 'height' => 1200]);
 
         $wasRejected = $agent->status_verification === AgentVerificationStatus::REJETE;
 
         $agent->update([
-            'statut_metier' => $this->statut_metier,
-            'id_document_path' => $path,
+            'statut_metier'       => $this->statut_metier,
+            'id_document_path'    => $path,
             'status_verification' => AgentVerificationStatus::PENDING_REVIEW,
-            'rejection_reason' => null,
+            'rejection_reason'    => null,
         ]);
 
         $message = $wasRejected

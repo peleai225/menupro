@@ -58,11 +58,23 @@ Route::get('/verify/{uuid}', [\App\Http\Controllers\Commando\AgentVerificationCo
 |--------------------------------------------------------------------------
 */
 Route::prefix('commando')->name('commando.')->group(function () {
-    Route::get('/inscription', \App\Livewire\Commando\RegisterStep1::class)->name('register.step1');
+    // Inscription publique — bloquée si déjà connecté
+    Route::middleware('guest')->group(function () {
+        Route::get('/inscription', \App\Livewire\Commando\RegisterStep1::class)->name('register.step1');
+    });
+
+    // Page succès — accessible après inscription (agent vient d'être connecté)
     Route::get('/inscription/success', fn () => view('pages.commando.register-success'))->name('register.success');
-    // Bienvenue agent : définir mot de passe (lien envoyé après approbation)
-    Route::get('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'show'])->name('welcome');
-    Route::post('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'store'])->name('welcome.store');
+
+    // Étape 2 — pièce d'identité (agent connecté, profil en attente de vérification)
+    Route::middleware('auth')->get('/inscription/verification', \App\Livewire\Commando\RegisterStep2::class)->name('register.step2');
+
+    // Bienvenue agent : définir mot de passe (lien envoyé après approbation admin)
+    Route::get('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'show'])
+        ->name('welcome');
+    Route::post('/bienvenue', [\App\Http\Controllers\Commando\CommandoWelcomeController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('welcome.store');
 });
 
 // Route pour rafraîchir le token CSRF (évite l'erreur 419)
