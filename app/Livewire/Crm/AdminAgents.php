@@ -26,6 +26,13 @@ class AdminAgents extends Component
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
 
+    // Edit modal
+    public bool $showEditModal = false;
+    public ?int $editingAgentId = null;
+    public string $editingRole = '';
+    public string $editingTeamId = '';
+    public string $editingAgentName = '';
+
     public function mount(): void
     {
         // Verify user is super_admin
@@ -257,6 +264,53 @@ class AdminAgents extends Component
         session()->flash('message', $user->is_active ? 'Agent activé.' : 'Agent désactivé.');
 
         unset($this->agents);
+    }
+
+    public function openEditModal(int $userId): void
+    {
+        $user = User::findOrFail($userId);
+        $this->editingAgentId = $userId;
+        $this->editingAgentName = $user->name;
+        $this->editingRole = $user->role->value;
+        $teamId = $user->commercialProfile?->team_id ?? $user->technicianProfile?->team_id;
+        $this->editingTeamId = (string) ($teamId ?? '');
+        $this->showEditModal = true;
+    }
+
+    public function saveAgentChanges(): void
+    {
+        $user = User::findOrFail($this->editingAgentId);
+
+        $allowedRoles = ['commercial', 'technician', 'team_leader'];
+        if (!in_array($this->editingRole, $allowedRoles)) {
+            session()->flash('error', 'Rôle invalide.');
+            return;
+        }
+
+        DB::transaction(function () use ($user) {
+            $user->update(['role' => $this->editingRole]);
+
+            $teamId = $this->editingTeamId ? (int) $this->editingTeamId : null;
+
+            if ($user->commercialProfile) {
+                $user->commercialProfile->update(['team_id' => $teamId]);
+            }
+            if ($user->technicianProfile) {
+                $user->technicianProfile->update(['team_id' => $teamId]);
+            }
+
+            // If promoted to team_leader, set as leader on the team
+            if ($this->editingRole === 'team_leader' && $teamId) {
+                Team::where('id', $teamId)->update(['leader_id' => $user->id]);
+            }
+        });
+
+        $this->showEditModal = false;
+        $this->editingAgentId = null;
+        session()->flash('message', "Rôle et équipe mis à jour pour {$user->name}.");
+
+        unset($this->agents);
+        unset($this->stats);
     }
 
     public function render()

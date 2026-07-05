@@ -28,6 +28,7 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
         Route::middleware('crm.role:super_admin')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/agents', [DashboardController::class, 'adminAgents'])->name('agents');
             Route::get('/agents/{agent}', [\App\Http\Controllers\Crm\AgentController::class, 'show'])->name('agents.show');
+            Route::get('/teams', [DashboardController::class, 'adminTeams'])->name('teams');
             Route::get('/withdrawals', [DashboardController::class, 'adminWithdrawals'])->name('withdrawals');
             Route::get('/reports', [DashboardController::class, 'adminReports'])->name('reports');
         });

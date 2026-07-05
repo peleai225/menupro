@@ -53,6 +53,11 @@ class DashboardController extends Controller
         return view('pages.crm.admin-agents');
     }
 
+    public function adminTeams()
+    {
+        return view('pages.crm.admin-teams');
+    }
+
     public function adminWithdrawals()
     {
         return view('pages.crm.admin-withdrawals');

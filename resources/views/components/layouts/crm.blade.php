@@ -69,6 +69,9 @@
                     <x-crm-nav-link href="{{ route('crm.admin.agents') }}" icon="shield-check" :active="request()->routeIs('crm.admin.agents*')">
                         Agents
                     </x-crm-nav-link>
+                    <x-crm-nav-link href="{{ route('crm.admin.teams') }}" icon="user-group" :active="request()->routeIs('crm.admin.teams*')">
+                        Équipes
+                    </x-crm-nav-link>
                     <x-crm-nav-link href="{{ route('crm.admin.withdrawals') }}" icon="arrow-up-tray" :active="request()->routeIs('crm.admin.withdrawals')">
                         Retraits
                     </x-crm-nav-link>
@@ -164,6 +167,9 @@
                     <p class="px-3 text-[10px] uppercase tracking-wider text-gray-600 font-semibold mb-2">Admin</p>
                     <x-crm-nav-link href="{{ route('crm.admin.agents') }}" icon="shield-check" :active="request()->routeIs('crm.admin.agents*')">
                         Agents
+                    </x-crm-nav-link>
+                    <x-crm-nav-link href="{{ route('crm.admin.teams') }}" icon="user-group" :active="request()->routeIs('crm.admin.teams*')">
+                        Équipes
                     </x-crm-nav-link>
                     <x-crm-nav-link href="{{ route('crm.admin.withdrawals') }}" icon="arrow-up-tray" :active="request()->routeIs('crm.admin.withdrawals')">
                         Retraits

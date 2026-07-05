@@ -1,4 +1,60 @@
 <div class="space-y-6" wire:poll.30s>
+
+    {{-- Edit Agent Modal --}}
+    @if($showEditModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-data
+         x-on:keydown.escape.window="$wire.showEditModal = false">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="$set('showEditModal', false)"></div>
+        <div class="relative bg-gray-900 rounded-2xl border border-gray-700 p-6 w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-white">Modifier l'agent</h3>
+                <button wire:click="$set('showEditModal', false)" class="text-gray-500 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p class="text-sm text-gray-400 mb-5">{{ $editingAgentName }}</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Rôle</label>
+                    <select wire:model="editingRole"
+                            class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <option value="commercial">Commercial (terrain)</option>
+                        <option value="technician">Technicien (installation)</option>
+                        <option value="team_leader">Team Leader (chef d'équipe)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Équipe</label>
+                    <select wire:model="editingTeamId"
+                            class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <option value="">— Sans équipe —</option>
+                        @foreach($this->teams as $team)
+                            <option value="{{ $team->id }}">{{ $team->name }}</option>
+                        @endforeach
+                    </select>
+                    @if($editingRole === 'team_leader')
+                    <p class="text-xs text-amber-400 mt-1.5">En sélectionnant Team Leader, cet agent sera automatiquement défini comme chef de l'équipe choisie.</p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button wire:click="$set('showEditModal', false)"
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-700 text-sm text-gray-300 hover:bg-gray-800 transition-all">
+                    Annuler
+                </button>
+                <button wire:click="saveAgentChanges" wire:loading.attr="disabled"
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-sm font-medium text-white transition-all disabled:opacity-50">
+                    <span wire:loading.remove wire:target="saveAgentChanges">Enregistrer</span>
+                    <span wire:loading wire:target="saveAgentChanges">Enregistrement...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
     {{-- Flash Messages --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
@@ -271,6 +327,12 @@
                                             <div class="h-px bg-gray-700"></div>
                                         @endif
 
+                                        <button wire:click="openEditModal({{ $agent->id }})"
+                                                class="w-full px-4 py-2.5 text-left text-sm text-violet-400 hover:bg-violet-500/10 transition-colors flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                            Modifier rôle / équipe
+                                        </button>
+
                                         <button wire:click="toggleActiveStatus({{ $agent->id }})"
                                                 class="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-white/5 transition-colors flex items-center gap-2">
                                             @if($agent->is_active)
@@ -378,7 +440,7 @@
                 </div>
 
                 {{-- Actions --}}
-                <div class="flex gap-2 pt-4 border-t border-gray-800">
+                <div class="flex gap-2 pt-4 border-t border-gray-800 flex-wrap">
                     @if($agent->commercialProfile && $agent->commercialProfile->verification_status === 'pending')
                         <button wire:click="verifyAgent({{ $agent->id }})"
                                 class="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
@@ -389,6 +451,10 @@
                             Rejeter
                         </button>
                     @endif
+                    <button wire:click="openEditModal({{ $agent->id }})"
+                            class="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 transition-all">
+                        Rôle/Équipe
+                    </button>
                     <a href="{{ route('crm.admin.agents.show', $agent->id) }}"
                        class="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-800/50 text-gray-300 border border-gray-700/50 hover:bg-gray-800 transition-all text-center">
                         Voir profil
