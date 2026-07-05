@@ -51,6 +51,12 @@ class LoginController extends Controller
         // Redirect based on role
         $route = $request->user()->getDashboardRoute();
 
+        // Flag CRM agents for welcome sound/animation on first page load
+        $crmRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
+        if (in_array($request->user()->role->value, $crmRoles)) {
+            session()->flash('crm_login_success', true);
+        }
+
         return redirect()->intended(route($route));
     }
 

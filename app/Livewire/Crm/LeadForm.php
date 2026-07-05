@@ -81,10 +81,12 @@ class LeadForm extends Component
         if ($this->lead) {
             $this->lead->update($data);
             $this->dispatch('lead-updated');
+            $this->dispatch('crm-notify', message: 'Lead mis à jour.', type: 'success');
         } else {
             $data['assigned_to'] = auth()->id();
             app(LeadPipelineService::class)->createLead($data, auth()->user());
             $this->dispatch('lead-created');
+            $this->dispatch('crm-notify', message: 'Lead créé avec succès !', type: 'lead');
         }
 
         $this->showModal = false;

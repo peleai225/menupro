@@ -9,6 +9,7 @@ use App\Models\Crm\CommercialProfile;
 use App\Models\Crm\Lead;
 use App\Models\Crm\Team;
 use App\Models\User;
+use App\Notifications\Crm\AgentStatusChangedNotification;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -311,6 +312,8 @@ class AdminAgents extends Component
             return;
         }
 
+        $previousStatus = $user->agent_status?->value;
+
         DB::transaction(function () use ($user) {
             $user->update([
                 'role' => $this->editingRole,
@@ -338,6 +341,11 @@ class AdminAgents extends Component
             }
         });
 
+        if ($this->editingStatus !== $previousStatus) {
+            $newStatus = AgentStatus::from($this->editingStatus);
+            $user->notify(new AgentStatusChangedNotification($newStatus));
+        }
+
         $this->showEditModal = false;
         $this->editingAgentId = null;
         session()->flash('message', "Agent {$user->name} mis à jour.");
@@ -360,6 +368,8 @@ class AdminAgents extends Component
             'agent_status' => $status,
             'is_active' => $status === AgentStatus::ACTIF,
         ]);
+
+        $user->notify(new AgentStatusChangedNotification($status));
 
         session()->flash('message', "{$user->name} → {$status->label()}");
         unset($this->agents);

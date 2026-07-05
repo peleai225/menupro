@@ -207,17 +207,8 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    {{-- Real-time notification bell --}}
-                    <div x-data="{ unread: 0 }" class="relative"
-                         @commission-credited.window="unread++"
-                         @lead-created.window="unread++">
-                        <button class="relative p-2 text-gray-400 hover:text-white transition rounded-xl hover:bg-gray-800/50">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                            <span x-show="unread > 0" x-text="unread"
-                                  class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
-                                  x-transition></span>
-                        </button>
-                    </div>
+                    {{-- In-app notification bell --}}
+                    @livewire('crm.crm-notifications-bell')
                     {{-- User avatar mobile --}}
                     <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-gray-800 lg:hidden" alt="">
                 </div>
@@ -256,44 +247,120 @@
 
     @livewireScripts
     <script>
+        // --- Web Audio helpers (no external file needed) ---
+        function playTone(freq, duration, type = 'sine', gain = 0.18) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gainNode.gain.setValueAtTime(gain, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + duration);
+            } catch (_) {}
+        }
+
+        function playNotifSound() {
+            // Two-tone ding: 880 Hz then 1100 Hz
+            playTone(880, 0.12);
+            setTimeout(() => playTone(1100, 0.18), 110);
+        }
+
+        function playWelcomeSound() {
+            // Ascending chord: C5 → E5 → G5
+            playTone(523, 0.2, 'sine', 0.15);
+            setTimeout(() => playTone(659, 0.2, 'sine', 0.15), 150);
+            setTimeout(() => playTone(784, 0.35, 'sine', 0.15), 300);
+        }
+
+        // --- Toast factory ---
+        function showToast(message, type = 'info', withSound = false) {
+            if (withSound) playNotifSound();
+            const icons = {
+                success: '✓',
+                commission: '💰',
+                lead: '📋',
+                status: '👤',
+                info: 'ℹ',
+            };
+            const colors = {
+                success: 'bg-emerald-500/95',
+                commission: 'bg-emerald-600/95',
+                lead: 'bg-blue-500/95',
+                status: 'bg-orange-500/95',
+                info: 'bg-gray-800/95',
+            };
+            const toast = document.createElement('div');
+            const existingToasts = document.querySelectorAll('.crm-toast');
+            const offset = existingToasts.length * 70;
+
+            toast.className = `crm-toast fixed right-4 z-[200] flex items-center gap-2.5 max-w-xs px-4 py-3 rounded-2xl shadow-2xl text-sm font-medium text-white backdrop-blur transition-all duration-400 opacity-0 translate-x-8 ${colors[type] || colors.info}`;
+            toast.style.top = `${80 + offset}px`;
+            toast.innerHTML = `<span class="text-base">${icons[type] || icons.info}</span><span class="flex-1">${message}</span>`;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('opacity-0', 'translate-x-8');
+                toast.classList.add('opacity-100', 'translate-x-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-8');
+                setTimeout(() => toast.remove(), 400);
+            }, 4500);
+        }
+
+        // --- Login welcome animation (one-shot via session flash) ---
+        @if(session('crm_login_success'))
+        document.addEventListener('DOMContentLoaded', () => {
+            // Small delay so the page renders first
+            setTimeout(() => {
+                playWelcomeSound();
+                showToast("Bienvenue, {{ auth()->user()->name }} !", 'success');
+
+                // Flash the whole page briefly
+                const flash = document.createElement('div');
+                flash.className = 'fixed inset-0 z-[300] pointer-events-none bg-orange-500/10';
+                flash.style.transition = 'opacity 0.6s';
+                document.body.appendChild(flash);
+                setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 600); }, 300);
+            }, 400);
+        });
+        @endif
+
+        // --- Livewire commission toast (from Livewire event) ---
         document.addEventListener('livewire:init', () => {
+            Livewire.on('crm-notify', (event) => {
+                showToast(event[0]?.message || event.message, event[0]?.type || event.type || 'info', true);
+                // Refresh bell badge
+                Livewire.dispatch('refresh-notifications');
+            });
+
             if (window.Echo) {
                 const userId = {{ auth()->id() }};
                 window.Echo.channel(`crm.user.${userId}`)
                     .listen('.commission.credited', (e) => {
-                        window.dispatchEvent(new CustomEvent('commission-credited', { detail: e }));
-                        showToast(`+${e.amount_formatted} — ${e.description}`, 'success');
+                        showToast(`+${e.amount_formatted} — ${e.description}`, 'commission', true);
+                        Livewire.dispatch('refresh-notifications');
                     })
                     .listen('.grade.changed', (e) => {
-                        showToast(`Grade ${e.new_grade_label} atteint !`, 'success');
+                        showToast(`Grade ${e.new_grade_label} atteint !`, 'status', true);
                     });
 
                 window.Echo.channel('crm.leads')
                     .listen('.lead.created', (e) => {
                         window.dispatchEvent(new CustomEvent('lead-created', { detail: e }));
-                    })
-                    .listen('.lead.status_changed', (e) => {
-                        window.dispatchEvent(new CustomEvent('lead-status-changed', { detail: e }));
+                        if (e.assigned_to === userId) {
+                            showToast(`Nouveau lead : ${e.restaurant_name}`, 'lead', true);
+                            Livewire.dispatch('refresh-notifications');
+                        }
                     });
             }
         });
-
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 z-[100] max-w-xs px-4 py-3 rounded-2xl shadow-2xl text-sm font-medium transition-all duration-500 transform translate-y-[-8px] opacity-0 ${
-                type === 'success' ? 'bg-emerald-500/95 text-white backdrop-blur' : 'bg-gray-800/95 text-gray-100 backdrop-blur'
-            }`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-[-8px]', 'opacity-0');
-                toast.classList.add('translate-y-0', 'opacity-100');
-            });
-            setTimeout(() => {
-                toast.classList.add('translate-y-[-8px]', 'opacity-0');
-                setTimeout(() => toast.remove(), 500);
-            }, 4000);
-        }
     </script>
 
     <style>
