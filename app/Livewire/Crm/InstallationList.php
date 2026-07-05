@@ -5,6 +5,7 @@ namespace App\Livewire\Crm;
 use App\Enums\Crm\InstallationStatus;
 use App\Models\Crm\Installation;
 use App\Models\User;
+use App\Services\Crm\InstallationService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -18,6 +19,9 @@ class InstallationList extends Component
     public ?int $activeInstallationId = null;
     public ?int $ratingValue = null;
     public string $notes = '';
+
+    public ?int $reassignInstallationId = null;
+    public ?int $reassignTechnicianId = null;
 
     #[On('installation-updated')]
     public function refresh(): void
@@ -104,7 +108,7 @@ class InstallationList extends Component
         $this->notes = '';
     }
 
-    public function completeInstallation(): void
+    public function completeInstallation(InstallationService $service): void
     {
         if (!$this->activeInstallationId) return;
 
@@ -116,14 +120,47 @@ class InstallationList extends Component
             return;
         }
 
-        $installation->complete($this->ratingValue);
+        $notes = $this->notes ?: null;
+        $service->complete($installation, $this->ratingValue);
 
-        if ($this->notes) {
-            $installation->update(['notes' => $installation->notes . "\n" . $this->notes]);
+        if ($notes) {
+            $installation->update(['notes' => trim(($installation->notes ?? '') . "\n" . $notes)]);
         }
 
         $this->activeInstallationId = null;
         $this->dispatch('toast', message: 'Installation terminée avec succès !', type: 'success');
+        $this->dispatch('installation-updated');
+    }
+
+    public function openReassignModal(int $id): void
+    {
+        $user = auth()->user();
+        if (!in_array($user->role->value, ['super_admin', 'team_leader'])) {
+            $this->dispatch('toast', message: 'Action non autorisée', type: 'error');
+            return;
+        }
+        $this->reassignInstallationId = $id;
+        $this->reassignTechnicianId = null;
+    }
+
+    public function confirmReassign(InstallationService $service): void
+    {
+        if (!$this->reassignInstallationId || !$this->reassignTechnicianId) return;
+
+        $user = auth()->user();
+        if (!in_array($user->role->value, ['super_admin', 'team_leader'])) {
+            $this->dispatch('toast', message: 'Action non autorisée', type: 'error');
+            return;
+        }
+
+        $installation = Installation::findOrFail($this->reassignInstallationId);
+        $technician = User::findOrFail($this->reassignTechnicianId);
+
+        $service->assignTechnician($installation, $technician);
+
+        $this->reassignInstallationId = null;
+        $this->reassignTechnicianId = null;
+        $this->dispatch('toast', message: "Réassigné à {$technician->name}", type: 'success');
         $this->dispatch('installation-updated');
     }
 

@@ -95,7 +95,7 @@ class CommissionEngine
 
         $alreadyCredited = Commission::where('user_id', $user->id)
             ->where('type', CommissionType::BONUS_GRADE)
-            ->where('description', 'like', "%grade {$grade}%")
+            ->whereJsonContains('metadata->grade', $grade)
             ->exists();
 
         if ($alreadyCredited) return null;
@@ -105,6 +105,25 @@ class CommissionEngine
             type: CommissionType::BONUS_GRADE,
             amountCents: $amountCents,
             description: "Bonus atteinte grade {$grade}",
+            metadata: ['grade' => $grade],
+        );
+    }
+
+    public function creditRecurring(Lead $lead, string $month): ?Commission
+    {
+        $user = $lead->assignedUser;
+        if (!$user) return null;
+
+        $amountCents = config('crm.commissions.commercial_recurring_cents');
+        if ($amountCents <= 0) return null;
+
+        return $this->credit(
+            user: $user,
+            type: CommissionType::RECURRING,
+            amountCents: $amountCents,
+            source: $lead,
+            description: "Commission récurrente {$month} — {$lead->restaurant_name}",
+            metadata: ['month' => $month],
         );
     }
 

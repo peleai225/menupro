@@ -51,9 +51,15 @@ class InstallationService
     {
         $profile = TechnicianProfile::disponible()
             ->when($city, fn ($q) => $q->inZone($city))
-            ->withCount(['user as pending_installations_count' => function ($q) {
-                // placeholder
-            }])
+            ->withCount(['user as active_count' => fn ($q) =>
+                $q->whereHas('crmInstallations', fn ($i) =>
+                    $i->whereIn('status', [
+                        InstallationStatus::PLANIFIEE->value,
+                        InstallationStatus::EN_COURS->value,
+                    ])
+                )
+            ])
+            ->orderBy('active_count')
             ->first();
 
         return $profile?->user;

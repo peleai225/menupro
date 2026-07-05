@@ -166,6 +166,10 @@
                             <span wire:loading wire:target="startInstallation({{ $installation->id }})">...</span>
                         </button>
                         @if(in_array(auth()->user()->role->value, ['super_admin', 'team_leader']))
+                        <button wire:click="openReassignModal({{ $installation->id }})"
+                                class="px-3 py-2 text-xs font-medium rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 transition active:scale-95">
+                            Réassigner
+                        </button>
                         <button wire:click="cancelInstallation({{ $installation->id }})"
                                 wire:confirm="Annuler cette installation ?"
                                 class="px-3 py-2 text-xs font-medium rounded-xl bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700 transition active:scale-95">
@@ -251,6 +255,38 @@
                         class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition active:scale-95">
                     <span wire:loading.remove wire:target="completeInstallation">Confirmer</span>
                     <span wire:loading wire:target="completeInstallation">Traitement...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Reassign Modal --}}
+    @if($reassignInstallationId)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-data x-transition>
+        <div class="w-full max-w-sm bg-gray-900 rounded-2xl border border-gray-800 p-6 shadow-2xl">
+            <h3 class="text-lg font-semibold text-white mb-4">Réassigner le technicien</h3>
+            <div class="mb-5">
+                <label class="text-sm text-gray-400 mb-2 block">Choisir un technicien</label>
+                <select wire:model="reassignTechnicianId"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30">
+                    <option value="">-- Sélectionner --</option>
+                    @foreach($this->technicians as $tech)
+                    <option value="{{ $tech->id }}">{{ $tech->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex gap-3">
+                <button wire:click="$set('reassignInstallationId', null)"
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 transition">
+                    Annuler
+                </button>
+                <button wire:click="confirmReassign"
+                        wire:loading.attr="disabled"
+                        @disabled(!$reassignTechnicianId)
+                        class="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl bg-sky-500 text-white hover:bg-sky-600 transition disabled:opacity-50">
+                    <span wire:loading.remove wire:target="confirmReassign">Confirmer</span>
+                    <span wire:loading wire:target="confirmReassign">...</span>
                 </button>
             </div>
         </div>

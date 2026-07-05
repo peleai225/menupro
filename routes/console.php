@@ -104,3 +104,9 @@ Schedule::command('recap:daily')
     ->at('23:00')
     ->name('send-daily-recap')
     ->withoutOverlapping();
+
+// CRM — Commissions récurrentes le 2 de chaque mois à 6h
+Schedule::command('crm:credit-recurring')
+    ->monthlyOn(2, '06:00')
+    ->name('crm-recurring-commissions')
+    ->withoutOverlapping();

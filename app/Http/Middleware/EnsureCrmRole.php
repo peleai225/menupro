@@ -15,12 +15,15 @@ class EnsureCrmRole
             return redirect()->route('login');
         }
 
+        // Forcer le rechargement depuis la DB pour éviter les sessions avec ancien rôle
+        $user = $request->user()->fresh();
+
         $allowedRoles = array_map(
             fn (string $role) => UserRole::tryFrom($role),
             $roles
         );
 
-        if (!in_array($request->user()->role, $allowedRoles)) {
+        if (!in_array($user->role, $allowedRoles)) {
             abort(403, 'Accès non autorisé.');
         }
 

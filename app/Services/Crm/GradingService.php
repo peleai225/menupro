@@ -17,7 +17,7 @@ class GradingService
     public function recalculateForUser(User $user): void
     {
         $conversions = Lead::where('assigned_to', $user->id)
-            ->where('status', 'actif')
+            ->where('status', \App\Enums\Crm\LeadStatus::ACTIF)
             ->count();
 
         $grade = UserGrade::firstOrCreate(

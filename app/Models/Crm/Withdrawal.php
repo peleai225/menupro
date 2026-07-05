@@ -7,6 +7,7 @@ use App\Enums\Crm\WithdrawalStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Withdrawal extends Model
 {
@@ -69,15 +70,22 @@ class Withdrawal extends Model
 
     public function markPaid(string $reference): void
     {
-        $this->update([
-            'status' => WithdrawalStatus::PAID,
-            'payment_reference' => $reference,
-            'processed_at' => now(),
-        ]);
+        DB::transaction(function () use ($reference) {
+            $withdrawal = static::lockForUpdate()->findOrFail($this->id);
 
-        // Balance déjà débitée au moment de la demande (requestWithdrawal)
-        // On met seulement à jour le total retiré
-        $this->wallet->increment('total_withdrawn_cents', $this->amount_cents);
+            if ($withdrawal->status === WithdrawalStatus::PAID) return;
+
+            $withdrawal->update([
+                'status' => WithdrawalStatus::PAID,
+                'payment_reference' => $reference,
+                'processed_at' => now(),
+            ]);
+
+            Wallet::lockForUpdate()->find($withdrawal->wallet_id)
+                ?->increment('total_withdrawn_cents', $withdrawal->amount_cents);
+        });
+
+        $this->refresh();
     }
 
     public function reject(int $processedBy, string $reason): void
