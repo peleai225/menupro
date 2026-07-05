@@ -242,16 +242,21 @@ class OrderController extends Controller
      */
     public function board(): View
     {
+        $restaurantId = auth()->user()->restaurant_id;
+
         $orders = [
-            'new' => Order::whereIn('status', [OrderStatus::PAID, OrderStatus::CONFIRMED])
+            'new' => Order::where('restaurant_id', $restaurantId)
+                ->whereIn('status', [OrderStatus::PAID, OrderStatus::CONFIRMED])
                 ->with('items')
                 ->oldest()
                 ->get(),
-            'preparing' => Order::where('status', OrderStatus::PREPARING)
+            'preparing' => Order::where('restaurant_id', $restaurantId)
+                ->where('status', OrderStatus::PREPARING)
                 ->with('items')
                 ->oldest()
                 ->get(),
-            'ready' => Order::where('status', OrderStatus::READY)
+            'ready' => Order::where('restaurant_id', $restaurantId)
+                ->where('status', OrderStatus::READY)
                 ->with('items')
                 ->oldest()
                 ->get(),

@@ -40,28 +40,13 @@ class KitchenController extends Controller
                 OrderStatus::PAID,
                 OrderStatus::CONFIRMED,
                 OrderStatus::PREPARING,
+                OrderStatus::READY,
             ])
             ->with('items.dish')
             ->oldest()
             ->get();
 
-        $ordersJson = $orders->map(fn($order) => [
-            'id' => $order->id,
-            'reference' => $order->reference,
-            'status' => $order->status->value,
-            'status_label' => $order->status->label(),
-            'customer_name' => $order->customer_name,
-            'type' => $order->type?->label() ?? '',
-            'table_number' => $order->table_number,
-            'created_at' => $order->created_at->format('H:i'),
-            'minutes_ago' => $order->created_at->diffInMinutes(now()),
-            'items' => $order->items->map(fn($item) => [
-                'quantity' => $item->quantity,
-                'name' => $item->dish?->name ?? $item->dish_name ?? 'Plat',
-                'options' => $item->selected_options ?? [],
-                'instructions' => $item->special_instructions,
-            ]),
-        ])->values();
+        $ordersJson = $orders->map(fn($order) => $this->serializeOrder($order))->values();
 
         return view('pages.kitchen.display', compact('restaurant', 'ordersJson', 'token'));
     }
@@ -78,33 +63,19 @@ class KitchenController extends Controller
                 OrderStatus::PAID,
                 OrderStatus::CONFIRMED,
                 OrderStatus::PREPARING,
+                OrderStatus::READY,
             ])
             ->with('items.dish')
             ->oldest()
             ->get()
-            ->map(fn($order) => [
-                'id' => $order->id,
-                'reference' => $order->reference,
-                'status' => $order->status->value,
-                'status_label' => $order->status->label(),
-                'customer_name' => $order->customer_name,
-                'type' => $order->type?->label() ?? '',
-                'table_number' => $order->table_number,
-                'created_at' => $order->created_at->format('H:i'),
-                'minutes_ago' => $order->created_at->diffInMinutes(now()),
-                'items' => $order->items->map(fn($item) => [
-                    'quantity' => $item->quantity,
-                    'name' => $item->dish?->name ?? $item->dish_name ?? 'Plat',
-                    'options' => $item->selected_options ?? [],
-                    'instructions' => $item->special_instructions,
-                ]),
-            ]);
+            ->map(fn($order) => $this->serializeOrder($order));
 
         return response()->json([
             'orders' => $orders,
             'counts' => [
-                'new' => $orders->where('status', 'paid')->count() + $orders->where('status', 'confirmed')->count(),
+                'new'      => $orders->whereIn('status', ['paid', 'confirmed'])->count(),
                 'preparing' => $orders->where('status', 'preparing')->count(),
+                'ready'    => $orders->where('status', 'ready')->count(),
             ],
         ]);
     }
@@ -125,18 +96,52 @@ class KitchenController extends Controller
         $newStatus = match ($action) {
             'confirm' => OrderStatus::CONFIRMED,
             'prepare' => OrderStatus::PREPARING,
-            'ready' => OrderStatus::READY,
-            default => null,
+            'ready'   => OrderStatus::READY,
+            default   => null,
         };
 
         if (!$newStatus) {
             return response()->json(['error' => 'Action invalide'], 400);
         }
 
-        if (!$order->transitionTo($newStatus)) {
+        if (!$order->status->canTransitionTo($newStatus)) {
             return response()->json(['error' => 'Transition impossible'], 422);
         }
 
+        // Déduire le stock lors de la confirmation (PAID → CONFIRMED), comme les autres contrôleurs
+        if ($newStatus === OrderStatus::CONFIRMED
+            && $order->status === OrderStatus::PAID
+            && $restaurant->hasFeature('stock')
+        ) {
+            app(\App\Services\StockManager::class)
+                ->forRestaurant($restaurant)
+                ->deductForOrder($order);
+        }
+
+        $order->transitionTo($newStatus);
+
         return response()->json(['success' => true, 'new_status' => $newStatus->value]);
+    }
+
+    private function serializeOrder(Order $order): array
+    {
+        return [
+            'id'            => $order->id,
+            'reference'     => $order->reference,
+            'status'        => $order->status->value,
+            'status_label'  => $order->status->label(),
+            'customer_name' => $order->customer_name,
+            'type'          => $order->type?->label() ?? '',
+            'table_number'  => $order->table_number,
+            'created_at'    => $order->created_at->format('H:i'),
+            'minutes_ago'   => $order->created_at->diffInMinutes(now()),
+            'ready_at'      => $order->ready_at?->format('H:i'),
+            'items'         => $order->items->map(fn($item) => [
+                'quantity'     => $item->quantity,
+                'name'         => $item->dish?->name ?? $item->dish_name ?? 'Plat',
+                'options'      => $item->selected_options ?? [],
+                'instructions' => $item->special_instructions,
+            ])->values()->all(),
+        ];
     }
 }
