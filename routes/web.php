@@ -266,7 +266,9 @@ Route::prefix('dashboard')
 |--------------------------------------------------------------------------
 */
 Route::prefix('commando')->name('commando.')->middleware(['auth', 'commando.agent'])->group(function () {
-    Route::get('/dashboard', \App\Livewire\Commando\Dashboard::class)->name('dashboard');
+    Route::get('/dashboard', function () {
+        return redirect('/crm');
+    })->name('dashboard');
     Route::get('/carte', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'card'])->name('card');
     Route::get('/carte/download/pdf', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'downloadPdf'])->name('card.download.pdf');
 });
