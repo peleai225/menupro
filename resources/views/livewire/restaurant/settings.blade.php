@@ -68,6 +68,7 @@
                 'wallet' => ['label' => 'Wallet', 'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'],
                 'hours' => ['label' => 'Horaires', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
                 'kitchen' => ['label' => 'Cuisine', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
+                'security' => ['label' => 'Sécurité', 'icon' => 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z'],
             ] as $key => $tab)
                 <button @click="activeTab = '{{ $key }}'"
                         :class="activeTab === '{{ $key }}' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'"
@@ -1019,6 +1020,73 @@
                 </div>
             </div>
         </div>
+
+        <!-- Security Tab -->
+        <div x-show="activeTab === 'security'" x-cloak>
+            <div class="max-w-lg">
+                <div class="card p-6">
+                    <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Changer le mot de passe
+                    </h2>
+                    <p class="text-sm text-neutral-500 mb-6">Choisissez un mot de passe fort d'au moins 8 caractères.</p>
+
+                    <form wire:submit="changePassword" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Mot de passe actuel</label>
+                            <input type="password" wire:model="current_password"
+                                   autocomplete="current-password"
+                                   class="input @error('current_password') border-red-400 focus:ring-red-300 @enderror"
+                                   placeholder="••••••••">
+                            @error('current_password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Nouveau mot de passe</label>
+                            <input type="password" wire:model="new_password"
+                                   autocomplete="new-password"
+                                   class="input @error('new_password') border-red-400 focus:ring-red-300 @enderror"
+                                   placeholder="••••••••">
+                            @error('new_password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Confirmer le nouveau mot de passe</label>
+                            <input type="password" wire:model="new_password_confirmation"
+                                   autocomplete="new-password"
+                                   class="input @error('new_password_confirmation') border-red-400 focus:ring-red-300 @enderror"
+                                   placeholder="••••••••">
+                            @error('new_password_confirmation')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit"
+                                    wire:loading.attr="disabled"
+                                    wire:target="changePassword"
+                                    class="btn btn-primary flex items-center gap-2 disabled:opacity-60">
+                                <span wire:loading.remove wire:target="changePassword">Enregistrer le nouveau mot de passe</span>
+                                <span wire:loading wire:target="changePassword" class="inline-flex items-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                    </svg>
+                                    Modification...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
