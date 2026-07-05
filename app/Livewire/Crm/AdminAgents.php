@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Crm;
 
+use App\Enums\Crm\AgentStatus;
 use App\Enums\Crm\Grade;
 use App\Enums\UserRole;
 use App\Models\Crm\CommercialProfile;
@@ -22,6 +23,7 @@ class AdminAgents extends Component
     public string $cityFilter = '';
     public string $gradeFilter = '';
     public string $verificationFilter = '';
+    public string $statusFilter = '';
     public string $teamFilter = '';
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
@@ -32,6 +34,8 @@ class AdminAgents extends Component
     public string $editingRole = '';
     public string $editingTeamId = '';
     public string $editingAgentName = '';
+    public string $editingStatus = '';
+    public string $editingSpecialty = '';
 
     public function mount(): void
     {
@@ -71,9 +75,14 @@ class AdminAgents extends Component
         $this->resetPage();
     }
 
+    public function updatingStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
-        $this->reset(['search', 'roleFilter', 'cityFilter', 'gradeFilter', 'verificationFilter', 'teamFilter']);
+        $this->reset(['search', 'roleFilter', 'cityFilter', 'gradeFilter', 'verificationFilter', 'statusFilter', 'teamFilter']);
         $this->resetPage();
     }
 
@@ -147,6 +156,11 @@ class AdminAgents extends Component
             $query->whereHas('commercialProfile', function ($q) {
                 $q->where('verification_status', $this->verificationFilter);
             });
+        }
+
+        // Status filter
+        if ($this->statusFilter) {
+            $query->where('agent_status', $this->statusFilter);
         }
 
         // Team filter
@@ -268,10 +282,14 @@ class AdminAgents extends Component
 
     public function openEditModal(int $userId): void
     {
-        $user = User::findOrFail($userId);
+        $user = User::with(['commercialProfile', 'technicianProfile'])->findOrFail($userId);
         $this->editingAgentId = $userId;
         $this->editingAgentName = $user->name;
         $this->editingRole = $user->role->value;
+        $this->editingStatus = $user->agent_status?->value ?? 'actif';
+        $this->editingSpecialty = $user->commercialProfile?->specialty
+            ?? $user->technicianProfile?->specialty
+            ?? '';
         $teamId = $user->commercialProfile?->team_id ?? $user->technicianProfile?->team_id;
         $this->editingTeamId = (string) ($teamId ?? '');
         $this->showEditModal = true;
@@ -287,19 +305,34 @@ class AdminAgents extends Component
             return;
         }
 
+        $allowedStatuses = array_column(AgentStatus::cases(), 'value');
+        if (!in_array($this->editingStatus, $allowedStatuses)) {
+            session()->flash('error', 'Statut invalide.');
+            return;
+        }
+
         DB::transaction(function () use ($user) {
-            $user->update(['role' => $this->editingRole]);
+            $user->update([
+                'role' => $this->editingRole,
+                'agent_status' => $this->editingStatus,
+                'is_active' => $this->editingStatus === 'actif',
+            ]);
 
             $teamId = $this->editingTeamId ? (int) $this->editingTeamId : null;
 
             if ($user->commercialProfile) {
-                $user->commercialProfile->update(['team_id' => $teamId]);
+                $user->commercialProfile->update([
+                    'team_id' => $teamId,
+                    'specialty' => $this->editingSpecialty ?: null,
+                ]);
             }
             if ($user->technicianProfile) {
-                $user->technicianProfile->update(['team_id' => $teamId]);
+                $user->technicianProfile->update([
+                    'team_id' => $teamId,
+                    'specialty' => $this->editingSpecialty ?: null,
+                ]);
             }
 
-            // If promoted to team_leader, set as leader on the team
             if ($this->editingRole === 'team_leader' && $teamId) {
                 Team::where('id', $teamId)->update(['leader_id' => $user->id]);
             }
@@ -307,8 +340,28 @@ class AdminAgents extends Component
 
         $this->showEditModal = false;
         $this->editingAgentId = null;
-        session()->flash('message', "Rôle et équipe mis à jour pour {$user->name}.");
+        session()->flash('message', "Agent {$user->name} mis à jour.");
 
+        unset($this->agents);
+        unset($this->stats);
+    }
+
+    public function changeStatus(int $userId, string $newStatus): void
+    {
+        $user = User::findOrFail($userId);
+        $status = AgentStatus::tryFrom($newStatus);
+
+        if (!$status) {
+            session()->flash('error', 'Statut invalide.');
+            return;
+        }
+
+        $user->update([
+            'agent_status' => $status,
+            'is_active' => $status === AgentStatus::ACTIF,
+        ]);
+
+        session()->flash('message', "{$user->name} → {$status->label()}");
         unset($this->agents);
         unset($this->stats);
     }

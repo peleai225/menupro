@@ -17,11 +17,11 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::SUPER_ADMIN => 'Super Administrateur',
+            self::SUPER_ADMIN => 'Manager',
             self::RESTAURANT_ADMIN => 'Administrateur Restaurant',
             self::EMPLOYEE => 'Employé',
-            self::COMMANDO_AGENT => 'Agent Commando',
-            self::COMMERCIAL => 'Commercial',
+            self::COMMANDO_AGENT => 'Ambassadeur',
+            self::COMMERCIAL => 'Ambassadeur',
             self::TECHNICIAN => 'Technicien',
             self::TEAM_LEADER => 'Team Leader',
             self::CUSTOMER => 'Client',

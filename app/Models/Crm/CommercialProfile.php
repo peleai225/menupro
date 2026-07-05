@@ -17,6 +17,7 @@ class CommercialProfile extends Model
         'uuid',
         'badge_id',
         'city',
+        'specialty',
         'statut_metier',
         'id_document_path',
         'verification_status',

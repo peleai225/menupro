@@ -13,6 +13,7 @@ class TechnicianProfile extends Model
     protected $fillable = [
         'user_id',
         'speciality',
+        'specialty',
         'zone_geographique',
         'disponible',
         'team_id',

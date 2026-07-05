@@ -6,7 +6,7 @@
          x-data
          x-on:keydown.escape.window="$wire.showEditModal = false">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="$set('showEditModal', false)"></div>
-        <div class="relative bg-gray-900 rounded-2xl border border-gray-700 p-6 w-full max-w-md shadow-2xl">
+        <div class="relative bg-gray-900 rounded-2xl border border-gray-700 p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-base font-semibold text-white">Modifier l'agent</h3>
                 <button wire:click="$set('showEditModal', false)" class="text-gray-500 hover:text-white transition-colors">
@@ -16,16 +16,58 @@
             <p class="text-sm text-gray-400 mb-5">{{ $editingAgentName }}</p>
 
             <div class="space-y-4">
+                {{-- Rôle --}}
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1.5">Rôle</label>
-                    <select wire:model="editingRole"
+                    <select wire:model.live="editingRole"
                             class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
-                        <option value="commercial">Commercial (terrain)</option>
+                        <option value="commercial">Ambassadeur (terrain)</option>
                         <option value="technician">Technicien (installation)</option>
                         <option value="team_leader">Team Leader (chef d'équipe)</option>
                     </select>
                 </div>
 
+                {{-- Statut --}}
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Statut</label>
+                    <select wire:model="editingStatus"
+                            class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <option value="candidat">Candidat</option>
+                        <option value="en_formation">En formation</option>
+                        <option value="actif">Actif</option>
+                        <option value="suspendu">Suspendu</option>
+                        <option value="inactif">Inactif</option>
+                        <option value="banni">Banni</option>
+                    </select>
+                    @if(in_array($editingStatus, ['suspendu', 'inactif', 'banni']))
+                    <p class="text-xs text-red-400 mt-1.5">Cet agent ne pourra plus se connecter au CRM.</p>
+                    @endif
+                </div>
+
+                {{-- Spécialité --}}
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Spécialité</label>
+                    @if($editingRole === 'technician')
+                    <select wire:model="editingSpecialty"
+                            class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <option value="">— Non définie —</option>
+                        <option value="installation">Installation</option>
+                        <option value="support">Support</option>
+                        <option value="formation">Formation</option>
+                    </select>
+                    @else
+                    <select wire:model="editingSpecialty"
+                            class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                        <option value="">— Non définie —</option>
+                        <option value="vente">Vente</option>
+                        <option value="prospection">Prospection</option>
+                        <option value="grands_comptes">Grands comptes</option>
+                        <option value="campus">Campus</option>
+                    </select>
+                    @endif
+                </div>
+
+                {{-- Équipe --}}
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1.5">Équipe</label>
                     <select wire:model="editingTeamId"
@@ -36,7 +78,7 @@
                         @endforeach
                     </select>
                     @if($editingRole === 'team_leader')
-                    <p class="text-xs text-amber-400 mt-1.5">En sélectionnant Team Leader, cet agent sera automatiquement défini comme chef de l'équipe choisie.</p>
+                    <p class="text-xs text-amber-400 mt-1.5">Cet agent sera automatiquement désigné chef de l'équipe choisie.</p>
                     @endif
                 </div>
             </div>
@@ -141,7 +183,7 @@
                 <select wire:model.live="roleFilter"
                         class="px-3 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
                     <option value="">Tous les rôles</option>
-                    <option value="commercial">Commercial</option>
+                    <option value="commercial">Ambassadeur</option>
                     <option value="technician">Technicien</option>
                     <option value="team_leader">Team Leader</option>
                 </select>
@@ -164,13 +206,16 @@
                     <option value="elite">Elite</option>
                 </select>
 
-                {{-- Verification Filter --}}
-                <select wire:model.live="verificationFilter"
+                {{-- Status Filter --}}
+                <select wire:model.live="statusFilter"
                         class="px-3 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
                     <option value="">Tous les statuts</option>
-                    <option value="pending">En attente</option>
-                    <option value="verified">Vérifié</option>
-                    <option value="rejected">Rejeté</option>
+                    <option value="candidat">Candidat</option>
+                    <option value="en_formation">En formation</option>
+                    <option value="actif">Actif</option>
+                    <option value="suspendu">Suspendu</option>
+                    <option value="inactif">Inactif</option>
+                    <option value="banni">Banni</option>
                 </select>
 
                 {{-- Team Filter --}}
@@ -182,7 +227,7 @@
                     @endforeach
                 </select>
 
-                @if($search || $roleFilter || $cityFilter || $gradeFilter || $verificationFilter || $teamFilter)
+                @if($search || $roleFilter || $cityFilter || $gradeFilter || $statusFilter || $teamFilter)
                     <button wire:click="clearFilters"
                             class="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400 hover:bg-red-500/20 transition-all">
                         Réinitialiser
@@ -202,7 +247,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Rôle</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Ville</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Grade</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Vérification</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Statut</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Équipe</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Conversions</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
@@ -256,28 +301,17 @@
                                 @endif
                             </td>
 
-                            {{-- Verification Status --}}
+                            {{-- Agent Status --}}
                             <td class="px-6 py-4">
-                                @if($agent->commercialProfile)
-                                    @php $status = $agent->commercialProfile->verification_status; @endphp
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg
-                                        {{ $status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
-                                        {{ $status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
-                                        {{ $status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
-                                        @if($status === 'pending')
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-                                            En attente
-                                        @elseif($status === 'verified')
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                            Vérifié
-                                        @else
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                                            Rejeté
-                                        @endif
-                                    </span>
-                                @else
-                                    <span class="text-xs text-gray-600">-</span>
-                                @endif
+                                @php $agentStatus = $agent->agent_status?->value ?? 'actif'; @endphp
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg
+                                    {{ $agentStatus === 'actif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
+                                    {{ $agentStatus === 'candidat' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
+                                    {{ $agentStatus === 'en_formation' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : '' }}
+                                    {{ $agentStatus === 'suspendu' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' : '' }}
+                                    {{ in_array($agentStatus, ['inactif', 'banni']) ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
+                                    {{ $agent->agent_status?->label() ?? 'Actif' }}
+                                </span>
                             </td>
 
                             {{-- Team --}}
@@ -415,21 +449,16 @@
                         </p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 mb-1">Vérification</p>
-                        @if($agent->commercialProfile)
-                            @php $status = $agent->commercialProfile->verification_status; @endphp
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-lg
-                                {{ $status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
-                                {{ $status === 'verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
-                                {{ $status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
-                                @if($status === 'pending') En attente
-                                @elseif($status === 'verified') Vérifié
-                                @else Rejeté
-                                @endif
-                            </span>
-                        @else
-                            <span class="text-sm text-gray-600">-</span>
-                        @endif
+                        <p class="text-xs text-gray-500 mb-1">Statut</p>
+                        @php $agentStatus = $agent->agent_status?->value ?? 'actif'; @endphp
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-lg
+                            {{ $agentStatus === 'actif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
+                            {{ $agentStatus === 'candidat' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
+                            {{ $agentStatus === 'en_formation' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : '' }}
+                            {{ $agentStatus === 'suspendu' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' : '' }}
+                            {{ in_array($agentStatus, ['inactif', 'banni']) ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
+                            {{ $agent->agent_status?->label() ?? 'Actif' }}
+                        </span>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Conversions</p>

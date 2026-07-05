@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Crm\AgentStatus;
 use App\Enums\UserRole;
 use App\Models\Crm\CommercialProfile;
 use App\Models\Crm\Commission;
@@ -37,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'restaurant_id',
         'avatar_path',
         'is_active',
+        'agent_status',
         'last_login_at',
         'welcome_token',
         'city',
@@ -54,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'agent_status' => AgentStatus::class,
             'is_active' => 'boolean',
         ];
     }
