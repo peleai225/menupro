@@ -2,22 +2,27 @@
 
 namespace App\Services\Crm;
 
+use App\Enums\Crm\AgentStatus;
 use App\Enums\Crm\CommissionStatus;
 use App\Enums\Crm\CommissionType;
+use App\Enums\Crm\SubscriptionPlan;
 use App\Events\Crm\CommissionCredited;
 use App\Models\Crm\Commission;
-use App\Models\Crm\Lead;
 use App\Models\Crm\Installation;
+use App\Models\Crm\Lead;
 use App\Models\Crm\Wallet;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CommissionEngine
 {
+    /**
+     * Commission signature ambassadeur — montant selon le plan souscrit.
+     */
     public function creditForSignature(Lead $lead): ?Commission
     {
         $user = $lead->assignedUser;
-        if (!$user) return null;
+        if (!$user || !$this->agentCanReceive($user)) return null;
 
         $alreadyCredited = Commission::where('user_id', $user->id)
             ->where('source_type', Lead::class)
@@ -27,19 +32,29 @@ class CommissionEngine
 
         if ($alreadyCredited) return null;
 
+        $amountCents = $lead->subscription_plan
+            ? $lead->subscription_plan->signatureCommissionCents()
+            : config('crm.commissions.commercial_first_payment_cents');
+
+        $planLabel = $lead->subscription_plan?->shortLabel() ?? 'Plan inconnu';
+
         return $this->credit(
             user: $user,
             type: CommissionType::SIGNATURE,
-            amountCents: config('crm.commissions.commercial_first_payment_cents'),
+            amountCents: $amountCents,
             source: $lead,
-            description: "Commission signature — {$lead->restaurant_name}",
+            description: "Commission signature {$planLabel} — {$lead->restaurant_name}",
+            metadata: ['plan' => $lead->subscription_plan?->value],
         );
     }
 
+    /**
+     * Commission installation technicien — paliers selon volume du mois calendaire.
+     */
     public function creditForInstallation(Installation $installation): ?Commission
     {
         $technician = $installation->technician;
-        if (!$technician) return null;
+        if (!$technician || !$this->agentCanReceive($technician)) return null;
 
         $alreadyCredited = Commission::where('user_id', $technician->id)
             ->where('source_type', Installation::class)
@@ -49,22 +64,27 @@ class CommissionEngine
 
         if ($alreadyCredited) return null;
 
+        $amountCents = $this->technicianInstallCommission($technician->id);
+
         return $this->credit(
             user: $technician,
             type: CommissionType::INSTALLATION,
-            amountCents: config('crm.commissions.technician_install_cents'),
+            amountCents: $amountCents,
             source: $installation,
             description: "Commission installation — {$installation->lead->restaurant_name}",
         );
     }
 
+    /**
+     * Override Team Leader — 1 000 F par conversion dans son équipe.
+     */
     public function creditLeaderOverride(Lead $lead): ?Commission
     {
         $team = $lead->team;
         if (!$team || !$team->leader_id) return null;
 
         $leader = $team->leader;
-        if (!$leader) return null;
+        if (!$leader || !$this->agentCanReceive($leader)) return null;
 
         $alreadyCredited = Commission::where('user_id', $leader->id)
             ->where('source_type', Lead::class)
@@ -83,12 +103,15 @@ class CommissionEngine
         );
     }
 
+    /**
+     * Bonus grade (one-shot).
+     */
     public function creditGradeBonus(User $user, string $grade): ?Commission
     {
         $amountCents = match ($grade) {
             'commando' => config('crm.commissions.bonus_grade_commando_cents'),
-            'elite' => config('crm.commissions.bonus_grade_elite_cents'),
-            default => 0,
+            'elite'    => config('crm.commissions.bonus_grade_elite_cents'),
+            default    => 0,
         };
 
         if ($amountCents <= 0) return null;
@@ -109,22 +132,76 @@ class CommissionEngine
         );
     }
 
+    /**
+     * Récurrente mensuelle — montant selon le plan actuel du lead.
+     * S'arrête si agent non actif ou si le lead n'est plus ACTIF.
+     */
     public function creditRecurring(Lead $lead, string $month): ?Commission
     {
         $user = $lead->assignedUser;
-        if (!$user) return null;
+        if (!$user || !$this->agentCanReceive($user)) return null;
 
-        $amountCents = config('crm.commissions.commercial_recurring_cents');
+        // Ne pas créditer si la récurrente n'a pas encore démarré
+        if ($lead->recurring_starts_month && $month < $lead->recurring_starts_month) {
+            return null;
+        }
+
+        $amountCents = $lead->subscription_plan
+            ? $lead->subscription_plan->recurringCommissionCents()
+            : config('crm.commissions.commercial_recurring_cents');
+
         if ($amountCents <= 0) return null;
+
+        $planLabel = $lead->subscription_plan?->shortLabel() ?? 'Plan inconnu';
 
         return $this->credit(
             user: $user,
             type: CommissionType::RECURRING,
             amountCents: $amountCents,
             source: $lead,
-            description: "Commission récurrente {$month} — {$lead->restaurant_name}",
-            metadata: ['month' => $month],
+            description: "Récurrente {$month} {$planLabel} — {$lead->restaurant_name}",
+            metadata: ['month' => $month, 'plan' => $lead->subscription_plan?->value],
         );
+    }
+
+    /**
+     * Palier commission technicien selon nombre d'installations ce mois.
+     */
+    private function technicianInstallCommission(int $technicianId): int
+    {
+        $countThisMonth = Installation::where('technician_id', $technicianId)
+            ->where('status', 'terminee')
+            ->whereMonth('completed_at', now()->month)
+            ->whereYear('completed_at', now()->year)
+            ->count();
+
+        $tier1Max = config('crm.commissions.technician_install_tier1_max');
+        $tier2Max = config('crm.commissions.technician_install_tier2_max');
+
+        // La nouvelle installation va s'ajouter à ce compte
+        $next = $countThisMonth + 1;
+
+        if ($next <= $tier1Max) {
+            return config('crm.commissions.technician_install_tier1_cents');
+        } elseif ($next <= $tier2Max) {
+            return config('crm.commissions.technician_install_tier2_cents');
+        } else {
+            return config('crm.commissions.technician_install_tier3_cents');
+        }
+    }
+
+    /**
+     * L'agent peut recevoir une commission s'il est actif.
+     */
+    private function agentCanReceive(User $user): bool
+    {
+        // Manager reçoit toujours (super_admin)
+        if ($user->isSuperAdmin()) return true;
+
+        $status = $user->agent_status;
+        if (!$status) return true; // pas encore migré → on laisse passer
+
+        return $status === AgentStatus::ACTIF;
     }
 
     private function credit(
@@ -142,15 +219,15 @@ class CommissionEngine
             );
 
             $commission = Commission::create([
-                'wallet_id' => $wallet->id,
-                'user_id' => $user->id,
-                'type' => $type,
-                'status' => CommissionStatus::VALIDATED,
+                'wallet_id'   => $wallet->id,
+                'user_id'     => $user->id,
+                'type'        => $type,
+                'status'      => CommissionStatus::VALIDATED,
                 'amount_cents' => $amountCents,
                 'source_type' => $source ? get_class($source) : null,
-                'source_id' => $source?->id,
+                'source_id'   => $source?->id,
                 'description' => $description,
-                'metadata' => $metadata,
+                'metadata'    => $metadata,
                 'validated_at' => now(),
             ]);
 

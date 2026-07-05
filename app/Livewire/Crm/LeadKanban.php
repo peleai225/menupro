@@ -14,6 +14,7 @@ class LeadKanban extends Component
     public ?string $filterCity = null;
     public ?string $filterSource = null;
     public ?int $filterTeam = null;
+    public ?string $filterPlan = null;
 
     public function moveToStatus(int $leadId, string $status): void
     {
@@ -67,6 +68,10 @@ class LeadKanban extends Component
 
         if ($this->filterTeam) {
             $query->forTeam($this->filterTeam);
+        }
+
+        if ($this->filterPlan) {
+            $query->where('subscription_plan', $this->filterPlan);
         }
 
         $leads = $query->with(['assignedUser', 'activities' => fn ($q) => $q->latest()])

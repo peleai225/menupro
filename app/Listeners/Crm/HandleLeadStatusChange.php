@@ -25,6 +25,13 @@ class HandleLeadStatusChange
         }
 
         if ($event->newStatus === LeadStatus::ACTIF) {
+            // Récurrente démarre le 2ème mois après conversion
+            if (!$lead->recurring_starts_month) {
+                $lead->update([
+                    'recurring_starts_month' => now()->addMonthNoOverflow()->format('Y-m'),
+                ]);
+            }
+
             $this->commissionEngine->creditForSignature($lead);
             $this->commissionEngine->creditLeaderOverride($lead);
 

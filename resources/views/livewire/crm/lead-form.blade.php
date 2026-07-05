@@ -73,6 +73,19 @@
                         </select>
                     </div>
 
+                    {{-- Plan proposé --}}
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Plan proposé</label>
+                        <select wire:model="subscription_plan"
+                                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition">
+                            <option value="">— Non défini —</option>
+                            @foreach(\App\Enums\Crm\SubscriptionPlan::cases() as $plan)
+                                <option value="{{ $plan->value }}">{{ $plan->label() }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-gray-600 mt-1">Détermine votre commission à la signature.</p>
+                    </div>
+
                     {{-- Address --}}
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-medium text-gray-400 mb-1.5">Adresse</label>

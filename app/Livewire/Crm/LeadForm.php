@@ -3,6 +3,7 @@
 namespace App\Livewire\Crm;
 
 use App\Enums\Crm\LeadSource;
+use App\Enums\Crm\SubscriptionPlan;
 use App\Models\Crm\Lead;
 use App\Services\Crm\LeadPipelineService;
 use Livewire\Attributes\On;
@@ -19,6 +20,7 @@ class LeadForm extends Component
     public string $address = '';
     public string $city = '';
     public string $source = 'terrain';
+    public string $subscription_plan = '';
     public ?float $latitude = null;
     public ?float $longitude = null;
 
@@ -34,6 +36,7 @@ class LeadForm extends Component
             'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:100',
             'source' => 'required|in:' . implode(',', array_column(LeadSource::cases(), 'value')),
+            'subscription_plan' => 'nullable|in:' . implode(',', array_column(SubscriptionPlan::cases(), 'value')),
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
         ];
@@ -57,8 +60,9 @@ class LeadForm extends Component
                 'address', 'city', 'latitude', 'longitude',
             ]));
             $this->source = $this->lead->source->value;
+            $this->subscription_plan = $this->lead->subscription_plan?->value ?? '';
         } else {
-            $this->reset(['lead', 'restaurant_name', 'manager_name', 'phone', 'email', 'address', 'city', 'source', 'latitude', 'longitude']);
+            $this->reset(['lead', 'restaurant_name', 'manager_name', 'phone', 'email', 'address', 'city', 'source', 'subscription_plan', 'latitude', 'longitude']);
             $this->source = 'terrain';
         }
 
@@ -68,6 +72,11 @@ class LeadForm extends Component
     public function save(): void
     {
         $data = $this->validate();
+
+        // Normaliser subscription_plan vide en null
+        if (empty($data['subscription_plan'])) {
+            $data['subscription_plan'] = null;
+        }
 
         if ($this->lead) {
             $this->lead->update($data);

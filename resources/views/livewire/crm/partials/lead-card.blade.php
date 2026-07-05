@@ -28,6 +28,13 @@
     <p class="text-xs text-gray-500 mb-1.5 {{ $compact ? 'truncate' : '' }}">{{ $lead->manager_name }}</p>
     @endif
 
+    {{-- Plan badge --}}
+    @if($lead->subscription_plan)
+    <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold mb-1.5 {{ $lead->subscription_plan->badgeClass() }}">
+        {{ $lead->subscription_plan->shortLabel() }}
+    </span>
+    @endif
+
     <div class="flex items-center justify-between {{ $compact ? 'mt-2' : 'mt-3' }}">
         <div class="flex items-center gap-1.5">
             @if($lead->phone)

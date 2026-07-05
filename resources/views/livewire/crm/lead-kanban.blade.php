@@ -38,6 +38,14 @@
         </select>
         @endif
 
+        <select wire:model.live="filterPlan"
+                class="bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition">
+            <option value="">Tous les plans</option>
+            @foreach(\App\Enums\Crm\SubscriptionPlan::cases() as $plan)
+                <option value="{{ $plan->value }}">{{ $plan->shortLabel() }}</option>
+            @endforeach
+        </select>
+
         {{-- Desktop button (hidden on mobile) --}}
         <button wire:click="$dispatch('open-lead-form')"
                 class="hidden lg:inline-flex ml-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 active:scale-95">

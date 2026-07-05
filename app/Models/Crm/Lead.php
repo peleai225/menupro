@@ -5,6 +5,7 @@ namespace App\Models\Crm;
 use App\Enums\Crm\ActivityType;
 use App\Enums\Crm\LeadSource;
 use App\Enums\Crm\LeadStatus;
+use App\Enums\Crm\SubscriptionPlan;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -36,6 +37,8 @@ class Lead extends Model
         'score',
         'next_action_at',
         'converted_at',
+        'subscription_plan',
+        'recurring_starts_month',
     ];
 
     protected function casts(): array
@@ -48,6 +51,7 @@ class Lead extends Model
             'score' => 'integer',
             'next_action_at' => 'datetime',
             'converted_at' => 'datetime',
+            'subscription_plan' => SubscriptionPlan::class,
         ];
     }
 
