@@ -35,7 +35,21 @@ class KitchenController extends Controller
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
 
-        return view('pages.kitchen.display', compact('restaurant', 'token'));
+        $orders = Order::withoutGlobalScope('restaurant')
+            ->where('restaurant_id', $restaurant->id)
+            ->whereIn('status', [
+                OrderStatus::PAID,
+                OrderStatus::CONFIRMED,
+                OrderStatus::PREPARING,
+                OrderStatus::READY,
+            ])
+            ->with('items.dish')
+            ->oldest()
+            ->get();
+
+        $ordersJson = $orders->map(fn($order) => $this->serializeOrder($order))->values();
+
+        return view('pages.kitchen.display', compact('restaurant', 'ordersJson', 'token'));
     }
 
     /**
