@@ -107,6 +107,19 @@ class Restaurant extends Model
     ];
 
     // =========================================================================
+    // BOOT — auto-génère le kitchen_token à la création
+    // =========================================================================
+
+    protected static function booted(): void
+    {
+        static::creating(function (Restaurant $restaurant) {
+            if (empty($restaurant->kitchen_token)) {
+                $restaurant->kitchen_token = \Illuminate\Support\Str::random(48);
+            }
+        });
+    }
+
+    // =========================================================================
     // RELATIONSHIPS
     // =========================================================================
 

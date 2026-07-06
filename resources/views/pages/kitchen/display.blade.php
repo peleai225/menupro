@@ -388,7 +388,7 @@
             online: true,
             token: '{{ $token }}',
             pollInterval: null,
-            previousOrderIds: [],
+            knownIds: new Set(),
 
             get newOrders() {
                 return this.orders.filter(o => o.status === 'paid' || o.status === 'confirmed');
@@ -401,13 +401,15 @@
             },
 
             init() {
-                this.previousOrderIds = this.orders.map(o => o.id);
+                // knownIds = IDs connus dès le chargement initial — les nouvelles
+                // commandes arrivées APRÈS ce moment déclencheront l'alerte
+                this.knownIds = new Set(this.orders.map(o => o.id));
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
-                this.pollInterval = setInterval(() => this.fetchOrders(), 8000); // fallback polling toutes les 8s si WebSocket indisponible
+                // Polling toutes les 5s — fiable même si WebSocket indisponible
+                this.pollInterval = setInterval(() => this.fetchOrders(), 5000);
 
-                // Indicateur réseau
                 window.addEventListener('online',  () => { this.online = true;  });
                 window.addEventListener('offline', () => { this.online = false; });
                 this.online = navigator.onLine;
@@ -462,16 +464,16 @@
                     this.online = true;
 
                     const data = await resp.json();
-                    const newIds = data.orders.map(o => o.id);
-                    const brandNew = data.orders.filter(o => !this.previousOrderIds.includes(o.id));
 
+                    // Détecte les commandes vraiment nouvelles (pas dans knownIds)
+                    const brandNew = data.orders.filter(o => !this.knownIds.has(o.id));
                     if (brandNew.length > 0) {
                         brandNew.forEach(order => this.announceNewOrder(order));
+                        brandNew.forEach(o => this.knownIds.add(o.id));
                     }
 
                     this.orders = data.orders;
                     this.counts = data.counts;
-                    this.previousOrderIds = newIds;
                 } catch (e) {
                     this.online = false;
                 }
