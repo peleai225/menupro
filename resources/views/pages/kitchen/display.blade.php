@@ -46,7 +46,8 @@
         .dn { background: #f97316; } .dp { background: #3b82f6; } .dr { background: #22c55e; }
 
         /* CARTES */
-        .card { background: #111; border-radius: 12px; border: 1px solid #1d1d1d; overflow: hidden; animation: si .2s ease-out; }
+        .card { background: #111; border-radius: 12px; border: 1px solid #1d1d1d; overflow: hidden; }
+        .card.new-card { animation: si .25s ease-out; }
         @keyframes si { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .ctop { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border-bottom: 1px solid #1a1a1a; }
         .ctop-paid      { background: rgba(249,115,22,.09); }
@@ -284,9 +285,16 @@
             col.innerHTML = '<div class="empty">Aucune commande</div>';
             return;
         }
-        col.innerHTML = orders.map(function(o){
-            return '<div class="card" id="card-'+parseInt(o.id,10)+'">'+cardHtml(o)+'</div>';
+        // Met à jour chaque carte individuellement pour éviter de tout reconstruire
+        var existingIds = {};
+        col.querySelectorAll('.card[id]').forEach(function(el){ existingIds[el.id] = true; });
+
+        var newHtml = orders.map(function(o){
+            var cid = 'card-' + parseInt(o.id, 10);
+            var isNew = !existingIds[cid];
+            return '<div class="card' + (isNew ? ' new-card' : '') + '" id="' + cid + '">' + cardHtml(o) + '</div>';
         }).join('');
+        col.innerHTML = newHtml;
     }
 
     /* ══ ALERTE ══════════════════════════════════════════ */
