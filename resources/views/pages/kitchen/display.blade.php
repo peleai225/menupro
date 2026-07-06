@@ -4,594 +4,450 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Cuisine — {{ $restaurant->name }}</title>
-    <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.bunny.net">
     <style>
-        [x-cloak] { display: none !important; }
-        body { user-select: none; -webkit-user-select: none; }
-        .card-enter { animation: cardSlideIn 0.3s ease-out; }
-        @keyframes cardSlideIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .pulse-ring {
-            animation: pulseRing 1.8s ease-out infinite;
-        }
-        @keyframes pulseRing {
-            0%   { transform: scale(0.8); opacity: 0.8; }
-            70%  { transform: scale(1.4); opacity: 0; }
-            100% { transform: scale(0.8); opacity: 0; }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: ui-sans-serif, system-ui, sans-serif; background: #0a0a0a; color: #fff; height: 100vh; overflow: hidden; user-select: none; }
+
+        /* HEADER */
+        #header { height: 56px; background: #f97316; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+        #header h1 { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .header-counts { display: flex; gap: 6px; font-size: 12px; }
+        .badge { padding: 3px 8px; border-radius: 8px; font-weight: 700; white-space: nowrap; }
+        .badge-new { background: rgba(255,255,255,0.25); }
+        .badge-prep { background: rgba(255,255,255,0.15); }
+        .badge-ready { background: #22c55e; }
+        .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .icon-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+        .icon-btn:hover { background: rgba(255,255,255,0.15); }
+        .icon-btn.off { opacity: 0.35; }
+        #dot-online { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+        #dot-online.offline { background: #ef4444; }
+        #clock { font-size: 11px; font-family: monospace; opacity: 0.6; }
+
+        /* COLONNES */
+        #main { display: flex; height: calc(100vh - 56px); overflow: hidden; }
+        .col { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1f1f1f; min-width: 0; }
+        .col:last-child { border-right: none; }
+        .col-header { height: 40px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #1f1f1f; flex-shrink: 0; font-size: 13px; font-weight: 700; gap: 8px; }
+        .col-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+        .col-body::-webkit-scrollbar { width: 4px; }
+        .col-body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        /* COULEURS COLONNES */
+        .col-new .col-header { background: rgba(249,115,22,0.08); color: #fb923c; }
+        .col-prep .col-header { background: rgba(59,130,246,0.08); color: #60a5fa; }
+        .col-ready .col-header { background: rgba(34,197,94,0.08); color: #4ade80; }
+
+        /* DOT COULEUR */
+        .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .dot-new { background: #f97316; }
+        .dot-prep { background: #3b82f6; }
+        .dot-ready { background: #22c55e; }
+        .col-count { margin-left: auto; font-family: monospace; opacity: 0.6; font-size: 12px; }
+
+        /* CARTES */
+        .card { background: #111; border-radius: 12px; border: 1px solid #222; overflow: hidden; animation: slideIn 0.25s ease-out; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .card-top { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid #1a1a1a; gap: 8px; }
+        .card-top.new { background: rgba(249,115,22,0.08); }
+        .card-top.confirmed { background: rgba(234,179,8,0.08); }
+        .card-top.preparing { background: rgba(59,130,246,0.08); }
+        .card-top.ready { background: rgba(34,197,94,0.08); }
+        .card-ref { font-size: 15px; font-weight: 900; }
+        .card-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+        .badge-paid { background: #f97316; color: #fff; }
+        .badge-confirmed { background: #eab308; color: #000; }
+        .badge-preparing { background: #3b82f6; color: #fff; }
+        .badge-ready { background: #22c55e; color: #fff; }
+        .card-table { font-size: 11px; background: #222; color: #fff; padding: 2px 8px; border-radius: 20px; font-weight: 700; flex-shrink: 0; }
+        .card-timer { font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .timer-ok { color: #6b7280; }
+        .timer-warn { color: #eab308; }
+        .timer-late { color: #ef4444; }
+        .card-body { padding: 12px 14px; }
+        .card-customer { font-size: 13px; font-weight: 600; color: #d1d5db; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .card-type { font-size: 11px; color: #6b7280; }
+        .item-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+        .item-qty { font-size: 13px; font-weight: 900; min-width: 24px; }
+        .item-name { font-size: 13px; color: #e5e7eb; }
+        .item-note { font-size: 11px; color: #fbbf24; background: rgba(251,191,36,0.1); padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
+        .card-btn { width: 100%; padding: 10px; border: none; border-radius: 10px; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; margin-top: 10px; transition: opacity 0.15s, transform 0.1s; }
+        .card-btn:hover { opacity: 0.9; }
+        .card-btn:active { transform: scale(0.97); }
+        .btn-confirm { background: #f97316; color: #fff; }
+        .btn-prepare { background: #eab308; color: #000; }
+        .btn-ready { background: #22c55e; color: #fff; }
+
+        /* ÉTAT VIDE */
+        .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; color: #333; font-size: 13px; text-align: center; gap: 6px; }
+
+        /* OVERLAY NOUVELLE COMMANDE */
+        #alert-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; align-items: center; justify-content: center; }
+        #alert-overlay.show { display: flex; }
+        #alert-box { background: #f97316; border-radius: 24px; padding: 40px 32px; text-align: center; max-width: 320px; width: 90%; animation: popIn 0.3s ease-out; }
+        @keyframes popIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+        #alert-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+        #alert-detail { font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 500; }
+        #alert-hint { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 16px; }
+
+        /* SCROLLBAR GLOBAL */
+        html { scrollbar-color: #333 transparent; }
     </style>
 </head>
-<body class="h-full bg-neutral-950 text-white overflow-hidden font-sans"
-      x-data="kitchenDisplay()"
-      x-init="init()">
+<body>
 
-    {{-- ══ HEADER ══ --}}
-    <header class="h-14 px-4 flex items-center justify-between shrink-0 bg-primary-600 shadow-lg">
-        <div class="flex items-center gap-3">
-            @if($restaurant->logo_url)
-                <img src="{{ $restaurant->logo_url }}" alt="" class="w-8 h-8 rounded-full object-cover border border-white/20">
-            @endif
-            <h1 class="text-base font-bold truncate max-w-[140px] sm:max-w-none">{{ $restaurant->name }}</h1>
-            <span class="text-white/50 text-xs hidden sm:inline">| Cuisine</span>
-        </div>
-        <div class="flex items-center gap-2 sm:gap-3">
-            {{-- Compteurs --}}
-            <div class="hidden sm:flex items-center gap-2 text-xs">
-                <span class="bg-white/20 px-2 py-1 rounded-lg font-bold" x-text="counts.new + ' en attente'"></span>
-                <span class="bg-white/10 px-2 py-1 rounded-lg" x-text="counts.preparing + ' en prep'"></span>
-                <span x-show="counts.ready > 0"
-                      class="bg-success-500/90 px-2 py-1 rounded-lg font-bold"
-                      x-text="counts.ready + ' prêt' + (counts.ready > 1 ? 's' : '')"></span>
-            </div>
-            {{-- Indicateur réseau --}}
-            <div class="relative flex items-center justify-center w-6 h-6" title="Connexion">
-                <span class="absolute w-3 h-3 rounded-full"
-                      :class="online ? 'bg-success-500' : 'bg-error-500'"></span>
-                <span x-show="online" class="absolute w-3 h-3 rounded-full bg-success-500 pulse-ring"></span>
-            </div>
-            {{-- Synthèse vocale --}}
-            <button @click="toggleVoice()"
-                    class="p-1.5 rounded-lg hover:bg-white/10 transition"
-                    :class="voiceEnabled ? 'text-white' : 'text-white/30'"
-                    title="Synthèse vocale">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path x-show="voiceEnabled" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-                    <path x-show="!voiceEnabled" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15z"/>
-                </svg>
-            </button>
-            {{-- Son --}}
-            <button @click="toggleSound()"
-                    class="p-1.5 rounded-lg hover:bg-white/10 transition"
-                    :class="soundEnabled ? 'text-white' : 'text-white/30'"
-                    title="Sonnerie">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path x-show="soundEnabled" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6 9H4a1 1 0 00-1 1v4a1 1 0 001 1h2l4 4V5L6 9z"/>
-                    <path x-show="!soundEnabled" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
-                </svg>
-            </button>
-            <span class="text-white/40 text-xs font-mono hidden sm:inline" x-text="clock"></span>
-        </div>
-    </header>
-
-    {{-- ══ 3 COLONNES ══ --}}
-    <main class="h-[calc(100vh-56px)] flex overflow-hidden">
-
-        {{-- ── Colonne 1 : Nouvelles commandes ── --}}
-        <div class="flex-1 flex flex-col border-r border-neutral-800 min-w-0">
-            <div class="h-10 flex items-center px-4 bg-primary-500/10 border-b border-neutral-800 shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-primary-500 mr-2 shrink-0"></span>
-                <span class="text-sm font-bold text-primary-400">Nouvelles</span>
-                <span class="ml-auto text-xs text-primary-400/70 font-mono" x-text="counts.new"></span>
-            </div>
-            <div class="flex-1 overflow-y-auto p-3 space-y-3">
-                <template x-for="order in newOrders" :key="order.id">
-                    <div class="card-enter bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden">
-                        {{-- Top bar --}}
-                        <div class="flex items-center justify-between px-4 py-2 border-b border-neutral-800/50"
-                             :class="order.status === 'paid' ? 'bg-primary-500/10' : 'bg-warning-500/10'">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="text-base font-black text-white shrink-0" x-text="'#' + order.reference"></span>
-                                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shrink-0"
-                                      :class="order.status === 'paid' ? 'bg-primary-500 text-white' : 'bg-warning-500 text-black'"
-                                      x-text="order.status === 'paid' ? 'NOUVELLE' : 'CONFIRMÉE'"></span>
-                                <template x-if="order.table_number">
-                                    <span class="text-[11px] bg-neutral-700 text-white px-2 py-0.5 rounded-full font-bold shrink-0"
-                                          x-text="'Table ' + order.table_number"></span>
-                                </template>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs text-neutral-400 shrink-0">
-                                <span x-text="order.created_at"></span>
-                                <span class="font-bold"
-                                      :class="{
-                                          'text-error-500': order.minutes_ago > 15,
-                                          'text-warning-500': order.minutes_ago > 8,
-                                          'text-neutral-400': order.minutes_ago <= 8
-                                      }"
-                                      x-text="order.minutes_ago + 'min'"></span>
-                            </div>
-                        </div>
-
-                        <div class="px-4 py-3">
-                            <div class="flex items-center justify-between mb-3 gap-2">
-                                <span class="text-sm font-semibold text-neutral-200 truncate" x-text="order.customer_name || 'Client'"></span>
-                                <span class="text-xs text-neutral-500 shrink-0" x-text="order.type"></span>
-                            </div>
-
-                            <div class="space-y-1.5 mb-3">
-                                <template x-for="(item, idx) in order.items" :key="idx">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-sm font-black text-white min-w-[22px] shrink-0" x-text="item.quantity + 'x'"></span>
-                                        <div class="flex-1 min-w-0">
-                                            <span class="text-sm text-neutral-100 font-medium" x-text="item.name"></span>
-                                            <template x-if="item.options && item.options.length > 0">
-                                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                                    <template x-for="(opt, oi) in item.options" :key="oi">
-                                                        <span class="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded"
-                                                              x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                            <template x-if="item.instructions">
-                                                <p class="text-[11px] text-warning-400 font-medium mt-0.5 bg-warning-500/10 px-1.5 py-0.5 rounded"
-                                                   x-text="'⚠ ' + item.instructions"></p>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <template x-if="order.status === 'paid'">
-                                <button @click="updateOrder(order.id, 'confirm')"
-                                        class="w-full py-3 rounded-xl bg-primary-500 hover:bg-primary-400 active:scale-[0.97] text-white font-black text-sm uppercase tracking-wide transition shadow-lg shadow-primary-500/20">
-                                    ✓ Confirmer la commande
-                                </button>
-                            </template>
-                            <template x-if="order.status === 'confirmed'">
-                                <button @click="updateOrder(order.id, 'prepare')"
-                                        class="w-full py-3 rounded-xl bg-warning-500 hover:bg-warning-400 active:scale-[0.97] text-black font-black text-sm uppercase tracking-wide transition shadow-lg shadow-warning-500/20">
-                                    🍳 Commencer la préparation
-                                </button>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-
-                <div x-show="newOrders.length === 0" class="flex flex-col items-center justify-center h-48 text-neutral-700 text-center">
-                    <svg class="w-10 h-10 mb-2 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <p class="text-sm">Aucune nouvelle commande</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- ── Colonne 2 : En préparation ── --}}
-        <div class="flex-1 flex flex-col border-r border-neutral-800 min-w-0">
-            <div class="h-10 flex items-center px-4 bg-info-500/10 border-b border-neutral-800 shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-info-500 mr-2 shrink-0"></span>
-                <span class="text-sm font-bold text-info-500">En préparation</span>
-                <span class="ml-auto text-xs text-info-500/70 font-mono" x-text="counts.preparing"></span>
-            </div>
-            <div class="flex-1 overflow-y-auto p-3 space-y-3">
-                <template x-for="order in preparingOrders" :key="order.id">
-                    <div class="card-enter bg-neutral-900 rounded-xl border border-info-500/30 overflow-hidden">
-                        <div class="flex items-center justify-between px-4 py-2 bg-info-500/10 border-b border-neutral-800/50">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="text-base font-black text-white shrink-0" x-text="'#' + order.reference"></span>
-                                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-info-500 text-white shrink-0">EN COURS</span>
-                                <template x-if="order.table_number">
-                                    <span class="text-[11px] bg-neutral-700 text-white px-2 py-0.5 rounded-full font-bold shrink-0"
-                                          x-text="'Table ' + order.table_number"></span>
-                                </template>
-                            </div>
-                            <span class="font-bold text-xs shrink-0"
-                                  :class="{
-                                      'text-error-500': order.minutes_ago > 20,
-                                      'text-warning-500': order.minutes_ago > 12,
-                                      'text-info-500': order.minutes_ago <= 12
-                                  }"
-                                  x-text="order.minutes_ago + 'min'"></span>
-                        </div>
-
-                        <div class="px-4 py-3">
-                            <div class="flex items-center justify-between mb-3 gap-2">
-                                <span class="text-sm font-semibold text-neutral-200 truncate" x-text="order.customer_name || 'Client'"></span>
-                                <span class="text-xs text-neutral-500 shrink-0" x-text="order.type"></span>
-                            </div>
-
-                            <div class="space-y-1.5 mb-3">
-                                <template x-for="(item, idx) in order.items" :key="idx">
-                                    <div class="flex items-start gap-2">
-                                        <span class="text-sm font-black text-white min-w-[22px] shrink-0" x-text="item.quantity + 'x'"></span>
-                                        <div class="flex-1 min-w-0">
-                                            <span class="text-sm text-neutral-100 font-medium" x-text="item.name"></span>
-                                            <template x-if="item.options && item.options.length > 0">
-                                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                                    <template x-for="(opt, oi) in item.options" :key="oi">
-                                                        <span class="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded"
-                                                              x-text="typeof opt === 'string' ? opt : (opt.name || '')"></span>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                            <template x-if="item.instructions">
-                                                <p class="text-[11px] text-warning-400 font-medium mt-0.5 bg-warning-500/10 px-1.5 py-0.5 rounded"
-                                                   x-text="'⚠ ' + item.instructions"></p>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <button @click="updateOrder(order.id, 'ready')"
-                                    class="w-full py-3 rounded-xl bg-success-500 hover:bg-success-400 active:scale-[0.97] text-white font-black text-sm uppercase tracking-wide transition shadow-lg shadow-success-500/20">
-                                ✅ Prêt — Servir !
-                            </button>
-                        </div>
-                    </div>
-                </template>
-
-                <div x-show="preparingOrders.length === 0" class="flex flex-col items-center justify-center h-48 text-neutral-700 text-center">
-                    <svg class="w-10 h-10 mb-2 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <p class="text-sm">Aucune préparation en cours</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- ── Colonne 3 : Prêtes — En attente de service ── --}}
-        <div class="flex-1 flex flex-col min-w-0">
-            <div class="h-10 flex items-center px-4 bg-success-500/10 border-b border-neutral-800 shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-success-500 mr-2 shrink-0"></span>
-                <span class="text-sm font-bold text-success-400">Prêtes à servir</span>
-                <span class="ml-auto text-xs text-success-400/70 font-mono" x-text="counts.ready"></span>
-            </div>
-            <div class="flex-1 overflow-y-auto p-3 space-y-3">
-                <template x-for="order in readyOrders" :key="order.id">
-                    <div class="card-enter bg-neutral-900 rounded-xl border border-success-500/40 overflow-hidden">
-                        <div class="flex items-center justify-between px-4 py-2.5 bg-success-500/10 border-b border-neutral-800/50">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="text-base font-black text-white shrink-0" x-text="'#' + order.reference"></span>
-                                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-success-500 text-white shrink-0">PRÊT</span>
-                                <template x-if="order.table_number">
-                                    <span class="text-[11px] bg-neutral-700 text-white px-2 py-0.5 rounded-full font-bold shrink-0"
-                                          x-text="'Table ' + order.table_number"></span>
-                                </template>
-                            </div>
-                            <span class="text-[11px] text-success-400 font-mono shrink-0" x-text="order.ready_at || order.created_at"></span>
-                        </div>
-
-                        <div class="px-4 py-3">
-                            <div class="flex items-center justify-between mb-2 gap-2">
-                                <span class="text-sm font-semibold text-neutral-200 truncate" x-text="order.customer_name || 'Client'"></span>
-                                <span class="text-xs text-neutral-500 shrink-0" x-text="order.type"></span>
-                            </div>
-
-                            <div class="space-y-1 mb-3 text-sm text-neutral-300">
-                                <template x-for="(item, idx) in order.items" :key="idx">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-black text-white shrink-0" x-text="item.quantity + 'x'"></span>
-                                        <span class="truncate" x-text="item.name"></span>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="text-center text-xs text-success-500 font-bold py-1 bg-success-500/10 rounded-lg">
-                                En attente d'un serveur
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <div x-show="readyOrders.length === 0" class="flex flex-col items-center justify-center h-48 text-neutral-700 text-center">
-                    <svg class="w-10 h-10 mb-2 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                    </svg>
-                    <p class="text-sm">Aucune commande prête</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    {{-- ══ OVERLAY Nouvelle commande ══ --}}
-    <div x-show="showAlert" x-cloak
-         @click="showAlert = false"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-90"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-90"
-         class="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-        <div class="rounded-3xl p-10 text-center shadow-2xl bg-primary-500 max-w-sm w-full mx-4">
-            <svg class="w-16 h-16 mx-auto mb-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
-            <p class="text-3xl font-black text-white mb-2" x-text="alertTitle">Nouvelle commande !</p>
-            <p class="text-base text-white/80 font-medium" x-text="alertDetail"></p>
-            <p class="text-sm mt-4 text-white/50">Touchez pour fermer</p>
-        </div>
+<!-- HEADER -->
+<header id="header">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+        @if($restaurant->logo_url)
+            <img src="{{ $restaurant->logo_url }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;">
+        @endif
+        <h1>{{ $restaurant->name }}</h1>
     </div>
-
-    {{-- ══ TUTORIEL (première visite) ══ --}}
-    <div x-show="showTutorial" x-cloak
-         class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4">
-        <div class="bg-neutral-900 rounded-2xl max-w-md w-full p-6 text-center border border-neutral-800 shadow-2xl">
-            <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center bg-primary-500">
-                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                </svg>
-            </div>
-            <h2 class="text-xl font-black text-white mb-2">Bienvenue en cuisine !</h2>
-            <p class="text-neutral-400 text-sm mb-5">Voici comment utiliser cet écran :</p>
-
-            <div class="text-left space-y-4 mb-6">
-                <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
-                    <div>
-                        <p class="text-sm font-bold text-white">Nouvelles commandes (gauche)</p>
-                        <p class="text-xs text-neutral-400">CONFIRMER → accepter, puis COMMENCER quand vous commencez à préparer</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-info-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
-                    <div>
-                        <p class="text-sm font-bold text-white">En préparation (centre)</p>
-                        <p class="text-xs text-neutral-400">Quand le plat est prêt → <span class="text-success-400 font-bold">PRÊT — SERVIR</span></p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-success-500 text-white text-xs font-bold flex items-center justify-center shrink-0">3</div>
-                    <div>
-                        <p class="text-sm font-bold text-white">Prêtes à servir (droite)</p>
-                        <p class="text-xs text-neutral-400">Les commandes prêtes restent visibles jusqu'à ce qu'un serveur les emporte</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-full bg-neutral-700 text-white text-xs font-bold flex items-center justify-center shrink-0">🔊</div>
-                    <div>
-                        <p class="text-sm font-bold text-white">Synthèse vocale activée</p>
-                        <p class="text-xs text-neutral-400">À chaque commande : annonce vocale avec le numéro de table et les plats</p>
-                    </div>
-                </div>
-            </div>
-
-            <button @click="closeTutorial()"
-                    class="w-full py-3 rounded-xl text-white font-bold text-sm transition active:scale-[0.97] bg-primary-500 hover:bg-primary-600">
-                J'ai compris, commencer !
-            </button>
-        </div>
+    <div class="header-counts">
+        <span class="badge badge-new" id="cnt-new">0 en attente</span>
+        <span class="badge badge-prep" id="cnt-prep">0 en prép</span>
+        <span class="badge badge-ready" id="cnt-ready" style="display:none;">0 prêt</span>
     </div>
+    <div class="header-actions">
+        <div id="dot-online" title="Connexion"></div>
+        <button class="icon-btn" id="btn-voice" title="Synthèse vocale" onclick="toggleVoice()">
+            <svg id="icon-voice-on" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            <svg id="icon-voice-off" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-sound" title="Son" onclick="toggleSound()">
+            <svg id="icon-sound-on" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6 9H4a1 1 0 00-1 1v4a1 1 0 001 1h2l4 4V5L6 9z"/></svg>
+            <svg id="icon-sound-off" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        </button>
+        <span id="clock" style="font-size:11px;font-family:monospace;opacity:0.6;"></span>
+    </div>
+</header>
 
-    <script>
-    function kitchenDisplay() {
-        return {
-            orders: @json($ordersJson),
-            counts: { new: 0, preparing: 0, ready: 0 },
-            soundEnabled: true,
-            voiceEnabled: true,
-            showAlert: false,
-            alertTitle: 'Nouvelle commande !',
-            alertDetail: '',
-            showTutorial: false,
-            clock: '',
-            online: true,
-            token: '{{ $token }}',
-            pollInterval: null,
-            knownIds: {},
+<!-- COLONNES -->
+<div id="main">
+    <div class="col col-new">
+        <div class="col-header"><span class="dot dot-new"></span>Nouvelles<span class="col-count" id="col-cnt-new">0</span></div>
+        <div class="col-body" id="col-new"></div>
+    </div>
+    <div class="col col-prep">
+        <div class="col-header"><span class="dot dot-prep"></span>En préparation<span class="col-count" id="col-cnt-prep">0</span></div>
+        <div class="col-body" id="col-prep"></div>
+    </div>
+    <div class="col col-ready">
+        <div class="col-header"><span class="dot dot-ready"></span>Prêtes à servir<span class="col-count" id="col-cnt-ready">0</span></div>
+        <div class="col-body" id="col-ready"></div>
+    </div>
+</div>
 
-            get newOrders() {
-                return this.orders.filter(o => o.status === 'paid' || o.status === 'confirmed');
-            },
-            get preparingOrders() {
-                return this.orders.filter(o => o.status === 'preparing');
-            },
-            get readyOrders() {
-                return this.orders.filter(o => o.status === 'ready');
-            },
+<!-- OVERLAY NOUVELLE COMMANDE -->
+<div id="alert-overlay" onclick="closeAlert()">
+    <div id="alert-box">
+        <div style="font-size:48px;margin-bottom:8px;">🔔</div>
+        <div id="alert-title">Nouvelle commande !</div>
+        <div id="alert-detail"></div>
+        <div id="alert-hint">Touchez pour fermer</div>
+    </div>
+</div>
 
-            init() {
-                // knownIds = dictionnaire des IDs connus au chargement initial
-                // les nouvelles commandes arrivées APRÈS déclenchent l'alerte
-                this.orders.forEach(o => { this.knownIds[o.id] = true; });
-                this.updateCounts();
-                this.updateClock();
-                setInterval(() => this.updateClock(), 1000);
-                // Polling toutes les 5s — fiable même si WebSocket indisponible
-                this.pollInterval = setInterval(() => this.fetchOrders(), 5000);
+<script>
+(function() {
+    var TOKEN   = '{{ $token }}';
+    var CSRF    = document.querySelector('meta[name="csrf-token"]').content;
+    var INITIAL = @json($ordersJson);
 
-                window.addEventListener('online',  () => { this.online = true;  });
-                window.addEventListener('offline', () => { this.online = false; });
-                this.online = navigator.onLine;
+    var state = {
+        orders:       [],
+        knownIds:     {},   // IDs présents au chargement — n'annonce pas d'alerte pour eux
+        soundEnabled: true,
+        voiceEnabled: true,
+        alertTimer:   null,
+    };
 
-                // WakeLock — empêche l'écran de se mettre en veille sur tablette
-                this.requestWakeLock();
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible') this.requestWakeLock();
-                });
-
-                // Reverb temps réel — canal public kitchen.{token} (pas besoin d'auth session)
-                if (window.Echo) {
-                    window.Echo.channel('kitchen.{{ $token }}')
-                        .listen('.order.created',        () => this.fetchOrders())
-                        .listen('.order.status_changed', () => this.fetchOrders());
-                }
-
-                // Tutorial première visite
-                if (!localStorage.getItem('kitchen_tutorial_seen_{{ $token }}')) {
-                    this.showTutorial = true;
-                }
-            },
-
-            closeTutorial() {
-                this.showTutorial = false;
-                localStorage.setItem('kitchen_tutorial_seen_{{ $token }}', '1');
-            },
-
-            async requestWakeLock() {
-                try {
-                    if ('wakeLock' in navigator) {
-                        await navigator.wakeLock.request('screen');
-                    }
-                } catch (_) {}
-            },
-
-            updateClock() {
-                const now = new Date();
-                this.clock = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            },
-
-            updateCounts() {
-                this.counts.new      = this.orders.filter(o => o.status === 'paid' || o.status === 'confirmed').length;
-                this.counts.preparing = this.orders.filter(o => o.status === 'preparing').length;
-                this.counts.ready    = this.orders.filter(o => o.status === 'ready').length;
-            },
-
-            async fetchOrders() {
-                try {
-                    const resp = await fetch(`/cuisine/${this.token}/data`);
-                    if (!resp.ok) { this.online = false; return; }
-                    this.online = true;
-
-                    const data = await resp.json();
-
-                    // Détecte les commandes vraiment nouvelles (pas dans knownIds)
-                    const brandNew = data.orders.filter(o => !this.knownIds[o.id]);
-                    if (brandNew.length > 0) {
-                        brandNew.forEach(order => this.announceNewOrder(order));
-                        brandNew.forEach(o => { this.knownIds[o.id] = true; });
-                    }
-
-                    this.orders = data.orders;
-                    this.counts = data.counts;
-                } catch (e) {
-                    this.online = false;
-                }
-            },
-
-            async updateOrder(orderId, action) {
-                try {
-                    const resp = await fetch(`/cuisine/${this.token}/orders/${orderId}/status`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        },
-                        body: JSON.stringify({ action }),
-                    });
-                    if (resp.ok) await this.fetchOrders();
-                } catch (e) {}
-            },
-
-            // ── Annonce une nouvelle commande : son + synthèse vocale + overlay ──
-            announceNewOrder(order) {
-                // Overlay visuel
-                this.alertTitle = 'Nouvelle commande !';
-                const tableInfo = order.table_number ? `Table ${order.table_number}` : (order.type || '');
-                const dishes = order.items.map(i => `${i.quantity} ${i.name}`).join(', ');
-                this.alertDetail = [tableInfo, dishes].filter(Boolean).join(' — ');
-                this.showAlert = true;
-                setTimeout(() => { this.showAlert = false; }, 5000);
-
-                // Son
-                this.playSound();
-
-                // Synthèse vocale
-                this.speakOrder(order);
-            },
-
-            // ── Synthèse vocale complète ──
-            speakOrder(order) {
-                if (!this.voiceEnabled) return;
-                if (!('speechSynthesis' in window)) return;
-
-                window.speechSynthesis.cancel(); // annuler toute annonce en cours
-
-                const ref = order.reference || order.id;
-                const table = order.table_number ? `table ${order.table_number}` : '';
-                const type = order.type ? order.type.toLowerCase() : '';
-                const dishes = order.items.map(i => {
-                    const qty = i.quantity > 1 ? `${i.quantity} ` : '';
-                    return qty + i.name;
-                }).join(', ');
-                const instructions = order.items
-                    .filter(i => i.instructions)
-                    .map(i => `attention ${i.name} : ${i.instructions}`)
-                    .join('. ');
-
-                // Construction du texte d'annonce
-                let text = `Nouvelle commande ! Numéro ${ref}.`;
-                if (table) text += ` ${table}.`;
-                else if (type) text += ` ${type}.`;
-                text += ` ${dishes}.`;
-                if (instructions) text += ` ${instructions}.`;
-
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.lang = 'fr-FR';
-                utter.rate = 0.9;
-                utter.pitch = 1.0;
-                utter.volume = 1.0;
-
-                // Choisir une voix française si disponible
-                const voices = window.speechSynthesis.getVoices();
-                const frVoice = voices.find(v => v.lang.startsWith('fr'));
-                if (frVoice) utter.voice = frVoice;
-
-                // Léger délai après le son (son dure ~540ms)
-                setTimeout(() => window.speechSynthesis.speak(utter), 600);
-            },
-
-            toggleSound() {
-                this.soundEnabled = !this.soundEnabled;
-            },
-
-            toggleVoice() {
-                this.voiceEnabled = !this.voiceEnabled;
-                if (!this.voiceEnabled) window.speechSynthesis.cancel();
-            },
-
-            playSound() {
-                if (!this.soundEnabled) return;
-                try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    // Triple bip ascendant + une note grave de confirmation
-                    const sequence = [880, 1100, 1320, 880];
-                    sequence.forEach((freq, i) => {
-                        setTimeout(() => {
-                            const osc = ctx.createOscillator();
-                            const gain = ctx.createGain();
-                            osc.connect(gain);
-                            gain.connect(ctx.destination);
-                            osc.frequency.value = freq;
-                            osc.type = i === 3 ? 'triangle' : 'sine';
-                            gain.gain.setValueAtTime(i === 3 ? 0.25 : 0.38, ctx.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (i === 3 ? 0.5 : 0.3));
-                            osc.start(ctx.currentTime);
-                            osc.stop(ctx.currentTime + (i === 3 ? 0.5 : 0.3));
-                        }, i * 135);
-                    });
-                } catch (e) {}
-            },
-        };
+    /* ── INIT ──────────────────────────────────────────── */
+    function init() {
+        // Marque les commandes initiales comme "déjà connues"
+        INITIAL.forEach(function(o) { state.knownIds[o.id] = true; });
+        state.orders = INITIAL;
+        render();
+        startClock();
+        startPolling();
+        watchNetwork();
+        wakeLock();
+        loadVoices();
     }
 
-    // Charger les voix dès que possible (Chrome nécessite un appel préalable)
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-        window.speechSynthesis.addEventListener('voiceschanged', () => {
-            window.speechSynthesis.getVoices();
+    /* ── POLLING ───────────────────────────────────────── */
+    function startPolling() {
+        fetchOrders(); // premier fetch immédiat
+        setInterval(fetchOrders, 5000);
+    }
+
+    function fetchOrders() {
+        fetch('/cuisine/' + TOKEN + '/data')
+            .then(function(r) {
+                setOnline(r.ok);
+                return r.ok ? r.json() : null;
+            })
+            .then(function(data) {
+                if (!data) return;
+                // Nouvelles commandes = IDs absents de knownIds
+                data.orders.forEach(function(o) {
+                    if (!state.knownIds[o.id]) {
+                        state.knownIds[o.id] = true;
+                        announceNewOrder(o);
+                    }
+                });
+                state.orders = data.orders;
+                render();
+            })
+            .catch(function() { setOnline(false); });
+    }
+
+    /* ── ACTIONS ───────────────────────────────────────── */
+    window.updateOrder = function(orderId, action) {
+        fetch('/cuisine/' + TOKEN + '/orders/' + orderId + '/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body: JSON.stringify({ action: action }),
+        })
+        .then(function(r) { if (r.ok) fetchOrders(); })
+        .catch(function() {});
+    };
+
+    /* ── ESCAPE XSS ────────────────────────────────────── */
+    function h(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /* ── RENDER ────────────────────────────────────────── */
+    function render() {
+        var newOrders  = state.orders.filter(function(o) { return o.status === 'paid' || o.status === 'confirmed'; });
+        var prepOrders = state.orders.filter(function(o) { return o.status === 'preparing'; });
+        var readyOrders= state.orders.filter(function(o) { return o.status === 'ready'; });
+
+        renderCol('col-new',  newOrders,  renderNewCard);
+        renderCol('col-prep', prepOrders, renderPrepCard);
+        renderCol('col-ready',readyOrders,renderReadyCard);
+
+        // Compteurs header
+        document.getElementById('cnt-new').textContent  = newOrders.length  + ' en attente';
+        document.getElementById('cnt-prep').textContent = prepOrders.length + ' en prép';
+        var rdyBadge = document.getElementById('cnt-ready');
+        if (readyOrders.length > 0) {
+            rdyBadge.textContent = readyOrders.length + ' prêt' + (readyOrders.length > 1 ? 's' : '');
+            rdyBadge.style.display = '';
+        } else {
+            rdyBadge.style.display = 'none';
+        }
+
+        // Compteurs colonnes
+        document.getElementById('col-cnt-new').textContent  = newOrders.length;
+        document.getElementById('col-cnt-prep').textContent = prepOrders.length;
+        document.getElementById('col-cnt-ready').textContent= readyOrders.length;
+    }
+
+    function renderCol(id, orders, cardFn) {
+        var col = document.getElementById(id);
+        col.innerHTML = '';
+        if (orders.length === 0) {
+            col.innerHTML = '<div class="empty"><svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.25"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/></svg><span>Aucune commande</span></div>';
+            return;
+        }
+        orders.forEach(function(o) {
+            var div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = cardFn(o);
+            col.appendChild(div);
         });
     }
-    </script>
+
+    function timerClass(min) {
+        if (min > 20) return 'timer-late';
+        if (min > 10) return 'timer-warn';
+        return 'timer-ok';
+    }
+
+    function itemsHtml(items) {
+        return items.map(function(item) {
+            var opts = (item.options || []).map(function(opt) {
+                var label = typeof opt === 'string' ? opt : (opt.name || '');
+                return '<span style="font-size:10px;background:#1e1e1e;color:#9ca3af;padding:1px 5px;border-radius:3px;">' + h(label) + '</span>';
+            }).join(' ');
+            var note = item.instructions ? '<div class="item-note">&#9888; ' + h(item.instructions) + '</div>' : '';
+            return '<div class="item-row"><span class="item-qty">' + h(item.quantity) + 'x</span><div><span class="item-name">' + h(item.name) + '</span>' + (opts ? '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;">' + opts + '</div>' : '') + note + '</div></div>';
+        }).join('');
+    }
+
+    function renderNewCard(o) {
+        var topClass = o.status === 'paid' ? 'new' : 'confirmed';
+        var badgeClass = o.status === 'paid' ? 'badge-paid' : 'badge-confirmed';
+        var badgeLabel = o.status === 'paid' ? 'NOUVELLE' : 'CONFIRM&#201;E';
+        var tableHtml = o.table_number ? '<span class="card-table">Table ' + h(o.table_number) + '</span>' : '';
+        var oid = parseInt(o.id, 10);
+        var btn = o.status === 'paid'
+            ? '<button class="card-btn btn-confirm" onclick="updateOrder(' + oid + ', \'confirm\')">&#10003; Confirmer</button>'
+            : '<button class="card-btn btn-prepare" onclick="updateOrder(' + oid + ', \'prepare\')">&#127859; Commencer</button>';
+        return '<div class="card-top ' + topClass + '">'
+            + '<span class="card-ref">#' + h(o.reference) + '</span>'
+            + '<span class="card-badge ' + badgeClass + '">' + badgeLabel + '</span>'
+            + tableHtml
+            + '<span class="card-timer ' + timerClass(o.minutes_ago) + '">' + Math.round(o.minutes_ago) + 'min</span>'
+            + '</div>'
+            + '<div class="card-body">'
+            + '<div class="card-customer"><span>' + h(o.customer_name || 'Client') + '</span><span class="card-type">' + h(o.type) + '</span></div>'
+            + itemsHtml(o.items)
+            + btn
+            + '</div>';
+    }
+
+    function renderPrepCard(o) {
+        var oid = parseInt(o.id, 10);
+        return '<div class="card-top preparing">'
+            + '<span class="card-ref">#' + h(o.reference) + '</span>'
+            + '<span class="card-badge badge-preparing">EN COURS</span>'
+            + (o.table_number ? '<span class="card-table">Table ' + h(o.table_number) + '</span>' : '')
+            + '<span class="card-timer ' + timerClass(o.minutes_ago) + '">' + Math.round(o.minutes_ago) + 'min</span>'
+            + '</div>'
+            + '<div class="card-body">'
+            + '<div class="card-customer"><span>' + h(o.customer_name || 'Client') + '</span><span class="card-type">' + h(o.type) + '</span></div>'
+            + itemsHtml(o.items)
+            + '<button class="card-btn btn-ready" onclick="updateOrder(' + oid + ', \'ready\')">&#9989; Pr&#234;t &#8212; Servir !</button>'
+            + '</div>';
+    }
+
+    function renderReadyCard(o) {
+        return '<div class="card-top ready">'
+            + '<span class="card-ref">#' + h(o.reference) + '</span>'
+            + '<span class="card-badge badge-ready">PR&#202;T</span>'
+            + (o.table_number ? '<span class="card-table">Table ' + h(o.table_number) + '</span>' : '')
+            + '<span style="font-size:11px;color:#4ade80;font-family:monospace;flex-shrink:0;">' + h(o.ready_at || o.created_at) + '</span>'
+            + '</div>'
+            + '<div class="card-body">'
+            + '<div class="card-customer"><span>' + h(o.customer_name || 'Client') + '</span><span class="card-type">' + h(o.type) + '</span></div>'
+            + itemsHtml(o.items)
+            + '<div style="text-align:center;font-size:12px;color:#4ade80;font-weight:700;padding:6px;background:rgba(34,197,94,0.08);border-radius:8px;">En attente d\'un serveur</div>'
+            + '</div>';
+    }
+
+    /* ── ALERTE ────────────────────────────────────────── */
+    function announceNewOrder(order) {
+        var tableInfo = order.table_number ? 'Table ' + order.table_number : (order.type || '');
+        var dishes = order.items.map(function(i) { return i.quantity + ' ' + i.name; }).join(', ');
+        document.getElementById('alert-detail').textContent = [tableInfo, dishes].filter(Boolean).join(' — ');
+        document.getElementById('alert-overlay').classList.add('show');
+        clearTimeout(state.alertTimer);
+        state.alertTimer = setTimeout(closeAlert, 6000);
+        playSound();
+        speakOrder(order);
+    }
+
+    window.closeAlert = function() {
+        document.getElementById('alert-overlay').classList.remove('show');
+        clearTimeout(state.alertTimer);
+    };
+
+    /* ── SON ───────────────────────────────────────────── */
+    function playSound() {
+        if (!state.soundEnabled) return;
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            [880, 1100, 1320, 880].forEach(function(freq, i) {
+                setTimeout(function() {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = i === 3 ? 'triangle' : 'sine';
+                    gain.gain.setValueAtTime(i === 3 ? 0.25 : 0.38, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (i === 3 ? 0.5 : 0.3));
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + (i === 3 ? 0.5 : 0.3));
+                }, i * 135);
+            });
+        } catch(e) {}
+    }
+
+    /* ── SYNTHÈSE VOCALE ───────────────────────────────── */
+    function loadVoices() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.addEventListener('voiceschanged', function() { window.speechSynthesis.getVoices(); });
+        }
+    }
+
+    function speakOrder(order) {
+        if (!state.voiceEnabled || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        var ref    = order.reference || order.id;
+        var table  = order.table_number ? 'table ' + order.table_number : '';
+        var dishes = order.items.map(function(i) { return (i.quantity > 1 ? i.quantity + ' ' : '') + i.name; }).join(', ');
+        var notes  = order.items.filter(function(i) { return i.instructions; }).map(function(i) { return 'attention ' + i.name + ' : ' + i.instructions; }).join('. ');
+        var text   = 'Nouvelle commande ! Numéro ' + ref + '.';
+        if (table) text += ' ' + table + '.';
+        else if (order.type) text += ' ' + order.type.toLowerCase() + '.';
+        text += ' ' + dishes + '.';
+        if (notes) text += ' ' + notes + '.';
+        var utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'fr-FR'; utter.rate = 0.9; utter.pitch = 1.0; utter.volume = 1.0;
+        var voices = window.speechSynthesis.getVoices();
+        var frVoice = voices.find(function(v) { return v.lang.startsWith('fr'); });
+        if (frVoice) utter.voice = frVoice;
+        setTimeout(function() { window.speechSynthesis.speak(utter); }, 600);
+    }
+
+    /* ── TOGGLES ───────────────────────────────────────── */
+    window.toggleVoice = function() {
+        state.voiceEnabled = !state.voiceEnabled;
+        document.getElementById('btn-voice').classList.toggle('off', !state.voiceEnabled);
+        document.getElementById('icon-voice-on').style.display  = state.voiceEnabled ? '' : 'none';
+        document.getElementById('icon-voice-off').style.display = state.voiceEnabled ? 'none' : '';
+        if (!state.voiceEnabled) window.speechSynthesis.cancel();
+    };
+    window.toggleSound = function() {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('btn-sound').classList.toggle('off', !state.soundEnabled);
+        document.getElementById('icon-sound-on').style.display  = state.soundEnabled ? '' : 'none';
+        document.getElementById('icon-sound-off').style.display = state.soundEnabled ? 'none' : '';
+    };
+
+    /* ── HORLOGE ───────────────────────────────────────── */
+    function startClock() {
+        function tick() {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }
+        tick(); setInterval(tick, 1000);
+    }
+
+    /* ── RÉSEAU ────────────────────────────────────────── */
+    function setOnline(v) {
+        document.getElementById('dot-online').className = v ? '' : 'offline';
+        document.getElementById('dot-online').id = 'dot-online';
+    }
+    function watchNetwork() {
+        window.addEventListener('online',  function() { setOnline(true);  fetchOrders(); });
+        window.addEventListener('offline', function() { setOnline(false); });
+        setOnline(navigator.onLine);
+    }
+
+    /* ── WAKE LOCK ─────────────────────────────────────── */
+    function wakeLock() {
+        if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(function() {});
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') navigator.wakeLock.request('screen').catch(function() {});
+            });
+        }
+    }
+
+    /* ── START ─────────────────────────────────────────── */
+    init();
+})();
+</script>
 </body>
 </html>
