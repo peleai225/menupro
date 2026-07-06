@@ -34,15 +34,20 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'phone',
         'password',
-        'role',
-        'restaurant_id',
         'avatar_path',
         'is_active',
         'agent_status',
         'last_login_at',
         'welcome_token',
+        'welcome_token_expires_at',
         'city',
     ];
+
+    /**
+     * Champs protégés contre le mass-assignment.
+     * `role` et `restaurant_id` doivent être assignés explicitement ($user->role = ...).
+     */
+    protected $guarded = ['role', 'restaurant_id'];
 
     protected $hidden = [
         'password',
@@ -54,6 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'welcome_token_expires_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
             'agent_status' => AgentStatus::class,

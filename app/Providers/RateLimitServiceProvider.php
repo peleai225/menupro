@@ -12,11 +12,19 @@ class RateLimitServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Auth client — empêcher le brute-force
+        // Double limiteur : par IP (5/min) + par compte (5 tentatives / 15 min)
+        // Le limiteur par compte protège même si l'attaquant tourne ses IPs.
         RateLimiter::for('api.auth', function (Request $request) {
-            return Limit::perMinute(10)->by($request->ip())
-                ->response(fn() => response()->json([
-                    'message' => 'Trop de tentatives. Réessayez dans 1 minute.',
-                ], 429));
+            return [
+                Limit::perMinute(5)->by($request->ip())
+                    ->response(fn() => response()->json([
+                        'message' => 'Trop de tentatives depuis votre adresse. Réessayez dans 1 minute.',
+                    ], 429)),
+                Limit::perMinutes(15, 5)->by('login:' . ($request->input('email') ?? $request->ip()))
+                    ->response(fn() => response()->json([
+                        'message' => 'Trop de tentatives sur ce compte. Réessayez dans 15 minutes.',
+                    ], 429)),
+            ];
         });
 
         // Inscription — une seule par IP par heure

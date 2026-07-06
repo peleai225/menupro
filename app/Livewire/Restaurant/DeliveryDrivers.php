@@ -67,7 +67,7 @@ class DeliveryDrivers extends Component
                 ->where('id', $this->editingId)
                 ->update($data);
         } else {
-            $data['token'] = Str::random(32);
+            $data['token'] = Str::random(64);
             DeliveryDriver::create($data);
         }
 
@@ -84,7 +84,7 @@ class DeliveryDrivers extends Component
     public function regenerateToken(int $id): void
     {
         $driver = DeliveryDriver::where('restaurant_id', auth()->user()->restaurant_id)->findOrFail($id);
-        $driver->update(['token' => Str::random(32)]);
+        $driver->update(['token' => Str::random(64)]);
     }
 
     public function render()

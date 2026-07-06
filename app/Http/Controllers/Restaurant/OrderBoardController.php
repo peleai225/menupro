@@ -100,8 +100,18 @@ class OrderBoardController extends Controller
      */
     protected function getOrdersByStatus(int $restaurantId, Request $request): array
     {
+        // Sélection stricte des colonnes pour éviter de charger les colonnes JSON lourdes
+        // (allergens, nutritional_info, gallery, payment_metadata) sur chaque refresh Kanban
         $query = Order::where('restaurant_id', $restaurantId)
-            ->with(['items.dish'])
+            ->select([
+                'id', 'restaurant_id', 'reference', 'customer_name', 'customer_phone',
+                'type', 'status', 'total', 'created_at', 'table_number',
+                'delivery_address', 'customer_notes', 'internal_notes',
+            ])
+            ->with([
+                'items' => fn($q) => $q->select('id', 'order_id', 'dish_id', 'dish_name', 'quantity', 'unit_price', 'total_price', 'selected_options', 'special_instructions'),
+                'items.dish' => fn($q) => $q->select('id', 'name', 'image_path'),
+            ])
             ->whereNotIn('status', [OrderStatus::CANCELLED, OrderStatus::REFUNDED])
             ->where('created_at', '>=', now()->subHours(24));
 

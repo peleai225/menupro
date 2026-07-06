@@ -1,4 +1,78 @@
 <div>
+    {{-- === CLOCHE NOTIFICATIONS === --}}
+    <div class="flex justify-end mb-4"
+         x-data="{ open: false }"
+         @click.outside="open = false">
+        <button @click="open = !open"
+                wire:click="$refresh"
+                class="relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            @if($this->unreadNotificationsCount > 0)
+                <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {{ $this->unreadNotificationsCount > 9 ? '9+' : $this->unreadNotificationsCount }}
+                </span>
+            @endif
+        </button>
+
+        <div x-show="open" x-transition
+             class="absolute mt-10 right-0 w-80 rounded-2xl border border-slate-700 bg-[#0f172a] shadow-2xl z-50 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700/60">
+                <span class="text-white font-semibold text-sm">Notifications</span>
+                @if($this->unreadNotificationsCount > 0)
+                    <button wire:click="markAllNotificationsRead"
+                            class="text-xs text-orange-400 hover:text-orange-300 transition">
+                        Tout marquer lu
+                    </button>
+                @endif
+            </div>
+            <div class="max-h-80 overflow-y-auto divide-y divide-slate-700/40">
+                @forelse($this->recentNotifications as $notif)
+                    @php
+                        $data = $notif->data;
+                        $type = $data['type'] ?? '';
+                        $isUnread = is_null($notif->read_at);
+                        $iconClass = match($type) {
+                            'commission_credited'   => 'text-emerald-400 bg-emerald-500/15',
+                            'commando_agent_approved' => 'text-emerald-400 bg-emerald-500/15',
+                            'account_banned'        => 'text-red-400 bg-red-500/15',
+                            'withdrawal_paid'       => 'text-blue-400 bg-blue-500/15',
+                            'withdrawal_rejected'   => 'text-amber-400 bg-amber-500/15',
+                            default                 => 'text-slate-400 bg-slate-700/40',
+                        };
+                    @endphp
+                    <button wire:click="markNotificationRead('{{ $notif->id }}')"
+                            class="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-800/60 transition text-left {{ $isUnread ? 'bg-slate-800/30' : '' }}">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 {{ $iconClass }}">
+                            @if($type === 'commission_credited')
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @elseif($type === 'commando_agent_approved')
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            @elseif($type === 'account_banned')
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            @elseif(in_array($type, ['withdrawal_paid', 'withdrawal_rejected']))
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                            @else
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-xs font-medium">{{ $data['title'] ?? 'Notification' }}</p>
+                            <p class="text-slate-400 text-[11px] mt-0.5 line-clamp-2">{{ $data['message'] ?? '' }}</p>
+                            <p class="text-slate-600 text-[10px] mt-1">{{ $notif->created_at->diffForHumans() }}</p>
+                        </div>
+                        @if($isUnread)
+                            <span class="w-2 h-2 rounded-full bg-orange-400 shrink-0 mt-2"></span>
+                        @endif
+                    </button>
+                @empty
+                    <div class="px-4 py-6 text-center text-slate-500 text-sm">Aucune notification</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     {{-- Toast --}}
     @if($successMessage)
         <div class="mb-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm"
@@ -176,16 +250,40 @@
         <h3 class="text-white font-semibold text-sm mb-3">Restaurants parrainés</h3>
         <div class="space-y-2">
             @foreach($referredRestaurants as $restaurant)
+                @php
+                    if ($restaurant['is_truly_active']) {
+                        $badgeClass = 'bg-emerald-500/10 text-emerald-400';
+                        $badgeLabel = 'Actif';
+                    } elseif ($restaurant['is_trial']) {
+                        $badgeClass = 'bg-blue-500/10 text-blue-400';
+                        $badgeLabel = 'Trial';
+                    } elseif ($restaurant['status'] === 'suspended') {
+                        $badgeClass = 'bg-amber-500/10 text-amber-400';
+                        $badgeLabel = 'Suspendu';
+                    } elseif ($restaurant['status'] === 'expired') {
+                        $badgeClass = 'bg-red-500/10 text-red-400';
+                        $badgeLabel = 'Expiré';
+                    } else {
+                        $badgeClass = 'bg-slate-700/40 text-slate-400';
+                        $badgeLabel = 'En attente';
+                    }
+                @endphp
                 <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-slate-700/60 bg-slate-800/40">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-white text-sm font-medium truncate">{{ $restaurant->name }}</p>
-                        <p class="text-slate-500 text-xs">Inscrit le {{ $restaurant->created_at->format('d/m/Y') }}</p>
+                        <p class="text-white text-sm font-medium truncate">{{ $restaurant['name'] }}</p>
+                        <p class="text-slate-500 text-xs">
+                            {{ $restaurant['plan'] }}
+                            @if($restaurant['subscription_expires_at'])
+                                · expire {{ $restaurant['subscription_expires_at'] }}
+                            @endif
+                        </p>
+                        <p class="text-slate-600 text-[11px]">Inscrit le {{ $restaurant['created_at'] }}</p>
                     </div>
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-                        actif
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg {{ $badgeClass }}">
+                        {{ $badgeLabel }}
                     </span>
                 </div>
             @endforeach
@@ -241,6 +339,54 @@
 
     @endif {{-- /canAccessParrainage --}}
 
+    {{-- Leaderboard --}}
+    <div class="bg-slate-800/40 rounded-2xl p-6 shadow-sm border border-slate-700/60 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-white flex items-center gap-2">
+                🏆 Classement agents
+            </h3>
+            @if($this->myRank > 0)
+            <span class="text-sm text-orange-400 font-medium">Votre rang : #{{ $this->myRank }}</span>
+            @endif
+        </div>
+        <div class="space-y-3">
+            @foreach($this->leaderboard as $index => $entry)
+            <div class="flex items-center gap-3 {{ $entry['is_me'] ? 'bg-orange-500/10 rounded-lg p-2 -mx-2' : '' }}">
+                <span class="text-lg font-bold {{ $index === 0 ? 'text-yellow-400' : ($index === 1 ? 'text-slate-400' : ($index === 2 ? 'text-amber-600' : 'text-slate-500')) }} w-6 text-center">
+                    {{ $index === 0 ? '🥇' : ($index === 1 ? '🥈' : ($index === 2 ? '🥉' : '#' . ($index + 1))) }}
+                </span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">
+                        {{ $entry['name'] }}
+                        @if($entry['is_me']) <span class="text-orange-400 text-xs">(vous)</span> @endif
+                    </p>
+                    <p class="text-xs text-slate-500">{{ $entry['city'] ?? '—' }} · {{ $entry['grade'] }}</p>
+                </div>
+                <span class="text-sm font-bold text-slate-300">{{ $entry['count'] }} <span class="text-xs text-slate-500">restaurants</span></span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Support --}}
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-6 text-white mb-6">
+        <h3 class="font-semibold text-lg mb-2">Besoin d'aide ?</h3>
+        <p class="text-orange-100 text-sm mb-4">Notre équipe support est disponible du lundi au vendredi, 8h-18h.</p>
+        <div class="flex flex-wrap gap-3">
+            <a href="https://wa.me/{{ preg_replace('/\D/', '', config('support.whatsapp', '2250000000000')) }}"
+               target="_blank"
+               class="flex items-center gap-2 bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp Support
+            </a>
+            <a href="mailto:{{ config('support.email', 'support@menupro.ci') }}"
+               class="flex items-center gap-2 bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Email Support
+            </a>
+        </div>
+    </div>
+
     {{-- === MODAL RETRAIT === --}}
     @if($showWithdrawalModal)
         <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
@@ -248,10 +394,39 @@
             <div class="w-full sm:max-w-sm rounded-2xl border border-slate-700 bg-[#0f172a] p-6 shadow-2xl">
                 <h3 class="text-white font-bold text-base mb-1">Demande de retrait</h3>
                 <p class="text-slate-400 text-sm mb-4">Solde disponible : <span class="text-white font-semibold">{{ number_format($agent->balance, 0, ',', ' ') }} FCFA</span></p>
+
+                {{-- Montant --}}
                 <input type="number" wire:model="withdrawalAmount" placeholder="Montant en FCFA" min="1"
-                       class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800 text-white text-sm placeholder-slate-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mb-2 transition">
+                       class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800 text-white text-sm placeholder-slate-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mb-1 transition">
                 @error('withdrawalAmount') <p class="text-red-400 text-xs mb-2">{{ $message }}</p> @enderror
-                <div class="flex gap-2 mt-2">
+
+                {{-- Mode de paiement --}}
+                <div class="mt-3">
+                    <label class="block text-slate-400 text-xs mb-1">Mode de paiement</label>
+                    <select wire:model.live="withdrawalMethod"
+                            class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800 text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">
+                        <option value="wave">Wave</option>
+                        <option value="orange_money">Orange Money</option>
+                        <option value="mtn_money">MTN Money</option>
+                    </select>
+                    @error('withdrawalMethod') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Numéro --}}
+                <div class="mt-3">
+                    <label class="block text-slate-400 text-xs mb-1">
+                        Numéro
+                        @if($withdrawalMethod === 'wave') Wave
+                        @elseif($withdrawalMethod === 'orange_money') Orange Money
+                        @else MTN Money
+                        @endif
+                    </label>
+                    <input type="tel" wire:model="withdrawalPhone" placeholder="+225 07 XX XX XX XX"
+                           class="w-full h-11 px-4 rounded-xl border border-slate-700 bg-slate-800 text-white text-sm placeholder-slate-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">
+                    @error('withdrawalPhone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="flex gap-2 mt-4">
                     <button wire:click="$set('showWithdrawalModal', false)"
                             class="flex-1 h-11 rounded-xl border border-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-800 transition">
                         Annuler

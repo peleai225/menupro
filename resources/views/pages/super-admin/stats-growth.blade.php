@@ -132,23 +132,23 @@
         new Chart(growthCtx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode(array_column($weeklyGrowth, 'week')) !!},
+                labels: {!! json_encode(array_column($weeklyGrowth, 'week'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                 datasets: [
                     {
                         label: 'Restaurants',
-                        data: {!! json_encode(array_column($weeklyGrowth, 'restaurants')) !!},
+                        data: {!! json_encode(array_column($weeklyGrowth, 'restaurants'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                         backgroundColor: 'rgba(59, 130, 246, 0.5)',
                         borderColor: 'rgb(59, 130, 246)',
                     },
                     {
                         label: 'Commandes',
-                        data: {!! json_encode(array_column($weeklyGrowth, 'orders')) !!},
+                        data: {!! json_encode(array_column($weeklyGrowth, 'orders'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                         backgroundColor: 'rgba(16, 185, 129, 0.5)',
                         borderColor: 'rgb(16, 185, 129)',
                     },
                     {
                         label: 'Revenus (K FCFA)',
-                        data: {!! json_encode(array_map(fn($v) => $v / 100000, array_column($weeklyGrowth, 'revenue'))) !!},
+                        data: {!! json_encode(array_map(fn($v) => $v / 100000, array_column($weeklyGrowth, 'revenue')), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                         backgroundColor: 'rgba(245, 158, 11, 0.5)',
                         borderColor: 'rgb(245, 158, 11)',
                         yAxisID: 'y1',

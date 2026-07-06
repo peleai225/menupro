@@ -31,7 +31,7 @@ class DishForm extends Component
     #[Rule('required|exists:categories,id')]
     public ?int $category_id = null;
 
-    #[Rule('nullable|image|max:5120')]
+    #[Rule('nullable|mimes:jpeg,jpg,png,webp|max:5120')]
     public $image = null;
 
     public ?string $existingImage = null;

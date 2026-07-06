@@ -12,7 +12,7 @@ class FcmService
     private const FCM_V1_URL = 'https://fcm.googleapis.com/v1/projects/%s/messages:send';
     private const OAUTH_URL  = 'https://oauth2.googleapis.com/token';
 
-    // Legacy API (désactivée par Google en juin 2024 — gardée en fallback d'urgence)
+    // DEPRECATED: FCM Legacy API désactivée depuis juin 2024 - utiliser FCM HTTP v1
     private const FCM_LEGACY_URL = 'https://fcm.googleapis.com/fcm/send';
 
     private function projectId(): ?string
@@ -66,10 +66,17 @@ class FcmService
             return $this->sendViaV1($tokens, $title, $body, $data);
         }
 
+        // DEPRECATED: FCM Legacy API désactivée depuis juin 2024 - utiliser FCM HTTP v1
+        // Le fallback legacy ne peut plus fonctionner (Google a coupé le service).
+        if (false) {
+            $key = $this->serverKey();
+            if ($key) {
+                return $this->sendViaLegacy($tokens, $title, $body, $data, $key);
+            }
+        }
         $key = $this->serverKey();
         if ($key) {
-            Log::warning('[FCM] Utilisation de l\'API legacy (désactivée depuis juin 2024). Migrez vers FCM v1.');
-            return $this->sendViaLegacy($tokens, $title, $body, $data, $key);
+            Log::error('[FCM] Clé serveur legacy détectée mais API désactivée par Google depuis juin 2024. Configurez FCM HTTP v1 (project_id + service_account_json).');
         }
 
         Log::warning('[FCM] Aucune configuration Firebase trouvée.');
@@ -188,7 +195,7 @@ class FcmService
         }
     }
 
-    // --- Legacy (désactivée, fallback d'urgence) ---
+    // --- Legacy (DEPRECATED: désactivée depuis juin 2024, ne peut plus fonctionner) ---
 
     private function sendViaLegacy(array $tokens, string $title, string $body, array $data, string $key): array
     {

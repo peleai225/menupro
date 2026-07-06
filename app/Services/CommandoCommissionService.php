@@ -38,9 +38,20 @@ class CommandoCommissionService
             return false;
         }
 
-        $cents = (int) (SystemSetting::has('commando_commission_cents_first_payment')
+        // Montant par grade (ROOKIE=3000F, COMMANDO=5000F, ELITE=7000F)
+        $grade = $agent->grade; // AgentGrade enum (computed accessor)
+        $amountKey = match ($grade->value) {
+            'elite'    => 'commando_commission_elite_cents',
+            'commando' => 'commando_commission_commando_cents',
+            default    => 'commando_commission_rookie_cents',
+        };
+        // Fallback vers le montant global si la clé par grade n'existe pas encore
+        $fallback = (int) (SystemSetting::has('commando_commission_cents_first_payment')
             ? SystemSetting::get('commando_commission_cents_first_payment', 500000)
             : config('commando.commission_cents_first_payment', 500000));
+        $cents = SystemSetting::has($amountKey)
+            ? (int) SystemSetting::get($amountKey, $fallback)
+            : $fallback;
         if ($cents <= 0) {
             return false;
         }
@@ -59,6 +70,22 @@ class CommandoCommissionService
         ]);
 
         $agent->increment('balance_cents', $cents);
+
+        // Notifier l'agent
+        if ($agent->user) {
+            try {
+                $agent->user->notify(new \App\Notifications\Commando\CommissionCreditedNotification(
+                    $agent,
+                    $cents,
+                    $restaurant->name
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('Commando: failed to send commission notification', [
+                    'agent_id' => $agent->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         Log::channel('payments')->info('Commando: commission credited', [
             'agent_id' => $agent->id,

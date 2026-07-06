@@ -10,7 +10,6 @@ use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
 use App\Services\DeliveryPricingService;
-use App\Services\JekoGateway;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -189,13 +188,8 @@ class Checkout extends Component
     #[Computed]
     public function jekoPaymentAvailable(): bool
     {
-        try {
-            $jeko = app(JekoGateway::class)->forPlatform();
-            return $jeko->isConfigured() && !empty($jeko->getPlatformStoreId());
-        } catch (\Throwable $e) {
-            \Log::error('Checkout: jekoPaymentAvailable check failed', ['error' => $e->getMessage()]);
-            return false;
-        }
+        // Jeko gateway supprimé (commit 03eba90) — toujours désactivé
+        return false;
     }
 
     #[Computed]
@@ -429,36 +423,13 @@ class Checkout extends Component
             });
 
         // Process payment
-        if ($this->payment_method === 'jeko') {
-            $jeko = app(JekoGateway::class)->forPlatform();
-            $storeId = $jeko->getPlatformStoreId();
-            try {
-                $result = $jeko->createOrderPayment($order, $storeId);
-
-                if ($result['success']) {
-                    $order->update([
-                        'payment_reference' => $result['payment_id'],
-                        'payment_metadata' => ['payment_url' => $result['payment_url']],
-                    ]);
-                    return redirect()->away($result['payment_url']);
-                }
-                session()->flash('error', 'Erreur de paiement : ' . ($result['error'] ?? 'Veuillez réessayer.'));
-                \Log::error('Jeko payment creation failed', ['order_id' => $order->id, 'result' => $result]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            } catch (\Exception $e) {
-                session()->flash('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
-                \Log::error('Jeko payment exception', ['order_id' => $order->id, 'error' => $e->getMessage()]);
-                $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
-                return;
-            }
-        } else {
-            // Cash on delivery
-            $order->markAsPaid([
-                'method' => 'cash_on_delivery',
-                'metadata' => ['note' => 'Paiement à la livraison'],
-            ]);
-        }
+        // Note: 'jeko' payment method supprimé (commit 03eba90) — jekoPaymentAvailable() retourne false,
+        // donc ce cas ne peut jamais être atteint via l'UI.
+        // Cash on delivery
+        $order->markAsPaid([
+            'method' => 'cash_on_delivery',
+            'metadata' => ['note' => 'Paiement à la livraison'],
+        ]);
 
         // Redirect to order status
         $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));

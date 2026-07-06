@@ -3,8 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CleanJsonResponse
 {
@@ -30,9 +33,14 @@ class CleanJsonResponse
             throw $e;
         }
 
+        // Ignorer les réponses streamées ou fichiers binaires — getContent() lève une exception
+        if ($response instanceof StreamedResponse || $response instanceof BinaryFileResponse) {
+            return $response;
+        }
+
         // Only process JSON responses (including Livewire responses)
         $contentType = $response->headers->get('Content-Type', '');
-        if (str_contains($contentType, 'application/json') || 
+        if (str_contains($contentType, 'application/json') ||
             str_contains($request->path(), 'livewire')) {
             
             try {
@@ -51,16 +59,16 @@ class CleanJsonResponse
                             $cleaned = $data;
                         }
                         
-                        // Encode with flags to ignore invalid UTF-8
-                        $cleanedContent = json_encode($cleaned, 
-                            JSON_UNESCAPED_UNICODE | 
-                            JSON_INVALID_UTF8_IGNORE | 
-                            JSON_PARTIAL_OUTPUT_ON_ERROR
+                        // Encoder sans JSON_PARTIAL_OUTPUT_ON_ERROR pour ne pas produire
+                        // un JSON tronqué qui casserait Livewire. JSON_THROW_ON_ERROR permet
+                        // au bloc catch(\JsonException) ci-dessous de s'exécuter réellement.
+                        $cleanedContent = json_encode($cleaned,
+                            JSON_UNESCAPED_UNICODE |
+                            JSON_INVALID_UTF8_IGNORE |
+                            JSON_THROW_ON_ERROR
                         );
-                        
-                        if ($cleanedContent !== false) {
-                            $response->setContent($cleanedContent);
-                        }
+
+                        $response->setContent($cleanedContent);
                     } else {
                         // If JSON decode failed, try to clean the raw content
                         $cleanedContent = $this->cleanString($content);
@@ -70,24 +78,13 @@ class CleanJsonResponse
                     }
                 }
             } catch (\JsonException $e) {
-                // If encoding fails, try with more permissive flags
-                try {
-                    if (isset($cleaned)) {
-                        $cleanedContent = json_encode($cleaned, 
-                            JSON_UNESCAPED_UNICODE | 
-                            JSON_INVALID_UTF8_IGNORE | 
-                            JSON_PARTIAL_OUTPUT_ON_ERROR
-                        );
-                        if ($cleanedContent !== false) {
-                            $response->setContent($cleanedContent);
-                        }
-                    }
-                } catch (\Exception $e2) {
-                    \Log::warning('Failed to clean JSON response', [
-                        'error' => $e2->getMessage(),
-                        'original_error' => $e->getMessage()
-                    ]);
-                }
+                // L'encodage a échoué — retourner la réponse originale intacte plutôt que
+                // de risquer un JSON partiel/corrompu (ex : Livewire attend un JSON complet).
+                \Log::warning('CleanJsonResponse: JSON encoding failed, returning original response', [
+                    'error' => $e->getMessage(),
+                    'path'  => $request->path(),
+                ]);
+                // Ne pas modifier $response — la réponse originale est retournée telle quelle.
             } catch (\Exception $e) {
                 // If cleaning fails, log and continue with original response
                 \Log::warning('Failed to clean JSON response', [

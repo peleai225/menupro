@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Enums\UserRole;
 use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,8 +41,14 @@ class LoginController extends Controller
         );
 
         // Les agents CRM utilisent un email synthétique non vérifiable — bypass email
-        $crmAgentRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
-        $isCrmAgent = in_array($request->user()->role->value, $crmAgentRoles);
+        $bypassRoles = [
+            UserRole::SUPER_ADMIN,
+            UserRole::COMMERCIAL,
+            UserRole::TECHNICIAN,
+            UserRole::TEAM_LEADER,
+            UserRole::COMMANDO_AGENT,
+        ];
+        $isCrmAgent = in_array($request->user()->role, $bypassRoles);
 
         if (!$isCrmAgent) {
             if (!$request->user()->hasVerifiedEmail()) {

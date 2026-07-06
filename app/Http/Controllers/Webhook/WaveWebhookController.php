@@ -25,6 +25,11 @@ class WaveWebhookController extends Controller
             'has_signature' => !empty($signatureHeader),
         ]);
 
+        // Charger la config plateforme (apiKey + webhookSecret depuis SystemSetting/DB)
+        // OBLIGATOIRE avant verifyWebhookSignature — sans ça, webhookSecret reste '' et
+        // tous les webhooks sont rejetés avec 401.
+        $wave->loadPlatformConfig();
+
         // Vérifier la signature avec la clé plateforme (une seule clé API gère tout)
         $signatureValid = $wave->verifyWebhookSignature($rawPayload, $signatureHeader);
 

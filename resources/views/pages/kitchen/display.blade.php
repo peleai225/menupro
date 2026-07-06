@@ -405,7 +405,7 @@
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
-                this.pollInterval = setInterval(() => this.fetchOrders(), 8000);
+                this.pollInterval = setInterval(() => this.fetchOrders(), 30000); // fallback polling — Reverb WebSocket est prioritaire
 
                 // Indicateur réseau
                 window.addEventListener('online',  () => { this.online = true;  });
@@ -420,7 +420,7 @@
 
                 // Reverb temps réel (si activé)
                 if (window.Echo) {
-                    window.Echo.channel('restaurant.{{ $restaurant->id }}.orders')
+                    window.Echo.private('restaurant.{{ $restaurant->id }}.orders')
                         .listen('.order.created',       () => this.fetchOrders())
                         .listen('.order.status_changed', () => this.fetchOrders());
                 }

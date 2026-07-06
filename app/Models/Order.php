@@ -348,6 +348,10 @@ class Order extends Model
 
     protected function deductDishStock(): void
     {
+        // loadMissing évite le N+1 : si items.dish n'est pas déjà chargé,
+        // Laravel émet une seule requête par relation plutôt qu'une par item
+        $this->loadMissing('items.dish');
+
         foreach ($this->items as $item) {
             if ($item->dish && $item->dish->track_stock) {
                 $item->dish->decreaseStock($item->quantity);
@@ -398,6 +402,10 @@ class Order extends Model
 
     protected function restoreDishStock(): void
     {
+        // loadMissing évite le N+1 : si items.dish n'est pas déjà chargé,
+        // Laravel émet une seule requête par relation plutôt qu'une par item
+        $this->loadMissing('items.dish');
+
         foreach ($this->items as $item) {
             if ($item->dish && $item->dish->track_stock) {
                 $item->dish->increaseStock($item->quantity);

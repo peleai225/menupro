@@ -27,14 +27,17 @@ class CleanupUnpaidRegistrations implements ShouldQueue
         Log::info('Cleaning up unpaid registrations (older than 48 hours)...');
 
         // Get all restaurants with PENDING status and PENDING subscriptions older than 48 hours
+        // withoutGlobalScopes sur subscriptions car ce job tourne hors contexte HTTP
         $unpaidRestaurants = Restaurant::query()
             ->where('status', RestaurantStatus::PENDING)
             ->whereHas('subscriptions', function ($query) {
-                $query->where('status', SubscriptionStatus::PENDING)
+                $query->withoutGlobalScopes()
+                    ->where('status', SubscriptionStatus::PENDING)
                     ->where('created_at', '<', now()->subHours(48));
             })
             ->with(['subscriptions' => function ($query) {
-                $query->where('status', SubscriptionStatus::PENDING);
+                $query->withoutGlobalScopes()
+                    ->where('status', SubscriptionStatus::PENDING);
             }])
             ->get();
 
@@ -50,7 +53,7 @@ class CleanupUnpaidRegistrations implements ShouldQueue
                 }
 
                 // Delete pending subscriptions
-                $restaurant->subscriptions()->where('status', SubscriptionStatus::PENDING)->delete();
+                $restaurant->subscriptions()->withoutGlobalScopes()->where('status', SubscriptionStatus::PENDING)->delete();
 
                 // Delete restaurant files
                 if ($restaurant->logo_path) {
@@ -76,7 +79,13 @@ class CleanupUnpaidRegistrations implements ShouldQueue
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error("Error cleaning up unpaid registration (Restaurant ID {$restaurant->id}): " . $e->getMessage());
+                Log::error("Error cleaning up unpaid registration", [
+                'restaurant_id'   => $restaurant->id,
+                'restaurant_name' => $restaurant->name,
+                'error'           => $e->getMessage(),
+                'trace'           => $e->getTraceAsString(),
+            ]);
+            // Exception intentionnellement avalee : les restaurants sont traites independamment en boucle
             }
         }
 

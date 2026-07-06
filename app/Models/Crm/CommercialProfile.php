@@ -25,6 +25,7 @@ class CommercialProfile extends Model
         'banned_at',
         'rejection_reason',
         'team_id',
+        'monthly_target',
     ];
 
     protected function casts(): array
@@ -32,6 +33,7 @@ class CommercialProfile extends Model
         return [
             'approved_at' => 'datetime',
             'banned_at' => 'datetime',
+            'monthly_target' => 'integer',
         ];
     }
 

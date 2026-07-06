@@ -27,8 +27,12 @@ class DishController extends Controller
     public function index(Request $request): View
     {
         $restaurant = $request->user()->restaurant;
+        if (!$restaurant) {
+            abort(403);
+        }
+        $restaurantId = $restaurant->id;
 
-        $query = Dish::with('category');
+        $query = Dish::where('restaurant_id', $restaurantId)->with('category');
 
         // Filters
         if ($request->filled('category')) {
@@ -45,7 +49,7 @@ class DishController extends Controller
 
         $dishes = $query->ordered()->paginate(20)->withQueryString();
 
-        $categories = Category::ordered()->get();
+        $categories = Category::where('restaurant_id', $restaurantId)->ordered()->get();
 
         $this->planLimiter->forRestaurant($restaurant);
         $canCreate = $this->planLimiter->canCreate('dishes');
@@ -65,11 +69,14 @@ class DishController extends Controller
     public function create(Request $request): View
     {
         $restaurant = $request->user()->restaurant;
+        if (!$restaurant) {
+            abort(403);
+        }
 
         // Check quota
         $this->planLimiter->forRestaurant($restaurant)->validateOrFail('dishes');
 
-        $categories = Category::ordered()->get();
+        $categories = Category::where('restaurant_id', $restaurant->id)->ordered()->get();
         $optionGroups = DishOptionGroup::active()->ordered()->get();
 
         return view('pages.restaurant.dishes-create', compact('categories', 'optionGroups'));
@@ -125,7 +132,7 @@ class DishController extends Controller
     {
         $this->authorize('update', $dish);
 
-        $categories = Category::ordered()->get();
+        $categories = Category::where('restaurant_id', $dish->restaurant_id)->ordered()->get();
         $optionGroups = DishOptionGroup::active()->ordered()->get();
         $dish->load('optionGroups', 'ingredients');
 

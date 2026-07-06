@@ -23,9 +23,14 @@ class PayoutController extends Controller
         ], 503);
     }
 
-    public function getPayoutStatus(string $payoutId): JsonResponse
+    public function getPayoutStatus(Request $request, string $payoutId): JsonResponse
     {
         $payout = PayoutTransaction::query()->findOrFail($payoutId);
+
+        $user = $request->user();
+        if (!$user->isSuperAdmin() && (int) $payout->restaurant_id !== (int) $user->restaurant_id) {
+            abort(403, 'Accès non autorisé.');
+        }
 
         return response()->json([
             'id' => $payout->id,

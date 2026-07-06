@@ -38,6 +38,11 @@ class LeadPipelineService
 
         event(new LeadCreated($lead));
 
+        // Auto-assignation si une équipe est définie et aucun assigné explicite
+        if ($lead->team_id && !$lead->assigned_to) {
+            $this->autoAssign($lead);
+        }
+
         return $lead;
     }
 

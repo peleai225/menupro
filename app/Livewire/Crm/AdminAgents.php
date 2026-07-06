@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Crm;
 
+use App\Enums\AgentVerificationStatus;
 use App\Enums\Crm\AgentStatus;
 use App\Enums\Crm\Grade;
 use App\Enums\UserRole;
@@ -37,6 +38,7 @@ class AdminAgents extends Component
     public string $editingAgentName = '';
     public string $editingStatus = '';
     public string $editingSpecialty = '';
+    public int $editingMonthlyTarget = 5;
 
     public function mount(): void
     {
@@ -94,9 +96,9 @@ class AdminAgents extends Component
 
         $totalAgents = User::whereIn('role', $crmRoles)->count();
 
-        $verified = CommercialProfile::where('verification_status', 'verified')->count();
+        $verified = CommercialProfile::where('verification_status', AgentVerificationStatus::VALIDE->value)->count();
 
-        $pending = CommercialProfile::whereIn('verification_status', ['pending', 'pending_review'])->count();
+        $pending = CommercialProfile::whereIn('verification_status', [AgentVerificationStatus::PENDING_REVIEW->value])->count();
 
         $activeThisWeek = User::whereIn('role', $crmRoles)
             ->where('last_login_at', '>=', now()->startOfWeek())
@@ -211,7 +213,7 @@ class AdminAgents extends Component
 
         if ($user->commercialProfile) {
             $user->commercialProfile->update([
-                'verification_status' => 'verified',
+                'verification_status' => AgentVerificationStatus::VALIDE->value,
                 'approved_at'         => now(),
                 'rejection_reason'    => null,
             ]);
@@ -229,7 +231,7 @@ class AdminAgents extends Component
 
         if ($user->commercialProfile) {
             $user->commercialProfile->update([
-                'verification_status' => 'rejected',
+                'verification_status' => AgentVerificationStatus::REJETE->value,
                 'rejection_reason' => $reason,
                 'approved_at' => null,
             ]);
@@ -298,6 +300,10 @@ class AdminAgents extends Component
             ?? '';
         $teamId = $user->commercialProfile?->team_id ?? $user->technicianProfile?->team_id;
         $this->editingTeamId = (string) ($teamId ?? '');
+        $defaultTarget = $user->role->value === 'technician' ? 8 : 5;
+        $this->editingMonthlyTarget = $user->commercialProfile?->monthly_target
+            ?? $user->technicianProfile?->monthly_target
+            ?? $defaultTarget;
         $this->showEditModal = true;
     }
 
@@ -332,12 +338,14 @@ class AdminAgents extends Component
                 $user->commercialProfile->update([
                     'team_id' => $teamId,
                     'specialty' => $this->editingSpecialty ?: null,
+                    'monthly_target' => max(1, (int) $this->editingMonthlyTarget),
                 ]);
             }
             if ($user->technicianProfile) {
                 $user->technicianProfile->update([
                     'team_id' => $teamId,
                     'specialty' => $this->editingSpecialty ?: null,
+                    'monthly_target' => max(1, (int) $this->editingMonthlyTarget),
                 ]);
             }
 

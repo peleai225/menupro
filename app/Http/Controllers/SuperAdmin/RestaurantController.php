@@ -6,7 +6,9 @@ use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
 use App\Exports\RestaurantsExport;
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Plan;
+use App\Models\User;
 use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Notifications\RestaurantRejectedNotification;
@@ -278,9 +280,15 @@ class RestaurantController extends Controller
 
         // Store original admin ID in session
         session(['impersonating_from' => auth()->id()]);
-        
+
+        ActivityLog::log('impersonation_start', auth()->user(),
+            "Super admin impersonne le restaurant {$restaurant->name}",
+            ['impersonated_user_id' => $owner->id, 'restaurant_id' => $restaurant->id]
+        );
+
         // Login as the owner
         auth()->login($owner);
+        request()->session()->regenerate();
 
         return redirect()->route('restaurant.dashboard')
             ->with('info', "Vous êtes maintenant connecté en tant que {$owner->name}.");
@@ -352,5 +360,22 @@ class RestaurantController extends Controller
         return redirect()->route('super-admin.restaurants.index')
             ->with('success', 'Restaurant supprimé.');
     }
+
+    /**
+     * Stop impersonating and return to super admin.
+     */
+    public function stopImpersonation(Request $request): RedirectResponse
+    {
+        $adminId = session()->pull('impersonating_from');
+        if (!$adminId) {
+            return redirect()->route('super-admin.dashboard')->with('error', 'Aucune impersonation active.');
+        }
+        $admin = User::findOrFail($adminId);
+        ActivityLog::log('impersonation_end', $admin, "Fin d'impersonation par super admin", ['restaurant_id' => auth()->user()->restaurant_id ?? null]);
+        auth()->login($admin);
+        $request->session()->regenerate();
+        return redirect()->route('super-admin.dashboard');
+    }
+
 }
 

@@ -5,6 +5,7 @@ namespace App\Events\Crm;
 use App\Models\Crm\Installation;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -20,8 +21,8 @@ class InstallationCompleted implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('crm.installations'),
-            new Channel("crm.user.{$this->installation->technician_id}"),
+            new PrivateChannel('crm.admin'),
+            new PrivateChannel("crm.user.{$this->installation->technician_id}"),
         ];
     }
 

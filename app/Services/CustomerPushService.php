@@ -15,14 +15,14 @@ class CustomerPushService
         $token = $order->customer?->fcm_token;
         if (! $token) return;
 
-        [$title, $body] = $this->messageFor($order->status, $order);
+        [$title, $body] = $this->messageFor($order->status->value, $order);
 
         if (! $title) return;
 
         $this->fcm->sendToToken($token, $title, $body, [
             'type'     => 'order_status',
             'order_id' => (string) $order->id,
-            'status'   => $order->status,
+            'status'   => $order->status->value,
         ]);
     }
 

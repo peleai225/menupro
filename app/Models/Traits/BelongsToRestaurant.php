@@ -17,6 +17,9 @@ trait BelongsToRestaurant
         static::addGlobalScope('restaurant', function (Builder $builder) {
             if ($restaurantId = static::getCurrentRestaurantId()) {
                 $builder->where($builder->getModel()->getTable() . '.restaurant_id', $restaurantId);
+            } elseif (!app()->runningInConsole() && request()->is('dashboard/*') && auth()->check() && !auth()->user()->isSuperAdmin()) {
+                // En contexte web restaurant sans scope: retourner 0 résultats par sécurité
+                $builder->whereRaw('0 = 1');
             }
         });
 

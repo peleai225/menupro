@@ -5,6 +5,7 @@ namespace App\Events\Crm;
 use App\Models\Crm\Commission;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +21,7 @@ class CommissionCredited implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel("crm.user.{$this->commission->user_id}"),
+            new PrivateChannel("crm.user.{$this->commission->user_id}"),
         ];
     }
 

@@ -110,3 +110,9 @@ Schedule::command('crm:credit-recurring')
     ->monthlyOn(2, '06:00')
     ->name('crm-recurring-commissions')
     ->withoutOverlapping();
+
+// CRM — Snapshots de performance + commissions récurrentes le 1er du mois à 2h
+Schedule::command('crm:monthly-processing')
+    ->monthlyOn(1, '02:00')
+    ->name('crm-monthly-processing')
+    ->withoutOverlapping();

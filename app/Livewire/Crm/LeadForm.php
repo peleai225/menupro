@@ -23,6 +23,8 @@ class LeadForm extends Component
     public string $subscription_plan = '';
     public ?float $latitude = null;
     public ?float $longitude = null;
+    public ?string $lostReason = null;
+    public ?string $nextActionAt = null;
 
     public bool $showModal = false;
 
@@ -39,6 +41,8 @@ class LeadForm extends Component
             'subscription_plan' => 'nullable|in:' . implode(',', array_column(SubscriptionPlan::cases(), 'value')),
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'lostReason' => 'nullable|string|max:500',
+            'nextActionAt' => 'nullable|date|after:today',
         ];
     }
 
@@ -61,8 +65,10 @@ class LeadForm extends Component
             ]));
             $this->source = $this->lead->source->value;
             $this->subscription_plan = $this->lead->subscription_plan?->value ?? '';
+            $this->lostReason = $this->lead->lost_reason;
+            $this->nextActionAt = $this->lead->next_action_at?->format('Y-m-d\TH:i');
         } else {
-            $this->reset(['lead', 'restaurant_name', 'manager_name', 'phone', 'email', 'address', 'city', 'source', 'subscription_plan', 'latitude', 'longitude']);
+            $this->reset(['lead', 'restaurant_name', 'manager_name', 'phone', 'email', 'address', 'city', 'source', 'subscription_plan', 'latitude', 'longitude', 'lostReason', 'nextActionAt']);
             $this->source = 'terrain';
         }
 
@@ -76,6 +82,16 @@ class LeadForm extends Component
         // Normaliser subscription_plan vide en null
         if (empty($data['subscription_plan'])) {
             $data['subscription_plan'] = null;
+        }
+
+        // Mapper les propriétés camelCase vers les colonnes snake_case
+        $data['lost_reason'] = $data['lostReason'] ?? null;
+        $data['next_action_at'] = !empty($data['nextActionAt']) ? $data['nextActionAt'] : null;
+        unset($data['lostReason'], $data['nextActionAt']);
+
+        // Si le lead n'est pas en statut perdu, on ne conserve pas le lost_reason
+        if ($this->lead && $this->lead->status->value !== 'perdu') {
+            unset($data['lost_reason']);
         }
 
         if ($this->lead) {

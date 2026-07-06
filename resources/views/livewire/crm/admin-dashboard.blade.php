@@ -71,15 +71,27 @@ class="space-y-6">
             <h1 class="text-xl font-bold text-white">Dashboard CRM</h1>
             <p class="text-sm text-gray-500 mt-0.5">Vue d'ensemble de l'activité commerciale</p>
         </div>
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-gray-800/50 border border-gray-700/50">
-            @foreach(['week' => 'Semaine', 'month' => 'Mois', 'quarter' => 'Trimestre', 'year' => 'Année'] as $key => $label)
-                <button wire:click="setPeriod('{{ $key }}')"
-                        @click="$dispatch('period-changed')"
-                        class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200
-                            {{ $period === $key ? 'bg-white/10 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200' }}">
-                    {{ $label }}
-                </button>
-            @endforeach
+        <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-1 p-1 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                @foreach(['week' => 'Semaine', 'month' => 'Mois', 'quarter' => 'Trimestre', 'year' => 'Année'] as $key => $label)
+                    <button wire:click="setPeriod('{{ $key }}')"
+                            @click="$dispatch('period-changed')"
+                            class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200
+                                {{ $period === $key ? 'bg-white/10 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200' }}">
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
+            <a href="{{ route('crm.admin.export.leads') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/30 hover:bg-sky-500/25 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Leads CSV
+            </a>
+            <a href="{{ route('crm.admin.export.commissions') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Commissions CSV
+            </a>
         </div>
     </div>
 

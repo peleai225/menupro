@@ -238,7 +238,7 @@
 
                     // Real-time updates via Reverb
                     if (window.Echo) {
-                        window.Echo.channel('restaurant.{{ auth()->user()->restaurant_id }}.orders')
+                        window.Echo.private('restaurant.{{ auth()->user()->restaurant_id }}.orders')
                             .listen('.order.created', () => this.refreshData())
                             .listen('.order.status_changed', () => this.refreshData());
                     }

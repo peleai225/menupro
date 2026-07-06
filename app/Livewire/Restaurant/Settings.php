@@ -244,8 +244,8 @@ class Settings extends Component
                 'postal_code' => 'nullable|string|max:20',
                 'latitude'    => 'nullable|numeric|between:-90,90',
                 'longitude'   => 'nullable|numeric|between:-180,180',
-                'logo'        => 'nullable|image|max:2048',
-                'banner'      => 'nullable|image|max:5120',
+                'logo'        => 'nullable|mimes:jpeg,jpg,png,webp|max:2048',
+                'banner'      => 'nullable|mimes:jpeg,jpg,png,webp|max:5120',
             ]);
 
             $data = [

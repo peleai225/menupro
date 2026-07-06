@@ -3,6 +3,19 @@
     $valid = $profile && $profile->isValide();
 
     if ($profile) {
+        // Anti-abus : vérifier le nombre de scans récents pour ce profil
+        $maxScansPerHour = config('crm.fraud.max_qr_scans_per_hour', 10);
+        $recentScans = \App\Models\Crm\VerifyScan::where('user_id', $profile->user_id)
+            ->where('created_at', '>=', now()->subHour())
+            ->count();
+
+        if ($recentScans > $maxScansPerHour) {
+            \Illuminate\Support\Facades\Log::warning(
+                "QR scan flood detected for profile {$profile->uuid} from IP " . request()->ip()
+            );
+            abort(429, 'Trop de vérifications. Réessayez dans une heure.');
+        }
+
         \App\Models\Crm\VerifyScan::create([
             'user_id' => $profile->user_id,
             'ip_address' => request()->ip(),

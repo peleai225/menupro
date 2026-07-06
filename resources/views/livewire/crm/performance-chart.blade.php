@@ -61,6 +61,27 @@
         </div>
     </div>
 
+    {{-- Objectif mensuel individuel --}}
+    @php
+        $target = $this->monthlyTarget;
+        $converted = $this->stats['converted'];
+        $progress = $target > 0 ? min(100, (int) round(($converted / $target) * 100)) : 0;
+    @endphp
+    <div class="rounded-2xl bg-gray-900 border border-gray-800/50 p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-300">Objectif du mois</h3>
+            <span class="text-xs font-medium {{ $progress >= 100 ? 'text-emerald-400' : 'text-gray-400' }}">
+                {{ $converted }} / {{ $target }} conversions
+            </span>
+        </div>
+        <div class="h-3 rounded-full bg-gray-800 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-1000 ease-out
+                        {{ $progress >= 100 ? 'bg-emerald-500' : ($progress >= 70 ? 'bg-orange-500' : 'bg-sky-500') }}"
+                 style="width: {{ $progress }}%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">{{ $progress }}% de l'objectif atteint ce mois-ci</p>
+    </div>
+
     {{-- Grade progression --}}
     @if($this->grade)
     <div class="rounded-2xl bg-gray-900 border border-gray-800/50 p-6">

@@ -6,12 +6,17 @@ use App\Enums\Crm\InstallationStatus;
 use App\Models\Crm\Installation;
 use App\Models\User;
 use App\Services\Crm\InstallationService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class InstallationList extends Component
 {
+    use WithFileUploads;
+
     public string $statusFilter = '';
     public string $technicianFilter = '';
     public string $dateFilter = 'all';
@@ -19,6 +24,17 @@ class InstallationList extends Component
     public ?int $activeInstallationId = null;
     public ?int $ratingValue = null;
     public string $notes = '';
+
+    #[Rule(['nullable', 'array', 'max:5'])]
+    public array $completionPhotos = [];
+
+    protected function rules(): array
+    {
+        return [
+            'completionPhotos'   => ['nullable', 'array', 'max:5'],
+            'completionPhotos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ];
+    }
 
     public ?int $reassignInstallationId = null;
     public ?int $reassignTechnicianId = null;
@@ -106,6 +122,7 @@ class InstallationList extends Component
         $this->activeInstallationId = $id;
         $this->ratingValue = null;
         $this->notes = '';
+        $this->completionPhotos = [];
     }
 
     public function completeInstallation(InstallationService $service): void
@@ -120,6 +137,8 @@ class InstallationList extends Component
             return;
         }
 
+        $this->validate();
+
         $notes = $this->notes ?: null;
         $service->complete($installation, $this->ratingValue);
 
@@ -127,7 +146,24 @@ class InstallationList extends Component
             $installation->update(['notes' => trim(($installation->notes ?? '') . "\n" . $notes)]);
         }
 
+        // Upload photos terrain
+        $photosPaths = [];
+        foreach ($this->completionPhotos as $photo) {
+            try {
+                $path = $photo->store('crm/installations/' . $this->activeInstallationId, 'public');
+                $photosPaths[] = $path;
+            } catch (\Exception $e) {
+                Log::warning("Photo upload failed for installation {$this->activeInstallationId}: " . $e->getMessage());
+            }
+        }
+        if (!empty($photosPaths)) {
+            $installation->update([
+                'photos' => array_merge($installation->photos ?? [], $photosPaths),
+            ]);
+        }
+
         $this->activeInstallationId = null;
+        $this->completionPhotos = [];
         $this->dispatch('toast', message: 'Installation terminée avec succès !', type: 'success');
         $this->dispatch('installation-updated');
     }

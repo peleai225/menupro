@@ -165,6 +165,34 @@ class CommissionEngine
     }
 
     /**
+     * Bonus top performer mensuel — 1 seul par équipe par mois.
+     * Idempotent : aucun double crédit si appelé plusieurs fois pour le même agent/équipe/mois.
+     */
+    public function creditBonusPerformance(User $user, int $teamId, string $month): ?Commission
+    {
+        if (!$this->agentCanReceive($user)) return null;
+
+        $alreadyCredited = Commission::where('user_id', $user->id)
+            ->where('type', CommissionType::BONUS_PERFORMANCE)
+            ->whereJsonContains('metadata->month', $month)
+            ->whereJsonContains('metadata->team_id', $teamId)
+            ->exists();
+
+        if ($alreadyCredited) return null;
+
+        $amountCents = (int) config('crm.commissions.bonus_monthly_top_cents', 5_000_000);
+        if ($amountCents <= 0) return null;
+
+        return $this->credit(
+            user: $user,
+            type: CommissionType::BONUS_PERFORMANCE,
+            amountCents: $amountCents,
+            description: "Bonus top performer {$month} — équipe #{$teamId}",
+            metadata: ['month' => $month, 'team_id' => $teamId],
+        );
+    }
+
+    /**
      * Palier commission technicien selon nombre d'installations ce mois.
      */
     private function technicianInstallCommission(int $technicianId): int

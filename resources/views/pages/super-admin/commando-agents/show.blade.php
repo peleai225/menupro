@@ -103,6 +103,38 @@
                     </dd>
                 </div>
             @endif
+
+            {{-- Statistiques agent --}}
+            <div class="mt-4 pt-4 grid grid-cols-2 gap-3" style="border-top:1px solid var(--sa-border);">
+                <div class="rounded-lg p-3 text-center" style="background:var(--sa-muted);">
+                    <p class="text-xs mb-1" style="color:var(--sa-muted-fg);">Commissions reçues</p>
+                    <p class="text-base font-bold text-green-400">{{ number_format($agentStats['total_commissions_fcfa'], 0, ',', ' ') }} <span class="text-xs font-normal" style="color:var(--sa-muted-fg);">FCFA</span></p>
+                </div>
+                <div class="rounded-lg p-3 text-center" style="background:var(--sa-muted);">
+                    <p class="text-xs mb-1" style="color:var(--sa-muted-fg);">Restaurants parrainés</p>
+                    <p class="text-base font-bold" style="color:var(--sa-fg);">
+                        <span class="text-orange-400">{{ $agentStats['restaurants_active'] }}</span>
+                        <span class="text-xs font-normal" style="color:var(--sa-muted-fg);">actifs</span>
+                        / {{ $agentStats['restaurants_total'] }}
+                    </p>
+                </div>
+                @if($agentStats['last_scan_at'])
+                <div class="rounded-lg p-3 col-span-2" style="background:var(--sa-muted);">
+                    <p class="text-xs mb-0.5" style="color:var(--sa-muted-fg);">Dernière activité</p>
+                    <p class="text-xs" style="color:var(--sa-fg);">
+                        Scan QR : {{ $agentStats['last_scan_at']->diffForHumans() }}
+                        @if($agentStats['last_commission_at'])
+                        &nbsp;·&nbsp; Commission : {{ $agentStats['last_commission_at']->diffForHumans() }}
+                        @endif
+                    </p>
+                </div>
+                @elseif($agentStats['last_commission_at'])
+                <div class="rounded-lg p-3 col-span-2" style="background:var(--sa-muted);">
+                    <p class="text-xs mb-0.5" style="color:var(--sa-muted-fg);">Dernière activité</p>
+                    <p class="text-xs" style="color:var(--sa-fg);">Dernière commission : {{ $agentStats['last_commission_at']->diffForHumans() }}</p>
+                </div>
+                @endif
+            </div>
         </div>
 
         {{-- Wallet --}}
@@ -124,18 +156,37 @@
                     <p class="text-amber-400 text-sm font-medium mb-2">Demandes de retrait en attente</p>
                     <ul class="space-y-2">
                         @foreach($pendingWithdrawals as $tx)
-                            <li class="flex items-center justify-between py-2 px-3 rounded-lg border text-sm" style="background:var(--sa-muted);border-color:var(--sa-border);">
-                                <span style="color:var(--sa-fg);">{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA – {{ $tx->created_at->format('d/m/Y H:i') }}</span>
-                                <span class="flex gap-2">
-                                    <form method="POST" action="{{ route('super-admin.commando.agents.withdrawal.pay', [$agent, $tx]) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-green-400 hover:text-green-300 text-xs font-medium">Marquer payé</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('super-admin.commando.agents.withdrawal.reject', [$agent, $tx]) }}" class="inline" onsubmit="return confirm('Rejeter cette demande ?');">
-                                        @csrf
-                                        <button type="submit" class="text-red-600 hover:text-red-300 text-xs font-medium">Rejeter</button>
-                                    </form>
-                                </span>
+                            <li class="py-2 px-3 rounded-lg border text-sm" style="background:var(--sa-muted);border-color:var(--sa-border);">
+                                <div class="flex items-center justify-between">
+                                    <span style="color:var(--sa-fg);">{{ number_format($tx->amount_cents / 100, 0, ',', ' ') }} FCFA – {{ $tx->created_at->format('d/m/Y H:i') }}</span>
+                                    <span class="flex gap-2">
+                                        <form method="POST" action="{{ route('super-admin.commando.agents.withdrawal.pay', [$agent, $tx]) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-green-400 hover:text-green-300 text-xs font-medium">Marquer payé</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('super-admin.commando.agents.withdrawal.reject', [$agent, $tx]) }}" class="inline" onsubmit="return confirm('Rejeter cette demande ?');">
+                                            @csrf
+                                            <button type="submit" class="text-red-600 hover:text-red-300 text-xs font-medium">Rejeter</button>
+                                        </form>
+                                    </span>
+                                </div>
+                                @if(!empty($tx->meta['payment_method']) || !empty($tx->meta['phone']))
+                                    <div class="mt-1 flex gap-3 text-xs" style="color:var(--sa-muted-fg);">
+                                        @if(!empty($tx->meta['payment_method']))
+                                            <span class="capitalize">
+                                                {{ match($tx->meta['payment_method']) {
+                                                    'wave'         => 'Wave',
+                                                    'orange_money' => 'Orange Money',
+                                                    'mtn_money'    => 'MTN Money',
+                                                    default        => $tx->meta['payment_method'],
+                                                } }}
+                                            </span>
+                                        @endif
+                                        @if(!empty($tx->meta['phone']))
+                                            <span class="font-mono">{{ $tx->meta['phone'] }}</span>
+                                        @endif
+                                    </div>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -236,11 +287,32 @@
             </div>
         @endif
         @if($agent->status_verification->value === 'valide' && !$agent->banned_at)
-            <form method="POST" action="{{ route('super-admin.commando.agents.ban', $agent) }}" class="inline"
-                  onsubmit="return confirm('Révoquer la carte de cet agent ? Le QR affichera « Agent invalide ».')">
-                @csrf
-                <button type="submit" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-neutral-900 font-medium">
+            <div x-data>
+                <button type="button" @click="$refs.banModal.showModal()"
+                        class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-neutral-900 font-medium">
                     Révoquer (bannir)
+                </button>
+                <dialog x-ref="banModal" class="rounded-xl p-6 max-w-md w-full backdrop:bg-black/60" style="background:var(--sa-card);border:1px solid var(--sa-border);">
+                    <form method="POST" action="{{ route('super-admin.commando.agents.ban', $agent) }}">
+                        @csrf
+                        <h3 class="text-lg font-semibold mb-2" style="color:var(--sa-fg);">Bannir l'agent</h3>
+                        <p class="text-sm mb-3" style="color:var(--sa-muted-fg);">Le QR de cet agent affichera « Agent invalide ». L'agent sera notifié.</p>
+                        <label class="block text-sm mb-2" style="color:var(--sa-muted-fg);">Motif du bannissement (optionnel)</label>
+                        <textarea name="ban_reason" rows="3" class="w-full px-4 py-2 border rounded-lg mb-4" style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="Raison du bannissement..."></textarea>
+                        <div class="flex gap-2 justify-end">
+                            <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 rounded-lg" style="background:var(--sa-muted);color:var(--sa-fg);">Annuler</button>
+                            <button type="submit" class="px-4 py-2 rounded-lg bg-red-500 text-white">Bannir</button>
+                        </div>
+                    </form>
+                </dialog>
+            </div>
+        @endif
+        @if($agent->status_verification->value === 'banni')
+            <form method="POST" action="{{ route('super-admin.commando.agents.unban', $agent) }}" class="inline"
+                  onsubmit="return confirm('Débannir cet agent et réactiver son compte ?')">
+                @csrf
+                <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-neutral-900 font-medium">
+                    Débannir
                 </button>
             </form>
         @endif

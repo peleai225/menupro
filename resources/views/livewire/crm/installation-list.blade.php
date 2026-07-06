@@ -200,6 +200,15 @@
                             </svg>
                             Complétée
                         </span>
+                        @if(!empty($installation->photos))
+                        <span class="flex items-center gap-1 text-xs text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            {{ count($installation->photos) }} photo(s)
+                        </span>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -238,11 +247,25 @@
             </div>
 
             {{-- Notes --}}
-            <div class="mb-6">
+            <div class="mb-4">
                 <label class="text-sm text-gray-400 mb-2 block">Notes (optionnel)</label>
                 <textarea wire:model="notes" rows="3"
                           class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 resize-none"
                           placeholder="Remarques, équipements installés..."></textarea>
+            </div>
+
+            {{-- Photos terrain --}}
+            <div class="mb-6">
+                <label class="block text-sm text-gray-400 mb-2">Photos terrain (optionnel, max 5)</label>
+                <input type="file"
+                       wire:model="completionPhotos"
+                       multiple
+                       accept="image/jpeg,image/png,image/webp"
+                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500/10 file:text-orange-400 hover:file:bg-orange-500/20">
+                @error('completionPhotos') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                @error('completionPhotos.*') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                <p class="text-xs text-gray-600 mt-1">JPG, PNG ou WebP, max 5 Mo par photo</p>
+                <div wire:loading wire:target="completionPhotos" class="text-xs text-orange-400 mt-1">Chargement en cours...</div>
             </div>
 
             <div class="flex gap-3">

@@ -27,6 +27,10 @@ class CommandoWelcomeController extends Controller
             return redirect()->route('login')->with('error', 'Lien expiré ou invalide.');
         }
 
+        if ($user->welcome_token_expires_at && $user->welcome_token_expires_at->isPast()) {
+            return redirect()->route('login')->with('error', 'Ce lien de bienvenue a expiré. Contactez votre administrateur.');
+        }
+
         return view('pages.commando.welcome', ['user' => $user, 'token' => $token]);
     }
 
@@ -45,9 +49,14 @@ class CommandoWelcomeController extends Controller
             return redirect()->route('login')->with('error', 'Lien expiré ou invalide.');
         }
 
+        if ($user->welcome_token_expires_at && $user->welcome_token_expires_at->isPast()) {
+            return redirect()->route('login')->with('error', 'Ce lien de bienvenue a expiré. Contactez votre administrateur.');
+        }
+
         $user->update([
             'password' => Hash::make($request->password),
             'welcome_token' => null,
+            'welcome_token_expires_at' => null,
         ]);
 
         $loginHint = $user->phone ?: $user->email;
@@ -58,7 +67,7 @@ class CommandoWelcomeController extends Controller
 
     private function isCrmAgent(User $user): bool
     {
-        $crmRoles = ['commercial', 'technician', 'team_leader', 'super_admin', 'commando_agent'];
+        $crmRoles = ['commercial', 'technician', 'team_leader', 'commando_agent'];
         return in_array($user->role->value, $crmRoles);
     }
 }

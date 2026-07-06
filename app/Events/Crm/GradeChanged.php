@@ -6,6 +6,7 @@ use App\Enums\Crm\Grade;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -22,8 +23,8 @@ class GradeChanged implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel("crm.user.{$this->user->id}"),
-            new Channel('crm.admin'),
+            new PrivateChannel("crm.user.{$this->user->id}"),
+            new PrivateChannel('crm.admin'),
         ];
     }
 

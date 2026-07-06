@@ -22,35 +22,51 @@ class DashboardController extends Controller
     {
         $demoRestaurantIds = Restaurant::where('is_demo', true)->pluck('id');
 
-        // Key metrics (excluding demo accounts)
+        // Key metrics (excluding demo accounts) — consolidated queries to reduce DB round-trips
+
+        // 1 requête au lieu de 4 pour les restaurants
+        $restaurantStats = DB::table('restaurants')
+            ->where('is_demo', false)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as expired
+            ", [
+                RestaurantStatus::ACTIVE->value,
+                RestaurantStatus::PENDING->value,
+                RestaurantStatus::EXPIRED->value,
+            ])
+            ->first();
+
+        // 1 requête au lieu de 5 pour les commandes + revenus
+        $orderStats = DB::table('orders')
+            ->when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
+                SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN 1 ELSE 0 END) as this_month,
+                SUM(CASE WHEN payment_status = ? THEN total ELSE 0 END) as revenue_total,
+                SUM(CASE WHEN payment_status = ? AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN total ELSE 0 END) as revenue_month
+            ", [PaymentStatus::COMPLETED->value, PaymentStatus::COMPLETED->value])
+            ->first();
+
         $stats = [
             'restaurants' => [
-                'total' => Restaurant::notDemo()->count(),
-                'active' => Restaurant::notDemo()->where('status', RestaurantStatus::ACTIVE)->count(),
-                'pending' => Restaurant::where('status', RestaurantStatus::PENDING)->count(),
-                'expired' => Restaurant::notDemo()->where('status', RestaurantStatus::EXPIRED)->count(),
+                'total'   => (int) ($restaurantStats->total ?? 0),
+                'active'  => (int) ($restaurantStats->active ?? 0),
+                'pending' => (int) ($restaurantStats->pending ?? 0),
+                'expired' => (int) ($restaurantStats->expired ?? 0),
             ],
             'users' => User::when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))->count(),
             'orders' => [
-                'total' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->count(),
-                'today' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->whereDate('created_at', today())->count(),
-                'this_month' => Order::withoutGlobalScope('restaurant')
-                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->count(),
+                'total'      => (int) ($orderStats->total ?? 0),
+                'today'      => (int) ($orderStats->today ?? 0),
+                'this_month' => (int) ($orderStats->this_month ?? 0),
             ],
             'revenue' => [
-                'total' => Order::withoutGlobalScope('restaurant')
-                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
-                    ->where('payment_status', PaymentStatus::COMPLETED)
-                    ->sum('total'),
-                'this_month' => Order::withoutGlobalScope('restaurant')
-                    ->whereNotIn('restaurant_id', $demoRestaurantIds)
-                    ->where('payment_status', PaymentStatus::COMPLETED)
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->sum('total'),
+                'total'      => (float) ($orderStats->revenue_total ?? 0),
+                'this_month' => (float) ($orderStats->revenue_month ?? 0),
             ],
         ];
 
@@ -213,6 +229,16 @@ class DashboardController extends Controller
             'commando_commission_only_first_payment' => \App\Models\SystemSetting::has('commando_commission_only_first_payment')
                 ? \App\Models\SystemSetting::get('commando_commission_only_first_payment', true)
                 : config('commando.commission_only_first_payment', true),
+            // Commissions par grade (ROOKIE/COMMANDO/ELITE)
+            'commando_commission_rookie_cents'   => \App\Models\SystemSetting::has('commando_commission_rookie_cents')
+                ? (int) \App\Models\SystemSetting::get('commando_commission_rookie_cents', 300000)
+                : null,
+            'commando_commission_commando_cents' => \App\Models\SystemSetting::has('commando_commission_commando_cents')
+                ? (int) \App\Models\SystemSetting::get('commando_commission_commando_cents', 500000)
+                : null,
+            'commando_commission_elite_cents'    => \App\Models\SystemSetting::has('commando_commission_elite_cents')
+                ? (int) \App\Models\SystemSetting::get('commando_commission_elite_cents', 700000)
+                : null,
             // MoneyFusion
             'moneyfusion_api_url' => \App\Models\SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', '')),
             'moneyfusion_api_key' => \App\Models\SystemSetting::get('moneyfusion_api_key', config('moneyfusion.api_key', '')),
@@ -286,6 +312,9 @@ class DashboardController extends Controller
             'home_videos.*.description' => ['nullable', 'string', 'max:500'],
             'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
             'commando_commission_only_first_payment' => ['boolean'],
+            'commando_commission_rookie_fcfa'   => ['nullable', 'numeric', 'min:0'],
+            'commando_commission_commando_fcfa' => ['nullable', 'numeric', 'min:0'],
+            'commando_commission_elite_fcfa'    => ['nullable', 'numeric', 'min:0'],
             // Marketing
             'banner_enabled' => ['boolean'],
             'banner_text' => ['nullable', 'string', 'max:255'],
@@ -500,6 +529,31 @@ class DashboardController extends Controller
                 'Commission uniquement au premier paiement par restaurant parrainé'
             );
         }
+        // Commissions par grade (montant saisi en FCFA → stocké en centimes)
+        if ($request->has('commando_commission_rookie_fcfa')) {
+            \App\Models\SystemSetting::set(
+                'commando_commission_rookie_cents',
+                (int) round((float) ($request->commando_commission_rookie_fcfa ?: 0) * 100),
+                'integer',
+                'Commission (centimes) versée à un agent ROOKIE pour chaque parrainage'
+            );
+        }
+        if ($request->has('commando_commission_commando_fcfa')) {
+            \App\Models\SystemSetting::set(
+                'commando_commission_commando_cents',
+                (int) round((float) ($request->commando_commission_commando_fcfa ?: 0) * 100),
+                'integer',
+                'Commission (centimes) versée à un agent COMMANDO pour chaque parrainage'
+            );
+        }
+        if ($request->has('commando_commission_elite_fcfa')) {
+            \App\Models\SystemSetting::set(
+                'commando_commission_elite_cents',
+                (int) round((float) ($request->commando_commission_elite_fcfa ?: 0) * 100),
+                'integer',
+                'Commission (centimes) versée à un agent ELITE pour chaque parrainage'
+            );
+        }
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Paramètres mis à jour avec succès.']);
@@ -558,14 +612,17 @@ class DashboardController extends Controller
             ->get()
             ->mapWithKeys(fn($item) => [$item->status => $item->count]);
 
-        // Hourly orders (for line chart)
+        // Hourly orders (for line chart) — 1 requête GROUP BY au lieu de 24 requêtes séparées
+        $hourlyRaw = DB::table('orders')
+            ->when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))
+            ->whereDate('created_at', today())
+            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
+            ->groupBy('hour')
+            ->pluck('count', 'hour');
+
         $hourlyOrders = [];
         for ($i = 0; $i < 24; $i++) {
-            $count = Order::withoutGlobalScope('restaurant')
-                ->whereDate('created_at', today())
-                ->whereRaw('HOUR(created_at) = ?', [$i])
-                ->count();
-            $hourlyOrders[] = ['hour' => sprintf('%02d:00', $i), 'count' => $count];
+            $hourlyOrders[] = ['hour' => sprintf('%02d:00', $i), 'count' => (int) ($hourlyRaw[$i] ?? 0)];
         }
 
         return response()->json([

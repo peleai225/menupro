@@ -118,6 +118,12 @@ class Announcement extends Model
 
     public function isDismissedBy(User $user): bool
     {
+        // Utilise la relation déjà chargée (eager load) quand elle est disponible
+        // pour éviter une requête SQL supplémentaire par annonce dans la boucle filter()
+        if ($this->relationLoaded('dismissals')) {
+            return $this->dismissals->where('user_id', $user->id)->isNotEmpty();
+        }
+
         return $this->dismissals()->where('user_id', $user->id)->exists();
     }
 }

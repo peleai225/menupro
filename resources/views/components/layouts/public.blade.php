@@ -321,7 +321,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                     <p class="text-neutral-500 text-sm">
-                        {!! $footerText !!}
+                        {{ $footerText }}
                     </p>
                     <p class="text-neutral-600 text-xs mt-1">
                         Un produit <a href="https://peleai.online" target="_blank" rel="noopener" class="text-neutral-400 hover:text-primary-400 transition-colors">PeleAI</a> — Made in Côte d'Ivoire 🇨🇮

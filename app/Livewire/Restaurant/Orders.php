@@ -80,17 +80,25 @@ class Orders extends Component
             ];
         }
 
-        $counts = Order::where('restaurant_id', $restaurantId)
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
+        // Cache 30s pour éviter un COUNT GROUP BY complet à chaque interaction Livewire
+        // (changement de filtre, pagination, checkNewOrders poll, etc.)
+        // Limité aux 30 derniers jours pour réduire le scan sur les gros restaurants
+        $counts = \Illuminate\Support\Facades\Cache::remember(
+            "status_counts.{$restaurantId}",
+            30,
+            fn() => Order::where('restaurant_id', $restaurantId)
+                ->where('created_at', '>=', now()->subDays(30))
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status')
+        );
 
         return [
-            'all' => $counts->sum(),
-            'pending' => $counts->get(OrderStatus::PENDING_PAYMENT->value, 0),
+            'all'       => $counts->sum(),
+            'pending'   => $counts->get(OrderStatus::PENDING_PAYMENT->value, 0),
             'confirmed' => $counts->get(OrderStatus::CONFIRMED->value, 0),
             'preparing' => $counts->get(OrderStatus::PREPARING->value, 0),
-            'ready' => $counts->get(OrderStatus::READY->value, 0),
+            'ready'     => $counts->get(OrderStatus::READY->value, 0),
         ];
     }
 

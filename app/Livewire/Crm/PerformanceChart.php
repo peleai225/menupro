@@ -47,6 +47,15 @@ class PerformanceChart extends Component
     }
 
     #[Computed]
+    public function monthlyTarget(): int
+    {
+        $user = auth()->user();
+        return $user->commercialProfile?->monthly_target
+            ?? $user->technicianProfile?->monthly_target
+            ?? 5;
+    }
+
+    #[Computed]
     public function weeklyData(): array
     {
         $userId = auth()->id();

@@ -124,10 +124,10 @@ class UserController extends Controller
         $newPassword = \Illuminate\Support\Str::random(12);
         $user->update(['password' => Hash::make($newPassword)]);
 
-        // Optionally send email with new password
+        // Envoyer le nouveau mot de passe uniquement par email — ne jamais le mettre dans le flash
         // Mail::to($user->email)->send(new PasswordResetNotification($newPassword));
 
-        return back()->with('success', "Mot de passe réinitialisé. Nouveau mot de passe: {$newPassword}");
+        return back()->with('success', 'Mot de passe réinitialisé. Un email a été envoyé à l\'utilisateur.');
     }
 
     /**

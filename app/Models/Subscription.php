@@ -68,8 +68,10 @@ class Subscription extends Model
 
     public function scopeTrial($query)
     {
-        return $query->where('status', SubscriptionStatus::TRIAL)
-            ->orWhere('is_trial', true);
+        return $query->where(function ($q) {
+            $q->where('status', SubscriptionStatus::TRIAL)
+              ->orWhere('is_trial', true);
+        });
     }
 
     public function scopeExpired($query)

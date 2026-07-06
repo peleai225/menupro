@@ -553,6 +553,33 @@
                                    class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
                                    style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="5000">
                         </div>
+                        {{-- Commissions par grade --}}
+                        <div class="grid grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Commission ROOKIE (FCFA)</label>
+                                <input type="number" name="commando_commission_rookie_fcfa"
+                                       value="{{ old('commando_commission_rookie_fcfa', isset($settings['commando_commission_rookie_cents']) ? $settings['commando_commission_rookie_cents']/100 : 3000) }}"
+                                       min="0" step="1"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="3000">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Commission COMMANDO (FCFA)</label>
+                                <input type="number" name="commando_commission_commando_fcfa"
+                                       value="{{ old('commando_commission_commando_fcfa', isset($settings['commando_commission_commando_cents']) ? $settings['commando_commission_commando_cents']/100 : 5000) }}"
+                                       min="0" step="1"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="5000">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Commission ELITE (FCFA)</label>
+                                <input type="number" name="commando_commission_elite_fcfa"
+                                       value="{{ old('commando_commission_elite_fcfa', isset($settings['commando_commission_elite_cents']) ? $settings['commando_commission_elite_cents']/100 : 7000) }}"
+                                       min="0" step="1"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="7000">
+                            </div>
+                        </div>
                         <label class="flex items-center justify-between p-3.5 rounded-xl cursor-pointer"
                                style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                             <div>

@@ -45,8 +45,8 @@ class CheckLowStock implements ShouldQueue
             return;
         }
 
-        // Get low stock ingredients
-        $lowStockIngredients = Ingredient::query()
+        // Get low stock ingredients (withoutGlobalScopes car ce job tourne hors contexte HTTP)
+        $lowStockIngredients = Ingredient::withoutGlobalScopes()
             ->where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
             ->whereColumn('current_quantity', '<=', 'min_quantity')

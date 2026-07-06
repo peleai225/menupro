@@ -17,10 +17,11 @@ return [
         'http://127.0.0.1:3001',
     ],
 
-    'allowed_origins_patterns' => [
-        '#^https://.*\.replit\.dev$#',
-        '#^https://.*\.replit\.app$#',
-    ],
+    // Les patterns Replit ont été retirés car ils permettaient à n'importe quel projet
+    // Replit gratuit d'effectuer des requêtes cross-origin vers l'API MenuPro.
+    // Pour le développement local, utiliser localhost:3000/3001 (déjà dans allowed_origins)
+    // ou la variable d'environnement CORS_ALLOWED_ORIGINS.
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 

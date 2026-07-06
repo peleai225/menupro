@@ -70,52 +70,39 @@ class PaymentController extends Controller
 
     /**
      * Callback succès paiement Wave (redirect depuis Wave).
+     *
+     * Ce callback GET sert uniquement à informer le client du statut courant de la commande.
+     * La modification d'état (markAsPaid, assignation livreur) est exclusivement gérée par
+     * le webhook Wave signé (WaveWebhookController) afin d'éviter toute manipulation via
+     * un appel GET non authentifié avec le tracking_token.
      */
     public function success(Request $request): JsonResponse
     {
         $order = Order::where('tracking_token', $request->token)->firstOrFail();
 
-        if ($order->payment_status === PaymentStatus::COMPLETED->value) {
-            return response()->json(['message' => 'Paiement déjà validé.', 'order' => $order->reference]);
-        }
-
-        DB::transaction(function () use ($order) {
-            $order->update([
-                'payment_status' => PaymentStatus::COMPLETED->value,
-                'status'         => OrderStatus::PAID->value,
-                'paid_at'        => now(),
-            ]);
-
-            // Déclencher la recherche d'un livreur
-            $delivery = $order->delivery;
-            if ($delivery) {
-                $this->driverAssignment->assign($delivery);
-            }
-        });
-
-        Log::info('Platform order paid', ['order_id' => $order->id, 'reference' => $order->reference]);
-
         return response()->json([
-            'message'        => 'Paiement confirmé. Recherche d\'un livreur en cours.',
+            'message'        => 'Redirection paiement reçue. Statut en cours de vérification.',
             'tracking_token' => $order->tracking_token,
-            'order_status'   => $order->fresh()->status,
+            'order_status'   => $order->status,
+            'payment_status' => $order->payment_status,
         ]);
     }
 
     /**
-     * Callback échec paiement.
+     * Callback échec paiement Wave (redirect depuis Wave).
+     *
+     * Ce callback GET ne modifie pas l'état de la commande — la mise à jour du statut de
+     * paiement est réservée au webhook Wave signé.
      */
     public function error(Request $request): JsonResponse
     {
         $order = Order::where('tracking_token', $request->token)->first();
 
-        if ($order) {
-            $order->update(['payment_status' => PaymentStatus::FAILED->value]);
-        }
-
         return response()->json([
-            'message' => 'Le paiement a échoué. Veuillez réessayer.',
+            'message'        => 'Le paiement a échoué ou été annulé. Veuillez réessayer.',
             'tracking_token' => $request->token,
+            'order_status'   => $order?->status,
+            'payment_status' => $order?->payment_status,
         ], 400);
     }
 

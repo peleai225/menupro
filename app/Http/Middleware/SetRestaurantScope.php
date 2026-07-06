@@ -49,6 +49,8 @@ class SetRestaurantScope
         // Store in session for global scope usage
         if ($restaurantId) {
             session(['current_restaurant_id' => $restaurantId]);
+        } else {
+            session()->forget('current_restaurant_id');
         }
 
         // Share with views

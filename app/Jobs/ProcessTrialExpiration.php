@@ -26,8 +26,9 @@ class ProcessTrialExpiration implements ShouldQueue
     {
         Log::info('[Trial] Processing trial subscriptions...');
 
-        // Find expiring trials (3 days before expiration)
-        $expiringTrials = Subscription::where('status', SubscriptionStatus::TRIAL)
+        // Find expiring trials (3 days before expiration) — withoutGlobalScopes car ce job tourne hors contexte HTTP
+        $expiringTrials = Subscription::withoutGlobalScopes()
+            ->where('status', SubscriptionStatus::TRIAL)
             ->where('ends_at', '<=', now()->addDays(3))
             ->where('ends_at', '>', now()->addDays(2))
             ->whereNull('reminder_sent_at')
@@ -39,10 +40,16 @@ class ProcessTrialExpiration implements ShouldQueue
         }
 
         // Find trials expiring tomorrow (1 day before)
-        $trialsExpiringTomorrow = Subscription::where('status', SubscriptionStatus::TRIAL)
+        // On retire le whereNull car J-3 a déjà renseigné reminder_sent_at.
+        // On accepte un 2ème rappel si reminder_sent_at date de plus d'1 jour (le rappel J-3).
+        $trialsExpiringTomorrow = Subscription::withoutGlobalScopes()
+            ->where('status', SubscriptionStatus::TRIAL)
             ->where('ends_at', '<=', now()->addDay())
             ->where('ends_at', '>', now())
-            ->whereNull('reminder_sent_at')
+            ->where(function ($q) {
+                $q->whereNull('reminder_sent_at')
+                  ->orWhere('reminder_sent_at', '<', now()->subDay());
+            })
             ->with('restaurant.users')
             ->get();
 
@@ -51,7 +58,8 @@ class ProcessTrialExpiration implements ShouldQueue
         }
 
         // Find expired trials
-        $expiredTrials = Subscription::where('status', SubscriptionStatus::TRIAL)
+        $expiredTrials = Subscription::withoutGlobalScopes()
+            ->where('status', SubscriptionStatus::TRIAL)
             ->where('ends_at', '<=', now())
             ->whereNull('expired_notification_sent_at')
             ->with('restaurant')

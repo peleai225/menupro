@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Commando;
 
+use App\Enums\AgentVerificationStatus;
 use App\Enums\CommissionTransactionType;
 use App\Enums\CommissionTransactionStatus;
 use App\Models\CommandoAgent;
@@ -9,6 +10,7 @@ use App\Models\CommandoCommissionTransaction;
 use App\Models\User;
 use App\Notifications\CommandoWithdrawalRequestNotification;
 use App\Services\MediaUploader;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -21,6 +23,8 @@ class Dashboard extends Component
     public ?string $successMessage = null;
 
     public string $withdrawalAmount = '';
+    public string $withdrawalPhone = '';
+    public string $withdrawalMethod = 'wave';
     public bool $showWithdrawalModal = false;
 
     public $photo = null;
@@ -68,6 +72,16 @@ class Dashboard extends Component
 
     public function requestWithdrawal(): void
     {
+        $this->validate([
+            'withdrawalAmount' => ['required'],
+            'withdrawalPhone' => ['required', 'string', 'min:8', 'max:20'],
+            'withdrawalMethod' => ['required', 'in:wave,orange_money,mtn_money'],
+        ], [], [
+            'withdrawalAmount' => 'montant',
+            'withdrawalPhone' => 'numéro de paiement',
+            'withdrawalMethod' => 'mode de paiement',
+        ]);
+
         $amount = (float) str_replace(',', '.', $this->withdrawalAmount);
         if ($amount < 1) {
             $this->addError('withdrawalAmount', 'Montant invalide.');
@@ -85,6 +99,10 @@ class Dashboard extends Component
             'status' => CommissionTransactionStatus::PENDING,
             'amount_cents' => $amountCents,
             'description' => 'Demande de retrait',
+            'meta' => [
+                'payment_method' => $this->withdrawalMethod,
+                'phone' => $this->withdrawalPhone,
+            ],
         ]);
 
         $admins = User::superAdmins()->get();
@@ -94,6 +112,7 @@ class Dashboard extends Component
 
         $this->showWithdrawalModal = false;
         $this->withdrawalAmount = '';
+        $this->withdrawalPhone = '';
         $this->successMessage = 'Votre demande de retrait a bien été envoyée.';
         $this->refreshAgent();
     }
@@ -118,6 +137,40 @@ class Dashboard extends Component
         $this->dispatch('photoUploaded');
     }
 
+    #[Computed]
+    public function leaderboard()
+    {
+        return CommandoAgent::with('user')
+            ->where('status_verification', AgentVerificationStatus::VALIDE)
+            ->whereNull('banned_at')
+            ->withCount('referredRestaurants')
+            ->orderByDesc('referred_restaurants_count')
+            ->limit(10)
+            ->get()
+            ->map(fn($agent) => [
+                'id'       => $agent->id,
+                'name'     => $agent->full_name ?? trim(($agent->first_name ?? '') . ' ' . ($agent->last_name ?? '')),
+                'badge_id' => $agent->badge_id,
+                'city'     => $agent->city,
+                'count'    => $agent->referred_restaurants_count,
+                'grade'    => $agent->grade->label(),
+                'is_me'    => $agent->id === $this->agent?->id,
+            ]);
+    }
+
+    #[Computed]
+    public function myRank(): int
+    {
+        if (!$this->agent) {
+            return 0;
+        }
+        return CommandoAgent::where('status_verification', AgentVerificationStatus::VALIDE)
+            ->whereNull('banned_at')
+            ->withCount('referredRestaurants')
+            ->havingRaw('referred_restaurants_count > ?', [$this->agent->referredRestaurants()->count()])
+            ->count() + 1;
+    }
+
     public function getWalletHistoryProperty()
     {
         if (!$this->agent) {
@@ -135,9 +188,55 @@ class Dashboard extends Component
             return collect();
         }
         return $this->agent->referredRestaurants()
+            ->with(['activeSubscription', 'currentPlan'])
             ->orderByDesc('created_at')
             ->limit(50)
-            ->get();
+            ->get()
+            ->map(function ($restaurant) {
+                $sub = $restaurant->activeSubscription;
+                $isTrial = $sub && $sub->is_trial;
+                $isTrulyActive = $restaurant->status->value === 'active' && $sub && $sub->isActive();
+
+                return [
+                    'id'                     => $restaurant->id,
+                    'name'                   => $restaurant->name,
+                    'status'                 => $restaurant->status->value,
+                    'plan'                   => $restaurant->currentPlan?->name ?? 'Aucun plan',
+                    'subscription_expires_at'=> $sub?->ends_at?->format('d/m/Y'),
+                    'created_at'             => $restaurant->created_at->format('d/m/Y'),
+                    'is_truly_active'        => $isTrulyActive,
+                    'is_trial'               => $isTrial,
+                ];
+            });
+    }
+
+    public function getUnreadNotificationsCountProperty(): int
+    {
+        if (!auth()->user()) {
+            return 0;
+        }
+        return auth()->user()->unreadNotifications()->count();
+    }
+
+    public function getRecentNotificationsProperty()
+    {
+        if (!auth()->user()) {
+            return collect();
+        }
+        return auth()->user()->notifications()->latest()->limit(10)->get();
+    }
+
+    public function markAllNotificationsRead(): void
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+    }
+
+    public function markNotificationRead(string $id): void
+    {
+        $notification = auth()->user()->notifications()->find($id);
+        if ($notification) {
+            $notification->markAsRead();
+        }
     }
 
     public function render()

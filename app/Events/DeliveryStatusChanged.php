@@ -6,6 +6,7 @@ use App\Enums\DeliveryStatus;
 use App\Models\Delivery;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -26,9 +27,9 @@ class DeliveryStatusChanged implements ShouldBroadcast
             // Canal suivi client (par tracking_token)
             new Channel("order.{$this->delivery->order->tracking_token}"),
             // Canal restaurant
-            new Channel("restaurant.{$this->delivery->restaurant_id}.deliveries"),
+            new PrivateChannel("restaurant.{$this->delivery->restaurant_id}.deliveries"),
             // Canal livreur
-            new Channel("driver.{$this->delivery->driver_id}"),
+            new PrivateChannel("driver.{$this->delivery->driver_id}"),
         ];
     }
 

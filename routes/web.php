@@ -295,10 +295,13 @@ Route::prefix('admin')
         // MenuPro Commando - Gestion des agents
         Route::prefix('commando')->name('commando.')->group(function () {
             Route::get('/agents', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'index'])->name('agents.index');
+            Route::get('/agents/export', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'export'])->name('agents.export');
+            Route::get('/agents/export-commissions', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'exportCommissions'])->name('agents.export-commissions');
             Route::get('/agents/{agent}', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'show'])->name('agents.show');
             Route::post('/agents/{agent}/approve', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'approve'])->name('agents.approve');
             Route::post('/agents/{agent}/reject', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'reject'])->name('agents.reject');
             Route::post('/agents/{agent}/ban', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'ban'])->name('agents.ban');
+            Route::post('/agents/{agent}/unban', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'unban'])->name('agents.unban');
             Route::post('/agents/{agent}/commission', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'addCommission'])->name('agents.commission');
             Route::post('/agents/{agent}/transactions/{transaction}/withdrawal-pay', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'withdrawalPay'])->name('agents.withdrawal.pay');
             Route::post('/agents/{agent}/transactions/{transaction}/withdrawal-reject', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'withdrawalReject'])->name('agents.withdrawal.reject');
@@ -317,6 +320,7 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
         Route::post('restaurants/{restaurant}/toggle-demo', [RestaurantController::class, 'toggleDemo'])->name('restaurants.toggle-demo');
+        Route::post('restaurants/stop-impersonation', [RestaurantController::class, 'stopImpersonation'])->name('restaurants.stop-impersonation');
 
         // Orders
         Route::get('commandes', [\App\Http\Controllers\SuperAdmin\OrderController::class, 'index'])->name('orders.index');

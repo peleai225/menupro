@@ -25,8 +25,8 @@ class ProcessSubscriptionExpiration implements ShouldQueue
     {
         Log::info('Processing subscription expirations...');
 
-        // Get all active subscriptions that have expired
-        $expiredSubscriptions = Subscription::query()
+        // Get all active subscriptions that have expired (withoutGlobalScopes car ce job tourne hors contexte HTTP)
+        $expiredSubscriptions = Subscription::withoutGlobalScopes()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->where('ends_at', '<', now())
             ->with('restaurant.owner')
@@ -71,8 +71,11 @@ class ProcessSubscriptionExpiration implements ShouldQueue
         } catch (\Exception $e) {
             Log::error("Failed to process subscription expiration", [
                 'subscription_id' => $subscription->id,
-                'error' => $e->getMessage(),
+                'restaurant_id'   => $subscription->restaurant_id ?? null,
+                'error'           => $e->getMessage(),
+                'trace'           => $e->getTraceAsString(),
             ]);
+            // Exception intentionnellement avalée : les abonnements sont traités indépendamment en boucle
         }
     }
 }

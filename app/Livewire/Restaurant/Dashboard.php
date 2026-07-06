@@ -89,7 +89,7 @@ class Dashboard extends Component
         }
         
         return Order::where('restaurant_id', $restaurantId)
-            ->with('items')
+            ->with('items.dish:id,name,price') // eager load items.dish pour éviter le N+1 en vue
             ->latest()
             ->limit(5)
             ->get();
@@ -155,8 +155,11 @@ class Dashboard extends Component
             return collect();
         }
 
+        // Eager-load dismissals pour l'utilisateur courant — évite N requêtes SQL dans isDismissedBy()
+        $userId = $user->id;
         return \App\Models\Announcement::active()
             ->forDashboard()
+            ->with(['dismissals' => fn($q) => $q->where('user_id', $userId)])
             ->latest()
             ->get()
             ->filter(fn($announcement) => $announcement->isVisibleFor($restaurant))

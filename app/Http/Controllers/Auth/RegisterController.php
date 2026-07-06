@@ -37,9 +37,13 @@ class RegisterController extends Controller
 
         $ref = request()->query('ref');
         if ($ref) {
-            $agent = \App\Models\CommandoAgent::where('uuid', $ref)->valide()->first();
-            if ($agent && !$agent->isBanni()) {
+            $agent = \App\Models\CommandoAgent::where('uuid', $ref)
+                ->where('status_verification', 'valide')
+                ->whereNull('banned_at')
+                ->first();
+            if ($agent) {
                 session(['register_ref_agent' => $ref]);
+                cookie()->queue(cookie('ref_agent', $ref, 60 * 24 * 7)); // 7 jours
             }
         }
 
@@ -101,8 +105,9 @@ class RegisterController extends Controller
             $trialEndsAt = now()->addDays($trialDays);
 
             $referredByAgentId = null;
-            if (session()->has('register_ref_agent')) {
-                $refAgent = \App\Models\CommandoAgent::where('uuid', session('register_ref_agent'))->valide()->first();
+            $refAgentUuid = session('register_ref_agent') ?? $request->cookie('ref_agent');
+            if ($refAgentUuid) {
+                $refAgent = \App\Models\CommandoAgent::where('uuid', $refAgentUuid)->valide()->first();
                 if ($refAgent && !$refAgent->isBanni()) {
                     $referredByAgentId = $refAgent->id;
                 }
@@ -144,8 +149,8 @@ class RegisterController extends Controller
             if ($request->hasFile('rccm_document')) {
                 $restaurant->rccm_document_path = $this->mediaUploader->upload(
                     $request->file('rccm_document'),
-                    "restaurants/{$restaurant->id}/documents/rccm",
-                    ['format' => $request->file('rccm_document')->getClientOriginalExtension()]
+                    "restaurants/{$restaurant->id}/documents/rccm"
+                    // format dérivé du MIME type réel par MediaUploader — ne pas passer getClientOriginalExtension()
                 );
             }
 

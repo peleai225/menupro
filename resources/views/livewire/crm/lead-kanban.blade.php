@@ -134,6 +134,119 @@
 
     {{-- Lead form modal --}}
     @livewire('crm.lead-form')
+
+    {{-- Modal de détail lead --}}
+    @if($viewingLeadId)
+    <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+         wire:click.self="closeLeadDetail">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            @if($this->viewingLead)
+            <div class="p-6">
+                {{-- En-tête --}}
+                <div class="flex items-start justify-between mb-5">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">{{ $this->viewingLead->restaurant_name }}</h2>
+                        <span class="inline-flex items-center gap-1.5 mt-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                              style="background: {{ $this->viewingLead->status->color() }}22; color: {{ $this->viewingLead->status->color() }}">
+                            {{ $this->viewingLead->status->label() }}
+                        </span>
+                    </div>
+                    <button wire:click="closeLeadDetail"
+                            class="text-gray-500 hover:text-white transition p-1 rounded-lg hover:bg-gray-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Infos lead --}}
+                <div class="grid grid-cols-2 gap-3 mb-6 text-sm">
+                    @if($this->viewingLead->manager_name)
+                    <div>
+                        <span class="text-gray-500 text-xs">Contact</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->manager_name }}</p>
+                    </div>
+                    @endif
+                    @if($this->viewingLead->phone)
+                    <div>
+                        <span class="text-gray-500 text-xs">Téléphone</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->phone }}</p>
+                    </div>
+                    @endif
+                    @if($this->viewingLead->city)
+                    <div>
+                        <span class="text-gray-500 text-xs">Ville</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->city }}</p>
+                    </div>
+                    @endif
+                    <div>
+                        <span class="text-gray-500 text-xs">Assigné à</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->assignedUser?->name ?? 'Non assigné' }}</p>
+                    </div>
+                    @if($this->viewingLead->subscription_plan)
+                    <div>
+                        <span class="text-gray-500 text-xs">Plan</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->subscription_plan->shortLabel() }}</p>
+                    </div>
+                    @endif
+                    @if($this->viewingLead->team)
+                    <div>
+                        <span class="text-gray-500 text-xs">Équipe</span>
+                        <p class="text-gray-200">{{ $this->viewingLead->team->name }}</p>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Historique activités --}}
+                <h3 class="text-sm font-semibold text-gray-300 mb-3">Historique</h3>
+                <div class="space-y-2 mb-5">
+                    @forelse($this->viewingLead->activities as $activity)
+                    <div class="flex gap-3 text-sm bg-gray-800/60 border border-gray-700/50 p-3 rounded-xl">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-medium text-gray-200 capitalize text-xs">{{ $activity->type->label() }}</span>
+                                <span class="text-gray-600 text-xs">{{ $activity->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-gray-400 text-xs leading-relaxed">{{ $activity->description }}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-gray-600 text-sm text-center py-4">Aucune activité enregistrée.</p>
+                    @endforelse
+                </div>
+
+                {{-- Ajouter une activité --}}
+                <div class="border-t border-gray-800 pt-5">
+                    <h3 class="text-sm font-semibold text-gray-300 mb-3">Ajouter une activité</h3>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        @foreach(['note' => 'Note', 'call' => 'Appel', 'visit' => 'Visite', 'demo' => 'RDV/Démo', 'email' => 'Email'] as $typeVal => $typeLabel)
+                        <button wire:click="$set('newActivityType', '{{ $typeVal }}')"
+                                class="px-3 py-1 rounded-full text-xs font-medium transition {{ $newActivityType === $typeVal ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700' }}">
+                            {{ $typeLabel }}
+                        </button>
+                        @endforeach
+                    </div>
+                    <textarea wire:model="newActivityContent"
+                              rows="3"
+                              class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-sm text-gray-200 placeholder-gray-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition resize-none"
+                              placeholder="Décrivez l'activité..."></textarea>
+                    @error('newActivityContent')
+                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    <div class="flex justify-end mt-3">
+                        <button wire:click="addActivity"
+                                class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-xl transition active:scale-95">
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @else
+            <div class="p-6 text-center text-gray-500 text-sm">Chargement...</div>
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 
 @script

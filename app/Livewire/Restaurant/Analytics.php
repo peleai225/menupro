@@ -3,6 +3,7 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -11,6 +12,9 @@ class Analytics extends Component
     public string $period = '30'; // days
     public string $chartType = 'revenue'; // revenue, orders, dishes
 
+    /** Périodes autorisées — protège contre un $period=36500 qui ferait un full table scan */
+    private const ALLOWED_PERIODS = ['7', '30', '90', '365'];
+
     public function mount(): void
     {
         //
@@ -18,7 +22,10 @@ class Analytics extends Component
 
     public function updatedPeriod(): void
     {
-        // Refresh data when period changes
+        // Valider la période pour éviter les full table scans sur des plages arbitraires
+        if (!in_array($this->period, self::ALLOWED_PERIODS)) {
+            $this->period = '30';
+        }
     }
 
     public function getStatsProperty(): array
@@ -29,6 +36,14 @@ class Analytics extends Component
             return [];
         }
 
+        // Cache 5 minutes par restaurant + période pour éviter les re-calculs
+        // à chaque render Livewire en mode multi-restaurant simultané
+        $cacheKey = "analytics.{$restaurant->id}.{$this->period}";
+        return Cache::remember($cacheKey, 300, fn() => $this->computeStats($restaurant));
+    }
+
+    private function computeStats($restaurant): array
+    {
         $startDate = now()->subDays((int) $this->period)->startOfDay();
         $endDate = now()->endOfDay();
 

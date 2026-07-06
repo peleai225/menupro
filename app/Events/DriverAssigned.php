@@ -6,6 +6,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryDriver;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -25,9 +26,9 @@ class DriverAssigned implements ShouldBroadcast
             // Client suit sa commande
             new Channel("order.{$this->delivery->order->tracking_token}"),
             // Restaurant voit le livreur assigné
-            new Channel("restaurant.{$this->delivery->restaurant_id}.deliveries"),
+            new PrivateChannel("restaurant.{$this->delivery->restaurant_id}.deliveries"),
             // Le livreur reçoit la notification de course
-            new Channel("driver.{$this->driver->id}"),
+            new PrivateChannel("driver.{$this->driver->id}"),
         ];
     }
 

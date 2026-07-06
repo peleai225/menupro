@@ -66,7 +66,6 @@ class MoneyFusionGateway
 
         try {
             $response = Http::withHeaders($headers)
-                ->withoutVerifying()
                 ->timeout(30)
                 ->post($this->getApiUrl(), [
                     'totalPrice' => $amount,
@@ -89,9 +88,11 @@ class MoneyFusionGateway
                 $data = $response->json();
 
                 if ($data['statut'] === true) {
+                    // Tronquer le token pour éviter de logger un identifiant d'activation en clair
+                    $tokenPreview = substr($data['token'] ?? '', 0, 8) . '...';
                     Log::channel('payments')->info('MoneyFusion payment initiated', [
                         'subscription_id' => $subscription->id,
-                        'token' => $data['token'] ?? null,
+                        'token_prefix'    => $tokenPreview,
                     ]);
 
                     return [
@@ -129,8 +130,7 @@ class MoneyFusionGateway
     public function verifyPayment(string $token): array
     {
         try {
-            $response = Http::withoutVerifying()
-                ->timeout(15)
+            $response = Http::timeout(15)
                 ->get("https://www.pay.moneyfusion.net/paiementNotif/{$token}");
 
             if ($response->successful()) {

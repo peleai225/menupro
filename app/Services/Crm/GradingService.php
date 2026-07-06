@@ -25,11 +25,13 @@ class GradingService
             ['current_grade' => Grade::ROOKIE, 'total_conversions' => 0]
         );
 
+        $oldGrade = $grade->current_grade;
         $newGrade = $grade->recalculate($conversions);
 
         if ($newGrade !== null) {
             $this->commissionEngine->creditGradeBonus($user, $newGrade->value);
             event(new GradeChanged($user, $newGrade));
+            $user->notify(new \App\Notifications\Crm\GradeChangedNotification($oldGrade->label(), $newGrade->label()));
         }
     }
 }

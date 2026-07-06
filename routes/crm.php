@@ -31,6 +31,9 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
             Route::get('/teams', [DashboardController::class, 'adminTeams'])->name('teams');
             Route::get('/withdrawals', [DashboardController::class, 'adminWithdrawals'])->name('withdrawals');
             Route::get('/reports', [DashboardController::class, 'adminReports'])->name('reports');
+            Route::get('/export/leads', [\App\Http\Controllers\Crm\ExportController::class, 'leads'])->name('export.leads');
+            Route::get('/export/commissions', [\App\Http\Controllers\Crm\ExportController::class, 'commissions'])->name('export.commissions');
+            Route::get('/export/reports', [\App\Http\Controllers\Crm\ExportController::class, 'reports'])->name('export.reports');
         });
 
         // Verification publique (pas auth nécessaire)

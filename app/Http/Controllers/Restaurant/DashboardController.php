@@ -21,37 +21,28 @@ class DashboardController extends Controller
         $restaurant = $request->user()->restaurant;
         $this->planLimiter->forRestaurant($restaurant);
 
-        // Today's orders
-        $ordersToday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', today())
-            ->count();
-
-        // Yesterday's orders for comparison
-        $ordersYesterday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', today()->subDay())
-            ->count();
-
-        // Revenue today
-        $revenueToday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', today())
-            ->where('payment_status', 'completed')
-            ->sum('total');
-
-        // Revenue yesterday
-        $revenueYesterday = Order::where('restaurant_id', $restaurant->id)
-            ->whereDate('created_at', today()->subDay())
-            ->where('payment_status', 'completed')
-            ->sum('total');
-
-        // Pending orders
-        $pendingOrders = Order::where('restaurant_id', $restaurant->id)
-            ->whereIn('status', [
-                OrderStatus::PENDING,
-                OrderStatus::PAID,
-                OrderStatus::CONFIRMED,
-                OrderStatus::PREPARING,
+        // Consolidation : 1 requête au lieu de 5 pour les compteurs du dashboard restaurant
+        $orderAgg = \Illuminate\Support\Facades\DB::table('orders')
+            ->where('restaurant_id', $restaurant->id)
+            ->selectRaw("
+                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as orders_today,
+                SUM(CASE WHEN DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) THEN 1 ELSE 0 END) as orders_yesterday,
+                SUM(CASE WHEN DATE(created_at) = CURDATE() AND payment_status = 'completed' THEN total ELSE 0 END) as revenue_today,
+                SUM(CASE WHEN DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND payment_status = 'completed' THEN total ELSE 0 END) as revenue_yesterday,
+                SUM(CASE WHEN status IN (?,?,?,?) THEN 1 ELSE 0 END) as pending_orders
+            ", [
+                OrderStatus::PENDING_PAYMENT->value,
+                OrderStatus::PAID->value,
+                OrderStatus::CONFIRMED->value,
+                OrderStatus::PREPARING->value,
             ])
-            ->count();
+            ->first();
+
+        $ordersToday     = (int) ($orderAgg->orders_today ?? 0);
+        $ordersYesterday = (int) ($orderAgg->orders_yesterday ?? 0);
+        $revenueToday    = (float) ($orderAgg->revenue_today ?? 0);
+        $revenueYesterday = (float) ($orderAgg->revenue_yesterday ?? 0);
+        $pendingOrders   = (int) ($orderAgg->pending_orders ?? 0);
 
         // Total dishes
         $totalDishes = $restaurant->dishes()->count();
@@ -108,16 +99,16 @@ class DashboardController extends Controller
         $subscription = $restaurant->activeSubscription;
 
         // Get active announcements for this restaurant
+        // Eager-load dismissals pour l'utilisateur courant afin d'éviter N requêtes SQL
+        // (une par annonce) dans isDismissedBy() — finding N+1
+        $userId = $request->user()->id;
         $announcements = \App\Models\Announcement::active()
             ->forDashboard()
+            ->with(['dismissals' => fn($q) => $q->where('user_id', $userId)])
             ->latest()
             ->get()
-            ->filter(function ($announcement) use ($restaurant) {
-                return $announcement->isVisibleFor($restaurant);
-            })
-            ->reject(function ($announcement) use ($request) {
-                return $announcement->isDismissedBy($request->user());
-            });
+            ->filter(fn($announcement) => $announcement->isVisibleFor($restaurant))
+            ->reject(fn($announcement) => $announcement->isDismissedBy($request->user()));
 
         return view('pages.restaurant.dashboard', compact(
             'restaurant',

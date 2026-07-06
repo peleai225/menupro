@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Crm;
 
+use App\Enums\Crm\ActivityType;
 use App\Enums\Crm\LeadStatus;
 use App\Models\Crm\Lead;
 use App\Services\Crm\LeadPipelineService;
@@ -15,6 +16,65 @@ class LeadKanban extends Component
     public ?string $filterSource = null;
     public ?int $filterTeam = null;
     public ?string $filterPlan = null;
+
+    public ?int $viewingLeadId = null;
+    public string $newActivityType = 'note';
+    public ?string $newActivityContent = null;
+
+    public function viewLead(int $leadId): void
+    {
+        $this->viewingLeadId = $leadId;
+        $this->newActivityContent = '';
+        unset($this->viewingLead);
+    }
+
+    public function closeLeadDetail(): void
+    {
+        $this->viewingLeadId = null;
+        unset($this->viewingLead);
+    }
+
+    #[Computed]
+    public function viewingLead(): ?Lead
+    {
+        if (!$this->viewingLeadId) return null;
+
+        return Lead::with([
+            'activities' => fn ($q) => $q->latest()->limit(20),
+            'assignedUser',
+            'team',
+        ])->find($this->viewingLeadId);
+    }
+
+    public function addActivity(): void
+    {
+        $this->validate([
+            'newActivityContent' => 'required|string|min:3|max:1000',
+            'newActivityType'    => 'required|in:note,call,visit,demo,email,whatsapp,assignment',
+        ]);
+
+        if (!$this->viewingLeadId) return;
+
+        $lead = Lead::find($this->viewingLeadId);
+        if (!$lead) return;
+
+        $user = auth()->user();
+        $canEdit = $user->isSuperAdmin()
+            || $lead->assigned_to === $user->id
+            || ($lead->team && $lead->team->leader_id === $user->id);
+
+        if (!$canEdit) return;
+
+        $lead->activities()->create([
+            'user_id'     => $user->id,
+            'type'        => $this->newActivityType,
+            'description' => $this->newActivityContent,
+        ]);
+
+        $this->newActivityContent = '';
+        unset($this->viewingLead);
+        $this->dispatch('activity-added');
+    }
 
     public function moveToStatus(int $leadId, string $status): void
     {
@@ -43,6 +103,7 @@ class LeadKanban extends Component
     public function refreshLeads(): void
     {
         unset($this->columns);
+        unset($this->viewingLead);
     }
 
     #[Computed]

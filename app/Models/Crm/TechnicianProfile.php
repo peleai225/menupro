@@ -18,6 +18,7 @@ class TechnicianProfile extends Model
         'disponible',
         'team_id',
         'certifications',
+        'monthly_target',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class TechnicianProfile extends Model
         return [
             'disponible' => 'boolean',
             'certifications' => 'array',
+            'monthly_target' => 'integer',
         ];
     }
 

@@ -112,10 +112,10 @@
         new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: {!! json_encode($dailyRevenue->pluck('date')) !!},
+                labels: {!! json_encode($dailyRevenue->pluck('date'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                 datasets: [{
                     label: 'Revenus (FCFA)',
-                    data: {!! json_encode($dailyRevenue->pluck('revenue')->map(fn($v) => $v / 100)) !!},
+                    data: {!! json_encode($dailyRevenue->pluck('revenue')->map(fn($v) => $v / 100), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                     borderColor: 'rgb(59, 130, 246)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4

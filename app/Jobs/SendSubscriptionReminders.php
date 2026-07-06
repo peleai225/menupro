@@ -30,8 +30,8 @@ class SendSubscriptionReminders implements ShouldQueue
     {
         Log::info("Sending subscription reminders for {$this->daysBeforeExpiry} days before expiry...");
 
-        // Get active subscriptions expiring within the specified days
-        $expiringSubscriptions = Subscription::query()
+        // Get active subscriptions expiring within the specified days (withoutGlobalScopes car ce job tourne hors contexte HTTP)
+        $expiringSubscriptions = Subscription::withoutGlobalScopes()
             ->where('status', SubscriptionStatus::ACTIVE)
             ->where('ends_at', '<=', now()->addDays($this->daysBeforeExpiry))
             ->where('ends_at', '>', now())
@@ -68,12 +68,15 @@ class SendSubscriptionReminders implements ShouldQueue
                 'restaurant_id' => $restaurant->id,
                 'days_remaining' => $subscription->days_remaining,
             ]);
-
         } catch (\Exception $e) {
             Log::error("Failed to send subscription reminder", [
                 'subscription_id' => $subscription->id,
-                'error' => $e->getMessage(),
+                'restaurant_id'   => $subscription->restaurant_id ?? null,
+                'days_before'     => $this->daysBeforeExpiry,
+                'error'           => $e->getMessage(),
+                'trace'           => $e->getTraceAsString(),
             ]);
+            // Exception intentionnellement avalee : les rappels sont traites independamment en boucle
         }
     }
 }

@@ -179,13 +179,28 @@ class MediaUploader
     }
 
     /**
-     * Generate unique filename
+     * Generate unique filename.
+     * L'extension est toujours dérivée du format options (défaut 'webp') ou du MIME type réel
+     * du fichier — jamais de getClientOriginalExtension() qui est contrôlée par le client.
      */
     protected function generateFilename(UploadedFile $file, string $extension = null): string
     {
-        $extension = $extension ?? $file->getClientOriginalExtension();
+        if ($extension === null || $extension === '') {
+            // Dériver l'extension depuis le vrai MIME type du fichier
+            $mime = $file->getMimeType() ?? '';
+            $extension = match (true) {
+                str_contains($mime, 'jpeg') => 'jpg',
+                str_contains($mime, 'png')  => 'png',
+                str_contains($mime, 'gif')  => 'gif',
+                str_contains($mime, 'webp') => 'webp',
+                str_contains($mime, 'svg')  => 'svg',
+                str_contains($mime, 'pdf')  => 'pdf',
+                default                     => 'bin',
+            };
+        }
+
         $uuid = Str::uuid();
-        
+
         return "{$uuid}.{$extension}";
     }
 

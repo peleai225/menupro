@@ -21,9 +21,15 @@ Broadcast::channel('restaurant.{restaurantId}.deliveries', function ($user, $res
     return $user->isSuperAdmin() || (int) $user->restaurant_id === (int) $restaurantId;
 });
 
-// Canal livreur — le livreur lui-même uniquement
+// Canal livreur — le livreur lui-même ou super admin
 Broadcast::channel('driver.{driverId}', function ($user, $driverId) {
-    return $user->deliveryDriver?->id === (int) $driverId;
+    return $user->isSuperAdmin() || $user->deliveryDriver?->id === (int) $driverId;
+});
+
+// Canal delivery — restaurant propriétaire ou super admin
+Broadcast::channel('delivery.{deliveryId}', function ($user, $deliveryId) {
+    $delivery = \App\Models\Delivery::find($deliveryId);
+    return $delivery && ($user->isSuperAdmin() || (int) $user->restaurant_id === (int) $delivery->restaurant_id);
 });
 
 // Canal suivi commande client — public (par tracking_token, pas d'auth)
@@ -32,4 +38,17 @@ Broadcast::channel('driver.{driverId}', function ($user, $driverId) {
 // Canal super admin
 Broadcast::channel('admin.platform', function ($user) {
     return $user->isSuperAdmin();
+});
+
+// Canaux CRM
+Broadcast::channel('crm.user.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});
+
+Broadcast::channel('crm.admin', function ($user) {
+    return $user->isSuperAdmin() || $user->isCrmUser();
+});
+
+Broadcast::channel('crm.team.{teamId}', function ($user, $teamId) {
+    return $user->isSuperAdmin() || $user->isCrmUser();
 });

@@ -122,15 +122,27 @@ class MoneyFusionWebhookController extends Controller
 
     protected function findSubscription(string $tokenPay, array $personalInfo): ?Subscription
     {
-        // 1. Chercher via payment_reference (token stocké à l'initiation)
+        // 1. Chercher via payment_reference (token stocké à l'initiation) — méthode principale
         $sub = Subscription::where('payment_reference', $tokenPay)->first();
         if ($sub) return $sub;
 
-        // 2. Chercher via personal_Info.subscription_id
+        // 2. Fallback via personal_Info.subscription_id — SÉCURISÉ :
+        //    On n'utilise l'ID que pour retrouver la souscription, MAIS on vérifie
+        //    que le tokenPay correspond bien au payment_token stocké dans les métadonnées
+        //    du paiement. Sans ce token valide, un ID seul ne suffit pas.
         foreach ($personalInfo as $info) {
             if (!empty($info['subscription_id'])) {
-                $sub = Subscription::find($info['subscription_id']);
-                if ($sub) return $sub;
+                $candidate = Subscription::find($info['subscription_id']);
+                // Vérifier que la souscription candidate a bien un token initié
+                // (payment_token dans payment_metadata) ou un payment_reference non nul
+                // lié à ce tokenPay. Sans ça, rejeter le fallback.
+                if ($candidate && !empty($candidate->payment_reference)) {
+                    // Le tokenPay doit correspondre au token initié pour cette souscription
+                    // Si payment_reference ne correspond pas, on n'active pas via ce chemin
+                    if ($candidate->payment_reference === $tokenPay) {
+                        return $candidate;
+                    }
+                }
             }
         }
 

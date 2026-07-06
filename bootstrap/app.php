@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\TrackLastLogin::class,
             \App\Http\Middleware\SecurityHeaders::class,
-            // \App\Http\Middleware\CleanJsonResponse::class, // Temporarily disabled - causes issues
+            \App\Http\Middleware\CleanJsonResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

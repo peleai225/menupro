@@ -67,6 +67,14 @@
                     @endif
                 </div>
 
+                {{-- Objectif mensuel --}}
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">Objectif mensuel</label>
+                    <input type="number" wire:model="editingMonthlyTarget" min="1" max="999"
+                           class="w-full px-3 py-2.5 rounded-xl bg-gray-800/50 border border-gray-700/50 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all">
+                    <p class="text-xs text-gray-500 mt-1">Nombre de conversions/installations visées par mois.</p>
+                </div>
+
                 {{-- Équipe --}}
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1.5">Équipe</label>
