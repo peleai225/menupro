@@ -405,7 +405,7 @@
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
-                this.pollInterval = setInterval(() => this.fetchOrders(), 30000); // fallback polling — Reverb WebSocket est prioritaire
+                this.pollInterval = setInterval(() => this.fetchOrders(), 8000); // fallback polling toutes les 8s si WebSocket indisponible
 
                 // Indicateur réseau
                 window.addEventListener('online',  () => { this.online = true;  });
@@ -418,10 +418,10 @@
                     if (document.visibilityState === 'visible') this.requestWakeLock();
                 });
 
-                // Reverb temps réel (si activé)
+                // Reverb temps réel — canal public kitchen.{token} (pas besoin d'auth session)
                 if (window.Echo) {
-                    window.Echo.private('restaurant.{{ $restaurant->id }}.orders')
-                        .listen('.order.created',       () => this.fetchOrders())
+                    window.Echo.channel('kitchen.{{ $token }}')
+                        .listen('.order.created',        () => this.fetchOrders())
                         .listen('.order.status_changed', () => this.fetchOrders());
                 }
 

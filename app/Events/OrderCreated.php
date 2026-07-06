@@ -9,6 +9,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Restaurant;
 
 class OrderCreated implements ShouldBroadcast
 {
@@ -20,9 +21,20 @@ class OrderCreated implements ShouldBroadcast
 
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel("restaurant.{$this->order->restaurant_id}.orders"),
         ];
+
+        // Canal public pour le KDS cuisine (sécurisé par token URL, pas de session auth)
+        $kitchenToken = $this->order->relationLoaded('restaurant')
+            ? $this->order->restaurant?->kitchen_token
+            : Restaurant::find($this->order->restaurant_id)?->kitchen_token;
+
+        if ($kitchenToken) {
+            $channels[] = new Channel("kitchen.{$kitchenToken}");
+        }
+
+        return $channels;
     }
 
     public function broadcastAs(): string
