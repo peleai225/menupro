@@ -135,6 +135,7 @@
             <svg id="vOn"  width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
             <svg id="vOff" width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15z"/></svg>
         </button>
+        <button class="iBtn" id="btnTest" onclick="testVoice()" title="Tester la voix" style="font-size:16px;">🔊</button>
         <button class="iBtn" id="btnS" onclick="toggleSound()" title="Son">
             <svg id="sOn"  width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6 9H4a1 1 0 00-1 1v4a1 1 0 001 1h2l4 4V5L6 9z"/></svg>
             <svg id="sOff" width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
@@ -359,6 +360,15 @@
         speak(o);
     }
     window.closeAlrt = function(){ document.getElementById('alrt').classList.remove('on'); clearTimeout(alrtTimer); };
+
+    window.testVoice = function() {
+        var btn = document.getElementById('btnTest');
+        btn.textContent = '⏳';
+        btn.disabled = true;
+        var fake = { reference: 'TEST', table_number: '3', items: [{ quantity: 1, name: 'Attièké Poisson' }, { quantity: 2, name: 'Coca Cola' }] };
+        speak(fake);
+        setTimeout(function() { btn.textContent = '🔊'; btn.disabled = false; }, 4000);
+    };
 
     /* ══ SON ══════════════════════════════════════════════ */
     function playSound() {
