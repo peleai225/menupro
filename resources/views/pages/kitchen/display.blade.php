@@ -388,7 +388,7 @@
             online: true,
             token: '{{ $token }}',
             pollInterval: null,
-            knownIds: new Set(),
+            knownIds: {},
 
             get newOrders() {
                 return this.orders.filter(o => o.status === 'paid' || o.status === 'confirmed');
@@ -401,9 +401,9 @@
             },
 
             init() {
-                // knownIds = IDs connus dès le chargement initial — les nouvelles
-                // commandes arrivées APRÈS ce moment déclencheront l'alerte
-                this.knownIds = new Set(this.orders.map(o => o.id));
+                // knownIds = dictionnaire des IDs connus au chargement initial
+                // les nouvelles commandes arrivées APRÈS déclenchent l'alerte
+                this.orders.forEach(o => { this.knownIds[o.id] = true; });
                 this.updateCounts();
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
@@ -466,10 +466,10 @@
                     const data = await resp.json();
 
                     // Détecte les commandes vraiment nouvelles (pas dans knownIds)
-                    const brandNew = data.orders.filter(o => !this.knownIds.has(o.id));
+                    const brandNew = data.orders.filter(o => !this.knownIds[o.id]);
                     if (brandNew.length > 0) {
                         brandNew.forEach(order => this.announceNewOrder(order));
-                        brandNew.forEach(o => this.knownIds.add(o.id));
+                        brandNew.forEach(o => { this.knownIds[o.id] = true; });
                     }
 
                     this.orders = data.orders;
