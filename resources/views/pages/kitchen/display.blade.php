@@ -380,17 +380,39 @@
     }
 
     /* ══ SYNTHÈSE VOCALE ══════════════════════════════════ */
+    var EL_ENABLED = {{ \App\Models\SystemSetting::get('elevenlabs_api_key') ? 'true' : 'false' }};
+
     function speak(o) {
-        if (!voiceOn||!('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
-        var t='Nouvelle commande '+(o.reference||'').replace('#','')+'. ';
-        if (o.table_number) t+='Table '+o.table_number+'. ';
-        t+=(o.items||[]).map(function(i){ return (i.quantity>1?i.quantity+' ':'')+i.name; }).join(', ')+'.';
-        var u=new SpeechSynthesisUtterance(t);
-        u.lang='fr-FR'; u.rate=.88; u.pitch=1; u.volume=1;
-        var fr=window.speechSynthesis.getVoices().find(function(v){ return v.lang.startsWith('fr'); });
-        if (fr) u.voice=fr;
-        setTimeout(function(){ window.speechSynthesis.speak(u); },400);
+        if (!voiceOn) return;
+        var t = 'Nouvelle commande ' + (o.reference||'').replace('#','') + '. ';
+        if (o.table_number) t += 'Table ' + o.table_number + '. ';
+        t += (o.items||[]).map(function(i){ return (i.quantity>1 ? i.quantity+' ' : '') + i.name; }).join(', ') + '.';
+
+        if (EL_ENABLED) {
+            // ElevenLabs via proxy serveur — clé API jamais exposée au navigateur
+            fetch('/cuisine/' + TOKEN + '/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                body: JSON.stringify({ text: t })
+            })
+            .then(function(r) { return r.ok ? r.blob() : null; })
+            .then(function(blob) {
+                if (!blob) return;
+                var url = URL.createObjectURL(blob);
+                var audio = new Audio(url);
+                audio.onended = function() { URL.revokeObjectURL(url); };
+                audio.play().catch(function(){});
+            })
+            .catch(function(){});
+        } else if ('speechSynthesis' in window) {
+            // Fallback : voix navigateur si ElevenLabs non configuré
+            window.speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(t);
+            u.lang='fr-FR'; u.rate=.88; u.pitch=1; u.volume=1;
+            var fr = window.speechSynthesis.getVoices().find(function(v){ return v.lang.startsWith('fr'); });
+            if (fr) u.voice = fr;
+            setTimeout(function(){ window.speechSynthesis.speak(u); }, 400);
+        }
     }
 
     /* ══ TOGGLES ══════════════════════════════════════════ */
@@ -399,7 +421,7 @@
         document.getElementById('btnV').classList.toggle('off',!voiceOn);
         document.getElementById('vOn').style.display=voiceOn?'':'none';
         document.getElementById('vOff').style.display=voiceOn?'none':'';
-        if (!voiceOn) window.speechSynthesis.cancel();
+        if (!voiceOn && !EL_ENABLED && 'speechSynthesis' in window) window.speechSynthesis.cancel();
     };
     window.toggleSound=function(){
         soundOn=!soundOn;

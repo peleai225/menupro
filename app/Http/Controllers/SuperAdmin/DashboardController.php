@@ -198,6 +198,8 @@ class DashboardController extends Controller
             'maintenance_mode' => \App\Models\SystemSetting::get('maintenance_mode', false),
             'registrations_open' => \App\Models\SystemSetting::get('registrations_open', true),
             'geoapify_api_key' => \App\Models\SystemSetting::get('geoapify_api_key', ''),
+            'elevenlabs_api_key' => \App\Models\SystemSetting::get('elevenlabs_api_key', ''),
+            'elevenlabs_voice_id' => \App\Models\SystemSetting::get('elevenlabs_voice_id', ''),
             'smtp_host' => \App\Models\SystemSetting::get('smtp_host', config('mail.mailers.smtp.host', '')),
             'smtp_port' => \App\Models\SystemSetting::get('smtp_port', config('mail.mailers.smtp.port', '587')),
             'smtp_encryption' => \App\Models\SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption', 'tls')),
@@ -283,6 +285,8 @@ class DashboardController extends Controller
             'maintenance_mode' => ['boolean'],
             'registrations_open' => ['boolean'],
             'geoapify_api_key' => ['nullable', 'string'],
+            'elevenlabs_api_key' => ['nullable', 'string', 'max:255'],
+            'elevenlabs_voice_id' => ['nullable', 'string', 'max:255'],
             // MoneyFusion
             'moneyfusion_api_url' => ['nullable', 'url'],
             'moneyfusion_api_key' => ['nullable', 'string'],
@@ -373,6 +377,14 @@ class DashboardController extends Controller
         if ($request->filled('moneyfusion_api_key')) {
             \App\Models\SystemSetting::set('moneyfusion_api_key', $request->moneyfusion_api_key, 'string', 'Clé API MoneyFusion');
         }
+        // ElevenLabs TTS (synthèse vocale KDS)
+        if ($request->filled('elevenlabs_api_key')) {
+            \App\Models\SystemSetting::set('elevenlabs_api_key', $request->elevenlabs_api_key, 'string', 'Clé API ElevenLabs (synthèse vocale KDS)');
+        }
+        if ($request->filled('elevenlabs_voice_id')) {
+            \App\Models\SystemSetting::set('elevenlabs_voice_id', $request->elevenlabs_voice_id, 'string', 'ID de la voix ElevenLabs (KDS)');
+        }
+
         // Wave CI
         if ($request->filled('wave_api_key')) {
             \App\Models\SystemSetting::set('wave_api_key', $request->wave_api_key, 'string', 'Clé API Wave (Bearer token)');

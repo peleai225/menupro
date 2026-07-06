@@ -477,8 +477,9 @@ Route::prefix('livreur/{token}')->middleware('throttle:30,1')->group(function ()
 */
 
 Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
+    Route::get('/',  [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
     Route::get('/data', [\App\Http\Controllers\Restaurant\KitchenController::class, 'data'])->name('kitchen.data');
+    Route::post('/tts', [\App\Http\Controllers\Restaurant\KitchenController::class, 'tts'])->name('kitchen.tts');
     Route::post('/orders/{order}/status', [\App\Http\Controllers\Restaurant\KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
 });
 

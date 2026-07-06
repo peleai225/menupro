@@ -53,6 +53,40 @@ class KitchenController extends Controller
     }
 
     /**
+     * Proxy ElevenLabs TTS — la clé API ne sort jamais dans le HTML.
+     */
+    public function tts(string $token, Request $request): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\Response
+    {
+        Restaurant::where('kitchen_token', $token)->firstOrFail();
+
+        $apiKey  = \App\Models\SystemSetting::get('elevenlabs_api_key', '');
+        $voiceId = \App\Models\SystemSetting::get('elevenlabs_voice_id', 'pNInz6obpgDQGcFmaJgB');
+
+        if (empty($apiKey)) {
+            return response('ElevenLabs non configuré', 503);
+        }
+
+        $text = $request->validate(['text' => ['required', 'string', 'max:500']])['text'];
+
+        $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+            ->timeout(10)
+            ->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
+                'text' => $text,
+                'model_id' => 'eleven_multilingual_v2',
+                'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
+            ]);
+
+        if (!$response->successful()) {
+            return response('TTS error', 502);
+        }
+
+        return response($response->body(), 200, [
+            'Content-Type' => 'audio/mpeg',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    /**
      * Get orders data (AJAX polling from kitchen display).
      */
     public function data(string $token): JsonResponse

@@ -235,6 +235,46 @@
                     </div>
                 </div>
 
+                {{-- ElevenLabs TTS --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="w-2 h-2 rounded-full" style="background:#a855f7;"></span>
+                        <h2 class="text-base font-semibold" style="color:var(--sa-fg);">ElevenLabs — Synthèse vocale KDS</h2>
+                    </div>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                        Voix africaine pour annoncer les nouvelles commandes sur l'écran cuisine.
+                        Clé API et ID de voix disponibles sur <strong>elevenlabs.io</strong>.
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Clé API <span style="color:var(--sa-danger);">*</span></label>
+                            <input type="password" name="elevenlabs_api_key"
+                                   value="{{ old('elevenlabs_api_key', $settings['elevenlabs_api_key'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder="sk_...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">ID de la voix</label>
+                            <input type="text" name="elevenlabs_voice_id"
+                                   value="{{ old('elevenlabs_voice_id', $settings['elevenlabs_voice_id'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none transition"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder="ex: pNInz6obpgDQGcFmaJgB">
+                            <p class="text-xs mt-1.5" style="color:var(--sa-muted-fg);">
+                                Copier l'ID depuis ElevenLabs → Voices → clic sur la voix choisie → l'ID est dans l'URL.
+                            </p>
+                        </div>
+                        @if(!empty($settings['elevenlabs_api_key']))
+                        <div class="rounded-lg border px-3 py-2.5 text-xs flex items-center gap-2"
+                             style="background:rgba(168,85,247,0.06);border-color:rgba(168,85,247,0.20);color:#a855f7;">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Clé API configurée — synthèse vocale active sur le KDS.
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="flex justify-end">
                     <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
                             style="background:var(--sa-primary);color:var(--sa-primary-fg);">
