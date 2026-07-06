@@ -68,8 +68,9 @@ class KitchenController extends Controller
 
         $text = $request->validate(['text' => ['required', 'string', 'max:500']])['text'];
 
-        $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
-            ->timeout(10)
+        // ElevenLabs utilise xi-api-key, pas Authorization: Bearer
+        $response = \Illuminate\Support\Facades\Http::withHeaders(['xi-api-key' => $apiKey])
+            ->timeout(15)
             ->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
                 'text' => $text,
                 'model_id' => 'eleven_multilingual_v2',
@@ -77,7 +78,12 @@ class KitchenController extends Controller
             ]);
 
         if (!$response->successful()) {
-            return response('TTS error', 502);
+            \Illuminate\Support\Facades\Log::error('ElevenLabs TTS error', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+                'voice'  => $voiceId,
+            ]);
+            return response('TTS error: ' . $response->status(), 502);
         }
 
         return response($response->body(), 200, [

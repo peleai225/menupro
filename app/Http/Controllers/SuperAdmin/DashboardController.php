@@ -312,7 +312,7 @@ class DashboardController extends Controller
             'footer_text' => ['nullable', 'string', 'max:500'],
             'home_videos' => ['nullable', 'array'],
             'home_videos.*.title' => ['nullable', 'string', 'max:255'],
-            'home_videos.*.url' => ['nullable', 'string', 'url', 'max:500'],
+            'home_videos.*.url' => ['nullable', 'string', 'max:500'],
             'home_videos.*.description' => ['nullable', 'string', 'max:500'],
             'commando_commission_fcfa_first_payment' => ['nullable', 'numeric', 'min:0'],
             'commando_commission_only_first_payment' => ['boolean'],
