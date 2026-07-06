@@ -35,7 +35,10 @@ class KitchenController extends Controller
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
 
-        $orders = Order::where('restaurant_id', $restaurant->id)
+        // withoutGlobalScope('restaurant') : le KDS est sans session auth,
+        // le scope BelongsToRestaurant retournerait whereRaw('0=1') sans ça
+        $orders = Order::withoutGlobalScope('restaurant')
+            ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', [
                 OrderStatus::PAID,
                 OrderStatus::CONFIRMED,
@@ -58,7 +61,8 @@ class KitchenController extends Controller
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
 
-        $orders = Order::where('restaurant_id', $restaurant->id)
+        $orders = Order::withoutGlobalScope('restaurant')
+            ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', [
                 OrderStatus::PAID,
                 OrderStatus::CONFIRMED,
@@ -86,6 +90,9 @@ class KitchenController extends Controller
     public function updateStatus(string $token, Order $order, Request $request): JsonResponse
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+
+        // Recharge sans scope pour éviter le filtre BelongsToRestaurant (pas de session ici)
+        $order = Order::withoutGlobalScope('restaurant')->findOrFail($order->id);
 
         if ((int) $order->restaurant_id !== (int) $restaurant->id) {
             abort(403);
