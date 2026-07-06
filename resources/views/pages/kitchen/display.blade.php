@@ -184,18 +184,18 @@
 (function(){
     var TOKEN   = '{{ $token }}';
     var CSRF    = document.querySelector('meta[name="csrf-token"]').content;
-    var INITIAL = @json($ordersJson);
+    // JSON encodé en base64 pour éviter tout conflit avec quotes/caractères spéciaux
+    var INITIAL = JSON.parse(atob('{{ base64_encode(json_encode($ordersJson)) }}'));
 
     var audioCtx  = null;
     var soundOn   = true;
     var voiceOn   = true;
     var knownIds  = {};
     var alrtTimer = null;
-    var firstRender = true;   // flag pour ne pas animer les cartes initiales
+    var firstRender = true;
 
-    /* ══════════════════════════════════════════════════════
-       INIT — rendu + polling démarrent immédiatement,
-       pas besoin d'attendre le tap "Démarrer"
+    /* ══ INIT ══════════════════════════════════════════════
+       Rendu + polling démarrent immédiatement.
     ══════════════════════════════════════════════════════ */
     INITIAL.forEach(function(o){ knownIds[o.id] = true; });
     render(INITIAL);
