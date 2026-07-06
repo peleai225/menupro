@@ -43,6 +43,7 @@ class KitchenController extends Controller
                 OrderStatus::PREPARING,
                 OrderStatus::READY,
             ])
+            ->where('created_at', '>=', now()->subHours(24))
             ->with('items.dish.category')
             ->oldest()
             ->get();
@@ -107,6 +108,7 @@ class KitchenController extends Controller
                 OrderStatus::PREPARING,
                 OrderStatus::READY,
             ])
+            ->where('created_at', '>=', now()->subHours(24))
             ->with('items.dish.category')
             ->oldest()
             ->get()
