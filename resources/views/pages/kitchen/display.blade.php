@@ -155,9 +155,23 @@
     var voiceOn   = true;
     var knownIds  = {};
     var alrtTimer = null;
-    var polling   = false;
 
-    /* ══ SPLASH ══════════════════════════════════════════ */
+    /* ══ DONNÉES INITIALES + POLLING ════════════════════
+       Démarrent immédiatement — pas besoin d'attendre
+       le tap sur "Démarrer" pour voir les commandes.    */
+    INITIAL.forEach(function(o){ knownIds[o.id] = true; });
+    render(INITIAL);
+
+    // Premier fetch immédiat, puis toutes les 5s
+    fetch('/cuisine/' + TOKEN + '/data').then(handleData).catch(function(){ setDot(false); });
+    setInterval(function(){
+        fetch('/cuisine/' + TOKEN + '/data').then(handleData).catch(function(){ setDot(false); });
+    }, 5000);
+
+    startClock();
+    watchNet();
+
+    /* ══ SPLASH — uniquement pour déverrouiller l'audio ══ */
     window.kdsStart = function() {
         // AudioContext DOIT être créé ici, dans le gestionnaire du clic
         try {
@@ -171,28 +185,8 @@
         s.classList.add('gone');
         setTimeout(function(){ s.style.display = 'none'; }, 380);
 
-        startClock();
-        watchNet();
         wakeLock();
-        startPolling();
     };
-
-    /* ══ DONNÉES INITIALES ═══════════════════════════════ */
-    // Marque les commandes déjà présentes au chargement
-    INITIAL.forEach(function(o){ knownIds[o.id] = true; });
-
-    /* ══ RENDU INITIAL (sans attendre le splash) ═════════ */
-    render(INITIAL);
-
-    /* ══ POLLING ═════════════════════════════════════════ */
-    function startPolling() {
-        if (polling) return;
-        polling = true;
-        fetch('/cuisine/' + TOKEN + '/data').then(handleData).catch(function(){ setDot(false); });
-        setInterval(function(){
-            fetch('/cuisine/' + TOKEN + '/data').then(handleData).catch(function(){ setDot(false); });
-        }, 5000);
-    }
 
     function handleData(r) {
         setDot(r.ok);
