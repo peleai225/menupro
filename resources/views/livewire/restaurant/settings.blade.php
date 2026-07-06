@@ -1108,7 +1108,7 @@ function kitchenSettings() {
         async regenerateToken() {
             this.loading = true;
             try {
-                const resp = await fetch('{{ route("restaurant.kitchen.generate-token") }}', {
+                const resp = await fetch('{{ route("kitchen.generate-token") }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
