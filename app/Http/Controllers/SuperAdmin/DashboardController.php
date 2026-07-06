@@ -279,7 +279,7 @@ class DashboardController extends Controller
         
         $request->validate([
             'app_name' => ['nullable', 'string', 'max:255'],
-            'app_url' => ['nullable', 'url'],
+            'app_url' => ['nullable', 'string', function($a,$v,$f){ if($v && !filter_var($v,FILTER_VALIDATE_URL)) $f('Format URL invalide.'); }],
             'contact_email' => ['nullable', 'email'],
             'contact_phone' => ['nullable', 'string', 'max:30'],
             'maintenance_mode' => ['boolean'],
@@ -288,7 +288,7 @@ class DashboardController extends Controller
             'elevenlabs_api_key' => ['nullable', 'string', 'max:255'],
             'elevenlabs_voice_id' => ['nullable', 'string', 'max:255'],
             // MoneyFusion
-            'moneyfusion_api_url' => ['nullable', 'url'],
+            'moneyfusion_api_url' => ['nullable', 'string', function($a,$v,$f){ if($v && !filter_var($v,FILTER_VALIDATE_URL)) $f('Format URL invalide.'); }],
             'moneyfusion_api_key' => ['nullable', 'string'],
             // Wave CI
             'wave_api_key' => ['nullable', 'string'],
@@ -305,10 +305,10 @@ class DashboardController extends Controller
             'logo' => ['nullable', 'image', 'max:2048'],
             'favicon' => ['nullable', 'image', 'max:512'],
             'hero_image' => ['nullable', 'image', 'max:5120'],
-            'social_facebook' => ['nullable', 'url'],
-            'social_twitter' => ['nullable', 'url'],
-            'social_instagram' => ['nullable', 'url'],
-            'social_linkedin' => ['nullable', 'url'],
+            'social_facebook' => ['nullable', 'string'],
+            'social_twitter' => ['nullable', 'string'],
+            'social_instagram' => ['nullable', 'string'],
+            'social_linkedin' => ['nullable', 'string'],
             'footer_text' => ['nullable', 'string', 'max:500'],
             'home_videos' => ['nullable', 'array'],
             'home_videos.*.title' => ['nullable', 'string', 'max:255'],
@@ -322,7 +322,7 @@ class DashboardController extends Controller
             // Marketing
             'banner_enabled' => ['boolean'],
             'banner_text' => ['nullable', 'string', 'max:255'],
-            'banner_link' => ['nullable', 'url'],
+            'banner_link' => ['nullable', 'string'],
             'banner_color' => ['nullable', 'string', 'in:primary,success,warning,dark'],
             'facebook_pixel_id' => ['nullable', 'string', 'max:50'],
             'google_analytics_id' => ['nullable', 'string', 'max:50'],
