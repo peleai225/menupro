@@ -53,8 +53,10 @@
         .d8 { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .dn { background: #f97316; } .dp { background: #3b82f6; } .dr { background: #22c55e; }
 
-        /* ── CARTES — pas d'animation, opacité toujours 1 ── */
-        .card { background: #111; border-radius: 11px; border: 1px solid #1d1d1d; overflow: hidden; opacity: 1; }
+        /* ── CARTES ─────────────────────────────────────────
+           flex-shrink:0 OBLIGATOIRE — sans ça, 44 cartes dans
+           une col flex se compriment à quelques pixels chacune */
+        .card { background: #111; border-radius: 11px; border: 1px solid #1d1d1d; overflow: hidden; opacity: 1; flex-shrink: 0; }
         .ctop { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 8px 11px; border-bottom: 1px solid #1a1a1a; }
         .ctop-paid      { background: rgba(249,115,22,.09); }
         .ctop-confirmed { background: rgba(234,179,8,.09); }
