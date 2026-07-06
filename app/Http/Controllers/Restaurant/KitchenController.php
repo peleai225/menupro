@@ -43,7 +43,7 @@ class KitchenController extends Controller
                 OrderStatus::PREPARING,
                 OrderStatus::READY,
             ])
-            ->with('items.dish')
+            ->with('items.dish.category')
             ->oldest()
             ->get();
 
@@ -107,7 +107,7 @@ class KitchenController extends Controller
                 OrderStatus::PREPARING,
                 OrderStatus::READY,
             ])
-            ->with('items.dish')
+            ->with('items.dish.category')
             ->oldest()
             ->get()
             ->map(fn($order) => $this->serializeOrder($order));
@@ -184,6 +184,7 @@ class KitchenController extends Controller
             'items'         => $order->items->map(fn($item) => [
                 'quantity'     => $item->quantity,
                 'name'         => $item->dish?->name ?? $item->dish_name ?? 'Plat',
+                'category'     => $item->dish?->category?->name ?? '',
                 'options'      => $item->selected_options ?? [],
                 'instructions' => $item->special_instructions,
             ])->values()->all(),

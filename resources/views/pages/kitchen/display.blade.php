@@ -365,7 +365,7 @@
         var btn = document.getElementById('btnTest');
         btn.textContent = '⏳';
         btn.disabled = true;
-        var fake = { reference: 'TEST', table_number: '3', items: [{ quantity: 1, name: 'Attièké Poisson' }, { quantity: 2, name: 'Coca Cola' }] };
+        var fake = { reference: 'TEST', table_number: '3', type: 'Sur place', items: [{ quantity: 1, name: 'Attièké Poisson', instructions: '' }, { quantity: 2, name: 'Coca Cola', instructions: '' }] };
         speak(fake);
         setTimeout(function() { btn.textContent = '🔊'; btn.disabled = false; }, 4000);
     };
@@ -394,14 +394,9 @@
 
     function speak(o) {
         if (!voiceOn) return;
-        var t = 'Nouvelle commande ' + (o.reference||'').replace('#','') + '. ';
-        if (o.table_number) t += 'Table ' + o.table_number + '. ';
-        t += (o.items||[]).map(function(i){ return (i.quantity>1 ? i.quantity+' ' : '') + i.name; }).join(', ') + '.';
+        var t = buildSpeechText(o);
 
         if (EL_ENABLED && audioCtx) {
-            // ElevenLabs via proxy — lecture via AudioContext (déjà déverrouillé au splash)
-            // new Audio().play() est bloqué par autoplay hors geste utilisateur,
-            // audioCtx.decodeAudioData + BufferSource fonctionne car audioCtx est "running"
             fetch('/cuisine/' + TOKEN + '/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
@@ -420,7 +415,6 @@
             })
             .catch(function(){});
         } else if ('speechSynthesis' in window) {
-            // Fallback : voix navigateur si ElevenLabs non configuré
             window.speechSynthesis.cancel();
             var u = new SpeechSynthesisUtterance(t);
             u.lang='fr-FR'; u.rate=.88; u.pitch=1; u.volume=1;
@@ -428,6 +422,53 @@
             if (fr) u.voice = fr;
             setTimeout(function(){ window.speechSynthesis.speak(u); }, 400);
         }
+    }
+
+    function buildSpeechText(o) {
+        var ref   = (o.reference || '').replace('#', '');
+        var items = o.items || [];
+        var total = items.reduce(function(s, i) { return s + (parseInt(i.quantity) || 1); }, 0);
+
+        var text = 'Nouvelle commande ' + ref + '. ';
+
+        if (o.table_number) {
+            text += 'Table ' + o.table_number + '. ';
+        } else if (o.type) {
+            text += o.type + '. ';
+        }
+
+        // Nombre total de plats/articles
+        if (total === 1) {
+            text += 'Un article. ';
+        } else {
+            text += total + ' articles. ';
+        }
+
+        // Détail de chaque item avec quantité explicite
+        var details = items.map(function(i) {
+            var qty = parseInt(i.quantity) || 1;
+            var nom = i.name || 'plat';
+            var prefix = qty === 1 ? 'Un ' : qty + ' ';
+            return prefix + nom;
+        });
+
+        if (details.length === 1) {
+            text += details[0] + '.';
+        } else {
+            // "A, B et C."
+            var last = details.pop();
+            text += details.join(', ') + ' et ' + last + '.';
+        }
+
+        // Notes spéciales
+        var notes = items.filter(function(i) { return i.instructions; });
+        if (notes.length) {
+            text += ' Attention : ' + notes.map(function(i) {
+                return i.name + ', ' + i.instructions;
+            }).join('. ') + '.';
+        }
+
+        return text;
     }
 
     /* ══ TOGGLES ══════════════════════════════════════════ */
