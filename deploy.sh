@@ -12,6 +12,9 @@ git stash pop -q 2>/dev/null || true
 # 1b. Installer/mettre à jour les dépendances PHP
 composer install --no-dev --no-interaction --optimize-autoloader 2>/dev/null || true
 
+# 1c. Régénérer le classmap (trouve les nouveaux composants Livewire, etc.)
+composer dump-autoload --optimize --no-dev 2>/dev/null || true
+
 # 2. Copier les assets publics vers public_html
 echo " Copie des assets publics..."
 cp -r public/build/* ~/public_html/build/ 2>/dev/null
