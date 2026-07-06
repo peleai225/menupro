@@ -388,20 +388,25 @@
         if (o.table_number) t += 'Table ' + o.table_number + '. ';
         t += (o.items||[]).map(function(i){ return (i.quantity>1 ? i.quantity+' ' : '') + i.name; }).join(', ') + '.';
 
-        if (EL_ENABLED) {
-            // ElevenLabs via proxy serveur — clé API jamais exposée au navigateur
+        if (EL_ENABLED && audioCtx) {
+            // ElevenLabs via proxy — lecture via AudioContext (déjà déverrouillé au splash)
+            // new Audio().play() est bloqué par autoplay hors geste utilisateur,
+            // audioCtx.decodeAudioData + BufferSource fonctionne car audioCtx est "running"
             fetch('/cuisine/' + TOKEN + '/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
                 body: JSON.stringify({ text: t })
             })
-            .then(function(r) { return r.ok ? r.blob() : null; })
-            .then(function(blob) {
-                if (!blob) return;
-                var url = URL.createObjectURL(blob);
-                var audio = new Audio(url);
-                audio.onended = function() { URL.revokeObjectURL(url); };
-                audio.play().catch(function(){});
+            .then(function(r) { return r.ok ? r.arrayBuffer() : null; })
+            .then(function(buf) {
+                if (!buf) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                audioCtx.decodeAudioData(buf, function(decoded) {
+                    var src = audioCtx.createBufferSource();
+                    src.buffer = decoded;
+                    src.connect(audioCtx.destination);
+                    src.start(0);
+                });
             })
             .catch(function(){});
         } else if ('speechSynthesis' in window) {
