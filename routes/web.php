@@ -33,16 +33,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('robots');
-Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('home');
-Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
-Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
+
+Route::middleware(\App\Http\Middleware\SetPublicCache::class . ':300')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('home');
+    Route::get('/tarifs', fn () => view('pages.public.pricing'))->name('pricing');
+    Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('contact');
+    Route::get('/supports-qr', fn () => view('pages.public.qr-supports'))->name('qr-supports');
+    Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
+    Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
+    Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
+    Route::get('/mentions-legales', fn () => view('pages.public.legal.mentions'))->name('mentions-legales');
+});
+
 Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
-Route::get('/supports-qr', fn () => view('pages.public.qr-supports'))->name('qr-supports');
 Route::post('/qr-supports/order', [\App\Http\Controllers\Public\QrSupportOrderController::class, 'store'])->name('qr-supports.order')->middleware('throttle:5,1');
-Route::get('/faq', fn () => view('pages.public.faq'))->name('faq');
-Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
-Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
-Route::get('/mentions-legales', fn () => view('pages.public.legal.mentions'))->name('mentions-legales');
 Route::get('/test-geocoding', [\App\Http\Controllers\Public\GeocodingTestController::class, 'index'])->name('geocoding.test');
 
 /*

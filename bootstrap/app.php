@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Register middleware aliases
         $middleware->alias([
+            'public.cache' => \App\Http\Middleware\SetPublicCache::class,
             'set.restaurant.scope' => \App\Http\Middleware\SetRestaurantScope::class,
             'restaurant.active' => \App\Http\Middleware\EnsureRestaurantActive::class,
             'restaurant.admin' => \App\Http\Middleware\EnsureRestaurantAdmin::class,
