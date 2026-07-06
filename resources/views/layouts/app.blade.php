@@ -33,8 +33,21 @@
             $faviconUrl = null;
         }
     @endphp
-    <title>{{ $title ?? $appName }} - Votre Menu Digital</title>
-    <meta name="description" content="{{ $description ?? $appName . ' - La solution SaaS pour digitaliser le menu de votre restaurant et recevoir des commandes en ligne.' }}">
+    <title>{{ $title ? $title . ' — ' . $appName : $appName . ' — Menu digital & commandes en ligne Côte d\'Ivoire' }}</title>
+    <meta name="description" content="{{ $description ?? $appName . ' — La solution SaaS pour digitaliser le menu de votre restaurant et recevoir des commandes en ligne en Côte d\'Ivoire.' }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_CI">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $title ? $title . ' — ' . $appName : $appName }}">
+    <meta property="og:description" content="{{ $description ?? $appName . ' — La solution SaaS pour digitaliser le menu de votre restaurant en Côte d\'Ivoire.' }}">
+    <meta property="og:image" content="{{ asset('images/logo-menupro.png') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $title ? $title . ' — ' . $appName : $appName }}">
+    <meta name="twitter:description" content="{{ $description ?? $appName . ' — La solution SaaS pour digitaliser le menu de votre restaurant en Côte d\'Ivoire.' }}">
+    <meta name="twitter:image" content="{{ asset('images/logo-menupro.png') }}">
 
     <!-- Favicon -->
     @if($faviconUrl)

@@ -3,9 +3,14 @@ Allow: /
 
 Disallow: /dashboard/
 Disallow: /super-admin/
+Disallow: /crm/
+Disallow: /commando/
+Disallow: /livreur/
+Disallow: /cuisine/
 Disallow: /login
 Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
+Disallow: /api/
 
 Sitemap: https://menupro.ci/sitemap.xml
