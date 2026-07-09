@@ -23,14 +23,18 @@
             {{-- Navigation --}}
             @php $role = auth()->user()->role->value; @endphp
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
+                <div id="tour-nav-dashboard">
                 <x-crm-nav-link href="{{ route('crm.dashboard') }}" icon="home" :active="request()->routeIs('crm.dashboard')">
                     Dashboard
                 </x-crm-nav-link>
+                </div>
 
                 @if(in_array($role, ['super_admin', 'team_leader', 'commercial']))
+                <div id="tour-nav-pipeline">
                 <x-crm-nav-link href="{{ route('crm.leads.index') }}" icon="funnel" :active="request()->routeIs('crm.leads.*')">
                     Pipeline
                 </x-crm-nav-link>
+                </div>
                 @endif
 
                 @if(in_array($role, ['super_admin', 'technician', 'team_leader']))
@@ -45,13 +49,17 @@
                 </x-crm-nav-link>
                 @endif
 
+                <div id="tour-nav-wallet">
                 <x-crm-nav-link href="{{ route('crm.wallet') }}" icon="banknotes" :active="request()->routeIs('crm.wallet')">
                     Wallet
                 </x-crm-nav-link>
+                </div>
 
+                <div id="tour-nav-performance">
                 <x-crm-nav-link href="{{ route('crm.performance') }}" icon="chart-bar" :active="request()->routeIs('crm.performance')">
                     Performance
                 </x-crm-nav-link>
+                </div>
 
                 @if(in_array($role, ['commercial', 'technician']))
                 <x-crm-nav-link href="{{ route('crm.report') }}" icon="document-text" :active="request()->routeIs('crm.report')">
@@ -207,6 +215,17 @@
                 </div>
 
                 <div class="flex items-center gap-2">
+                    {{-- Replay tour button --}}
+                    @if(auth()->user()->tour_completed_at)
+                    <button id="tour-replay-btn" onclick="window.crmTour && window.crmTour.start()"
+                            title="Revoir la visite guidée"
+                            class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-gray-500 hover:text-orange-400 hover:bg-gray-800/50 rounded-lg transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Guide
+                    </button>
+                    @endif
                     {{-- In-app notification bell --}}
                     @livewire('crm.crm-notifications-bell')
                     {{-- User avatar mobile --}}
@@ -368,6 +387,204 @@
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(75,85,99,0.3); border-radius: 4px; }
+
+        /* Driver.js dark theme override */
+        .driver-popover {
+            background: #111827 !important;
+            border: 1px solid rgba(249,115,22,0.3) !important;
+            border-radius: 16px !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7) !important;
+            max-width: 320px !important;
+        }
+        .driver-popover-title {
+            color: #f97316 !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            margin-bottom: 6px !important;
+        }
+        .driver-popover-description {
+            color: #9ca3af !important;
+            font-size: 13px !important;
+            line-height: 1.6 !important;
+        }
+        .driver-popover-progress-text {
+            color: #6b7280 !important;
+            font-size: 11px !important;
+        }
+        .driver-popover-prev-btn, .driver-popover-next-btn, .driver-popover-done-btn {
+            background: #f97316 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 6px 14px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+        }
+        .driver-popover-prev-btn {
+            background: #374151 !important;
+            color: #9ca3af !important;
+        }
+        .driver-popover-close-btn {
+            color: #6b7280 !important;
+        }
+        .driver-popover-close-btn:hover {
+            color: #f3f4f6 !important;
+        }
+        .driver-overlay { background: rgba(0,0,0,0.75) !important; }
     </style>
+
+    @php $user = auth()->user(); @endphp
+    @if(in_array($user->role->value, ['commercial', 'technician', 'team_leader']) && !$user->tour_completed_at)
+    {{-- Driver.js guided tour — shown once for new agents --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dynamically load driver.js from CDN (already in package.json but simpler to load here)
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
+        script.onload = function() {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css';
+            document.head.appendChild(link);
+
+            setTimeout(() => initTour(), 800);
+        };
+        document.head.appendChild(script);
+    });
+
+    function initTour() {
+        const role = @json($user->role->value);
+
+        const steps = [];
+
+        // Étape 1 — Bienvenue
+        steps.push({
+            popover: {
+                title: '👋 Bienvenue sur le CRM MenuPro !',
+                description: 'Vous êtes maintenant Ambassadeur MenuPro. Ce guide rapide vous montre comment tout fonctionne. Ça prend moins de 2 minutes !',
+                side: 'over',
+                align: 'center',
+            }
+        });
+
+        // Étape 2 — Dashboard
+        if (document.getElementById('tour-nav-dashboard')) {
+            steps.push({
+                element: '#tour-nav-dashboard',
+                popover: {
+                    title: '📊 Dashboard',
+                    description: 'Votre tableau de bord : vos stats du mois, vos leads actifs, vos commissions récentes. C\'est votre point de départ chaque matin.',
+                    side: 'right',
+                }
+            });
+        }
+
+        // Étape 3 — Pipeline (commercial seulement)
+        if ((role === 'commercial' || role === 'team_leader' || role === 'super_admin') && document.getElementById('tour-nav-pipeline')) {
+            steps.push({
+                element: '#tour-nav-pipeline',
+                popover: {
+                    title: '🎯 Pipeline de leads',
+                    description: 'C\'est ici que vous gérez vos prospects. Créez un lead pour chaque restaurant que vous contactez, puis faites-le avancer jusqu\'à le signer. Dès qu\'il paie, votre commission est créditée automatiquement.',
+                    side: 'right',
+                }
+            });
+        }
+
+        // Étape 4 — Wallet
+        if (document.getElementById('tour-nav-wallet')) {
+            steps.push({
+                element: '#tour-nav-wallet',
+                popover: {
+                    title: '💰 Votre Wallet',
+                    description: 'Toutes vos commissions sont créditées ici automatiquement. Dès que vous avez 5 000 FCFA, vous pouvez faire une demande de retrait vers Wave, Orange Money ou MTN.',
+                    side: 'right',
+                }
+            });
+        }
+
+        // Étape 5 — Performance
+        if (document.getElementById('tour-nav-performance')) {
+            steps.push({
+                element: '#tour-nav-performance',
+                popover: {
+                    title: '📈 Performance',
+                    description: 'Suivez votre progression, votre grade (Rookie → Commando → Elite) et vos classements. Plus vous signez, plus votre commission par restaurant augmente.',
+                    side: 'right',
+                }
+            });
+        }
+
+        // Étape 6 — Comment ça marche
+        steps.push({
+            popover: {
+                title: '🚀 Comment gagner des commissions ?',
+                description: '1️⃣ Créez un lead (prospect restaurant)\n2️⃣ Inscrivez le restaurant depuis la fiche lead\n3️⃣ Dès qu\'il paie son abonnement → vous gagnez automatiquement\n\nEssentiel : 3 000 FCFA • Pro : 5 000 FCFA • Business : 8 000 FCFA',
+                side: 'over',
+                align: 'center',
+            }
+        });
+
+        // Étape 7 — C'est parti
+        steps.push({
+            popover: {
+                title: '✅ Vous êtes prêt !',
+                description: 'Commencez par créer votre premier lead. Cliquez sur le bouton "+ Nouveau lead" dans le Pipeline. Bonne chance !',
+                side: 'over',
+                align: 'center',
+            }
+        });
+
+        const driver = window.driver.js.driver({
+            showProgress: true,
+            progressText: '{{__("Étape")}} __current__ / __total__',
+            nextBtnText: 'Suivant →',
+            prevBtnText: '← Retour',
+            doneBtnText: 'C\'est parti !',
+            allowClose: true,
+            steps: steps,
+            onDestroyStarted: () => {
+                driver.destroy();
+                markTourComplete();
+            },
+        });
+
+        window.crmTour = driver;
+        driver.drive();
+    }
+
+    function markTourComplete() {
+        fetch('{{ route("crm.tour.complete") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            }
+        }).catch(() => {});
+    }
+    </script>
+    @elseif(auth()->user()->tour_completed_at)
+    <script>
+    // Permet de rejouer le tour manuellement via le bouton "Guide"
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('tour-replay-btn')?.addEventListener('click', function() {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
+            s.onload = function() {
+                const l = document.createElement('link');
+                l.rel = 'stylesheet';
+                l.href = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css';
+                document.head.appendChild(l);
+                setTimeout(() => typeof initTour === 'function' && initTour(), 200);
+            };
+            // Only load once
+            if (!window.driver?.js) document.head.appendChild(s);
+            else typeof initTour === 'function' && initTour();
+        });
+    });
+    </script>
+    @endif
 </body>
 </html>

@@ -24,6 +24,16 @@ Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_lead
         Route::get('/report', [DashboardController::class, 'dailyReport'])->name('report');
         Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
 
+        Route::post('/tour/complete', function () {
+            auth()->user()->update(['tour_completed_at' => now()]);
+            return response()->json(['ok' => true]);
+        })->name('tour.complete');
+
+        Route::post('/tour/reset', function () {
+            auth()->user()->update(['tour_completed_at' => null]);
+            return response()->json(['ok' => true]);
+        })->name('tour.reset');
+
         // Admin-only
         Route::middleware('crm.role:super_admin')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/agents', [DashboardController::class, 'adminAgents'])->name('agents');

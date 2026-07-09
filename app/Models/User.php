@@ -41,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'welcome_token',
         'welcome_token_expires_at',
         'city',
+        'tour_completed_at',
     ];
 
     /**
@@ -60,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'welcome_token_expires_at' => 'datetime',
+            'tour_completed_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
             'agent_status' => AgentStatus::class,
