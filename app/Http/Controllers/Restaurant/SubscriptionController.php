@@ -222,8 +222,10 @@ class SubscriptionController extends Controller
         return back()->with('error', "Erreur paiement : {$errorDetail}");
     }
 
-    public function success(Request $request, Subscription $subscription): RedirectResponse
+    public function success(Request $request, int $subscription): RedirectResponse
     {
+        $subscription = Subscription::withoutGlobalScope('restaurant')->findOrFail($subscription);
+
         if ($subscription->status === SubscriptionStatus::ACTIVE) {
             return redirect()->route('restaurant.subscription')
                 ->with('success', 'Votre abonnement est déjà actif.');
@@ -295,8 +297,10 @@ class SubscriptionController extends Controller
         }
     }
 
-    public function cancel(Subscription $subscription): RedirectResponse
+    public function cancel(int $subscription): RedirectResponse
     {
+        $subscription = Subscription::withoutGlobalScope('restaurant')->findOrFail($subscription);
+
         $subscription->update([
             'status' => SubscriptionStatus::CANCELLED,
         ]);
@@ -305,12 +309,14 @@ class SubscriptionController extends Controller
             ->with('warning', 'Le paiement a été annulé.');
     }
 
-    public function retryPayment(Request $request, Subscription $subscription): RedirectResponse
+    public function retryPayment(Request $request, int $subscription): RedirectResponse
     {
         $restaurant = $request->user()->restaurant;
 
-        // Correction : subscriptions créées avant le fix $guarded ont restaurant_id NULL
-        // On les rattache au restaurant du user connecté si elles sont orphelines
+        // Contourner le global scope BelongsToRestaurant pour le route model binding
+        $subscription = Subscription::withoutGlobalScope('restaurant')->findOrFail($subscription);
+
+        // Rattacher les subscriptions orphelines (restaurant_id NULL — créées avant le fix $guarded)
         if ($subscription->restaurant_id === null) {
             $subscription->update(['restaurant_id' => $restaurant->id]);
         }
