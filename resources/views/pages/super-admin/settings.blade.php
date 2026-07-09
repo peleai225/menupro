@@ -716,6 +716,53 @@
                                    placeholder="whatsapp:+14155238886">
                             <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Sandbox : whatsapp:+14155238886 · Production : votre numéro approuvé</p>
                         </div>
+
+                        {{-- Bouton test --}}
+                        <div x-data="{ phone: '', loading: false, result: null }"
+                             class="pt-2 border-t" style="border-color:var(--sa-border);">
+                            <p class="text-xs font-medium mb-2" style="color:var(--sa-fg);">Tester l'envoi</p>
+                            <div class="flex gap-2">
+                                <input type="text" x-model="phone"
+                                       placeholder="07 00 00 00 00"
+                                       inputmode="tel"
+                                       class="flex-1 h-9 px-3 rounded-xl border text-sm outline-none"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                                <button type="button"
+                                        :disabled="loading || !phone"
+                                        @click="
+                                            loading = true; result = null;
+                                            fetch('{{ route('super-admin.settings.test-whatsapp') }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json'
+                                                },
+                                                body: JSON.stringify({ phone })
+                                            })
+                                            .then(r => r.json())
+                                            .then(d => { result = d; loading = false; })
+                                            .catch(e => { result = { success: false, message: e.message }; loading = false; })
+                                        "
+                                        class="h-9 px-4 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+                                        style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                                    <svg x-show="!loading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                    </svg>
+                                    <svg x-show="loading" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <span x-text="loading ? 'Envoi...' : 'Tester'"></span>
+                                </button>
+                            </div>
+                            <div x-show="result" x-cloak class="mt-2 p-2.5 rounded-lg text-xs font-medium"
+                                 :style="result?.success
+                                    ? 'background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.3)'
+                                    : 'background:rgba(239,68,68,0.1);color:#dc2626;border:1px solid rgba(239,68,68,0.3)'"
+                                 x-text="result?.message">
+                            </div>
+                        </div>
                     </div>
                 </div>
 

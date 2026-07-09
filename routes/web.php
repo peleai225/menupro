@@ -429,6 +429,7 @@ Route::prefix('admin')
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
+        Route::post('parametres/test-whatsapp', [SuperAdminDashboardController::class, 'testWhatsapp'])->name('settings.test-whatsapp');
     });
 
 /*

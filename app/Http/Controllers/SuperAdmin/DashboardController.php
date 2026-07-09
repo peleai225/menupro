@@ -664,5 +664,27 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function testWhatsapp(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'phone' => ['required', 'string'],
+        ]);
+
+        try {
+            $ok = app(\App\Services\WhatsAppService::class)->send(
+                $request->phone,
+                "✅ *Test MenuPro* — Le service WhatsApp est bien configuré ! Vous recevez ce message depuis le backoffice."
+            );
+
+            if ($ok) {
+                return response()->json(['success' => true, 'message' => 'Message envoyé avec succès sur ' . $request->phone]);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Envoi échoué — vérifiez les credentials et les logs Laravel.'], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
 }
 
