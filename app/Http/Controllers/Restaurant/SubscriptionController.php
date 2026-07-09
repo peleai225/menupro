@@ -309,6 +309,12 @@ class SubscriptionController extends Controller
     {
         $restaurant = $request->user()->restaurant;
 
+        // Correction : subscriptions créées avant le fix $guarded ont restaurant_id NULL
+        // On les rattache au restaurant du user connecté si elles sont orphelines
+        if ($subscription->restaurant_id === null) {
+            $subscription->update(['restaurant_id' => $restaurant->id]);
+        }
+
         if ($subscription->restaurant_id !== $restaurant->id) {
             abort(403);
         }
