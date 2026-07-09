@@ -171,15 +171,17 @@ class RegisterController extends Controller
 
             $restaurant->save();
 
+            // role et restaurant_id sont dans $guarded — assign après create()
             $user = User::create([
                 'name' => $request->name,
                 'email' => $email,
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
-                'role' => UserRole::RESTAURANT_ADMIN,
-                'restaurant_id' => $restaurant->id,
-                'email_verified_at' => now(), // pas de vérification email — connexion par téléphone
+                'email_verified_at' => now(),
             ]);
+            $user->role = UserRole::RESTAURANT_ADMIN;
+            $user->restaurant_id = $restaurant->id;
+            $user->save();
 
             $subscription = Subscription::create([
                 'restaurant_id' => $restaurant->id,
