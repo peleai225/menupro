@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
+use App\Enums\Crm\LeadStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Crm\Lead;
 use App\Models\Plan;
 use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
 use App\Models\User;
+use App\Services\Crm\LeadPipelineService;
 use App\Services\MoneyFusionGateway;
 use App\Services\MediaUploader;
 use Illuminate\Auth\Events\Registered;
@@ -44,6 +47,15 @@ class RegisterController extends Controller
             if ($agent) {
                 session(['register_ref_agent' => $ref]);
                 cookie()->queue(cookie('ref_agent', $ref, 60 * 24 * 7)); // 7 jours
+            }
+        }
+
+        // Token lead CRM : pré-associer un lead à cette inscription
+        $leadToken = request()->query('lead');
+        if ($leadToken) {
+            $crmLead = Lead::where('registration_token', $leadToken)->first();
+            if ($crmLead) {
+                session(['crm_lead_token' => $leadToken]);
             }
         }
 
@@ -180,6 +192,9 @@ class RegisterController extends Controller
 
             DB::commit();
 
+            // Lier au lead CRM si un token est en session
+            $this->linkLeadToRestaurant($restaurant);
+
             event(new Registered($user));
 
             auth()->login($user);
@@ -269,6 +284,35 @@ class RegisterController extends Controller
             return redirect()->route('restaurant.dashboard')
                 ->with('error', 'Une erreur est survenue lors de l\'activation. Veuillez contacter le support.');
         }
+    }
+
+    protected function linkLeadToRestaurant(Restaurant $restaurant): void
+    {
+        $token = session('crm_lead_token');
+        if (!$token) return;
+
+        $lead = Lead::where('registration_token', $token)
+            ->whereNull('restaurant_id')
+            ->first();
+
+        if (!$lead) return;
+
+        $lead->update([
+            'restaurant_id'   => $restaurant->id,
+            'referred_by_user_id' => null, // déjà stocké sur restaurant
+        ]);
+
+        // Lier l'agent CRM comme référent du restaurant
+        if ($lead->assigned_to) {
+            $restaurant->update(['referred_by_user_id' => $lead->assigned_to]);
+        }
+
+        // Avancer le lead → SIGNATURE automatiquement
+        if ($lead->status->canTransitionTo(LeadStatus::SIGNATURE)) {
+            app(LeadPipelineService::class)->changeStatus($lead, LeadStatus::SIGNATURE);
+        }
+
+        session()->forget('crm_lead_token');
     }
 
     public function paymentCancel(Subscription $subscription): RedirectResponse

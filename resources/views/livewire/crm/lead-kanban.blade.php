@@ -135,6 +135,9 @@
     {{-- Lead form modal --}}
     @livewire('crm.lead-form')
 
+    {{-- Lead registration modal --}}
+    @livewire('crm.lead-registration')
+
     {{-- Modal de détail lead --}}
     @if($viewingLeadId)
     <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
@@ -158,6 +161,26 @@
                         </svg>
                     </button>
                 </div>
+
+                {{-- Actions inscription restaurant --}}
+                @if(!$this->viewingLead->restaurant_id && in_array($this->viewingLead->status->value, ['nouveau','contacte','demonstration','relance','signature','installation']))
+                <div class="flex gap-2 mb-5">
+                    <button wire:click="$dispatch('open-lead-registration', { leadId: {{ $this->viewingLead->id }} })"
+                            class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-xl transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Inscrire le restaurant
+                    </button>
+                </div>
+                @elseif($this->viewingLead->restaurant_id)
+                <div class="flex items-center gap-2 mb-5 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                    <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="text-xs text-emerald-400 font-medium">Restaurant inscrit — en attente de paiement</span>
+                </div>
+                @endif
 
                 {{-- Infos lead --}}
                 <div class="grid grid-cols-2 gap-3 mb-6 text-sm">

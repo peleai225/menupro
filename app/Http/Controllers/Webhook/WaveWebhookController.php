@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Webhook;
 
+use App\Enums\Crm\LeadStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Crm\Lead;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Subscription;
 use App\Notifications\NewOrderNotification;
+use App\Services\Crm\LeadPipelineService;
 use App\Services\WalletService;
 use App\Services\WaveGateway;
 use Illuminate\Http\Request;
@@ -195,11 +198,42 @@ class WaveWebhookController extends Controller
             ]);
         }
 
+        $this->advanceLeadToActif($subscription);
+
         Log::channel('payments')->info('Wave webhook: subscription activated', [
             'subscription_id' => $subscription->id,
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    protected function advanceLeadToActif(Subscription $subscription): void
+    {
+        $restaurantId = $subscription->restaurant_id;
+        if (!$restaurantId) return;
+
+        $lead = Lead::where('restaurant_id', $restaurantId)
+            ->whereNotIn('status', [LeadStatus::ACTIF->value, LeadStatus::PERDU->value])
+            ->latest()
+            ->first();
+
+        if (!$lead) return;
+
+        try {
+            if ($lead->status->canTransitionTo(LeadStatus::ACTIF)) {
+                app(LeadPipelineService::class)->changeStatus($lead, LeadStatus::ACTIF);
+            } elseif ($lead->status === LeadStatus::SIGNATURE) {
+                app(LeadPipelineService::class)->changeStatus($lead, LeadStatus::INSTALLATION);
+                $lead->refresh();
+                app(LeadPipelineService::class)->changeStatus($lead, LeadStatus::ACTIF);
+            }
+        } catch (\Throwable $e) {
+            Log::channel('payments')->error('Wave webhook: lead advance error', [
+                'restaurant_id' => $restaurantId,
+                'lead_id'       => $lead->id,
+                'error'         => $e->getMessage(),
+            ]);
+        }
     }
 
     protected function findOrder(?string $checkoutId, ?string $clientReference): ?Order

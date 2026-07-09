@@ -20,6 +20,7 @@ class Lead extends Model
 
     protected $fillable = [
         'uuid',
+        'registration_token',
         'restaurant_name',
         'manager_name',
         'phone',
