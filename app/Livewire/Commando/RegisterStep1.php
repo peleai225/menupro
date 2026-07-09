@@ -78,21 +78,23 @@ class RegisterStep1 extends Component
 
         $user = DB::transaction(function () use ($whatsapp, $hashedPassword) {
             // 1. Créer le User unifié
+            // `role` est dans $guarded → assignation explicite après create()
             $user = User::create([
                 'name'              => trim($this->first_name . ' ' . $this->last_name),
                 'email'             => $whatsapp . '@ambassadeur.menupro.ci',
                 'phone'             => $whatsapp,
                 'password'          => $hashedPassword,
-                'role'              => UserRole::COMMERCIAL,
                 'is_active'         => false,
                 'email_verified_at' => null,
             ]);
+            $user->role = UserRole::COMMERCIAL;
+            $user->save();
 
             // 2. Créer le CommercialProfile lié
             CommercialProfile::create([
                 'user_id'             => $user->id,
                 'city'                => $this->city,
-                'verification_status' => 'pending',
+                'verification_status' => AgentVerificationStatus::PENDING_REVIEW->value,
             ]);
 
             // 3. Créer le CommandoAgent pour rétrocompatibilité (QR card, etc.)

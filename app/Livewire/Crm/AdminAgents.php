@@ -98,7 +98,7 @@ class AdminAgents extends Component
 
         $verified = CommercialProfile::where('verification_status', AgentVerificationStatus::VALIDE->value)->count();
 
-        $pending = CommercialProfile::whereIn('verification_status', [AgentVerificationStatus::PENDING_REVIEW->value])->count();
+        $pending = CommercialProfile::whereIn('verification_status', [AgentVerificationStatus::PENDING_REVIEW->value, 'pending'])->count();
 
         $activeThisWeek = User::whereIn('role', $crmRoles)
             ->where('last_login_at', '>=', now()->startOfWeek())
