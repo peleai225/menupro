@@ -140,7 +140,7 @@
 
     {{-- Modal de détail lead --}}
     @if($viewingLeadId)
-    <div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+    <div class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4"
          wire:click.self="closeLeadDetail">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             @if($this->viewingLead)
