@@ -684,6 +684,41 @@
                     </div>
                 </div>
 
+                {{-- Twilio WhatsApp --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Twilio WhatsApp</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Utilisé pour les codes OTP (récupération de mot de passe). Prioritaire sur Meta si configuré.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Account SID</label>
+                            <input type="text" name="twilio_sid"
+                                   value="{{ old('twilio_sid', $settings['twilio_sid'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Twilio Console → Account Info</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Auth Token</label>
+                            <input type="password" name="twilio_auth_token"
+                                   value="{{ old('twilio_auth_token', $settings['twilio_auth_token'] ?? '') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder="••••••••••••••••••••••••••••••••">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Twilio Console → cliquez l'icône œil pour révéler</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Numéro expéditeur</label>
+                            <input type="text" name="twilio_whatsapp_from"
+                                   value="{{ old('twilio_whatsapp_from', $settings['twilio_whatsapp_from'] ?? 'whatsapp:+14155238886') }}"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                                   placeholder="whatsapp:+14155238886">
+                            <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Sandbox : whatsapp:+14155238886 · Production : votre numéro approuvé</p>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Guide de configuration --}}
                 <div class="rounded-2xl border p-5" style="background:rgba(217,119,6,0.06);border-color:rgba(217,119,6,0.25);">
                     <h3 class="text-sm font-semibold mb-3" style="color:var(--sa-warning);">Comment configurer WhatsApp Business API ?</h3>

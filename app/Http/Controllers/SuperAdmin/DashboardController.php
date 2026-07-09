@@ -247,10 +247,14 @@ class DashboardController extends Controller
             // Wave CI
             'wave_api_key' => \App\Models\SystemSetting::get('wave_api_key', config('wave.api_key', '')),
             'wave_webhook_secret' => \App\Models\SystemSetting::get('wave_webhook_secret', config('wave.webhook_secret', '')),
-            // WhatsApp Business API
+            // WhatsApp Business API (Meta)
             'whatsapp_enabled' => \App\Models\SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false)),
             'whatsapp_phone_id' => \App\Models\SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', '')),
             'whatsapp_api_key' => \App\Models\SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', '')),
+            // Twilio WhatsApp (OTP + notifications)
+            'twilio_sid' => \App\Models\SystemSetting::get('twilio_sid', config('twilio.sid', '')),
+            'twilio_auth_token' => \App\Models\SystemSetting::get('twilio_auth_token', config('twilio.token', '')),
+            'twilio_whatsapp_from' => \App\Models\SystemSetting::get('twilio_whatsapp_from', config('twilio.whatsapp_from', 'whatsapp:+14155238886')),
             // Mapbox
             'mapbox_public_token' => \App\Models\SystemSetting::get('mapbox_public_token', config('services.mapbox.public_token', '')),
             'mapbox_style' => \App\Models\SystemSetting::get('mapbox_style', 'streets-v12'),
@@ -326,10 +330,14 @@ class DashboardController extends Controller
             'banner_color' => ['nullable', 'string', 'in:primary,success,warning,dark'],
             'facebook_pixel_id' => ['nullable', 'string', 'max:50'],
             'google_analytics_id' => ['nullable', 'string', 'max:50'],
-            // WhatsApp Business API
+            // WhatsApp Business API (Meta)
             'whatsapp_enabled' => ['boolean'],
             'whatsapp_phone_id' => ['nullable', 'string', 'max:255'],
             'whatsapp_api_key' => ['nullable', 'string'],
+            // Twilio
+            'twilio_sid' => ['nullable', 'string', 'max:100'],
+            'twilio_auth_token' => ['nullable', 'string'],
+            'twilio_whatsapp_from' => ['nullable', 'string', 'max:50'],
             // Mapbox
             'mapbox_public_token' => ['nullable', 'string'],
             'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
@@ -466,7 +474,7 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('home_videos', $videos, 'json', 'Vidéos tutoriels de la page d\'accueil');
         }
 
-        // WhatsApp Business API
+        // WhatsApp Business API (Meta)
         if ($request->has('whatsapp_enabled')) {
             \App\Models\SystemSetting::set('whatsapp_enabled', $request->boolean('whatsapp_enabled'), 'boolean', 'Activer les notifications WhatsApp');
         }
@@ -475,6 +483,16 @@ class DashboardController extends Controller
         }
         if ($request->filled('whatsapp_api_key')) {
             \App\Models\SystemSetting::set('whatsapp_api_key', $request->whatsapp_api_key, 'string', 'Token d\'accès permanent WhatsApp Business API');
+        }
+        // Twilio WhatsApp
+        if ($request->filled('twilio_sid')) {
+            \App\Models\SystemSetting::set('twilio_sid', $request->twilio_sid, 'string', 'Twilio Account SID');
+        }
+        if ($request->filled('twilio_auth_token')) {
+            \App\Models\SystemSetting::set('twilio_auth_token', $request->twilio_auth_token, 'string', 'Twilio Auth Token');
+        }
+        if ($request->filled('twilio_whatsapp_from')) {
+            \App\Models\SystemSetting::set('twilio_whatsapp_from', $request->twilio_whatsapp_from, 'string', 'Numéro expéditeur Twilio WhatsApp');
         }
         // Mapbox
         if ($request->filled('mapbox_public_token')) {

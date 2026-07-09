@@ -195,10 +195,10 @@ class WhatsAppService
     {
         $normalizedPhone = $this->normalizePhone($phone);
 
-        // Twilio en priorité si configuré
-        $twilioSid   = config('twilio.sid');
-        $twilioToken = config('twilio.token');
-        $twilioFrom  = config('twilio.whatsapp_from', 'whatsapp:+14155238886');
+        // Twilio en priorité si configuré (DB > .env)
+        $twilioSid   = SystemSetting::get('twilio_sid', config('twilio.sid', ''));
+        $twilioToken = SystemSetting::get('twilio_auth_token', config('twilio.token', ''));
+        $twilioFrom  = SystemSetting::get('twilio_whatsapp_from', config('twilio.whatsapp_from', 'whatsapp:+14155238886'));
 
         if ($twilioSid && $twilioToken) {
             return $this->sendViaTwilio($normalizedPhone, $message, $twilioSid, $twilioToken, $twilioFrom);
