@@ -132,7 +132,7 @@ class MoneyFusionGateway
     {
         try {
             $response = Http::timeout(15)
-                ->get("https://www.pay.moneyfusion.net/paiementNotif/{$token}");
+                ->get("https://pay.moneyfusion.net/paiementNotif/{$token}");
 
             if ($response->successful()) {
                 $data = $response->json();
