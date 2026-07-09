@@ -74,6 +74,7 @@ class Restaurant extends Model
         'wave_business_enabled',
         'kitchen_token',
         'is_demo',
+        'referred_by_user_id',
     ];
 
     protected $casts = [

@@ -77,6 +77,10 @@ class RegisterController extends Controller
 
     public function store(RegisterRequest $request): RedirectResponse
     {
+        if (!\App\Models\SystemSetting::get('registrations_open', true)) {
+            return redirect()->route('register')->with('error', 'Les inscriptions sont temporairement fermées.');
+        }
+
         $planSlug = $request->input('plan', $request->query('plan', 'essentiel'));
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
         if (!$plan) {
@@ -135,7 +139,6 @@ class RegisterController extends Controller
                 'company_name' => $request->company_name,
                 'rccm' => $request->rccm,
                 'referred_by_agent_id' => $referredByAgentId,
-                'slug' => Str::slug($request->restaurant_name),
                 'email' => $email,
                 'phone' => $request->phone,
                 'description' => $request->restaurant_description,

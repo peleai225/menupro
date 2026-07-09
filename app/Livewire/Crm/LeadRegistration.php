@@ -108,13 +108,15 @@ class LeadRegistration extends Component
             ]);
 
             $user = User::create([
-                'name'       => $this->owner_name,
-                'email'      => $this->email,
-                'phone'      => $this->phone,
-                'password'   => Hash::make($this->password),
-                'role'       => UserRole::RESTAURANT_ADMIN,
-                'restaurant_id' => $restaurant->id,
+                'name'     => $this->owner_name,
+                'email'    => $this->email,
+                'phone'    => $this->phone,
+                'password' => Hash::make($this->password),
+                'email_verified_at' => now(),
             ]);
+            $user->role = UserRole::RESTAURANT_ADMIN;
+            $user->restaurant_id = $restaurant->id;
+            $user->save();
 
             Subscription::create([
                 'restaurant_id'      => $restaurant->id,
