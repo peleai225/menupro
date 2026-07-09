@@ -104,26 +104,32 @@
                         </div>
                     </div>
 
-                    {{-- Email --}}
+                    {{-- Phone (identifiant principal) --}}
                     <div>
-                        <label for="email" class="block text-[13px] font-semibold text-neutral-700 mb-2">Adresse email <span class="text-error-500">*</span></label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <input type="email" id="email" name="email" x-model="formData.email" placeholder="vous@exemple.com" required autocomplete="email"
-                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
-                        </div>
-                    </div>
-
-                    {{-- Phone --}}
-                    <div>
-                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-2">Téléphone WhatsApp <span class="text-error-500">*</span></label>
+                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-2">
+                            Numéro WhatsApp <span class="text-error-500">*</span>
+                            <span class="text-neutral-400 font-normal ml-1">— utilisé pour vous connecter</span>
+                        </label>
                         <div class="relative group">
                             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                                 <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                             </div>
-                            <input type="tel" id="phone" name="phone" x-model="formData.phone" placeholder="+225 07 00 00 00 00" required autocomplete="tel"
+                            <input type="tel" id="phone" name="phone" x-model="formData.phone" placeholder="07 00 00 00 00" required autocomplete="tel" inputmode="tel"
+                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                        </div>
+                    </div>
+
+                    {{-- Email (optionnel) --}}
+                    <div>
+                        <label for="email" class="block text-[13px] font-semibold text-neutral-700 mb-2">
+                            Adresse email
+                            <span class="text-neutral-400 font-normal ml-1">— optionnel</span>
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
+                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <input type="email" id="email" name="email" x-model="formData.email" placeholder="vous@exemple.com (facultatif)" autocomplete="email"
                                    class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
                         </div>
                     </div>
@@ -462,7 +468,7 @@
                 showPassword: false,
                 logoPreview: null,
                 bannerPreview: null,
-                validateStep1() { return this.formData.name && this.formData.email && this.formData.phone && this.formData.password.length >= 8; },
+                validateStep1() { return this.formData.name && this.formData.phone && this.formData.password.length >= 8; },
                 validateStep2() { return this.formData.restaurant_name && this.formData.restaurant_type; },
                 goToStep(t) { if (t >= 1 && t <= this.step) { this.step = t; this.submitError = null; } },
                 submitForm() {

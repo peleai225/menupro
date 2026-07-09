@@ -40,23 +40,14 @@ class LoginController extends Controller
             ['email' => $request->user()->email]
         );
 
-        // Les agents CRM utilisent un email synthétique non vérifiable — bypass email
-        $bypassRoles = [
+        // Connexion par téléphone — pas de vérification email pour personne
+        $isCrmAgent = in_array($request->user()->role, [
             UserRole::SUPER_ADMIN,
             UserRole::COMMERCIAL,
             UserRole::TECHNICIAN,
             UserRole::TEAM_LEADER,
             UserRole::COMMANDO_AGENT,
-        ];
-        $isCrmAgent = in_array($request->user()->role, $bypassRoles);
-
-        if (!$isCrmAgent) {
-            if (!$request->user()->hasVerifiedEmail()) {
-                $request->user()->sendEmailVerificationNotification();
-                return redirect()->route('verification.notice')
-                    ->with('warning', 'Veuillez vérifier votre adresse email avant de continuer. Un nouveau lien de vérification a été envoyé.');
-            }
-        }
+        ]);
 
         // Redirect based on role
         $route = $request->user()->getDashboardRoute();

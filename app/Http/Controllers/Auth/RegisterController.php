@@ -126,6 +126,9 @@ class RegisterController extends Controller
                 session()->forget('register_ref_agent');
             }
 
+            // Email auto-généré si non fourni (connexion par téléphone)
+            $email = $request->email ?: Str::slug($request->restaurant_name) . '.' . preg_replace('/\D/', '', $request->phone) . '@restaurant.menupro.ci';
+
             $restaurant = Restaurant::create([
                 'name' => $request->restaurant_name,
                 'type' => $request->restaurant_type ?? 'restaurant',
@@ -133,7 +136,7 @@ class RegisterController extends Controller
                 'rccm' => $request->rccm,
                 'referred_by_agent_id' => $referredByAgentId,
                 'slug' => Str::slug($request->restaurant_name),
-                'email' => $request->email,
+                'email' => $email,
                 'phone' => $request->phone,
                 'description' => $request->restaurant_description,
                 'address' => $request->restaurant_address,
@@ -170,11 +173,12 @@ class RegisterController extends Controller
 
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $email,
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
                 'role' => UserRole::RESTAURANT_ADMIN,
                 'restaurant_id' => $restaurant->id,
+                'email_verified_at' => now(), // pas de vérification email — connexion par téléphone
             ]);
 
             $subscription = Subscription::create([

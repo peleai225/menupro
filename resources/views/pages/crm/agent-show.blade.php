@@ -1,5 +1,13 @@
 <x-layouts.crm title="Détails Agent">
     <div class="space-y-6">
+        @if(session('success'))
+        <div class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-start gap-3">
+            <svg class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <p class="text-sm text-emerald-300 font-medium">{{ session('success') }}</p>
+        </div>
+        @endif
         {{-- Agent Header --}}
         <div class="rounded-2xl bg-gray-900 border border-gray-800/50 p-6">
             <div class="flex items-start gap-6">
@@ -13,7 +21,20 @@
                             <p class="text-gray-400 mt-1">{{ $agent->email }}</p>
                             <p class="text-gray-500 text-sm mt-0.5">{{ $agent->phone }}</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap gap-2">
+                            {{-- Reset mot de passe --}}
+                            <form method="POST" action="{{ route('crm.admin.agents.reset-password', $agent) }}"
+                                  onsubmit="return confirm('Réinitialiser le mot de passe de {{ $agent->name }} ?')"
+                                  x-data>
+                                @csrf
+                                <button type="submit"
+                                        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                    Reset MDP
+                                </button>
+                            </form>
                             <span class="px-3 py-1.5 text-sm font-medium rounded-lg
                                 {{ $agent->role->value === 'commercial' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : '' }}
                                 {{ $agent->role->value === 'technician' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : '' }}

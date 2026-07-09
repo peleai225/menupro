@@ -31,18 +31,18 @@
             {{-- Login field --}}
             <div>
                 <label for="login" class="block text-[13px] font-semibold text-neutral-700 mb-2">
-                    Email ou numéro WhatsApp
+                    Numéro WhatsApp
                 </label>
                 <div class="relative group">
                     <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
                         <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                         </svg>
                     </div>
                     <input
-                        type="text" id="login" name="login" value="{{ old('login') }}"
-                        placeholder="vous@email.com ou 07 00 00 00 00"
-                        required autofocus autocomplete="username"
+                        type="tel" id="login" name="login" value="{{ old('login') }}"
+                        placeholder="07 00 00 00 00"
+                        required autofocus autocomplete="tel" inputmode="tel"
                         class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 @error('login') border-error-500/50 bg-error-500/5 @enderror"
                     >
                 </div>

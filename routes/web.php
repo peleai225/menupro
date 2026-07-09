@@ -135,7 +135,7 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::prefix('dashboard')
     ->name('restaurant.')
-    ->middleware(['auth', 'verified', 'set.restaurant.scope'])
+    ->middleware(['auth', 'set.restaurant.scope'])
     ->group(function () {
         // Dashboard (Livewire) - tous
         Route::get('/', \App\Livewire\Restaurant\Dashboard::class)->name('dashboard');
@@ -291,7 +291,7 @@ Route::prefix('commando')->name('commando.')->middleware(['auth', 'commando.agen
 
 Route::prefix('admin')
     ->name('super-admin.')
-    ->middleware(['auth', 'verified', 'super.admin'])
+    ->middleware(['auth', 'super.admin'])
     ->group(function () {
         // Dashboard
         Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');

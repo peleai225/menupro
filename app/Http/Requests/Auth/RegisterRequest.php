@@ -17,16 +17,16 @@ class RegisterRequest extends FormRequest
         return [
             // User info
             'name' => ['required', 'string', 'max:255'],
-            // Email doit être unique à la fois pour les utilisateurs et pour les restaurants
+            // Email optionnel — connexion par téléphone
             'email' => [
-                'required',
+                'nullable',
                 'string',
                 'email',
                 'max:255',
                 'unique:users',
                 'unique:restaurants,email',
             ],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', Password::min(8)],
             
             // Restaurant info
@@ -62,10 +62,10 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name.required' => 'Le nom est obligatoire.',
-            'email.required' => 'L\'adresse email est obligatoire.',
             'email.email' => 'L\'adresse email n\'est pas valide.',
             'email.unique' => 'Cette adresse email est déjà utilisée.',
-            'phone.required' => 'Le numéro de téléphone est obligatoire.',
+            'phone.required' => 'Le numéro de téléphone WhatsApp est obligatoire.',
+            'phone.unique' => 'Ce numéro de téléphone est déjà utilisé. Connectez-vous plutôt.',
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
             'password.min' => 'Le mot de passe doit contenir au moins :min caractères.',
