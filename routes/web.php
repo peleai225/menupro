@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\OtpPasswordResetController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Public\CheckoutController;
@@ -101,8 +102,14 @@ Route::middleware('guest')->group(function () {
     Route::get('/inscription', [RegisterController::class, 'create'])->name('register');
     Route::post('/inscription', [RegisterController::class, 'store'])->middleware('throttle:3,1')->name('register.post');
 
-    // Password Reset
-    Route::get('/mot-de-passe-oublie', [PasswordResetController::class, 'requestForm'])->name('password.request');
+    // Password Reset — OTP WhatsApp (flow principal)
+    Route::get('/mot-de-passe-oublie', [OtpPasswordResetController::class, 'requestForm'])->name('password.request');
+    Route::post('/mot-de-passe-oublie/envoyer', [OtpPasswordResetController::class, 'sendOtp'])->middleware('throttle:3,1')->name('password.otp.send');
+    Route::get('/mot-de-passe-oublie/verifier', [OtpPasswordResetController::class, 'verifyForm'])->name('password.otp.verify.form');
+    Route::post('/mot-de-passe-oublie/verifier', [OtpPasswordResetController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('password.otp.verify');
+    Route::get('/mot-de-passe-oublie/otp', [OtpPasswordResetController::class, 'requestForm'])->name('password.otp.request');
+
+    // Password Reset — Email (fallback, conservé)
     Route::post('/mot-de-passe-oublie', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,1')->name('password.email');
     Route::get('/reinitialiser-mot-de-passe/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
     Route::post('/reinitialiser-mot-de-passe', [PasswordResetController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');

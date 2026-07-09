@@ -177,35 +177,50 @@ class WhatsAppService
         return $this->send($restaurantPhone, $message);
     }
 
+    /* ─── OTP ────────────────────────────────────────────────────────────── */
+
+    public function sendOtp(string $phone, string $otp): bool
+    {
+        $message = "🔐 *MenuPro* — Code de vérification : *{$otp}*\n\nCe code expire dans 10 minutes. Ne le partagez à personne.";
+        return $this->send($phone, $message);
+    }
+
     /* ─── Core : envoi HTTP ───────────────────────────────────────────────── */
 
     /**
      * Envoyer un message WhatsApp à un numéro donné.
-     *
-     * @param  string  $phone   Numéro en format local ou international
-     * @param  string  $message Corps du message (Markdown WhatsApp supporté)
+     * Utilise Twilio si configuré, sinon Meta Graph API.
      */
     public function send(string $phone, string $message): bool
     {
+        $normalizedPhone = $this->normalizePhone($phone);
+
+        // Twilio en priorité si configuré
+        $twilioSid   = config('twilio.sid');
+        $twilioToken = config('twilio.token');
+        $twilioFrom  = config('twilio.whatsapp_from', 'whatsapp:+14155238886');
+
+        if ($twilioSid && $twilioToken) {
+            return $this->sendViaTwilio($normalizedPhone, $message, $twilioSid, $twilioToken, $twilioFrom);
+        }
+
+        // Fallback : Meta Graph API
         $enabled = SystemSetting::get('whatsapp_enabled', config('services.whatsapp.enabled', false));
         $phoneId = SystemSetting::get('whatsapp_phone_id', config('services.whatsapp.phone_id', ''));
-        $apiKey = SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', ''));
+        $apiKey  = SystemSetting::get('whatsapp_api_key', config('services.whatsapp.api_key', ''));
 
         if (!$enabled || !$phoneId || !$apiKey) {
             Log::channel('stack')->info('WhatsApp non configuré — message non envoyé', [
-                'phone' => $phone,
+                'phone'   => $phone,
                 'preview' => mb_substr($message, 0, 80),
             ]);
             return false;
         }
 
-        $apiUrl = "https://graph.facebook.com/v21.0/{$phoneId}/messages";
-        $normalizedPhone = $this->normalizePhone($phone);
-
         try {
             $response = Http::withToken($apiKey)
                 ->timeout(10)
-                ->post($apiUrl, [
+                ->post("https://graph.facebook.com/v21.0/{$phoneId}/messages", [
                     'messaging_product' => 'whatsapp',
                     'to'                => $normalizedPhone,
                     'type'              => 'text',
@@ -213,7 +228,7 @@ class WhatsAppService
                 ]);
 
             if (!$response->successful()) {
-                Log::channel('stack')->warning('WhatsApp — envoi échoué', [
+                Log::channel('stack')->warning('WhatsApp Meta — envoi échoué', [
                     'phone'  => $normalizedPhone,
                     'status' => $response->status(),
                     'body'   => $response->body(),
@@ -221,15 +236,38 @@ class WhatsAppService
                 return false;
             }
 
-            Log::channel('stack')->info('WhatsApp — message envoyé', [
-                'phone' => $normalizedPhone,
-            ]);
-
             return true;
         } catch (\Throwable $e) {
-            Log::channel('stack')->error('WhatsApp — exception : ' . $e->getMessage(), [
-                'phone' => $normalizedPhone,
-            ]);
+            Log::channel('stack')->error('WhatsApp Meta — exception : ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function sendViaTwilio(string $phone, string $message, string $sid, string $token, string $from): bool
+    {
+        try {
+            $response = Http::withBasicAuth($sid, $token)
+                ->timeout(15)
+                ->asForm()
+                ->post("https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json", [
+                    'To'   => 'whatsapp:+' . $phone,
+                    'From' => $from,
+                    'Body' => $message,
+                ]);
+
+            if (!$response->successful()) {
+                Log::channel('stack')->warning('WhatsApp Twilio — envoi échoué', [
+                    'phone'  => $phone,
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return false;
+            }
+
+            Log::channel('stack')->info('WhatsApp Twilio — message envoyé', ['phone' => $phone]);
+            return true;
+        } catch (\Throwable $e) {
+            Log::channel('stack')->error('WhatsApp Twilio — exception : ' . $e->getMessage());
             return false;
         }
     }
