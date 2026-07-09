@@ -218,7 +218,8 @@ class SubscriptionController extends Controller
         }
 
         $subscription->delete();
-        return back()->with('error', 'Erreur lors de la création du paiement. Veuillez contacter le support.');
+        $errorDetail = $this->lastPaymentError ?? 'Erreur inconnue';
+        return back()->with('error', "Erreur paiement : {$errorDetail}");
     }
 
     public function success(Request $request, Subscription $subscription): RedirectResponse
@@ -331,10 +332,13 @@ class SubscriptionController extends Controller
             ->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
     }
 
+    protected ?string $lastPaymentError = null;
+
     private function createSubscriptionPaymentSession(Subscription $subscription): ?array
     {
         if (!$this->moneyFusion->isConfigured()) {
-            \Log::channel('payments')->warning('MoneyFusion not configured');
+            $this->lastPaymentError = 'MoneyFusion non configuré (API URL manquante dans les paramètres)';
+            \Log::channel('payments')->warning($this->lastPaymentError);
             return null;
         }
 
@@ -356,6 +360,7 @@ class SubscriptionController extends Controller
             ];
         }
 
+        $this->lastPaymentError = $result['error'] ?? 'Erreur inconnue MoneyFusion';
         return null;
     }
 
