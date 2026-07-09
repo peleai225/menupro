@@ -1,480 +1,431 @@
 <x-layouts.admin-restaurant title="Abonnement">
-    <!-- Flash Messages -->
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-secondary-50 border border-secondary-200 rounded-xl text-secondary-700">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
-    @if(session('info'))
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-blue-700">
-            {{ session('info') }}
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700">
-            {{ session('warning') }}
-        </div>
-    @endif
 
-    <!-- Pending Subscription Alert -->
+    {{-- Flash messages --}}
+    @foreach(['success' => 'emerald', 'error' => 'red', 'info' => 'blue', 'warning' => 'amber'] as $type => $color)
+        @if(session($type))
+            <div class="mb-6 p-4 bg-{{ $color }}-50 border border-{{ $color }}-200 rounded-2xl flex items-start gap-3">
+                <svg class="w-5 h-5 text-{{ $color }}-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm text-{{ $color }}-700 font-medium">{{ session($type) }}</p>
+            </div>
+        @endif
+    @endforeach
+
     @php
+        $isTrial        = $subscription && $subscription->isTrial();
+        $isActive       = $subscription && $subscription->isActive() && !$isTrial;
+        $isExpired      = $restaurant->is_subscription_expired;
+        $daysLeft       = $restaurant->days_until_expiration ?? 0;
+        $trialDays      = $subscription?->trial_days ?? 7;
+        $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
+
         $pendingSubscription = $restaurant->subscriptions()
             ->where('status', \App\Enums\SubscriptionStatus::PENDING)
-            ->latest()
-            ->first();
+            ->latest()->first();
     @endphp
-    @if($pendingSubscription && $restaurant->status === \App\Enums\RestaurantStatus::PENDING)
-        <div class="mb-6 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl shadow-lg">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold text-yellow-900 mb-2">Paiement en attente</h3>
-                    <p class="text-yellow-800 mb-4">
-                        Votre compte a été créé mais votre abonnement est en attente de paiement. 
-                        Complétez votre paiement pour activer votre restaurant et commencer à recevoir des commandes.
-                    </p>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <p class="text-sm text-yellow-700 mb-1">Montant à payer :</p>
-                            <p class="text-2xl font-bold text-yellow-900">
-                                {{ number_format($pendingSubscription->amount_paid, 0, ',', ' ') }} FCFA
-                            </p>
-                        </div>
-                        <form method="POST" action="{{ route('restaurant.subscription.retry', $pendingSubscription) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl">
-                                Compléter le paiement
-                            </button>
-                        </form>
-                    </div>
-                    <p class="text-xs text-yellow-600 mt-4">
-                        ⚠️ Votre compte sera supprimé automatiquement si le paiement n'est pas complété dans les 48 heures.
-                    </p>
-                </div>
+
+    {{-- ═══ BANNIÈRE PAIEMENT EN ATTENTE ═══ --}}
+    @if($pendingSubscription && $pendingSubscription->status === \App\Enums\SubscriptionStatus::PENDING)
+        <div class="mb-6 p-5 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-amber-900 mb-1">Paiement en attente</h3>
+                <p class="text-sm text-amber-800 mb-3">Votre abonnement <strong>{{ $pendingSubscription->plan->name }}</strong> est en attente de paiement — <strong>{{ number_format($pendingSubscription->amount_paid, 0, ',', ' ') }} FCFA</strong>.</p>
+                <form method="POST" action="{{ route('restaurant.subscription.retry', $pendingSubscription) }}">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Reprendre le paiement
+                    </button>
+                </form>
             </div>
         </div>
     @endif
 
-    <!-- Trial Alert -->
-    @if($subscription && $subscription->isTrial())
-        @php
-            $daysLeft = $restaurant->days_until_expiration ?? 0;
-            $trialEndsAt = $subscription->ends_at;
-        @endphp
-        <div class="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl shadow-lg">
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold text-blue-900 mb-2">Essai gratuit de 14 jours</h3>
-                    <p class="text-blue-800 mb-4">
-                        Vous profitez actuellement de votre essai gratuit. 
-                        @if($daysLeft > 0)
-                            Il vous reste <strong>{{ $daysLeft }} jour(s)</strong> pour tester toutes les fonctionnalités de MenuPro.
-                        @else
-                            Votre essai expire aujourd'hui !
-                        @endif
-                    </p>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <p class="text-sm text-blue-700 mb-1">Expire le :</p>
-                            <p class="text-lg font-bold text-blue-900">
-                                {{ $trialEndsAt->locale('fr')->isoFormat('dddd D MMMM YYYY [à] HH:mm') }}
-                            </p>
-                        </div>
-                        <a href="{{ route('restaurant.subscription.plans') }}" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl">
-                            Convertir en abonnement payant
-                        </a>
+    {{-- ═══ STATUT ACTUEL ═══ --}}
+    @if($isTrial && !$isExpired)
+        {{-- Essai en cours --}}
+        <div class="mb-8 p-6 rounded-2xl border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-blue-50">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-                    @if($daysLeft <= 3)
-                        <p class="text-xs text-blue-600 mt-4 font-medium">
-                            ⚠️ Votre essai expire bientôt ! Souscrivez maintenant pour continuer à utiliser MenuPro sans interruption.
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h2 class="text-lg font-bold text-neutral-900">Essai gratuit</h2>
+                            <span class="px-2 py-0.5 text-xs font-bold bg-primary-100 text-primary-700 rounded-full">
+                                {{ $daysLeft }} jour{{ $daysLeft > 1 ? 's' : '' }} restant{{ $daysLeft > 1 ? 's' : '' }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-neutral-600">
+                            Expire le <strong>{{ $subscription->ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}</strong> —
+                            accès complet à toutes les fonctionnalités.
                         </p>
-                    @endif
+                        @if($daysLeft <= 2)
+                            <p class="text-xs text-red-600 font-semibold mt-1">⚠️ Votre essai expire très bientôt, abonnez-vous pour ne pas perdre l'accès.</p>
+                        @endif
+                    </div>
+                </div>
+                {{-- Barre de progression --}}
+                <div class="sm:w-48 flex-shrink-0">
+                    @php $progress = $trialDays > 0 ? max(0, min(100, ($daysLeft / $trialDays) * 100)) : 0; @endphp
+                    <div class="flex justify-between text-xs text-neutral-500 mb-1">
+                        <span>Progression</span>
+                        <span>{{ $daysLeft }}/{{ $trialDays }}j</span>
+                    </div>
+                    <div class="h-2 bg-primary-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all {{ $daysLeft <= 2 ? 'bg-red-500' : 'bg-primary-500' }}"
+                             style="width: {{ $progress }}%"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    @endif
 
-    <!-- Expired Trial Alert -->
-    @if($restaurant->is_subscription_expired && $subscription && $subscription->isTrial())
-        <div class="mb-6 p-6 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-400 rounded-xl shadow-lg">
+    @elseif($isTrial && $isExpired)
+        {{-- Essai expiré --}}
+        <div class="mb-8 p-6 rounded-2xl border-2 border-red-300 bg-gradient-to-r from-red-50 to-orange-50">
             <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold text-red-900 mb-2">🔒 Votre essai gratuit a expiré</h3>
-                    <p class="text-red-800 mb-4 font-medium">
-                        Votre essai gratuit de 14 jours est terminé. Pour continuer à utiliser MenuPro, vous devez souscrire à un abonnement payant.
-                    </p>
-                    <div class="bg-white rounded-lg p-4 mb-4 border border-red-200">
-                        <p class="text-sm font-semibold text-red-900 mb-2">⚠️ Fonctionnalités actuellement bloquées :</p>
-                        <ul class="text-sm text-red-700 space-y-1">
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Réception de nouvelles commandes</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Accès complet au tableau de bord</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Gestion des commandes</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Statistiques et rapports</li>
-                        </ul>
+                <div>
+                    <h2 class="text-lg font-bold text-red-900 mb-1">Votre essai gratuit est terminé</h2>
+                    <p class="text-sm text-red-800 mb-3">Les commandes et l'accès complet sont bloqués. Choisissez un plan ci-dessous pour réactiver votre restaurant.</p>
+                    <div class="flex flex-wrap gap-2 text-xs text-red-700">
+                        @foreach(['Réception de commandes', 'Tableau de bord complet', 'Gestion des commandes', 'Statistiques'] as $f)
+                            <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>{{ $f }}</span>
+                        @endforeach
                     </div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <p class="text-sm text-red-700 mb-1">Pour débloquer votre compte :</p>
-                            <p class="text-lg font-bold text-red-900">
-                                Souscrivez à un abonnement maintenant
-                            </p>
-                        </div>
-                        <a href="{{ route('restaurant.subscription.plans') }}" class="btn btn-primary px-6 py-3 font-semibold shadow-lg hover:shadow-xl bg-red-600 hover:bg-red-700">
-                            Souscrire maintenant
-                        </a>
-                    </div>
-                    <p class="text-xs text-red-600 mt-4 font-medium">
-                        💡 Une fois le paiement effectué, votre compte sera immédiatement débloqué et vous pourrez continuer à utiliser MenuPro.
-                    </p>
                 </div>
             </div>
         </div>
+
+    @elseif($isActive)
+        {{-- Abonnement actif --}}
+        <div class="mb-8 p-5 rounded-2xl border border-emerald-200 bg-emerald-50 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold text-emerald-900">Plan {{ $currentPlan?->name }} — Actif</p>
+                    <p class="text-sm text-emerald-700">
+                        Expire le {{ $restaurant->subscription_ends_at?->locale('fr')->isoFormat('D MMMM YYYY') }}
+                        @if($daysLeft <= 7) — <span class="font-semibold text-amber-600">{{ $daysLeft }} jours restants</span> @endif
+                    </p>
+                </div>
+            </div>
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">{{ $daysLeft }}j restants</span>
+        </div>
     @endif
 
-    <!-- Current Plan -->
-    <div class="card p-6 mb-8">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    {{-- ═══ PLANS ═══ --}}
+    <div x-data="{ period: 'monthly' }">
+
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-2xl font-bold text-neutral-900">
-                        Plan {{ $currentPlan?->name ?? 'Aucun' }}
-                    </h1>
-                    @if($subscription && $subscription->isTrial())
-                        <span class="badge bg-blue-100 text-blue-700">Essai gratuit</span>
-                    @elseif($subscription && $subscription->isActive())
-                        <span class="badge badge-success">Actif</span>
-                    @elseif($restaurant->subscription_ends_at && $restaurant->subscription_ends_at->isFuture())
-                        <span class="badge badge-success">Actif</span>
-                    @else
-                        <span class="badge bg-red-100 text-red-700">Expiré</span>
+                <h2 class="text-xl font-bold text-neutral-900">
+                    @if($isTrial) Choisissez votre plan
+                    @elseif($isActive) Modifier votre abonnement
+                    @else Réactiver votre abonnement
+                    @endif
+                </h2>
+                <p class="text-sm text-neutral-500 mt-0.5">Sans engagement · Changez de plan à tout moment</p>
+            </div>
+            {{-- Toggle période --}}
+            <div class="flex bg-neutral-100 rounded-xl p-1 gap-1 text-xs font-semibold shrink-0">
+                @foreach(['monthly' => ['1 mois', null], 'quarterly' => ['3 mois', '-10%'], 'semiannual' => ['6 mois', '-15%'], 'annual' => ['1 an', '-20%']] as $p => [$label, $badge])
+                    <button type="button" @click="period = '{{ $p }}'"
+                            :class="period === '{{ $p }}' ? 'bg-white shadow text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'"
+                            class="relative px-3 py-1.5 rounded-lg transition-all">
+                        {{ $label }}
+                        @if($badge)
+                            <span class="absolute -top-1.5 -right-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded leading-tight"
+                                  x-show="period !== '{{ $p }}'">{{ $badge }}</span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Grille des plans --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            @foreach($plans as $plan)
+                @php
+                    $isCurrentPlan = $currentPlan && $currentPlan->id === $plan->id && $isActive;
+                    $canRenew = $isExpired || ($daysLeft !== null && $daysLeft <= 7);
+                    $isDisabled = $isCurrentPlan && !$canRenew;
+
+                    $accent = match($plan->slug) {
+                        'essentiel' => ['ring' => '', 'btn' => 'bg-neutral-900 hover:bg-neutral-800 text-white', 'price' => 'text-neutral-900'],
+                        'pro'       => ['ring' => 'ring-2 ring-primary-400', 'btn' => 'bg-primary-500 hover:bg-primary-600 text-white', 'price' => 'text-primary-600'],
+                        'business'  => ['ring' => 'ring-2 ring-amber-400', 'btn' => 'bg-amber-500 hover:bg-amber-600 text-white', 'price' => 'text-amber-600'],
+                        default     => ['ring' => '', 'btn' => 'bg-neutral-900 hover:bg-neutral-800 text-white', 'price' => 'text-neutral-900'],
+                    };
+                @endphp
+
+                <div class="relative bg-white rounded-2xl border {{ $isCurrentPlan ? 'border-primary-400' : 'border-neutral-200' }} {{ $accent['ring'] }} p-5 flex flex-col transition-all hover:shadow-md">
+
+                    {{-- Badge populaire --}}
+                    @if($plan->is_featured)
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                            <span class="bg-primary-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap">⭐ POPULAIRE</span>
+                        </div>
+                    @endif
+
+                    @if($isCurrentPlan)
+                        <div class="absolute -top-3 right-4">
+                            <span class="bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Plan actuel</span>
+                        </div>
+                    @endif
+
+                    {{-- Nom + description --}}
+                    <div class="mb-4 {{ $plan->is_featured ? 'mt-2' : '' }}">
+                        <h3 class="text-lg font-bold text-neutral-900">{{ $plan->name }}</h3>
+                        <p class="text-xs text-neutral-500 mt-0.5 leading-relaxed">{{ $plan->description }}</p>
+                    </div>
+
+                    {{-- Prix dynamique --}}
+                    <div class="mb-5">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-bold {{ $accent['price'] }}"
+                                  x-text="calcPrice({{ (int)$plan->price }}, period)"></span>
+                            <span class="text-sm text-neutral-400" x-text="periodSuffix(period)"></span>
+                        </div>
+                        <p class="text-xs text-neutral-400 mt-0.5"
+                           x-show="period !== 'monthly'"
+                           x-text="'soit ' + calcMonthly({{ (int)$plan->price }}, period) + ' FCFA/mois'"></p>
+                        <p class="text-xs text-emerald-600 font-semibold mt-0.5"
+                           x-show="period !== 'monthly'"
+                           x-text="'économie : ' + calcSaving({{ (int)$plan->price }}, period) + ' FCFA'"></p>
+                    </div>
+
+                    {{-- Fonctionnalités --}}
+                    <ul class="space-y-2 mb-6 flex-1 text-sm text-neutral-600">
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>{{ $plan->max_dishes >= 9999 ? 'Plats illimités' : $plan->max_dishes . ' plats' }}</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>{{ $plan->max_employees }} compte{{ $plan->max_employees > 1 ? 's' : '' }} employé</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>{{ $plan->max_orders_per_month >= 9999 ? 'Commandes illimitées' : number_format($plan->max_orders_per_month, 0, ',', ' ') . ' cmd/mois' }}</span>
+                        </li>
+                        @if($plan->has_delivery)
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Gestion de la livraison</span>
+                        </li>
+                        @endif
+                        @if($plan->has_stock_management)
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Gestion du stock</span>
+                        </li>
+                        @endif
+                        @if($plan->has_analytics)
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Statistiques avancées</span>
+                        </li>
+                        @endif
+                        @foreach($plan->features ?? [] as $feature)
+                        <li class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>{{ $feature }}</span>
+                        </li>
+                        @endforeach
+                    </ul>
+
+                    {{-- Bouton --}}
+                    <form method="POST"
+                          action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
+                        @csrf
+                        <input type="hidden" name="plan" value="{{ $plan->slug }}">
+                        <input type="hidden" name="billing_period" x-bind:value="period">
+                        @if($isDisabled)
+                            <button type="button" disabled
+                                    class="w-full py-2.5 rounded-xl text-sm font-semibold bg-neutral-100 text-neutral-400 cursor-not-allowed">
+                                Plan actuel
+                            </button>
+                        @else
+                            <button type="submit"
+                                    class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all {{ $accent['btn'] }} shadow-sm hover:shadow">
+                                @if($isTrial || $isExpired)
+                                    Activer ce plan
+                                @elseif($isCurrentPlan && $canRenew)
+                                    Renouveler
+                                @else
+                                    Choisir ce plan
+                                @endif
+                            </button>
+                        @endif
+                    </form>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Add-ons --}}
+        @if($availableAddons)
+        <div class="mb-8">
+            <h3 class="text-base font-bold text-neutral-900 mb-1">Options supplémentaires</h3>
+            <p class="text-sm text-neutral-500 mb-4">Ajoutez des fonctionnalités à votre plan.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($availableAddons as $addonType => $addon)
+                    <div class="flex items-start gap-3 p-4 rounded-2xl border border-neutral-200 bg-neutral-50">
+                        <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-neutral-900">{{ $addon['name'] }}</p>
+                            <p class="text-xs text-neutral-500 mt-0.5">{{ $addon['description'] }}</p>
+                        </div>
+                        <span class="text-sm font-bold text-primary-600 whitespace-nowrap">{{ number_format($addon['price'], 0, ',', ' ') }} F/mois</span>
+                    </div>
+                @endforeach
+            </div>
+            <p class="text-xs text-neutral-400 mt-3">Les add-ons sont sélectionnables lors du choix d'un plan. Contactez le support pour en ajouter à un abonnement existant.</p>
+        </div>
+        @endif
+
+    </div>
+
+    {{-- ═══ UTILISATION ═══ --}}
+    @if($currentPlan)
+    <div class="mb-8">
+        <h3 class="text-base font-bold text-neutral-900 mb-4">Utilisation actuelle</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            @php
+                $usages = [
+                    ['label' => 'Plats', 'count' => $restaurant->dishes()->count(), 'max' => $currentPlan->max_dishes, 'color' => 'primary'],
+                    ['label' => 'Catégories', 'count' => $restaurant->categories()->count(), 'max' => $currentPlan->max_categories ?? 999, 'color' => 'secondary'],
+                    ['label' => 'Équipe', 'count' => $restaurant->users()->where('role', 'employee')->count(), 'max' => $currentPlan->max_employees, 'color' => 'amber'],
+                ];
+            @endphp
+            @foreach($usages as $u)
+                @php
+                    $pct = $u['max'] < 9999 ? min(100, ($u['count'] / max(1, $u['max'])) * 100) : 0;
+                    $warn = $pct >= 90;
+                @endphp
+                <div class="p-4 rounded-2xl border border-neutral-200 bg-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-neutral-600">{{ $u['label'] }}</span>
+                        <span class="text-sm font-bold {{ $warn ? 'text-red-600' : 'text-neutral-900' }}">
+                            {{ $u['count'] }} / {{ $u['max'] >= 9999 ? '∞' : $u['max'] }}
+                        </span>
+                    </div>
+                    @if($u['max'] < 9999)
+                    <div class="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all {{ $warn ? 'bg-red-500' : 'bg-' . $u['color'] . '-500' }}"
+                             style="width: {{ $pct }}%"></div>
+                    </div>
+                    @if($warn)
+                        <p class="text-[10px] text-red-500 font-medium mt-1">Limite presque atteinte</p>
+                    @endif
                     @endif
                 </div>
-                @if($subscription && $subscription->isTrial())
-                    <p class="text-blue-600 font-medium">
-                        Essai gratuit • Expire le {{ $subscription->ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}
-                    </p>
-                @elseif($restaurant->subscription_ends_at)
-                    @if($restaurant->subscription_ends_at->isFuture())
-                        <p class="text-neutral-500">Votre abonnement expire le {{ $restaurant->subscription_ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
-                    @else
-                        <p class="text-red-500">Votre abonnement a expiré le {{ $restaurant->subscription_ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}</p>
-                    @endif
-                @else
-                    <p class="text-neutral-500">Aucun abonnement actif</p>
-                @endif
-            </div>
-            <div class="text-right">
-                @if($subscription && $subscription->isTrial())
-                    <p class="text-3xl font-bold text-blue-600">Gratuit</p>
-                    <p class="text-sm text-blue-500">{{ $restaurant->days_until_expiration ?? 0 }} jour(s) restant(s)</p>
-                @elseif($currentPlan)
-                    <p class="text-3xl font-bold text-neutral-900">{{ number_format($currentPlan->price, 0, ',', ' ') }} <span class="text-lg font-normal">F/mois</span></p>
-                    @if($restaurant->subscription_ends_at && $restaurant->subscription_ends_at->isFuture())
-                        <p class="text-sm text-neutral-500">Expire le {{ $restaurant->subscription_ends_at->format('d M Y') }}</p>
-                    @endif
-                @else
-                    <p class="text-neutral-500">Choisissez un plan ci-dessous</p>
-                @endif
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- ═══ HISTORIQUE ═══ --}}
+    @if($history->isNotEmpty())
+    <div>
+        <h3 class="text-base font-bold text-neutral-900 mb-4">Historique des paiements</h3>
+        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[500px]">
+                    <thead class="bg-neutral-50 border-b border-neutral-100">
+                        <tr>
+                            @foreach(['Date', 'Plan', 'Période', 'Montant', 'Statut'] as $h)
+                                <th class="px-4 py-3 text-left text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">{{ $h }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-50">
+                        @foreach($history as $sub)
+                            @php
+                                $statusMap = [
+                                    'active'  => ['Actif',       'bg-emerald-100 text-emerald-700'],
+                                    'trial'   => ['Essai',       'bg-blue-100 text-blue-700'],
+                                    'pending' => ['En attente',  'bg-amber-100 text-amber-700'],
+                                    'expired' => ['Expiré',      'bg-neutral-100 text-neutral-500'],
+                                    'cancelled'=> ['Annulé',     'bg-red-100 text-red-600'],
+                                ];
+                                [$statusLabel, $statusClass] = $statusMap[$sub->status->value] ?? [$sub->status->value, 'bg-neutral-100 text-neutral-500'];
+                                $periodLabels = ['monthly' => 'Mensuel', 'quarterly' => 'Trimestriel', 'semiannual' => 'Semestriel', 'annual' => 'Annuel'];
+                            @endphp
+                            <tr class="hover:bg-neutral-50 transition-colors">
+                                <td class="px-4 py-3 text-sm text-neutral-600">{{ $sub->created_at->format('d M Y') }}</td>
+                                <td class="px-4 py-3 text-sm font-medium text-neutral-900">{{ $sub->plan->name }}</td>
+                                <td class="px-4 py-3 text-sm text-neutral-500">{{ $periodLabels[$sub->billing_period] ?? 'Mensuel' }}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-neutral-900">
+                                    {{ $sub->amount_paid > 0 ? number_format($sub->amount_paid, 0, ',', ' ') . ' F' : 'Gratuit' }}
+                                    @if($sub->discount_percentage > 0)
+                                        <span class="text-xs text-emerald-600 font-normal">(-{{ $sub->discount_percentage }}%)</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $statusClass }}">{{ $statusLabel }}</span>
+                                        @if($sub->status->value === 'pending')
+                                            <form method="POST" action="{{ route('restaurant.subscription.retry', $sub) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-xs text-primary-600 hover:underline font-medium">Payer</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <!-- Usage -->
-    @if($currentPlan)
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card p-6">
-                @php
-                    $dishesCount = $restaurant->dishes()->count();
-                    $maxDishes = $currentPlan->max_dishes ?? 999;
-                    $dishesPercent = $maxDishes > 0 ? min(100, ($dishesCount / $maxDishes) * 100) : 0;
-                @endphp
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-neutral-600">Plats</span>
-                    <span class="font-bold text-neutral-900">{{ $dishesCount }} / {{ $maxDishes == 999 ? '∞' : $maxDishes }}</span>
-                </div>
-                <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary-500 rounded-full transition-all" style="width: {{ $dishesPercent }}%"></div>
-                </div>
-            </div>
-            <div class="card p-6">
-                @php
-                    $categoriesCount = $restaurant->categories()->count();
-                    $maxCategories = $currentPlan->max_categories ?? 999;
-                    $categoriesPercent = $maxCategories > 0 ? min(100, ($categoriesCount / $maxCategories) * 100) : 0;
-                @endphp
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-neutral-600">Catégories</span>
-                    <span class="font-bold text-neutral-900">{{ $categoriesCount }} / {{ $maxCategories == 999 ? '∞' : $maxCategories }}</span>
-                </div>
-                <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-secondary-500 rounded-full transition-all" style="width: {{ $categoriesPercent }}%"></div>
-                </div>
-            </div>
-            <div class="card p-6">
-                @php
-                    $teamCount = $restaurant->users()->where('role', 'employee')->count();
-                    $maxTeam = $currentPlan->max_employees ?? 1;
-                    $teamPercent = $maxTeam > 0 ? min(100, ($teamCount / $maxTeam) * 100) : 0;
-                @endphp
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-neutral-600">Équipe</span>
-                    <span class="font-bold text-neutral-900">{{ $teamCount }} / {{ $maxTeam }}</span>
-                </div>
-                <div class="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-accent-500 rounded-full transition-all" style="width: {{ $teamPercent }}%"></div>
-                </div>
-            </div>
-        </div>
     @endif
 
-    <!-- Plan actuel / Renouveler -->
-    @php
-        $featuredPlan = $plans->firstWhere('is_featured', true) ?? $plans->first();
-        $isCurrentPlan = $currentPlan && $currentPlan->id === $featuredPlan?->id;
-        $canRenew = $restaurant->is_subscription_expired
-            || ($restaurant->days_until_expiration !== null && $restaurant->days_until_expiration <= 7);
-        $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
-    @endphp
+    @push('scripts')
+    <script>
+        function calcPrice(price, period) {
+            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
+            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
+            const final = Math.round(price * m * (1 - d/100) / 100) * 100;
+            return new Intl.NumberFormat('fr-FR').format(final) + ' F';
+        }
+        function calcMonthly(price, period) {
+            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
+            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
+            const final = Math.round(price * m * (1 - d/100) / 100) * 100;
+            return new Intl.NumberFormat('fr-FR').format(Math.round(final / m));
+        }
+        function calcSaving(price, period) {
+            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
+            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
+            const saving = Math.round(price * m * (d/100) / 100) * 100;
+            return new Intl.NumberFormat('fr-FR').format(saving);
+        }
+        function periodSuffix(period) {
+            return {monthly:'/mois', quarterly:'/trimestre', semiannual:'/semestre', annual:'/an'}[period] || '/mois';
+        }
+    </script>
+    @endpush
 
-    @if($featuredPlan)
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-neutral-900 mb-2">{{ $currentPlan ? 'Renouveler votre abonnement' : 'Choisir votre abonnement' }}</h2>
-            <p class="text-neutral-500">Choisissez votre periode de facturation.
-                <a href="{{ route('restaurant.subscription.plans') }}" class="text-primary-600 hover:text-primary-700 font-medium">Voir tous les plans &rarr;</a>
-            </p>
-        </div>
-
-        <div class="card p-8 mb-8 border-2 {{ $isCurrentPlan ? 'border-primary-500 bg-primary-50/30' : 'border-neutral-200' }} relative overflow-visible" x-data="{ billingPeriod: 'monthly' }">
-            @if($isCurrentPlan)
-                <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg whitespace-nowrap z-10 border-2 border-white">Plan actuel</span>
-            @endif
-            <span class="absolute -top-3 right-4 bg-secondary-500 text-white text-sm px-3 py-2 rounded-full font-bold shadow-lg z-10 border-2 border-white">Populaire</span>
-            
-            <div class="mb-6">
-                <h3 class="text-3xl font-bold text-neutral-900 mb-2">{{ $featuredPlan->name }}</h3>
-                <p class="text-neutral-600">{{ $featuredPlan->description }}</p>
-            </div>
-
-            <!-- Billing Period Selection -->
-            <div class="mb-8">
-                <label class="block text-sm font-medium text-neutral-700 mb-4">Période de facturation</label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach([
-                        'monthly' => ['label' => 'Mensuel', 'months' => 1, 'discount' => 0],
-                        'quarterly' => ['label' => 'Trimestriel', 'months' => 3, 'discount' => 10],
-                        'semiannual' => ['label' => 'Semestriel', 'months' => 6, 'discount' => 15],
-                        'annual' => ['label' => 'Annuel', 'months' => 12, 'discount' => 20],
-                    ] as $period => $data)
-                        @php
-                            $calc = \App\Models\Subscription::calculatePriceWithDiscount($featuredPlan->price, $period);
-                        @endphp
-                        <label class="relative cursor-pointer">
-                            <input type="radio" name="billing_period" value="{{ $period }}" x-model="billingPeriod" class="sr-only peer">
-                            <div class="p-4 border-2 border-neutral-200 rounded-xl peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all hover:border-primary-300">
-                                <div class="font-bold text-neutral-900 mb-1">{{ $data['label'] }}</div>
-                                <div class="text-2xl font-bold text-primary-600 mb-1">{{ number_format($calc['final_price'], 0, ',', ' ') }} F</div>
-                                @if($data['discount'] > 0)
-                                    <div class="text-xs text-emerald-600 font-semibold">-{{ $data['discount'] }}%</div>
-                                    <div class="text-xs text-neutral-500 line-through">{{ number_format($calc['total_before_discount'], 0, ',', ' ') }} F</div>
-                                @else
-                                    <div class="text-xs text-neutral-500">{{ number_format($calc['monthly_equivalent'], 0, ',', ' ') }} F/mois</div>
-                                @endif
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Features List -->
-            <div class="mb-8">
-                <h4 class="text-lg font-semibold text-neutral-900 mb-4">Toutes les fonctionnalités incluses :</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ul class="space-y-3">
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ $featuredPlan->max_dishes }} plats maximum
-                        </li>
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ $featuredPlan->max_categories }} catégories
-                        </li>
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ $featuredPlan->max_employees }} employés
-                        </li>
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ number_format($featuredPlan->max_orders_per_month ?? 0, 0, ',', ' ') }} commandes/mois
-                        </li>
-                    </ul>
-                    <ul class="space-y-3">
-                        @if($featuredPlan->has_delivery)
-                            <li class="flex items-center gap-2 text-neutral-600">
-                                <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Gestion de la livraison
-                            </li>
-                        @endif
-                        @if($featuredPlan->has_stock_management)
-                            <li class="flex items-center gap-2 text-neutral-600">
-                                <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Gestion du stock
-                            </li>
-                        @endif
-                        @if($featuredPlan->has_analytics)
-                            <li class="flex items-center gap-2 text-neutral-600">
-                                <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Statistiques avancées
-                            </li>
-                        @endif
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            Réservations de tables
-                        </li>
-                        <li class="flex items-center gap-2 text-neutral-600">
-                            <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            Avis clients
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Add-ons Section -->
-            <div class="mb-8 border-t border-neutral-200 pt-6">
-                <h4 class="text-lg font-semibold text-neutral-900 mb-4">Add-ons optionnels</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ selectedAddons: [] }">
-                    @foreach($availableAddons as $addonType => $addon)
-                        <label class="flex items-start gap-3 p-4 border-2 border-neutral-200 rounded-xl hover:border-primary-300 transition-all cursor-pointer">
-                            <input type="checkbox" name="addons[]" value="{{ $addonType }}" x-model="selectedAddons" class="mt-1 w-5 h-5 text-primary-600 border-neutral-300 rounded focus:ring-primary-500">
-                            <div class="flex-1">
-                                <div class="font-semibold text-neutral-900 mb-1">{{ $addon['name'] }}</div>
-                                <div class="text-sm text-neutral-600 mb-2">{{ $addon['description'] }}</div>
-                                <div class="text-lg font-bold text-primary-600">{{ number_format($addon['price'], 0, ',', ' ') }} F/mois</div>
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Subscribe Button -->
-            @if($isCurrentPlan && !$canRenew)
-                <button class="btn btn-primary w-full px-6 py-3 flex items-center justify-center gap-2 shadow-sm" disabled>Plan actuel</button>
-            @else
-                <form method="POST" action="{{ route('restaurant.subscription.change') }}">
-                    @csrf
-                    <input type="hidden" name="plan" value="{{ $featuredPlan->slug }}">
-                    <input type="hidden" name="billing_period" :value="billingPeriod">
-                    <div class="flex items-center justify-center gap-4 mb-4">
-                        <button type="submit" class="btn btn-primary px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all">
-                            {{ $currentPlan ? 'Renouveler l\'abonnement' : 'S\'abonner maintenant' }}
-                        </button>
-                    </div>
-                    <p class="text-center text-sm text-neutral-500">Vous serez redirigé vers la page de paiement sécurisée</p>
-                </form>
-            @endif
-        </div>
-    @endif
-
-    <!-- Payment History -->
-    @if($history->isNotEmpty())
-        <h2 class="text-xl font-bold text-neutral-900 mb-4">Historique des paiements</h2>
-        <div class="card overflow-hidden">
-            <div class="table-responsive">
-            <table class="w-full min-w-[500px]">
-                <thead class="bg-neutral-50 border-b border-neutral-200">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Date</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Description</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Montant</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase">Statut</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100">
-                    @foreach($history as $sub)
-                        <tr>
-                            <td class="px-6 py-4 text-neutral-900">{{ $sub->created_at->format('d M Y') }}</td>
-                            <td class="px-6 py-4 text-neutral-600">
-                                Abonnement {{ $sub->plan->name }}
-                                @if($sub->billing_period && $sub->billing_period !== 'monthly')
-                                    <span class="text-xs text-neutral-500">({{ ucfirst($sub->billing_period) }})</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 font-semibold text-neutral-900">
-                                {{ number_format($sub->amount_paid, 0, ',', ' ') }} F
-                                @if($sub->discount_percentage > 0)
-                                    <span class="text-xs text-emerald-600">(-{{ $sub->discount_percentage }}%)</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    @php
-                                        $statusColors = [
-                                            'active' => 'badge-success',
-                                            'pending' => 'bg-yellow-100 text-yellow-700',
-                                            'cancelled' => 'bg-red-100 text-red-700',
-                                            'expired' => 'bg-neutral-100 text-neutral-700',
-                                        ];
-                                        $statusLabels = [
-                                            'active' => 'Actif',
-                                            'pending' => 'En attente',
-                                            'cancelled' => 'Annulé',
-                                            'expired' => 'Expiré',
-                                        ];
-                                    @endphp
-                                    <span class="badge {{ $statusColors[$sub->status->value] ?? 'bg-neutral-100 text-neutral-700' }}">
-                                        {{ $statusLabels[$sub->status->value] ?? $sub->status->value }}
-                                    </span>
-                                    @if($sub->status->value === 'pending')
-                                        <form method="POST" action="{{ route('restaurant.subscription.retry', $sub) }}" class="inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-primary">
-                                                Reprendre le paiement
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            </div>
-        </div>
-    @endif
 </x-layouts.admin-restaurant>
