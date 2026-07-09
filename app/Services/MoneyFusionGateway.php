@@ -116,10 +116,11 @@ class MoneyFusionGateway
         } catch (\Exception $e) {
             Log::channel('payments')->error('MoneyFusion exception', [
                 'subscription_id' => $subscription->id,
+                'api_url' => $this->getApiUrl(),
                 'error' => $e->getMessage(),
             ]);
 
-            return ['success' => false, 'error' => 'Impossible de contacter MoneyFusion'];
+            return ['success' => false, 'error' => 'Impossible de contacter MoneyFusion : ' . $e->getMessage()];
         }
     }
 

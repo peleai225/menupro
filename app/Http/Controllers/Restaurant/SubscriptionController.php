@@ -334,8 +334,9 @@ class SubscriptionController extends Controller
             return redirect($result['payment_url']);
         }
 
+        $errorDetail = $this->lastPaymentError ?? 'Erreur inconnue';
         return redirect()->route('restaurant.subscription')
-            ->with('error', 'Erreur lors de la création du paiement. Veuillez réessayer.');
+            ->with('error', "Erreur paiement : {$errorDetail}");
     }
 
     protected ?string $lastPaymentError = null;
