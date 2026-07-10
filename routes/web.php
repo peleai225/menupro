@@ -296,6 +296,12 @@ Route::prefix('commando')->name('commando.')->middleware(['auth', 'commando.agen
     Route::get('/carte/download/pdf', [\App\Http\Controllers\Commando\AgentDashboardController::class, 'downloadPdf'])->name('card.download.pdf');
 });
 
+// Super admin dedicated login (separate from restaurant login)
+Route::middleware('guest')->group(function () {
+    Route::get('/admin/login', [LoginController::class, 'adminCreate'])->name('admin.login');
+    Route::post('/admin/login', [LoginController::class, 'adminStore'])->middleware('throttle:5,1')->name('admin.login.post');
+});
+
 Route::prefix('admin')
     ->name('super-admin.')
     ->middleware(['auth', 'super.admin'])

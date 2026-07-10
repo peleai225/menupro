@@ -12,27 +12,24 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    /**
-     * Display the login view.
-     */
     public function create(): View
     {
         return view('pages.auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
+    public function adminCreate(): View
+    {
+        return view('pages.auth.admin-login');
+    }
+
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        // Update last login
         $request->user()->updateLastLogin();
 
-        // Log login activity
         ActivityLog::log(
             'login',
             $request->user(),
@@ -40,7 +37,6 @@ class LoginController extends Controller
             ['email' => $request->user()->email]
         );
 
-        // Connexion par téléphone — pas de vérification email pour personne
         $isCrmAgent = in_array($request->user()->role, [
             UserRole::SUPER_ADMIN,
             UserRole::COMMERCIAL,
@@ -49,15 +45,39 @@ class LoginController extends Controller
             UserRole::COMMANDO_AGENT,
         ]);
 
-        // Redirect based on role
         $route = $request->user()->getDashboardRoute();
 
-        // Flag CRM agents for welcome sound/animation on first page load
         if ($isCrmAgent) {
             session()->flash('crm_login_success', true);
         }
 
         return redirect()->intended(route($route));
+    }
+
+    public function adminStore(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+
+        if (! $request->user()->isSuperAdmin()) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['login' => 'Accès refusé. Seul le super administrateur peut se connecter ici.'])->onlyInput('login');
+        }
+
+        $request->session()->regenerate();
+
+        $request->user()->updateLastLogin();
+
+        ActivityLog::log(
+            'login',
+            $request->user(),
+            "Connexion super admin de {$request->user()->name}",
+            ['email' => $request->user()->email, 'via' => 'admin_login']
+        );
+
+        return redirect()->intended(route('super-admin.dashboard'));
     }
 
     /**
