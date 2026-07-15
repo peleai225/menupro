@@ -97,7 +97,7 @@ class SupplierController extends Controller
     {
         $supplier->delete();
 
-        return redirect()->route('restaurant.suppliers')
+        return redirect()->route('restaurant.stock.fournisseurs.index')
             ->with('success', 'Fournisseur supprimé.');
     }
 

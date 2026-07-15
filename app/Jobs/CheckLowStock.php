@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Ingredient;
 use App\Models\Restaurant;
 use App\Notifications\LowStockNotification;
+use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -64,6 +65,20 @@ class CheckLowStock implements ShouldQueue
                 'restaurant_id' => $restaurant->id,
                 'ingredients_count' => $lowStockIngredients->count(),
             ]);
+        }
+
+        // WhatsApp alert for each critical ingredient
+        $ownerPhone = $restaurant->owner?->phone ?? $restaurant->phone ?? null;
+        if ($ownerPhone) {
+            $whatsApp = app(WhatsAppService::class);
+            foreach ($lowStockIngredients as $ingredient) {
+                $whatsApp->sendLowStockAlert(
+                    $ownerPhone,
+                    $ingredient->name,
+                    (int) $ingredient->current_quantity,
+                    $ingredient->unit?->value ?? 'unité'
+                );
+            }
         }
     }
 }

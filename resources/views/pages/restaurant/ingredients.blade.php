@@ -44,6 +44,140 @@
         </div>
     @endif
 
+    <!-- Tutoriel : comment fonctionne le stock -->
+    @if($stats['total'] === 0)
+    <div class="mb-8 rounded-2xl border-2 border-primary-200 bg-primary-50 p-6" x-data="{ open: true }">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-primary-900 text-lg">Comment fonctionne la gestion du stock ?</h3>
+                    <p class="text-primary-700 text-sm mt-0.5">Lisez ce guide avant de commencer — 2 minutes suffisent.</p>
+                </div>
+            </div>
+            <button type="button" @click="open = !open" class="text-primary-500 hover:text-primary-700 flex-shrink-0">
+                <svg class="w-5 h-5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+
+        <div x-show="open" x-transition class="mt-6 space-y-6">
+            <!-- Étape 1 -->
+            <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-sm">1</div>
+                <div>
+                    <p class="font-semibold text-primary-900">Créez vos ingrédients ici (dans "Stock")</p>
+                    <p class="text-primary-700 text-sm mt-1">
+                        Un ingrédient, c'est ce que vous achetez : une bouteille de Flag, un poulet entier, un kilo de riz, un litre d'huile de palme.
+                        Pour chaque ingrédient vous indiquez l'<strong>unité</strong> (bouteille, pièce, kg, L...), la <strong>quantité actuelle en stock</strong>, et un <strong>seuil minimum</strong> qui déclenchera une alerte quand vous approchez de la rupture.
+                    </p>
+                    <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Exemple boisson</span><br>
+                            Bière Flag · Unité : bouteille · Stock : 48 · Seuil min : 24
+                        </div>
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Exemple viande</span><br>
+                            Poulet entier · Unité : pièce · Stock : 10 · Seuil min : 3
+                        </div>
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Exemple féculent</span><br>
+                            Riz · Unité : kg · Stock : 25 · Seuil min : 5
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-l-2 border-primary-200 ml-4 pl-4"></div>
+
+            <!-- Étape 2 -->
+            <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-sm">2</div>
+                <div>
+                    <p class="font-semibold text-primary-900">Liez chaque plat à ses ingrédients (dans "Plats")</p>
+                    <p class="text-primary-700 text-sm mt-1">
+                        Allez dans <strong>Plats → modifier un plat</strong>. En bas de la page, vous verrez une section "Ingrédients".
+                        Ajoutez chaque ingrédient qu'utilise ce plat, et la <strong>quantité exacte consommée par portion</strong>.
+                        C'est cette liaison qu'on appelle la <em>recette</em>.
+                    </p>
+                    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Poulet braisé entier</span><br>
+                            → Poulet entier : <strong>1 pièce</strong><br>
+                            → Huile : <strong>0.1 L</strong>
+                        </div>
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Demi-poulet braisé</span><br>
+                            → Poulet entier : <strong>0.5 pièce</strong><br>
+                            → Huile : <strong>0.05 L</strong>
+                        </div>
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Bière Flag (vendue à l'unité)</span><br>
+                            → Bière Flag : <strong>1 bouteille</strong>
+                        </div>
+                        <div class="bg-white rounded-lg px-3 py-2 border border-primary-200">
+                            <span class="font-medium text-primary-800">Bière Flag (vendue par 2)</span><br>
+                            → Bière Flag : <strong>2 bouteilles</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-l-2 border-primary-200 ml-4 pl-4"></div>
+
+            <!-- Étape 3 -->
+            <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-sm">3</div>
+                <div>
+                    <p class="font-semibold text-primary-900">Le stock se déduit automatiquement à chaque commande</p>
+                    <p class="text-primary-700 text-sm mt-1">
+                        Quand un client commande un demi-poulet, le système retire automatiquement <strong>0.5 pièce</strong> de votre stock de poulet.
+                        Si un client annule, le stock est remis. Vous n'avez rien à faire manuellement.
+                        Seul cas où vous intervenez manuellement : les <strong>pertes</strong> (plat raté, denrée abîmée) et les <strong>entrées de stock</strong> quand vous réapprovisionnez.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-primary-200 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <p class="text-sm text-primary-700 font-medium">Prêt à commencer ?</p>
+                <div class="flex gap-2">
+                    @livewire('restaurant.ingredient-import')
+                    <button onclick="document.getElementById('addIngredientModal').classList.remove('hidden')"
+                            class="btn btn-primary btn-sm text-sm px-4 py-2">
+                        + Ajouter un ingrédient manuellement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @else
+    {{-- Guide réduit si des ingrédients existent déjà --}}
+    <div class="mb-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4" x-data="{ open: false }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-4 text-left">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-sm font-medium text-neutral-600">Comment fonctionne le stock ? (rappel)</span>
+            </div>
+            <svg class="w-4 h-4 text-neutral-400 transition-transform flex-shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div x-show="open" x-transition class="mt-4 space-y-3 text-sm text-neutral-600">
+            <p><span class="font-semibold text-neutral-800">Stock = les matières que vous achetez.</span> Ici vous gérez : Bière Flag, Poulet entier, Riz (kg), Huile (L), etc.</p>
+            <p><span class="font-semibold text-neutral-800">Plat = ce que vous vendez au client.</span> Dans chaque plat (menu), vous liez les ingrédients avec la quantité par portion (la "recette").</p>
+            <p><span class="font-semibold text-neutral-800">Demi-portion ?</span> Créez un plat "Demi-poulet" et mettez 0.5 pièce de Poulet entier dans sa recette. Le système déduira 0.5 automatiquement à chaque vente.</p>
+            <p><span class="font-semibold text-neutral-800">Boisson vendue à l'unité ?</span> Créez un plat "Bière Flag" et liez-le à l'ingrédient Bière Flag avec quantité = 1. Chaque vente déduit 1 bouteille.</p>
+        </div>
+    </div>
+    @endif
+
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="card p-6">

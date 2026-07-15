@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers\Restaurant;
 
+use App\Exports\StockExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Restaurant\StockAdjustmentRequest;
 use App\Http\Requests\Restaurant\StockEntryRequest;
 use App\Http\Requests\Restaurant\StoreIngredientRequest;
 use App\Models\Ingredient;
 use App\Models\IngredientCategory;
+use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Services\MediaUploader;
 use App\Services\StockManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IngredientController extends Controller
 {
@@ -313,6 +316,33 @@ class IngredientController extends Controller
         $outOfStockCount = $ingredients->filter(fn($i) => $i->current_quantity <= 0)->count();
 
         return view('pages.restaurant.stock-report', compact('ingredients', 'totalValue', 'lowStockCount', 'outOfStockCount'));
+    }
+
+    /**
+     * Export stock inventory to Excel.
+     */
+    public function export(Request $request)
+    {
+        $restaurant = $request->user()->restaurant;
+
+        if (!$restaurant->hasFeature('stock')) {
+            return redirect()->route('restaurant.stock.ingredients.index');
+        }
+
+        $ingredients = Ingredient::with('category')
+            ->where('restaurant_id', $restaurant->id)
+            ->orderBy('name')
+            ->get();
+
+        $movements = StockMovement::with(['ingredient', 'user'])
+            ->where('restaurant_id', $restaurant->id)
+            ->latest()
+            ->limit(500)
+            ->get();
+
+        $filename = 'stock-' . str($restaurant->name)->slug() . '-' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new StockExport($restaurant, $ingredients, $movements), $filename);
     }
 
     /**

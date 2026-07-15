@@ -222,10 +222,10 @@
                 <!-- Ingredients (if stock management) -->
                 @if(auth()->user()->restaurant?->currentPlan?->has_stock_management)
                     <div class="card p-6">
-                        <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h2 class="text-lg font-bold text-neutral-900">Ingrédients</h2>
-                                <p class="text-sm text-neutral-500 mt-1">Liez ce plat aux ingrédients pour le suivi du stock</p>
+                                <h2 class="text-lg font-bold text-neutral-900">Ingrédients (recette)</h2>
+                                <p class="text-sm text-neutral-500 mt-1">Liez ce plat aux ingrédients pour le suivi du stock automatique</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button type="button" wire:click="$toggle('showQuickIngredient')" class="btn btn-outline px-3 py-2 text-sm flex items-center gap-1.5">
@@ -240,6 +240,60 @@
                                     </svg>
                                     Ajouter
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Guide recette -->
+                        <div class="mb-5 rounded-xl bg-amber-50 border border-amber-200 p-4" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" class="w-full flex items-start gap-3 text-left">
+                                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-amber-800">Comment renseigner la recette ?</p>
+                                    <p class="text-xs text-amber-600 mt-0.5">Cliquez pour voir les explications et exemples</p>
+                                </div>
+                                <svg class="w-4 h-4 text-amber-500 flex-shrink-0 transition-transform mt-0.5" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-transition class="mt-4 space-y-4 text-sm text-amber-800">
+                                <p>
+                                    La recette, c'est la liste des ingrédients utilisés pour préparer <strong>une portion</strong> de ce plat.
+                                    À chaque vente, MenuPro retire automatiquement les quantités que vous avez définies ici.
+                                </p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div class="bg-white rounded-lg p-3 border border-amber-200">
+                                        <p class="font-semibold text-amber-900 mb-1">Poulet braisé entier</p>
+                                        <p class="text-xs text-neutral-600">Ingrédient : Poulet entier</p>
+                                        <p class="text-xs text-neutral-600">Quantité : <strong>1</strong> pièce</p>
+                                        <p class="text-xs text-neutral-500 mt-1">→ 1 vente = retire 1 poulet du stock</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-3 border border-amber-200">
+                                        <p class="font-semibold text-amber-900 mb-1">Demi-poulet braisé</p>
+                                        <p class="text-xs text-neutral-600">Ingrédient : Poulet entier</p>
+                                        <p class="text-xs text-neutral-600">Quantité : <strong>0.5</strong> pièce</p>
+                                        <p class="text-xs text-neutral-500 mt-1">→ 1 vente = retire 0.5 poulet du stock</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-3 border border-amber-200">
+                                        <p class="font-semibold text-amber-900 mb-1">Bière Flag (1 bouteille)</p>
+                                        <p class="text-xs text-neutral-600">Ingrédient : Bière Flag</p>
+                                        <p class="text-xs text-neutral-600">Quantité : <strong>1</strong> bouteille</p>
+                                        <p class="text-xs text-neutral-500 mt-1">→ 1 vente = retire 1 bouteille du stock</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-3 border border-amber-200">
+                                        <p class="font-semibold text-amber-900 mb-1">Riz sauce graine</p>
+                                        <p class="text-xs text-neutral-600">Ingrédient : Riz → Qté : <strong>0.3</strong> kg</p>
+                                        <p class="text-xs text-neutral-600">Ingrédient : Huile de palme → Qté : <strong>0.1</strong> L</p>
+                                        <p class="text-xs text-neutral-500 mt-1">→ Plusieurs ingrédients possibles</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-amber-100 rounded-lg px-3 py-2 border border-amber-300">
+                                    <p class="font-semibold text-amber-900">Règle simple :</p>
+                                    <p class="text-xs mt-0.5">L'ingrédient doit d'abord exister dans le stock (onglet Stock du menu). Si ce n'est pas le cas, utilisez le bouton "Créer" ici pour en ajouter un rapidement.</p>
+                                </div>
                             </div>
                         </div>
 

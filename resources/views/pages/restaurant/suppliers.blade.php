@@ -197,11 +197,110 @@
         </div>
     </div>
 
+    <!-- Edit Supplier Modal -->
+    <div id="editSupplierModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/50" onclick="closeEditModal()"></div>
+            <div class="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold text-neutral-900 mb-6">Modifier le fournisseur</h2>
+                <form id="editSupplierForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nom du fournisseur <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" id="edit_name" required
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Personne de contact</label>
+                            <input type="text" name="contact_name" id="edit_contact_name"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                            <input type="email" name="email" id="edit_email"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone</label>
+                            <input type="tel" name="phone" id="edit_phone"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Ville</label>
+                            <input type="text" name="city" id="edit_city"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
+                            <input type="text" name="address" id="edit_address"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Montant minimum de commande (FCFA)</label>
+                            <input type="number" name="min_order_amount" id="edit_min_order_amount" min="0"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Délai de livraison (jours)</label>
+                            <input type="number" name="delivery_days" id="edit_delivery_days" min="0"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Conditions de paiement</label>
+                            <input type="text" name="payment_terms" id="edit_payment_terms"
+                                   class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Statut</label>
+                            <select name="is_active" id="edit_is_active"
+                                    class="w-full h-12 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="1">Actif</option>
+                                <option value="0">Inactif</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Notes</label>
+                            <textarea name="notes" id="edit_notes" rows="3"
+                                      class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 mt-6">
+                        <button type="submit" class="btn btn-primary flex-1">Enregistrer</button>
+                        <button type="button" onclick="closeEditModal()" class="btn btn-outline flex-1">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
+            const suppliers = @json($suppliers->keyBy('id'));
+            const baseUrl = '{{ url('dashboard/stock/fournisseurs') }}';
+
             function editSupplier(id) {
-                // TODO: Implement edit functionality
-                window.location.href = '{{ route('restaurant.stock.fournisseurs.show', ':id') }}'.replace(':id', id);
+                const s = suppliers[id];
+                if (!s) return;
+                const form = document.getElementById('editSupplierForm');
+                form.action = baseUrl + '/' + id;
+                document.getElementById('edit_name').value = s.name ?? '';
+                document.getElementById('edit_contact_name').value = s.contact_name ?? '';
+                document.getElementById('edit_email').value = s.email ?? '';
+                document.getElementById('edit_phone').value = s.phone ?? '';
+                document.getElementById('edit_city').value = s.city ?? '';
+                document.getElementById('edit_address').value = s.address ?? '';
+                document.getElementById('edit_min_order_amount').value = s.min_order_amount ?? '';
+                document.getElementById('edit_delivery_days').value = s.delivery_days ?? '';
+                document.getElementById('edit_payment_terms').value = s.payment_terms ?? '';
+                document.getElementById('edit_notes').value = s.notes ?? '';
+                document.getElementById('edit_is_active').value = s.is_active ? '1' : '0';
+                document.getElementById('editSupplierModal').classList.remove('hidden');
+            }
+
+            function closeEditModal() {
+                document.getElementById('editSupplierModal').classList.add('hidden');
             }
         </script>
     @endpush
