@@ -111,8 +111,7 @@
                         <span x-show="expanded" x-transition class="whitespace-nowrap">QR Code</span>
                     </a>
 
-                    {{-- DEBUG temporaire: affiche plan_id et résultat hasFeature --}}
-                    <!-- plan_id={{ auth()->user()?->restaurant?->current_plan_id }} hotel={{ auth()->user()?->restaurant?->hasFeature('hotel_rooms') ? 'OUI' : 'NON' }} -->
+                    @if(auth()->user()?->restaurant?->hasFeature('hotel_rooms'))
                     <a href="{{ route('restaurant.rooms.index') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.rooms*') ? 'sidebar-item-active' : '' }}"
                        :title="!expanded ? 'Chambres hôtel' : ''">
@@ -121,6 +120,7 @@
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Chambres hôtel</span>
                     </a>
+                    @endif
 
                     <!-- Commerce Section -->
                     <div class="pt-4">
@@ -674,7 +674,7 @@
                  class="absolute bottom-full left-0 right-0 bg-white border-t border-neutral-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-2xl px-4 pt-4 pb-3"
                  x-cloak>
                 <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
-                <div class="grid grid-cols-4 gap-3 mb-3">
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
                     @if($isAdmin)
                     <a href="{{ route('restaurant.categories.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.categories*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -713,6 +713,14 @@
                             <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Stock</span>
+                    </a>
+                    @endif
+                    @if(auth()->user()?->restaurant?->hasFeature('hotel_rooms'))
+                    <a href="{{ route('restaurant.rooms.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.rooms*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Chambres</span>
                     </a>
                     @endif
                     @if($isAdmin)
