@@ -431,7 +431,7 @@ window.Echo = new Echo({
             @endif
 
             <!-- Mini jeu pendant l'attente -->
-            @if(in_array($order->status->value, ['pending', 'confirmed', 'preparing']))
+            @if(in_array($order->status->value, ['pending_payment', 'paid', 'confirmed', 'preparing']))
             <div class="card p-5 mb-6" id="game-section">
                 <div class="text-center mb-4">
                     <p class="text-sm text-neutral-500 mb-3">En attendant votre commande...</p>
@@ -850,7 +850,7 @@ window.Echo = new Echo({
 </script>
 @endif
 
-@if(in_array($order->status->value, ['pending', 'confirmed', 'preparing']))
+@if(in_array($order->status->value, ['pending_payment', 'paid', 'confirmed', 'preparing']))
 <script>
 (function() {
     var canvas, ctx;
