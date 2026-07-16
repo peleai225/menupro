@@ -430,6 +430,32 @@ window.Echo = new Echo({
                 </div>
             @endif
 
+            <!-- Mini jeu pendant l'attente -->
+            @if(in_array($order->status->value, ['pending', 'confirmed', 'preparing']))
+            <div class="card p-5 mb-6" id="game-section">
+                <div class="text-center mb-4">
+                    <p class="text-sm text-neutral-500 mb-3">En attendant votre commande...</p>
+                    <button id="game-toggle-btn"
+                            onclick="toggleGame()"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all text-sm">
+                        🎮 Jouer en attendant
+                    </button>
+                </div>
+
+                <div id="game-container" style="display:none;">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <div class="text-sm font-bold text-neutral-700">⭐ Score : <span id="g-score">0</span></div>
+                        <div class="text-sm font-bold text-neutral-700">❤️ Vies : <span id="g-lives">3</span></div>
+                        <div class="text-sm font-bold text-neutral-700">⏱ <span id="g-timer">60</span>s</div>
+                    </div>
+                    <div class="relative mx-auto rounded-2xl overflow-hidden border-2 border-neutral-200 bg-gradient-to-b from-sky-100 to-sky-50" style="width:100%;max-width:360px;">
+                        <canvas id="game-canvas" width="360" height="420" style="display:block;width:100%;touch-action:none;"></canvas>
+                    </div>
+                    <p class="text-xs text-neutral-400 text-center mt-2">Touchez / déplacez pour attraper les plats 🍔🍕🌮</p>
+                </div>
+            </div>
+            @endif
+
             <!-- Receipt & Actions -->
             <div class="flex flex-col items-center gap-4 mt-8" id="actions-section">
                 @if($order->is_paid)
@@ -824,3 +850,240 @@ window.Echo = new Echo({
 </script>
 @endif
 
+@if(in_array($order->status->value, ['pending', 'confirmed', 'preparing']))
+<script>
+(function() {
+    var canvas, ctx;
+    var W = 360, H = 420;
+    var gameRunning = false, gameStarted = false;
+    var score = 0, lives = 3, timeLeft = 60;
+    var chef, foods = [], particles = [];
+    var animId, timerInterval;
+    var spawnTimer = 0, spawnInterval = 80;
+
+    var EMOJIS = ['🍔','🍕','🌮','🍗','🥗','🍜','🌯','🥩','🍱','🍣','🥪','🧆'];
+    var BAD    = ['💣','🪰','🦟'];
+
+    function toggleGame() {
+        var container = document.getElementById('game-container');
+        var btn = document.getElementById('game-toggle-btn');
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            btn.innerHTML = '✕ Fermer le jeu';
+            if (!gameStarted) initGame();
+        } else {
+            container.style.display = 'none';
+            btn.innerHTML = '🎮 Jouer en attendant';
+            stopGame();
+        }
+    }
+    window.toggleGame = toggleGame;
+
+    function initGame() {
+        canvas = document.getElementById('game-canvas');
+        var wrap = canvas.parentElement;
+        W = Math.min(360, wrap.offsetWidth - 4);
+        canvas.width = W; canvas.height = H;
+        ctx = canvas.getContext('2d');
+        bindControls();
+        gameStarted = true;
+        resetState();
+        showStartScreen();
+    }
+
+    function resetState() {
+        score = 0; lives = 3; timeLeft = 60; foods = []; particles = [];
+        spawnTimer = 0; spawnInterval = 80;
+        chef = { x: W/2, w: 64, h: 14, y: H - 40, targetX: W/2 };
+        document.getElementById('g-score').textContent = '0';
+        document.getElementById('g-lives').textContent = '❤️❤️❤️';
+        document.getElementById('g-timer').textContent = '60';
+    }
+
+    function showStartScreen() {
+        drawBg();
+        drawChef();
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(0,0,W,H);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('🍽 Attrape les plats !', W/2, H/2 - 60);
+        ctx.font = '15px sans-serif';
+        ctx.fillStyle = '#fde68a';
+        ctx.fillText('Déplace le panier pour attraper', W/2, H/2 - 18);
+        ctx.fillText('les plats et marquer des points.', W/2, H/2 + 7);
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText('Évite les 💣 🪰 !', W/2, H/2 + 35);
+        ctx.font = 'bold 15px sans-serif';
+        ctx.fillStyle = '#6ee7b7';
+        ctx.fillText('Touche / clique pour commencer', W/2, H/2 + 78);
+    }
+
+    function startGame() {
+        if (gameRunning) return;
+        gameRunning = true;
+        resetState();
+        loop();
+        timerInterval = setInterval(function() {
+            if (!gameRunning) return;
+            timeLeft--;
+            document.getElementById('g-timer').textContent = timeLeft;
+            if (timeLeft <= 0) endGame();
+        }, 1000);
+    }
+
+    function stopGame() {
+        gameRunning = false;
+        if (animId) cancelAnimationFrame(animId);
+        clearInterval(timerInterval);
+    }
+
+    function endGame() {
+        stopGame();
+        drawBg(); drawFoods(); drawParticles(); drawChef();
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(0,0,W,H);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(lives <= 0 ? '💔 Perdu !' : '⏱ Temps écoulé !', W/2, H/2 - 55);
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillStyle = '#fde68a';
+        ctx.fillText('Score : ' + score, W/2, H/2 - 15);
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#6ee7b7';
+        ctx.fillText(score >= 20 ? '🏆 Excellent !' : score >= 10 ? '👏 Bien joué !' : '😅 Réessaie !', W/2, H/2 + 20);
+        ctx.font = 'bold 15px sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('Touche / clique pour rejouer', W/2, H/2 + 65);
+        gameStarted = false;
+    }
+
+    function loop() {
+        if (!gameRunning) return;
+        animId = requestAnimationFrame(loop);
+        spawnTimer++;
+        if (spawnTimer >= spawnInterval) {
+            spawnFood();
+            spawnTimer = 0;
+            spawnInterval = Math.max(30, spawnInterval - 0.4);
+        }
+        updateChef(); updateFoods(); updateParticles();
+        drawBg(); drawFoods(); drawParticles(); drawChef();
+    }
+
+    function spawnFood() {
+        var isBad = Math.random() < 0.2;
+        var list = isBad ? BAD : EMOJIS;
+        foods.push({
+            x: 22 + Math.random() * (W - 44),
+            y: -30,
+            speed: 2.5 + Math.random() * 2 + (60 - timeLeft) * 0.04,
+            emoji: list[Math.floor(Math.random() * list.length)],
+            bad: isBad
+        });
+    }
+
+    function updateChef() {
+        chef.x += (chef.targetX - chef.x) * 0.2;
+        chef.x = Math.max(chef.w/2, Math.min(W - chef.w/2, chef.x));
+    }
+
+    function updateFoods() {
+        for (var i = foods.length - 1; i >= 0; i--) {
+            var f = foods[i];
+            f.y += f.speed;
+            var caught = f.y + 14 >= chef.y && f.y - 14 <= chef.y + chef.h
+                      && f.x >= chef.x - chef.w/2 - 10 && f.x <= chef.x + chef.w/2 + 10;
+            if (caught) {
+                if (f.bad) {
+                    lives = Math.max(0, lives - 1);
+                    spawnParticles(f.x, f.y, '#ef4444', 8);
+                    if (lives <= 0) { foods.splice(i,1); endGame(); return; }
+                } else {
+                    score++;
+                    document.getElementById('g-score').textContent = score;
+                    spawnParticles(f.x, f.y, '#fbbf24', 6);
+                }
+                document.getElementById('g-lives').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+                foods.splice(i, 1);
+            } else if (f.y > H + 20) {
+                if (!f.bad) {
+                    lives = Math.max(0, lives - 1);
+                    document.getElementById('g-lives').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+                    if (lives <= 0) { endGame(); return; }
+                }
+                foods.splice(i, 1);
+            }
+        }
+    }
+
+    function spawnParticles(x, y, color, n) {
+        for (var i = 0; i < n; i++) {
+            particles.push({ x:x, y:y, vx:(Math.random()-0.5)*5, vy:-2-Math.random()*3, color:color, life:30 });
+        }
+    }
+
+    function updateParticles() {
+        for (var i = particles.length - 1; i >= 0; i--) {
+            var p = particles[i];
+            p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+    }
+
+    function drawBg() {
+        var g = ctx.createLinearGradient(0,0,0,H);
+        g.addColorStop(0,'#e0f2fe'); g.addColorStop(1,'#f0fdf4');
+        ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+        ctx.fillStyle = '#fde68a'; ctx.fillRect(0, H-20, W, 20);
+    }
+
+    function drawFoods() {
+        ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (var i = 0; i < foods.length; i++) ctx.fillText(foods[i].emoji, foods[i].x, foods[i].y);
+    }
+
+    function drawParticles() {
+        for (var i = 0; i < particles.length; i++) {
+            var p = particles[i];
+            ctx.save(); ctx.globalAlpha = p.life/30; ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill(); ctx.restore();
+        }
+    }
+
+    function drawChef() {
+        ctx.fillStyle = '#7c3aed';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(chef.x - chef.w/2, chef.y, chef.w, chef.h, 6);
+        else ctx.rect(chef.x - chef.w/2, chef.y, chef.w, chef.h);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(chef.x - chef.w/2 + 4, chef.y + 2, chef.w - 8, 4, 3);
+        else ctx.rect(chef.x - chef.w/2 + 4, chef.y + 2, chef.w - 8, 4);
+        ctx.fill();
+        ctx.font = '20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('👨‍🍳', chef.x, chef.y - 14);
+    }
+
+    function bindControls() {
+        canvas.addEventListener('mousemove', function(e) {
+            var r = canvas.getBoundingClientRect();
+            chef.targetX = (e.clientX - r.left) * (W / r.width);
+        });
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            var r = canvas.getBoundingClientRect();
+            chef.targetX = (e.touches[0].clientX - r.left) * (W / r.width);
+        }, { passive: false });
+        canvas.addEventListener('click', function() { if (!gameRunning) startGame(); });
+        canvas.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            if (!gameRunning) startGame();
+        }, { passive: false });
+    }
+})();
+</script>
+@endif
