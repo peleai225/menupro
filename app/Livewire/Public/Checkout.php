@@ -69,9 +69,9 @@ class Checkout extends Component
             $this->redirect(route('r.menu', $slug));
         }
 
-        // Auto-fill table number from QR code URL (?table=X)
+        // Auto-fill table identifier from QR code URL (?table=X) — accepts numeric or text (e.g. "Chambre 101")
         $tableFromUrl = request()->query('table');
-        if ($tableFromUrl && is_numeric($tableFromUrl)) {
+        if ($tableFromUrl && strlen((string) $tableFromUrl) <= 50) {
             $this->table_number = (string) $tableFromUrl;
             $this->order_type = 'dine_in';
         }

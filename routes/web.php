@@ -227,6 +227,15 @@ Route::prefix('dashboard')
         Route::get('qr-code/tables/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadTableQR'])->name('qrcode.download-tables');
         Route::get('qr-code/social/download', [App\Http\Controllers\Restaurant\QRCodeController::class, 'downloadSocialCard'])->name('qrcode.download-social');
         Route::get('qr-code/tables/{tableNumber}/preview', [App\Http\Controllers\Restaurant\QRCodeController::class, 'previewTableQR'])->name('qrcode.preview-table');
+
+        // Hotel Rooms QR (Pro+)
+        Route::middleware('feature:hotel_rooms')->group(function () {
+            Route::get('chambres', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'index'])->name('rooms.index');
+            Route::post('chambres', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'store'])->name('rooms.store');
+            Route::put('chambres/{room}', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'update'])->name('rooms.update');
+            Route::delete('chambres/{room}', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'destroy'])->name('rooms.destroy');
+            Route::get('chambres/download-pdf', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'downloadPdf'])->name('rooms.download-pdf');
+        });
         
         // Reviews, Taxes - admin uniquement (tous plans)
         Route::middleware('restaurant.admin')->group(function () {
@@ -463,6 +472,9 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     
     // Reservations
     Route::post('/reservations', [\App\Http\Controllers\Public\ReservationController::class, 'store'])->name('reservations.store')->middleware('throttle:5,1');
+
+    // Service Requests (appel du personnel)
+    Route::post('/service-request', [\App\Http\Controllers\Public\ServiceRequestController::class, 'store'])->name('service-request.store')->middleware('throttle:10,1');
     
     // Payment Callbacks
     Route::get('/commande/{order}/success', [CheckoutController::class, 'success'])->name('order.success');
@@ -500,6 +512,7 @@ Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function (
     Route::get('/data', [\App\Http\Controllers\Restaurant\KitchenController::class, 'data'])->name('kitchen.data');
     Route::post('/tts', [\App\Http\Controllers\Restaurant\KitchenController::class, 'tts'])->name('kitchen.tts');
     Route::post('/orders/{order}/status', [\App\Http\Controllers\Restaurant\KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
+    Route::post('/service-requests/{serviceRequest}/done', [\App\Http\Controllers\Restaurant\KitchenController::class, 'serviceRequestDone'])->name('kitchen.service-request.done');
 });
 
 /*

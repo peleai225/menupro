@@ -32,6 +32,7 @@ class CheckPlanFeature
             'analytics' => 'Statistiques, Rapports et Codes Promo',
             'stock' => 'Gestion de Stock',
             'delivery' => 'Gestion des Livraisons',
+            'hotel_rooms' => 'Chambres Hôtel (QR par chambre)',
             default => ucfirst($feature),
         };
     }

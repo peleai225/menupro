@@ -26,6 +26,7 @@ class Plan extends Model
         'has_analytics',
         'has_custom_domain',
         'has_priority_support',
+        'has_hotel_rooms',
         'is_active',
         'is_featured',
         'sort_order',
@@ -43,6 +44,7 @@ class Plan extends Model
         'has_analytics' => 'boolean',
         'has_custom_domain' => 'boolean',
         'has_priority_support' => 'boolean',
+        'has_hotel_rooms' => 'boolean',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'sort_order' => 'integer',
@@ -145,6 +147,7 @@ class Plan extends Model
             'analytics' => $this->has_analytics,
             'custom_domain' => $this->has_custom_domain,
             'priority_support' => $this->has_priority_support,
+            'hotel_rooms' => $this->has_hotel_rooms,
         ];
 
         return $featureMap[$feature] ?? false;

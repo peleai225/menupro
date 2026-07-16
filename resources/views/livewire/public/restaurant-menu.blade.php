@@ -134,7 +134,7 @@
                         @if($this->tableNumber)
                             <span class="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2 py-0.5 rounded-full mt-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
-                                Table {{ $this->tableNumber }}
+                                {{ is_numeric($this->tableNumber) ? 'Table '.$this->tableNumber : $this->tableNumber }}
                             </span>
                         @endif
                     </div>
@@ -886,6 +886,131 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    <!-- Floating Service Request Button (appel du personnel — visible si QR table détecté) -->
+    @if($this->tableNumber)
+    <div x-data="{
+            showServiceModal: false,
+            type: 'assistance',
+            notes: '',
+            sent: false,
+            loading: false,
+            send() {
+                if (this.loading) return;
+                this.loading = true;
+                fetch('{{ route('r.service-request.store', $restaurant->slug) }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ table_number: '{{ $this->tableNumber }}', type: this.type, notes: this.notes })
+                }).then(r => r.json()).then(() => {
+                    this.sent = true;
+                    this.loading = false;
+                    setTimeout(() => { this.showServiceModal = false; this.sent = false; this.notes = ''; }, 2500);
+                }).catch(() => { this.loading = false; });
+            }
+        }"
+         class="fixed bottom-6 right-6 z-40 {{ $restaurant->reservations_enabled ? 'bottom-28' : 'bottom-6' }}"
+         :class="{{ $this->cartItemsCount > 0 ? 'true' : 'false' }} ? 'bottom-24 lg:bottom-6' : 'bottom-6'">
+
+        <!-- Bouton flottant -->
+        <button @click="showServiceModal = true"
+                class="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white font-bold transition-all hover:scale-110"
+                style="background: linear-gradient(135deg, #7c3aed, #4c1d95);"
+                title="Appeler le personnel">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </button>
+
+        <!-- Modal appel du personnel -->
+        <div x-show="showServiceModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+             x-cloak>
+            <div class="absolute inset-0 bg-black/50" @click="showServiceModal = false"></div>
+            <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="p-5 text-white" style="background: linear-gradient(135deg, #7c3aed, #4c1d95);">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold">Appeler le personnel</h3>
+                            <p class="text-sm text-purple-200 mt-0.5">Table {{ $this->tableNumber }}</p>
+                        </div>
+                        <button @click="showServiceModal = false" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    <template x-if="sent">
+                        <div class="text-center py-6">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="font-bold text-neutral-900">Demande envoyée !</p>
+                            <p class="text-sm text-neutral-500 mt-1">Le personnel arrive bientôt.</p>
+                        </div>
+                    </template>
+
+                    <template x-if="!sent">
+                        <div>
+                            <p class="text-sm text-neutral-600 mb-4">Que puis-je faire pour vous ?</p>
+
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <button @click="type = 'assistance'"
+                                        :class="type === 'assistance' ? 'ring-2 ring-purple-500 bg-purple-50' : 'bg-neutral-50'"
+                                        class="p-3 rounded-xl text-left border border-neutral-200 transition-all">
+                                    <div class="text-2xl mb-1">🔔</div>
+                                    <div class="text-xs font-bold text-neutral-800">Appeler</div>
+                                    <div class="text-xs text-neutral-500">un serveur</div>
+                                </button>
+                                <button @click="type = 'cleaning'"
+                                        :class="type === 'cleaning' ? 'ring-2 ring-purple-500 bg-purple-50' : 'bg-neutral-50'"
+                                        class="p-3 rounded-xl text-left border border-neutral-200 transition-all">
+                                    <div class="text-2xl mb-1">🧹</div>
+                                    <div class="text-xs font-bold text-neutral-800">Nettoyage</div>
+                                    <div class="text-xs text-neutral-500">chambre / table</div>
+                                </button>
+                                <button @click="type = 'checkout'"
+                                        :class="type === 'checkout' ? 'ring-2 ring-purple-500 bg-purple-50' : 'bg-neutral-50'"
+                                        class="p-3 rounded-xl text-left border border-neutral-200 transition-all">
+                                    <div class="text-2xl mb-1">💳</div>
+                                    <div class="text-xs font-bold text-neutral-800">Addition</div>
+                                    <div class="text-xs text-neutral-500">/ check-out</div>
+                                </button>
+                                <button @click="type = 'other'"
+                                        :class="type === 'other' ? 'ring-2 ring-purple-500 bg-purple-50' : 'bg-neutral-50'"
+                                        class="p-3 rounded-xl text-left border border-neutral-200 transition-all">
+                                    <div class="text-2xl mb-1">💬</div>
+                                    <div class="text-xs font-bold text-neutral-800">Autre</div>
+                                    <div class="text-xs text-neutral-500">demande</div>
+                                </button>
+                            </div>
+
+                            <textarea x-model="notes"
+                                      class="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                      rows="2"
+                                      placeholder="Précisez votre demande (optionnel)..."></textarea>
+
+                            <button @click="send()"
+                                    :disabled="loading"
+                                    class="w-full mt-3 py-3.5 text-white font-bold rounded-xl transition-all active:scale-[0.98] disabled:opacity-60"
+                                    style="background: linear-gradient(135deg, #7c3aed, #4c1d95);">
+                                <span x-show="!loading">Envoyer la demande</span>
+                                <span x-show="loading">Envoi en cours...</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
     @endif
 
     <!-- Floating Reservation Button (gauche sur mobile pour éviter chevauchement avec panier, droite sur desktop) -->

@@ -37,11 +37,26 @@
         #tabs .tb-cnt { background: #f97316; color: #fff; border-radius: 10px; padding: 1px 6px; font-weight: 900; }
         #tabs .tb-cnt.prep { background: #3b82f6; }
         #tabs .tb-cnt.rdy  { background: #22c55e; }
+        #tabs .tb-cnt.svc  { background: #8b5cf6; }
 
         /* ── LAYOUT ────────────────────────────────────────── */
         #main { display: flex; height: calc(100vh - 52px); }
         .col { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #181818; min-width: 0; }
         .col:last-child { border-right: none; }
+
+        /* ── APPELS SERVICE ────────────────────────────────── */
+        #col-wrap-s .col-hd { background: rgba(139,92,246,.07); color: #a78bfa; }
+        .ds { background: #8b5cf6; }
+        .scard { background: #111; border-radius: 11px; border: 1px solid #1d1d1d; overflow: hidden; flex-shrink: 0; animation: svc-pulse 1.5s ease-in-out 3; }
+        @keyframes svc-pulse { 0%,100%{border-color:#1d1d1d;} 50%{border-color:#8b5cf6;} }
+        .scard-top { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 8px 11px; border-bottom: 1px solid #1a1a1a; background: rgba(139,92,246,.09); }
+        .scard-body { padding: 9px 11px; }
+        .stype { font-size: 22px; }
+        .stype-lbl { font-size: 13px; font-weight: 800; color: #e5e7eb; flex: 1; }
+        .snotes { font-size: 12px; color: #fbbf24; background: rgba(251,191,36,.08); padding: 4px 7px; border-radius: 5px; margin-bottom: 8px; }
+        .sbtn { display: block; width: 100%; padding: 10px; border: none; border-radius: 9px; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; background: #8b5cf6; color: #fff; }
+        .sbtn:active { opacity: .82; transform: scale(.97); }
+        .sbtn:disabled { opacity: .45; cursor: wait; }
         .col-hd { height: 38px; display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #181818; font-size: 13px; font-weight: 700; gap: 7px; flex-shrink: 0; }
         .col-body { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         .col-body::-webkit-scrollbar { width: 3px; }
@@ -107,6 +122,8 @@
             .col { display: none; }
             .col.active { display: flex; flex: 1; border-right: none; }
         }
+        /* badge violet sur le header desktop */
+        #svc-badge { display: none; position: absolute; top: -6px; right: -6px; background: #8b5cf6; color: #fff; border-radius: 10px; padding: 1px 5px; font-size: 10px; font-weight: 900; }
         @media (min-width: 768px) and (max-width: 1023px) {
             .cref  { font-size: 13px; }
             .iname { font-size: 12px; }
@@ -158,6 +175,9 @@
     <button id="tab-r" onclick="showTab('r')">
         <div class="tb">Prêtes <span id="tc-r" class="tb-cnt rdy">0</span></div>
     </button>
+    <button id="tab-s" onclick="showTab('s')">
+        <div class="tb">Appels <span id="tc-s" class="tb-cnt svc">0</span></div>
+    </button>
 </div>
 
 {{-- COLONNES --}}
@@ -173,6 +193,10 @@
     <div class="col col-rdy" id="col-wrap-r">
         <div class="col-hd"><span class="d8 dr"></span>Prêtes<span class="col-cnt" id="cr">0</span></div>
         <div class="col-body" id="col-r"></div>
+    </div>
+    <div class="col" id="col-wrap-s" style="max-width:260px;">
+        <div class="col-hd"><span class="d8 ds"></span>Appels<span class="col-cnt" id="cs">0</span></div>
+        <div class="col-body" id="col-s"></div>
     </div>
 </div>
 
@@ -230,13 +254,15 @@
 
     /* ══ TABS MOBILE ══════════════════════════════════════ */
     window.showTab = function(t) {
-        ['n','p','r'].forEach(function(id){
+        ['n','p','r','s'].forEach(function(id){
             document.getElementById('col-wrap-'+id).classList.toggle('active', id===t);
             document.getElementById('tab-'+id).classList.toggle('active', id===t);
         });
     };
 
     /* ══ DONNÉES ══════════════════════════════════════════ */
+    var knownSvcIds = {};
+
     function handleData(r) {
         setDot(r.ok);
         if (!r.ok) return;
@@ -245,7 +271,68 @@
                 if (!knownIds[o.id]) { knownIds[o.id]=true; announceOrder(o); }
             });
             render(data.orders);
+
+            var svcList = data.service_requests || [];
+            svcList.forEach(function(s){
+                if (!knownSvcIds[s.id]) { knownSvcIds[s.id]=true; announceService(s); }
+            });
+            renderService(svcList);
         });
+    }
+
+    /* ══ ACTION SERVICE ═══════════════════════════════════ */
+    window.svcDone = function(id, btn) {
+        btn.disabled = true;
+        fetch('/cuisine/'+TOKEN+'/service-requests/'+id+'/done', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':CSRF},
+            body: JSON.stringify({})
+        }).then(function(r){
+            if (r.ok) fetch('/cuisine/'+TOKEN+'/data').then(handleData);
+            else btn.disabled = false;
+        }).catch(function(){ btn.disabled=false; });
+    };
+
+    /* ══ RENDU SERVICE ════════════════════════════════════ */
+    function renderService(list) {
+        var col  = document.getElementById('col-s');
+        var cnt  = list.length;
+        document.getElementById('cs').textContent    = cnt;
+        document.getElementById('tc-s').textContent  = cnt;
+
+        // Badge sur l'onglet service (desktop) — colorer la col-hd si > 0
+        document.getElementById('col-wrap-s').style.outline = cnt > 0 ? '1px solid #8b5cf6' : '';
+
+        if (!cnt) {
+            col.innerHTML = '<div class="empty">Aucun appel</div>';
+            return;
+        }
+
+        col.innerHTML = list.map(function(s){
+            var notes = s.notes ? '<div class="snotes">'+h(s.notes)+'</div>' : '';
+            return '<div class="scard" id="svc-'+parseInt(s.id,10)+'">'
+                +'<div class="scard-top">'
+                +'<span class="ctbl">'+h(s.table_number)+'</span>'
+                +'<span class="ctmr '+(s.minutes_ago > 10 ? 'tlate' : s.minutes_ago > 5 ? 'twarn' : 'tok')+'">'+Math.round(s.minutes_ago)+'min</span>'
+                +'</div>'
+                +'<div class="scard-body">'
+                +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                +'<span class="stype">'+h(s.type_icon)+'</span>'
+                +'<span class="stype-lbl">'+h(s.type_label)+'</span>'
+                +'</div>'
+                +notes
+                +'<button class="sbtn" onclick="svcDone('+parseInt(s.id,10)+',this)">&#10003; Traité</button>'
+                +'</div></div>';
+        }).join('');
+    }
+
+    function announceService(s) {
+        playSound();
+        if (voiceOn) {
+            var t = 'Appel du personnel. ' + s.table_number + '. ' + s.type_label + '.';
+            if (s.notes) t += ' ' + s.notes;
+            speak({ reference: '', table_number: s.table_number, type: s.type_label, items: [], _text: t });
+        }
     }
 
     /* ══ ACTION BOUTONS ═══════════════════════════════════ */
@@ -291,7 +378,8 @@
         var id  = parseInt(o.id, 10);
         var st  = String(o.status||'');
         var min = Math.round(Number(o.minutes_ago)||0);
-        var tbl = o.table_number ? '<span class="ctbl">Table '+h(o.table_number)+'</span>' : '';
+        var tblLabel = o.table_number ? (/^\d+$/.test(String(o.table_number)) ? 'Table '+h(o.table_number) : h(o.table_number)) : '';
+        var tbl = tblLabel ? '<span class="ctbl">'+tblLabel+'</span>' : '';
         var badgeLabel = st==='paid' ? 'NOUVELLE' : st==='confirmed' ? 'CONFIRM&#201;E' : st==='preparing' ? 'EN COURS' : 'PR&#202;T';
 
         var orderNote = o.customer_notes
@@ -358,7 +446,7 @@
     /* ══ ALERTE NOUVELLE COMMANDE ═════════════════════════ */
     function announceOrder(o) {
         var parts = [];
-        if (o.table_number) parts.push('Table '+o.table_number);
+        if (o.table_number) parts.push(/^\d+$/.test(String(o.table_number)) ? 'Table '+o.table_number : o.table_number);
         var dishes = (o.items||[]).map(function(i){ return i.quantity+'x '+i.name; }).join(', ');
         if (dishes) parts.push(dishes);
         document.getElementById('alrt-d').textContent = parts.join(' — ');
@@ -403,7 +491,7 @@
 
     function speak(o) {
         if (!voiceOn) return;
-        var t = buildSpeechText(o);
+        var t = o._text || buildSpeechText(o);
 
         if (EL_ENABLED && audioCtx) {
             fetch('/cuisine/' + TOKEN + '/tts', {
@@ -441,7 +529,7 @@
         var text = 'Nouvelle commande ' + ref + '. ';
 
         if (o.table_number) {
-            text += 'Table ' + o.table_number + '. ';
+            text += (/^\d+$/.test(String(o.table_number)) ? 'Table ' + o.table_number : o.table_number) + '. ';
         } else if (o.type) {
             text += o.type + '. ';
         }

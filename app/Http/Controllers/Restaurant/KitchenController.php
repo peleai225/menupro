@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use App\Models\ServiceRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -114,14 +115,47 @@ class KitchenController extends Controller
             ->get()
             ->map(fn($order) => $this->serializeOrder($order));
 
+        $serviceRequests = ServiceRequest::where('restaurant_id', $restaurant->id)
+            ->where('status', 'pending')
+            ->where('created_at', '>=', now()->subHours(12))
+            ->oldest()
+            ->get()
+            ->map(fn($r) => [
+                'id'           => $r->id,
+                'table_number' => $r->table_number,
+                'type'         => $r->type,
+                'type_label'   => $r->typeLabel(),
+                'type_icon'    => $r->typeIcon(),
+                'notes'        => $r->notes,
+                'minutes_ago'  => $r->created_at->diffInMinutes(now()),
+            ]);
+
         return response()->json([
             'orders' => $orders,
             'counts' => [
-                'new'      => $orders->whereIn('status', ['paid', 'confirmed'])->count(),
-                'preparing' => $orders->where('status', 'preparing')->count(),
-                'ready'    => $orders->where('status', 'ready')->count(),
+                'new'           => $orders->whereIn('status', ['paid', 'confirmed'])->count(),
+                'preparing'     => $orders->where('status', 'preparing')->count(),
+                'ready'         => $orders->where('status', 'ready')->count(),
+                'service'       => $serviceRequests->count(),
             ],
+            'service_requests' => $serviceRequests,
         ]);
+    }
+
+    /**
+     * Mark a service request as done.
+     */
+    public function serviceRequestDone(string $token, ServiceRequest $serviceRequest): JsonResponse
+    {
+        $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+
+        if ((int) $serviceRequest->restaurant_id !== (int) $restaurant->id) {
+            abort(403);
+        }
+
+        $serviceRequest->update(['status' => 'done', 'done_at' => now()]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

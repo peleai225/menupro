@@ -21,8 +21,8 @@ class RestaurantMenu extends Component
     public array $cart = [];
     public bool $showCart = false;
 
-    // Table number from QR code scan
-    public ?int $tableNumber = null;
+    // Table number/name from QR code scan (can be numeric or text like "Chambre 101")
+    public ?string $tableNumber = null;
 
     public function mount(string $slug): void
     {
@@ -55,10 +55,11 @@ class RestaurantMenu extends Component
             // Load cart from session
             $this->cart = session()->get("cart.{$this->restaurant->id}", []);
 
-            // Capture table number from QR code URL (?table=X) and store in session
+            // Capture table identifier from QR code URL (?table=X) and store in session
+            // Accepts both numeric (table 5) and text (Chambre 101) values
             $tableFromUrl = request()->query('table');
-            if ($tableFromUrl && is_numeric($tableFromUrl)) {
-                $this->tableNumber = (int) $tableFromUrl;
+            if ($tableFromUrl && strlen((string) $tableFromUrl) <= 50) {
+                $this->tableNumber = (string) $tableFromUrl;
                 session()->put("table.{$this->restaurant->id}", $this->tableNumber);
             }
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
