@@ -33,7 +33,9 @@ class POS extends Component
     public string $searchDish = '';
     public ?int $selectedCategory = null;
     public bool $showConfirmModal = false;
-    public ?Order $lastOrder = null;
+    public ?int $lastOrderId = null;
+    public string $lastOrderReference = '';
+    public string $posSuccessMessage = '';
 
     protected $rules = [
         'customerName' => 'required|string|max:100',
@@ -201,7 +203,9 @@ class POS extends Component
         $this->tableNumber = '';
         $this->customerNotes = '';
         $this->paymentMethod = 'cash';
-        $this->lastOrder = null;
+        $this->lastOrderId = null;
+        $this->lastOrderReference = '';
+        $this->posSuccessMessage = '';
     }
 
     public function confirmOrder(): void
@@ -225,9 +229,10 @@ class POS extends Component
         $this->validate();
 
         $restaurant = $this->restaurant;
+        $createdOrder = null;
 
         try {
-            \DB::transaction(function () use ($restaurant) {
+            \DB::transaction(function () use ($restaurant, &$createdOrder) {
                 $order = Order::create([
                     'restaurant_id' => $restaurant->id,
                     'reference' => 'POS-' . now()->format('ymd') . '-' . strtoupper(Str::random(4)),
@@ -270,21 +275,23 @@ class POS extends Component
                     ]);
                 }
 
-                $this->lastOrder = $order;
+                $createdOrder = $order;
             });
 
             // Send WhatsApp notification if enabled
             try {
                 $whatsapp = app(\App\Services\WhatsAppService::class);
-                if ($this->lastOrder->customer_phone) {
-                    $whatsapp->sendOrderConfirmation($this->lastOrder);
+                if ($createdOrder->customer_phone) {
+                    $whatsapp->sendOrderConfirmation($createdOrder);
                 }
-                $whatsapp->sendNewOrderToRestaurant($this->lastOrder);
+                $whatsapp->sendNewOrderToRestaurant($createdOrder);
             } catch (\Throwable $e) {
-                // Don't fail the order if WhatsApp fails
                 \Log::warning('POS WhatsApp notification failed: ' . $e->getMessage());
             }
 
+            $this->lastOrderId = $createdOrder->id;
+            $this->lastOrderReference = $createdOrder->reference;
+            $this->posSuccessMessage = 'Commande ' . $createdOrder->reference . ' créée avec succès !';
             $this->showConfirmModal = false;
             $this->cart = [];
             $this->customerName = '';
@@ -292,8 +299,6 @@ class POS extends Component
             $this->customerEmail = '';
             $this->tableNumber = '';
             $this->customerNotes = '';
-
-            session()->flash('pos_success', 'Commande ' . $this->lastOrder->reference . ' créée avec succès !');
 
         } catch (\Throwable $e) {
             $this->addError('submit', 'Erreur lors de la création : ' . $e->getMessage());

@@ -95,6 +95,10 @@ class ReservationController extends Controller
             return;
         }
 
+        if (empty($reservation->customer_email)) {
+            return;
+        }
+
         try {
             if ($newStatus === 'confirmed') {
                 Notification::route('mail', $reservation->customer_email)

@@ -7,6 +7,7 @@ use App\Notifications\NewReservationNotification;
 use App\Notifications\ReservationReceivedNotification;
 use App\Models\Restaurant;
 use App\Models\Reservation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -17,7 +18,7 @@ class ReservationController extends Controller
     /**
      * Store a new reservation.
      */
-    public function store(Request $request, string $slug): RedirectResponse
+    public function store(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $restaurant = Restaurant::where('slug', $slug)
             ->where('status', \App\Enums\RestaurantStatus::ACTIVE)

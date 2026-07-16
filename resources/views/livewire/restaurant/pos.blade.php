@@ -19,14 +19,14 @@
     </div>
 
     {{-- Success message --}}
-    @if(session('pos_success'))
+    @if($posSuccessMessage)
         <div class="mb-6 p-4 bg-secondary-50 border border-secondary-200 rounded-xl text-secondary-800 flex items-center gap-3">
             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="font-medium">{{ session('pos_success') }}</span>
-            @if($lastOrder)
-                <span class="ml-auto text-sm text-secondary-600">Réf: {{ $lastOrder->reference }}</span>
+            <span class="font-medium">{{ $posSuccessMessage }}</span>
+            @if($lastOrderId)
+                <a href="{{ route('restaurant.orders.show', $lastOrderId) }}" class="ml-auto text-sm text-secondary-600 hover:underline">Voir la commande →</a>
             @endif
         </div>
     @endif
