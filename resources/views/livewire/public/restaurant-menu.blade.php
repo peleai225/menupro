@@ -1077,82 +1077,93 @@
                     <!-- Form -->
                     <form @submit.prevent="
                             sending = true;
+                            const data = {};
+                            new FormData($el).forEach((v,k) => { if (k !== '_token') data[k] = v; });
                             fetch('{{ route('r.reservations.store', $restaurant->slug) }}', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json'},
-                                body: JSON.stringify(Object.fromEntries(new FormData($el)))
+                                body: JSON.stringify(data)
                             }).then(r => r.json()).then(d => {
                                 sending = false;
                                 if (d.success) { sent = true; }
                                 else { alert(d.message || 'Erreur. Veuillez réessayer.'); }
                             }).catch(() => { sending = false; alert('Erreur réseau. Veuillez réessayer.'); })
                           "
-                          class="p-6 space-y-5">
+                          class="p-5 space-y-4">
                         @csrf
-                        <div class="grid grid-cols-2 gap-4">
+                        {{-- Nom + Téléphone --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nom complet *</label>
+                                <label class="block text-sm font-semibold text-neutral-700 mb-1.5">Nom complet *</label>
                                 <input type="text" name="customer_name" required
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                       class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition"
                                        style="--tw-ring-color: {{ $primaryColor }};"
                                        placeholder="Votre nom">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone *</label>
+                                <label class="block text-sm font-semibold text-neutral-700 mb-1.5">Téléphone *</label>
                                 <input type="tel" name="customer_phone" required
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                       class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition"
                                        style="--tw-ring-color: {{ $primaryColor }};"
                                        placeholder="+225 07 XX XX XX XX">
                             </div>
                         </div>
+                        {{-- Email optionnel --}}
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Email <span class="text-neutral-400 font-normal">(optionnel — pour recevoir la confirmation)</span></label>
+                            <label class="block text-sm font-semibold text-neutral-700 mb-1.5">
+                                Email <span class="text-neutral-400 font-normal text-xs">(optionnel — reçoit la confirmation)</span>
+                            </label>
                             <input type="email" name="customer_email"
-                                   class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                   class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition"
                                    style="--tw-ring-color: {{ $primaryColor }};"
                                    placeholder="votre@email.com">
                         </div>
-                        <div class="grid grid-cols-3 gap-4">
+                        {{-- Personnes + Date + Heure --}}
+                        <div class="grid grid-cols-3 gap-3">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Personnes *</label>
+                                <label class="block text-sm font-semibold text-neutral-700 mb-1.5">Personnes *</label>
                                 <input type="number" name="number_of_guests" required min="1" max="50" value="2"
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition text-center"
+                                       class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm text-center transition"
                                        style="--tw-ring-color: {{ $primaryColor }};">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Date *</label>
+                                <label class="block text-sm font-semibold text-neutral-700 mb-1.5">Date *</label>
                                 <input type="date" name="reservation_date" required
-                                       min="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                       min="{{ date('Y-m-d') }}"
+                                       class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition"
                                        style="--tw-ring-color: {{ $primaryColor }};">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Heure *</label>
+                                <label class="block text-sm font-semibold text-neutral-700 mb-1.5">Heure *</label>
                                 <input type="time" name="reservation_time" required
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                       class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition"
                                        style="--tw-ring-color: {{ $primaryColor }};">
                             </div>
                         </div>
+                        {{-- Message --}}
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Message <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                            <label class="block text-sm font-semibold text-neutral-700 mb-1.5">
+                                Message <span class="text-neutral-400 font-normal text-xs">(optionnel)</span>
+                            </label>
                             <textarea name="special_requests" rows="2"
-                                      class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition resize-none"
+                                      class="w-full px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm transition resize-none"
                                       style="--tw-ring-color: {{ $primaryColor }};"
                                       placeholder="Anniversaire, allergie, demande particulière..."></textarea>
                         </div>
-                        <div class="flex gap-3 pt-2">
+                        {{-- Boutons --}}
+                        <div class="flex gap-3 pt-1">
                             <button type="button" @click="showReservationModal = false"
-                                    class="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 rounded-xl font-medium hover:bg-neutral-50 transition">
+                                    class="flex-1 px-4 py-2.5 border border-neutral-300 text-neutral-700 rounded-xl text-sm font-medium hover:bg-neutral-50 transition">
                                 Annuler
                             </button>
                             <button type="submit" :disabled="sending"
-                                    class="flex-1 px-6 py-3 text-white rounded-xl font-medium transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                    class="flex-1 px-4 py-2.5 text-white rounded-xl text-sm font-semibold transition shadow-md flex items-center justify-center gap-2 disabled:opacity-70"
                                     style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }});">
-                                <svg x-show="sending" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <svg x-show="sending" class="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                                <span x-text="sending ? 'Envoi...' : 'Confirmer la réservation'"></span>
+                                <span x-text="sending ? 'Envoi en cours...' : 'Confirmer la réservation'"></span>
                             </button>
                         </div>
                     </form>

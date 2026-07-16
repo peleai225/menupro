@@ -29,7 +29,7 @@ class ReservationController extends Controller
             'customer_email' => ['nullable', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:20'],
             'number_of_guests' => ['required', 'integer', 'min:1', 'max:50'],
-            'reservation_date' => ['required', 'date', 'after:now'],
+            'reservation_date' => ['required', 'date', 'after_or_equal:today'],
             'reservation_time' => ['required', 'date_format:H:i'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
         ], [
@@ -72,13 +72,14 @@ class ReservationController extends Controller
             $restaurant->owner->notify(new NewReservationNotification($reservation));
         }
 
-        // Send confirmation email to customer
-        try {
-            Notification::route('mail', $validated['customer_email'])
-                ->notify(new ReservationReceivedNotification($reservation));
-        } catch (\Exception $e) {
-            // Log error but don't fail the reservation
-            \Log::warning('Failed to send reservation confirmation email: ' . $e->getMessage());
+        // Send confirmation email to customer (only if email provided)
+        if (!empty($validated['customer_email'])) {
+            try {
+                Notification::route('mail', $validated['customer_email'])
+                    ->notify(new ReservationReceivedNotification($reservation));
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send reservation confirmation email: ' . $e->getMessage());
+            }
         }
 
         if ($request->expectsJson()) {
