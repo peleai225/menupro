@@ -65,8 +65,8 @@ class Dishes extends Component
             ->with('category')
             ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->when($this->category, fn($q) => $q->where('category_id', $this->category))
-            ->when($this->status === 'available', fn($q) => $q->where('is_available', true))
-            ->when($this->status === 'unavailable', fn($q) => $q->where('is_available', false))
+            ->when($this->status === 'available', fn($q) => $q->where('is_active', true))
+            ->when($this->status === 'unavailable', fn($q) => $q->where('is_active', false))
             ->when($this->status === 'featured', fn($q) => $q->where('is_featured', true))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(12);
@@ -75,8 +75,8 @@ class Dishes extends Component
     public function toggleAvailability(int $id): void
     {
         $dish = Dish::findOrFail($id);
-        $dish->update(['is_available' => !$dish->is_available]);
-        session()->flash('message', $dish->is_available ? 'Plat disponible' : 'Plat indisponible');
+        $dish->update(['is_active' => !$dish->is_active]);
+        session()->flash('success', $dish->is_active ? 'Plat activé — visible sur le menu' : 'Plat désactivé — masqué du menu');
     }
 
     public function toggleFeatured(int $id): void

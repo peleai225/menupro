@@ -124,8 +124,9 @@
     </div>
 
     <!-- Filters -->
-    <div class="card p-4 mb-6">
-        <div class="flex flex-col sm:flex-row gap-4">
+    <div class="card p-4 mb-6 space-y-3">
+        <!-- Search + toggle -->
+        <div class="flex flex-col sm:flex-row gap-3">
             <div class="flex-1 relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -135,18 +136,28 @@
                        placeholder="Rechercher un plat..."
                        class="w-full h-10 pl-10 pr-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
             </div>
-            <select wire:model.live="filterCategory"
-                    class="h-10 px-4 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <option value="">Toutes categories</option>
-                @foreach($this->categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                @endforeach
-            </select>
             <label class="flex items-center gap-2 cursor-pointer px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg hover:bg-neutral-100 transition-colors">
                 <input type="checkbox" wire:model.live="showOnlyTracked" class="w-4 h-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500">
                 <span class="text-sm text-neutral-700 whitespace-nowrap">Suivis uniquement</span>
             </label>
         </div>
+        <!-- Category pill buttons -->
+        @if($this->categories->isNotEmpty())
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button wire:click="$set('filterCategory', null)"
+                    class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all
+                           {{ !$filterCategory ? 'bg-primary-500 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                Tous
+            </button>
+            @foreach($this->categories as $cat)
+                <button wire:click="$set('filterCategory', {{ $cat->id }})"
+                        class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all
+                               {{ $filterCategory == $cat->id ? 'bg-primary-500 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                    {{ $cat->name }}
+                </button>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     <!-- Dishes Grid -->
