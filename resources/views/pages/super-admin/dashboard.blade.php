@@ -42,7 +42,7 @@
                     +{{ $stats['restaurants']['total'] }}
                 </span>
             </div>
-            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['restaurants']['active']) }}</p>
+            <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['restaurants']['active']) }}</p>
             <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
         </div>
 
@@ -62,7 +62,7 @@
                     MRR
                 </span>
             </div>
-            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">
+            <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">
                 @if($stats['revenue']['this_month'] >= 1000000)
                     {{ number_format($stats['revenue']['this_month'] / 1000000, 1, ',', ' ') }}M
                 @else
@@ -88,7 +88,7 @@
                     +{{ number_format($stats['orders']['this_month']) }}
                 </span>
             </div>
-            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">
+            <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">
                 @if($stats['orders']['total'] >= 1000)
                     {{ number_format($stats['orders']['total'] / 1000, 1, ',', ' ') }}K
                 @else
@@ -115,7 +115,7 @@
                           style="background:var(--sa-muted);color:var(--sa-muted-fg);">OK</span>
                 @endif
             </div>
-            <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['restaurants']['pending'] }}</p>
+            <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['restaurants']['pending'] }}</p>
             <p class="mt-1 text-sm font-{{ $stats['restaurants']['pending'] > 0 ? 'semibold' : 'normal' }}"
                style="color:{{ $stats['restaurants']['pending'] > 0 ? 'var(--sa-warning)' : 'var(--sa-muted-fg)' }};">
                 {{ $stats['restaurants']['pending'] > 0 ? 'En attente de validation' : 'Aucun en attente' }}
@@ -477,8 +477,8 @@
                 <template x-for="order in orders" :key="order.id">
                     <div class="px-5 py-3 transition" style="border-color:var(--sa-sidebar-border);"
                          onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='transparent'">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex items-center justify-between gap-2 sm:gap-3">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                      :class="{
                                         'bg-amber-500/15 text-amber-400': order.status === 'pending',
@@ -498,7 +498,7 @@
                                     <p class="text-xs truncate" style="color:var(--sa-sidebar-accent);" x-text="order.restaurant"></p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 flex-shrink-0">
+                            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold"
                                       :class="{
                                         'bg-amber-500/15 text-amber-400': order.status === 'pending',
@@ -509,7 +509,7 @@
                                       }"
                                       x-text="order.status_label"></span>
                                 <span class="text-xs font-semibold" style="color:var(--sa-sidebar-fg);" x-text="formatCurrency(order.total) + ' F'"></span>
-                                <span class="text-[10px]" style="color:var(--sa-sidebar-accent);" x-text="order.created_at"></span>
+                                <span class="text-[10px] hidden sm:inline" style="color:var(--sa-sidebar-accent);" x-text="order.created_at"></span>
                             </div>
                         </div>
                     </div>
@@ -526,7 +526,7 @@
 
             {{-- Stats Footer --}}
             <div class="px-5 py-3" style="border-top:1px solid var(--sa-sidebar-border);background:rgba(0,0,0,.2);">
-                <div class="grid grid-cols-4 gap-4 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                     <div>
                         <p class="text-lg font-bold" style="color:var(--sa-sidebar-fg);" x-text="stats.pending_orders || 0"></p>
                         <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">En attente</p>

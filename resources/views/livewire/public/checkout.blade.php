@@ -50,33 +50,33 @@
                 <!-- Order Type -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
                     <h2 class="text-lg font-bold text-neutral-900 mb-4">Type de commande</h2>
-                    <div class="grid grid-cols-3 gap-4">
-                        <button type="button" 
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+                        <button type="button"
                                 wire:click="$set('order_type', 'dine_in')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'dine_in' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                class="p-2 sm:p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'dine_in' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
                                 @if($order_type === 'dine_in') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'dine_in' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 {{ $order_type === 'dine_in' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'dine_in' ? '' : 'text-neutral-700' }}" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>Sur place</span>
+                            <span class="text-xs sm:text-sm font-medium {{ $order_type === 'dine_in' ? '' : 'text-neutral-700' }}" @if($order_type === 'dine_in') style="color: {{ $primaryColor }};" @endif>Sur place</span>
                         </button>
                         <button type="button"
                                 wire:click="$set('order_type', 'takeaway')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'takeaway' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                class="p-2 sm:p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'takeaway' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
                                 @if($order_type === 'takeaway') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'takeaway' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 {{ $order_type === 'takeaway' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'takeaway' ? '' : 'text-neutral-700' }}" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>À emporter</span>
+                            <span class="text-xs sm:text-sm font-medium {{ $order_type === 'takeaway' ? '' : 'text-neutral-700' }}" @if($order_type === 'takeaway') style="color: {{ $primaryColor }};" @endif>À emporter</span>
                         </button>
                         <button type="button"
                                 wire:click="$set('order_type', 'delivery')"
-                                class="p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'delivery' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
+                                class="p-2 sm:p-4 rounded-xl border-2 transition-all text-center {{ $order_type === 'delivery' ? '' : 'border-neutral-200 hover:border-neutral-300' }}"
                                 @if($order_type === 'delivery') style="border-color: {{ $primaryColor }}; background-color: {{ $primaryColor }}15;" @endif>
-                            <svg class="w-8 h-8 mx-auto mb-2 {{ $order_type === 'delivery' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 {{ $order_type === 'delivery' ? '' : 'text-neutral-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                             </svg>
-                            <span class="font-medium {{ $order_type === 'delivery' ? '' : 'text-neutral-700' }}" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>Livraison</span>
+                            <span class="text-xs sm:text-sm font-medium {{ $order_type === 'delivery' ? '' : 'text-neutral-700' }}" @if($order_type === 'delivery') style="color: {{ $primaryColor }};" @endif>Livraison</span>
                         </button>
                     </div>
                 </div>
@@ -98,9 +98,9 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone *</label>
-                                <div class="flex gap-2">
+                                <div class="flex flex-col sm:flex-row gap-2">
                                     <select wire:model="customer_phone_country"
-                                            class="w-44 px-3 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_phone') border-red-500 @enderror bg-white">
+                                            class="w-full sm:w-44 px-3 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('customer_phone') border-red-500 @enderror bg-white">
                                         @foreach(\App\Livewire\Public\Checkout::phoneCountryOptions() as $code => $label)
                                             <option value="{{ $code }}">{{ $label }}</option>
                                         @endforeach
@@ -290,7 +290,7 @@
 
             <!-- Order Summary -->
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl p-8 shadow-sm sticky top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+                <div class="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm sticky top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
                     <h2 class="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
                         <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>

@@ -75,9 +75,9 @@
                         <p class="text-sm text-neutral-500">{{ $order['phone'] }} · {{ $order['items'] }} articles · Il y a {{ $order['time'] }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4">
                     <div class="text-right">
-                        <p class="text-xl font-bold text-neutral-900">{{ $order['total'] }} F</p>
+                        <p class="text-lg sm:text-xl font-bold text-neutral-900">{{ $order['total'] }} F</p>
                         @php
                             $statusColors = [
                                 'pending' => 'bg-yellow-100 text-yellow-700',

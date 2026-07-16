@@ -12,7 +12,7 @@
     @livewireStyles
 </head>
 <body class="h-full bg-gray-950 text-white antialiased overscroll-none" x-data="{ sidebarOpen: false }">
-    <div class="flex h-full">
+    <div class="flex min-h-screen">
         {{-- Desktop Sidebar --}}
         <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-gray-900/95 backdrop-blur-xl border-r border-gray-800/50 z-30">
             {{-- Logo --}}
@@ -216,7 +216,7 @@
         </aside>
 
         {{-- Main content --}}
-        <div class="flex-1 lg:pl-64 flex flex-col min-h-screen pb-16 lg:pb-0">
+        <div class="flex-1 lg:pl-64 flex flex-col min-h-screen pb-20 lg:pb-0">
             {{-- Top bar --}}
             <header class="sticky top-0 z-20 h-14 lg:h-16 flex items-center justify-between px-4 lg:px-8 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800/50">
                 <div class="flex items-center gap-3">
@@ -331,7 +331,7 @@
             const existingToasts = document.querySelectorAll('.crm-toast');
             const offset = existingToasts.length * 70;
 
-            toast.className = `crm-toast fixed right-4 z-[200] flex items-center gap-2.5 max-w-xs px-4 py-3 rounded-2xl shadow-2xl text-sm font-medium text-white backdrop-blur transition-all duration-400 opacity-0 translate-x-8 ${colors[type] || colors.info}`;
+            toast.className = `crm-toast fixed right-4 z-[200] flex items-center gap-2.5 max-w-[calc(100vw-2rem)] sm:max-w-xs px-4 py-3 rounded-2xl shadow-2xl text-sm font-medium text-white backdrop-blur transition-all duration-400 opacity-0 translate-x-8 ${colors[type] || colors.info}`;
             toast.style.top = `${80 + offset}px`;
             toast.innerHTML = `<span class="text-base">${icons[type] || icons.info}</span><span class="flex-1">${message}</span>`;
             document.body.appendChild(toast);

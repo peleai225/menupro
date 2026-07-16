@@ -76,14 +76,14 @@
 
             <!-- Billing Cycle Toggle -->
             <div class="flex justify-center mb-12">
-                <div class="inline-flex bg-neutral-900 border border-neutral-800 p-1.5 rounded-2xl">
+                <div class="inline-flex flex-wrap justify-center bg-neutral-900 border border-neutral-800 p-1.5 rounded-2xl max-w-full">
                     <template x-for="cycle in cycles" :key="cycle.id">
                         <button @click="billingCycle = cycle.id"
                                 :class="billingCycle === cycle.id ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20' : 'text-neutral-400 hover:text-white'"
-                                class="relative px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+                                class="relative px-2.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all">
                             <span x-text="cycle.label"></span>
                             <template x-if="cycle.discount > 0">
-                                <span class="ml-1 inline-block px-1.5 py-0.5 rounded-md bg-secondary-500 text-white text-[10px] font-bold"
+                                <span class="ml-0.5 sm:ml-1 inline-block px-1 sm:px-1.5 py-0.5 rounded-md bg-secondary-500 text-white text-[9px] sm:text-[10px] font-bold"
                                       x-text="'-' + cycle.discount + '%'"></span>
                             </template>
                         </button>
@@ -337,7 +337,7 @@
 
             <div class="bg-neutral-950 rounded-2xl border border-neutral-800 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full min-w-[600px]">
                         <thead>
                             <tr class="border-b border-neutral-800">
                                 <th class="text-left py-4 px-6 text-sm font-semibold text-neutral-400">Fonctionnalite</th>

@@ -65,21 +65,21 @@
                     </div>
 
                     {{-- Trust stats --}}
-                    <div class="mt-10 flex items-center gap-8 justify-center lg:justify-start">
+                    <div class="mt-10 flex flex-wrap items-center gap-4 sm:gap-8 justify-center lg:justify-start">
                         <div>
                             <div class="text-2xl font-bold text-neutral-900" x-data="counter({{ $stats['raw']['restaurants'] }})" x-intersect.once="startCount()">
                                 <span x-text="displayCount"></span>
                             </div>
                             <div class="text-neutral-500 text-xs mt-0.5">Restaurants</div>
                         </div>
-                        <div class="w-px h-10 bg-neutral-200"></div>
+                        <div class="w-px h-10 bg-neutral-200 hidden sm:block"></div>
                         <div>
                             <div class="text-2xl font-bold text-neutral-900" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()">
                                 <span x-text="displayCount"></span>
                             </div>
                             <div class="text-neutral-500 text-xs mt-0.5">Commandes</div>
                         </div>
-                        <div class="w-px h-10 bg-neutral-200"></div>
+                        <div class="w-px h-10 bg-neutral-200 hidden sm:block"></div>
                         <div>
                             <div class="text-2xl font-bold text-neutral-900">15 000 F</div>
                             <div class="text-neutral-500 text-xs mt-0.5">A partir de</div>
@@ -160,21 +160,21 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
                 <span class="text-sm text-neutral-500 font-semibold whitespace-nowrap uppercase tracking-wide">Paiements acceptes</span>
-                <div class="flex items-center gap-6 sm:gap-10">
+                <div class="flex items-center gap-4 sm:gap-6 md:gap-10">
                     <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
                         <span class="text-xs text-neutral-500 font-medium">Wave</span>
                     </div>
                     <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
                         <span class="text-xs text-neutral-500 font-medium">Orange Money</span>
                     </div>
                     <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
                         <span class="text-xs text-neutral-500 font-medium">MTN MoMo</span>
                     </div>
                     <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-14 w-14 sm:h-16 sm:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
+                        <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
                         <span class="text-xs text-neutral-500 font-medium">Moov Money</span>
                     </div>
                 </div>

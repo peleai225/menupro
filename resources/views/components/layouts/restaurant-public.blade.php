@@ -80,24 +80,24 @@
 
                         <!-- Info -->
                         <div class="flex-1">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h1 class="text-2xl md:text-3xl font-bold text-neutral-900">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 truncate">
                                         {{ $restaurant->name ?? 'Restaurant' }}
                                     </h1>
-                                    <p class="text-neutral-500 mt-1">
+                                    <p class="text-neutral-500 mt-1 line-clamp-2">
                                         {{ $restaurant->description ?? 'Bienvenue dans notre restaurant' }}
                                     </p>
                                 </div>
-                                
+
                                 <!-- Status Badge -->
                                 @if($restaurant->isOpen ?? true)
-                                    <span class="badge badge-success flex items-center gap-1.5">
+                                    <span class="badge badge-success flex items-center gap-1.5 flex-shrink-0">
                                         <span class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse"></span>
                                         Ouvert
                                     </span>
                                 @else
-                                    <span class="badge badge-error flex items-center gap-1.5">
+                                    <span class="badge badge-error flex items-center gap-1.5 flex-shrink-0">
                                         <span class="w-2 h-2 bg-red-500 rounded-full"></span>
                                         Fermé
                                     </span>

@@ -395,8 +395,8 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-4 flex-shrink-0">
-                                        <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($order->total, 0, ',', ' ') }} F</span>
+                                    <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                                        <span class="font-bold text-neutral-900 tabular-nums text-sm sm:text-base">{{ number_format($order->total, 0, ',', ' ') }} F</span>
                                         @php
                                             $statusConfig = [
                                                 'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'En attente', 'dot' => 'bg-yellow-500'],

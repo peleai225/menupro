@@ -160,17 +160,17 @@
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
          class="bg-white rounded-2xl p-2 shadow-sm border border-neutral-100 mb-6">
-        <div class="flex flex-wrap gap-2">
-            <button wire:click="$set('status', '')" 
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+            <button wire:click="$set('status', '')"
                     wire:loading.attr="disabled"
-                    class="relative px-5 py-2.5 rounded-xl font-medium transition-all duration-200 {{ !$status ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'text-neutral-600 hover:bg-neutral-100' }}">
+                    class="relative px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base transition-all duration-200 whitespace-nowrap {{ !$status ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'text-neutral-600 hover:bg-neutral-100' }}">
                 <span class="relative z-10">Toutes</span>
                 <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ !$status ? 'bg-white/20' : 'bg-neutral-200' }}">
                     {{ $this->statusCounts['all'] }}
                 </span>
             </button>
-            <button wire:click="$set('status', 'pending_payment')" 
-                    class="relative px-5 py-2.5 rounded-xl font-medium transition-all duration-200 {{ $status === 'pending_payment' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'text-neutral-600 hover:bg-yellow-50' }}">
+            <button wire:click="$set('status', 'pending_payment')"
+                    class="relative px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'pending_payment' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'text-neutral-600 hover:bg-yellow-50' }}">
                 @if($this->statusCounts['pending'] > 0)
                     <span class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-500 rounded-full animate-ping"></span>
                     <span class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-500 rounded-full"></span>
@@ -180,22 +180,22 @@
                     {{ $this->statusCounts['pending'] }}
                 </span>
             </button>
-            <button wire:click="$set('status', 'confirmed')" 
-                    class="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 {{ $status === 'confirmed' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-neutral-600 hover:bg-blue-50' }}">
+            <button wire:click="$set('status', 'confirmed')"
+                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'confirmed' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-neutral-600 hover:bg-blue-50' }}">
                 <span>Confirmées</span>
                 <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'confirmed' ? 'bg-white/20' : 'bg-blue-100 text-blue-700' }}">
                     {{ $this->statusCounts['confirmed'] }}
                 </span>
             </button>
-            <button wire:click="$set('status', 'preparing')" 
-                    class="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 {{ $status === 'preparing' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-neutral-600 hover:bg-indigo-50' }}">
+            <button wire:click="$set('status', 'preparing')"
+                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'preparing' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-neutral-600 hover:bg-indigo-50' }}">
                 <span>En préparation</span>
                 <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'preparing' ? 'bg-white/20' : 'bg-indigo-100 text-indigo-700' }}">
                     {{ $this->statusCounts['preparing'] }}
                 </span>
             </button>
-            <button wire:click="$set('status', 'ready')" 
-                    class="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 {{ $status === 'ready' ? 'bg-secondary-500 text-white shadow-lg shadow-secondary-500/30' : 'text-neutral-600 hover:bg-secondary-50' }}">
+            <button wire:click="$set('status', 'ready')"
+                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'ready' ? 'bg-secondary-500 text-white shadow-lg shadow-secondary-500/30' : 'text-neutral-600 hover:bg-secondary-50' }}">
                 <span>Prêtes</span>
                 <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'ready' ? 'bg-white/20' : 'bg-secondary-100 text-secondary-700' }}">
                     {{ $this->statusCounts['ready'] }}

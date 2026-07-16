@@ -188,15 +188,15 @@
                                 $qty = $this->quantities[$dish->id]['qty'] ?? 0;
                                 $statusClass = !$isTracked ? 'border-neutral-200' : ($qty <= 0 ? 'border-red-200 bg-red-50/30' : ($qty <= 5 ? 'border-yellow-200 bg-yellow-50/30' : 'border-emerald-200 bg-emerald-50/30'));
                             @endphp
-                            <div class="card border {{ $statusClass }} p-4 transition-all duration-200" wire:key="dish-{{ $dish->id }}">
-                                <div class="flex items-center gap-4">
+                            <div class="card border {{ $statusClass }} p-3 sm:p-4 transition-all duration-200" wire:key="dish-{{ $dish->id }}">
+                                <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                                     <!-- Image -->
                                     <div class="flex-shrink-0">
                                         @if($dish->image_url)
-                                            <img src="{{ $dish->image_url }}" alt="{{ $dish->name }}" class="w-12 h-12 rounded-xl object-cover">
+                                            <img src="{{ $dish->image_url }}" alt="{{ $dish->name }}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover">
                                         @else
-                                            <div class="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-100 rounded-xl flex items-center justify-center">
+                                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                                 </svg>
                                             </div>
@@ -205,20 +205,20 @@
 
                                     <!-- Name & Price -->
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="font-semibold text-neutral-900 truncate">{{ $dish->name }}</h3>
-                                        <p class="text-sm text-neutral-500">{{ number_format($dish->price, 0, ',', ' ') }} F</p>
+                                        <h3 class="font-semibold text-neutral-900 truncate text-sm sm:text-base">{{ $dish->name }}</h3>
+                                        <p class="text-xs sm:text-sm text-neutral-500">{{ number_format($dish->price, 0, ',', ' ') }} F</p>
                                     </div>
 
-                                    <!-- Stock Controls -->
-                                    <div class="flex items-center gap-3">
-                                        <!-- Toggle tracking -->
-                                        <button wire:click="toggleTrack({{ $dish->id }})"
-                                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 {{ $isTracked ? 'bg-emerald-500' : 'bg-neutral-300' }}"
-                                                title="{{ $isTracked ? 'Desactiver le suivi' : 'Activer le suivi' }}">
-                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {{ $isTracked ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                                        </button>
+                                    <!-- Toggle tracking (always visible) -->
+                                    <button wire:click="toggleTrack({{ $dish->id }})"
+                                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 flex-shrink-0 {{ $isTracked ? 'bg-emerald-500' : 'bg-neutral-300' }}"
+                                            title="{{ $isTracked ? 'Desactiver le suivi' : 'Activer le suivi' }}">
+                                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {{ $isTracked ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                    </button>
 
-                                        @if($isTracked)
+                                    <!-- Stock Controls (wraps to new line on mobile) -->
+                                    @if($isTracked)
+                                        <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                             <!-- Quantity input -->
                                             <div class="flex items-center gap-1.5">
                                                 <button wire:click="updateQuantity({{ $dish->id }}, {{ max(0, $qty - 1) }})"
@@ -232,7 +232,7 @@
                                                        wire:model.lazy="quantities.{{ $dish->id }}.qty"
                                                        wire:change="updateQuantity({{ $dish->id }}, $event.target.value)"
                                                        min="0"
-                                                       class="w-16 h-8 text-center text-sm font-bold border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent {{ $qty <= 0 ? 'text-red-600 bg-red-50' : ($qty <= 5 ? 'text-yellow-600 bg-yellow-50' : 'text-emerald-600 bg-emerald-50') }}">
+                                                       class="w-12 sm:w-16 h-8 text-center text-sm font-bold border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent {{ $qty <= 0 ? 'text-red-600 bg-red-50' : ($qty <= 5 ? 'text-yellow-600 bg-yellow-50' : 'text-emerald-600 bg-emerald-50') }}">
                                                 <button wire:click="updateQuantity({{ $dish->id }}, {{ $qty + 1 }})"
                                                         class="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 transition-colors">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,10 +257,10 @@
                                             @elseif($qty <= 5)
                                                 <span class="badge bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5">Faible</span>
                                             @endif
-                                        @else
-                                            <span class="text-xs text-neutral-400 italic">Non suivi</span>
-                                        @endif
-                                    </div>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-neutral-400 italic">Non suivi</span>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach

@@ -319,7 +319,7 @@
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--sa-muted-fg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
                         </svg>
-                        <input type="search" placeholder="Rechercher..." class="h-10 w-64 rounded-lg pl-9 pr-3 text-sm outline-none transition"
+                        <input type="search" placeholder="Rechercher..." class="h-10 w-48 lg:w-64 rounded-lg pl-9 pr-3 text-sm outline-none transition"
                                style="border: 1px solid var(--sa-border); background: var(--sa-bg); color: var(--sa-fg);"
                                onfocus="this.style.borderColor='var(--sa-primary)'" onblur="this.style.borderColor='var(--sa-border)'">
                     </div>
@@ -350,7 +350,7 @@
                                   class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-white text-[10px] font-bold rounded-full ring-2"
                                   style="background: var(--sa-primary); ring-color: var(--sa-card);" x-cloak></span>
                         </button>
-                        <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-h-[70vh] overflow-hidden rounded-2xl shadow-xl flex flex-col z-50"
+                        <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-h-[70vh] overflow-hidden rounded-2xl shadow-xl flex flex-col z-50"
                              style="background:var(--sa-card);border:1px solid var(--sa-border);">
                             <div class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--sa-border);">
                                 <span class="font-semibold text-sm" style="color:var(--sa-fg);">Notifications</span>
@@ -504,7 +504,7 @@
                  class="absolute bottom-full left-0 right-0 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] rounded-t-2xl px-4 pt-4 pb-3"
                  x-cloak>
                 <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
-                <div class="grid grid-cols-4 gap-3 mb-3">
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
                     <a href="{{ route('super-admin.orders.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.orders*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>

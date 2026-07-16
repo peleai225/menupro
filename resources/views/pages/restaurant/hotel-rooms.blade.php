@@ -121,7 +121,7 @@
                                     </form>
                                 </template>
 
-                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" x-show="!editing">
+                                <div class="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" x-show="!editing">
                                     <button @click="editing=true"
                                             class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 flex items-center justify-center text-neutral-600 transition-colors"
                                             title="Renommer">

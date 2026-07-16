@@ -160,7 +160,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="-translate-y-full opacity-0">
-            <div class="relative py-2.5 px-12">
+            <div class="relative py-2.5 px-4 sm:px-8 md:px-12">
                 <div class="flex items-center justify-center">
                     <div class="animate-marquee sm:animate-none whitespace-nowrap sm:whitespace-normal flex items-center gap-2">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
@@ -174,8 +174,8 @@
                         @endif
                     </div>
                 </div>
-                <button @click="showBanner = false; sessionStorage.setItem('banner_closed_{{ md5($bannerText) }}', '1')" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-white/20 transition" aria-label="Fermer la bannière">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button @click="showBanner = false; sessionStorage.setItem('banner_closed_{{ md5($bannerText) }}', '1')" class="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-full hover:bg-white/20 transition" aria-label="Fermer la bannière">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
