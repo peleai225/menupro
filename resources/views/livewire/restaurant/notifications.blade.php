@@ -101,30 +101,32 @@
      @new-service-request.window="onNewServiceRequest()"
      wire:poll.10s="checkForNewNotifications">
 
-    {{-- Alerte appels clients (top bar, toutes pages) --}}
+    {{-- Bouton appels clients --}}
     @if($serviceRequests->count() > 0)
-    <div x-data="{ open: false }" class="relative">
-        <button @click="open = !open; $dispatch('service-alert-opened')"
-                class="relative flex items-center gap-1.5 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors animate-pulse"
+    <div x-data="{ srOpen: false }" class="relative flex-shrink-0">
+        <button @click="srOpen = !srOpen"
+                class="flex items-center gap-1.5 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors animate-pulse"
                 title="{{ $serviceRequests->count() }} appel(s) client">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
             <span class="text-xs font-bold hidden sm:inline">Appels</span>
-            <span class="w-5 h-5 bg-white text-violet-700 text-xs font-bold rounded-full flex items-center justify-center">{{ $serviceRequests->count() }}</span>
+            <span class="w-5 h-5 bg-white text-violet-700 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">{{ $serviceRequests->count() }}</span>
         </button>
-        <div x-show="open"
+
+        <div x-show="srOpen"
              x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
              x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             @click.outside="open = false"
-             class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-violet-200 z-50 overflow-hidden"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click.outside="srOpen = false"
+             class="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-violet-200 overflow-hidden"
+             style="z-index: 9999;"
              x-cloak>
             <div class="p-3 bg-violet-50 border-b border-violet-100 flex items-center gap-2">
-                <div class="w-7 h-7 bg-violet-500 rounded-lg flex items-center justify-center">
+                <div class="w-7 h-7 bg-violet-500 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
@@ -137,22 +139,22 @@
             <div class="divide-y divide-neutral-100 max-h-72 overflow-y-auto">
                 @foreach($serviceRequests as $req)
                 <div class="flex items-center gap-3 p-3 hover:bg-neutral-50" wire:key="sr-top-{{ $req->id }}">
-                    <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center text-base flex-shrink-0">
+                    <div class="w-9 h-9 bg-violet-100 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
                         {{ $req->typeIcon() }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="font-semibold text-sm text-neutral-900">{{ $req->table_number }}</span>
-                            <span class="text-xs text-violet-700">{{ $req->typeLabel() }}</span>
+                            <span class="text-xs text-violet-700 font-medium">{{ $req->typeLabel() }}</span>
                         </div>
                         @if($req->notes)
-                            <p class="text-xs text-neutral-400 truncate">"{{ $req->notes }}"</p>
+                            <p class="text-xs text-neutral-500 truncate">"{{ $req->notes }}"</p>
                         @endif
-                        <p class="text-xs text-neutral-400">{{ $req->created_at->diffForHumans(['locale' => 'fr']) }}</p>
+                        <p class="text-xs text-neutral-400 mt-0.5">{{ $req->created_at->diffForHumans(['locale' => 'fr']) }}</p>
                     </div>
                     <button wire:click="markServiceRequestDone({{ $req->id }})"
                             wire:loading.attr="disabled"
-                            class="flex-shrink-0 px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                            class="flex-shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-lg transition-colors">
                         <span wire:loading.remove wire:target="markServiceRequestDone({{ $req->id }})">✓ OK</span>
                         <span wire:loading wire:target="markServiceRequestDone({{ $req->id }})">...</span>
                     </button>
@@ -162,49 +164,50 @@
         </div>
     </div>
     @endif
-    <!-- New Notification Alert Badge -->
-    <div x-show="showNewBadge"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="absolute -top-2 right-0 transform translate-x-full whitespace-nowrap z-50"
-         x-cloak>
-        <div class="bg-primary-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse flex items-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            Nouvelle commande !
+
+    {{-- Cloche notifications — wrapper dédié pour positionnement correct --}}
+    <div class="relative flex-shrink-0">
+        {{-- Badge "Nouvelle commande" --}}
+        <div x-show="showNewBadge"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none"
+             style="z-index: 9999;"
+             x-cloak>
+            <div class="bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                Nouvelle commande !
+            </div>
         </div>
-    </div>
 
-    <!-- Notification Bell -->
-    <button @click="open = !open" 
-            class="relative p-2.5 rounded-lg hover:bg-neutral-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            :class="{ 'animate-bounce': showNewBadge }">
-        <svg class="w-6 h-6 text-neutral-600" :class="{ 'text-primary-500': showNewBadge }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
-        @if($this->unreadCount > 0)
-            <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
-                  :class="{ 'animate-ping-once': showNewBadge }">
-                {{ $this->unreadCount > 99 ? '99+' : $this->unreadCount }}
-            </span>
-        @endif
-    </button>
+        {{-- Bouton cloche --}}
+        <button @click="open = !open"
+                class="relative p-2.5 rounded-lg hover:bg-neutral-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                :class="{ 'bg-primary-50': showNewBadge }">
+            <svg class="w-6 h-6 text-neutral-600" :class="{ 'text-primary-500': showNewBadge }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            @if($this->unreadCount > 0)
+                <span class="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {{ $this->unreadCount > 99 ? '99+' : $this->unreadCount }}
+                </span>
+            @endif
+        </button>
 
-    <!-- Dropdown -->
-    <div x-show="open"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-96 sm:w-96 bg-white rounded-xl shadow-xl border border-neutral-200 z-50 max-h-[70vh] sm:max-h-[600px] overflow-hidden flex flex-col"
-         x-cloak>
+        {{-- Dropdown notifications --}}
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-96 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[70vh] sm:max-h-[600px] overflow-hidden flex flex-col"
+             style="z-index: 9999;"
+             x-cloak>
         <!-- Header -->
         <div class="p-4 border-b border-neutral-200">
             <div class="flex items-center justify-between mb-2">
@@ -357,6 +360,7 @@
                 {{ $notifications->links('pagination::simple-tailwind') }}
             </div>
         @endif
-    </div>
-</div>
+    </div>{{-- /dropdown notifications --}}
+    </div>{{-- /wrapper cloche --}}
+</div>{{-- /composant racine --}}
 
