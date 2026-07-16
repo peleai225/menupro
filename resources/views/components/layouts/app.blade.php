@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'canonical' => null])
+@props(['title' => null, 'description' => null, 'canonical' => null, 'manifestUrl' => null])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -75,7 +75,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ $appName }}">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="manifest" href="{{ asset($manifestUrl ?? 'manifest.json') }}">
 
     <!-- Google Fonts (non-blocking, DM Sans only) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

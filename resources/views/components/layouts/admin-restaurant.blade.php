@@ -47,7 +47,7 @@
     }
 @endphp
 
-<x-layouts.app :title="($title ?? 'Dashboard') . ' - ' . ($restaurant?->name ?? 'Restaurant')">
+<x-layouts.app :title="($title ?? 'Dashboard') . ' - ' . ($restaurant?->name ?? 'Restaurant')" manifestUrl="manifest-admin.json">
     <div x-data="sidebar()" class="min-h-screen bg-neutral-50">
         <!-- Sidebar -->
         <aside :class="expanded ? 'w-64' : 'w-20'" 
