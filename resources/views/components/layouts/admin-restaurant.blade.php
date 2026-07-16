@@ -111,7 +111,8 @@
                         <span x-show="expanded" x-transition class="whitespace-nowrap">QR Code</span>
                     </a>
 
-                    @if(auth()->user()?->restaurant?->hasFeature('hotel_rooms'))
+                    {{-- DEBUG temporaire: affiche plan_id et résultat hasFeature --}}
+                    <!-- plan_id={{ auth()->user()?->restaurant?->current_plan_id }} hotel={{ auth()->user()?->restaurant?->hasFeature('hotel_rooms') ? 'OUI' : 'NON' }} -->
                     <a href="{{ route('restaurant.rooms.index') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.rooms*') ? 'sidebar-item-active' : '' }}"
                        :title="!expanded ? 'Chambres hôtel' : ''">
@@ -120,7 +121,6 @@
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Chambres hôtel</span>
                     </a>
-                    @endif
 
                     <!-- Commerce Section -->
                     <div class="pt-4">
