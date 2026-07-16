@@ -281,7 +281,7 @@ Route::prefix('dashboard')
         
         // Reservations - admin uniquement
         Route::middleware('restaurant.admin')->group(function () {
-            Route::get('reservations', [\App\Http\Controllers\Restaurant\ReservationController::class, 'index'])->name('reservations.index');
+            Route::get('reservations', \App\Livewire\Restaurant\Reservations::class)->name('reservations.index');
             Route::get('reservations/{reservation}', [\App\Http\Controllers\Restaurant\ReservationController::class, 'show'])->name('reservations.show');
             Route::patch('reservations/{reservation}/status', [\App\Http\Controllers\Restaurant\ReservationController::class, 'updateStatus'])->name('reservations.status');
         });

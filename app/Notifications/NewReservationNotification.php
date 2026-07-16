@@ -3,22 +3,18 @@
 namespace App\Notifications;
 
 use App\Models\Reservation;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewReservationNotification extends Notification implements ShouldQueue
+class NewReservationNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(
         protected Reservation $reservation
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -56,4 +52,3 @@ class NewReservationNotification extends Notification implements ShouldQueue
         ];
     }
 }
-
