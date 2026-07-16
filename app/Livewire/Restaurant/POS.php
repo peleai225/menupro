@@ -238,8 +238,8 @@ class POS extends Component
                     'reference' => 'POS-' . now()->format('ymd') . '-' . strtoupper(Str::random(4)),
                     'tracking_token' => Str::random(32),
                     'customer_name' => $this->customerName,
-                    'customer_email' => $this->customerEmail ?: null,
-                    'customer_phone' => $this->customerPhone ?: null,
+                    'customer_email' => $this->customerEmail ?: '',
+                    'customer_phone' => $this->customerPhone ?: '',
                     'type' => OrderType::from($this->orderType),
                     'status' => $this->paymentMethod === 'cash'
                         ? OrderStatus::CONFIRMED
