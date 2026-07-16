@@ -745,6 +745,19 @@
     @push('scripts')
     <script>
         window.__restaurantTourSteps = @json($tourSteps ?? []);
+
+        // Pause all Livewire polls when tab is hidden, resume when visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (typeof Livewire !== 'undefined' && Livewire.pausePolling) {
+                    Livewire.pausePolling();
+                }
+            } else {
+                if (typeof Livewire !== 'undefined' && Livewire.resumePolling) {
+                    Livewire.resumePolling();
+                }
+            }
+        });
     </script>
     @endpush
 </x-layouts.app>

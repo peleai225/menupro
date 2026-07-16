@@ -10,13 +10,14 @@ use App\Notifications\NewReviewNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Contracts\View\View as ViewContract;
 
 class ReviewController extends Controller
 {
     /**
      * Show review form for an order (secured with tracking token).
      */
-    public function create(string $slug, string $token): View
+    public function create(string $slug, string $token): ViewContract|RedirectResponse
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();
 

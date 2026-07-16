@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Restaurant;
 
+use App\Models\ServiceRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,26 +13,52 @@ class Notifications extends Component
 
     public bool $showDropdown = false;
     public int $lastUnreadCount = 0;
+    public int $lastServiceRequestId = 0;
+    public int $pendingServiceRequests = 0;
 
     public function mount(): void
     {
-        // Initialize the last unread count to avoid playing sound on first load
         $this->lastUnreadCount = auth()->user()->unreadNotifications()->count();
+        $restaurantId = auth()->user()->restaurant_id;
+        $this->lastServiceRequestId = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->max('id') ?? 0;
+        $this->pendingServiceRequests = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->count();
     }
 
     /**
-     * Called on every poll - check for new notifications and play sound
+     * Called on every poll - check for new notifications and service requests
      */
     public function checkForNewNotifications(): void
     {
         $currentCount = auth()->user()->unreadNotifications()->count();
-        
         if ($currentCount > $this->lastUnreadCount) {
-            // New notification(s) arrived - dispatch browser event to play sound
             $this->dispatch('new-notification-arrived');
         }
-        
         $this->lastUnreadCount = $currentCount;
+
+        $restaurantId = auth()->user()->restaurant_id;
+        $latestId = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->max('id') ?? 0;
+        if ($latestId > $this->lastServiceRequestId && $this->lastServiceRequestId > 0) {
+            $this->dispatch('new-service-request');
+        }
+        $this->lastServiceRequestId = $latestId;
+        $this->pendingServiceRequests = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->count();
+    }
+
+    public function markServiceRequestDone(int $id): void
+    {
+        $restaurantId = auth()->user()->restaurant_id;
+        $req = ServiceRequest::where('restaurant_id', $restaurantId)->where('id', $id)->first();
+        if ($req) {
+            $req->update(['status' => 'done', 'done_at' => now()]);
+        }
+        $this->pendingServiceRequests = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->count();
+        $this->lastServiceRequestId = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')->max('id') ?? 0;
     }
 
     public function toggleDropdown(): void
@@ -86,8 +113,15 @@ class Notifications extends Component
             ->latest()
             ->paginate(10, ['*'], 'notifications_page');
 
+        $restaurantId = auth()->user()->restaurant_id;
+        $serviceRequests = ServiceRequest::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
         return view('livewire.restaurant.notifications', [
             'notifications' => $notifications,
+            'serviceRequests' => $serviceRequests,
         ]);
     }
 }

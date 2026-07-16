@@ -1,13 +1,24 @@
-<div class="relative"
+<div class="relative flex items-center gap-2"
      x-data="{
          open: @entangle('showDropdown'),
          soundEnabled: localStorage.getItem('notificationSound') !== 'false',
          showNewBadge: false,
+         showServiceAlert: false,
          audioCtx: null,
          audioUnlocked: false,
          init() {
              this.requestNotificationPermission();
              this.unlockAudio();
+             this.setupVisibilityPause();
+         },
+         setupVisibilityPause() {
+             document.addEventListener('visibilitychange', () => {
+                 if (document.hidden) {
+                     window._livewirePollingPaused = true;
+                 } else {
+                     window._livewirePollingPaused = false;
+                 }
+             });
          },
          unlockAudio() {
              const unlock = () => {
@@ -25,7 +36,12 @@
              this.showNewBadge = true;
              setTimeout(() => this.showNewBadge = false, 5000);
              if (this.soundEnabled) this.playNotificationSound();
-             this.showBrowserNotification();
+             this.showBrowserNotification('Nouvelle commande !', 'Vous avez reçu une nouvelle commande');
+         },
+         onNewServiceRequest() {
+             this.showServiceAlert = true;
+             if (this.soundEnabled) this.playServiceAlertSound();
+             this.showBrowserNotification('Appel client !', 'Un client demande de l\'aide');
          },
          playNotificationSound() {
              if (!this.audioUnlocked || !this.audioCtx) return;
@@ -46,9 +62,27 @@
                  });
              } catch (e) {}
          },
-         showBrowserNotification() {
+         playServiceAlertSound() {
+             if (!this.audioUnlocked || !this.audioCtx) return;
+             try {
+                 if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                 const ctx = this.audioCtx;
+                 [660, 880, 660, 880].forEach(function(freq, i) {
+                     setTimeout(function() {
+                         const o = ctx.createOscillator(), g = ctx.createGain();
+                         o.connect(g); g.connect(ctx.destination);
+                         o.frequency.value = freq;
+                         o.type = 'sine';
+                         g.gain.setValueAtTime(0.4, ctx.currentTime);
+                         g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                         o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.25);
+                     }, i * 150);
+                 });
+             } catch (e) {}
+         },
+         showBrowserNotification(title, body) {
              if ('Notification' in window && Notification.permission === 'granted') {
-                 new Notification('Nouvelle commande !', { body: 'Vous avez reçu une nouvelle commande', icon: '/favicon.svg', tag: 'new-order' });
+                 new Notification(title, { body: body, icon: '/favicon.svg', tag: title });
              }
          },
          toggleSound() {
@@ -64,7 +98,70 @@
      }"
      @click.away="open = false"
      @new-notification-arrived.window="onNewNotification()"
+     @new-service-request.window="onNewServiceRequest()"
      wire:poll.10s="checkForNewNotifications">
+
+    {{-- Alerte appels clients (top bar, toutes pages) --}}
+    @if($serviceRequests->count() > 0)
+    <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open; $dispatch('service-alert-opened')"
+                class="relative flex items-center gap-1.5 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors animate-pulse"
+                title="{{ $serviceRequests->count() }} appel(s) client">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="text-xs font-bold hidden sm:inline">Appels</span>
+            <span class="w-5 h-5 bg-white text-violet-700 text-xs font-bold rounded-full flex items-center justify-center">{{ $serviceRequests->count() }}</span>
+        </button>
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.outside="open = false"
+             class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-violet-200 z-50 overflow-hidden"
+             x-cloak>
+            <div class="p-3 bg-violet-50 border-b border-violet-100 flex items-center gap-2">
+                <div class="w-7 h-7 bg-violet-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold text-violet-900 text-sm">Appels du personnel</p>
+                    <p class="text-xs text-violet-600">{{ $serviceRequests->count() }} en attente</p>
+                </div>
+            </div>
+            <div class="divide-y divide-neutral-100 max-h-72 overflow-y-auto">
+                @foreach($serviceRequests as $req)
+                <div class="flex items-center gap-3 p-3 hover:bg-neutral-50" wire:key="sr-top-{{ $req->id }}">
+                    <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center text-base flex-shrink-0">
+                        {{ $req->typeIcon() }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-semibold text-sm text-neutral-900">{{ $req->table_number }}</span>
+                            <span class="text-xs text-violet-700">{{ $req->typeLabel() }}</span>
+                        </div>
+                        @if($req->notes)
+                            <p class="text-xs text-neutral-400 truncate">"{{ $req->notes }}"</p>
+                        @endif
+                        <p class="text-xs text-neutral-400">{{ $req->created_at->diffForHumans(['locale' => 'fr']) }}</p>
+                    </div>
+                    <button wire:click="markServiceRequestDone({{ $req->id }})"
+                            wire:loading.attr="disabled"
+                            class="flex-shrink-0 px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                        <span wire:loading.remove wire:target="markServiceRequestDone({{ $req->id }})">✓ OK</span>
+                        <span wire:loading wire:target="markServiceRequestDone({{ $req->id }})">...</span>
+                    </button>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
     <!-- New Notification Alert Badge -->
     <div x-show="showNewBadge"
          x-transition:enter="transition ease-out duration-300"
