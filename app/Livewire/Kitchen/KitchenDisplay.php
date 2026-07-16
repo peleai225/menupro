@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Services\StockManager;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -95,9 +96,13 @@ class KitchenDisplay extends Component
             'created_at'    => $order->created_at->format('H:i'),
             'minutes_ago'   => (int) $order->created_at->diffInMinutes(now()),
             'ready_at'      => $order->ready_at?->format('H:i'),
-            'items'         => $order->items->map(fn($item) => [
+            'customer_notes' => $order->customer_notes,
+            'items'          => $order->items->map(fn($item) => [
                 'quantity'     => $item->quantity,
                 'name'         => $item->dish?->name ?? $item->dish_name ?? 'Plat',
+                'photo'        => $item->dish?->image_path
+                                    ? \Illuminate\Support\Facades\Storage::url($item->dish->image_path)
+                                    : null,
                 'options'      => $item->selected_options ?? [],
                 'instructions' => $item->special_instructions ?? '',
             ])->values()->all(),

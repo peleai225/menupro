@@ -51,40 +51,48 @@
         <!-- Tab buttons -->
         <div class="flex border-b border-neutral-200">
             <button wire:click="$set('activeTab', 'entry')"
-                    class="flex-1 py-3 px-4 text-sm font-medium transition-colors {{ $activeTab === 'entry' ? 'text-secondary-600 border-b-2 border-secondary-500 bg-secondary-50' : 'text-neutral-500 hover:text-neutral-700' }}">
-                <span class="flex items-center justify-center gap-2">
+                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'entry' ? 'text-secondary-600 border-b-2 border-secondary-500 bg-secondary-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Entrée
+                    <span class="hidden sm:inline">Réception</span>
+                    <span class="sm:hidden">+</span>
                 </span>
+                <span class="block text-xs font-normal opacity-60 hidden sm:block">Achat / livraison</span>
             </button>
             <button wire:click="$set('activeTab', 'exit')"
-                    class="flex-1 py-3 px-4 text-sm font-medium transition-colors {{ $activeTab === 'exit' ? 'text-red-600 border-b-2 border-red-500 bg-red-50' : 'text-neutral-500 hover:text-neutral-700' }}">
-                <span class="flex items-center justify-center gap-2">
+                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'exit' ? 'text-red-600 border-b-2 border-red-500 bg-red-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                     </svg>
-                    Sortie
+                    <span class="hidden sm:inline">Retrait</span>
+                    <span class="sm:hidden">−</span>
                 </span>
+                <span class="block text-xs font-normal opacity-60 hidden sm:block">Consommation manuelle</span>
             </button>
             <button wire:click="$set('activeTab', 'adjustment')"
-                    class="flex-1 py-3 px-4 text-sm font-medium transition-colors {{ $activeTab === 'adjustment' ? 'text-accent-600 border-b-2 border-accent-500 bg-accent-50' : 'text-neutral-500 hover:text-neutral-700' }}">
-                <span class="flex items-center justify-center gap-2">
+                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'adjustment' ? 'text-accent-600 border-b-2 border-accent-500 bg-accent-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    Ajustement
+                    <span class="hidden sm:inline">Inventaire</span>
+                    <span class="sm:hidden">≡</span>
                 </span>
+                <span class="block text-xs font-normal opacity-60 hidden sm:block">Corriger le comptage</span>
             </button>
             <button wire:click="$set('activeTab', 'waste')"
-                    class="flex-1 py-3 px-4 text-sm font-medium transition-colors {{ $activeTab === 'waste' ? 'text-yellow-600 border-b-2 border-yellow-500 bg-yellow-50' : 'text-neutral-500 hover:text-neutral-700' }}">
-                <span class="flex items-center justify-center gap-2">
+                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'waste' ? 'text-yellow-600 border-b-2 border-yellow-500 bg-yellow-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    Perte
+                    <span class="hidden sm:inline">Perte</span>
+                    <span class="sm:hidden">🗑</span>
                 </span>
+                <span class="block text-xs font-normal opacity-60 hidden sm:block">Périmé / abîmé / cassé</span>
             </button>
         </div>
 
@@ -117,8 +125,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-1">Note</label>
-                            <input type="text" wire:model="entryReason" class="input" placeholder="Ex: Livraison hebdomadaire">
+                            <label class="block text-sm font-medium text-neutral-700 mb-1">Référence / Motif</label>
+                            <input type="text" wire:model="entryReason" class="input" placeholder="Ex: Livraison hebdomadaire, Facture N°123">
                         </div>
                     </div>
                     <button type="submit" class="btn btn-secondary w-full" wire:loading.attr="disabled" wire:target="addStock">

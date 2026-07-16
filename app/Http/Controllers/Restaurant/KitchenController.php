@@ -173,20 +173,24 @@ class KitchenController extends Controller
     private function serializeOrder(Order $order): array
     {
         return [
-            'id'            => $order->id,
-            'reference'     => $order->reference,
-            'status'        => $order->status->value,
-            'status_label'  => $order->status->label(),
-            'customer_name' => $order->customer_name,
-            'type'          => $order->type?->label() ?? '',
-            'table_number'  => $order->table_number,
-            'created_at'    => $order->created_at->format('H:i'),
-            'minutes_ago'   => $order->created_at->diffInMinutes(now()),
-            'ready_at'      => $order->ready_at?->format('H:i'),
-            'items'         => $order->items->map(fn($item) => [
+            'id'             => $order->id,
+            'reference'      => $order->reference,
+            'status'         => $order->status->value,
+            'status_label'   => $order->status->label(),
+            'customer_name'  => $order->customer_name,
+            'customer_notes' => $order->customer_notes,
+            'type'           => $order->type?->label() ?? '',
+            'table_number'   => $order->table_number,
+            'created_at'     => $order->created_at->format('H:i'),
+            'minutes_ago'    => $order->created_at->diffInMinutes(now()),
+            'ready_at'       => $order->ready_at?->format('H:i'),
+            'items'          => $order->items->map(fn($item) => [
                 'quantity'     => $item->quantity,
                 'name'         => $item->dish?->name ?? $item->dish_name ?? 'Plat',
                 'category'     => $item->dish?->category?->name ?? '',
+                'photo'        => $item->dish?->image_path
+                                    ? \Illuminate\Support\Facades\Storage::url($item->dish->image_path)
+                                    : null,
                 'options'      => $item->selected_options ?? [],
                 'instructions' => $item->special_instructions,
             ])->values()->all(),

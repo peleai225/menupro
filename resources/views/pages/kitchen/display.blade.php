@@ -76,9 +76,12 @@
         .ctype { font-size: 11px; color: #6b7280; font-weight: 400; flex-shrink: 0; }
         .item  { display: flex; gap: 7px; margin-bottom: 4px; align-items: flex-start; }
         .iqty  { font-size: 13px; font-weight: 900; min-width: 20px; flex-shrink: 0; }
+        .iphoto { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; flex-shrink: 0; border: 1px solid #2a2a2a; }
         .iname { font-size: 13px; color: #e5e7eb; }
         .iopt  { display: inline-block; font-size: 10px; background: #1e1e1e; color: #9ca3af; padding: 1px 4px; border-radius: 3px; margin: 2px 2px 0 0; }
         .inote { font-size: 11px; color: #fbbf24; background: rgba(251,191,36,.1); padding: 2px 5px; border-radius: 3px; margin-top: 2px; }
+        .cnote { font-size: 11px; color: #f87171; background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); padding: 4px 7px; border-radius: 5px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 4px; }
+        .cnote-icon { flex-shrink: 0; font-size: 12px; }
         .cbtn  { display: block; width: 100%; padding: 10px; border: none; border-radius: 9px; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; margin-top: 9px; }
         .cbtn:active { opacity: .82; transform: scale(.97); }
         .cbtn:disabled { opacity: .45; cursor: wait; }
@@ -274,9 +277,11 @@
                 return label ? '<span class="iopt">'+h(label)+'</span>' : '';
             }).join('');
             var note = it.instructions ? '<div class="inote">&#9888; '+h(it.instructions)+'</div>' : '';
+            var photo = it.photo ? '<img class="iphoto" src="'+h(it.photo)+'" alt="'+h(it.name||'')+'" loading="lazy">' : '';
             return '<div class="item">'
                 +'<span class="iqty">'+h(it.quantity)+'x</span>'
-                +'<div><span class="iname">'+h(it.name||'Plat')+'</span>'
+                +photo
+                +'<div style="min-width:0;flex:1;"><span class="iname">'+h(it.name||'Plat')+'</span>'
                 +(opts?'<div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;">'+opts+'</div>':'')
                 +note+'</div></div>';
         }).join('');
@@ -289,6 +294,9 @@
         var tbl = o.table_number ? '<span class="ctbl">Table '+h(o.table_number)+'</span>' : '';
         var badgeLabel = st==='paid' ? 'NOUVELLE' : st==='confirmed' ? 'CONFIRM&#201;E' : st==='preparing' ? 'EN COURS' : 'PR&#202;T';
 
+        var orderNote = o.customer_notes
+            ? '<div class="cnote"><span class="cnote-icon">&#9888;</span><span>'+h(o.customer_notes)+'</span></div>'
+            : '';
         var html = '<div class="card'+(isNew?' new-anim':'')+'" id="card-'+id+'">'
             +'<div class="ctop ctop-'+h(st)+'">'
             +'<span class="cref">#'+h(o.reference)+'</span>'
@@ -299,6 +307,7 @@
             +'<div class="cbody">'
             +'<div class="cust"><span>'+h(o.customer_name||'Client')+'</span>'
             +'<span class="ctype">'+h(o.type||'')+'</span></div>'
+            +orderNote
             +itemsHtml(o.items);
 
         if      (st==='paid')      html += '<button class="cbtn bc" onclick="act('+id+',\'confirm\',this)">&#10003; Confirmer</button>';
