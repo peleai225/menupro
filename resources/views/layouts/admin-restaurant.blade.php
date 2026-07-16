@@ -152,11 +152,6 @@
                     <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">QR Code</span>
                 </a>
 
-                {{-- TEST TEMPORAIRE --}}
-                <a href="#" class="sidebar-item" style="background:#7c3aed;color:#fff;">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span x-show="expanded" x-transition.opacity.duration.200ms class="truncate">TEST VISIBLE</span>
-                </a>
                 @if(auth()->user()?->restaurant?->hasFeature('hotel_rooms'))
                 <a href="{{ route('restaurant.rooms.index') }}"
                    class="sidebar-item {{ request()->routeIs('restaurant.rooms*') ? 'sidebar-item-active' : '' }}"
