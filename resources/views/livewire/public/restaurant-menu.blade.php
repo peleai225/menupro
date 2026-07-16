@@ -1026,28 +1026,47 @@
             </button>
 
             <!-- Reservation Modal -->
-            <div x-show="showReservationModal" 
+            <div x-show="showReservationModal"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 @click.away="showReservationModal = false"
                  class="fixed inset-0 z-50 flex items-center justify-center p-4"
                  x-cloak>
                 <!-- Backdrop -->
                 <div class="absolute inset-0 bg-black/50" @click="showReservationModal = false"></div>
-                
+
                 <!-- Modal Content -->
-                <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+                     x-data="{ sending: false, sent: false }">
+
+                    <!-- Succès -->
+                    <div x-show="sent" class="flex flex-col items-center justify-center p-10 text-center">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                             style="background: {{ $primaryColor }}20">
+                            <svg class="w-8 h-8" style="color:{{ $primaryColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-neutral-900 mb-2">Réservation envoyée !</h3>
+                        <p class="text-neutral-500 text-sm mb-6">Le restaurant a reçu votre demande et vous contactera pour confirmer.</p>
+                        <button @click="showReservationModal = false; sent = false"
+                                class="px-6 py-2 rounded-xl text-white font-medium"
+                                style="background: {{ $primaryColor }}">Fermer</button>
+                    </div>
+
+                    <!-- Formulaire -->
+                    <template x-if="!sent">
+                        <div>
                     <!-- Header -->
                     <div class="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
                         <div>
                             <h3 class="text-xl font-bold text-neutral-900">Réserver une table</h3>
-                            <p class="text-sm text-neutral-500 mt-1">Remplissez le formulaire ci-dessous</p>
+                            <p class="text-sm text-neutral-500 mt-1">{{ $restaurant->name }}</p>
                         </div>
-                        <button @click="showReservationModal = false" 
+                        <button @click="showReservationModal = false"
                                 class="w-8 h-8 rounded-full hover:bg-neutral-100 flex items-center justify-center transition-colors">
                             <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1056,92 +1075,89 @@
                     </div>
 
                     <!-- Form -->
-                    <form method="POST" 
-                          action="{{ route('r.reservations.store', $restaurant->slug) }}"
+                    <form @submit.prevent="
+                            sending = true;
+                            fetch('{{ route('r.reservations.store', $restaurant->slug) }}', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json'},
+                                body: JSON.stringify(Object.fromEntries(new FormData($el)))
+                            }).then(r => r.json()).then(d => {
+                                sending = false;
+                                if (d.success) { sent = true; }
+                                else { alert(d.message || 'Erreur. Veuillez réessayer.'); }
+                            }).catch(() => { sending = false; alert('Erreur réseau. Veuillez réessayer.'); })
+                          "
                           class="p-6 space-y-5">
                         @csrf
-                        <div class="grid md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Nom complet *</label>
-                                <input type="text" 
-                                       name="customer_name" 
-                                       required
+                                <input type="text" name="customer_name" required
                                        class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
                                        style="--tw-ring-color: {{ $primaryColor }};"
                                        placeholder="Votre nom">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Email *</label>
-                                <input type="email" 
-                                       name="customer_email" 
-                                       required
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
-                                       style="--tw-ring-color: {{ $primaryColor }};"
-                                       placeholder="votre@email.com">
-                            </div>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Téléphone *</label>
-                                <input type="tel" 
-                                       name="customer_phone" 
-                                       required
+                                <input type="tel" name="customer_phone" required
                                        class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
                                        style="--tw-ring-color: {{ $primaryColor }};"
-                                       placeholder="+225 XX XX XX XX XX">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nombre de personnes *</label>
-                                <input type="number" 
-                                       name="number_of_guests" 
-                                       required
-                                       min="1"
-                                       max="50"
-                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
-                                       style="--tw-ring-color: {{ $primaryColor }};"
-                                       placeholder="2">
+                                       placeholder="+225 07 XX XX XX XX">
                             </div>
                         </div>
-                        <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Email <span class="text-neutral-400 font-normal">(optionnel — pour recevoir la confirmation)</span></label>
+                            <input type="email" name="customer_email"
+                                   class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
+                                   style="--tw-ring-color: {{ $primaryColor }};"
+                                   placeholder="votre@email.com">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Personnes *</label>
+                                <input type="number" name="number_of_guests" required min="1" max="50" value="2"
+                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition text-center"
+                                       style="--tw-ring-color: {{ $primaryColor }};">
+                            </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Date *</label>
-                                <input type="date" 
-                                       name="reservation_date" 
-                                       required
+                                <input type="date" name="reservation_date" required
                                        min="{{ date('Y-m-d', strtotime('+1 day')) }}"
                                        class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
                                        style="--tw-ring-color: {{ $primaryColor }};">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700 mb-2">Heure *</label>
-                                <input type="time" 
-                                       name="reservation_time" 
-                                       required
+                                <input type="time" name="reservation_time" required
                                        class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition"
                                        style="--tw-ring-color: {{ $primaryColor }};">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Demandes spéciales (optionnel)</label>
-                            <textarea name="special_requests" 
-                                      rows="3"
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Message <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                            <textarea name="special_requests" rows="2"
                                       class="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition resize-none"
                                       style="--tw-ring-color: {{ $primaryColor }};"
-                                      placeholder="Allergies, anniversaire, demande spéciale..."></textarea>
+                                      placeholder="Anniversaire, allergie, demande particulière..."></textarea>
                         </div>
                         <div class="flex gap-3 pt-2">
-                            <button type="button" 
-                                    @click="showReservationModal = false"
+                            <button type="button" @click="showReservationModal = false"
                                     class="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 rounded-xl font-medium hover:bg-neutral-50 transition">
                                 Annuler
                             </button>
-                            <button type="submit" 
-                                    class="flex-1 px-6 py-3 text-white rounded-xl font-medium transition shadow-lg hover:shadow-xl"
+                            <button type="submit" :disabled="sending"
+                                    class="flex-1 px-6 py-3 text-white rounded-xl font-medium transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                                     style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }});">
-                                Confirmer la réservation
+                                <svg x-show="sending" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span x-text="sending ? 'Envoi...' : 'Confirmer la réservation'"></span>
                             </button>
                         </div>
                     </form>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>

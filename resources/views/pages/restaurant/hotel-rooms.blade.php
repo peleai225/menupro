@@ -38,16 +38,34 @@
                     Ajouter une chambre
                 </h2>
 
-                <form method="POST" action="{{ route('restaurant.rooms.store') }}" class="flex gap-3">
+                <form x-data="{ adding: false, newName: '' }"
+                      @submit.prevent="
+                          if (!newName.trim()) return;
+                          adding = true;
+                          fetch('{{ route('restaurant.rooms.store') }}', {
+                              method: 'POST',
+                              headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json'},
+                              body: JSON.stringify({name: newName})
+                          }).then(r => r.json()).then(d => {
+                              adding = false;
+                              if (d.success) { newName = ''; window.location.reload(); }
+                              else { alert(d.message || 'Erreur'); }
+                          }).catch(() => { adding = false; alert('Erreur réseau'); })
+                      "
+                      class="flex gap-3">
                     @csrf
                     <input type="text"
-                           name="name"
+                           x-model="newName"
                            required
                            maxlength="100"
                            class="input flex-1"
                            placeholder="Ex: Chambre 101, Suite Royale, R1...">
-                    <button type="submit" class="btn btn-primary whitespace-nowrap">
-                        Ajouter
+                    <button type="submit" :disabled="adding" class="btn btn-primary whitespace-nowrap flex items-center gap-2">
+                        <svg x-show="adding" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span x-text="adding ? '...' : 'Ajouter'"></span>
                     </button>
                 </form>
 

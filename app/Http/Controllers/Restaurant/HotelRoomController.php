@@ -26,11 +26,15 @@ class HotelRoomController extends Controller
 
         $maxSort = HotelRoom::where('restaurant_id', $restaurant->id)->max('sort_order') ?? 0;
 
-        HotelRoom::create([
+        $room = HotelRoom::create([
             'restaurant_id' => $restaurant->id,
             'name'          => $request->name,
             'sort_order'    => $maxSort + 1,
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'room' => $room]);
+        }
 
         return back()->with('success', 'Chambre ajoutée.');
     }

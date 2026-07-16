@@ -33,12 +33,7 @@ class ReservationController extends Controller
             $query->whereDate('reservation_date', $request->date);
         }
 
-        // Default: show upcoming reservations
-        if (!$request->filled('status') && !$request->filled('date')) {
-            $query->upcoming();
-        }
-
-        $reservations = $query->orderBy('reservation_date', 'asc')->paginate(20)->withQueryString();
+        $reservations = $query->orderBy('reservation_date', 'desc')->paginate(20)->withQueryString();
 
         // Stats
         $stats = [

@@ -26,7 +26,7 @@ class ReservationController extends Controller
 
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
-            'customer_email' => ['required', 'email', 'max:255'],
+            'customer_email' => ['nullable', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:20'],
             'number_of_guests' => ['required', 'integer', 'min:1', 'max:50'],
             'reservation_date' => ['required', 'date', 'after:now'],
@@ -49,6 +49,9 @@ class ReservationController extends Controller
 
         // Check if restaurant will be open at reservation time
         if (!$this->isRestaurantOpenAt($restaurant, $reservationDateTime)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Le restaurant sera fermé à cette date et heure. Veuillez choisir un autre créneau.'], 422);
+            }
             return back()->with('error', 'Le restaurant sera fermé à cette date et heure. Veuillez choisir un autre créneau.');
         }
 
@@ -76,6 +79,10 @@ class ReservationController extends Controller
         } catch (\Exception $e) {
             // Log error but don't fail the reservation
             \Log::warning('Failed to send reservation confirmation email: ' . $e->getMessage());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Réservation enregistrée !']);
         }
 
         return redirect()->route('r.menu', $slug)

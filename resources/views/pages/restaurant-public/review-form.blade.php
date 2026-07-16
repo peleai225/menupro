@@ -14,7 +14,7 @@
 
             <!-- Form -->
             <div class="card p-6">
-                <form action="{{ route('r.review.store', [$restaurant->slug, $order]) }}" method="POST">
+                <form action="{{ route('r.review.store', [$restaurant->slug, $order->tracking_token]) }}" method="POST">
                     @csrf
 
                     <!-- Customer Info -->
