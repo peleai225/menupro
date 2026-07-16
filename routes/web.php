@@ -462,7 +462,7 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     Route::post('/commande/{token}/avis', [\App\Http\Controllers\Public\ReviewController::class, 'store'])->name('review.store');
     
     // Reservations
-    Route::post('/reservations', [\App\Http\Controllers\Public\ReservationController::class, 'store'])->name('reservations.store');
+    Route::post('/reservations', [\App\Http\Controllers\Public\ReservationController::class, 'store'])->name('reservations.store')->middleware('throttle:5,1');
     
     // Payment Callbacks
     Route::get('/commande/{order}/success', [CheckoutController::class, 'success'])->name('order.success');

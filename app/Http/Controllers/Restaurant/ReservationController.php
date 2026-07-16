@@ -67,9 +67,15 @@ class ReservationController extends Controller
         $oldStatus = $reservation->status;
         $newStatus = $request->status;
 
+        $notes = $request->notes ?? $reservation->notes;
+        if ($newStatus === 'cancelled' && $request->filled('cancellation_reason')) {
+            $prefix = 'Motif d\'annulation : ' . $request->cancellation_reason;
+            $notes = $notes ? $prefix . "\n\n" . $notes : $prefix;
+        }
+
         $reservation->update([
             'status' => $newStatus,
-            'notes' => $request->notes ?? $reservation->notes,
+            'notes' => $notes,
         ]);
 
         // Send notification to customer based on status change

@@ -889,7 +889,7 @@
     @endif
 
     <!-- Floating Reservation Button (gauche sur mobile pour éviter chevauchement avec panier, droite sur desktop) -->
-    @if($restaurant->reservations_enabled ?? true)
+    @if($restaurant->reservations_enabled)
         <div x-data="{ showReservationModal: false }" class="fixed bottom-6 left-6 z-40 lg:left-auto lg:right-6">
             <!-- Floating Button -->
             <button @click="showReservationModal = true" 

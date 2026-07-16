@@ -61,6 +61,10 @@ class Settings extends Component
     public ?string $existingLogo = null;
     public ?string $existingBanner = null;
 
+    // Reservations
+    public bool $reservations_enabled = false;
+    public ?int $number_of_tables = null;
+
     // Delivery
     public bool $delivery_enabled = false;
     public int $delivery_fee = 0;
@@ -138,6 +142,8 @@ class Settings extends Component
         $this->longitude = $this->restaurant->longitude ? (float) $this->restaurant->longitude : null;
         $this->existingLogo = $this->restaurant->logo_path;
         $this->existingBanner = $this->restaurant->banner_path;
+        $this->reservations_enabled = $this->restaurant->reservations_enabled ?? false;
+        $this->number_of_tables = $this->restaurant->number_of_tables;
         $this->delivery_enabled = $this->restaurant->delivery_enabled ?? false;
         $this->delivery_fee = $this->restaurant->delivery_fee ?? 0;
         $this->min_order_amount = $this->restaurant->min_order_amount ?? 0;
@@ -321,6 +327,21 @@ class Settings extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Une erreur est survenue : ' . $e->getMessage());
         }
+    }
+
+    public function saveReservations(): void
+    {
+        $this->validate([
+            'reservations_enabled' => 'boolean',
+            'number_of_tables' => 'nullable|integer|min:1|max:500',
+        ]);
+
+        $this->restaurant->update([
+            'reservations_enabled' => $this->reservations_enabled,
+            'number_of_tables' => $this->number_of_tables,
+        ]);
+
+        session()->flash('success', 'Paramètres de réservation mis à jour.');
     }
 
     public function saveDelivery(): void

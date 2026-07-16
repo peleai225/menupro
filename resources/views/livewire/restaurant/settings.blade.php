@@ -64,6 +64,7 @@
                 'verification' => ['label' => 'Vérification', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
                 'appearance' => ['label' => 'Apparence', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
                 'delivery' => ['label' => 'Livraison', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
+                'reservations' => ['label' => 'Réservations', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                 'payment' => ['label' => 'Paiement', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
                 'wallet' => ['label' => 'Wallet', 'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'],
                 'hours' => ['label' => 'Horaires', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
@@ -659,6 +660,53 @@
                                 <div>
                                     <p class="text-sm font-medium text-blue-900">Tarification gérée par la plateforme</p>
                                     <p class="text-xs text-blue-700 mt-1">Les frais de livraison et les zones de couverture sont configurés par MenuPro pour garantir une expérience cohérente à vos clients.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Enregistrer
+                </button>
+            </div>
+            </form>
+        </div>
+
+        <!-- Reservations Tab -->
+        <div x-show="activeTab === 'reservations'" x-cloak>
+            <form wire:submit="saveReservations" class="max-w-2xl">
+            <div class="card p-6 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-neutral-900">Activer les réservations</h3>
+                        <p class="text-sm text-neutral-500">Permettez à vos clients de réserver une table depuis votre menu en ligne</p>
+                    </div>
+                    <button type="button" wire:click="$toggle('reservations_enabled')"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $reservations_enabled ? 'bg-primary-500' : 'bg-neutral-200' }}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $reservations_enabled ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                    </button>
+                </div>
+
+                @if($reservations_enabled)
+                    <div class="border-t border-neutral-200 pt-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nombre de tables</label>
+                            <input type="number" wire:model="number_of_tables" class="input w-32" min="1" max="500" placeholder="ex: 20">
+                            <p class="text-xs text-neutral-500 mt-1">Capacité totale du restaurant (indicatif)</p>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-blue-900">Comment ça marche ?</p>
+                                    <p class="text-xs text-blue-700 mt-1">Un bouton "Réserver une table" apparaîtra sur votre menu en ligne. Les demandes arrivent dans votre tableau de bord sous <strong>Réservations</strong> avec le statut "En attente". Vous recevrez une notification email et in-app pour chaque nouvelle demande.</p>
                                 </div>
                             </div>
                         </div>

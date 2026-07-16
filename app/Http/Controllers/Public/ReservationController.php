@@ -21,6 +21,7 @@ class ReservationController extends Controller
     {
         $restaurant = Restaurant::where('slug', $slug)
             ->where('status', \App\Enums\RestaurantStatus::ACTIVE)
+            ->where('reservations_enabled', true)
             ->firstOrFail();
 
         $validated = $request->validate([
