@@ -68,6 +68,29 @@ class HotelRoomController extends Controller
 
         $baseUrl = route('r.menu', ['slug' => $restaurant->slug]);
 
+        // Logo du restaurant en priorité, sinon logo MenuPro
+        $logoBase64  = null;
+        $logoMime    = 'image/png';
+        if ($restaurant->logo_path) {
+            $disk = \Illuminate\Support\Facades\Storage::disk('public');
+            if ($disk->exists($restaurant->logo_path)) {
+                $logoBase64 = base64_encode($disk->get($restaurant->logo_path));
+                $ext = strtolower(pathinfo($restaurant->logo_path, PATHINFO_EXTENSION));
+                $logoMime = match($ext) {
+                    'jpg', 'jpeg' => 'image/jpeg',
+                    'gif'         => 'image/gif',
+                    'webp'        => 'image/webp',
+                    default       => 'image/png',
+                };
+            }
+        }
+        if (!$logoBase64) {
+            $fallback = public_path('images/logo-menupro.png');
+            if (file_exists($fallback)) {
+                $logoBase64 = base64_encode(file_get_contents($fallback));
+            }
+        }
+
         $roomsData = $rooms->map(function ($room) use ($baseUrl) {
             $url   = $baseUrl . '?table=' . urlencode($room->name);
             $qrSvg = QrCode::format('svg')->size(280)->margin(1)->errorCorrection('H')->generate($url);
@@ -79,13 +102,11 @@ class HotelRoomController extends Controller
             ];
         })->all();
 
-        $logoPath   = public_path('images/logo-menupro.png');
-        $logoBase64 = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : null;
-
         $pdf = Pdf::loadView('pdf.hotel-room-qrcodes', [
             'restaurant' => $restaurant,
             'rooms'      => $roomsData,
             'logoBase64' => $logoBase64,
+            'logoMime'   => $logoMime,
         ])
         ->setPaper('a4', 'portrait')
         ->setOption('isRemoteEnabled', true);

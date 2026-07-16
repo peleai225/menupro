@@ -61,7 +61,7 @@
                                                 <div class="scan-cta">Scanner ici</div>
                                                 <div class="logo-area">
                                                     @if($logoBase64)
-                                                        <img src="data:image/png;base64,{{ $logoBase64 }}" alt="{{ $restaurant->name }}">
+                                                        <img src="data:{{ $logoMime ?? 'image/png' }};base64,{{ $logoBase64 }}" alt="{{ $restaurant->name }}">
                                                     @else
                                                         <div class="restaurant-name">{{ $restaurant->name }}</div>
                                                     @endif
