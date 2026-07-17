@@ -67,10 +67,10 @@ class Team extends Component
     {
         $this->validate([
             'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
-            'email' => 'required|email|max:255|unique:users,email' . ($this->editingUser ? ',' . $this->editingUser->id : ''),
-            'phone' => 'nullable|string|max:20',
-            'role' => 'required|in:restaurant_admin,employee',
+            'last_name'  => 'required|string|max:100',
+            'email'      => 'required|email|max:255|unique:users,email' . ($this->editingUser ? ',' . $this->editingUser->id : ''),
+            'phone'      => 'nullable|string|max:20',
+            'role'       => 'required|in:restaurant_admin,employee',
         ]);
 
         $restaurant = auth()->user()->restaurant;
