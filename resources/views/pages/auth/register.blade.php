@@ -177,8 +177,29 @@
             ═══════════════════════════════════════ --}}
             <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <div class="mb-8">
-                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Votre restaurant</h1>
+                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight" x-text="isStand ? 'Votre stand' : 'Votre restaurant'">Votre établissement</h1>
                     <p class="text-neutral-500 mt-2 text-[15px]">Décrivez votre établissement — vous pourrez tout modifier après.</p>
+                </div>
+
+                {{-- Choix type de compte --}}
+                <div class="mb-5">
+                    <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Vous êtes ? <span class="text-error-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" @click="isStand = false; formData.plan = 'essentiel'; formData.restaurant_type = formData.restaurant_type === 'stand' || formData.restaurant_type === 'kiosque' ? '' : formData.restaurant_type"
+                                :class="!isStand ? 'border-primary-400 bg-primary-50 shadow-sm' : 'border-neutral-200 hover:border-neutral-300'"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all">
+                            <span class="text-2xl">🍽️</span>
+                            <span class="text-[13px] font-semibold text-neutral-800">Restaurant / Maquis</span>
+                            <span class="text-[11px] text-neutral-500 text-center">Bar, brasserie, traiteur…</span>
+                        </button>
+                        <button type="button" @click="isStand = true; formData.plan = 'stand'"
+                                :class="isStand ? 'border-primary-400 bg-primary-50 shadow-sm' : 'border-neutral-200 hover:border-neutral-300'"
+                                class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all">
+                            <span class="text-2xl">🛒</span>
+                            <span class="text-[13px] font-semibold text-neutral-800">Stand / Kiosque</span>
+                            <span class="text-[11px] text-neutral-500 text-center">Micro-commerce, vendeuse…</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-5">
@@ -201,9 +222,22 @@
                             <select id="restaurant_type" name="restaurant_type" x-model="formData.restaurant_type" required
                                     class="w-full h-[52px] pl-4 pr-10 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 appearance-none cursor-pointer">
                                 <option value="">Sélectionnez un type</option>
-                                @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'] as $val => $label)
-                                    <option value="{{ $val }}">{{ $label }}</option>
-                                @endforeach
+                                {{-- Types restaurant --}}
+                                <template x-if="!isStand">
+                                    <optgroup label="Restaurant">
+                                        @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'] as $val => $label)
+                                            <option value="{{ $val }}">{{ $label }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                </template>
+                                {{-- Types stand --}}
+                                <template x-if="isStand">
+                                    <optgroup label="Stand / Kiosque">
+                                        @foreach(['stand' => 'Stand de rue', 'kiosque' => 'Kiosque', 'cantine' => 'Cantine / Cafétéria', 'patisserie' => 'Pâtisserie / Boulangerie', 'epicerie' => 'Épicerie', 'jus' => 'Jus & Boissons', 'snack' => 'Snack rapide'] as $val => $label)
+                                            <option value="{{ $val }}">{{ $label }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                </template>
                             </select>
                             <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
@@ -298,8 +332,32 @@
                 <input type="hidden" name="plan" x-model="formData.plan">
                 <input type="hidden" name="billing_period" :value="billingCycle">
 
-                {{-- Plan cards --}}
-                @if(isset($availablePlans) && $availablePlans->count() > 1)
+                {{-- Résumé Stand (simplifié) --}}
+                @if($isStand)
+                <div class="mb-6 p-5 rounded-2xl border-2 border-primary-300 bg-primary-50/60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-3xl">🛒</span>
+                        <div>
+                            <p class="font-bold text-neutral-900">Plan Stand</p>
+                            <p class="text-[13px] text-neutral-500">Idéal pour votre micro-commerce</p>
+                        </div>
+                        <div class="ml-auto text-right">
+                            <p class="font-bold text-xl text-neutral-900">5 000 <span class="text-[13px] font-normal">F/mois</span></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5 text-[12px]">
+                        @foreach(['15 plats maximum', '5 catégories', 'QR Code inclus', 'Commandes WhatsApp', '7 jours gratuits', '1 compte utilisateur'] as $f)
+                        <div class="flex items-center gap-1.5 text-neutral-700">
+                            <svg class="w-3.5 h-3.5 text-secondary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            {{ $f }}
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Plan cards (restaurants uniquement) --}}
+                @if(!$isStand && isset($availablePlans) && $availablePlans->count() > 1)
                 <div class="space-y-2.5 mb-6">
                     @foreach($availablePlans as $p)
                     <button type="button"
@@ -341,7 +399,8 @@
                 </div>
                 @endif
 
-                {{-- Billing toggle --}}
+                {{-- Billing toggle (restaurants uniquement) --}}
+                @if(!$isStand)
                 <div class="mb-5">
                     <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Facturation</label>
                     <div class="grid grid-cols-4 gap-1 p-1 bg-neutral-100 rounded-xl">
@@ -358,8 +417,10 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
 
-                {{-- Features --}}
+                {{-- Features (restaurants uniquement) --}}
+                @if(!$isStand)
                 <div class="mb-5 p-4 rounded-2xl border border-neutral-200 bg-neutral-50/50">
                     <div class="text-[12px] font-bold text-neutral-600 uppercase tracking-wider mb-2.5">Inclus</div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -381,8 +442,21 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
 
-                {{-- Price card --}}
+                {{-- Price card (restaurants) / Price stand --}}
+                @if($isStand)
+                <div class="p-4 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 text-white mb-5">
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-[13px] font-medium text-primary-200">Plan Stand — 1 mois</span>
+                    </div>
+                    <div class="flex items-baseline gap-1.5 mt-1">
+                        <span class="text-3xl font-bold">5 000</span>
+                        <span class="text-[13px] text-primary-200">FCFA</span>
+                    </div>
+                    <p class="text-[12px] text-primary-200 mt-1">7 jours gratuits · Renouvelable chaque mois</p>
+                </div>
+                @else
                 <div class="p-4 rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-950 text-white mb-5 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-[40px]"></div>
                     <div class="relative">
@@ -399,6 +473,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 {{-- Terms --}}
                 <label class="flex items-start gap-3 cursor-pointer mb-5">
@@ -460,6 +535,7 @@
                 loading: false,
                 submitted: false,
                 submitError: null,
+                isStand: {{ $isStand ? 'true' : 'false' }},
                 formData: {
                     name: '', email: '', phone: '', password: '',
                     restaurant_name: '', restaurant_type: '', company_name: '', rccm: '',

@@ -59,7 +59,15 @@ class RegisterController extends Controller
             }
         }
 
-        $planSlug = request()->query('plan', 'essentiel');
+        // ?type=stand → force le plan Stand, pas de choix de plan à l'étape 3
+        $accountType = request()->query('type');
+        $isStand = $accountType === 'stand';
+
+        if ($isStand) {
+            $planSlug = 'stand';
+        } else {
+            $planSlug = request()->query('plan', 'essentiel');
+        }
 
         $plan = Plan::where('slug', $planSlug)->where('is_active', true)->first();
 
@@ -68,11 +76,12 @@ class RegisterController extends Controller
                 ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
         }
 
-        $availablePlans = Plan::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        // Pour les stands : pas d'autres plans proposés (étape 3 simplifiée)
+        $availablePlans = $isStand
+            ? collect([$plan])
+            : Plan::where('is_active', true)->where('slug', '!=', 'stand')->orderBy('sort_order')->get();
 
-        return view('pages.auth.register', compact('plan', 'availablePlans'));
+        return view('pages.auth.register', compact('plan', 'availablePlans', 'isStand'));
     }
 
     public function store(RegisterRequest $request): RedirectResponse

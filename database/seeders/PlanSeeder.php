@@ -72,13 +72,36 @@ class PlanSeeder extends Seeder
             'sort_order' => 3,
         ];
 
+        // Plan STAND - Pour vendeuses de stand et micro-commerces
+        $stand = [
+            'name'                  => 'Stand',
+            'slug'                  => 'stand',
+            'description'           => 'Pour les vendeuses de stand, kiosques et micro-commerces. Simple, rapide, efficace.',
+            'price'                 => 5000,
+            'duration_days'         => 30,
+            'max_dishes'            => 15,
+            'max_categories'        => 5,
+            'max_employees'         => 1,
+            'max_orders_per_month'  => 100,
+            'has_delivery'          => false,
+            'has_stock_management'  => false,
+            'has_analytics'         => false,
+            'has_custom_domain'     => false,
+            'has_priority_support'  => false,
+            'has_hotel_rooms'       => false,
+            'is_active'             => true,
+            'is_featured'           => false,
+            'sort_order'            => 0,
+        ];
+
+        Plan::updateOrCreate(['slug' => $stand['slug']], $stand);
         Plan::updateOrCreate(['slug' => $essentiel['slug']], $essentiel);
         Plan::updateOrCreate(['slug' => $pro['slug']], $pro);
         Plan::updateOrCreate(['slug' => $business['slug']], $business);
 
-        Plan::whereNotIn('slug', ['essentiel', 'pro', 'business'])
+        Plan::whereNotIn('slug', ['stand', 'essentiel', 'pro', 'business'])
             ->update(['is_active' => false]);
 
-        $this->command->info('Plans Essentiel + Pro + Business crees avec succes.');
+        $this->command->info('Plans Stand + Essentiel + Pro + Business crees avec succes.');
     }
 }

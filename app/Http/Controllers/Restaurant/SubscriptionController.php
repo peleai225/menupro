@@ -23,7 +23,7 @@ class SubscriptionController extends Controller
         $restaurant = $request->user()->restaurant;
         $currentPlan = $restaurant->currentPlan;
         $subscription = $restaurant->activeSubscription;
-        $plans = Plan::active()->ordered()->get();
+        $plans = Plan::active()->ordered()->where('slug', '!=', 'stand')->get();
 
         $history = Subscription::where('restaurant_id', $restaurant->id)
             ->with('plan')
@@ -45,7 +45,7 @@ class SubscriptionController extends Controller
         $restaurant = $request->user()->restaurant;
         $currentPlan = $restaurant->currentPlan;
         $subscription = $restaurant->activeSubscription;
-        $plans = Plan::active()->ordered()->get();
+        $plans = Plan::active()->ordered()->where('slug', '!=', 'stand')->get();
 
         return view('pages.restaurant.subscription-plans', compact(
             'restaurant',
