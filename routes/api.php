@@ -150,7 +150,7 @@ Route::prefix('v1')
     // RESTAURANT — Gestion commandes livraison
     // -----------------------------------------------------------------------
     Route::prefix('restaurant')->name('restaurant.')
-        ->middleware(['auth:sanctum', 'has.restaurant'])
+        ->middleware(['auth:sanctum', 'has.restaurant', 'feature:delivery'])
         ->group(function () {
             Route::get('/delivery/orders',               [DeliveryOrderController::class, 'pending'])->name('delivery.orders');
             Route::post('/delivery/orders/{id}/confirm', [DeliveryOrderController::class, 'confirm'])->name('delivery.confirm');

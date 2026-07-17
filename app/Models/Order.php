@@ -90,6 +90,19 @@ class Order extends Model
             if (empty($order->tracking_token)) {
                 $order->tracking_token = static::generateTrackingToken();
             }
+
+            if ($order->restaurant_id) {
+                $plan = Restaurant::find($order->restaurant_id)?->currentPlan;
+                if ($plan && $plan->max_orders_per_month !== null) {
+                    $count = static::where('restaurant_id', $order->restaurant_id)
+                        ->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->count();
+                    if ($count >= $plan->max_orders_per_month) {
+                        throw new \App\Exceptions\QuotaExceededException('Limite de commandes mensuelles atteinte (' . $plan->max_orders_per_month . '/mois).');
+                    }
+                }
+            }
         });
     }
 

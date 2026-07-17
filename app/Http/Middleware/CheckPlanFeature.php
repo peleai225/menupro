@@ -22,6 +22,14 @@ class CheckPlanFeature
             return $next($request);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Cette fonctionnalité nécessite un plan supérieur.',
+                'feature' => $feature,
+                'upgrade_required' => $this->featureLabel($feature),
+            ], 403);
+        }
+
         return redirect()->route('restaurant.subscription')
             ->with('upgrade_required', $this->featureLabel($feature));
     }

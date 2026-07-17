@@ -67,6 +67,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 422);
             }
 
+            if ($e instanceof \App\Exceptions\QuotaExceededException) {
+                return response()->json(['message' => $e->getMessage()], 429);
+            }
+
             if ($e instanceof \Illuminate\Auth\AuthenticationException) {
                 return response()->json(['message' => 'Non authentifié.'], 401);
             }

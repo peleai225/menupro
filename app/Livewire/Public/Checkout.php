@@ -365,30 +365,35 @@ class Checkout extends Component
         }
 
         // Create order
-        $order = Order::create([
-            'restaurant_id' => $this->restaurant->id,
-            'customer_name' => $this->customer_name,
-            'customer_email' => $this->customer_email ?: null,
-            'customer_phone' => $this->getFullPhoneNumber(),
-            'type' => OrderType::from($this->order_type),
-            'status' => OrderStatus::PENDING_PAYMENT,
-            'payment_status' => PaymentStatus::PENDING,
-            'payment_method' => $this->payment_method === 'jeko' ? 'jeko' : null,
-            'subtotal' => $this->subtotal,
-            'delivery_fee' => $this->deliveryFee,
-            'discount_amount' => $this->discount,
-            'tax_amount' => $this->taxAmount,
-            'service_fee' => $this->serviceFee,
-            'total' => $this->total,
-            'delivery_address' => $this->delivery_address,
-            'delivery_city' => $this->delivery_city,
-            'delivery_latitude' => $this->delivery_latitude,
-            'delivery_longitude' => $this->delivery_longitude,
-            'delivery_instructions' => $this->delivery_instructions,
-            'table_number' => $this->table_number,
-            'customer_notes' => $this->customer_notes,
-            'estimated_prep_time' => $this->restaurant->estimated_prep_time ?? 30,
-        ]);
+        try {
+            $order = Order::create([
+                'restaurant_id' => $this->restaurant->id,
+                'customer_name' => $this->customer_name,
+                'customer_email' => $this->customer_email ?: null,
+                'customer_phone' => $this->getFullPhoneNumber(),
+                'type' => OrderType::from($this->order_type),
+                'status' => OrderStatus::PENDING_PAYMENT,
+                'payment_status' => PaymentStatus::PENDING,
+                'payment_method' => $this->payment_method === 'jeko' ? 'jeko' : null,
+                'subtotal' => $this->subtotal,
+                'delivery_fee' => $this->deliveryFee,
+                'discount_amount' => $this->discount,
+                'tax_amount' => $this->taxAmount,
+                'service_fee' => $this->serviceFee,
+                'total' => $this->total,
+                'delivery_address' => $this->delivery_address,
+                'delivery_city' => $this->delivery_city,
+                'delivery_latitude' => $this->delivery_latitude,
+                'delivery_longitude' => $this->delivery_longitude,
+                'delivery_instructions' => $this->delivery_instructions,
+                'table_number' => $this->table_number,
+                'customer_notes' => $this->customer_notes,
+                'estimated_prep_time' => $this->restaurant->estimated_prep_time ?? 30,
+            ]);
+        } catch (\App\Exceptions\QuotaExceededException $e) {
+            session()->flash('error', 'Ce restaurant a atteint sa limite de commandes pour ce mois.');
+            return;
+        }
 
         // Create order items
         foreach ($this->cart as $item) {

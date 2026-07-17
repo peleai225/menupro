@@ -190,44 +190,48 @@ class CheckoutController extends Controller
         $baseTotal += $serviceFee;
         $total = $baseTotal;
 
-        $order = DB::transaction(function () use (
-            $restaurant, $request, $orderType, $subtotal, $deliveryFee,
-            $discountAmount, $taxAmount, $serviceFee, $total, $orderItems, $promoCode
-        ) {
-            $order = Order::create([
-                'restaurant_id' => $restaurant->id,
-                'customer_name' => $request->customer_name,
-                'customer_email' => $request->customer_email,
-                'customer_phone' => $request->customer_phone,
-                'type' => $orderType,
-                'status' => OrderStatus::PENDING_PAYMENT,
-                'subtotal' => $subtotal,
-                'delivery_fee' => $deliveryFee,
-                'discount_amount' => $discountAmount,
-                'tax_amount' => $taxAmount,
-                'service_fee' => $serviceFee,
-                'total' => $total,
-                'delivery_address' => $request->delivery_address,
-                'delivery_city' => $request->delivery_city,
-                'delivery_latitude' => $request->delivery_latitude,
-                'delivery_longitude' => $request->delivery_longitude,
-                'delivery_instructions' => $request->delivery_instructions,
-                'table_number' => $request->table_number,
-                'customer_notes' => $request->customer_notes,
-                'scheduled_at' => $request->scheduled_at,
-                'estimated_prep_time' => $restaurant->estimated_prep_time,
-            ]);
+        try {
+            $order = DB::transaction(function () use (
+                $restaurant, $request, $orderType, $subtotal, $deliveryFee,
+                $discountAmount, $taxAmount, $serviceFee, $total, $orderItems, $promoCode
+            ) {
+                $order = Order::create([
+                    'restaurant_id' => $restaurant->id,
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'type' => $orderType,
+                    'status' => OrderStatus::PENDING_PAYMENT,
+                    'subtotal' => $subtotal,
+                    'delivery_fee' => $deliveryFee,
+                    'discount_amount' => $discountAmount,
+                    'tax_amount' => $taxAmount,
+                    'service_fee' => $serviceFee,
+                    'total' => $total,
+                    'delivery_address' => $request->delivery_address,
+                    'delivery_city' => $request->delivery_city,
+                    'delivery_latitude' => $request->delivery_latitude,
+                    'delivery_longitude' => $request->delivery_longitude,
+                    'delivery_instructions' => $request->delivery_instructions,
+                    'table_number' => $request->table_number,
+                    'customer_notes' => $request->customer_notes,
+                    'scheduled_at' => $request->scheduled_at,
+                    'estimated_prep_time' => $restaurant->estimated_prep_time,
+                ]);
 
-            foreach ($orderItems as $item) {
-                $order->items()->create($item);
-            }
+                foreach ($orderItems as $item) {
+                    $order->items()->create($item);
+                }
 
-            if ($promoCode && $discountAmount > 0) {
-                $promoCode->applyToOrder($order, $request->customer_email);
-            }
+                if ($promoCode && $discountAmount > 0) {
+                    $promoCode->applyToOrder($order, $request->customer_email);
+                }
 
-            return $order;
-        });
+                return $order;
+            });
+        } catch (\App\Exceptions\QuotaExceededException $e) {
+            return back()->withErrors(['order' => 'Ce restaurant a atteint sa limite de commandes pour ce mois. Veuillez réessayer plus tard.']);
+        }
 
         try {
             $whatsapp = app(\App\Services\WhatsAppService::class);
