@@ -29,11 +29,11 @@ class ReviewController extends Controller
             abort(404);
         }
 
-        // Check if order is completed
-        if ($order->status->value !== 'completed') {
+        // Check if order is ready or completed
+        if (!in_array($order->status->value, ['ready', 'completed'])) {
             return redirect()
                 ->route('r.order.status', [$slug, $order->tracking_token])
-                ->with('error', 'Vous ne pouvez laisser un avis que pour une commande terminée.');
+                ->with('error', 'Vous ne pouvez laisser un avis que pour une commande prête ou terminée.');
         }
 
         // Check if review already exists
@@ -64,9 +64,9 @@ class ReviewController extends Controller
             abort(404);
         }
 
-        // Check if order is completed
-        if ($order->status->value !== 'completed') {
-            return back()->with('error', 'Vous ne pouvez laisser un avis que pour une commande terminée.');
+        // Check if order is ready or completed
+        if (!in_array($order->status->value, ['ready', 'completed'])) {
+            return back()->with('error', 'Vous ne pouvez laisser un avis que pour une commande prête ou terminée.');
         }
 
         // Check if review already exists

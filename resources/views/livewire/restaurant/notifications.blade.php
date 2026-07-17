@@ -206,7 +206,7 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[75vh] sm:max-h-[600px] overflow-hidden flex flex-col"
+             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[75vh] sm:max-h-[600px] flex flex-col"
              style="z-index: 9999;"
              x-cloak>
         <!-- Header -->
@@ -239,7 +239,7 @@
         </div>
 
         <!-- Notifications List -->
-        <div class="overflow-y-auto flex-1">
+        <div class="overflow-y-auto flex-1 overscroll-contain" style="-webkit-overflow-scrolling: touch;">
             @if($notifications->count() > 0)
                 <div class="divide-y divide-neutral-100">
                     @foreach($notifications as $notification)
