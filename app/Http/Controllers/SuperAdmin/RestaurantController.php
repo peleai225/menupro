@@ -117,8 +117,9 @@ class RestaurantController extends Controller
     public function update(Request $request, Restaurant $restaurant): RedirectResponse
     {
         $request->validate([
-            'current_plan_id' => ['nullable', 'exists:plans,id'],
-            'type' => ['nullable', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe'],
+            'current_plan_id'   => ['nullable', 'exists:plans,id'],
+            'type'              => ['nullable', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe'],
+            'platform_category' => ['nullable', 'string', 'max:50'],
         ]);
 
         $data = [];
@@ -129,6 +130,10 @@ class RestaurantController extends Controller
 
         if ($request->filled('type')) {
             $data['type'] = $request->type;
+        }
+
+        if ($request->has('platform_category')) {
+            $data['platform_category'] = $request->platform_category ?: null;
         }
 
         if (!empty($data)) {

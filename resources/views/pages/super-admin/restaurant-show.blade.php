@@ -404,6 +404,49 @@
                         </form>
                     </div>
 
+                    <!-- Catégorie plateforme -->
+                    <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
+                        <p class="text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">Catégorie affichée dans l'app</p>
+                        <form method="POST" action="{{ route('super-admin.restaurants.update', $restaurant) }}" class="space-y-3">
+                            @csrf
+                            @method('PUT')
+                            <select name="platform_category"
+                                    class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
+                                @php
+                                $categories = [
+                                    'restaurant'  => 'Restaurant',
+                                    'ivoirien'    => 'Cuisine ivoirienne',
+                                    'africain'    => 'Cuisine africaine',
+                                    'fastfood'    => 'Fast food',
+                                    'burger'      => 'Burger',
+                                    'pizza'       => 'Pizza',
+                                    'poulet'      => 'Poulet / Grillades',
+                                    'poisson'     => 'Poisson / Fruits de mer',
+                                    'maquis'      => 'Maquis / Bar',
+                                    'traiteur'    => 'Traiteur',
+                                    'café'        => 'Café / Snack',
+                                    'patisserie'  => 'Pâtisserie / Boulangerie',
+                                    'sain'        => 'Cuisine saine / Végé',
+                                    'asiatique'   => 'Asiatique',
+                                ];
+                                @endphp
+                                <option value="">-- Aucune catégorie --</option>
+                                @foreach($categories as $value => $label)
+                                    <option value="{{ $value }}" {{ $restaurant->platform_category === $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="submit"
+                                    class="btn btn-outline w-full"
+                                    style="border-color:var(--sa-border);color:var(--sa-muted-fg);"
+                                    onmouseover="this.style.background='var(--sa-muted)'" onmouseout="this.style.background='transparent'">
+                                Enregistrer la catégorie
+                            </button>
+                        </form>
+                    </div>
+
                     <!-- Prolonger / Renouveler l'abonnement (sans Lygos) -->
                     <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
                         <p class="text-sm mb-3" style="color:var(--sa-muted-fg);">Lygos indisponible ? Prolongez l'abonnement manuellement (paiement hors ligne).</p>
