@@ -429,6 +429,7 @@
                                     'patisserie'  => 'Pâtisserie / Boulangerie',
                                     'sain'        => 'Cuisine saine / Végé',
                                     'asiatique'   => 'Asiatique',
+                                    'stand'       => 'Stand / Kiosque',
                                 ];
                                 @endphp
                                 <option value="">-- Aucune catégorie --</option>
