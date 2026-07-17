@@ -206,8 +206,8 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[75vh] sm:max-h-[600px] flex flex-col"
-             style="z-index: 9999;"
+             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 flex flex-col"
+             :style="window.innerWidth < 640 ? 'z-index:9999; max-height: calc(100dvh - 9rem)' : 'z-index:9999; max-height:600px'"
              x-cloak>
         <!-- Header -->
         <div class="p-4 border-b border-neutral-200">
