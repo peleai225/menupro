@@ -19,6 +19,7 @@
         $daysLeft       = $restaurant->days_until_expiration ?? 0;
         $trialDays      = $subscription?->trial_days ?? 7;
         $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
+        $isStand        = ($restaurant->currentPlan?->slug ?? '') === 'stand';
 
         $pendingSubscription = $restaurant->subscriptions()
             ->where('status', \App\Enums\SubscriptionStatus::PENDING)
@@ -132,6 +133,57 @@
     @endif
 
     {{-- ═══ PLANS ═══ --}}
+    @if($isStand)
+    {{-- Récapitulatif simplifié pour le plan Stand --}}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-neutral-900 mb-4">Votre plan</h2>
+        <div class="p-6 rounded-2xl border-2 border-primary-200 bg-gradient-to-br from-primary-50 to-white">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-neutral-900">Plan Stand</h3>
+                    <p class="text-sm text-neutral-500">Pour les stands, kiosques et micro-commerces</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl font-bold text-primary-600">5 000 F</span>
+                    <span class="text-sm text-neutral-500">/mois</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    15 plats max
+                </div>
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    5 catégories
+                </div>
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    100 commandes/mois
+                </div>
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    QR Code inclus
+                </div>
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Commandes WhatsApp
+                </div>
+                <div class="flex items-center gap-2 text-sm text-neutral-700">
+                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    1 compte
+                </div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-neutral-200">
+                <p class="text-sm text-neutral-600">Besoin de plus ? Passez au plan <strong>Essentiel</strong> pour débloquer la livraison, les statistiques et plus encore.</p>
+                <a href="{{ route('restaurant.subscription.plans') }}" class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 mt-2">
+                    Voir les plans supérieurs
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    @else
     <div x-data="{ period: 'monthly' }">
 
         {{-- Header --}}
@@ -305,6 +357,7 @@
         @endif
 
     </div>
+    @endif
 
     {{-- ═══ UTILISATION ═══ --}}
     @if($currentPlan)
