@@ -43,13 +43,19 @@ class OrderController extends Controller
             'delivery_city'      => 'required|string|max:100',
             'delivery_instructions' => 'nullable|string|max:300',
             'customer_notes'     => 'nullable|string|max:300',
-            'payment_method'     => 'required|in:wave,orange_money,mtn_money,cash',
+            'payment_method'     => 'required|in:wave,orange_money,mtn_money,cash,cash_on_delivery',
         ]);
 
         $customer   = $request->user()->customer;
         $restaurant = Restaurant::where('is_on_platform', true)
             ->where('status', 'active')
             ->findOrFail($data['restaurant_id']);
+
+        if ($data['payment_method'] === 'cash_on_delivery' && !$restaurant->cash_on_delivery) {
+            return response()->json([
+                'message' => 'Ce restaurant n\'accepte pas le paiement à la livraison.',
+            ], 422);
+        }
 
         // Vérifier que le restaurant livre à cette adresse
         $pricing = $this->pricing->calculate(

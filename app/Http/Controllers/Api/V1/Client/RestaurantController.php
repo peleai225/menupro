@@ -196,11 +196,16 @@ class RestaurantController extends Controller
             'phone'            => $r->phone,
             'logo_url'         => $r->logo_path ? asset('storage/' . $r->logo_path) : null,
             'banner_url'       => $r->banner_path ? asset('storage/' . $r->banner_path) : null,
-            'is_open'          => $r->isOpenNow(),
-            'min_order_amount' => $r->min_order_amount ?? 0,
-            'avg_prep_time'    => $r->avg_prep_time_minutes ?? 20,
-            'latitude'         => $r->latitude,
-            'longitude'        => $r->longitude,
+            'is_open'              => $r->isOpenNow(),
+            'min_order_amount'     => $r->min_order_amount ?? 0,
+            'avg_prep_time'        => $r->avg_prep_time_minutes ?? 20,
+            'cash_on_delivery'     => (bool) $r->cash_on_delivery,
+            'payment_methods'      => array_values(array_filter([
+                'wave',
+                $r->cash_on_delivery ? 'cash_on_delivery' : null,
+            ])),
+            'latitude'             => $r->latitude,
+            'longitude'            => $r->longitude,
         ];
 
         if ($detailed) {
