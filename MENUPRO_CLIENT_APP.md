@@ -16,20 +16,21 @@
 7. [Endpoints API — Paiement](#7-endpoints-api--paiement)
 8. [Endpoints API — Géocodage](#8-endpoints-api--géocodage)
 9. [Endpoints API — Ticker (annonces bannière)](#9-endpoints-api--ticker-annonces-bannière)
-10. [Routes web publiques](#10-routes-web-publiques)
-11. [Flux complet de commande](#11-flux-complet-de-commande)
-12. [Formats de réponse détaillés](#12-formats-de-réponse-détaillés)
-13. [Structure des options de plats](#13-structure-des-options-de-plats)
-14. [Horaires d'ouverture](#14-horaires-douverture)
-15. [Paiement — Wave & Paiement à la livraison](#15-paiement--wave--paiement-à-la-livraison)
-16. [Notifications push FCM](#16-notifications-push-fcm)
-17. [Suivi de commande temps réel](#17-suivi-de-commande-temps-réel)
-18. [Calcul des frais de livraison](#18-calcul-des-frais-de-livraison)
-19. [Statuts & enums](#19-statuts--enums)
-20. [Modèle de données](#20-modèle-de-données)
-21. [Rate limits](#21-rate-limits)
-22. [Gestion des erreurs](#22-gestion-des-erreurs)
-23. [Notes importantes](#23-notes-importantes)
+10. [Endpoints API — Bannières promotionnelles](#10-endpoints-api--bannières-promotionnelles)
+11. [Routes web publiques](#11-routes-web-publiques)
+12. [Flux complet de commande](#12-flux-complet-de-commande)
+13. [Formats de réponse détaillés](#13-formats-de-réponse-détaillés)
+14. [Structure des options de plats](#14-structure-des-options-de-plats)
+15. [Horaires d'ouverture](#15-horaires-douverture)
+16. [Paiement — Wave & Paiement à la livraison](#16-paiement--wave--paiement-à-la-livraison)
+17. [Notifications push FCM](#17-notifications-push-fcm)
+18. [Suivi de commande temps réel](#18-suivi-de-commande-temps-réel)
+19. [Calcul des frais de livraison](#19-calcul-des-frais-de-livraison)
+20. [Statuts & enums](#20-statuts--enums)
+21. [Modèle de données](#21-modèle-de-données)
+22. [Rate limits](#22-rate-limits)
+23. [Gestion des erreurs](#23-gestion-des-erreurs)
+24. [Notes importantes](#24-notes-importantes)
 
 ---
 
@@ -479,7 +480,7 @@ Rate limit : 20/heure par client
 | `delivery_city` | string | required, max:100 |
 | `delivery_instructions` | string | nullable, max:300 |
 | `customer_notes` | string | nullable, max:300 |
-| `payment_method` | string | required, `in:wave,orange_money,mtn_money,cash` |
+| `payment_method` | string | required, `in:wave,orange_money,mtn_money,cash_on_delivery` |
 
 Validations supplémentaires :
 - Restaurant doit avoir `is_on_platform=true` et `status=active`
@@ -804,7 +805,78 @@ Retourne HTTP **422** si `is_dismissible=false` (l'annonce ne peut pas être fer
 
 ---
 
-## 10. Routes web publiques
+## 10. Endpoints API — Bannières promotionnelles
+
+Les bannières sont des **images publicitaires** affichées en carousel sur la page menu d'un restaurant. Elles sont créées par le Super Admin — certaines sont globales (tous les restaurants), d'autres ciblées sur un restaurant précis.
+
+### `GET /api/v1/restaurants/{restaurantId}/banners` — Public
+
+Rate limit : 120/min par IP. Pas d'authentification requise.
+
+Retourne les bannières actives pour ce restaurant (globales + spécifiques au restaurant), triées par `sort_order` croissant.
+
+**Réponse 200 :**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "-20% sur les pizzas",
+      "subtitle": "Ce weekend seulement",
+      "image_url": "https://menupro.ci/storage/banners/pizza-promo.jpg",
+      "link_type": "promo_code",
+      "link_value": "PIZZA20",
+      "cta_label": "Utiliser le code"
+    },
+    {
+      "id": 2,
+      "title": null,
+      "subtitle": null,
+      "image_url": "https://menupro.ci/storage/banners/global-pub.jpg",
+      "link_type": "none",
+      "link_value": null,
+      "cta_label": null
+    }
+  ]
+}
+```
+
+**Champs :**
+
+| Champ | Type | Notes |
+|-------|------|-------|
+| `id` | int | Identifiant |
+| `title` | string\|null | Texte overlay titre — `null` = image seule |
+| `subtitle` | string\|null | Texte overlay sous-titre |
+| `image_url` | string | URL complète de l'image (ratio 16:7 recommandé) |
+| `link_type` | string | `none` \| `dish` \| `promo_code` \| `url` |
+| `link_value` | string\|null | Valeur selon `link_type` (ID plat, code, URL) |
+| `cta_label` | string\|null | Libellé du bouton CTA — `null` si pas de bouton |
+
+**Comportement selon `link_type` :**
+
+| `link_type` | Action au clic |
+|-------------|---------------|
+| `none` | Aucune — bannière décorative |
+| `dish` | `link_value` = ID du plat → naviguer vers ce plat dans le menu |
+| `promo_code` | `link_value` = code promo → l'appliquer automatiquement au panier |
+| `url` | `link_value` = URL externe → ouvrir dans le navigateur |
+
+**Implémentation recommandée :**
+- Afficher en carousel horizontal en haut de la page menu
+- Si `data` est vide → ne pas afficher le carousel (pas d'espace vide)
+- Si `title` ou `subtitle` → afficher en overlay sur l'image avec fond dégradé
+- Si `cta_label` → afficher un bouton en bas de l'image
+
+**Erreurs :**
+
+| Code | Cas |
+|------|-----|
+| 404 | `restaurant_id` inconnu |
+
+---
+
+## 11. Routes web publiques
 
 > Pour référence — le menu web est accessible via QR code au restaurant.
 > Préfixe : `https://menupro.ci/r/{slug}`
@@ -820,7 +892,7 @@ Retourne HTTP **422** si `is_dismissible=false` (l'annonce ne peut pas être fer
 
 ---
 
-## 11. Flux complet de commande
+## 12. Flux complet de commande
 
 ```
 CLIENT ouvre l'app
@@ -864,7 +936,7 @@ GET /client/orders/track/{token}  ← polling suivi temps réel
 
 ---
 
-## 12. Formats de réponse détaillés
+## 13. Formats de réponse détaillés
 
 ### 11.1 OrderObject
 
@@ -911,7 +983,7 @@ GET /client/orders/track/{token}  ← polling suivi temps réel
 
 ---
 
-## 13. Structure des options de plats
+## 14. Structure des options de plats
 
 Les groupes d'options permettent de personnaliser un plat (taille, extras, sauces, etc.).
 
@@ -974,7 +1046,7 @@ total_price = unit_price × quantity
 
 ---
 
-## 14. Horaires d'ouverture
+## 15. Horaires d'ouverture
 
 ### 13.1 Format JSON dans `opening_hours`
 
@@ -1008,7 +1080,7 @@ Exemples de valeurs possibles du champ `next_opening_message` :
 
 ---
 
-## 15. Paiement — Wave & Paiement à la livraison
+## 16. Paiement — Wave & Paiement à la livraison
 
 ### 15.1 Méthodes de paiement disponibles
 
@@ -1101,7 +1173,7 @@ POST /api/v1/client/orders
 {
   "order": {
     "id": 42,
-    "status": "pending_payment",
+    "status": "confirmed",
     "payment_method": "cash_on_delivery",
     "payment_status": "pending",
     "total": 325000
@@ -1116,9 +1188,9 @@ POST /api/v1/client/orders
 #### Cycle de vie du paiement à la livraison
 
 ```
-Commande créée (payment_status: pending)
-        ↓
-Restaurant confirme la commande → status: confirmed
+Commande créée → status: confirmed (payment_status: pending)
+        ↓  [directement, pas d'étape paiement]
+Livreur assigné → status: delivering
         ↓
 Livreur récupère → status: picked_up
         ↓
@@ -1145,7 +1217,7 @@ Les montants dans l'API sont en **FCFA entiers** (ex: `325000` = 3 250 F CFA). L
 
 ---
 
-## 16. Notifications push FCM
+## 17. Notifications push FCM
 
 ### 15.1 Configuration requise
 
@@ -1189,7 +1261,7 @@ Utiliser `type` pour router la notification dans l'app (naviguer vers la page de
 
 ---
 
-## 17. Suivi de commande temps réel
+## 18. Suivi de commande temps réel
 
 ### 16.1 Polling JSON recommandé
 
@@ -1244,7 +1316,7 @@ Si `has_review=true` → l'avis a déjà été déposé. Sinon afficher `review_
 
 ---
 
-## 18. Calcul des frais de livraison
+## 19. Calcul des frais de livraison
 
 ### 17.1 Formule
 
@@ -1288,7 +1360,7 @@ total           = prep_minutes + transit_minutes
 
 ---
 
-## 19. Statuts & enums
+## 20. Statuts & enums
 
 ### 18.1 OrderStatus
 
@@ -1356,7 +1428,7 @@ completed       → refunded
 
 ---
 
-## 20. Modèle de données
+## 21. Modèle de données
 
 ### 19.1 Table `customers`
 
@@ -1453,6 +1525,7 @@ completed       → refunded
 | `is_on_platform` | `true` si visible dans l'app livraison |
 | `platform_category` | Ex: `ivoirien`, `pizza`, `fastfood`, `burger` |
 | `cash_on_delivery` | `true` si paiement cash accepté |
+| `payment_methods` | Array — ex: `["wave","cash_on_delivery"]` — méthodes disponibles pour ce restaurant |
 | `reservations_enabled` | |
 
 ---
@@ -1495,7 +1568,7 @@ Saisir le code → POST (validation) → réduction appliquée au subtotal
 
 ---
 
-## 21. Rate limits
+## 22. Rate limits
 
 | Endpoint | Limite |
 |----------|--------|
@@ -1512,7 +1585,7 @@ Toutes les erreurs de rate limit → HTTP **429** JSON.
 
 ---
 
-## 22. Gestion des erreurs
+## 23. Gestion des erreurs
 
 ### Headers requis
 
@@ -1569,7 +1642,7 @@ Authorization: Bearer {token}    ← routes protégées uniquement
 
 ---
 
-## 23. Notes importantes
+## 24. Notes importantes
 
 1. **Tous les montants sont en FCFA entiers** dans l'API (ex: `125000` = 1 250 F CFA). Toujours formater avec séparateur de milliers avant affichage.
 
