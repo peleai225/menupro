@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Driver\AuthController as DriverAuthController;
 use App\Http\Controllers\Api\V1\Driver\DeliveryController;
 use App\Http\Controllers\Api\V1\Driver\EarningsController;
 use App\Http\Controllers\Api\V1\AnnouncementController;
+use App\Http\Controllers\Api\V1\PromoBannerController;
 use App\Http\Controllers\Api\V1\Restaurant\DeliveryOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,9 @@ Route::prefix('v1')
     // -----------------------------------------------------------------------
     Route::middleware('throttle:api.public')->group(function () {
         Route::get('/ticker', [AnnouncementController::class, 'ticker'])->name('ticker.index');
+
+        // PromoBanners — bannières promotionnelles par restaurant (public)
+        Route::get('/restaurants/{restaurantId}/banners', [PromoBannerController::class, 'index'])->name('restaurants.banners.index');
     });
 
     Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {

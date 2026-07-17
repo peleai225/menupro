@@ -217,6 +217,14 @@
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Annonces</span>
                 </a>
 
+                <a href="{{ route('super-admin.promo-banners.index') }}"
+                   class="nav-item {{ request()->routeIs('super-admin.promo-banners*') ? 'nav-active' : '' }}" title="Bannières promo">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Bannières promo</span>
+                </a>
+
                 <!-- Section: Système -->
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
@@ -564,6 +572,12 @@
                             <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Annonces</span>
+                    </a>
+                    <a href="{{ route('super-admin.promo-banners.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.promo-banners*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-fuchsia-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Bannières</span>
                     </a>
                     <a href="{{ route('super-admin.drivers.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.drivers*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">

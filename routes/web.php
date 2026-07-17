@@ -401,6 +401,10 @@ Route::prefix('admin')
         // Announcements
         Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements')->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         Route::post('annonces/{announcement}/send-emails', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'sendEmails'])->name('announcements.send-emails');
+
+        // Promo Banners
+        Route::resource('promo-banners', \App\Http\Controllers\SuperAdmin\PromoBannerController::class)->names('promo-banners')->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::post('promo-banners/{promoBanner}/toggle', [\App\Http\Controllers\SuperAdmin\PromoBannerController::class, 'toggleActive'])->name('promo-banners.toggle');
         
         // Live Dashboard API
         Route::get('api/live-stats', [SuperAdminDashboardController::class, 'liveStats'])->name('api.live-stats')->middleware('throttle:20,1');
