@@ -13,6 +13,8 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'content',
+        'link_url',
+        'link_label',
         'type', // info, warning, success, danger
         'target', // all, active, trial, expired
         'is_active',
@@ -21,6 +23,7 @@ class Announcement extends Model
         'created_by',
         'is_dismissible',
         'show_on_dashboard',
+        'show_on_ticker',
         'send_email',
         'email_sent_at',
     ];
@@ -29,6 +32,7 @@ class Announcement extends Model
         'is_active' => 'boolean',
         'is_dismissible' => 'boolean',
         'show_on_dashboard' => 'boolean',
+        'show_on_ticker' => 'boolean',
         'send_email' => 'boolean',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
@@ -67,6 +71,11 @@ class Announcement extends Model
     public function scopeForDashboard($query)
     {
         return $query->where('show_on_dashboard', true);
+    }
+
+    public function scopeForTicker($query)
+    {
+        return $query->where('show_on_ticker', true);
     }
 
     // =========================================================================

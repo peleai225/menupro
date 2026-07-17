@@ -58,6 +58,33 @@
                 </div>
             </div>
 
+            <!-- Lien (ticker) -->
+            <div class="border shadow-sm rounded-xl p-6 space-y-5" style="background:var(--sa-card);border-color:var(--sa-border);">
+                <h3 class="text-sm font-medium" style="color:var(--sa-fg);">Lien optionnel <span class="text-xs font-normal" style="color:var(--sa-muted-fg);">(utilisé dans le bandeau défilant)</span></h3>
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm mb-2" style="color:var(--sa-muted-fg);">URL du lien</label>
+                        <input type="url" name="link_url" value="{{ old('link_url', $announcement->link_url) }}"
+                               class="w-full h-12 px-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                               placeholder="https://...">
+                        @error('link_url')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2" style="color:var(--sa-muted-fg);">Libellé du bouton</label>
+                        <input type="text" name="link_label" value="{{ old('link_label', $announcement->link_label) }}"
+                               class="w-full h-12 px-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                               placeholder="Ex: En savoir plus">
+                        @error('link_label')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
             <!-- Target -->
             <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
                 <label class="block text-sm font-medium mb-4" style="color:var(--sa-fg);">Destinataires</label>
@@ -117,6 +144,15 @@
                         <p class="text-sm" style="color:var(--sa-muted-fg);">L'annonce apparaîtra sur le dashboard</p>
                     </div>
                     <input type="checkbox" name="show_on_dashboard" value="1" {{ old('show_on_dashboard', $announcement->show_on_dashboard) ? 'checked' : '' }}
+                           class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-600">
+                </label>
+
+                <label class="flex items-center justify-between p-4 rounded-xl cursor-pointer" style="background:var(--sa-muted);">
+                    <div>
+                        <span class="font-medium" style="color:var(--sa-fg);">Afficher dans le bandeau défilant (PWA)</span>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">L'annonce défilera en haut de l'app mobile des clients</p>
+                    </div>
+                    <input type="checkbox" name="show_on_ticker" value="1" {{ old('show_on_ticker', $announcement->show_on_ticker) ? 'checked' : '' }}
                            class="w-5 h-5 rounded border-neutral-500 text-primary-500 focus:ring-primary-500 bg-neutral-600">
                 </label>
 

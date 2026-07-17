@@ -41,6 +41,8 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:200',
             'content' => 'required|string|max:2000',
+            'link_url' => 'nullable|url|max:500',
+            'link_label' => 'nullable|string|max:100',
             'type' => 'required|in:info,warning,success,danger',
             'target' => 'required|in:all,active,trial,expired',
             'is_active' => 'boolean',
@@ -48,6 +50,7 @@ class AnnouncementController extends Controller
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
             'is_dismissible' => 'boolean',
             'show_on_dashboard' => 'boolean',
+            'show_on_ticker' => 'boolean',
             'send_email' => 'boolean',
         ]);
 
@@ -55,6 +58,7 @@ class AnnouncementController extends Controller
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['is_dismissible'] = $request->boolean('is_dismissible', true);
         $validated['show_on_dashboard'] = $request->boolean('show_on_dashboard', true);
+        $validated['show_on_ticker'] = $request->boolean('show_on_ticker', false);
         $validated['send_email'] = $request->boolean('send_email', false);
 
         $announcement = Announcement::create($validated);
@@ -78,6 +82,8 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:200',
             'content' => 'required|string|max:2000',
+            'link_url' => 'nullable|url|max:500',
+            'link_label' => 'nullable|string|max:100',
             'type' => 'required|in:info,warning,success,danger',
             'target' => 'required|in:all,active,trial,expired',
             'is_active' => 'boolean',
@@ -85,11 +91,13 @@ class AnnouncementController extends Controller
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
             'is_dismissible' => 'boolean',
             'show_on_dashboard' => 'boolean',
+            'show_on_ticker' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['is_dismissible'] = $request->boolean('is_dismissible', true);
         $validated['show_on_dashboard'] = $request->boolean('show_on_dashboard', true);
+        $validated['show_on_ticker'] = $request->boolean('show_on_ticker', false);
 
         $announcement->update($validated);
 

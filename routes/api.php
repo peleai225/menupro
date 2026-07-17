@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\Client\RestaurantController;
 use App\Http\Controllers\Api\V1\Driver\AuthController as DriverAuthController;
 use App\Http\Controllers\Api\V1\Driver\DeliveryController;
 use App\Http\Controllers\Api\V1\Driver\EarningsController;
+use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\Restaurant\DeliveryOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,17 @@ Route::prefix('v1')
     ->name('api.v1.')
     ->middleware(['api.json', 'api.sanitize', 'api.security'])
     ->group(function () {
+
+    // -----------------------------------------------------------------------
+    // TICKER — Bandeau défilant PWA (public, sans auth)
+    // -----------------------------------------------------------------------
+    Route::middleware('throttle:api.public')->group(function () {
+        Route::get('/ticker', [AnnouncementController::class, 'ticker'])->name('ticker.index');
+    });
+
+    Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+        Route::post('/ticker/{id}/dismiss', [AnnouncementController::class, 'dismiss'])->name('ticker.dismiss');
+    });
 
     // -----------------------------------------------------------------------
     // CLIENT
