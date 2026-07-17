@@ -688,6 +688,12 @@
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Clients</span>
                     </a>
+                    <a href="{{ route('restaurant.reservations.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.reservations*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Réservations</span>
+                    </a>
                     <a href="{{ route('restaurant.analytics') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.analytics*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -701,6 +707,12 @@
                         <span class="text-[10px] font-medium text-neutral-700">Promos</span>
                     </a>
                     @endif
+                    <button @click="more = false; $dispatch('open-notifications')" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 w-full">
+                        <span class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center relative">
+                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Notifications</span>
+                    </button>
                     <a href="{{ route('restaurant.pos') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.pos*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>

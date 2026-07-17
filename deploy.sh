@@ -31,6 +31,10 @@ cp public/offline.html ~/public_html/ 2>/dev/null
 cp public/favicon.svg ~/public_html/ 2>/dev/null
 cp public/robots.txt ~/public_html/ 2>/dev/null
 
+# 2b. Symlink storage (images téléchargées via Storage::url)
+echo " Lien symbolique storage..."
+ln -sfn ~/MenuPro/storage/app/public ~/public_html/storage 2>/dev/null || true
+
 # 3. Migrations
 echo " Migrations..."
 php artisan migrate --force 2>/dev/null || true

@@ -142,14 +142,14 @@
             </div>
 
             {{-- Form Content --}}
-            <div class="flex-1 flex items-start lg:items-center justify-center px-6 sm:px-10 lg:px-16 xl:px-20 overflow-y-auto">
-                <div class="w-full max-w-[440px] mx-auto py-8 sm:py-10 lg:py-12">
+            <div class="flex-1 flex items-start lg:items-center justify-center px-4 xs:px-6 sm:px-10 lg:px-16 xl:px-20 overflow-y-auto">
+                <div class="w-full max-w-[440px] mx-auto py-6 sm:py-10 lg:py-12">
                     {{ $slot }}
                 </div>
             </div>
 
             {{-- Footer --}}
-            <div class="px-6 sm:px-10 lg:px-16 xl:px-20 pb-4 sm:pb-5 flex-shrink-0">
+            <div class="px-4 xs:px-6 sm:px-10 lg:px-16 xl:px-20 pb-4 sm:pb-5 flex-shrink-0">
                 <div class="max-w-[440px] mx-auto pt-4 border-t border-neutral-100">
                     <div class="flex flex-wrap items-center justify-center gap-x-4 text-[11px] text-neutral-400">
                         <a href="{{ route('terms') }}" class="hover:text-primary-600 transition-colors">Conditions</a>

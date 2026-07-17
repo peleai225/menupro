@@ -99,6 +99,7 @@
      @click.away="open = false"
      @new-notification-arrived.window="onNewNotification()"
      @new-service-request.window="onNewServiceRequest()"
+     @open-notifications.window="open = true"
      wire:poll.10s="checkForNewNotifications">
 
     {{-- Bouton appels clients --}}
@@ -122,7 +123,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click.outside="srOpen = false"
-             class="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-violet-200 overflow-hidden"
+             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-80 bg-white rounded-xl shadow-2xl border border-violet-200 overflow-hidden max-h-[75vh] sm:max-h-80 overflow-y-auto"
              style="z-index: 9999;"
              x-cloak>
             <div class="p-3 bg-violet-50 border-b border-violet-100 flex items-center gap-2">
@@ -205,7 +206,7 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-96 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[70vh] sm:max-h-[600px] overflow-hidden flex flex-col"
+             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200 max-h-[75vh] sm:max-h-[600px] overflow-hidden flex flex-col"
              style="z-index: 9999;"
              x-cloak>
         <!-- Header -->
