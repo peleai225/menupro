@@ -85,9 +85,11 @@ class OrderController extends Controller
         $commission = (int) round($subtotal * $commissionRate / 100);
         $total = $subtotal + $deliveryFee;
 
+        $isCashOnDelivery = $data['payment_method'] === 'cash_on_delivery';
+
         $order = DB::transaction(function () use (
             $data, $customer, $restaurant, $items,
-            $subtotal, $deliveryFee, $commission, $total, $pricing
+            $subtotal, $deliveryFee, $commission, $total, $pricing, $isCashOnDelivery
         ) {
             $order = Order::create([
                 'restaurant_id'       => $restaurant->id,
@@ -99,7 +101,9 @@ class OrderController extends Controller
                 'customer_phone'      => $customer->phone,
                 'type'                => OrderType::DELIVERY->value,
                 'source'              => 'platform_web',
-                'status'              => OrderStatus::PENDING_PAYMENT->value,
+                'status'              => $isCashOnDelivery
+                    ? OrderStatus::CONFIRMED->value
+                    : OrderStatus::PENDING_PAYMENT->value,
                 'subtotal'            => $subtotal,
                 'delivery_fee'        => $deliveryFee,
                 'platform_commission' => $commission,
@@ -147,12 +151,19 @@ class OrderController extends Controller
             return $order;
         });
 
-        return response()->json([
+        $response = [
             'order'          => $this->formatOrder($order),
             'tracking_token' => $order->tracking_token,
-            'next_step'      => 'payment',
-            'payment_url'    => route('api.v1.client.payment.initiate', $order->id),
-        ], 201);
+        ];
+
+        if ($isCashOnDelivery) {
+            $response['next_step'] = 'track';
+        } else {
+            $response['next_step']    = 'payment';
+            $response['payment_url']  = route('api.v1.client.payment.initiate', $order->id);
+        }
+
+        return response()->json($response, 201);
     }
 
     /**
