@@ -210,9 +210,9 @@ Route::prefix('dashboard')
             Route::post('abonnement/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
         });
         
-        // Delivery Management - tous
-        Route::get('livraisons', \App\Livewire\Restaurant\Deliveries::class)->name('deliveries');
-        Route::get('livreurs', \App\Livewire\Restaurant\DeliveryDrivers::class)->name('delivery-drivers');
+        // Delivery Management - requiert feature delivery
+        Route::get('livraisons', \App\Livewire\Restaurant\Deliveries::class)->name('deliveries')->middleware('feature:delivery');
+        Route::get('livreurs', \App\Livewire\Restaurant\DeliveryDrivers::class)->name('delivery-drivers')->middleware('feature:delivery');
 
         // Settings (Livewire) - admin uniquement
         Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings')->middleware('restaurant.admin');
