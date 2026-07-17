@@ -92,8 +92,10 @@ class Team extends Component
                     'name' => $fullName,
                     'email' => $this->email,
                     'phone' => $this->phone,
-                    'role' => UserRole::from($this->role),
                 ]);
+                // role est dans $guarded → assignation explicite
+                $this->editingUser->role = UserRole::from($this->role);
+                $this->editingUser->save();
 
                 session()->flash('success', 'Membre d\'équipe mis à jour avec succès.');
             } else {
@@ -105,10 +107,12 @@ class Team extends Component
                     'email' => $this->email,
                     'phone' => $this->phone,
                     'password' => Hash::make($tempPassword),
-                    'role' => UserRole::from($this->role),
-                    'restaurant_id' => $restaurant->id,
-                    'email_verified_at' => now(), // Auto-vérifier pour permettre la connexion immédiate
+                    'email_verified_at' => now(),
                 ]);
+                // role et restaurant_id sont dans $guarded → assignation explicite
+                $user->role = UserRole::from($this->role);
+                $user->restaurant_id = $restaurant->id;
+                $user->save();
 
                 // Envoyer l'email d'invitation avec le mot de passe temporaire
                 $user->notify(new TeamInvitationNotification($restaurant, $tempPassword));
