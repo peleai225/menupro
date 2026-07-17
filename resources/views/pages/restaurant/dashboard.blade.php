@@ -506,53 +506,121 @@
                      x-transition:enter-start="opacity-0 transform translate-y-4"
                      x-transition:enter-end="opacity-100 transform translate-y-0"
                      class="card p-6">
-                    <h2 class="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        Plats populaires
-                    </h2>
-                    
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Plats populaires
+                        </h2>
+                        @if(isset($topDishes) && $topDishes->count() > 0)
+                            <span class="text-xs text-neutral-400 font-medium">Top {{ $topDishes->count() }}</span>
+                        @endif
+                    </div>
+
                     @if(isset($topDishes) && $topDishes->count() > 0)
-                        <div class="space-y-4">
-                            @foreach($topDishes as $index => $dish)
-                                <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-50 transition-colors group">
-                                    <div class="relative flex-shrink-0">
+                        @php $maxOrders = $topDishes->max('orders_count') ?: 1; @endphp
+
+                        {{-- Top 3 : grandes cartes visuelles --}}
+                        @if($topDishes->count() >= 1)
+                        <div class="grid grid-cols-{{ min($topDishes->take(3)->count(), 3) }} gap-3 mb-4">
+                            @foreach($topDishes->take(3) as $index => $dish)
+                                @php
+                                    $medals = [
+                                        0 => ['bg' => 'from-yellow-400 to-amber-500',  'border' => 'border-yellow-300', 'label' => 'bg-yellow-400',  'text' => '🥇'],
+                                        1 => ['bg' => 'from-slate-300 to-slate-400',   'border' => 'border-slate-200',  'label' => 'bg-slate-400',   'text' => '🥈'],
+                                        2 => ['bg' => 'from-amber-600 to-amber-700',   'border' => 'border-amber-300',  'label' => 'bg-amber-600',   'text' => '🥉'],
+                                    ];
+                                    $m = $medals[$index];
+                                @endphp
+                                <div class="relative rounded-2xl overflow-hidden border-2 {{ $m['border'] }} group cursor-default">
+                                    {{-- Image --}}
+                                    <div class="relative h-28 sm:h-32 bg-neutral-100">
                                         @if($dish->image)
-                                            <img src="{{ Storage::url($dish->image) }}" 
+                                            <img src="{{ Storage::url($dish->image) }}"
                                                  alt="{{ $dish->name }}"
-                                                 class="w-14 h-14 rounded-xl object-cover ring-2 ring-neutral-100 group-hover:ring-primary-200 transition-all">
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                         @else
-                                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                            <div class="w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center">
+                                                <svg class="w-10 h-10 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                                 </svg>
                                             </div>
                                         @endif
-                                        @if($index < 3)
-                                            <div class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br {{ $index == 0 ? 'from-yellow-400 to-yellow-500' : ($index == 1 ? 'from-neutral-300 to-neutral-400' : 'from-amber-600 to-amber-700') }} rounded-full flex items-center justify-center shadow">
-                                                <span class="text-[10px] font-bold text-white">{{ $index + 1 }}</span>
-                                            </div>
-                                        @endif
+                                        {{-- Médaille --}}
+                                        <div class="absolute top-2 left-2 w-7 h-7 rounded-full bg-gradient-to-br {{ $m['bg'] }} flex items-center justify-center shadow-md text-sm">
+                                            {{ $m['text'] }}
+                                        </div>
+                                        {{-- Overlay gradient bas --}}
+                                        <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                        {{-- Prix --}}
+                                        <span class="absolute bottom-1.5 right-2 text-xs font-bold text-white">
+                                            {{ number_format($dish->price, 0, ',', ' ') }} F
+                                        </span>
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-semibold text-neutral-900 truncate">{{ $dish->name }}</p>
-                                        <p class="text-sm text-neutral-500">{{ $dish->orders_count ?? 0 }} commandes</p>
-                                    </div>
-                                    <div class="text-right flex-shrink-0">
-                                        <p class="font-bold text-primary-600">{{ number_format($dish->price, 0, ',', ' ') }} F</p>
+                                    {{-- Info --}}
+                                    <div class="p-2.5 bg-white">
+                                        <p class="font-semibold text-neutral-900 text-xs leading-tight truncate">{{ $dish->name }}</p>
+                                        <p class="text-[11px] text-neutral-500 mt-0.5">{{ $dish->orders_count ?? 0 }} cmd</p>
+                                        {{-- Barre de popularité --}}
+                                        <div class="mt-1.5 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r {{ $m['bg'] }} rounded-full transition-all duration-700"
+                                                 style="width: {{ round(($dish->orders_count / $maxOrders) * 100) }}%"></div>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
+                        @endif
+
+                        {{-- Rang 4+ : liste compacte --}}
+                        @if($topDishes->count() > 3)
+                        <div class="space-y-2">
+                            @foreach($topDishes->skip(3) as $index => $dish)
+                                <div class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-50 transition-colors">
+                                    {{-- Numéro --}}
+                                    <span class="w-6 text-center text-xs font-bold text-neutral-400 flex-shrink-0">{{ $index + 4 }}</span>
+                                    {{-- Image --}}
+                                    <div class="flex-shrink-0">
+                                        @if($dish->image)
+                                            <img src="{{ Storage::url($dish->image) }}"
+                                                 alt="{{ $dish->name }}"
+                                                 class="w-10 h-10 rounded-lg object-cover">
+                                        @else
+                                            <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    {{-- Nom + barre --}}
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-sm text-neutral-800 truncate">{{ $dish->name }}</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <div class="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                                                <div class="h-full bg-primary-400 rounded-full"
+                                                     style="width: {{ round(($dish->orders_count / $maxOrders) * 100) }}%"></div>
+                                            </div>
+                                            <span class="text-[11px] text-neutral-400 flex-shrink-0">{{ $dish->orders_count ?? 0 }}</span>
+                                        </div>
+                                    </div>
+                                    {{-- Prix --}}
+                                    <span class="text-sm font-bold text-primary-600 flex-shrink-0">{{ number_format($dish->price, 0, ',', ' ') }} F</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
                     @else
-                        <div class="text-center py-8">
-                            <div class="w-14 h-14 mx-auto bg-neutral-100 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-7 h-7 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        <div class="text-center py-10">
+                            <div class="w-16 h-16 mx-auto bg-neutral-100 rounded-2xl flex items-center justify-center mb-3">
+                                <svg class="w-8 h-8 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
                             </div>
-                            <p class="text-neutral-500 text-sm">Pas encore de plats populaires</p>
+                            <p class="text-neutral-500 text-sm font-medium">Pas encore de commandes</p>
+                            <p class="text-neutral-400 text-xs mt-1">Les plats les plus commandés apparaîtront ici</p>
                         </div>
                     @endif
                 </div>
