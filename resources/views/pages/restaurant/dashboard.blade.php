@@ -475,6 +475,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </a>
+                        @if($restaurant->hasFeature('analytics'))
                         <a href="{{ route('restaurant.promo-codes') }}" class="action-item-secondary bounce-click">
                             <div class="action-item-icon">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,6 +487,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </a>
+                        @endif
                         <a href="{{ route('restaurant.settings') }}" class="action-item-secondary bounce-click">
                             <div class="action-item-icon">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

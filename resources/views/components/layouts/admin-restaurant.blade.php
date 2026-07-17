@@ -16,9 +16,20 @@
     $hasAnalytics = isset($restaurant) && $restaurant?->hasFeature('analytics');
     $hasDelivery = isset($restaurant) && $restaurant?->hasFeature('delivery');
     $planName = $restaurant?->currentPlan?->slug ?? 'essentiel';
+    $isStand = $planName === 'stand';
 
     // Étapes du tutoriel guidé (selon le rôle et les fonctionnalités)
-    if ($isAdmin) {
+    if ($isAdmin && $isStand) {
+        $tourSteps = [
+            ['popover' => ['title' => 'Bienvenue sur MenuPro', 'description' => 'Ce tutoriel vous présente votre espace Stand. Cliquez sur Suivant pour découvrir chaque section.']],
+            ['element' => '#tour-dashboard', 'popover' => ['title' => 'Dashboard', 'description' => 'Vue d\'ensemble : commandes du jour et plats actifs.']],
+            ['element' => '#tour-categories', 'popover' => ['title' => 'Catégories', 'description' => 'Organisez votre menu (max 5 catégories).']],
+            ['element' => '#tour-plats', 'popover' => ['title' => 'Plats', 'description' => 'Ajoutez vos plats (max 15), modifiez les prix et la disponibilité.']],
+            ['element' => '#tour-qrcode', 'popover' => ['title' => 'QR Code', 'description' => 'Téléchargez votre QR Code pour que les clients voient votre menu.']],
+            ['element' => '#tour-commandes', 'popover' => ['title' => 'Commandes', 'description' => 'Gérez les commandes reçues via WhatsApp.']],
+            ['element' => '#tour-parametres', 'popover' => ['title' => 'Paramètres', 'description' => 'Configurez vos infos et horaires.']],
+        ];
+    } elseif ($isAdmin) {
         $tourSteps = [
             ['popover' => ['title' => 'Bienvenue sur MenuPro', 'description' => 'Ce tutoriel vous présente les onglets du tableau de bord. Cliquez sur Suivant pour découvrir chaque section.']],
             ['element' => '#tour-dashboard', 'popover' => ['title' => 'Dashboard', 'description' => 'Vue d\'ensemble : commandes du jour, chiffre d\'affaires et statistiques.']],
@@ -143,6 +154,7 @@
                         @endif
                     </a>
 
+                    @if(!$isStand)
                     <a href="{{ route('restaurant.pos') }}"
                        id="tour-pos"
                        class="sidebar-item {{ request()->routeIs('restaurant.pos*') ? 'sidebar-item-active' : '' }}">
@@ -151,8 +163,9 @@
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Caisse (POS)</span>
                     </a>
+                    @endif
 
-                    @if($isAdmin)
+                    @if($isAdmin && !$isStand)
                     <a href="{{ route('restaurant.customers') }}"
                        id="tour-clients"
                        class="sidebar-item {{ request()->routeIs('restaurant.customers*') ? 'sidebar-item-active' : '' }}">
@@ -187,6 +200,7 @@
                     </a>
 
                     <!-- === SECTION PRO === -->
+                    @if(!$isStand)
                     <div class="pt-4">
                         <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
                             Pilotage
@@ -246,8 +260,10 @@
                         </a>
                     @endif
                     @endif
+                    @endif
 
                     <!-- === SECTION STOCK (PRO) === -->
+                    @if(!$isStand)
                     <div class="pt-4">
                         <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
                             Stock
@@ -314,22 +330,25 @@
                             <svg x-show="expanded" class="w-3.5 h-3.5 ml-auto text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
                         </a>
                     @endif
+                    @endif
 
                     @if($isAdmin)
                     <!-- Gestion d'équipe Section -->
+                    @if(!$isStand)
                     <div class="pt-4">
                         <span x-show="expanded" x-transition class="px-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                             Équipe
                         </span>
                     </div>
 
-                    <a href="{{ route('restaurant.team') }}" 
+                    <a href="{{ route('restaurant.team') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.team*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Équipe</span>
                     </a>
+                    @endif
 
                     <!-- Settings Section -->
                     <div class="pt-4">
@@ -346,13 +365,15 @@
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Abonnement</span>
                     </a>
 
-                    <a href="{{ route('restaurant.taxes-fees') }}" 
+                    @if(!$isStand)
+                    <a href="{{ route('restaurant.taxes-fees') }}"
                        class="sidebar-item {{ request()->routeIs('restaurant.taxes-fees*') ? 'sidebar-item-active' : '' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-5m-3 5h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
                         <span x-show="expanded" x-transition class="whitespace-nowrap">Taxes & Frais</span>
                     </a>
+                    @endif
 
                     <a href="{{ route('restaurant.settings') }}" 
                        id="tour-parametres"
@@ -682,6 +703,7 @@
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Categories</span>
                     </a>
+                    @if(!$isStand)
                     <a href="{{ route('restaurant.customers') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.customers*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -707,18 +729,21 @@
                         <span class="text-[10px] font-medium text-neutral-700">Promos</span>
                     </a>
                     @endif
+                    @endif
                     <button @click="more = false; $dispatch('open-notifications')" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 w-full">
                         <span class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center relative">
                             <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Notifications</span>
                     </button>
+                    @if(!$isStand)
                     <a href="{{ route('restaurant.pos') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.pos*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Caisse</span>
                     </a>
+                    @endif
                     @if(isset($restaurant) && $restaurant?->hasFeature('stock'))
                     <a href="{{ route('restaurant.stock.ingredients.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.stock*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
@@ -735,7 +760,7 @@
                         <span class="text-[10px] font-medium text-neutral-700">Chambres</span>
                     </a>
                     @endif
-                    @if($isAdmin)
+                    @if($isAdmin && !$isStand)
                     <a href="{{ route('restaurant.team') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.team*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
