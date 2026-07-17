@@ -523,7 +523,8 @@
 
                         {{-- Top 3 : grandes cartes visuelles --}}
                         @if($topDishes->count() >= 1)
-                        <div class="grid grid-cols-{{ min($topDishes->take(3)->count(), 3) }} gap-3 mb-4">
+                        @php $topCount = min($topDishes->take(3)->count(), 3); $gridCols = ['grid-cols-1','grid-cols-2','grid-cols-3'][$topCount - 1] ?? 'grid-cols-3'; @endphp
+                        <div class="grid {{ $gridCols }} gap-3 mb-4">
                             @foreach($topDishes->take(3) as $index => $dish)
                                 @php
                                     $medals = [

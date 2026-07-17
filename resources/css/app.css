@@ -16,6 +16,9 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
+    /* Breakpoints */
+    --breakpoint-xs: 480px;
+
     /* Typography */
     --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-display: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;

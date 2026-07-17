@@ -123,7 +123,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click.outside="srOpen = false"
-             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-80 bg-white rounded-xl shadow-2xl border border-violet-200 overflow-hidden max-h-[75vh] sm:max-h-80 overflow-y-auto"
+             class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-80 bg-white rounded-xl shadow-2xl border border-violet-200 max-h-[75vh] sm:max-h-80 overflow-y-auto"
              style="z-index: 9999;"
              x-cloak>
             <div class="p-3 bg-violet-50 border-b border-violet-100 flex items-center gap-2">
