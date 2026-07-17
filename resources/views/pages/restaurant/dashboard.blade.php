@@ -536,8 +536,8 @@
                                 <div class="relative rounded-2xl overflow-hidden border-2 {{ $m['border'] }} group cursor-default">
                                     {{-- Image --}}
                                     <div class="relative h-28 sm:h-32 bg-neutral-100">
-                                        @if($dish->image)
-                                            <img src="{{ Storage::url($dish->image) }}"
+                                        @if($dish->image_url)
+                                            <img src="{{ $dish->image_url }}"
                                                  alt="{{ $dish->name }}"
                                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                         @else
@@ -582,8 +582,8 @@
                                     <span class="w-6 text-center text-xs font-bold text-neutral-400 flex-shrink-0">{{ $index + 4 }}</span>
                                     {{-- Image --}}
                                     <div class="flex-shrink-0">
-                                        @if($dish->image)
-                                            <img src="{{ Storage::url($dish->image) }}"
+                                        @if($dish->image_url)
+                                            <img src="{{ $dish->image_url }}"
                                                  alt="{{ $dish->name }}"
                                                  class="w-10 h-10 rounded-lg object-cover">
                                         @else

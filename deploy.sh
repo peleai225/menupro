@@ -24,6 +24,7 @@ mkdir -p ~/public_html/sounds 2>/dev/null
 cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
 cp public/icon-*.png ~/public_html/ 2>/dev/null
 cp public/manifest.json ~/public_html/ 2>/dev/null
+cp public/manifest-admin.json ~/public_html/ 2>/dev/null
 cp public/sw.js ~/public_html/ 2>/dev/null
 cp public/firebase-messaging-sw.js ~/public_html/ 2>/dev/null
 cp public/offline.html ~/public_html/ 2>/dev/null
