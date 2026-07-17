@@ -174,7 +174,25 @@
                     1 compte
                 </div>
             </div>
+            @if(!$isActive || $daysLeft <= 7)
             <div class="mt-5 pt-4 border-t border-neutral-200">
+                <form method="POST" action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
+                    @csrf
+                    <input type="hidden" name="plan" value="stand">
+                    <input type="hidden" name="billing_period" value="monthly">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm hover:shadow transition-all">
+                        @if($isTrial)
+                            Activer mon plan — 5 000 F/mois
+                        @elseif($isActive && $daysLeft <= 7)
+                            Renouveler — 5 000 F/mois
+                        @else
+                            Réactiver mon plan — 5 000 F/mois
+                        @endif
+                    </button>
+                </form>
+            </div>
+            @endif
+            <div class="mt-4 pt-4 {{ !$isActive ? '' : 'border-t border-neutral-200' }}">
                 <p class="text-sm text-neutral-600">Besoin de plus ? Passez au plan <strong>Essentiel</strong> pour débloquer la livraison, les statistiques et plus encore.</p>
                 <a href="{{ route('restaurant.subscription.plans') }}" class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 mt-2">
                     Voir les plans supérieurs
