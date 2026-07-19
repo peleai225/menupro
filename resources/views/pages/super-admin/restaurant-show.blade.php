@@ -425,7 +425,7 @@
                                     'poisson'     => 'Poisson / Fruits de mer',
                                     'maquis'      => 'Maquis / Bar',
                                     'traiteur'    => 'Traiteur',
-                                    'café'        => 'Café / Snack',
+                                    'cafe'        => 'Café / Snack',
                                     'patisserie'  => 'Pâtisserie / Boulangerie',
                                     'sain'        => 'Cuisine saine / Végé',
                                     'asiatique'   => 'Asiatique',
