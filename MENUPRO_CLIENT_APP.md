@@ -288,6 +288,39 @@ Si `is_default=true` → toutes les autres adresses du client sont désactivées
 
 > Routes publiques — sans authentification — Rate limit : 120/min par IP
 
+### 4.0 Catégories plateforme
+
+```
+GET /api/v1/restaurants/categories
+```
+
+Retourne les catégories actives sur la plateforme avec le nombre d'établissements, triées par popularité décroissante. Utile pour peupler dynamiquement le sélecteur de catégories dans l'app.
+
+**Réponse :**
+```json
+{
+  "data": [
+    { "key": "restaurant",  "label": "Restaurant",              "count": 24 },
+    { "key": "ivoirien",    "label": "Cuisine ivoirienne",      "count": 8  },
+    { "key": "stand",       "label": "Stand / Kiosque",         "count": 5  },
+    { "key": "maquis",      "label": "Maquis / Bar",            "count": 4  },
+    { "key": "patisserie",  "label": "Pâtisserie / Boulangerie","count": 2  }
+  ]
+}
+```
+
+**Champs :**
+
+| Champ | Type | Notes |
+|-------|------|-------|
+| `key` | string | Valeur à passer en `?category=` sur les autres endpoints |
+| `label` | string | Libellé traduit pour affichage |
+| `count` | integer | Nombre d'établissements actifs dans cette catégorie |
+
+Seules les catégories ayant au moins 1 établissement `active` + `is_on_platform=true` sont retournées.
+
+---
+
 ### 4.1 Liste des restaurants
 
 ```

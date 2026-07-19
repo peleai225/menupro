@@ -74,6 +74,46 @@ class RestaurantController extends Controller
     }
 
     /**
+     * Catégories plateforme actives avec nombre d'établissements.
+     */
+    public function categories(): JsonResponse
+    {
+        $labels = [
+            'restaurant' => 'Restaurant',
+            'ivoirien'   => 'Cuisine ivoirienne',
+            'africain'   => 'Cuisine africaine',
+            'fastfood'   => 'Fast food',
+            'burger'     => 'Burger',
+            'pizza'      => 'Pizza',
+            'poulet'     => 'Poulet / Grillades',
+            'poisson'    => 'Poisson / Fruits de mer',
+            'maquis'     => 'Maquis / Bar',
+            'traiteur'   => 'Traiteur',
+            'cafe'       => 'Café / Snack',
+            'patisserie' => 'Pâtisserie / Boulangerie',
+            'sain'       => 'Cuisine saine / Végé',
+            'asiatique'  => 'Asiatique',
+            'stand'      => 'Stand / Kiosque',
+        ];
+
+        $rows = Restaurant::where('is_on_platform', true)
+            ->where('status', 'active')
+            ->whereNotNull('platform_category')
+            ->selectRaw('platform_category, COUNT(*) as count')
+            ->groupBy('platform_category')
+            ->orderByDesc('count')
+            ->get();
+
+        $data = $rows->map(fn($row) => [
+            'key'   => $row->platform_category,
+            'label' => $labels[$row->platform_category] ?? ucfirst($row->platform_category),
+            'count' => (int) $row->count,
+        ]);
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
      * Détail d'un restaurant.
      */
     public function show(int $id): JsonResponse

@@ -211,6 +211,7 @@ Route::prefix('v1')
         ->group(function () {
             Route::get('/',                       [RestaurantController::class, 'index'])->name('index');
             Route::get('/nearby',                 [RestaurantController::class, 'nearby'])->name('nearby');
+            Route::get('/categories',             [RestaurantController::class, 'categories'])->name('categories');
             Route::get('/{id}',                   [RestaurantController::class, 'show'])->name('show');
             Route::get('/{id}/menu',              [RestaurantController::class, 'menu'])->name('menu');
             Route::get('/{id}/delivery-estimate', [RestaurantController::class, 'estimateDelivery'])->name('delivery-estimate');
