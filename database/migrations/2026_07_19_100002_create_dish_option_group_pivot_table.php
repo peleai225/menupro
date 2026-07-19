@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('dish_option_group')) {
+            return;
+        }
+
         // Table pivot : un plat peut avoir plusieurs groupes d'options,
         // un groupe peut être partagé entre plusieurs plats du même restaurant.
         Schema::create('dish_option_group', function (Blueprint $table) {
