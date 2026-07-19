@@ -170,7 +170,7 @@ class OrderController extends Controller
             $response['next_step'] = 'track';
         } else {
             $response['next_step']    = 'payment';
-            $response['payment_url']  = route('api.v1.client.payment.initiate', $order->id);
+            $response['payment_url']  = route('payment.initiate', $order->id);
         }
 
         return response()->json($response, 201);
