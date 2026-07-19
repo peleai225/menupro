@@ -108,11 +108,18 @@
                                     @endif
                                     @php
                                         $statusMap = [
-                                            'delivered' => ['text' => 'Livré', 'class' => 'bg-emerald-100 text-emerald-700'],
-                                            'cancelled' => ['text' => 'Annulé', 'class' => 'bg-red-100 text-red-700'],
-                                            'in_progress'=> ['text' => 'En cours', 'class' => 'bg-blue-100 text-blue-700'],
+                                            'pending'               => ['text' => 'En attente',  'class' => 'bg-neutral-100 text-neutral-600'],
+                                            'assigned'              => ['text' => 'Assigné',      'class' => 'bg-blue-100 text-blue-700'],
+                                            'heading_to_restaurant' => ['text' => 'En route',     'class' => 'bg-indigo-100 text-indigo-700'],
+                                            'picked_up'             => ['text' => 'Récupéré',     'class' => 'bg-orange-100 text-orange-700'],
+                                            'delivering'            => ['text' => 'En livraison', 'class' => 'bg-purple-100 text-purple-700'],
+                                            'delivered'             => ['text' => 'Livré',         'class' => 'bg-emerald-100 text-emerald-700'],
+                                            'cancelled'             => ['text' => 'Annulé',        'class' => 'bg-red-100 text-red-700'],
                                         ];
-                                        $s = $statusMap[$delivery->status] ?? ['text' => $delivery->status, 'class' => 'bg-neutral-100 text-neutral-600'];
+                                        $statusKey = $delivery->status instanceof \App\Enums\DeliveryStatus
+                                            ? $delivery->status->value
+                                            : (string) $delivery->status;
+                                        $s = $statusMap[$statusKey] ?? ['text' => $statusKey, 'class' => 'bg-neutral-100 text-neutral-600'];
                                     @endphp
                                     <span class="px-2 py-0.5 text-xs rounded-full font-medium {{ $s['class'] }}">{{ $s['text'] }}</span>
                                 </div>
