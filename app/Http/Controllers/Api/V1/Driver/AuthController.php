@@ -24,7 +24,7 @@ class AuthController extends Controller
             'password'           => ['required', Password::min(6)],
             'city'               => 'required|string|max:100',
             'zone'               => 'nullable|string|max:100',
-            'vehicle_type'       => 'required|in:moto,vélo,voiture',
+            'vehicle_type'       => 'required|in:moto,velo,voiture',
             'vehicle_plate'      => 'nullable|string|max:20',
             'cni_number'         => 'required|string|max:30',
             'cni_photo'          => 'required|file|image|max:5120',
