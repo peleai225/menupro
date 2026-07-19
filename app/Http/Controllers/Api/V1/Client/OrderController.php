@@ -43,7 +43,7 @@ class OrderController extends Controller
             'delivery_city'      => 'required|string|max:100',
             'delivery_instructions' => 'nullable|string|max:300',
             'customer_notes'     => 'nullable|string|max:300',
-            'payment_method'     => 'required|in:wave,orange_money,mtn_money,cash,cash_on_delivery',
+            'payment_method'     => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
         ]);
 
         $customer   = $request->user()->customer;

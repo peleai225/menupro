@@ -95,6 +95,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'Trop de requêtes. Réessayez plus tard.'], 429);
             }
 
+            // abort(403), abort(422, "..."), etc.
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                $msg = $e->getMessage() ?: 'Erreur.';
+                return response()->json(['message' => $msg], $e->getStatusCode());
+            }
+
             // Erreur serveur — ne pas exposer les détails en production
             \Log::error('API v1 error', [
                 'message' => $e->getMessage(),

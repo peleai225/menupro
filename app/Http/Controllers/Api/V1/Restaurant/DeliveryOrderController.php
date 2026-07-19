@@ -50,7 +50,7 @@ class DeliveryOrderController extends Controller
         $restaurantId = $request->user()->restaurant_id;
 
         $order = Order::where('restaurant_id', $restaurantId)
-            ->where('status', OrderStatus::PAID->value)
+            ->whereIn('status', [OrderStatus::PAID->value, OrderStatus::CONFIRMED->value])
             ->findOrFail($orderId);
 
         $data = $request->validate([

@@ -187,7 +187,8 @@ class DeliveryController extends Controller
                     'status'       => OrderStatus::COMPLETED->value,
                     'completed_at' => now(),
                 ]);
-                $this->assignment->completeDelivery($delivery->fill($updates));
+                $delivery->update($updates);
+                $this->assignment->completeDelivery($delivery->fresh());
                 return;
             }
 
