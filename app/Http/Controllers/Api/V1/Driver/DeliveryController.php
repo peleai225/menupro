@@ -135,8 +135,8 @@ class DeliveryController extends Controller
         });
 
         return response()->json([
-            'message'  => 'Course acceptée.',
-            'delivery' => $this->formatDeliveryDetail($delivery->fresh()),
+            'message' => 'Course acceptée.',
+            'data'    => $this->formatDeliveryDetail($delivery->fresh()->load(['order.items', 'restaurant'])),
         ]);
     }
 
@@ -207,7 +207,7 @@ class DeliveryController extends Controller
 
         return response()->json([
             'message' => DeliveryStatus::from($data['status'])->label(),
-            'status'  => $data['status'],
+            'data'    => $this->formatDeliveryDetail($delivery->fresh()->load(['order.items', 'restaurant'])),
         ]);
     }
 
@@ -255,55 +255,80 @@ class DeliveryController extends Controller
             ? round($this->geo->distanceKm($driverLat, $driverLng, $pickupLat, $pickupLng), 1)
             : null;
 
+        $order = $delivery->order;
+        $items = $order->items->map(fn($i) => [
+            'name'     => $i->dish_name,
+            'quantity' => $i->quantity,
+        ])->values()->toArray();
+
         return [
-            'id'              => $delivery->id,
-            'pickup_address'  => $delivery->restaurant->address ?? '',
-            'pickup_name'     => $delivery->restaurant->name ?? '',
-            'pickup_lat'      => $pickupLat,
-            'pickup_lng'      => $pickupLng,
-            'delivery_address' => $delivery->delivery_address,
-            'delivery_lat'    => $delivery->delivery_latitude,
-            'delivery_lng'    => $delivery->delivery_longitude,
-            'distance_to_pickup_km' => $distToPickup,
-            'delivery_fee'    => $delivery->order->delivery_fee,
-            'driver_earning'  => (int) round($delivery->order->delivery_fee * 0.80),
-            'items_count'     => $delivery->order->items()->count(),
-            'estimated_minutes' => $delivery->estimated_minutes,
-            'created_at'      => $delivery->created_at,
+            'id'     => $delivery->id,
+            'status' => $delivery->status instanceof \App\Enums\DeliveryStatus
+                ? $delivery->status->value
+                : $delivery->status,
+            'order'  => [
+                'reference'             => $order->reference ?? '',
+                'delivery_address'      => $delivery->delivery_address,
+                'delivery_phone'        => $delivery->delivery_phone,
+                'delivery_instructions' => $delivery->delivery_instructions,
+                'delivery_latitude'     => $delivery->delivery_latitude,
+                'delivery_longitude'    => $delivery->delivery_longitude,
+                'total'                 => $order->total ?? 0,
+                'payment_method'        => $order->payment_method ?? '',
+                'items'                 => $items,
+                'restaurant' => [
+                    'name'      => $delivery->restaurant->name ?? '',
+                    'address'   => $delivery->restaurant->address ?? '',
+                    'latitude'  => $pickupLat,
+                    'longitude' => $pickupLng,
+                    'phone'     => $delivery->restaurant->phone ?? null,
+                ],
+            ],
+            'distance_km'             => $distToPickup,
+            'estimated_minutes'       => $delivery->estimated_minutes,
+            'driver_earning_estimate' => (int) round(($order->delivery_fee ?? 0) * 0.80),
         ];
     }
 
     private function formatDeliveryDetail(Delivery $delivery): array
     {
         $order = $delivery->order;
+        $statusValue = $delivery->status instanceof DeliveryStatus
+            ? $delivery->status->value
+            : $delivery->status;
+
+        $items = $order->items->map(fn($i) => [
+            'name'     => $i->dish_name,
+            'quantity' => $i->quantity,
+        ])->values()->toArray();
+
         return [
-            'id'               => $delivery->id,
-            'status'           => $delivery->status,
-            'status_label'     => DeliveryStatus::from($delivery->status)->label(),
-            'pickup' => [
-                'name'    => $delivery->restaurant->name ?? '',
-                'address' => $delivery->restaurant->address ?? '',
-                'phone'   => $delivery->restaurant->phone ?? '',
-                'lat'     => $delivery->pickup_latitude,
-                'lng'     => $delivery->pickup_longitude,
+            'id'     => $delivery->id,
+            'status' => $statusValue,
+            'order'  => [
+                'reference'             => $order->reference ?? '',
+                'delivery_address'      => $delivery->delivery_address,
+                'delivery_phone'        => $delivery->delivery_phone,
+                'delivery_instructions' => $delivery->delivery_instructions,
+                'delivery_latitude'     => (float) $delivery->delivery_latitude,
+                'delivery_longitude'    => (float) $delivery->delivery_longitude,
+                'total'                 => $order->total ?? 0,
+                'payment_method'        => $order->payment_method ?? '',
+                'items'                 => $items,
+                'restaurant' => [
+                    'name'      => $delivery->restaurant->name ?? '',
+                    'address'   => $delivery->restaurant->address ?? '',
+                    'latitude'  => (float) $delivery->pickup_latitude,
+                    'longitude' => (float) $delivery->pickup_longitude,
+                    'phone'     => $delivery->restaurant->phone ?? null,
+                ],
             ],
-            'dropoff' => [
-                'address'      => $delivery->delivery_address,
-                'phone'        => $delivery->delivery_phone,
-                'instructions' => $delivery->delivery_instructions,
-                'lat'          => $delivery->delivery_latitude,
-                'lng'          => $delivery->delivery_longitude,
-            ],
-            'order' => [
-                'reference'    => $order->reference,
-                'items_count'  => $order->items()->count(),
-                'total'        => $order->total,
-                'delivery_fee' => $order->delivery_fee,
-                'driver_earning' => (int) round($order->delivery_fee * 0.80),
-            ],
-            'assigned_at'   => $delivery->assigned_at,
-            'picked_up_at'  => $delivery->picked_up_at,
-            'delivered_at'  => $delivery->delivered_at,
+            'distance_km'             => null,
+            'estimated_minutes'       => $delivery->estimated_minutes,
+            'driver_earning_estimate' => (int) round(($order->delivery_fee ?? 0) * 0.80),
+            'assigned_at'             => $delivery->assigned_at,
+            'picked_up_at'            => $delivery->picked_up_at,
+            'delivered_at'            => $delivery->delivered_at,
         ];
     }
 }
