@@ -37,8 +37,10 @@ class AuthController extends Controller
             'email'    => $data['email'] ?? null,
             'phone'    => $data['phone'],
             'password' => Hash::make($data['password']),
-            'role'     => UserRole::DELIVERY_DRIVER->value,
         ]);
+        // 'role' est dans $guarded — assigner après create()
+        $user->role = UserRole::DELIVERY_DRIVER;
+        $user->save();
 
         $cniPath     = $request->file('cni_photo')->store('drivers/cni', 'public');
         $licensePath = $request->file('license_photo')->store('drivers/license', 'public');
