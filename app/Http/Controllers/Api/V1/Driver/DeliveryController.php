@@ -146,13 +146,24 @@ class DeliveryController extends Controller
     public function decline(Request $request, int $deliveryId): JsonResponse
     {
         $driver   = $request->user()->deliveryDriver;
-        $delivery = Delivery::where('driver_id', $driver->id)
-            ->where('status', DeliveryStatus::ASSIGNED->value)
+
+        // Refus depuis la liste (pending) OU refus après assignation automatique (assigned)
+        $delivery = Delivery::whereIn('status', [
+                DeliveryStatus::PENDING->value,
+                DeliveryStatus::ASSIGNED->value,
+            ])
+            ->where(function ($q) use ($driver) {
+                $q->where('driver_id', $driver->id)
+                  ->orWhereNull('driver_id'); // pending = pas encore assigné
+            })
             ->findOrFail($deliveryId);
 
-        $this->assignment->unassign($delivery, 'Refus livreur');
+        if ($delivery->status === DeliveryStatus::ASSIGNED->value && $delivery->driver_id === $driver->id) {
+            $this->assignment->unassign($delivery, 'Refus livreur');
+        }
+        // Pour une course pending, on ne fait rien côté DB — on retire juste du cache local
 
-        return response()->json(['message' => 'Course refusée. Un autre livreur sera cherché.']);
+        return response()->json(['message' => 'Course ignorée.']);
     }
 
     /**

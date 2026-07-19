@@ -36,16 +36,15 @@ class EarningsController extends Controller
             ->sum('net_amount');
 
         return response()->json([
-            'available_balance' => (int) $available,
-            'today' => [
-                'deliveries' => (int) $today->deliveries,
-                'earnings'   => (int) $today->earnings,
-            ],
-            'this_week' => [
-                'deliveries' => (int) $week->deliveries,
-                'earnings'   => (int) $week->earnings,
-            ],
-            'total_lifetime' => $driver->total_earnings_xof,
+            'balance_available' => (int) $available,
+            'today'             => (int) $today->earnings,
+            'this_week'         => (int) $week->earnings,
+            'this_month'        => (int) DriverEarning::where('driver_id', $driver->id)
+                                        ->whereMonth('created_at', now()->month)
+                                        ->sum('net_amount'),
+            'total_lifetime'    => (int) ($driver->total_earnings_xof ?? 0),
+            'deliveries_today'  => (int) $today->deliveries,
+            'deliveries_total'  => (int) $driver->total_deliveries,
         ]);
     }
 
