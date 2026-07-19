@@ -126,7 +126,7 @@ class RestaurantController extends Controller
     }
 
     /**
-     * Menu complet d'un restaurant (catégories + plats).
+     * Menu complet d'un restaurant (catégories + plats + groupes d'options).
      */
     public function menu(int $id): JsonResponse
     {
@@ -138,13 +138,19 @@ class RestaurantController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->with(['dishes' => function ($q) {
-                $q->where('is_active', true)->orderBy('sort_order');
+                $q->where('is_active', true)
+                  ->orderBy('sort_order')
+                  ->with(['optionGroups' => function ($gq) {
+                      $gq->where('is_active', true)
+                         ->orderBy('sort_order')
+                         ->with(['activeOptions']);
+                  }]);
             }])
             ->get()
             ->map(fn($cat) => [
                 'id'     => $cat->id,
                 'name'   => $cat->name,
-                'dishes' => $cat->dishes->map(fn($d) => $this->formatDish($d)),
+                'dishes' => $cat->dishes->map(fn($d) => $this->formatDish($d, true)),
             ]);
 
         return response()->json([
@@ -266,21 +272,39 @@ class RestaurantController extends Controller
         return $data;
     }
 
-    private function formatDish($dish): array
+    private function formatDish($dish, bool $withOptions = false): array
     {
-        return [
-            'id'          => $dish->id,
-            'name'        => $dish->name,
-            'description' => $dish->description,
-            'price'       => $dish->price,
+        $data = [
+            'id'            => $dish->id,
+            'name'          => $dish->name,
+            'description'   => $dish->description,
+            'price'         => $dish->price,
             'compare_price' => $dish->compare_price,
-            'image_url'   => $dish->image_path ? asset('storage/' . $dish->image_path) : null,
-            'is_available' => $dish->hasStock(),
-            'is_featured'  => $dish->is_featured,
-            'is_spicy'     => $dish->is_spicy,
+            'image_url'     => $dish->image_path ? asset('storage/' . $dish->image_path) : null,
+            'is_available'  => $dish->hasStock(),
+            'is_featured'   => $dish->is_featured,
+            'is_spicy'      => $dish->is_spicy,
             'is_vegetarian' => $dish->is_vegetarian,
-            'prep_time'    => $dish->prep_time,
-            'calories'     => $dish->calories,
+            'prep_time'     => $dish->prep_time,
+            'calories'      => $dish->calories,
         ];
+
+        if ($withOptions && $dish->relationLoaded('optionGroups')) {
+            $data['option_groups'] = $dish->optionGroups->map(fn($g) => [
+                'id'             => $g->id,
+                'name'           => $g->name,
+                'is_required'    => $g->is_required,
+                'min_selections' => $g->min_selections,
+                'max_selections' => $g->max_selections,
+                'options'        => $g->activeOptions->map(fn($o) => [
+                    'id'               => $o->id,
+                    'name'             => $o->name,
+                    'price_adjustment' => $o->price_adjustment,
+                    'is_default'       => $o->is_default ?? false,
+                ]),
+            ]);
+        }
+
+        return $data;
     }
 }

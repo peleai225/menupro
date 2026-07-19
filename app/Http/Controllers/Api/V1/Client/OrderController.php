@@ -32,18 +32,20 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'restaurant_id'      => 'required|integer|exists:restaurants,id',
-            'items'              => 'required|array|min:1',
-            'items.*.dish_id'    => 'required|integer|exists:dishes,id',
-            'items.*.quantity'   => 'required|integer|min:1|max:20',
-            'items.*.notes'      => 'nullable|string|max:200',
-            'delivery_lat'       => 'required|numeric|between:-90,90',
-            'delivery_lng'       => 'required|numeric|between:-180,180',
-            'delivery_address'   => 'required|string|max:300',
-            'delivery_city'      => 'required|string|max:100',
-            'delivery_instructions' => 'nullable|string|max:300',
-            'customer_notes'     => 'nullable|string|max:300',
-            'payment_method'     => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
+            'restaurant_id'               => 'required|integer|exists:restaurants,id',
+            'items'                       => 'required|array|min:1',
+            'items.*.dish_id'             => 'required|integer|exists:dishes,id',
+            'items.*.quantity'            => 'required|integer|min:1|max:20',
+            'items.*.notes'               => 'nullable|string|max:200',
+            'items.*.selected_options'    => 'nullable|array',
+            'items.*.selected_options.*'  => 'integer|exists:dish_options,id',
+            'delivery_lat'                => 'required|numeric|between:-90,90',
+            'delivery_lng'                => 'required|numeric|between:-180,180',
+            'delivery_address'            => 'required|string|max:300',
+            'delivery_city'               => 'required|string|max:100',
+            'delivery_instructions'       => 'nullable|string|max:300',
+            'customer_notes'              => 'nullable|string|max:300',
+            'payment_method'              => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
         ]);
 
         $customer   = $request->user()->customer;
@@ -121,12 +123,14 @@ class OrderController extends Controller
 
             foreach ($items as $item) {
                 $order->items()->create([
-                    'dish_id'    => $item['dish_id'],
-                    'dish_name'  => $item['dish_name'],
-                    'unit_price' => $item['unit_price'],
-                    'quantity'   => $item['quantity'],
-                    'total_price' => $item['total_price'],
-                    'notes'      => $item['notes'] ?? null,
+                    'dish_id'          => $item['dish_id'],
+                    'dish_name'        => $item['dish_name'],
+                    'unit_price'       => $item['unit_price'],
+                    'quantity'         => $item['quantity'],
+                    'total_price'      => $item['total_price'],
+                    'options_price'    => $item['options_price'] ?? 0,
+                    'selected_options' => $item['selected_options'] ?? null,
+                    'special_instructions' => $item['notes'] ?? null,
                 ]);
             }
 
@@ -172,16 +176,68 @@ class OrderController extends Controller
     public function track(string $token): JsonResponse
     {
         $order = Order::where('tracking_token', $token)
-            ->with(['delivery.driver'])
+            ->with(['delivery.driver', 'items', 'restaurant'])
             ->firstOrFail();
 
         $delivery = $order->delivery;
         $driver   = $delivery?->driver;
+        $status   = OrderStatus::from($order->status);
+        $isFinal  = $status->isFinal();
+
+        $progress = [
+            ['key' => 'ordered',   'label' => 'Commande reçue',      'time' => $order->created_at],
+            ['key' => 'confirmed', 'label' => 'Confirmée',            'time' => $order->confirmed_at],
+            ['key' => 'preparing', 'label' => 'En préparation',       'time' => $order->preparing_at],
+            ['key' => 'ready',     'label' => 'Prête',                'time' => $order->ready_at],
+            ['key' => 'delivering','label' => 'En livraison',          'time' => $order->picked_up_at],
+            ['key' => 'completed', 'label' => 'Livrée',               'time' => $order->completed_at],
+        ];
+
+        $statusOrder = ['draft','pending_payment','paid','confirmed','preparing','ready','delivering','completed'];
+        $currentIdx  = array_search($order->status, $statusOrder);
+
+        $progress = array_map(function ($step, $idx) use ($currentIdx) {
+            $stepOrder = ['ordered' => 0, 'confirmed' => 3, 'preparing' => 4, 'ready' => 5, 'delivering' => 6, 'completed' => 7];
+            $stepIdx   = $stepOrder[$step['key']] ?? 0;
+            return array_merge($step, [
+                'completed' => $currentIdx !== false && $currentIdx > $stepIdx,
+                'current'   => $currentIdx !== false && $currentIdx === $stepIdx,
+            ]);
+        }, $progress, array_keys($progress));
 
         return response()->json([
-            'order_status'    => $order->status,
-            'order_status_label' => OrderStatus::from($order->status)->label(),
-            'estimated_minutes' => $order->estimated_prep_time,
+            'order_status'       => $order->status,
+            'order_status_label' => $status->label(),
+            'estimated_minutes'  => $order->estimated_prep_time,
+            'is_final'           => $isFinal,
+            'payment_status'     => $order->payment_status,
+            'order' => [
+                'id'             => $order->id,
+                'reference'      => $order->reference,
+                'tracking_token' => $order->tracking_token,
+                'status'         => $order->status,
+                'status_label'   => $status->label(),
+                'payment_status' => $order->payment_status,
+                'payment_method' => $order->payment_method,
+                'subtotal'       => $order->subtotal,
+                'delivery_fee'   => $order->delivery_fee,
+                'total'          => $order->total,
+                'estimated_minutes' => $order->estimated_prep_time,
+                'items' => $order->items->map(fn($i) => [
+                    'name'       => $i->dish_name,
+                    'quantity'   => $i->quantity,
+                    'unit_price' => $i->unit_price,
+                    'total'      => $i->total_price,
+                ]),
+                'restaurant' => $order->restaurant ? [
+                    'id'       => $order->restaurant->id,
+                    'name'     => $order->restaurant->name,
+                    'logo_url' => $order->restaurant->logo_path
+                        ? asset('storage/' . $order->restaurant->logo_path)
+                        : null,
+                ] : null,
+                'created_at' => $order->created_at,
+            ],
             'delivery' => $delivery ? [
                 'status'       => $delivery->status,
                 'status_label' => DeliveryStatus::from($delivery->status)->label(),
@@ -195,14 +251,15 @@ class OrderController extends Controller
                 ] : null,
             ] : null,
             'timeline' => [
-                'ordered_at'        => $order->created_at,
-                'confirmed_at'      => $order->confirmed_at,
-                'preparing_at'      => $order->preparing_at,
-                'ready_at'          => $order->ready_at,
+                'ordered_at'         => $order->created_at,
+                'confirmed_at'       => $order->confirmed_at,
+                'preparing_at'       => $order->preparing_at,
+                'ready_at'           => $order->ready_at,
                 'driver_assigned_at' => $order->driver_assigned_at,
-                'picked_up_at'      => $order->picked_up_at,
-                'completed_at'      => $order->completed_at,
+                'picked_up_at'       => $order->picked_up_at,
+                'completed_at'       => $order->completed_at,
             ],
+            'progress' => $progress,
         ]);
     }
 
@@ -259,13 +316,33 @@ class OrderController extends Controller
                 ->where('is_active', true)
                 ->firstOrFail();
 
+            $optionsPrice   = 0;
+            $selectedOptions = [];
+            if (!empty($item['selected_options'])) {
+                $options = \App\Models\DishOption::whereIn('id', $item['selected_options'])
+                    ->where('is_active', true)
+                    ->get();
+                foreach ($options as $opt) {
+                    $optionsPrice += $opt->price_adjustment;
+                    $selectedOptions[] = [
+                        'id'               => $opt->id,
+                        'name'             => $opt->name,
+                        'price_adjustment' => $opt->price_adjustment,
+                    ];
+                }
+            }
+
+            $unitPrice = $dish->price + $optionsPrice;
+
             return [
-                'dish_id'    => $dish->id,
-                'dish_name'  => $dish->name,
-                'unit_price' => $dish->price,
-                'quantity'   => $item['quantity'],
-                'total_price' => $dish->price * $item['quantity'],
-                'notes'      => $item['notes'] ?? null,
+                'dish_id'         => $dish->id,
+                'dish_name'       => $dish->name,
+                'unit_price'      => $unitPrice,
+                'quantity'        => $item['quantity'],
+                'total_price'     => $unitPrice * $item['quantity'],
+                'options_price'   => $optionsPrice,
+                'selected_options' => $selectedOptions ?: null,
+                'notes'           => $item['notes'] ?? null,
             ];
         });
     }
