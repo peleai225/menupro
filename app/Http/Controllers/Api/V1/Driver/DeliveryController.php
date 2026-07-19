@@ -293,6 +293,9 @@ class DeliveryController extends Controller
                     'latitude'  => $pickupLat,
                     'longitude' => $pickupLng,
                     'phone'     => $delivery->restaurant->phone ?? null,
+                    'logo_url'  => $delivery->restaurant->logo_path
+                        ? \Illuminate\Support\Facades\Storage::url($delivery->restaurant->logo_path)
+                        : null,
                 ],
             ],
             'distance_km'             => $distToPickup,
@@ -332,6 +335,9 @@ class DeliveryController extends Controller
                     'latitude'  => (float) $delivery->pickup_latitude,
                     'longitude' => (float) $delivery->pickup_longitude,
                     'phone'     => $delivery->restaurant->phone ?? null,
+                    'logo_url'  => $delivery->restaurant->logo_path
+                        ? \Illuminate\Support\Facades\Storage::url($delivery->restaurant->logo_path)
+                        : null,
                 ],
             ],
             'distance_km'             => null,
