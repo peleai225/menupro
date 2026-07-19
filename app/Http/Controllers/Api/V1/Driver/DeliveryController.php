@@ -190,7 +190,10 @@ class DeliveryController extends Controller
 
         $this->validateStatusTransition($delivery, $newStatus);
 
-        $oldStatus = $delivery->status;
+        // $delivery->status est casté en enum par le modèle — extraire la valeur string
+        $oldStatus = $delivery->status instanceof DeliveryStatus
+            ? $delivery->status->value
+            : (string) $delivery->status;
 
         DB::transaction(function () use ($delivery, $newStatus, $driver) {
             $updates = ['status' => $newStatus->value];
@@ -249,7 +252,10 @@ class DeliveryController extends Controller
 
     private function validateStatusTransition(Delivery $delivery, DeliveryStatus $new): void
     {
-        $current = DeliveryStatus::from($delivery->status);
+        // status peut être un enum (cast modèle) ou une string
+        $current = $delivery->status instanceof DeliveryStatus
+            ? $delivery->status
+            : DeliveryStatus::from($delivery->status);
 
         $allowed = [
             DeliveryStatus::ASSIGNED->value              => DeliveryStatus::HEADING_TO_RESTAURANT,
