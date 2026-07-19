@@ -47,11 +47,11 @@ class DeliveryDriverController extends Controller
 
     public function show(DeliveryDriver $driver): View
     {
-        $driver->load(['deliveries' => fn($q) => $q->latest()->limit(20), 'earnings' => fn($q) => $q->latest()->limit(20)]);
-        $totalEarnings = $driver->earnings()->sum('amount_xof');
+        $recentDeliveries = $driver->deliveries()->latest()->limit(20)->get();
+        $totalEarnings = $driver->earnings()->sum('net_amount');
         $deliveriesThisMonth = $driver->deliveries()->whereMonth('created_at', now()->month)->count();
 
-        return view('pages.super-admin.drivers.show', compact('driver', 'totalEarnings', 'deliveriesThisMonth'));
+        return view('pages.super-admin.drivers.show', compact('driver', 'recentDeliveries', 'totalEarnings', 'deliveriesThisMonth'));
     }
 
     public function approve(DeliveryDriver $driver): RedirectResponse
