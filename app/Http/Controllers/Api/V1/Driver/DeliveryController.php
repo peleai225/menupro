@@ -66,13 +66,17 @@ class DeliveryController extends Controller
                 'driver_location_at' => now(),
             ]);
 
-            broadcast(new DriverLocationUpdated(
-                deliveryId: $activeDelivery->id,
-                latitude:   (float) $data['latitude'],
-                longitude:  (float) $data['longitude'],
-                driverName: $driver->name,
-                status:     $activeDelivery->status,
-            ));
+            try {
+                broadcast(new DriverLocationUpdated(
+                    deliveryId: $activeDelivery->id,
+                    latitude:   (float) $data['latitude'],
+                    longitude:  (float) $data['longitude'],
+                    driverName: $driver->name,
+                    status:     $activeDelivery->status,
+                ));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('DriverLocationUpdated broadcast failed', ['error' => $e->getMessage()]);
+            }
         }
 
         return response()->json(['message' => 'Position mise à jour.']);
@@ -210,11 +214,15 @@ class DeliveryController extends Controller
             $delivery->update($updates);
         });
 
-        broadcast(new DeliveryStatusChanged(
-            delivery:  $delivery->fresh()->load(['order', 'driver', 'restaurant']),
-            oldStatus: $oldStatus,
-            newStatus: $data['status'],
-        ));
+        try {
+            broadcast(new DeliveryStatusChanged(
+                delivery:  $delivery->fresh()->load(['order', 'driver', 'restaurant']),
+                oldStatus: $oldStatus,
+                newStatus: $data['status'],
+            ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('DeliveryStatusChanged broadcast failed', ['error' => $e->getMessage()]);
+        }
 
         return response()->json([
             'message' => DeliveryStatus::from($data['status'])->label(),
