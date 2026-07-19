@@ -48,7 +48,12 @@ class OrderController extends Controller
             'payment_method'              => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
         ]);
 
-        $customer   = $request->user()->customer;
+        $customer = $request->user()->load('customer')->customer;
+
+        if (!$customer) {
+            return response()->json(['message' => 'Profil client introuvable.'], 403);
+        }
+
         $restaurant = Restaurant::where('is_on_platform', true)
             ->where('status', 'active')
             ->findOrFail($data['restaurant_id']);
@@ -310,7 +315,7 @@ class OrderController extends Controller
     {
         return collect($rawItems)->map(function ($item) use ($restaurantId) {
             $dish = Dish::where('id', $item['dish_id'])
-                ->where('category_id', function ($q) use ($restaurantId) {
+                ->whereIn('category_id', function ($q) use ($restaurantId) {
                     $q->select('id')->from('categories')->where('restaurant_id', $restaurantId);
                 })
                 ->where('is_active', true)
