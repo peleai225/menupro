@@ -117,6 +117,36 @@ class AuthController extends Controller
         return response()->json(['message' => 'Déconnecté.']);
     }
 
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $driver = $request->user()->deliveryDriver;
+
+        $data = $request->validate([
+            'name'          => 'sometimes|string|max:100',
+            'city'          => 'sometimes|string|max:100',
+            'zone'          => 'sometimes|nullable|string|max:100',
+            'vehicle_type'  => 'sometimes|in:moto,velo,voiture',
+            'vehicle_plate' => 'sometimes|nullable|string|max:20',
+            'photo'         => 'sometimes|file|image|max:5120',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $data['photo_path'] = $request->file('photo')->store('drivers/photos', 'public');
+        }
+        unset($data['photo']);
+
+        $driver->update($data);
+
+        if (isset($data['name'])) {
+            $request->user()->update(['name' => $data['name']]);
+        }
+
+        return response()->json([
+            'message' => 'Profil mis à jour.',
+            'driver'  => $this->formatDriver($driver->fresh()),
+        ]);
+    }
+
     public function updateFcmToken(Request $request): JsonResponse
     {
         $data = $request->validate(['fcm_token' => 'required|string|max:255']);

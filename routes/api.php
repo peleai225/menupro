@@ -142,6 +142,7 @@ Route::prefix('v1')
         Route::middleware(['auth:sanctum', 'delivery.driver'])->group(function () {
 
             Route::patch('/auth/fcm-token', [DriverAuthController::class, 'updateFcmToken'])->name('auth.fcm');
+            Route::patch('/auth/profile',   [DriverAuthController::class, 'updateProfile'])->name('auth.profile');
 
             Route::post('/status', [DeliveryController::class, 'setStatus'])->name('status');
 

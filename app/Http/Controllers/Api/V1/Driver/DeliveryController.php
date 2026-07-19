@@ -91,8 +91,12 @@ class DeliveryController extends Controller
         }
 
         // Courses en attente dans la même ville
+        // Accepter paid (paiement en ligne) ET confirmed (cash on delivery)
         $deliveries = Delivery::where('status', DeliveryStatus::PENDING->value)
-            ->whereHas('order', fn($q) => $q->where('status', OrderStatus::PAID->value))
+            ->whereHas('order', fn($q) => $q->whereIn('status', [
+                OrderStatus::PAID->value,
+                OrderStatus::CONFIRMED->value,
+            ]))
             ->whereHas('restaurant', fn($q) => $q->where('city', $driver->city))
             ->with(['order', 'restaurant'])
             ->latest()

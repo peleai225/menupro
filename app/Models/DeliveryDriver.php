@@ -19,6 +19,7 @@ class DeliveryDriver extends Model
         'vehicle_plate',
         'token',
         'cni_number',
+        'photo_path',
         'cni_photo_path',
         'license_photo_path',
         'vehicle_photo_path',
