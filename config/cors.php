@@ -13,6 +13,7 @@ return [
             'https://delivery.menupro.ci',
             'https://driver.menupro.ci',
             'https://mpa-five.vercel.app',
+            'https://mpa-driver.vercel.app',
             'http://localhost:3000',
             'http://localhost:3001',
             'http://localhost:5173',
