@@ -187,20 +187,21 @@ class OrderController extends Controller
 
         $delivery = $order->delivery;
         $driver   = $delivery?->driver;
-        $status   = OrderStatus::from($order->status);
+        $status   = $order->status instanceof OrderStatus ? $order->status : OrderStatus::from($order->status);
         $isFinal  = $status->isFinal();
+        $statusValue = $status->value;
 
         $progress = [
-            ['key' => 'ordered',   'label' => 'Commande reçue',      'time' => $order->created_at],
-            ['key' => 'confirmed', 'label' => 'Confirmée',            'time' => $order->confirmed_at],
-            ['key' => 'preparing', 'label' => 'En préparation',       'time' => $order->preparing_at],
-            ['key' => 'ready',     'label' => 'Prête',                'time' => $order->ready_at],
-            ['key' => 'delivering','label' => 'En livraison',          'time' => $order->picked_up_at],
-            ['key' => 'completed', 'label' => 'Livrée',               'time' => $order->completed_at],
+            ['key' => 'ordered',    'label' => 'Commande reçue',   'time' => $order->created_at],
+            ['key' => 'confirmed',  'label' => 'Confirmée',         'time' => $order->confirmed_at],
+            ['key' => 'preparing',  'label' => 'En préparation',    'time' => $order->preparing_at],
+            ['key' => 'ready',      'label' => 'Prête',             'time' => $order->ready_at],
+            ['key' => 'delivering', 'label' => 'En livraison',      'time' => $order->picked_up_at],
+            ['key' => 'completed',  'label' => 'Livrée',            'time' => $order->completed_at],
         ];
 
         $statusOrder = ['draft','pending_payment','paid','confirmed','preparing','ready','delivering','completed'];
-        $currentIdx  = array_search($order->status, $statusOrder);
+        $currentIdx  = array_search($statusValue, $statusOrder);
 
         $progress = array_map(function ($step, $idx) use ($currentIdx) {
             $stepOrder = ['ordered' => 0, 'confirmed' => 3, 'preparing' => 4, 'ready' => 5, 'delivering' => 6, 'completed' => 7];
@@ -211,19 +212,27 @@ class OrderController extends Controller
             ]);
         }, $progress, array_keys($progress));
 
+        $paymentStatus = $order->payment_status instanceof PaymentStatus
+            ? $order->payment_status->value
+            : $order->payment_status;
+
+        $deliveryStatus = $delivery
+            ? ($delivery->status instanceof DeliveryStatus ? $delivery->status : DeliveryStatus::from($delivery->status))
+            : null;
+
         return response()->json([
-            'order_status'       => $order->status,
+            'order_status'       => $statusValue,
             'order_status_label' => $status->label(),
             'estimated_minutes'  => $order->estimated_prep_time,
             'is_final'           => $isFinal,
-            'payment_status'     => $order->payment_status,
+            'payment_status'     => $paymentStatus,
             'order' => [
                 'id'             => $order->id,
                 'reference'      => $order->reference,
                 'tracking_token' => $order->tracking_token,
-                'status'         => $order->status,
+                'status'         => $statusValue,
                 'status_label'   => $status->label(),
-                'payment_status' => $order->payment_status,
+                'payment_status' => $paymentStatus,
                 'payment_method' => $order->payment_method,
                 'subtotal'       => $order->subtotal,
                 'delivery_fee'   => $order->delivery_fee,
@@ -244,9 +253,9 @@ class OrderController extends Controller
                 ] : null,
                 'created_at' => $order->created_at,
             ],
-            'delivery' => $delivery ? [
-                'status'       => $delivery->status,
-                'status_label' => DeliveryStatus::from($delivery->status)->label(),
+            'delivery' => $deliveryStatus ? [
+                'status'       => $deliveryStatus->value,
+                'status_label' => $deliveryStatus->label(),
                 'driver'       => $driver ? [
                     'name'      => $driver->name,
                     'phone'     => $driver->phone,
