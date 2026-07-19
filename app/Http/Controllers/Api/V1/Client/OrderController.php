@@ -48,7 +48,8 @@ class OrderController extends Controller
             'payment_method'              => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
         ]);
 
-        $customer = $request->user()->load('customer')->customer;
+        $user     = $request->user()->load('customer.user');
+        $customer = $user->customer;
 
         if (!$customer) {
             return response()->json(['message' => 'Profil client introuvable.'], 403);
@@ -95,7 +96,7 @@ class OrderController extends Controller
         $isCashOnDelivery = $data['payment_method'] === 'cash_on_delivery';
 
         $order = DB::transaction(function () use (
-            $data, $customer, $restaurant, $items,
+            $data, $user, $customer, $restaurant, $items,
             $subtotal, $deliveryFee, $commission, $total, $pricing, $isCashOnDelivery
         ) {
             $order = Order::create([
@@ -103,8 +104,8 @@ class OrderController extends Controller
                 'customer_id'         => $customer->id,
                 'reference'           => 'PLT-' . strtoupper(Str::random(8)),
                 'tracking_token'      => Str::random(32),
-                'customer_name'       => $customer->user->name,
-                'customer_email'      => $customer->user->email,
+                'customer_name'       => $user->name,
+                'customer_email'      => $user->email,
                 'customer_phone'      => $customer->phone,
                 'type'                => OrderType::DELIVERY->value,
                 'source'              => 'platform_web',
