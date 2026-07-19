@@ -888,8 +888,8 @@
         </div>
     @endif
 
-    <!-- Floating Service Request Button (appel du personnel — visible si QR table détecté) -->
-    @if($this->tableNumber)
+    <!-- Floating Service Request Button (appel du personnel — visible uniquement pour les chambres, pas les tables numérotées) -->
+    @if($this->tableNumber && !is_numeric($this->tableNumber))
     <div x-data="{
             showServiceModal: false,
             type: 'assistance',
