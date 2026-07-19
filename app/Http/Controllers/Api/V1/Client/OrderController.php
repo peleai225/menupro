@@ -355,13 +355,16 @@ class OrderController extends Controller
 
     private function formatOrder(Order $order): array
     {
+        $status        = $order->status instanceof OrderStatus  ? $order->status  : OrderStatus::from($order->status);
+        $paymentStatus = $order->payment_status instanceof PaymentStatus ? $order->payment_status : PaymentStatus::from($order->payment_status);
+
         return [
             'id'             => $order->id,
             'reference'      => $order->reference,
             'tracking_token' => $order->tracking_token,
-            'status'         => $order->status,
-            'status_label'   => OrderStatus::from($order->status)->label(),
-            'payment_status' => $order->payment_status,
+            'status'         => $status->value,
+            'status_label'   => $status->label(),
+            'payment_status' => $paymentStatus->value,
             'payment_method' => $order->payment_method,
             'subtotal'       => $order->subtotal,
             'delivery_fee'   => $order->delivery_fee,
