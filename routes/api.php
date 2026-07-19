@@ -133,10 +133,14 @@ Route::prefix('v1')
             Route::post('/auth/register', [DriverAuthController::class, 'register'])->name('auth.register');
         });
 
+        // /me et /logout accessibles à tous les livreurs (y compris pending)
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/auth/me',      [DriverAuthController::class, 'me'])->name('auth.me');
+            Route::post('/auth/logout', [DriverAuthController::class, 'logout'])->name('auth.logout');
+        });
+
         Route::middleware(['auth:sanctum', 'delivery.driver'])->group(function () {
 
-            Route::get('/auth/me',          [DriverAuthController::class, 'me'])->name('auth.me');
-            Route::post('/auth/logout',     [DriverAuthController::class, 'logout'])->name('auth.logout');
             Route::patch('/auth/fcm-token', [DriverAuthController::class, 'updateFcmToken'])->name('auth.fcm');
 
             Route::post('/status', [DeliveryController::class, 'setStatus'])->name('status');

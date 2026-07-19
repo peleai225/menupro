@@ -135,9 +135,9 @@ class AuthController extends Controller
             'verification_status' => $driver->verification_status,
             'is_active'           => $driver->is_active,
             'is_available'        => $driver->is_available,
-            'rating'              => $driver->rating,
-            'total_deliveries'    => $driver->total_deliveries,
-            'total_earnings_xof'  => $driver->total_earnings_xof,
+            'rating'              => $driver->rating !== null ? (float) $driver->rating : null,
+            'total_deliveries'    => (int) ($driver->total_deliveries ?? 0),
+            'total_earnings_xof'  => (int) ($driver->total_earnings_xof ?? 0),
         ];
     }
 }
