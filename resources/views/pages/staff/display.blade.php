@@ -136,7 +136,9 @@ function render(requests) {
     const newOnes = requests.filter(r => !lastIds.has(r.id));
     newOnes.forEach(r => {
         beep();
-        speak('Appel ' + r.type_label + ' à la ' + r.table);
+        const msg = 'Appel ' + r.type_label + ' à la ' + r.table
+            + (r.notes ? '. Message : ' + r.notes : '');
+        speak(msg);
     });
     lastIds = new Set(requests.map(r => r.id));
 
