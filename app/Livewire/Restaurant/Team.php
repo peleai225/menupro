@@ -114,8 +114,8 @@ class Team extends Component
                 $user->restaurant_id = $restaurant->id;
                 $user->save();
 
-                // Envoyer l'email d'invitation avec le mot de passe temporaire
-                $user->notify(new TeamInvitationNotification($restaurant, $tempPassword));
+                // Envoyer l'email d'invitation (notifyNow = synchrone, jamais en queue)
+                $user->notifyNow(new TeamInvitationNotification($restaurant, $tempPassword));
 
                 session()->flash('success', "Membre ajouté avec succès ! Un email d'invitation a été envoyé à {$user->email}.");
             }
@@ -123,6 +123,11 @@ class Team extends Component
             $this->closeInviteModal();
             $this->resetPage();
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('TeamInvitation error', [
+                'email' => $this->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             session()->flash('error', 'Une erreur est survenue : ' . $e->getMessage());
         }
     }
@@ -207,8 +212,8 @@ class Team extends Component
             $tempPassword = Str::random(12);
             $user->update(['password' => Hash::make($tempPassword)]);
 
-            // Renvoyer l'email d'invitation
-            $user->notify(new TeamInvitationNotification($restaurant, $tempPassword));
+            // Renvoyer l'email d'invitation (synchrone)
+            $user->notifyNow(new TeamInvitationNotification($restaurant, $tempPassword));
 
             session()->flash('success', "Invitation renvoyée à {$user->email} avec un nouveau mot de passe.");
         } catch (\Exception $e) {

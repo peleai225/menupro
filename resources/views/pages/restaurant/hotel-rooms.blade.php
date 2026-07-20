@@ -144,6 +144,72 @@
             </div>
         </div>
 
+        {{-- Lien interface personnel --}}
+        <div class="mt-6 bg-slate-900 border border-slate-700 rounded-2xl p-6"
+             x-data="{
+                 token: '{{ $restaurant->staff_token ?? '' }}',
+                 loading: false,
+                 copied: false,
+                 get url() { return this.token ? (window.location.origin + '/personnel/' + this.token) : ''; },
+                 async generate() {
+                     this.loading = true;
+                     const res = await fetch('{{ route('restaurant.staff.generate-token') }}', {
+                         method: 'POST',
+                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                     });
+                     const d = await res.json();
+                     this.token = d.token;
+                     this.loading = false;
+                 },
+                 copyUrl() {
+                     if (!this.url) return;
+                     navigator.clipboard.writeText(this.url).then(() => {
+                         this.copied = true;
+                         setTimeout(() => this.copied = false, 2000);
+                     });
+                 }
+             }">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-violet-600 text-white rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-base">Interface personnel — Appels en temps réel</h3>
+                    <p class="text-slate-400 text-xs mt-0.5">Ouvrez ce lien sur la tablette ou le téléphone du personnel. Il reçoit les appels avec son et voix ElevenLabs.</p>
+                </div>
+            </div>
+
+            <template x-if="token">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 bg-slate-800 rounded-xl px-4 py-3">
+                        <span class="text-slate-300 text-sm font-mono truncate flex-1" x-text="url"></span>
+                        <button @click="copyUrl()"
+                                class="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                                :class="copied ? 'bg-emerald-600 text-white' : 'bg-slate-600 hover:bg-slate-500 text-slate-200'">
+                            <span x-text="copied ? '✓ Copié' : 'Copier'"></span>
+                        </button>
+                        <a :href="url" target="_blank"
+                           class="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors">
+                            Ouvrir
+                        </a>
+                    </div>
+                    <button @click="generate()" :disabled="loading"
+                            class="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span x-text="loading ? 'Génération...' : 'Régénérer le lien (révoque l\'ancien)'"></span>
+                    </button>
+                </div>
+            </template>
+
+            <template x-if="!token">
+                <button @click="generate()" :disabled="loading"
+                        class="flex items-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-colors">
+                    <svg class="w-4 h-4" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    <span x-text="loading ? 'Génération...' : 'Générer le lien personnel'"></span>
+                </button>
+            </template>
+        </div>
+
         {{-- Info plan --}}
         <div class="mt-6 bg-violet-50 border border-violet-200 rounded-xl p-4 flex items-start gap-3">
             <div class="w-8 h-8 bg-violet-500 text-white rounded-lg flex items-center justify-center flex-shrink-0">

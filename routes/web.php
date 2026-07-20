@@ -223,6 +223,9 @@ Route::prefix('dashboard')
         // TTS dashboard (même proxy ElevenLabs, accessible depuis le dashboard restaurant avec session)
         Route::post('tts', [\App\Http\Controllers\Restaurant\KitchenController::class, 'ttsDashboard'])->name('tts');
 
+        // Génération token interface personnel
+        Route::post('personnel/generate-token', [\App\Http\Controllers\Restaurant\StaffDisplayController::class, 'generateToken'])->name('staff.generate-token')->middleware('restaurant.admin');
+
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
         Route::get('qr-code/generate', [App\Http\Controllers\Restaurant\QRCodeController::class, 'generate'])->name('qrcode.generate');
@@ -513,6 +516,12 @@ Route::prefix('livreur/{token}')->middleware('throttle:30,1')->group(function ()
 | Kitchen Display System (token-secured, no auth)
 |--------------------------------------------------------------------------
 */
+
+Route::prefix('personnel/{token}')->name('staff.')->middleware('throttle:120,1')->group(function () {
+    Route::get('/',         [\App\Http\Controllers\Restaurant\StaffDisplayController::class, 'display'])->name('display');
+    Route::get('/data',     [\App\Http\Controllers\Restaurant\StaffDisplayController::class, 'data'])->name('data');
+    Route::post('/done/{id}', [\App\Http\Controllers\Restaurant\StaffDisplayController::class, 'markDone'])->name('done');
+});
 
 Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function () {
     Route::get('/',  [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
