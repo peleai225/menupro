@@ -51,10 +51,11 @@ php artisan migrate --force 2>/dev/null || true
 
 # 4. Vider les caches Laravel
 echo " Nettoyage cache..."
-php artisan view:clear
-php artisan cache:clear
-php artisan route:cache
 php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+php artisan route:cache
 
 echo ""
 echo " DÉPLOIEMENT TERMINÉ !"

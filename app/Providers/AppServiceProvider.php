@@ -191,18 +191,18 @@ class AppServiceProvider extends ServiceProvider
                 ];
             });
 
-            if (!empty($cfg['key']) && !empty($cfg['secret'])) {
+            if (!empty($cfg['key']) && !empty($cfg['secret']) && class_exists(\Pusher\Pusher::class)) {
                 config([
-                    'broadcasting.default'                                  => 'pusher',
-                    'broadcasting.connections.pusher.key'                   => $cfg['key'],
-                    'broadcasting.connections.pusher.secret'                => $cfg['secret'],
-                    'broadcasting.connections.pusher.app_id'                => $cfg['app_id'],
-                    'broadcasting.connections.pusher.options.cluster'       => $cfg['cluster'],
-                    'broadcasting.connections.pusher.options.useTLS'        => true,
-                    'broadcasting.connections.pusher.options.encrypted'     => true,
+                    'broadcasting.default'                              => 'pusher',
+                    'broadcasting.connections.pusher.key'               => $cfg['key'],
+                    'broadcasting.connections.pusher.secret'            => $cfg['secret'],
+                    'broadcasting.connections.pusher.app_id'            => $cfg['app_id'],
+                    'broadcasting.connections.pusher.options.cluster'   => $cfg['cluster'],
+                    'broadcasting.connections.pusher.options.useTLS'    => true,
+                    'broadcasting.connections.pusher.options.encrypted' => true,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::warning('Could not load dynamic Pusher config: ' . $e->getMessage());
         }
     }
