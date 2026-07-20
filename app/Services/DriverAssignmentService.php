@@ -31,18 +31,21 @@ class DriverAssignmentService
     {
         $driver = $this->findNearest($delivery);
 
+        // Toujours broadcaster la disponibilité de la course à tous les livreurs de la ville
+        $city = $delivery->restaurant->city ?? '';
+        if ($city) {
+            try {
+                broadcast(new NewDeliveryAvailable($delivery, $city))->toOthers();
+            } catch (\Throwable $e) {
+                Log::warning('NewDeliveryAvailable broadcast failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         if (!$driver) {
             Log::info('DriverAssignment: aucun livreur disponible', [
                 'delivery_id' => $delivery->id,
                 'order_id'    => $delivery->order_id,
             ]);
-
-            // Notifier tous les livreurs disponibles dans la ville
-            $city = $delivery->restaurant->city ?? '';
-            if ($city) {
-                broadcast(new NewDeliveryAvailable($delivery, $city))->toOthers();
-            }
-
             return null;
         }
 
