@@ -24,12 +24,20 @@ mkdir -p ~/public_html/sounds 2>/dev/null
 cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
 cp public/icon-*.png ~/public_html/ 2>/dev/null
 cp public/manifest.json ~/public_html/ 2>/dev/null
-cp public/manifest-admin.json ~/public_html/ 2>/dev/null
+cp public/manifest-admin.json ~/public_html/ && echo " manifest-admin.json copié" || echo " ERREUR copie manifest-admin.json"
 cp public/sw.js ~/public_html/ 2>/dev/null
 cp public/firebase-messaging-sw.js ~/public_html/ 2>/dev/null
 cp public/offline.html ~/public_html/ 2>/dev/null
 cp public/favicon.svg ~/public_html/ 2>/dev/null
 cp public/robots.txt ~/public_html/ 2>/dev/null
+
+# Copier aussi vers menupro.ci/ si le dossier existe (domaine sans www)
+if [ -d ~/menupro.ci ]; then
+    cp public/manifest-admin.json ~/menupro.ci/ 2>/dev/null && echo " manifest-admin.json copié → menupro.ci/"
+    cp public/manifest.json ~/menupro.ci/ 2>/dev/null
+    cp public/sw.js ~/menupro.ci/ 2>/dev/null
+    cp public/firebase-messaging-sw.js ~/menupro.ci/ 2>/dev/null
+fi
 
 # 2b. Symlink storage (images téléchargées via Storage::url)
 echo " Lien symbolique storage..."

@@ -246,7 +246,7 @@
                         </div>
 
                         <!-- Quick Actions Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-16">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-16">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('restaurant.plats.edit', $dish) }}" 
                                    class="p-3 bg-white rounded-xl hover:bg-primary-50 hover:scale-110 transition-all shadow-lg bounce-click"
@@ -375,7 +375,7 @@
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                        <div class="flex items-center gap-1 flex-shrink-0">
                             <a href="{{ route('restaurant.plats.edit', $dish) }}" 
                                class="p-2 rounded-lg hover:bg-neutral-200 transition-colors"
                                title="Modifier">
