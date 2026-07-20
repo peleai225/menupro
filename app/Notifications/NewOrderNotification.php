@@ -19,14 +19,15 @@ class NewOrderNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'new_order',
-            'order_id' => $this->order->id,
-            'order_reference' => $this->order->reference,
-            'customer_name' => $this->order->customer_name,
-            'total' => $this->order->total,
-            'items_count' => $this->order->items_count,
-            'order_type' => $this->order->type->value,
-            'message' => "Nouvelle commande #{$this->order->reference} de {$this->order->customer_name}.",
+            'type'             => 'new_order',
+            'order_id'         => $this->order->id,
+            'order_reference'  => $this->order->reference,
+            'customer_name'    => $this->order->customer_name,
+            'total'            => $this->order->total,
+            'items_count'      => $this->order->items_count,
+            'order_type'       => $this->order->type->value,
+            'table_number'     => $this->order->table_number ?? null,
+            'message'          => "Nouvelle commande #{$this->order->reference} de {$this->order->customer_name}.",
         ];
     }
 }

@@ -32,11 +32,21 @@
              document.addEventListener('click', unlock, { once: true });
              document.addEventListener('touchstart', unlock, { once: true });
          },
-         onNewNotification() {
+         onNewNotification(event) {
              this.showNewBadge = true;
              setTimeout(() => this.showNewBadge = false, 5000);
              if (this.soundEnabled) this.playNotificationSound();
-             this.showBrowserNotification('Nouvelle commande !', 'Vous avez reçu une nouvelle commande');
+             const d = event?.detail ?? {};
+             const table = d.table_number ?? '';
+             const ref   = d.reference ?? '';
+             const body  = table ? 'Commande à la ' + table : 'Vous avez reçu une nouvelle commande';
+             this.showBrowserNotification('Nouvelle commande !', body);
+             if (this.soundEnabled && d.type === 'new_order') {
+                 const text = table
+                     ? 'Nouvelle commande à la ' + table
+                     : (ref ? 'Nouvelle commande numéro ' + ref : 'Nouvelle commande');
+                 this.speakServiceRequest(null, null, text);
+             }
          },
          onNewServiceRequest(event) {
              this.showServiceAlert = true;
@@ -44,10 +54,10 @@
              this.showBrowserNotification('Appel client !', 'Un client demande de l\'aide');
              if (this.soundEnabled) this.speakServiceRequest(event?.detail?.table ?? '', event?.detail?.type_label ?? '');
          },
-         async speakServiceRequest(table, typeLabel) {
-             const text = table
-                 ? 'Appel ' + typeLabel + ' à la ' + table
-                 : 'Appel du personnel';
+         async speakServiceRequest(table, typeLabel, overrideText) {
+             const text = overrideText
+                 ? overrideText
+                 : (table ? 'Appel ' + typeLabel + ' à la ' + table : 'Appel du personnel');
              try {
                  const res = await fetch('{{ route('restaurant.tts') }}', {
                      method: 'POST',
@@ -117,7 +127,7 @@
          }
      }"
      @click.away="open = false"
-     @new-notification-arrived.window="onNewNotification()"
+     @new-notification-arrived.window="onNewNotification($event)"
      @new-service-request.window="onNewServiceRequest($event)"
      @open-notifications.window="open = true"
      wire:poll.10s="checkForNewNotifications">

@@ -33,7 +33,14 @@ class Notifications extends Component
     {
         $currentCount = auth()->user()->unreadNotifications()->count();
         if ($currentCount > $this->lastUnreadCount) {
-            $this->dispatch('new-notification-arrived');
+            $latest = auth()->user()->unreadNotifications()->latest()->first();
+            $data   = $latest?->data ?? [];
+            $this->dispatch('new-notification-arrived', [
+                'type'         => $data['type'] ?? '',
+                'order_type'   => $data['order_type'] ?? '',
+                'table_number' => $data['table_number'] ?? '',
+                'reference'    => $data['order_reference'] ?? '',
+            ]);
         }
         $this->lastUnreadCount = $currentCount;
 
