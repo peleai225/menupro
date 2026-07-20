@@ -138,6 +138,9 @@ class AppServiceProvider extends ServiceProvider
         // Load dynamic mail configuration from SystemSetting
         $this->loadDynamicMailConfig();
 
+        // Load dynamic Pusher configuration from SystemSetting
+        $this->loadDynamicPusherConfig();
+
         // Platform delivery events
         Event::listen(NewDeliveryAvailable::class, NotifyDriversOnNewDelivery::class);
         Event::listen(OrderStatusChanged::class, NotifyCustomerOnOrderStatusChange::class);
@@ -170,6 +173,38 @@ class AppServiceProvider extends ServiceProvider
 
         Dish::observe(\App\Observers\MenuCacheObserver::class);
         Category::observe(\App\Observers\MenuCacheObserver::class);
+    }
+
+    /**
+     * Load Pusher configuration dynamically from SystemSetting.
+     * Credentials are stored in DB, not in .env, so the super admin can update them.
+     */
+    protected function loadDynamicPusherConfig(): void
+    {
+        try {
+            $cfg = Cache::remember('system.pusher_config', 300, function () {
+                return [
+                    'app_id'  => \App\Models\SystemSetting::get('pusher_app_id', ''),
+                    'key'     => \App\Models\SystemSetting::get('pusher_key', ''),
+                    'secret'  => \App\Models\SystemSetting::get('pusher_secret', ''),
+                    'cluster' => \App\Models\SystemSetting::get('pusher_cluster', 'ap2'),
+                ];
+            });
+
+            if (!empty($cfg['key']) && !empty($cfg['secret'])) {
+                config([
+                    'broadcasting.default'                                  => 'pusher',
+                    'broadcasting.connections.pusher.key'                   => $cfg['key'],
+                    'broadcasting.connections.pusher.secret'                => $cfg['secret'],
+                    'broadcasting.connections.pusher.app_id'                => $cfg['app_id'],
+                    'broadcasting.connections.pusher.options.cluster'       => $cfg['cluster'],
+                    'broadcasting.connections.pusher.options.useTLS'        => true,
+                    'broadcasting.connections.pusher.options.encrypted'     => true,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Could not load dynamic Pusher config: ' . $e->getMessage());
+        }
     }
 
     /**

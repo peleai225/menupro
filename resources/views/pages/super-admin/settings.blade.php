@@ -841,6 +841,70 @@
                         </div>
                     </div>
 
+                    {{-- Pusher --}}
+                    @php $pusherOk = !empty($settings['pusher_key'] ?? '') && !empty($settings['pusher_secret'] ?? ''); @endphp
+                    <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-2 h-2 rounded-full" style="background:#6366f1;"></span>
+                                    <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Pusher — Temps réel (app livreur)</h2>
+                                </div>
+                                <p class="text-xs" style="color:var(--sa-muted-fg);">
+                                    Notifications en direct : nouvelle commande, mise à jour statut, position GPS.
+                                    <a href="https://dashboard.pusher.com/" target="_blank" class="underline" style="color:var(--sa-primary);">Dashboard Pusher</a>
+                                </p>
+                            </div>
+                            @if($pusherOk)
+                                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shrink-0"
+                                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Configuré
+                                </span>
+                            @else
+                                <span class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shrink-0"
+                                      style="background:rgba(217,119,6,0.10);color:var(--sa-warning);">
+                                    Non configuré
+                                </span>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">App ID <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="pusher_app_id" value="{{ old('pusher_app_id', $settings['pusher_app_id'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="1234567">
+                                <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">Pusher Dashboard → App Keys</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Cluster</label>
+                                <input type="text" name="pusher_cluster" value="{{ old('pusher_cluster', $settings['pusher_cluster'] ?? 'ap2') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="ap2">
+                                <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">ap2 = Asie Pacifique Mumbai — recommandé pour Côte d'Ivoire</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">App Key <span class="opacity-60">(public)</span> <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="text" name="pusher_key" value="{{ old('pusher_key', $settings['pusher_key'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="abc123def456…">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">App Secret <span class="opacity-60">(privé)</span> <span style="color:var(--sa-danger);">*</span></label>
+                                <input type="password" name="pusher_secret" value="{{ old('pusher_secret', $settings['pusher_secret'] ?? '') }}"
+                                       class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                       style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="••••••••••••••••">
+                            </div>
+                        </div>
+                        @if($pusherOk)
+                        <div class="mt-4 rounded-lg border px-3 py-2.5 text-xs flex items-center gap-2"
+                             style="background:rgba(61,158,98,0.06);border-color:rgba(61,158,98,0.25);color:var(--sa-success);">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Pusher actif — cluster <strong>{{ $settings['pusher_cluster'] ?? 'ap2' }}</strong>, app key <code class="font-mono">{{ substr($settings['pusher_key'], 0, 8) }}…</code>
+                        </div>
+                        @endif
+                    </div>
+
                     {{-- Geoapify --}}
                     <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
                         <div class="flex items-center gap-2 mb-1">

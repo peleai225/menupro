@@ -25,6 +25,10 @@ class ConfigController extends Controller
                 'app' => [
                     'name' => SystemSetting::get('app_name', config('app.name', 'MenuPro')),
                 ],
+                'pusher' => [
+                    'key'     => SystemSetting::get('pusher_key', ''),
+                    'cluster' => SystemSetting::get('pusher_cluster', 'ap2'),
+                ],
             ];
         });
 

@@ -230,6 +230,13 @@ Route::prefix('v1')
         ->middleware('throttle:api.public');
 
     // -----------------------------------------------------------------------
+    // BROADCASTING AUTH — pour les canaux privés Pusher via Bearer token
+    // -----------------------------------------------------------------------
+    Route::post('/broadcasting/auth', function (\Illuminate\Http\Request $request) {
+        return \Illuminate\Support\Facades\Broadcast::auth($request);
+    })->middleware('auth:sanctum');
+
+    // -----------------------------------------------------------------------
     // GEOCODING — API publique (géocodage inversé + recherche d'adresse)
     // -----------------------------------------------------------------------
     Route::prefix('geocoding')->name('geocoding.')

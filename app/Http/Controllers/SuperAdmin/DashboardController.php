@@ -258,6 +258,11 @@ class DashboardController extends Controller
             // Mapbox
             'mapbox_public_token' => \App\Models\SystemSetting::get('mapbox_public_token', config('services.mapbox.public_token', '')),
             'mapbox_style' => \App\Models\SystemSetting::get('mapbox_style', 'streets-v12'),
+            // Pusher (temps réel — app livreur)
+            'pusher_app_id'  => \App\Models\SystemSetting::get('pusher_app_id', ''),
+            'pusher_key'     => \App\Models\SystemSetting::get('pusher_key', ''),
+            'pusher_secret'  => \App\Models\SystemSetting::get('pusher_secret', ''),
+            'pusher_cluster' => \App\Models\SystemSetting::get('pusher_cluster', 'ap2'),
             // Firebase FCM
             'firebase_server_key' => \App\Models\SystemSetting::get('firebase_server_key', ''),
             'firebase_project_id' => \App\Models\SystemSetting::get('firebase_project_id', ''),
@@ -341,6 +346,11 @@ class DashboardController extends Controller
             // Mapbox
             'mapbox_public_token' => ['nullable', 'string'],
             'mapbox_style' => ['nullable', 'string', 'in:streets-v12,light-v11,dark-v11,satellite-v9,navigation-day-v1,navigation-night-v1'],
+            // Pusher
+            'pusher_app_id'  => ['nullable', 'string', 'max:50'],
+            'pusher_key'     => ['nullable', 'string', 'max:100'],
+            'pusher_secret'  => ['nullable', 'string', 'max:100'],
+            'pusher_cluster' => ['nullable', 'string', 'max:20'],
             // Firebase FCM
             'firebase_server_key' => ['nullable', 'string'],
             'firebase_project_id' => ['nullable', 'string', 'max:100'],
@@ -501,6 +511,25 @@ class DashboardController extends Controller
         if ($request->filled('mapbox_style')) {
             \App\Models\SystemSetting::set('mapbox_style', $request->mapbox_style, 'string', 'Style de carte Mapbox');
         }
+        // Pusher
+        if ($request->filled('pusher_app_id')) {
+            \App\Models\SystemSetting::set('pusher_app_id', $request->pusher_app_id, 'string', 'Pusher App ID');
+        }
+        if ($request->filled('pusher_key')) {
+            \App\Models\SystemSetting::set('pusher_key', $request->pusher_key, 'string', 'Pusher App Key (public)');
+        }
+        if ($request->filled('pusher_secret')) {
+            \App\Models\SystemSetting::set('pusher_secret', $request->pusher_secret, 'string', 'Pusher App Secret');
+        }
+        if ($request->filled('pusher_cluster')) {
+            \App\Models\SystemSetting::set('pusher_cluster', $request->pusher_cluster, 'string', 'Pusher Cluster');
+        }
+        // Vider les caches Pusher pour que le nouveau config prenne effet immédiatement
+        if ($request->filled('pusher_key') || $request->filled('pusher_secret') || $request->filled('pusher_cluster')) {
+            \Illuminate\Support\Facades\Cache::forget('system.pusher_config');
+            \Illuminate\Support\Facades\Cache::forget('platform.public_config');
+        }
+
         // Firebase FCM
         if ($request->filled('firebase_server_key')) {
             \App\Models\SystemSetting::set('firebase_server_key', $request->firebase_server_key, 'string', 'Clé serveur Firebase legacy (désactivée)');
