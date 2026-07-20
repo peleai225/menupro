@@ -35,6 +35,16 @@ cp public/robots.txt ~/public_html/ 2>/dev/null
 echo " Lien symbolique storage..."
 ln -sfn ~/MenuPro/storage/app/public ~/public_html/storage 2>/dev/null || true
 
+# 2c. Corriger APP_URL et FILESYSTEM_DISK si valeurs de dev présentes
+if grep -q "APP_URL=http://MenuPro.test" ~/MenuPro/.env 2>/dev/null; then
+    sed -i 's|APP_URL=http://MenuPro.test|APP_URL=https://www.menupro.ci|g' ~/MenuPro/.env
+    echo " APP_URL corrigé → https://www.menupro.ci"
+fi
+if grep -q "FILESYSTEM_DISK=local" ~/MenuPro/.env 2>/dev/null; then
+    sed -i 's|FILESYSTEM_DISK=local|FILESYSTEM_DISK=public|g' ~/MenuPro/.env
+    echo " FILESYSTEM_DISK corrigé → public"
+fi
+
 # 3. Migrations
 echo " Migrations..."
 php artisan migrate --force 2>/dev/null || true

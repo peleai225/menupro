@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Driver;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryDriver;
+use App\Support\StorageUrl;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -170,9 +171,7 @@ class AuthController extends Controller
             'rating'              => $driver->rating !== null ? (float) $driver->rating : null,
             'total_deliveries'    => (int) ($driver->total_deliveries ?? 0),
             'total_earnings_xof'  => (int) ($driver->total_earnings_xof ?? 0),
-            'photo_url'           => $driver->photo_path
-                ? \Illuminate\Support\Facades\Storage::url($driver->photo_path)
-                : null,
+            'photo_url'           => StorageUrl::url($driver->photo_path),
         ];
     }
 }

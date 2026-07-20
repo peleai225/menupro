@@ -14,6 +14,7 @@ use App\Services\DriverAssignmentService;
 use App\Services\GeocodingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Support\StorageUrl;
 use Illuminate\Support\Facades\DB;
 
 class DeliveryController extends Controller
@@ -307,9 +308,7 @@ class DeliveryController extends Controller
                     'latitude'  => $pickupLat,
                     'longitude' => $pickupLng,
                     'phone'     => $delivery->restaurant->phone ?? null,
-                    'logo_url'  => $delivery->restaurant->logo_path
-                        ? \Illuminate\Support\Facades\Storage::url($delivery->restaurant->logo_path)
-                        : null,
+                    'logo_url'  => StorageUrl::url($delivery->restaurant->logo_path),
                 ],
             ],
             'distance_km'             => $distToPickup,
@@ -349,9 +348,7 @@ class DeliveryController extends Controller
                     'latitude'  => (float) $delivery->pickup_latitude,
                     'longitude' => (float) $delivery->pickup_longitude,
                     'phone'     => $delivery->restaurant->phone ?? null,
-                    'logo_url'  => $delivery->restaurant->logo_path
-                        ? \Illuminate\Support\Facades\Storage::url($delivery->restaurant->logo_path)
-                        : null,
+                    'logo_url'  => StorageUrl::url($delivery->restaurant->logo_path),
                 ],
             ],
             'distance_km'             => null,
