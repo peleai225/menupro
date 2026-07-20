@@ -214,6 +214,9 @@ Route::prefix('dashboard')
         Route::get('livraisons', \App\Livewire\Restaurant\Deliveries::class)->name('deliveries')->middleware('feature:delivery');
         Route::get('livreurs', \App\Livewire\Restaurant\DeliveryDrivers::class)->name('delivery-drivers')->middleware('feature:delivery');
 
+        // Profil — accessible à tous les membres (changement de mot de passe)
+        Route::get('profil', \App\Livewire\Restaurant\Profile::class)->name('profile');
+
         // Settings (Livewire) - admin uniquement
         Route::get('parametres', \App\Livewire\Restaurant\Settings::class)->name('settings')->middleware('restaurant.admin');
         
