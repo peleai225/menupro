@@ -41,7 +41,14 @@ class Notifications extends Component
         $latestId = ServiceRequest::where('restaurant_id', $restaurantId)
             ->where('status', 'pending')->max('id') ?? 0;
         if ($latestId > $this->lastServiceRequestId && $this->lastServiceRequestId > 0) {
-            $this->dispatch('new-service-request');
+            $latest = ServiceRequest::where('restaurant_id', $restaurantId)
+                ->where('status', 'pending')
+                ->orderByDesc('id')
+                ->first();
+            $this->dispatch('new-service-request', [
+                'table'      => $latest?->table_number ?? '',
+                'type_label' => $latest?->typeLabel() ?? '',
+            ]);
         }
         $this->lastServiceRequestId = $latestId;
         $this->pendingServiceRequests = ServiceRequest::where('restaurant_id', $restaurantId)

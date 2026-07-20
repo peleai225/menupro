@@ -28,7 +28,14 @@ class ServiceRequests extends Component
 
         if ($latestId > $this->lastRequestId && $this->lastRequestId > 0) {
             $this->hasNew = true;
-            $this->dispatch('new-service-request');
+            $latest = ServiceRequest::where('restaurant_id', $restaurantId)
+                ->where('status', 'pending')
+                ->orderByDesc('id')
+                ->first();
+            $this->dispatch('new-service-request', [
+                'table'      => $latest?->table_number ?? '',
+                'type_label' => $latest?->typeLabel() ?? '',
+            ]);
         }
 
         $this->lastRequestId = $latestId;

@@ -38,10 +38,30 @@
              if (this.soundEnabled) this.playNotificationSound();
              this.showBrowserNotification('Nouvelle commande !', 'Vous avez reçu une nouvelle commande');
          },
-         onNewServiceRequest() {
+         onNewServiceRequest(event) {
              this.showServiceAlert = true;
              if (this.soundEnabled) this.playServiceAlertSound();
              this.showBrowserNotification('Appel client !', 'Un client demande de l\'aide');
+             if (this.soundEnabled) this.speakServiceRequest(event?.detail?.table ?? '', event?.detail?.type_label ?? '');
+         },
+         async speakServiceRequest(table, typeLabel) {
+             const text = table
+                 ? 'Appel ' + typeLabel + ' à la ' + table
+                 : 'Appel du personnel';
+             try {
+                 const res = await fetch('{{ route('restaurant.tts') }}', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                     },
+                     body: JSON.stringify({ text })
+                 });
+                 if (!res.ok) return;
+                 const blob = await res.blob();
+                 const audio = new Audio(URL.createObjectURL(blob));
+                 audio.play().catch(() => {});
+             } catch(e) {}
          },
          playNotificationSound() {
              if (!this.audioUnlocked || !this.audioCtx) return;
@@ -98,7 +118,7 @@
      }"
      @click.away="open = false"
      @new-notification-arrived.window="onNewNotification()"
-     @new-service-request.window="onNewServiceRequest()"
+     @new-service-request.window="onNewServiceRequest($event)"
      @open-notifications.window="open = true"
      wire:poll.10s="checkForNewNotifications">
 

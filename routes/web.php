@@ -220,6 +220,9 @@ Route::prefix('dashboard')
         // Kitchen token generation (admin)
         Route::post('cuisine/generate-token', [\App\Http\Controllers\Restaurant\KitchenController::class, 'generateToken'])->name('kitchen.generate-token')->middleware('restaurant.admin');
 
+        // TTS dashboard (même proxy ElevenLabs, accessible depuis le dashboard restaurant avec session)
+        Route::post('tts', [\App\Http\Controllers\Restaurant\KitchenController::class, 'ttsDashboard'])->name('restaurant.tts');
+
         // QR Code
         Route::get('qr-code', [App\Http\Controllers\Restaurant\QRCodeController::class, 'index'])->name('qrcode');
         Route::get('qr-code/generate', [App\Http\Controllers\Restaurant\QRCodeController::class, 'generate'])->name('qrcode.generate');

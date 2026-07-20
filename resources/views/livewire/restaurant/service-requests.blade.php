@@ -31,10 +31,29 @@
                      }, i * 150);
                  });
              } catch(e) {}
+         },
+         async speakServiceRequest(table, typeLabel) {
+             const text = table
+                 ? 'Appel ' + typeLabel + ' à la ' + table
+                 : 'Appel du personnel';
+             try {
+                 const res = await fetch('{{ route('restaurant.tts') }}', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                     },
+                     body: JSON.stringify({ text })
+                 });
+                 if (!res.ok) return;
+                 const blob = await res.blob();
+                 const audio = new Audio(URL.createObjectURL(blob));
+                 audio.play().catch(() => {});
+             } catch(e) {}
          }
      }"
      x-init="unlockAudio()"
-     @new-service-request.window="playAlert()">
+     @new-service-request.window="playAlert(); speakServiceRequest($event.detail.table, $event.detail.type_label)">
 
     @if($requests->isEmpty())
         {{-- Rien à afficher si aucun appel --}}
