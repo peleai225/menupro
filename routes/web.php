@@ -245,6 +245,11 @@ Route::prefix('dashboard')
             Route::delete('chambres/{room}', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'destroy'])->name('rooms.destroy');
             Route::get('chambres/download-pdf', [App\Http\Controllers\Restaurant\HotelRoomController::class, 'downloadPdf'])->name('rooms.download-pdf');
         });
+
+        // Espaces (Plan GOLD)
+        Route::middleware(['feature:multi_spaces'])->group(function () {
+            Route::get('espaces', \App\Livewire\Restaurant\Spaces::class)->name('spaces');
+        });
         
         // Reviews, Taxes - admin uniquement (tous plans)
         Route::middleware('restaurant.admin')->group(function () {
