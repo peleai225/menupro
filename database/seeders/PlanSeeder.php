@@ -25,6 +25,8 @@ class PlanSeeder extends Seeder
             'has_analytics' => false,
             'has_custom_domain' => false,
             'has_priority_support' => false,
+            'has_hotel_rooms' => false,
+            'has_multi_spaces' => false,
             'is_active' => true,
             'is_featured' => false,
             'sort_order' => 1,
@@ -46,6 +48,8 @@ class PlanSeeder extends Seeder
             'has_analytics' => true,
             'has_custom_domain' => false,
             'has_priority_support' => false,
+            'has_hotel_rooms' => true,
+            'has_multi_spaces' => false,
             'is_active' => true,
             'is_featured' => true,
             'sort_order' => 2,
@@ -67,6 +71,8 @@ class PlanSeeder extends Seeder
             'has_analytics' => true,
             'has_custom_domain' => true,
             'has_priority_support' => true,
+            'has_hotel_rooms' => true,
+            'has_multi_spaces' => false,
             'is_active' => true,
             'is_featured' => false,
             'sort_order' => 3,
@@ -89,19 +95,44 @@ class PlanSeeder extends Seeder
             'has_custom_domain'     => false,
             'has_priority_support'  => false,
             'has_hotel_rooms'       => false,
+            'has_multi_spaces'      => false,
             'is_active'             => true,
             'is_featured'           => false,
             'sort_order'            => 0,
+        ];
+
+        // Plan GOLD - Pour complexes multi-espaces, maquis VIP, hotels
+        $gold = [
+            'name'                  => 'Gold',
+            'slug'                  => 'gold',
+            'description'           => 'Complexes multi-espaces, maquis VIP, hotels',
+            'price'                 => 85000, // 85 000 FCFA/mois
+            'duration_days'         => 30,
+            'max_dishes'            => 9999,
+            'max_categories'        => 9999,
+            'max_employees'         => 9999,
+            'max_orders_per_month'  => 999999,
+            'has_delivery'          => true,
+            'has_stock_management'  => true,
+            'has_analytics'         => true,
+            'has_custom_domain'     => true,
+            'has_priority_support'  => true,
+            'has_hotel_rooms'       => true,
+            'has_multi_spaces'      => true,
+            'is_active'             => true,
+            'is_featured'           => false,
+            'sort_order'            => 4,
         ];
 
         Plan::updateOrCreate(['slug' => $stand['slug']], $stand);
         Plan::updateOrCreate(['slug' => $essentiel['slug']], $essentiel);
         Plan::updateOrCreate(['slug' => $pro['slug']], $pro);
         Plan::updateOrCreate(['slug' => $business['slug']], $business);
+        Plan::updateOrCreate(['slug' => $gold['slug']], $gold);
 
-        Plan::whereNotIn('slug', ['stand', 'essentiel', 'pro', 'business'])
+        Plan::whereNotIn('slug', ['stand', 'essentiel', 'pro', 'business', 'gold'])
             ->update(['is_active' => false]);
 
-        $this->command->info('Plans Stand + Essentiel + Pro + Business crees avec succes.');
+        $this->command->info('Plans Stand + Essentiel + Pro + Business + Gold crees avec succes.');
     }
 }
