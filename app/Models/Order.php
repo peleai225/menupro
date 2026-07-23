@@ -18,6 +18,7 @@ class Order extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'space_id',
         'customer_id',
         'reference',
         'tracking_token',
@@ -115,6 +116,11 @@ class Order extends Model
     // RELATIONSHIPS
     // =========================================================================
 
+    public function space(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\RestaurantSpace::class, 'space_id');
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -138,6 +144,12 @@ class Order extends Model
     // =========================================================================
     // SCOPES
     // =========================================================================
+
+    public function scopeForSpace($query, ?int $spaceId)
+    {
+        if ($spaceId === null) return $query;
+        return $query->where('space_id', $spaceId);
+    }
 
     public function scopeStatus($query, OrderStatus $status)
     {

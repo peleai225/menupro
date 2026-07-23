@@ -53,4 +53,32 @@ class SpacesTest extends TestCase
         ]);
         $this->assertTrue($restaurant->hasMultiSpaces());
     }
+
+    public function test_dish_can_be_assigned_to_space(): void
+    {
+        $this->seed(\Database\Seeders\PlanSeeder::class);
+        $restaurant = \App\Models\Restaurant::factory()->create();
+        $space = \App\Models\RestaurantSpace::factory()->create(['restaurant_id' => $restaurant->id]);
+        $dish = \App\Models\Dish::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'space_id'      => $space->id,
+        ]);
+        $this->assertEquals($space->id, $dish->space_id);
+        $this->assertEquals(1, \App\Models\Dish::forSpace($space->id)->count());
+    }
+
+    public function test_order_scope_for_space_filters_correctly(): void
+    {
+        $this->seed(\Database\Seeders\PlanSeeder::class);
+        $restaurant = \App\Models\Restaurant::factory()->create();
+        $space1 = \App\Models\RestaurantSpace::factory()->create(['restaurant_id' => $restaurant->id]);
+        $space2 = \App\Models\RestaurantSpace::factory()->create(['restaurant_id' => $restaurant->id]);
+
+        \App\Models\Order::factory()->create(['restaurant_id' => $restaurant->id, 'space_id' => $space1->id]);
+        \App\Models\Order::factory()->create(['restaurant_id' => $restaurant->id, 'space_id' => $space2->id]);
+        \App\Models\Order::factory()->create(['restaurant_id' => $restaurant->id, 'space_id' => null]);
+
+        $this->assertEquals(1, \App\Models\Order::forSpace($space1->id)->count());
+        $this->assertEquals(3, \App\Models\Order::forSpace(null)->count()); // null = pas de filtre
+    }
 }

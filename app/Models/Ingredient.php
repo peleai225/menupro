@@ -16,6 +16,7 @@ class Ingredient extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'space_id',
         'ingredient_category_id',
         'name',
         'sku',
@@ -53,6 +54,11 @@ class Ingredient extends Model
         return $this->belongsTo(IngredientCategory::class, 'ingredient_category_id');
     }
 
+    public function space(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\RestaurantSpace::class, 'space_id');
+    }
+
     public function movements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
@@ -83,6 +89,12 @@ class Ingredient extends Model
     // =========================================================================
     // SCOPES
     // =========================================================================
+
+    public function scopeForSpace($query, ?int $spaceId)
+    {
+        if ($spaceId === null) return $query;
+        return $query->where('space_id', $spaceId);
+    }
 
     public function scopeActive($query)
     {

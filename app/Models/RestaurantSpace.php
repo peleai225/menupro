@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RestaurantSpace extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'restaurant_id', 'name', 'color', 'description', 'is_active', 'sort_order',
     ];

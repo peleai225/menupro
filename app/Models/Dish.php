@@ -18,6 +18,7 @@ class Dish extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'space_id',
         'category_id',
         'name',
         'slug',
@@ -73,6 +74,11 @@ class Dish extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function space(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\RestaurantSpace::class, 'space_id');
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -93,6 +99,12 @@ class Dish extends Model
     // =========================================================================
     // SCOPES
     // =========================================================================
+
+    public function scopeForSpace($query, ?int $spaceId)
+    {
+        if ($spaceId === null) return $query;
+        return $query->where('space_id', $spaceId);
+    }
 
     public function scopeActive($query)
     {
