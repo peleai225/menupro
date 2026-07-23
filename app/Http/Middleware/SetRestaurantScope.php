@@ -64,6 +64,7 @@ class SetRestaurantScope
             if ($currentSpaceId) {
                 $spaceExists = \App\Models\RestaurantSpace::where('id', $currentSpaceId)
                     ->where('restaurant_id', $restaurant->id)
+                    ->where('is_active', true)
                     ->exists();
                 if (!$spaceExists) {
                     $currentSpaceId = null;

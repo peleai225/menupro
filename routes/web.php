@@ -253,7 +253,7 @@ Route::prefix('dashboard')
 
         // Sélecteur d'espace actif — accessible à tous les membres authentifiés du restaurant
         Route::post('espaces/select', function (\Illuminate\Http\Request $request) {
-            $spaceId = $request->input('space_id') ?: null;
+            $spaceId = $request->input('space_id') ? (int) $request->input('space_id') : null;
             session(['current_space_id' => $spaceId]);
             return back();
         })->name('spaces.select');
