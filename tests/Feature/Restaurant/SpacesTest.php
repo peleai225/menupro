@@ -25,4 +25,32 @@ class SpacesTest extends TestCase
             $this->assertFalse((bool) $plan->has_multi_spaces, "Plan {$plan->slug} should not have multi_spaces");
         }
     }
+
+    public function test_restaurant_can_have_spaces(): void
+    {
+        $this->seed(\Database\Seeders\PlanSeeder::class);
+        $restaurant = \App\Models\Restaurant::factory()->create([
+            'current_plan_id' => \App\Models\Plan::where('slug', 'gold')->value('id'),
+        ]);
+
+        $space = \App\Models\RestaurantSpace::create([
+            'restaurant_id' => $restaurant->id,
+            'name'          => 'VIP',
+            'color'         => '#f59e0b',
+            'is_active'     => true,
+            'sort_order'    => 1,
+        ]);
+
+        $this->assertDatabaseHas('restaurant_spaces', ['name' => 'VIP', 'restaurant_id' => $restaurant->id]);
+        $this->assertEquals(1, $restaurant->spaces()->count());
+    }
+
+    public function test_restaurant_has_multi_spaces_returns_true_for_gold(): void
+    {
+        $this->seed(\Database\Seeders\PlanSeeder::class);
+        $restaurant = \App\Models\Restaurant::factory()->create([
+            'current_plan_id' => \App\Models\Plan::where('slug', 'gold')->value('id'),
+        ]);
+        $this->assertTrue($restaurant->hasMultiSpaces());
+    }
 }

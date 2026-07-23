@@ -244,6 +244,11 @@ class Restaurant extends Model
         return $this->hasOne(RestaurantWallet::class);
     }
 
+    public function spaces(): HasMany
+    {
+        return $this->hasMany(RestaurantSpace::class)->orderBy('sort_order');
+    }
+
     // =========================================================================
     // SCOPES
     // =========================================================================
@@ -454,6 +459,14 @@ class Restaurant extends Model
     public function hasFeature(string $feature): bool
     {
         return $this->currentPlan?->hasFeature($feature) ?? false;
+    }
+
+    /**
+     * Check if restaurant has the multi-spaces feature (Plan GOLD)
+     */
+    public function hasMultiSpaces(): bool
+    {
+        return $this->hasFeature('multi_spaces');
     }
 
     /**
