@@ -44,13 +44,13 @@
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-neutral-900 leading-[1.1] tracking-tight">
-                        Votre restaurant en ligne,
+                        Restaurant, hotel ou stand —
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-indigo-600">commandes et paiements</span>
                         en direct.
                     </h1>
 
                     <p class="mt-6 text-lg text-neutral-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                        Creez votre site de commande en 15 minutes. Vos clients paient par <strong class="text-neutral-900">Wave, Orange Money, MTN, Moov</strong> — l'argent arrive directement sur votre compte.
+                        De la vendeuse de panini au grand hotel, MenuPro digitalise votre activite en 15 minutes. Vos clients paient par <strong class="text-neutral-900">Wave, Orange Money, MTN, Moov</strong> — l'argent arrive directement sur votre compte.
                     </p>
 
                     <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
@@ -249,6 +249,37 @@
                             <p class="text-neutral-600 leading-relaxed">Gerez vos livreurs, suivez en temps reel, et vos clients voient leur commande avancer. Comme Glovo mais avec VOS livreurs.</p>
                         </div>
                     </div>
+                </div>
+
+                {{-- Card Hôtel / Chambres --}}
+                <div class="lg:col-span-2 bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-start gap-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-sky-100 to-sky-200 rounded-2xl flex items-center justify-center shrink-0">
+                            <svg class="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-neutral-900 mb-2">Mode Hotel — QR par chambre</h3>
+                            <p class="text-neutral-600 leading-relaxed">Chaque chambre a son propre QR code. Le client commande depuis son lit, appelle le service depuis son telephone. La voix annonce les nouvelles commandes en cuisine et au personnel.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Card Interface Personnel --}}
+                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Interface Personnel dédiée</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">Un lien sécurisé pour votre équipe. Ils reçoivent les appels clients avec voix en temps réel — sans connexion requise.</p>
+                </div>
+
+                {{-- Card Voix TTS --}}
+                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-gradient-to-br from-fuchsia-100 to-fuchsia-200 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Voix sur nouvelles commandes</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">Nouvelle commande à la Chambre 3, Appel addition à la Table 7. La voix IA lit les commandes et appels en temps réel.</p>
                 </div>
             </div>
         </div>
@@ -590,11 +621,32 @@
                     Un prix simple, pas de surprise
                 </h2>
                 <p class="text-neutral-600 text-lg mt-4">
-                    Pas de commission par commande. Un forfait mensuel fixe. Economisez jusqu'a 20% sur l'annee.
+                    Du stand de rue au grand restaurant. Pas de commission par commande. Un forfait mensuel fixe.
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6 animate-on-scroll">
+            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6 animate-on-scroll">
+                {{-- Stand --}}
+                <div class="bg-white rounded-2xl p-7 border border-orange-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300">
+                    <div class="text-xs font-semibold text-orange-600 uppercase tracking-wider mb-3">Stand</div>
+                    <div class="flex items-baseline gap-1 mb-2">
+                        <span class="text-4xl font-bold text-neutral-900">5 000</span>
+                        <span class="text-neutral-500 text-sm">F/mois</span>
+                    </div>
+                    <p class="text-sm text-neutral-500 mb-6">Vendeurs de rue, stands panini, tacos, jus...</p>
+                    <ul class="space-y-3 mb-8">
+                        @foreach(['15 plats', '100 commandes/mois', 'QR code personnalisé', 'Wave & Orange Money', 'Sans ordinateur requis'] as $f)
+                        <li class="flex items-center gap-2.5 text-sm text-neutral-700">
+                            <svg class="w-4 h-4 text-orange-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            {{ $f }}
+                        </li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-orange-100 text-orange-900 hover:bg-orange-200 transition-all">
+                        Essai gratuit 7j
+                    </a>
+                </div>
+
                 {{-- Essentiel --}}
                 <div class="bg-white rounded-2xl p-7 border border-neutral-200 hover:border-neutral-300 hover:shadow-lg transition-all duration-300">
                     <div class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Essentiel</div>
@@ -617,7 +669,7 @@
                 </div>
 
                 {{-- Pro (featured) --}}
-                <div class="bg-white rounded-2xl p-7 border-2 border-primary-500 shadow-xl shadow-primary-100/50 relative hover:shadow-2xl transition-all duration-300 -mt-2 mb-[-8px]">
+                <div class="bg-white rounded-2xl p-7 border-2 border-primary-500 shadow-xl shadow-primary-100/50 relative hover:shadow-2xl transition-all duration-300">
                     <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-xs font-bold px-4 py-1 rounded-full">Populaire</div>
                     <div class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3">Pro</div>
                     <div class="flex items-baseline gap-1 mb-2">
