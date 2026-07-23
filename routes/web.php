@@ -247,7 +247,7 @@ Route::prefix('dashboard')
         });
 
         // Espaces (Plan GOLD)
-        Route::middleware(['feature:multi_spaces'])->group(function () {
+        Route::middleware(['restaurant.admin', 'feature:multi_spaces'])->group(function () {
             Route::get('espaces', \App\Livewire\Restaurant\Spaces::class)->name('spaces');
         });
         

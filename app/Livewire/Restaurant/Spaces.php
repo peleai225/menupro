@@ -46,9 +46,10 @@ class Spaces extends Component
         ];
 
         if ($this->editingId) {
-            RestaurantSpace::where('id', $this->editingId)
+            $space = RestaurantSpace::where('id', $this->editingId)
                 ->where('restaurant_id', $this->restaurant->id)
-                ->update($data);
+                ->firstOrFail();
+            $space->update($data);
             session()->flash('success', 'Espace mis à jour.');
         } else {
             $data['restaurant_id'] = $this->restaurant->id;
