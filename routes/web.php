@@ -250,6 +250,13 @@ Route::prefix('dashboard')
         Route::middleware(['restaurant.admin', 'feature:multi_spaces'])->group(function () {
             Route::get('espaces', \App\Livewire\Restaurant\Spaces::class)->name('spaces');
         });
+
+        // Sélecteur d'espace actif — accessible à tous les membres authentifiés du restaurant
+        Route::post('espaces/select', function (\Illuminate\Http\Request $request) {
+            $spaceId = $request->input('space_id') ?: null;
+            session(['current_space_id' => $spaceId]);
+            return back();
+        })->name('spaces.select');
         
         // Reviews, Taxes - admin uniquement (tous plans)
         Route::middleware('restaurant.admin')->group(function () {

@@ -57,6 +57,20 @@ class SetRestaurantScope
         if ($restaurant) {
             view()->share('restaurant', $restaurant);
             view()->share('subscription', $restaurant->activeSubscription);
+
+            // Partager l'espace actif (null = tous les espaces)
+            $currentSpaceId = session('current_space_id');
+            // Valider que l'espace appartient bien au restaurant
+            if ($currentSpaceId) {
+                $spaceExists = \App\Models\RestaurantSpace::where('id', $currentSpaceId)
+                    ->where('restaurant_id', $restaurant->id)
+                    ->exists();
+                if (!$spaceExists) {
+                    $currentSpaceId = null;
+                    session()->forget('current_space_id');
+                }
+            }
+            view()->share('currentSpaceId', $currentSpaceId);
         }
 
         return $next($request);

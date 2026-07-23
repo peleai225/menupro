@@ -555,6 +555,9 @@
 
                     <!-- Right Section -->
                     <div class="flex items-center gap-4">
+                        <!-- Sélecteur d'espace actif (Plan GOLD) -->
+                        <x-space-selector />
+
                         <!-- Tutoriel guidé -->
                         <button type="button" 
                                 onclick="window.runRestaurantTour && window.runRestaurantTour()"
