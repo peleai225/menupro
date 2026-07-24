@@ -105,6 +105,12 @@ Schedule::command('recap:daily')
     ->name('send-daily-recap')
     ->withoutOverlapping();
 
+// Rapport nightly serveurs GOLD à 23h30
+Schedule::command('waiter:nightly-report')
+    ->dailyAt('23:30')
+    ->name('waiter-nightly-report')
+    ->withoutOverlapping();
+
 // CRM — Commissions récurrentes le 2 de chaque mois à 6h
 Schedule::command('crm:credit-recurring')
     ->monthlyOn(2, '06:00')
