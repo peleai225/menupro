@@ -5,6 +5,7 @@ namespace App\Livewire\Restaurant;
 use Livewire\Component;
 use App\Models\Waiter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class Waiters extends Component
 {
@@ -25,7 +26,7 @@ class Waiters extends Component
             'name'       => 'required|string|max:80',
             'pin'        => $pinRule,
             'pinConfirm' => 'nullable|digits:4',
-            'spaceId'    => 'nullable|exists:restaurant_spaces,id',
+            'spaceId'    => ['nullable', Rule::exists('restaurant_spaces', 'id')->where('restaurant_id', $this->restaurant->id)],
             'isActive'   => 'boolean',
         ];
     }

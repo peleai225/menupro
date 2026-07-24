@@ -45,10 +45,12 @@ class WaiterController extends Controller
             ->where('is_active', true)
             ->get();
 
+        $allLocked = true;
         foreach ($waiters as $waiter) {
             if ($waiter->isLocked()) {
                 continue;
             }
+            $allLocked = false;
             if ($waiter->checkPin($request->pin)) {
                 $waiter->resetAttempts();
 
@@ -62,6 +64,10 @@ class WaiterController extends Controller
             }
         }
 
+        if ($allLocked) {
+            return response()->json(['success' => false, 'locked' => true, 'message' => 'Trop de tentatives. Attendez 5 minutes.'], 401);
+        }
+
         // PIN incorrect — rate-limit by IP + restaurant via cache (fixed 5-min window)
         $key = 'waiter_pin_fail_' . $request->ip() . '_' . $restaurant->id;
         cache()->add($key, 0, now()->addMinutes(5)); // set TTL only on first write
@@ -71,7 +77,7 @@ class WaiterController extends Controller
             $waiters->each->recordFailedAttempt();
         }
 
-        return response()->json(['success' => false, 'message' => 'PIN incorrect'], 401);
+        return response()->json(['success' => false, 'locked' => false, 'message' => 'PIN incorrect'], 401);
     }
 
     /**

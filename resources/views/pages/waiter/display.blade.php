@@ -147,7 +147,11 @@
             } else {
                 pin = '';
                 updateDots();
-                document.getElementById('pin-error').classList.remove('hidden');
+                if (data.locked) {
+                    document.getElementById('pin-locked').classList.remove('hidden');
+                } else {
+                    document.getElementById('pin-error').classList.remove('hidden');
+                }
             }
         } catch (e) {
             pin = '';
