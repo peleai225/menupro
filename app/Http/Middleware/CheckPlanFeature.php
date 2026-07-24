@@ -41,6 +41,7 @@ class CheckPlanFeature
             'stock' => 'Gestion de Stock',
             'delivery' => 'Gestion des Livraisons',
             'hotel_rooms' => 'Chambres Hôtel (QR par chambre)',
+            'multi_spaces' => 'Gestion multi-espaces (Plan GOLD)',
             default => ucfirst($feature),
         };
     }

@@ -10,7 +10,6 @@ return new class extends Migration {
         Schema::table('dishes', function (Blueprint $table) {
             $table->foreignId('space_id')->nullable()->after('restaurant_id')
                   ->constrained('restaurant_spaces')->nullOnDelete();
-            $table->index('space_id');
         });
     }
 

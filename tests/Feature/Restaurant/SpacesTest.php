@@ -33,7 +33,7 @@ class SpacesTest extends TestCase
             'current_plan_id' => \App\Models\Plan::where('slug', 'gold')->value('id'),
         ]);
 
-        $space = \App\Models\RestaurantSpace::create([
+        \App\Models\RestaurantSpace::create([
             'restaurant_id' => $restaurant->id,
             'name'          => 'VIP',
             'color'         => '#f59e0b',

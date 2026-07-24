@@ -1,10 +1,11 @@
 {{-- resources/views/components/space-selector.blade.php --}}
-@if($restaurant->hasMultiSpaces() && $restaurant->spaces()->active()->count() > 0)
+@php $activeSpaces = $restaurant->hasMultiSpaces() ? $restaurant->spaces()->active()->get() : collect() @endphp
+@if($activeSpaces->isNotEmpty())
 <div x-data="{ open: false }" class="relative">
     <button @click="open = !open"
         class="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:border-neutral-300 transition shadow-sm">
         @if($currentSpaceId)
-            @php $activeSpace = $restaurant->spaces->find($currentSpaceId) @endphp
+            @php $activeSpace = $activeSpaces->find($currentSpaceId) @endphp
             <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $activeSpace?->color ?? '#6366f1' }}"></span>
             <span>{{ $activeSpace?->name ?? 'Espace' }}</span>
         @else
@@ -25,7 +26,7 @@
                 Tous les espaces
             </button>
         </form>
-        @foreach($restaurant->spaces()->active()->get() as $space)
+        @foreach($activeSpaces as $space)
         <form method="POST" action="{{ route('restaurant.spaces.select') }}">
             @csrf
             <input type="hidden" name="space_id" value="{{ $space->id }}">
