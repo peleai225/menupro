@@ -336,6 +336,11 @@ class Restaurant extends Model
         return $this->status->canAcceptOrders() && !$this->orders_blocked;
     }
 
+    public function isOnTrial(): bool
+    {
+        return $this->activeSubscription?->status === \App\Enums\SubscriptionStatus::TRIAL;
+    }
+
     public function getIsSubscriptionExpiredAttribute(): bool
     {
         return $this->subscription_ends_at && $this->subscription_ends_at->isPast();

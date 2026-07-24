@@ -1,5 +1,5 @@
 {{-- resources/views/components/space-selector.blade.php --}}
-@php $activeSpaces = $restaurant->hasMultiSpaces() ? $restaurant->spaces()->active()->get() : collect() @endphp
+@php $activeSpaces = ($restaurant ?? null)?->hasMultiSpaces() ? $restaurant->spaces()->active()->get() : collect() @endphp
 @if($activeSpaces->isNotEmpty())
 <div x-data="{ open: false }" class="relative">
     <button @click="open = !open"
