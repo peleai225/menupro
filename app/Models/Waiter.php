@@ -13,7 +13,7 @@ class Waiter extends Model
     use HasFactory;
 
     protected $fillable = [
-        'restaurant_id', 'space_id', 'name', 'pin_hash', 'is_active', 'failed_attempts', 'locked_until',
+        'restaurant_id', 'space_id', 'name', 'is_active', 'failed_attempts', 'locked_until',
     ];
 
     protected $casts = [
