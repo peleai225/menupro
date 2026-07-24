@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Enums\StockMovementType;
+use App\Events\LowStockAlert;
 use App\Models\Dish;
 use App\Models\Ingredient;
+use App\Models\NotificationSetting;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\StockMovement;
+use App\Notifications\RealTimeLowStockNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -165,26 +168,62 @@ class StockManager
                 continue;
             }
 
+            $quantityBefore = (float) $lockedIngredient->current_quantity;
+
             $movement = StockMovement::create([
                 'restaurant_id' => $lockedIngredient->restaurant_id,
                 'ingredient_id' => $lockedIngredient->id,
                 'user_id' => auth()->id(),
                 'type' => StockMovementType::EXIT_SALE,
                 'quantity' => -abs($requiredQuantity),
-                'quantity_before' => $lockedIngredient->current_quantity,
-                'quantity_after' => max(0, $lockedIngredient->current_quantity - $requiredQuantity),
+                'quantity_before' => $quantityBefore,
+                'quantity_after' => max(0, $quantityBefore - $requiredQuantity),
                 'reference_type' => $reference ? get_class($reference) : null,
                 'reference_id' => $reference?->id,
                 'reason' => "Vente: {$dish->name} x{$quantity}",
             ]);
 
-            $lockedIngredient->current_quantity = max(0, $lockedIngredient->current_quantity - $requiredQuantity);
+            $lockedIngredient->current_quantity = max(0, $quantityBefore - $requiredQuantity);
             $lockedIngredient->save();
 
             $movements->push($movement);
+
+            // Fire real-time alert only when stock JUST crosses below min_quantity
+            $this->dispatchLowStockAlertIfNeeded($lockedIngredient, $quantityBefore);
         }
 
         return $movements;
+    }
+
+    /**
+     * Dispatch a real-time low-stock alert if the ingredient just crossed below its threshold.
+     * Fires only on threshold crossing (was above, now at/below) to avoid notification spam.
+     */
+    protected function dispatchLowStockAlertIfNeeded(Ingredient $ingredient, float $quantityBefore): void
+    {
+        $minQuantity = (float) $ingredient->min_quantity;
+
+        // Was above threshold before, now at/below — threshold just crossed
+        if ($quantityBefore > $minQuantity && $ingredient->is_low_stock) {
+            // Broadcast real-time event
+            event(new LowStockAlert($ingredient));
+
+            // Send database notification (always) + email (if restaurant setting allows)
+            $restaurant = $ingredient->restaurant()->withoutGlobalScope('restaurant')->first();
+            if (!$restaurant) {
+                return;
+            }
+
+            $settings = NotificationSetting::withoutGlobalScope('restaurant')
+                ->where('restaurant_id', $restaurant->id)
+                ->first();
+            $sendEmail = $settings ? (bool) $settings->email_low_stock : true;
+
+            $owner = $restaurant->owner;
+            if ($owner) {
+                $owner->notify(new RealTimeLowStockNotification($ingredient, $sendEmail));
+            }
+        }
     }
 
     /**

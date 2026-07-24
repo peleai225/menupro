@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use App\Enums\Unit;
+use App\Events\LowStockAlert;
+use App\Models\NotificationSetting;
 use App\Models\Traits\BelongsToRestaurant;
+use App\Notifications\RealTimeLowStockNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -217,11 +220,11 @@ class Ingredient extends Model
      */
     public function decreaseStock(float $quantity, string $reason = null, $reference = null): StockMovement
     {
-        $quantityBefore = $this->current_quantity;
-        $this->current_quantity = max(0, $this->current_quantity - $quantity);
+        $quantityBefore = (float) $this->current_quantity;
+        $this->current_quantity = max(0, $quantityBefore - $quantity);
         $this->save();
 
-        return $this->movements()->create([
+        $movement = $this->movements()->create([
             'restaurant_id' => $this->restaurant_id,
             'user_id' => auth()->id(),
             'type' => 'exit_manual',
@@ -232,6 +235,27 @@ class Ingredient extends Model
             'reference_type' => $reference ? get_class($reference) : null,
             'reference_id' => $reference?->id,
         ]);
+
+        // Fire real-time alert only when stock JUST crosses below min_quantity
+        $minQuantity = (float) $this->min_quantity;
+        if ($quantityBefore > $minQuantity && $this->is_low_stock) {
+            event(new LowStockAlert($this));
+
+            $restaurant = $this->restaurant()->withoutGlobalScope('restaurant')->first();
+            if ($restaurant) {
+                $settings = NotificationSetting::withoutGlobalScope('restaurant')
+                    ->where('restaurant_id', $this->restaurant_id)
+                    ->first();
+                $sendEmail = $settings ? (bool) $settings->email_low_stock : true;
+
+                $owner = $restaurant->owner;
+                if ($owner) {
+                    $owner->notify(new RealTimeLowStockNotification($this, $sendEmail));
+                }
+            }
+        }
+
+        return $movement;
     }
 
     /**
