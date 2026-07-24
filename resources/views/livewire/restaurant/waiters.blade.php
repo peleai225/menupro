@@ -11,7 +11,7 @@
             <h1 class="text-2xl font-bold text-neutral-900">Serveurs</h1>
             <p class="text-neutral-500 text-sm mt-1">Chaque serveur s'identifie avec un PIN à 4 chiffres sur sa tablette</p>
         </div>
-        @php $waiterUrl = $restaurant->waiter_token
+        @php $waiterUrl = ($restaurant->waiter_token && \Illuminate\Support\Facades\Route::has('waiter.display'))
             ? route('waiter.display', $restaurant->waiter_token)
             : null @endphp
         @if($waiterUrl)
