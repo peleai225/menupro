@@ -548,6 +548,13 @@ Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function (
     Route::post('/service-requests/{serviceRequest}/done', [\App\Http\Controllers\Restaurant\KitchenController::class, 'serviceRequestDone'])->name('kitchen.service-request.done');
 });
 
+// Interface serveur (token public, comme cuisine et personnel)
+Route::prefix('serveur/{token}')->name('waiter.')->middleware('throttle:120,1')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Restaurant\WaiterController::class, 'display'])->name('display');
+    Route::post('/auth', [\App\Http\Controllers\Restaurant\WaiterController::class, 'authenticatePin'])->name('auth');
+    Route::get('/data', [\App\Http\Controllers\Restaurant\WaiterController::class, 'data'])->name('data');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Geocoding API Routes (Public)
