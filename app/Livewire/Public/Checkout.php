@@ -10,6 +10,7 @@ use App\Models\PromoCode;
 use App\Models\Restaurant;
 use App\Notifications\NewOrderNotification;
 use App\Services\DeliveryPricingService;
+use App\Services\WaveGateway;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -55,7 +56,7 @@ class Checkout extends Component
     public ?string $promoError = null;
 
     // Payment Method
-    public ?string $payment_method = null; // 'jeko' or 'cash_on_delivery'
+    public ?string $payment_method = null; // 'wave' | 'cash_on_delivery'
 
     public function mount(string $slug): void
     {
@@ -95,8 +96,8 @@ class Checkout extends Component
             return;
         }
         $methods = array_merge(
-            ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : [],
-            $this->jekoPaymentAvailable ? ['jeko'] : []
+            $this->wavePaymentAvailable ? ['wave'] : [],
+            ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : []
         );
         if (count($methods) === 1) {
             $this->payment_method = $methods[0];
@@ -188,8 +189,13 @@ class Checkout extends Component
     #[Computed]
     public function jekoPaymentAvailable(): bool
     {
-        // Jeko gateway supprimé (commit 03eba90) — toujours désactivé
         return false;
+    }
+
+    #[Computed]
+    public function wavePaymentAvailable(): bool
+    {
+        return $this->resolveWaveGateway()->isConfigured();
     }
 
     #[Computed]
@@ -331,12 +337,9 @@ class Checkout extends Component
             return;
         }
 
-        $cashOnDeliveryAvailable = $this->restaurant->cash_on_delivery ?? false;
-        $jekoAvailable = $this->jekoPaymentAvailable;
-
         $validMethods = array_merge(
-            $cashOnDeliveryAvailable ? ['cash_on_delivery'] : [],
-            $jekoAvailable ? ['jeko'] : []
+            $this->wavePaymentAvailable ? ['wave'] : [],
+            ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : []
         );
 
         if (!$this->payment_method) {
@@ -420,24 +423,59 @@ class Checkout extends Component
         // Clear cart
         session()->forget("cart.{$this->restaurant->id}");
 
-        // Notify restaurant
+        // Wave CI — créer session checkout et rediriger
+        if ($this->payment_method === 'wave') {
+            $wave = $this->resolveWaveGateway();
+            if ($wave->isConfigured()) {
+                $successUrl = route('r.order.success', [$this->restaurant->slug, $order]);
+                $errorUrl   = route('r.order.cancel',  [$this->restaurant->slug, $order]);
+                $result     = $wave->createCheckoutSession($order, $successUrl, $errorUrl);
+
+                if ($result['success']) {
+                    $order->update([
+                        'payment_reference' => $result['checkout_id'],
+                        'payment_method'    => 'wave',
+                        'payment_metadata'  => [
+                            'wave_checkout_id' => $result['checkout_id'],
+                            'wave_launch_url'  => $result['wave_launch_url'],
+                            'wave_mode'        => $wave->isRestaurantMode() ? 'restaurant_direct' : 'platform',
+                        ],
+                    ]);
+
+                    $this->redirect($result['wave_launch_url'], navigate: false);
+                    return;
+                }
+
+                // Wave a échoué — fallback message
+                session()->flash('error', 'Impossible de contacter Wave. Veuillez réessayer ou choisir un autre mode de paiement.');
+                session()->put("cart.{$this->restaurant->id}", $this->cart); // remettre le panier
+                return;
+            }
+        }
+
+        // Paiement à la caisse
+        // Notify restaurant before marking paid so notification has correct status context
         $this->restaurant->users()
             ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
             ->each(function ($user) use ($order) {
                 $user->notify(new NewOrderNotification($order));
             });
 
-        // Process payment
-        // Note: 'jeko' payment method supprimé (commit 03eba90) — jekoPaymentAvailable() retourne false,
-        // donc ce cas ne peut jamais être atteint via l'UI.
-        // Cash on delivery
         $order->markAsPaid([
-            'method' => 'cash_on_delivery',
-            'metadata' => ['note' => 'Paiement à la livraison'],
+            'method'   => 'cash_on_delivery',
+            'metadata' => ['note' => 'Paiement à la caisse'],
         ]);
 
-        // Redirect to order status
         $this->redirect(route('r.order.status', [$this->restaurant->slug, $order->tracking_token]));
+    }
+
+    private function resolveWaveGateway(): WaveGateway
+    {
+        if ($this->restaurant->hasWaveBusiness()) {
+            return app(WaveGateway::class)->forRestaurant($this->restaurant);
+        }
+
+        return app(WaveGateway::class)->forPlatform();
     }
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float

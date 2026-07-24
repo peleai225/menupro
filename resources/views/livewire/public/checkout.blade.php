@@ -371,19 +371,17 @@
                     </div>
 
                     <!-- Payment Method -->
-                    @if($this->jekoPaymentAvailable || $this->cashOnDeliveryAvailable)
+                    @if($this->wavePaymentAvailable || $this->cashOnDeliveryAvailable)
                         <div class="mb-6 pb-6 border-b border-neutral-200">
                             <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
                             <div class="space-y-2">
-                                @if($this->jekoPaymentAvailable)
-                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'jeko' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                        <input type="radio" wire:model="payment_method" value="jeko" class="text-primary-500 focus:ring-primary-500">
-                                        <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                                            <span class="text-white text-xs font-bold">J</span>
-                                        </div>
+                                @if($this->wavePaymentAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'wave' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="wave" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="wave" />
                                         <div class="flex-1">
-                                            <span class="font-medium">Jeko</span>
-                                            <span class="text-xs text-neutral-500 ml-2">(Wave, Orange, MTN, Moov, Djamo, Carte)</span>
+                                            <span class="font-medium">Wave CI</span>
+                                            <span class="text-xs text-neutral-500 ml-2">Paiement mobile instantané</span>
                                         </div>
                                     </label>
                                 @endif
@@ -465,7 +463,11 @@
                             class="w-full mt-6 py-4 text-white font-bold rounded-xl disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
                             style="background-color: {{ $primaryColor }}; box-shadow: 0 6px 20px {{ $primaryColor }}50;">
                         <span wire:loading.remove wire:target="placeOrder">
-                            Passer la commande
+                            @if($payment_method === 'wave')
+                                Payer avec Wave
+                            @else
+                                Passer la commande
+                            @endif
                         </span>
                         <span wire:loading wire:target="placeOrder" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
