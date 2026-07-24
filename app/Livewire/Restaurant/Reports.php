@@ -4,6 +4,7 @@ namespace App\Livewire\Restaurant;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Waiter;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -13,7 +14,7 @@ use App\Exports\ReportsExport;
 
 class Reports extends Component
 {
-    public string $reportType = 'sales'; // sales, dishes, customers, financial
+    public string $reportType = 'sales'; // sales, dishes, customers, financial, waiters
     public string $period = '30'; // days
     public ?string $startDate = null;
     public ?string $endDate = null;
@@ -76,6 +77,7 @@ class Reports extends Component
                 'dishes' => $this->getDishesReport($restaurant->id, $startDate, $endDate),
                 'customers' => $this->getCustomersReport($restaurant->id, $startDate, $endDate),
                 'financial' => $this->getFinancialReport($restaurant->id, $startDate, $endDate),
+                'waiters' => $this->getWaitersReport($restaurant->id, $startDate, $endDate),
                 default => [],
             };
 
@@ -374,6 +376,89 @@ class Reports extends Component
             'total_discounts' => (float) $totalDiscounts,
             'revenue_by_payment' => $revenueByPayment,
             'daily_revenue' => $dailyRevenue,
+        ];
+    }
+
+    protected function getWaitersReport(int $restaurantId, $startDate, $endDate): array
+    {
+        // Base query: paid orders in the period for this restaurant
+        $baseQuery = Order::where('restaurant_id', $restaurantId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->paid();
+
+        // Per-waiter aggregates
+        $waiterStats = $baseQuery
+            ->select(
+                'waiter_id',
+                DB::raw('COUNT(*) as orders_count'),
+                DB::raw('SUM(total) as total_revenue'),
+                DB::raw('AVG(total) as avg_order'),
+                DB::raw('MIN(created_at) as first_order_at'),
+                DB::raw('MAX(created_at) as last_order_at')
+            )
+            ->groupBy('waiter_id')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        // Load waiters for this restaurant (including null = unassigned)
+        $waiterIds = $waiterStats->pluck('waiter_id')->filter()->unique()->values();
+        $waiters = Waiter::whereIn('id', $waiterIds)->with('space')->get()->keyBy('id');
+
+        // Determine primary space per waiter (most frequent space_id among paid orders)
+        $primarySpaces = Order::where('restaurant_id', $restaurantId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->paid()
+            ->whereIn('waiter_id', $waiterIds)
+            ->whereNotNull('space_id')
+            ->select('waiter_id', 'space_id', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('waiter_id', 'space_id')
+            ->orderByDesc('cnt')
+            ->get()
+            ->groupBy('waiter_id')
+            ->map(fn($rows) => $rows->first()?->space_id);
+
+        // Load space names
+        $spaceIds = $primarySpaces->values()->filter()->unique();
+        $spaces = \App\Models\RestaurantSpace::whereIn('id', $spaceIds)->get()->keyBy('id');
+
+        $rows = $waiterStats->map(function ($stat) use ($waiters, $primarySpaces, $spaces) {
+            $waiterId = $stat->waiter_id;
+            $waiter = $waiterId ? $waiters->get($waiterId) : null;
+            $waiterName = $waiter ? $waiter->name : 'Non assigné';
+
+            $primarySpaceId = $waiterId ? ($primarySpaces->get($waiterId) ?? null) : null;
+            $primarySpaceName = $primarySpaceId ? ($spaces->get($primarySpaceId)?->name ?? '') : '';
+
+            $firstAt = $stat->first_order_at ? \Carbon\Carbon::parse($stat->first_order_at) : null;
+            $lastAt  = $stat->last_order_at  ? \Carbon\Carbon::parse($stat->last_order_at)  : null;
+
+            $heuresActives = '';
+            if ($firstAt && $lastAt) {
+                if ($firstAt->isSameDay($lastAt)) {
+                    $heuresActives = $firstAt->format('H:i') . ' – ' . $lastAt->format('H:i');
+                } else {
+                    $heuresActives = $firstAt->format('d/m H:i') . ' – ' . $lastAt->format('d/m H:i');
+                }
+            }
+
+            return [
+                'waiter_id'         => (int) ($waiterId ?? 0),
+                'waiter_name'       => $this->cleanString($waiterName),
+                'orders_count'      => (int) $stat->orders_count,
+                'total_revenue'     => (float) $stat->total_revenue,
+                'avg_order'         => (float) round($stat->avg_order),
+                'primary_space'     => $this->cleanString($primarySpaceName),
+                'heures_actives'    => $this->cleanString($heuresActives),
+            ];
+        })->values()->toArray();
+
+        $totalRevenue = array_sum(array_column($rows, 'total_revenue'));
+        $totalOrders  = array_sum(array_column($rows, 'orders_count'));
+
+        return [
+            'waiters'       => $rows,
+            'total_revenue' => (float) $totalRevenue,
+            'total_orders'  => (int) $totalOrders,
         ];
     }
 

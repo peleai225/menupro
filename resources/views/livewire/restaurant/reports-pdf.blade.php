@@ -210,6 +210,44 @@
         </table>
     @endif
 
+    @if($reportType === 'waiters')
+        <h2>Performance par serveur</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Serveur</th>
+                    <th>Commandes</th>
+                    <th>Chiffre d'affaires (FCFA)</th>
+                    <th>Ticket moyen (FCFA)</th>
+                    <th>Espace principal</th>
+                    <th>Heures actives</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($reportData['waiters'] ?? [] as $waiter)
+                    <tr>
+                        <td>{{ $waiter['waiter_name'] ?? '' }}</td>
+                        <td>{{ $waiter['orders_count'] ?? 0 }}</td>
+                        <td>{{ number_format($waiter['total_revenue'] ?? 0, 0, ',', ' ') }}</td>
+                        <td>{{ number_format($waiter['avg_order'] ?? 0, 0, ',', ' ') }}</td>
+                        <td>{{ $waiter['primary_space'] ?? '' }}</td>
+                        <td>{{ $waiter['heures_actives'] ?? '' }}</td>
+                    </tr>
+                @endforeach
+                @if(!empty($reportData['waiters']))
+                    <tr class="total">
+                        <td>TOTAL</td>
+                        <td>{{ $reportData['total_orders'] ?? 0 }}</td>
+                        <td>{{ number_format($reportData['total_revenue'] ?? 0, 0, ',', ' ') }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    @endif
+
     <div class="footer">
         <p>Rapport généré par MenuPro - {{ config('app.name') }}</p>
     </div>

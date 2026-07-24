@@ -30,12 +30,15 @@
             <!-- Report Type -->
             <div>
                 <label class="block text-sm font-medium text-neutral-700 mb-2">Type de rapport</label>
-                <select wire:model.live="reportType" 
+                <select wire:model.live="reportType"
                         class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="sales">Ventes</option>
                     <option value="dishes">Plats</option>
                     <option value="customers">Clients</option>
                     <option value="financial">Financier</option>
+                    @if(auth()->user()->restaurant?->hasMultiSpaces())
+                        <option value="waiters">Serveurs</option>
+                    @endif
                 </select>
             </div>
 
@@ -323,6 +326,58 @@
                             <p class="font-bold text-neutral-900">{{ number_format($payment['revenue'] ?? 0, 0, ',', ' ') }} F</p>
                         </div>
                     @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Waiters Report -->
+    @if($reportType === 'waiters' && auth()->user()->restaurant?->hasMultiSpaces())
+        <div class="space-y-6">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <p class="text-sm font-medium text-neutral-500 mb-2">Chiffre d'affaires total</p>
+                    <p class="text-3xl font-bold text-neutral-900">{{ number_format($data['total_revenue'] ?? 0, 0, ',', ' ') }} F</p>
+                </div>
+                <div class="card p-6">
+                    <p class="text-sm font-medium text-neutral-500 mb-2">Commandes totales</p>
+                    <p class="text-3xl font-bold text-neutral-900">{{ $data['total_orders'] ?? 0 }}</p>
+                </div>
+            </div>
+
+            <!-- Waiters Table -->
+            <div class="card p-6">
+                <h2 class="text-lg font-bold text-neutral-900 mb-4">Performance par serveur</h2>
+                <div class="table-responsive">
+                    <table class="w-full min-w-[600px]">
+                        <thead>
+                            <tr class="border-b border-neutral-200">
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Serveur</th>
+                                <th class="text-right py-3 px-4 text-sm font-semibold text-neutral-700">Commandes</th>
+                                <th class="text-right py-3 px-4 text-sm font-semibold text-neutral-700">Chiffre d'affaires</th>
+                                <th class="text-right py-3 px-4 text-sm font-semibold text-neutral-700">Ticket moyen</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Espace principal</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Heures actives</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-100">
+                            @forelse($data['waiters'] ?? [] as $waiter)
+                                <tr class="hover:bg-neutral-50 transition-colors">
+                                    <td class="py-3 px-4 font-medium text-neutral-900">{{ $waiter['waiter_name'] ?? '' }}</td>
+                                    <td class="py-3 px-4 text-right text-neutral-700">{{ $waiter['orders_count'] ?? 0 }}</td>
+                                    <td class="py-3 px-4 text-right font-bold text-neutral-900">{{ number_format($waiter['total_revenue'] ?? 0, 0, ',', ' ') }} F</td>
+                                    <td class="py-3 px-4 text-right text-neutral-600">{{ number_format($waiter['avg_order'] ?? 0, 0, ',', ' ') }} F</td>
+                                    <td class="py-3 px-4 text-sm text-neutral-600">{{ $waiter['primary_space'] ?? '—' }}</td>
+                                    <td class="py-3 px-4 text-sm text-neutral-500">{{ $waiter['heures_actives'] ?? '' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="py-8 text-center text-neutral-500">Aucun serveur avec des commandes sur cette période</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

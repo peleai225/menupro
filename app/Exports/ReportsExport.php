@@ -29,6 +29,7 @@ class ReportsExport implements FromArray, WithHeadings, WithTitle, WithStyles, W
             'dishes' => $this->getDishesData(),
             'customers' => $this->getCustomersData(),
             'financial' => $this->getFinancialData(),
+            'waiters' => $this->getWaitersData(),
             default => [],
         };
     }
@@ -40,6 +41,7 @@ class ReportsExport implements FromArray, WithHeadings, WithTitle, WithStyles, W
             'dishes' => ['Plat', 'Quantité vendue', 'Revenus (FCFA)', 'Pourcentage'],
             'customers' => ['Client', 'Email', 'Commandes', 'Total dépensé (FCFA)', 'Dernière commande'],
             'financial' => ['Type', 'Montant (FCFA)', 'Pourcentage'],
+            'waiters' => ['Serveur', 'Commandes', 'Chiffre d\'affaires (FCFA)', 'Ticket moyen (FCFA)', 'Espace principal', 'Heures actives'],
             default => [],
         };
     }
@@ -51,6 +53,7 @@ class ReportsExport implements FromArray, WithHeadings, WithTitle, WithStyles, W
             'dishes' => 'Plats',
             'customers' => 'Clients',
             'financial' => 'Financier',
+            'waiters' => 'Serveurs',
             default => 'Rapport',
         };
     }
@@ -129,12 +132,12 @@ class ReportsExport implements FromArray, WithHeadings, WithTitle, WithStyles, W
     {
         $data = [];
         $total = $this->reportData['total_revenue'] ?? 0;
-        
+
         $data[] = ['Sous-total', number_format(($this->reportData['total_subtotal'] ?? 0) / 100, 0, ',', ' '), ''];
         $data[] = ['Frais de livraison', number_format(($this->reportData['total_delivery_fees'] ?? 0) / 100, 0, ',', ' '), ''];
         $data[] = ['Réductions', '-' . number_format(($this->reportData['total_discounts'] ?? 0) / 100, 0, ',', ' '), ''];
         $data[] = ['TOTAL REVENUS', number_format($total / 100, 0, ',', ' '), '100%'];
-        
+
         foreach ($this->reportData['revenue_by_payment'] ?? [] as $method => $amount) {
             $percentage = $total > 0 ? ($amount / $total) * 100 : 0;
             $data[] = [
@@ -143,7 +146,36 @@ class ReportsExport implements FromArray, WithHeadings, WithTitle, WithStyles, W
                 number_format($percentage, 2) . '%',
             ];
         }
-        
+
+        return $data;
+    }
+
+    protected function getWaitersData(): array
+    {
+        $data = [];
+        foreach ($this->reportData['waiters'] ?? [] as $waiter) {
+            $data[] = [
+                $waiter['waiter_name'] ?? '',
+                $waiter['orders_count'] ?? 0,
+                number_format($waiter['total_revenue'] ?? 0, 0, ',', ' '),
+                number_format($waiter['avg_order'] ?? 0, 0, ',', ' '),
+                $waiter['primary_space'] ?? '',
+                $waiter['heures_actives'] ?? '',
+            ];
+        }
+
+        // Totals row
+        if (!empty($data)) {
+            $data[] = [
+                'TOTAL',
+                $this->reportData['total_orders'] ?? 0,
+                number_format($this->reportData['total_revenue'] ?? 0, 0, ',', ' '),
+                '',
+                '',
+                '',
+            ];
+        }
+
         return $data;
     }
 }
