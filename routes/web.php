@@ -249,6 +249,8 @@ Route::prefix('dashboard')
         // Espaces (Plan GOLD)
         Route::middleware(['restaurant.admin', 'feature:multi_spaces'])->group(function () {
             Route::get('espaces', \App\Livewire\Restaurant\Spaces::class)->name('spaces');
+            Route::get('serveurs', \App\Livewire\Restaurant\Waiters::class)->name('waiters');
+            Route::post('serveurs/generate-token', [\App\Http\Controllers\Restaurant\WaiterController::class, 'generateToken'])->name('waiter.generate-token');
         });
 
         // Sélecteur d'espace actif — accessible à tous les membres authentifiés du restaurant
