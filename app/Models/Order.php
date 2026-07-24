@@ -7,6 +7,7 @@ use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
 use App\Models\RestaurantSpace;
 use App\Models\Traits\BelongsToRestaurant;
+use App\Models\Waiter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ class Order extends Model
     protected $fillable = [
         'restaurant_id',
         'space_id',
+        'waiter_id',
         'customer_id',
         'reference',
         'tracking_token',
@@ -123,6 +125,11 @@ class Order extends Model
         return $this->belongsTo(RestaurantSpace::class, 'space_id');
     }
 
+    public function waiter(): BelongsTo
+    {
+        return $this->belongsTo(Waiter::class, 'waiter_id');
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -151,6 +158,12 @@ class Order extends Model
     {
         if ($spaceId === null) return $query;
         return $query->where('space_id', $spaceId);
+    }
+
+    public function scopeForWaiter($query, ?int $waiterId)
+    {
+        if ($waiterId === null) return $query;
+        return $query->where('waiter_id', $waiterId);
     }
 
     public function scopeStatus($query, OrderStatus $status)

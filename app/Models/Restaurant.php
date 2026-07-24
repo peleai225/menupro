@@ -75,6 +75,7 @@ class Restaurant extends Model
         'wave_business_enabled',
         'kitchen_token',
         'staff_token',
+        'waiter_token',
         'is_demo',
         'referred_by_user_id',
         'platform_category',
@@ -247,6 +248,11 @@ class Restaurant extends Model
     public function spaces(): HasMany
     {
         return $this->hasMany(RestaurantSpace::class)->orderBy('sort_order');
+    }
+
+    public function waiters(): HasMany
+    {
+        return $this->hasMany(Waiter::class)->orderBy('name');
     }
 
     // =========================================================================
