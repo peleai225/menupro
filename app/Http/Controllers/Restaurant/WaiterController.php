@@ -29,9 +29,8 @@ class WaiterController extends Controller
     public function display(string $token): View
     {
         $restaurant = Restaurant::where('waiter_token', $token)->firstOrFail();
-        $spaces     = $restaurant->spaces()->active()->get(['id', 'name', 'color']);
 
-        return view('pages.waiter.display', compact('restaurant', 'token', 'spaces'));
+        return view('pages.waiter.display', compact('restaurant', 'token'));
     }
 
     /**
@@ -63,10 +62,10 @@ class WaiterController extends Controller
             }
         }
 
-        // PIN incorrect — rate-limit by IP + restaurant via cache
-        $key      = 'waiter_pin_fail_' . $request->ip() . '_' . $restaurant->id;
+        // PIN incorrect — rate-limit by IP + restaurant via cache (fixed 5-min window)
+        $key = 'waiter_pin_fail_' . $request->ip() . '_' . $restaurant->id;
+        cache()->add($key, 0, now()->addMinutes(5)); // set TTL only on first write
         $attempts = cache()->increment($key);
-        cache()->put($key, $attempts, now()->addMinutes(5));
 
         if ($attempts >= 10) {
             $waiters->each->recordFailedAttempt();
