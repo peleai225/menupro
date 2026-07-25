@@ -182,7 +182,7 @@
     @endif
 
     <!-- Main Content -->
-    <main class="{{ ($bannerEnabled && $bannerText) ? 'pt-[104px]' : 'pt-16' }}">
+    <main class="{{ ($bannerEnabled && $bannerText) ? 'pt-[104px]' : 'pt-16' }} pb-20 md:pb-0">
         {{ $slot }}
     </main>
 
@@ -194,7 +194,7 @@
         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsappNumber) }}?text={{ urlencode('Bonjour, je souhaite en savoir plus sur MenuPro.') }}"
            target="_blank"
            rel="noopener noreferrer"
-           class="fixed bottom-6 right-6 z-50 group"
+           class="fixed bottom-24 md:bottom-6 right-6 z-40 group"
            aria-label="Nous contacter sur WhatsApp">
             <div class="relative">
                 {{-- Pulse ring --}}
