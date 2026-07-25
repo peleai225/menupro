@@ -138,6 +138,17 @@ class JekoGatewayTest extends TestCase
         $this->assertStringContainsString('trop faible', $result['error']);
     }
 
+    public function test_payout_throws_when_reference_is_empty(): void
+    {
+        Http::fake();
+        $gateway = new JekoGateway();
+        $gateway->forPlatform();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('idempotency key');
+        $gateway->payout('22500000001', 10000, '', '', '');
+    }
+
     public function test_payout_succeeds_when_api_returns_ok(): void
     {
         Http::fake([

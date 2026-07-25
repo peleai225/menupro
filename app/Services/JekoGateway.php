@@ -206,7 +206,10 @@ class JekoGateway implements PaymentGatewayInterface
         }
 
         $raison = $reason ?: 'Reversement commande MenuPro';
-        $refClient = $reference ?: 'PAYOUT-' . now()->timestamp;
+        if (empty($reference)) {
+            throw new \InvalidArgumentException('payout() reference must not be empty — it is the idempotency key');
+        }
+        $refClient = $reference;
 
         try {
             $response = Http::withToken($this->apiKey)
@@ -366,8 +369,8 @@ class JekoGateway implements PaymentGatewayInterface
 
                 return [
                     'success' => true,
-                    'merchant_id' => $data['entreprise_id'],
-                    'store_id' => $data['magasin_id'],
+                    'merchant_id' => $data['entreprise_id'] ?? null,
+                    'store_id'    => $data['magasin_id'] ?? null,
                     'wallet_id' => $data['portefeuille_id'] ?? null,
                 ];
             }
