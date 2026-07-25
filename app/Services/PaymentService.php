@@ -22,7 +22,7 @@ class PaymentService
         }
 
         return match($gateway) {
-            PaymentGateway::WAVE => app(WaveGateway::class)->forPlatform(),
+            PaymentGateway::WAVE => throw new InvalidArgumentException('WaveGateway pas encore adapté à l\'interface. Utilisez JekoGateway.'),
             PaymentGateway::JEKO => throw new InvalidArgumentException('Jeko pas encore implémenté'),
             PaymentGateway::CINETPAY => throw new InvalidArgumentException('CinetPay pas encore implémenté'),
             PaymentGateway::CASH => throw new InvalidArgumentException('Cash ne supporte pas les paiements en ligne'),

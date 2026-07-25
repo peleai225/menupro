@@ -65,4 +65,12 @@ class PaymentServiceTest extends TestCase
 
         PaymentService::gateway('cinetpay');
     }
+
+    public function test_gateway_throws_for_wave_not_yet_adapted()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('WaveGateway pas encore adapté à l\'interface');
+
+        PaymentService::gateway('wave');
+    }
 }
