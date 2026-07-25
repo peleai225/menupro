@@ -174,9 +174,7 @@
     </nav>
 
     {{-- Spacer pour éviter que le contenu soit caché par la bottom nav --}}
-    @if(!auth()->check() && (request()->routeIs('home') || request()->routeIs('pricing')))
     <div class="md:hidden h-20"></div>
-    @endif
     @endif
 </body>
 </html>
