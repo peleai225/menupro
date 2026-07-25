@@ -122,9 +122,31 @@
 
     @stack('scripts')
 
+    {{-- DEBUG CONDITIONS --}}
+    @if(!auth()->check())
+        <div class="fixed top-20 left-4 bg-green-500 text-white px-3 py-1 rounded text-xs z-[9999]">
+            ✓ Non connecté
+        </div>
+    @else
+        <div class="fixed top-20 left-4 bg-red-500 text-white px-3 py-1 rounded text-xs z-[9999]">
+            ✗ Connecté ({{ auth()->user()->name }})
+        </div>
+    @endif
+
+    @if(request()->routeIs('home') || request()->routeIs('pricing'))
+        <div class="fixed top-32 left-4 bg-green-500 text-white px-3 py-1 rounded text-xs z-[9999]">
+            ✓ Route OK ({{ request()->route()->getName() }})
+        </div>
+    @else
+        <div class="fixed top-32 left-4 bg-red-500 text-white px-3 py-1 rounded text-xs z-[9999]">
+            ✗ Route incorrecte ({{ request()->route()?->getName() ?? 'null' }})
+        </div>
+    @endif
+
     {{-- Bottom Navigation Mobile (PWA) - Uniquement pages publiques --}}
     @if(!auth()->check() && (request()->routeIs('home') || request()->routeIs('pricing')))
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 shadow-lg z-50 safe-area-inset-bottom">
+    {{-- DEBUG: Nav va s'afficher --}}
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-primary-500 shadow-2xl z-[9999]" style="min-height: 80px !important;">
         <div class="flex items-center justify-around px-2 py-3">
             {{-- Accueil --}}
             <a href="{{ route('home') }}"
