@@ -7,6 +7,7 @@ use App\Enums\MobileMoneyOperator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class JekoSubMerchant extends Model
 {
@@ -21,7 +22,6 @@ class JekoSubMerchant extends Model
         'jeko_merchant_id',
         'jeko_store_id',
         'jeko_wallet_id',
-        'jeko_api_key',
         'approved_by',
         'approved_at',
         'rejected_reason',
@@ -79,6 +79,10 @@ class JekoSubMerchant extends Model
         try {
             return Crypt::decryptString($this->jeko_api_key);
         } catch (\Exception $e) {
+            Log::channel('payments')->error(
+                'JekoSubMerchant: failed to decrypt jeko_api_key',
+                ['id' => $this->id, 'exception' => $e->getMessage()]
+            );
             return null;
         }
     }
