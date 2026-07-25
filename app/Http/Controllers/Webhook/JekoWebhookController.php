@@ -79,14 +79,10 @@ class JekoWebhookController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if (
-                    $subscription
-                    && $subscription->status !== \App\Enums\SubscriptionStatus::ACTIVE
-                    && $subscription->status !== \App\Enums\SubscriptionStatus::TRIAL
-                ) {
+                if ($subscription && $subscription->status !== \App\Enums\SubscriptionStatus::ACTIVE) {
                     $subscription->convertToPaid([
-                        'payment_method'    => 'jeko',
-                        'payment_reference' => $paymentId,
+                        'method'    => 'jeko',
+                        'reference' => $paymentId,
                     ]);
 
                     $restaurant = $subscription->restaurant;
@@ -111,6 +107,11 @@ class JekoWebhookController extends Controller
     {
         $paymentId = $payload['payment_id'] ?? $payload['id'] ?? null;
         $clientReference = $payload['reference_client'] ?? $payload['client_reference'] ?? '';
+
+        if (!$paymentId && !$clientReference) {
+            Log::channel('payments')->warning('Jeko webhook payment.failed: no identifier in payload');
+            return;
+        }
 
         DB::transaction(function () use ($paymentId, $clientReference) {
             $order = Order::where('payment_reference', $paymentId)
