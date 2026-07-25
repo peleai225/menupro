@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\CommandoAgent;
+use App\Models\JekoSubMerchant;
 use App\Models\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -253,6 +254,16 @@ class Restaurant extends Model
     public function waiters(): HasMany
     {
         return $this->hasMany(Waiter::class)->orderBy('name');
+    }
+
+    public function jekoSubMerchant(): HasOne
+    {
+        return $this->hasOne(JekoSubMerchant::class);
+    }
+
+    public function hasJekoIntegrated(): bool
+    {
+        return $this->jekoSubMerchant?->isIntegrated() ?? false;
     }
 
     // =========================================================================
