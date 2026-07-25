@@ -40,10 +40,12 @@ interface PaymentGatewayInterface
      *
      * @param string $recipient Numéro mobile ou identifiant bénéficiaire
      * @param int $amount Montant en centimes
-     * @param string $reference Référence unique de la transaction
+     * @param string $recipientName Nom du bénéficiaire (optionnel)
+     * @param string $reason Raison du paiement (optionnel)
+     * @param string $reference Référence unique de la transaction (optionnel)
      * @return array ['success' => bool, 'transfer_id' => string, 'status' => string, 'error' => string]
      */
-    public function payout(string $recipient, int $amount, string $reference): array;
+    public function payout(string $recipient, int $amount, string $recipientName = '', string $reason = '', string $reference = ''): array;
 
     /**
      * Vérifie la signature HMAC d'un webhook.
