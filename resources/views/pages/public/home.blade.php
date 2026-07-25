@@ -690,23 +690,27 @@
                     </a>
                 </div>
 
-                {{-- Business --}}
-                <div class="bg-white rounded-2xl p-7 border border-neutral-200 hover:border-amber-300 hover:shadow-lg transition-all duration-300">
-                    <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-3">Business</div>
-                    <div class="flex items-baseline gap-1 mb-2">
-                        <span class="text-4xl font-bold text-neutral-900">45 000</span>
-                        <span class="text-neutral-500 text-sm">F/mois</span>
+                {{-- GOLD (Premium) --}}
+                <div class="bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-50 rounded-2xl p-7 border-2 border-amber-400 shadow-xl shadow-amber-200/50 relative hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 text-neutral-900 text-xs font-bold px-4 py-1 rounded-full flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Premium
                     </div>
-                    <p class="text-sm text-neutral-500 mb-6">Tout illimite pour les grands restaurants</p>
+                    <div class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-3">Gold</div>
+                    <div class="flex items-baseline gap-1 mb-2">
+                        <span class="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">85 000</span>
+                        <span class="text-amber-700 text-sm">F/mois</span>
+                    </div>
+                    <p class="text-sm text-amber-900/70 mb-6">Multi-espaces pour complexes VIP & hotels</p>
                     <ul class="space-y-3 mb-8">
-                        @foreach(['Plats et commandes illimites', '10 employes', 'Support prioritaire (2h)', 'Domaine personnalise', 'Multi-restaurant'] as $f)
-                        <li class="flex items-center gap-2.5 text-sm text-neutral-700">
-                            <svg class="w-4.5 h-4.5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        @foreach(['Multi-espaces illimites', 'Serveurs avec PIN dedie', 'Rapports par espace', 'QR chambres hotel', 'Formation personnalisee'] as $f)
+                        <li class="flex items-center gap-2.5 text-sm text-amber-900">
+                            <svg class="w-4.5 h-4.5 text-amber-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             {{ $f }}
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}?plan=business" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-all">
+                    <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-600 text-white hover:from-amber-600 hover:to-yellow-700 shadow-lg shadow-amber-500/30 transition-all">
                         Essai gratuit 7j
                     </a>
                 </div>

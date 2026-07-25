@@ -91,8 +91,8 @@
                 </div>
             </div>
 
-            <!-- Plans Grid - 3 columns -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+            <!-- Plans Grid - 4 columns -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 max-w-[90rem] mx-auto">
 
                 <!-- ESSENTIEL PLAN -->
                 <div class="relative group">
@@ -303,6 +303,85 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- GOLD PLAN (Premium) -->
+                <div class="relative group">
+                    <!-- Premium badge -->
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                        <div class="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-neutral-900 px-5 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-amber-500/40 flex items-center gap-1.5 whitespace-nowrap">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            PREMIUM
+                        </div>
+                    </div>
+
+                    <!-- Gold glow effect -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 rounded-3xl opacity-30 blur-xl group-hover:opacity-40 transition-opacity"></div>
+
+                    <div class="relative h-full bg-gradient-to-br from-amber-950 via-neutral-900 to-amber-950 rounded-3xl p-6 sm:p-8 border-2 border-amber-500/60 shadow-2xl shadow-amber-500/20 flex flex-col">
+                        <!-- Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 border border-amber-400/40 rounded-full text-xs font-semibold text-amber-300 mb-4 self-start">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                            </svg>
+                            Complexes VIP & Hotels
+                        </div>
+
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent mb-1">Gold</h3>
+                        <p class="text-sm text-amber-200/80 mb-6">Multi-espaces, serveurs dedies, rapports avances. Pour les complexes qui exigent le meilleur.</p>
+
+                        <!-- Price -->
+                        <div class="mb-6 pb-6 border-b border-amber-900/50">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent" x-text="formatPrice(goldPrice)"></span>
+                                <span class="text-amber-400/60 text-sm">F</span>
+                            </div>
+                            <div class="text-xs text-amber-400/70 mt-2">
+                                <span x-text="cycleLabel"></span>
+                                <template x-if="billingCycle !== 'monthly'">
+                                    <span class="text-amber-300 block mt-1">soit <span x-text="formatPrice(Math.round(goldPrice / getMonths()))"></span> F/mois</span>
+                                </template>
+                            </div>
+                            <template x-if="billingCycle !== 'monthly'">
+                                <div class="mt-2 text-xs text-amber-300 font-medium">
+                                    Vous economisez <span x-text="formatPrice(85000 * getMonths() - goldPrice)"></span> F
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- CTA -->
+                        <a :href="'{{ route('register') }}?plan=gold&cycle=' + billingCycle"
+                           class="flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 hover:from-amber-500 hover:via-yellow-600 hover:to-amber-500 text-neutral-900 transition-all shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 hover:scale-[1.02] mb-6">
+                            Essayer 7 jours gratuit
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+
+                        <!-- Features -->
+                        <p class="text-xs font-bold text-amber-300 uppercase tracking-wider mb-3">Tout Business, plus</p>
+                        <ul class="space-y-2.5 flex-1">
+                            @foreach([
+                                'Multi-espaces illimites',
+                                'Serveurs avec PIN dedie',
+                                'Stock par espace',
+                                'Rapports par espace',
+                                'Rapports par serveur',
+                                'Alertes temps reel',
+                                'Interface tablette serveur',
+                                'QR chambres hotel',
+                                'Gestion terrasses/VIP',
+                                'Formation personnalisee',
+                            ] as $f)
+                                <li class="flex items-start gap-2.5 text-sm text-amber-100">
+                                    <svg class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>{{ $f }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- Annual savings highlight -->
@@ -329,7 +408,7 @@
 
     <!-- Comparison Table -->
     <section class="py-20 bg-neutral-900 border-t border-neutral-800">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mb-3">Comparaison detaillee</h2>
                 <p class="text-neutral-400">Tout ce que contient chaque plan, en un coup d'oeil</p>
@@ -337,60 +416,66 @@
 
             <div class="bg-neutral-950 rounded-2xl border border-neutral-800 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[600px]">
+                    <table class="w-full min-w-[800px]">
                         <thead>
                             <tr class="border-b border-neutral-800">
                                 <th class="text-left py-4 px-6 text-sm font-semibold text-neutral-400">Fonctionnalite</th>
                                 <th class="text-center py-4 px-4 text-sm font-bold text-white">Essentiel</th>
                                 <th class="text-center py-4 px-4 text-sm font-bold text-primary-400">Pro</th>
                                 <th class="text-center py-4 px-4 text-sm font-bold text-amber-400">Business</th>
+                                <th class="text-center py-4 px-4 text-sm font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">Gold</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php
                                 $compareCategories = [
                                     'Limites' => [
-                                        ['Plats', '25', '80', 'Illimite'],
-                                        ['Categories', '8', '20', 'Illimite'],
-                                        ['Comptes employes', '1', '3', '10'],
-                                        ['Commandes / mois', '200', '1 000', 'Illimite'],
+                                        ['Plats', '25', '80', 'Illimite', 'Illimite'],
+                                        ['Categories', '8', '20', 'Illimite', 'Illimite'],
+                                        ['Comptes employes', '1', '3', '10', 'Illimite'],
+                                        ['Commandes / mois', '200', '1 000', 'Illimite', 'Illimite'],
                                     ],
                                     'Menu & commandes' => [
-                                        ['Page publique + QR codes', true, true, true],
-                                        ['Suivi temps reel', true, true, true],
-                                        ['Paiement Mobile Money', true, true, true],
-                                        ['Promotions & plats du jour', true, true, true],
-                                        ['Cuisine (KDS)', true, true, true],
+                                        ['Page publique + QR codes', true, true, true, true],
+                                        ['Suivi temps reel', true, true, true, true],
+                                        ['Paiement Mobile Money', true, true, true, true],
+                                        ['Promotions & plats du jour', true, true, true, true],
+                                        ['Cuisine (KDS)', true, true, true, true],
                                     ],
                                     'Gestion' => [
-                                        ['Gestion de stock', false, true, true],
-                                        ['Alertes stock', false, true, true],
-                                        ['Livraison integree', false, true, true],
-                                        ['Base clients', false, true, true],
-                                        ['Multi-restaurant', false, false, true],
+                                        ['Gestion de stock', false, true, true, true],
+                                        ['Alertes stock', false, true, true, true],
+                                        ['Livraison integree', false, true, true, true],
+                                        ['Base clients', false, true, true, true],
+                                        ['Multi-restaurant', false, false, true, true],
+                                        ['Multi-espaces', false, false, false, true],
+                                        ['Serveurs avec PIN', false, false, false, true],
                                     ],
                                     'Analyse & export' => [
-                                        ['Statistiques basiques', true, true, true],
-                                        ['Analytics avances', false, true, true],
-                                        ['Portefeuille & retraits', true, true, true],
-                                        ['Export Excel/PDF', false, true, true],
+                                        ['Statistiques basiques', true, true, true, true],
+                                        ['Analytics avances', false, true, true, true],
+                                        ['Portefeuille & retraits', true, true, true, true],
+                                        ['Export Excel/PDF', false, true, true, true],
+                                        ['Rapports par espace', false, false, false, true],
+                                        ['Rapports par serveur', false, false, false, true],
                                     ],
                                     'Support' => [
-                                        ['Support WhatsApp', true, true, true],
-                                        ['Support prioritaire (2h)', false, false, true],
-                                        ['Domaine personnalise', false, false, true],
-                                        ['Accompagnement dedie', false, false, true],
+                                        ['Support WhatsApp', true, true, true, true],
+                                        ['Support prioritaire (2h)', false, false, true, true],
+                                        ['Domaine personnalise', false, false, true, true],
+                                        ['Accompagnement dedie', false, false, true, true],
+                                        ['Formation personnalisee', false, false, false, true],
                                     ],
                                 ];
                             @endphp
                             @foreach($compareCategories as $catName => $items)
                                 <tr class="bg-neutral-900/50">
-                                    <td colspan="4" class="py-2.5 px-6 text-xs font-bold text-primary-400 uppercase tracking-wider">{{ $catName }}</td>
+                                    <td colspan="5" class="py-2.5 px-6 text-xs font-bold text-primary-400 uppercase tracking-wider">{{ $catName }}</td>
                                 </tr>
                                 @foreach($items as $item)
                                     <tr class="border-t border-neutral-800/50 hover:bg-neutral-900/30 transition-colors">
                                         <td class="py-3 px-6 text-sm text-neutral-300">{{ $item[0] }}</td>
-                                        @foreach([$item[1], $item[2], $item[3]] as $val)
+                                        @foreach([$item[1], $item[2], $item[3], $item[4]] as $val)
                                         <td class="py-3 px-4 text-center">
                                             @if(is_bool($val))
                                                 @if($val)
@@ -519,6 +604,7 @@
                     essentiel: 15000,
                     pro: 25000,
                     business: 45000,
+                    gold: 85000,
                 },
 
                 init() {
@@ -550,6 +636,10 @@
 
                 get businessPrice() {
                     return this.computePrice(this.basePrices.business);
+                },
+
+                get goldPrice() {
+                    return this.computePrice(this.basePrices.gold);
                 },
 
                 get cycleLabel() {

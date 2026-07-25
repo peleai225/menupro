@@ -46,9 +46,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Champs protégés contre le mass-assignment.
-     * `role` et `restaurant_id` doivent être assignés explicitement ($user->role = ...).
+     * `role`, `restaurant_id` et `locked_space_id` doivent être assignés explicitement.
      */
-    protected $guarded = ['role', 'restaurant_id'];
+    protected $guarded = ['role', 'restaurant_id', 'locked_space_id'];
 
     protected $hidden = [
         'password',
@@ -76,6 +76,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function lockedSpace(): BelongsTo
+    {
+        return $this->belongsTo(RestaurantSpace::class, 'locked_space_id');
     }
 
     public function activityLogs(): HasMany

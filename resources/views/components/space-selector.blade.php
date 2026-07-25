@@ -1,6 +1,9 @@
 {{-- resources/views/components/space-selector.blade.php --}}
-@php $activeSpaces = ($restaurant ?? null)?->hasMultiSpaces() ? $restaurant->spaces()->active()->get() : collect() @endphp
-@if($activeSpaces->isNotEmpty())
+@php
+    $activeSpaces = ($restaurant ?? null)?->hasMultiSpaces() ? $restaurant->spaces()->active()->get() : collect();
+    $isLocked = $isSpaceLocked ?? false;
+@endphp
+@if($activeSpaces->isNotEmpty() && !$isLocked)
 <div x-data="{ open: false }" class="relative">
     <button @click="open = !open"
         class="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:border-neutral-300 transition shadow-sm">
