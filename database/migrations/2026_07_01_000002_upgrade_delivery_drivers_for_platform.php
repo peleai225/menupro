@@ -13,6 +13,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
 
             // Le livreur n'appartient plus à UN restaurant — il est sur la plateforme
+            // Drop the old index first (SQLite requires this before dropping the column)
+            $table->dropIndex(['restaurant_id', 'is_active', 'is_available']);
             $table->dropForeign(['restaurant_id']);
             $table->dropColumn('restaurant_id');
 
