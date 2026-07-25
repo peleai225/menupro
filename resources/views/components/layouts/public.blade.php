@@ -217,6 +217,58 @@
         </a>
     @endif
 
+    <!-- Bottom Navigation Mobile (PWA) - Toujours visible sur mobile -->
+    @guest
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-primary-500 shadow-2xl z-[9999]">
+        <div class="flex items-center justify-around px-2 py-3">
+            {{-- Accueil --}}
+            <a href="{{ route('home') }}"
+               class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-500' }} hover:text-primary-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-[10px] font-medium">Accueil</span>
+            </a>
+
+            {{-- Fonctionnalités --}}
+            <a href="{{ route('home') }}#features"
+               class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl text-neutral-500 hover:text-primary-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+                <span class="text-[10px] font-medium">Features</span>
+            </a>
+
+            {{-- Tarifs --}}
+            <a href="{{ route('pricing') }}"
+               class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-500' }} hover:text-primary-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                <span class="text-[10px] font-medium">Tarifs</span>
+            </a>
+
+            {{-- Contact --}}
+            <a href="{{ route('contact') }}"
+               class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-500' }} hover:text-primary-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span class="text-[10px] font-medium">Contact</span>
+            </a>
+
+            {{-- Démarrer (CTA principal) --}}
+            <a href="{{ route('register') }}"
+               class="flex flex-col items-center gap-1 px-3 py-1 rounded-xl bg-primary-500 text-white shadow-md shadow-primary-500/30 hover:bg-primary-600 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span class="text-[10px] font-bold">Démarrer</span>
+            </a>
+        </div>
+    </nav>
+    @endguest
+
     <!-- Footer -->
     <footer class="bg-neutral-900 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
