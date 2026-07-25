@@ -22,37 +22,48 @@ class Waiters extends Component
             ? 'nullable|digits:4'
             : 'required|digits:4|same:pinConfirm';
 
+        $restaurantId = $this->restaurant?->id;
+
         return [
             'name'       => 'required|string|max:80',
             'pin'        => $pinRule,
             'pinConfirm' => 'nullable|digits:4',
-            'spaceId'    => ['nullable', Rule::exists('restaurant_spaces', 'id')->where('restaurant_id', $this->restaurant->id)],
+            'spaceId'    => ['nullable', Rule::exists('restaurant_spaces', 'id')->where('restaurant_id', $restaurantId)],
             'isActive'   => 'boolean',
         ];
     }
 
     public function getRestaurantProperty()
     {
-        return Auth::user()->restaurant;
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Non authentifié.');
+        }
+
+        return $user->restaurant;
     }
 
     public function getWaitersProperty()
     {
-        return $this->restaurant->waiters()->with('space')->get();
+        return $this->restaurant?->waiters()->with('space')->get() ?? collect();
     }
 
     public function getSpacesProperty()
     {
-        return $this->restaurant->spaces()->active()->get();
+        return $this->restaurant?->spaces()->active()->get() ?? collect();
     }
 
     public function save(): void
     {
+        $restaurant = $this->restaurant;
+        abort_unless($restaurant, 403);
+
         $this->validate();
 
         if ($this->editingId) {
             $waiter = Waiter::where('id', $this->editingId)
-                ->where('restaurant_id', $this->restaurant->id)
+                ->where('restaurant_id', $restaurant->id)
                 ->firstOrFail();
 
             $waiter->name      = $this->name;
@@ -67,7 +78,7 @@ class Waiters extends Component
             session()->flash('success', 'Serveur mis à jour.');
         } else {
             $waiter = new Waiter([
-                'restaurant_id' => $this->restaurant->id,
+                'restaurant_id' => $restaurant->id,
                 'space_id'      => $this->spaceId,
                 'name'          => $this->name,
                 'is_active'     => $this->isActive,
@@ -84,6 +95,8 @@ class Waiters extends Component
 
     public function edit(int $id): void
     {
+        abort_unless($this->restaurant, 403);
+
         $waiter = Waiter::where('id', $id)
             ->where('restaurant_id', $this->restaurant->id)
             ->firstOrFail();
@@ -98,6 +111,8 @@ class Waiters extends Component
 
     public function delete(int $id): void
     {
+        abort_unless($this->restaurant, 403);
+
         Waiter::where('id', $id)
             ->where('restaurant_id', $this->restaurant->id)
             ->delete();

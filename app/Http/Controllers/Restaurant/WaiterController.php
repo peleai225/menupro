@@ -15,7 +15,13 @@ class WaiterController extends Controller
 {
     public function generateToken(): \Illuminate\Http\RedirectResponse
     {
-        $restaurant = auth()->user()->restaurant;
+        $restaurant = auth()->user()?->restaurant;
+
+        if (!$restaurant) {
+            return redirect()->route('restaurant.waiters')
+                ->with('error', 'Restaurant non trouvé.');
+        }
+
         $restaurant->waiter_token = Str::random(32);
         $restaurant->save();
 
