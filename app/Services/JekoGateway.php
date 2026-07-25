@@ -197,7 +197,12 @@ class JekoGateway implements PaymentGatewayInterface
             return ['success' => false, 'error' => 'Montant trop faible (min 100 FCFA)'];
         }
 
+        if (empty($reference)) {
+            throw new \InvalidArgumentException('payout() reference must not be empty — it is the idempotency key');
+        }
+
         $amountFcfa = (int) ($amount / 100);
+        $raison = $reason ?: 'Reversement commande MenuPro';
 
         $contact = $this->createContact($recipient);
 
@@ -205,10 +210,6 @@ class JekoGateway implements PaymentGatewayInterface
             return $contact;
         }
 
-        $raison = $reason ?: 'Reversement commande MenuPro';
-        if (empty($reference)) {
-            throw new \InvalidArgumentException('payout() reference must not be empty — it is the idempotency key');
-        }
         $refClient = $reference;
 
         try {

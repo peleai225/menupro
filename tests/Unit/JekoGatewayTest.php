@@ -144,9 +144,13 @@ class JekoGatewayTest extends TestCase
         $gateway = new JekoGateway();
         $gateway->forPlatform();
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('idempotency key');
-        $gateway->payout('22500000001', 10000, '', '', '');
+        try {
+            $gateway->payout('22500000001', 10000, '', '', '');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('idempotency key', $e->getMessage());
+            Http::assertNothingSent();
+        }
     }
 
     public function test_payout_succeeds_when_api_returns_ok(): void
