@@ -132,7 +132,7 @@ class JekoGatewayTest extends TestCase
         $gateway = new JekoGateway();
         $gateway->forPlatform();
 
-        $result = $gateway->payout('+22507000000', 50);
+        $result = $gateway->payout('+22507000000', 0);
 
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('trop faible', $result['error']);

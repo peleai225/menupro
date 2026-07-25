@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Webhooks;
+namespace App\Http\Controllers\Webhook;
 
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
@@ -85,9 +85,18 @@ class JekoWebhookController extends Controller
                     && $subscription->status !== \App\Enums\SubscriptionStatus::TRIAL
                 ) {
                     $subscription->convertToPaid([
-                        'method'    => 'jeko',
-                        'reference' => $paymentId,
+                        'payment_method'    => 'jeko',
+                        'payment_reference' => $paymentId,
                     ]);
+
+                    $restaurant = $subscription->restaurant;
+                    if ($restaurant) {
+                        $restaurant->update([
+                            'current_plan_id'      => $subscription->plan_id,
+                            'subscription_ends_at' => $subscription->ends_at,
+                            'orders_blocked'       => false,
+                        ]);
+                    }
                 }
             }
         });
@@ -98,22 +107,25 @@ class JekoWebhookController extends Controller
         ]);
     }
 
-    protected function handlePaymentFailed(array $payload): void
+    private function handlePaymentFailed(array $payload): void
     {
         $paymentId = $payload['payment_id'] ?? $payload['id'] ?? null;
         $clientReference = $payload['reference_client'] ?? $payload['client_reference'] ?? '';
 
-        $order = $this->findOrder($paymentId, $clientReference);
+        DB::transaction(function () use ($paymentId, $clientReference) {
+            $order = Order::where('payment_reference', $paymentId)
+                ->orWhere('payment_reference', $clientReference)
+                ->lockForUpdate()
+                ->first();
 
-        if ($order && $order->payment_status === PaymentStatus::PENDING) {
-            Order::withoutGlobalScope('restaurant')
-                ->where('id', $order->id)
-                ->update(['payment_status' => PaymentStatus::FAILED]);
-        }
+            if ($order && $order->payment_status === PaymentStatus::PENDING) {
+                $order->update(['payment_status' => PaymentStatus::FAILED]);
+            }
+        });
 
         Log::channel('payments')->warning('Jeko webhook payment.failed', [
             'payment_id' => $paymentId,
-            'reference'  => $clientReference,
+            'reference' => $clientReference,
         ]);
     }
 

@@ -88,8 +88,7 @@ class JekoGateway implements PaymentGatewayInterface
             return ['success' => false, 'error' => 'Jeko API key not configured'];
         }
 
-        $amount = $entity instanceof Order ? $entity->total : $entity->amount_paid;
-        $amountFcfa = (int) ($amount / 100);
+        $amountFcfa = (int) ($entity instanceof Order ? $entity->total : $entity->amount_paid);
 
         $reference = $entity instanceof Order
             ? "ORDER-{$entity->id}-{$entity->reference}"
@@ -193,15 +192,15 @@ class JekoGateway implements PaymentGatewayInterface
             return ['success' => false, 'error' => 'Jeko API key not configured'];
         }
 
-        if ($amount < 100) {
-            return ['success' => false, 'error' => 'Montant trop faible (min 100 FCFA)'];
+        if ($amount < 1) {
+            return ['success' => false, 'error' => 'Montant trop faible (min 1 FCFA)'];
         }
 
         if (empty($reference)) {
             throw new \InvalidArgumentException('payout() reference must not be empty — it is the idempotency key');
         }
 
-        $amountFcfa = (int) ($amount / 100);
+        $amountFcfa = (int) $amount;
         $raison = $reason ?: 'Reversement commande MenuPro';
 
         $contact = $this->createContact($recipient);
