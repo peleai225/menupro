@@ -24,7 +24,7 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('home') }}#features" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group">
+                    <a href="{{ route('home') }}#how-it-works" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group">
                         Fonctionnalités
                         <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-200 rounded-full"></span>
                     </a>
@@ -93,7 +93,7 @@
              class="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-neutral-200 shadow-lg"
              x-cloak>
             <div class="px-4 py-6 space-y-4">
-                <a href="{{ route('home') }}#features" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
+                <a href="{{ route('home') }}#how-it-works" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
                     Fonctionnalités
                 </a>
                 <a href="{{ route('pricing') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
@@ -234,7 +234,7 @@
             </a>
 
             {{-- Fonctionnalités --}}
-            <a href="{{ route('home') }}#features"
+            <a href="{{ route('home') }}#how-it-works"
                class="flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
@@ -343,7 +343,7 @@
                 <div>
                     <h4 class="font-bold text-lg mb-6">Produit</h4>
                     <ul class="space-y-4">
-                        <li><a href="{{ route('home') }}#features" class="text-neutral-400 hover:text-primary-400 transition-colors">Fonctionnalités</a></li>
+                        <li><a href="{{ route('home') }}#how-it-works" class="text-neutral-400 hover:text-primary-400 transition-colors">Fonctionnalités</a></li>
                         <li><a href="{{ route('pricing') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Tarifs</a></li>
                         <li><a href="{{ route('commando.register.step1') }}" class="text-neutral-400 hover:text-orange-400 transition-colors">Devenir agent Commando</a></li>
                         <li><a href="{{ route('contact') }}?type=demo" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
