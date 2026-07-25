@@ -24,7 +24,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index('gateway');
             $table->index('is_active');
         });
     }

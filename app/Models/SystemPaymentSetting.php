@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class SystemPaymentSetting extends Model
 {
@@ -34,6 +35,10 @@ class SystemPaymentSetting extends Model
         try {
             return Crypt::decryptString($this->api_key);
         } catch (\Exception $e) {
+            Log::channel('payments')->error('Failed to decrypt api_key', [
+                'gateway' => $this->gateway,
+                'exception' => $e->getMessage(),
+            ]);
             return null;
         }
     }
@@ -58,6 +63,10 @@ class SystemPaymentSetting extends Model
         try {
             return Crypt::decryptString($this->webhook_secret);
         } catch (\Exception $e) {
+            Log::channel('payments')->error('Failed to decrypt webhook_secret', [
+                'gateway' => $this->gateway,
+                'exception' => $e->getMessage(),
+            ]);
             return null;
         }
     }
