@@ -3,11 +3,15 @@
 namespace Tests\Unit;
 
 use App\Enums\PaymentGateway;
+use App\Services\JekoGateway;
 use App\Services\PaymentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PaymentServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_gateway_throws_for_unknown_gateway()
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -48,12 +52,11 @@ class PaymentServiceTest extends TestCase
         $this->assertFalse(PaymentGateway::CASH->supportsOnlinePayment());
     }
 
-    public function test_payment_service_throws_for_jeko_not_implemented()
+    public function test_payment_service_returns_jeko_gateway_instance()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Jeko pas encore implémenté');
+        $gateway = PaymentService::gateway('jeko');
 
-        PaymentService::gateway('jeko');
+        $this->assertInstanceOf(JekoGateway::class, $gateway);
     }
 
     public function test_payment_service_throws_for_cinetpay_not_implemented()

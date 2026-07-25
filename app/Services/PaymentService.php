@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\PaymentGatewayInterface;
 use App\Enums\PaymentGateway;
 use InvalidArgumentException;
+use App\Services\JekoGateway;
 
 class PaymentService
 {
@@ -23,7 +24,7 @@ class PaymentService
 
         return match($gateway) {
             PaymentGateway::WAVE => throw new InvalidArgumentException('WaveGateway pas encore adapté à l\'interface. Utilisez JekoGateway.'),
-            PaymentGateway::JEKO => throw new InvalidArgumentException('Jeko pas encore implémenté'),
+            PaymentGateway::JEKO => (new JekoGateway())->forPlatform(),
             PaymentGateway::CINETPAY => throw new InvalidArgumentException('CinetPay pas encore implémenté'),
             PaymentGateway::CASH => throw new InvalidArgumentException('Cash ne supporte pas les paiements en ligne'),
         };
