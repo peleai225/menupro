@@ -42,13 +42,21 @@ self.addEventListener('install', (event) => {
 /* ─── Activation (nettoyage anciens caches) ────────────────────────────────── */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key.startsWith('menupro-') && key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
-          .map((key) => caches.delete(key))
+    caches.keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith('menupro-') && key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+            .map((key) => caches.delete(key))
+        )
       )
-    ).then(() => self.clients.claim())
+      .then(() => {
+        // Claim seulement après activation complète
+        return self.clients.claim().catch(() => {
+          // Ignore l'erreur si le SW n'est pas encore actif
+          console.log('SW will claim clients on next activation');
+        });
+      })
   );
 });
 
