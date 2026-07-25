@@ -42,7 +42,7 @@ interface PaymentGatewayInterface
      * @param int $amount Montant en centimes
      * @param string $recipientName Nom du bénéficiaire (optionnel)
      * @param string $reason Raison du paiement (optionnel)
-     * @param string $reference Référence unique de la transaction (optionnel)
+     * @param string $reference Référence unique — NE PAS laisser vide : sert de clé d'idempotence
      * @return array ['success' => bool, 'transfer_id' => string, 'status' => string, 'error' => string]
      */
     public function payout(string $recipient, int $amount, string $recipientName = '', string $reason = '', string $reference = ''): array;

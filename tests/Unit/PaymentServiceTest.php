@@ -2,10 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Contracts\PaymentGatewayInterface;
 use App\Enums\PaymentGateway;
 use App\Services\PaymentService;
-use App\Services\WaveGateway;
 use Tests\TestCase;
 
 class PaymentServiceTest extends TestCase
