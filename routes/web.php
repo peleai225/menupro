@@ -310,8 +310,12 @@ Route::prefix('dashboard')
         });
 
         // Jeko Onboarding
-        Route::get('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'show'])->name('jeko.onboarding');
-        Route::post('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'submit'])->name('jeko.submit');
+        Route::get('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'show'])
+            ->name('jeko.onboarding')
+            ->middleware('restaurant.admin');
+        Route::post('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'submit'])
+            ->name('jeko.submit')
+            ->middleware('restaurant.admin');
     });
 
 /*

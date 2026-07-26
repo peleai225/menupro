@@ -55,6 +55,10 @@ class OnboardingRequestTest extends TestCase
     {
         Notification::fake();
 
+        $superAdmin = User::factory()->create([
+            'role' => UserRole::SUPER_ADMIN,
+        ]);
+
         $user = $this->createRestaurantAdmin();
 
         $response = $this->actingAs($user)->post('/dashboard/jeko', $this->validPayload());
@@ -69,6 +73,8 @@ class OnboardingRequestTest extends TestCase
             'mobile_money'          => '0707000000',
             'mobile_money_operator' => MobileMoneyOperator::ORANGE->value,
         ]);
+
+        Notification::assertSentTo($superAdmin, \App\Notifications\JekoOnboardingRequestNotification::class);
     }
 
     public function test_duplicate_request_is_rejected(): void

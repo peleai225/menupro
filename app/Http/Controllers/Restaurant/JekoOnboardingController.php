@@ -40,15 +40,19 @@ class JekoOnboardingController extends Controller
             'email'                 => ['nullable', 'email', 'max:255'],
         ]);
 
-        JekoSubMerchant::create([
-            'restaurant_id'         => $restaurant->id,
-            'status'                => JekoSubMerchantStatus::PENDING,
-            'legal_name'            => $validated['legal_name'],
-            'business_type'         => $validated['business_type'] ?? 'restaurant',
-            'mobile_money'          => $validated['mobile_money'],
-            'mobile_money_operator' => $validated['mobile_money_operator'],
-            'email'                 => $validated['email'] ?? $restaurant->email,
-        ]);
+        try {
+            JekoSubMerchant::create([
+                'restaurant_id'         => $restaurant->id,
+                'status'                => JekoSubMerchantStatus::PENDING,
+                'legal_name'            => $validated['legal_name'],
+                'business_type'         => $validated['business_type'] ?? 'restaurant',
+                'mobile_money'          => $validated['mobile_money'],
+                'mobile_money_operator' => $validated['mobile_money_operator'],
+                'email'                 => $validated['email'] ?? $restaurant->email,
+            ]);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException) {
+            return back()->with('error', 'Vous avez déjà soumis une demande d\'intégration Jeko.');
+        }
 
         // Notify all super admins
         User::superAdmins()->get()->each(
