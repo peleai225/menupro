@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\SuperAdmin;
 
 use App\Enums\JekoSubMerchantStatus;
 use App\Http\Controllers\Controller;
@@ -10,6 +10,7 @@ use App\Notifications\JekoIntegrationApprovedNotification;
 use App\Notifications\JekoIntegrationRejectedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class JekoSubMerchantController extends Controller
@@ -54,46 +55,58 @@ class JekoSubMerchantController extends Controller
 
     public function approve(Request $request, JekoSubMerchant $jekoSubMerchant): RedirectResponse
     {
-        if (!$jekoSubMerchant->isPending()) {
-            return back()->with('error', 'Cette demande ne peut pas être approuvée (statut actuel : ' . $jekoSubMerchant->status->label() . ').');
-        }
+        DB::transaction(function () use ($jekoSubMerchant) {
+            $fresh = JekoSubMerchant::lockForUpdate()->findOrFail($jekoSubMerchant->id);
 
-        $jekoSubMerchant->update([
-            'status'      => JekoSubMerchantStatus::APPROVED,
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-        ]);
+            if (!$fresh->isPending()) {
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                    back()->with('error', 'Cette demande n\'est plus en attente de validation.')
+                );
+            }
 
-        IntegrateJekoSubMerchantJob::dispatch($jekoSubMerchant);
+            $fresh->update([
+                'status'      => JekoSubMerchantStatus::APPROVED,
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
 
-        $restaurant = $jekoSubMerchant->restaurant;
-        if ($restaurant?->owner) {
-            $restaurant->owner->notify(new JekoIntegrationApprovedNotification($restaurant));
-        }
+            IntegrateJekoSubMerchantJob::dispatch($fresh);
+
+            $restaurant = $fresh->restaurant;
+            if ($restaurant && $restaurant->owner) {
+                $restaurant->owner->notify(new JekoIntegrationApprovedNotification($restaurant));
+            }
+        });
 
         return back()->with('success', 'Demande approuvée. L\'intégration Jeko est en cours.');
     }
 
     public function reject(Request $request, JekoSubMerchant $jekoSubMerchant): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'rejected_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        if (!$jekoSubMerchant->isPending()) {
-            return back()->with('error', 'Cette demande ne peut pas être rejetée (statut actuel : ' . $jekoSubMerchant->status->label() . ').');
-        }
+        DB::transaction(function () use ($jekoSubMerchant, $validated) {
+            $fresh = JekoSubMerchant::lockForUpdate()->findOrFail($jekoSubMerchant->id);
 
-        $jekoSubMerchant->update([
-            'status'          => JekoSubMerchantStatus::REJECTED,
-            'rejected_reason' => $request->input('rejected_reason'),
-        ]);
+            if (!$fresh->isPending()) {
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                    back()->with('error', 'Cette demande n\'est plus en attente de validation.')
+                );
+            }
 
-        $restaurant = $jekoSubMerchant->restaurant;
-        if ($restaurant?->owner) {
-            $restaurant->owner->notify(new JekoIntegrationRejectedNotification($restaurant, $request->input('rejected_reason')));
-        }
+            $fresh->update([
+                'status'          => JekoSubMerchantStatus::REJECTED,
+                'rejected_reason' => $validated['rejected_reason'],
+            ]);
 
-        return back()->with('success', 'Demande rejetée et restaurant notifié.');
+            $restaurant = $fresh->restaurant;
+            if ($restaurant && $restaurant->owner) {
+                $restaurant->owner->notify(new JekoIntegrationRejectedNotification($restaurant, $validated['rejected_reason']));
+            }
+        });
+
+        return back()->with('success', 'Demande rejetée. Le propriétaire a été notifié.');
     }
 }

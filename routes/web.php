@@ -483,10 +483,10 @@ Route::prefix('admin')
         Route::post('parametres/test-whatsapp', [SuperAdminDashboardController::class, 'testWhatsapp'])->name('settings.test-whatsapp');
 
         // Jeko Sub-Merchants
-        Route::get('jeko', [\App\Http\Controllers\Admin\JekoSubMerchantController::class, 'index'])->name('jeko.index');
-        Route::get('jeko/{jekoSubMerchant}', [\App\Http\Controllers\Admin\JekoSubMerchantController::class, 'show'])->name('jeko.show');
-        Route::post('jeko/{jekoSubMerchant}/approve', [\App\Http\Controllers\Admin\JekoSubMerchantController::class, 'approve'])->name('jeko.approve');
-        Route::post('jeko/{jekoSubMerchant}/reject', [\App\Http\Controllers\Admin\JekoSubMerchantController::class, 'reject'])->name('jeko.reject');
+        Route::get('jeko', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'index'])->name('jeko.index');
+        Route::get('jeko/{jekoSubMerchant}', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'show'])->name('jeko.show');
+        Route::post('jeko/{jekoSubMerchant}/approve', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'approve'])->name('jeko.approve');
+        Route::post('jeko/{jekoSubMerchant}/reject', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'reject'])->name('jeko.reject');
     });
 
 /*
