@@ -38,6 +38,13 @@ class IntegrateJekoSubMerchantJob implements ShouldQueue
         $result = $gateway->forPlatform()->integrateSubMerchant($this->subMerchant);
 
         if ($result['success']) {
+            if (empty($result['merchant_id'])) {
+                Log::channel('payments')->error('IntegrateJekoSubMerchantJob: success but no merchant_id returned', [
+                    'restaurant_id' => $this->subMerchant->restaurant_id,
+                ]);
+                throw new \RuntimeException('Jeko integration succeeded but returned no merchant_id — will retry');
+            }
+
             $this->subMerchant->update([
                 'status'               => JekoSubMerchantStatus::INTEGRATED,
                 'jeko_merchant_id'     => $result['merchant_id'],

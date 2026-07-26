@@ -136,4 +136,29 @@ class AdminApprovalTest extends TestCase
         $subMerchant->refresh();
         $this->assertEquals(JekoSubMerchantStatus::INTEGRATED, $subMerchant->status);
     }
+
+    public function test_cannot_reject_non_pending_request(): void
+    {
+        Queue::fake();
+        Notification::fake();
+
+        $superAdmin = $this->createSuperAdmin();
+        $subMerchant = $this->createPendingSubMerchant();
+
+        $subMerchant->update([
+            'status' => JekoSubMerchantStatus::INTEGRATED,
+            'jeko_merchant_id' => 'JEKO-123',
+        ]);
+
+        $response = $this->actingAs($superAdmin)
+            ->post("/admin/jeko/{$subMerchant->id}/reject", [
+                'rejected_reason' => 'Test reason.',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+
+        $subMerchant->refresh();
+        $this->assertEquals(JekoSubMerchantStatus::INTEGRATED, $subMerchant->status);
+    }
 }
