@@ -27,6 +27,12 @@ class ProcessJekoPayoutJob implements ShouldQueue
     public function handle(JekoGateway $gateway): void
     {
         $restaurant = $this->order->restaurant;
+
+        if (!$restaurant) {
+            Log::channel('payments')->warning('ProcessJekoPayoutJob: restaurant not found', ['order_id' => $this->order->id]);
+            return;
+        }
+
         $subMerchant = $restaurant->jekoSubMerchant;
 
         if (!$subMerchant || !$subMerchant->isIntegrated()) {
@@ -46,7 +52,15 @@ class ProcessJekoPayoutJob implements ShouldQueue
 
         $reference = 'PAYOUT-ORDER-' . $this->order->id . '-' . $this->order->payment_reference;
         $amount    = $this->order->total;
-        $phone     = $restaurant->mobile_money_number ?? $restaurant->phone;
+        $phone     = $subMerchant->mobile_money;
+
+        if (empty($phone)) {
+            Log::channel('payments')->error('ProcessJekoPayoutJob: no mobile_money number on JekoSubMerchant', [
+                'order_id' => $this->order->id,
+                'sub_merchant_id' => $subMerchant->id,
+            ]);
+            return;
+        }
 
         $result = $gateway->forMarketplace($restaurant)->payout(
             $phone,

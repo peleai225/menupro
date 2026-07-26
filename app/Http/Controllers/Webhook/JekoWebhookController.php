@@ -48,8 +48,9 @@ class JekoWebhookController extends Controller
     {
         $paymentId = $payload['payment_id'] ?? $payload['id'] ?? null;
         $clientReference = $payload['reference_client'] ?? $payload['client_reference'] ?? '';
+        $orderToPayout = null;
 
-        DB::transaction(function () use ($paymentId, $clientReference) {
+        DB::transaction(function () use ($paymentId, $clientReference, &$orderToPayout) {
             // ─── Order ────────────────────────────────────────────────────────
             $order = $this->findOrder($paymentId, $clientReference);
 
@@ -66,7 +67,7 @@ class JekoWebhookController extends Controller
                         'metadata'  => ['jeko_payment_id' => $paymentId],
                     ]);
 
-                    ProcessJekoPayoutJob::dispatch($order);
+                    $orderToPayout = $order;
                 }
             }
 
@@ -97,6 +98,10 @@ class JekoWebhookController extends Controller
             }
         });
 
+        if ($orderToPayout) {
+            ProcessJekoPayoutJob::dispatch($orderToPayout);
+        }
+
         Log::channel('payments')->info('Jeko webhook payment.success', [
             'payment_id' => $paymentId,
             'reference'  => $clientReference,
@@ -114,7 +119,8 @@ class JekoWebhookController extends Controller
         }
 
         DB::transaction(function () use ($paymentId, $clientReference) {
-            $order = Order::where('payment_reference', $paymentId)
+            $order = Order::withoutGlobalScope('restaurant')
+                ->where('payment_reference', $paymentId)
                 ->orWhere('payment_reference', $clientReference)
                 ->lockForUpdate()
                 ->first();
