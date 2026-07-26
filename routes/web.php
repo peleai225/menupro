@@ -308,6 +308,10 @@ Route::prefix('dashboard')
             Route::get('reservations/{reservation}', [\App\Http\Controllers\Restaurant\ReservationController::class, 'show'])->name('reservations.show');
             Route::patch('reservations/{reservation}/status', [\App\Http\Controllers\Restaurant\ReservationController::class, 'updateStatus'])->name('reservations.status');
         });
+
+        // Jeko Onboarding
+        Route::get('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'show'])->name('jeko.onboarding');
+        Route::post('jeko', [\App\Http\Controllers\Restaurant\JekoOnboardingController::class, 'submit'])->name('jeko.submit');
     });
 
 /*
