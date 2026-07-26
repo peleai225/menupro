@@ -75,6 +75,12 @@ class PaymentFlowTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure(['payment_url', 'session_id', 'order_id', 'amount', 'tracking_token']);
         $this->assertNotNull($response->json('payment_url'));
+
+        $this->assertDatabaseHas('payment_transactions', [
+            'order_id' => $order->id,
+            'gateway'  => 'wave',
+            'status'   => 'pending',
+        ]);
     }
 
     public function test_jeko_payment_initiation_creates_transaction(): void

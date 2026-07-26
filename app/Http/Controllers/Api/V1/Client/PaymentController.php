@@ -129,7 +129,7 @@ class PaymentController extends Controller
                 config('app.url') . '/api/v1/client/payment/error?token=' . $order->tracking_token,
             );
 
-            if (!$result['success']) {
+            if (!($result['success'] ?? false)) {
                 Log::channel('payments')->error('Jeko payment initiation failed', [
                     'order_id' => $order->id,
                     'error'    => $result['error'] ?? 'unknown',
