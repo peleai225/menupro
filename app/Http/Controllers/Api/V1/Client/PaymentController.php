@@ -68,24 +68,26 @@ class PaymentController extends Controller
 
             $checkoutId = $session['checkout_id'] ?? null;
 
-            $order->update([
-                'payment_reference' => $checkoutId,
-                'payment_metadata'  => $session,
-            ]);
+            DB::transaction(function () use ($order, $checkoutId, $session) {
+                $order->update([
+                    'payment_reference' => $checkoutId,
+                    'payment_metadata'  => $session,
+                ]);
 
-            PaymentTransaction::create([
-                'order_id'               => $order->id,
-                'restaurant_id'          => $order->restaurant_id,
-                'gateway'                => 'wave',
-                'gateway_transaction_id' => $checkoutId,
-                'wave_checkout_id'       => $checkoutId,
-                'amount'                 => $order->total,
-                'commission'             => 0,
-                'net_amount'             => $order->total,
-                'currency'               => 'XOF',
-                'status'                 => 'pending',
-                'client_reference'       => $order->reference,
-            ]);
+                PaymentTransaction::create([
+                    'order_id'               => $order->id,
+                    'restaurant_id'          => $order->restaurant_id,
+                    'gateway'                => 'wave',
+                    'gateway_transaction_id' => $checkoutId,
+                    'wave_checkout_id'       => $checkoutId,
+                    'amount'                 => $order->total,
+                    'commission'             => 0,
+                    'net_amount'             => $order->total,
+                    'currency'               => 'XOF',
+                    'status'                 => 'pending',
+                    'client_reference'       => $order->reference,
+                ]);
+            });
 
             return response()->json([
                 'payment_url'    => $session['wave_launch_url'] ?? null,
@@ -95,7 +97,7 @@ class PaymentController extends Controller
                 'tracking_token' => $order->tracking_token,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Wave payment initiation failed', [
+            Log::channel('payments')->error('Wave payment initiation failed', [
                 'order_id' => $order->id,
                 'error'    => $e->getMessage(),
             ]);
@@ -136,25 +138,27 @@ class PaymentController extends Controller
                 return response()->json(['message' => 'Impossible d\'initier le paiement Jeko. Réessayez.'], 500);
             }
 
-            $order->update([
-                'payment_reference' => $result['payment_id'],
-                'payment_metadata'  => $result,
-            ]);
+            DB::transaction(function () use ($order, $result) {
+                $order->update([
+                    'payment_reference' => $result['payment_id'],
+                    'payment_metadata'  => $result,
+                ]);
 
-            PaymentTransaction::create([
-                'order_id'               => $order->id,
-                'restaurant_id'          => $order->restaurant_id,
-                'gateway'                => 'jeko',
-                'gateway_transaction_id' => $result['payment_id'],
-                'jeko_payment_id'        => $result['payment_id'],
-                'jeko_reference'         => $order->reference,
-                'amount'                 => $order->total,
-                'commission'             => 0,
-                'net_amount'             => $order->total,
-                'currency'               => 'XOF',
-                'status'                 => 'pending',
-                'client_reference'       => $order->reference,
-            ]);
+                PaymentTransaction::create([
+                    'order_id'               => $order->id,
+                    'restaurant_id'          => $order->restaurant_id,
+                    'gateway'                => 'jeko',
+                    'gateway_transaction_id' => $result['payment_id'],
+                    'jeko_payment_id'        => $result['payment_id'],
+                    'jeko_reference'         => $order->reference,
+                    'amount'                 => $order->total,
+                    'commission'             => 0,
+                    'net_amount'             => $order->total,
+                    'currency'               => 'XOF',
+                    'status'                 => 'pending',
+                    'client_reference'       => $order->reference,
+                ]);
+            });
 
             return response()->json([
                 'payment_url'    => $result['payment_url'],
