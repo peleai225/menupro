@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhook;
 
 use App\Enums\PaymentStatus;
+use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessJekoPayoutJob;
 use App\Models\Order;
@@ -80,7 +81,7 @@ class JekoWebhookController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if ($subscription && $subscription->status !== \App\Enums\SubscriptionStatus::ACTIVE) {
+                if ($subscription && $subscription->status !== SubscriptionStatus::ACTIVE) {
                     $subscription->convertToPaid([
                         'method'    => 'jeko',
                         'reference' => $paymentId,
@@ -119,11 +120,20 @@ class JekoWebhookController extends Controller
         }
 
         DB::transaction(function () use ($paymentId, $clientReference) {
-            $order = Order::withoutGlobalScope('restaurant')
-                ->where('payment_reference', $paymentId)
-                ->orWhere('payment_reference', $clientReference)
-                ->lockForUpdate()
-                ->first();
+            $query = Order::withoutGlobalScope('restaurant')->lockForUpdate();
+
+            if ($paymentId && $clientReference) {
+                $query->where(function ($q) use ($paymentId, $clientReference) {
+                    $q->where('payment_reference', $paymentId)
+                      ->orWhere('payment_reference', $clientReference);
+                });
+            } elseif ($paymentId) {
+                $query->where('payment_reference', $paymentId);
+            } else {
+                $query->where('payment_reference', $clientReference);
+            }
+
+            $order = $query->first();
 
             if ($order && $order->payment_status === PaymentStatus::PENDING) {
                 $order->update(['payment_status' => PaymentStatus::FAILED]);
