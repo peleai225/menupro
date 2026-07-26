@@ -15,6 +15,8 @@ class PaymentTransaction extends Model
         'cinetpay_transaction_id',
         'wave_checkout_id',
         'wave_payment_id',
+        'jeko_payment_id',
+        'jeko_reference',
         'amount',
         'commission',
         'net_amount',
