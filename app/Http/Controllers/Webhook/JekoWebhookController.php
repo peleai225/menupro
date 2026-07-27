@@ -26,13 +26,8 @@ class JekoWebhookController extends Controller
         $valid = app(JekoGateway::class)->forMarketplacePlatform()->verifyWebhookSignature($rawPayload, $signature);
 
         if (!$valid) {
-            // Log le payload brut pour récupérer le bon secret depuis Jeko
-            Log::channel('payments')->warning('Jeko webhook: invalid signature — raw payload logged for debug', [
-                'signature_received' => $signature,
-                'payload'            => json_decode($rawPayload, true),
-            ]);
-            // TEMPORAIRE : on continue quand même pour ne pas bloquer les paiements
-            // À désactiver une fois le bon webhook_secret configuré
+            Log::channel('payments')->warning('Jeko webhook: invalid signature');
+            return response()->json(['error' => 'Invalid signature'], 401);
         }
 
         $payload = json_decode($rawPayload, true) ?? [];
@@ -42,12 +37,12 @@ class JekoWebhookController extends Controller
 
         $event = $payload['event'] ?? '';
 
-        // Jeko n'a qu'un seul event: transaction.completed
-        if ($event !== 'transaction.completed') {
+        // Jeko envoie soit {event, data} soit la transaction directement à la racine
+        if ($event !== 'transaction.completed' && empty($payload['transactionType'])) {
             return response()->json(['status' => 'ignored'], 200);
         }
 
-        // Le payload réel Jeko est à la racine, pas dans 'data'
+        // Le payload réel Jeko est à la racine ou dans 'data'
         $data            = isset($payload['data']) ? $payload['data'] : $payload;
         $status          = $data['status'] ?? '';
         $transactionType = $data['transactionType'] ?? '';
