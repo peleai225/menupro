@@ -78,10 +78,18 @@ class JekoSubMerchantController extends Controller
         });
 
         if ($fresh && $fresh->status === JekoSubMerchantStatus::APPROVED) {
-            IntegrateJekoSubMerchantJob::dispatch($fresh);
+            try {
+                IntegrateJekoSubMerchantJob::dispatchSync($fresh);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::channel('payments')->error('IntegrateJekoSubMerchantJob sync failed', [
+                    'sub_merchant_id' => $fresh->id,
+                    'error'           => $e->getMessage(),
+                ]);
+                return back()->with('error', 'Approuvé mais l\'intégration Jeko a échoué : ' . $e->getMessage());
+            }
         }
 
-        return back()->with('success', 'Demande approuvée. L\'intégration Jeko est en cours.');
+        return back()->with('success', 'Demande approuvée et intégration Jeko effectuée.');
     }
 
     public function reject(Request $request, JekoSubMerchant $jekoSubMerchant): RedirectResponse
