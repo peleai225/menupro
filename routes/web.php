@@ -488,6 +488,9 @@ Route::prefix('admin')
         Route::post('jeko/{jekoSubMerchant}/approve', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'approve'])->name('jeko.approve');
         Route::post('jeko/{jekoSubMerchant}/reject', [\App\Http\Controllers\SuperAdmin\JekoSubMerchantController::class, 'reject'])->name('jeko.reject');
 
+        // Jeko API Test
+        Route::get('jeko-test', [\App\Http\Controllers\SuperAdmin\JekoTestController::class, 'index'])->name('jeko.test');
+
         // Payment Settings
         Route::get('payment-settings', [\App\Http\Controllers\SuperAdmin\PaymentSettingsController::class, 'index'])->name('payment-settings.index');
         Route::put('payment-settings/{paymentSetting}', [\App\Http\Controllers\SuperAdmin\PaymentSettingsController::class, 'update'])->name('payment-settings.update');
