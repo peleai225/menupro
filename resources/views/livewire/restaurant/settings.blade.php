@@ -785,6 +785,72 @@
                     @endif
                 </div>
 
+                <!-- Jeko -->
+                @php $jeko = $restaurant->jekoSubMerchant; @endphp
+                <div class="border-t border-neutral-200 pt-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-neutral-900 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded text-white text-xs font-black" style="background:#F59E0B;">J</span>
+                                Jeko (Wave, Orange, MTN, Moov)
+                            </h3>
+                            <p class="text-sm text-neutral-500">Acceptez tous les Mobile Money via Jeko</p>
+                        </div>
+                        @if($jeko && $jeko->isIntegrated())
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Actif
+                            </span>
+                        @elseif($jeko && $jeko->isPending())
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-amber-100 text-amber-700">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                En attente de validation
+                            </span>
+                        @elseif($jeko && $jeko->isApproved())
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-700">
+                                Approuvé — intégration en cours
+                            </span>
+                        @elseif($jeko && $jeko->isRejected())
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-red-100 text-red-700">
+                                Refusé
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-neutral-100 text-neutral-500">
+                                Non configuré
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($jeko && $jeko->isIntegrated())
+                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
+                            Jeko est actif. Vos clients peuvent payer via Wave, Orange Money, MTN MoMo et Moov Money.
+                        </div>
+                    @elseif($jeko && $jeko->isRejected())
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 mb-3">
+                            Votre demande a été refusée.
+                            @if($jeko->rejected_reason)
+                                Motif : {{ $jeko->rejected_reason }}
+                            @endif
+                        </div>
+                        <a href="{{ route('restaurant.jeko.onboarding') }}"
+                           class="inline-flex items-center gap-2 btn btn-secondary text-sm">
+                            Soumettre une nouvelle demande
+                        </a>
+                    @elseif($jeko && ($jeko->isPending() || $jeko->isApproved()))
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                            Votre dossier est en cours de validation par l'équipe MenuPro. Vous serez notifié dès que Jeko sera activé.
+                        </div>
+                    @else
+                        <a href="{{ route('restaurant.jeko.onboarding') }}"
+                           class="inline-flex items-center gap-2 btn btn-secondary text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Activer Jeko
+                        </a>
+                    @endif
+                </div>
+
                 <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
