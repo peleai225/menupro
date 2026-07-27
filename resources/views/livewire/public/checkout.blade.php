@@ -398,11 +398,17 @@
                                         <div class="mt-2 px-1">
                                             <p class="text-xs text-neutral-500 mb-2">Choisissez votre opérateur :</p>
                                             <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                                                @foreach(['wave' => 'Wave', 'orange' => 'Orange Money', 'mtn' => 'MTN MoMo', 'moov' => 'Moov Money'] as $op => $label)
-                                                    <label class="flex flex-col items-center gap-1 p-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-medium
-                                                        {{ $jeko_operator === $op ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 hover:border-neutral-300 text-neutral-600' }}">
+                                                @foreach([
+                                                    'wave'   => ['label' => 'Wave',         'logo' => 'wave.png'],
+                                                    'orange' => ['label' => 'Orange Money',  'logo' => 'orange-money.png'],
+                                                    'mtn'    => ['label' => 'MTN MoMo',      'logo' => 'mtn-momo.png'],
+                                                    'moov'   => ['label' => 'Moov Money',    'logo' => 'moov-money.png'],
+                                                ] as $op => $info)
+                                                    <label class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all
+                                                        {{ $jeko_operator === $op ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
                                                         <input type="radio" wire:model="jeko_operator" value="{{ $op }}" class="sr-only">
-                                                        {{ $label }}
+                                                        <img src="{{ asset('images/payments/' . $info['logo']) }}" alt="{{ $info['label'] }}" class="h-8 w-auto object-contain">
+                                                        <span class="text-xs font-medium {{ $jeko_operator === $op ? 'text-primary-700' : 'text-neutral-600' }}">{{ $info['label'] }}</span>
                                                     </label>
                                                 @endforeach
                                             </div>
