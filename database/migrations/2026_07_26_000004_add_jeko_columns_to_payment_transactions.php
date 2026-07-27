@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('payment_transactions', function (Blueprint $table) {
-            $table->string('jeko_payment_id')->nullable()->after('wave_payment_id');
-            $table->string('jeko_reference')->nullable()->after('jeko_payment_id');
+            $table->string('jeko_payment_id')->nullable();
+            $table->string('jeko_reference')->nullable();
         });
     }
 
