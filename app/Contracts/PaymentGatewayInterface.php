@@ -39,7 +39,7 @@ interface PaymentGatewayInterface
      * Effectue un payout (Pay-out) vers un bénéficiaire.
      *
      * @param string $recipient Numéro mobile ou identifiant bénéficiaire
-     * @param int $amount Montant en centimes
+     * @param int $amount Montant en FCFA (entier, pas de centimes)
      * @param string $recipientName Nom du bénéficiaire (optionnel)
      * @param string $reason Raison du paiement (optionnel)
      * @param string $reference Référence unique — NE PAS laisser vide : sert de clé d'idempotence

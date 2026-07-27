@@ -55,7 +55,8 @@ class JekoSubMerchantController extends Controller
 
     public function approve(Request $request, JekoSubMerchant $jekoSubMerchant): RedirectResponse
     {
-        DB::transaction(function () use ($jekoSubMerchant) {
+        $fresh = null;
+        DB::transaction(function () use ($jekoSubMerchant, &$fresh) {
             $fresh = JekoSubMerchant::lockForUpdate()->findOrFail($jekoSubMerchant->id);
 
             if (!$fresh->isPending()) {
@@ -70,13 +71,15 @@ class JekoSubMerchantController extends Controller
                 'approved_at' => now(),
             ]);
 
-            IntegrateJekoSubMerchantJob::dispatch($fresh);
-
             $restaurant = $fresh->restaurant;
             if ($restaurant && $restaurant->owner) {
                 $restaurant->owner->notify(new JekoIntegrationApprovedNotification($restaurant));
             }
         });
+
+        if ($fresh && $fresh->status === JekoSubMerchantStatus::APPROVED) {
+            IntegrateJekoSubMerchantJob::dispatch($fresh);
+        }
 
         return back()->with('success', 'Demande approuvée. L\'intégration Jeko est en cours.');
     }

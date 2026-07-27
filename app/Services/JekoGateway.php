@@ -62,7 +62,7 @@ class JekoGateway implements PaymentGatewayInterface
     {
         $gateway = $this->isMarketplaceMode ? 'jeko_marketplace' : 'jeko_normal';
 
-        $setting = SystemPaymentSetting::where('gateway', $gateway)->first();
+        $setting = SystemPaymentSetting::where('gateway', $gateway)->where('is_active', true)->first();
 
         if ($setting) {
             $this->apiKey = $setting->getDecryptedApiKey() ?? '';

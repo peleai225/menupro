@@ -12,11 +12,11 @@ class SystemPaymentSetting extends Model
         'gateway',
         'is_active',
         'mode',
-        'api_key',
-        'webhook_secret',
         'merchant_id',
         'config',
     ];
+
+    protected $hidden = ['api_key', 'webhook_secret'];
 
     protected $casts = [
         'is_active' => 'boolean',

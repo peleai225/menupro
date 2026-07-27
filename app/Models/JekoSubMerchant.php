@@ -28,6 +28,8 @@ class JekoSubMerchant extends Model
         'integration_metadata',
     ];
 
+    protected $hidden = ['jeko_api_key'];
+
     protected $casts = [
         'status' => JekoSubMerchantStatus::class,
         'mobile_money_operator' => MobileMoneyOperator::class,
