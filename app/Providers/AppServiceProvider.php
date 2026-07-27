@@ -116,6 +116,11 @@ class AppServiceProvider extends ServiceProvider
                         ->count()
                 )
             );
+            $view->with('pendingJekoRequests',
+                \Illuminate\Support\Facades\Cache::remember('pending_jeko_requests', 60,
+                    fn() => \App\Models\JekoSubMerchant::where('status', \App\Enums\JekoSubMerchantStatus::PENDING)->count()
+                )
+            );
         });
 
         // Invalider le cache des compteurs sidebar quand le statut d'un restaurant change
@@ -126,6 +131,15 @@ class AppServiceProvider extends ServiceProvider
         });
         \App\Models\Restaurant::created(function () {
             \Illuminate\Support\Facades\Cache::forget('pending_restaurants');
+        });
+
+        \App\Models\JekoSubMerchant::updated(function (\App\Models\JekoSubMerchant $sub) {
+            if ($sub->isDirty('status')) {
+                \Illuminate\Support\Facades\Cache::forget('pending_jeko_requests');
+            }
+        });
+        \App\Models\JekoSubMerchant::created(function () {
+            \Illuminate\Support\Facades\Cache::forget('pending_jeko_requests');
         });
 
         // Invalider le cache des CommandoAgents en attente quand leur statut change
