@@ -406,7 +406,7 @@
                                                 ] as $op => $info)
                                                     <label class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all
                                                         {{ $jeko_operator === $op ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
-                                                        <input type="radio" wire:model="jeko_operator" value="{{ $op }}" class="sr-only">
+                                                        <input type="radio" wire:model.live="jeko_operator" value="{{ $op }}" class="sr-only">
                                                         <img src="{{ asset('images/payments/' . $info['logo']) }}" alt="{{ $info['label'] }}" class="h-8 w-auto object-contain">
                                                         <span class="text-xs font-medium {{ $jeko_operator === $op ? 'text-primary-700' : 'text-neutral-600' }}">{{ $info['label'] }}</span>
                                                     </label>
