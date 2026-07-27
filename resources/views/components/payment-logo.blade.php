@@ -4,7 +4,11 @@
     $method = strtolower($method);
 @endphp
 
-@if($method === 'wave')
+@if($method === 'jeko')
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg flex-shrink-0" style="background:#F59E0B;" title="Jeko">
+        <span class="text-white font-black text-sm">J</span>
+    </span>
+@elseif($method === 'wave')
     {{-- Wave - logo officiel PNG --}}
     <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white flex-shrink-0 overflow-hidden" title="Wave">
         <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-9 w-auto object-contain">

@@ -371,7 +371,7 @@
                     </div>
 
                     <!-- Payment Method -->
-                    @if($this->wavePaymentAvailable || $this->cashOnDeliveryAvailable)
+                    @if($this->wavePaymentAvailable || $this->cashOnDeliveryAvailable || $this->jekoPaymentAvailable)
                         <div class="mb-6 pb-6 border-b border-neutral-200">
                             <h3 class="text-sm font-semibold text-neutral-700 mb-3">Mode de paiement</h3>
                             <div class="space-y-2">
@@ -382,6 +382,16 @@
                                         <div class="flex-1">
                                             <span class="font-medium">Wave CI</span>
                                             <span class="text-xs text-neutral-500 ml-2">Paiement mobile instantané</span>
+                                        </div>
+                                    </label>
+                                @endif
+                                @if($this->jekoPaymentAvailable)
+                                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'jeko' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">
+                                        <input type="radio" wire:model="payment_method" value="jeko" class="text-primary-500 focus:ring-primary-500">
+                                        <x-payment-logo method="jeko" />
+                                        <div class="flex-1">
+                                            <span class="font-medium">Jeko</span>
+                                            <span class="text-xs text-neutral-500 ml-2">Wave, Orange, MTN, Moov</span>
                                         </div>
                                     </label>
                                 @endif

@@ -247,7 +247,8 @@ class RestaurantController extends Controller
             'avg_prep_time'        => $r->avg_prep_time_minutes ?? 20,
             'cash_on_delivery'     => (bool) $r->cash_on_delivery,
             'payment_methods'      => array_values(array_filter([
-                'wave',
+                $r->hasWaveBusiness() || app(\App\Services\WaveGateway::class)->forPlatform()->isConfigured() ? 'wave' : null,
+                ($r->jekoSubMerchant && $r->jekoSubMerchant->isIntegrated()) ? 'jeko' : null,
                 $r->cash_on_delivery ? 'cash_on_delivery' : null,
             ])),
             'latitude'             => $r->latitude,

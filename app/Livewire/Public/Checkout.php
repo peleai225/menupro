@@ -189,7 +189,8 @@ class Checkout extends Component
     #[Computed]
     public function jekoPaymentAvailable(): bool
     {
-        return false;
+        $subMerchant = $this->restaurant->jekoSubMerchant;
+        return $subMerchant && $subMerchant->isIntegrated();
     }
 
     #[Computed]
@@ -339,6 +340,7 @@ class Checkout extends Component
 
         $validMethods = array_merge(
             $this->wavePaymentAvailable ? ['wave'] : [],
+            $this->jekoPaymentAvailable ? ['jeko'] : [],
             ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : []
         );
 
@@ -451,6 +453,29 @@ class Checkout extends Component
                 session()->put("cart.{$this->restaurant->id}", $this->cart); // remettre le panier
                 return;
             }
+        }
+
+        // Jeko — créer un lien de paiement et rediriger
+        if ($this->payment_method === 'jeko') {
+            $jeko       = app(\App\Services\JekoGateway::class)->forMarketplace($this->restaurant);
+            $successUrl = route('r.order.success', [$this->restaurant->slug, $order]);
+            $errorUrl   = route('r.order.cancel',  [$this->restaurant->slug, $order]);
+            $result     = $jeko->createPayment($order, $successUrl, $errorUrl);
+
+            if ($result['success']) {
+                $order->update([
+                    'payment_reference' => $result['payment_id'],
+                    'payment_method'    => 'jeko',
+                    'payment_metadata'  => ['jeko_link_id' => $result['payment_id']],
+                ]);
+
+                $this->redirect($result['payment_url'], navigate: false);
+                return;
+            }
+
+            session()->flash('error', 'Impossible de contacter Jeko. Veuillez réessayer ou choisir un autre mode de paiement.');
+            session()->put("cart.{$this->restaurant->id}", $this->cart);
+            return;
         }
 
         // Paiement à la caisse
