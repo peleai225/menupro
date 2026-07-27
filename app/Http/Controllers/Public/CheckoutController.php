@@ -364,6 +364,74 @@ class CheckoutController extends Controller
             ->with('warning', 'Paiement annulé. Vous pouvez réessayer.');
     }
 
+    /**
+     * Polling endpoint: check if Jeko payment link has been paid.
+     * Called by JS every 3s while the customer is on the Jeko payment page.
+     * Returns JSON {paid: bool, redirect: url|null}
+     */
+    public function jekoStatus(string $slug, Order $order): \Illuminate\Http\JsonResponse
+    {
+        if ($order->is_paid) {
+            return response()->json([
+                'paid'     => true,
+                'redirect' => route('r.order.status', [$slug, $order->tracking_token]),
+            ]);
+        }
+
+        if ($order->payment_method !== 'jeko' || empty($order->payment_metadata['jeko_link_id'])) {
+            return response()->json(['paid' => false]);
+        }
+
+        try {
+            $jeko   = app(\App\Services\JekoGateway::class)->forMarketplace($order->restaurant);
+            $result = $jeko->getPaymentStatus($order->payment_metadata['jeko_link_id']);
+
+            if ($result['success'] && ($result['status'] ?? '') === 'success') {
+                // Webhook may have already processed it; check again
+                $order->refresh();
+                if (!$order->is_paid) {
+                    $order->markAsPaid([
+                        'reference'      => $order->payment_metadata['jeko_link_id'],
+                        'method'         => 'jeko',
+                        'transaction_id' => $order->payment_metadata['jeko_link_id'],
+                        'metadata'       => $result['data'] ?? [],
+                    ]);
+
+                    \App\Models\PaymentTransaction::firstOrCreate(
+                        ['gateway_transaction_id' => $order->payment_metadata['jeko_link_id']],
+                        [
+                            'order_id'      => $order->id,
+                            'restaurant_id' => $order->restaurant_id,
+                            'gateway'       => 'jeko',
+                            'amount'        => $order->total,
+                            'currency'      => 'XOF',
+                            'status'        => 'completed',
+                            'metadata'      => $result['data'] ?? [],
+                        ]
+                    );
+
+                    app(\App\Services\WalletService::class)->creditWallet(
+                        $order->restaurant_id,
+                        \App\Models\PaymentTransaction::where('gateway_transaction_id', $order->payment_metadata['jeko_link_id'])->latest()->value('id')
+                    );
+
+                    $order->restaurant->users()
+                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                        ->each(fn ($u) => $u->notify(new \App\Notifications\NewOrderNotification($order)));
+                }
+
+                return response()->json([
+                    'paid'     => true,
+                    'redirect' => route('r.order.status', [$slug, $order->tracking_token]),
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Jeko polling status failed', ['order' => $order->id, 'error' => $e->getMessage()]);
+        }
+
+        return response()->json(['paid' => false]);
+    }
+
     public function applyPromo(Request $request, string $slug)
     {
         $restaurant = Restaurant::where('slug', $slug)->firstOrFail();

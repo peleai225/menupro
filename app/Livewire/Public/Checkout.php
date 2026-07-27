@@ -457,7 +457,7 @@ class Checkout extends Component
             }
         }
 
-        // Jeko — créer un lien de paiement et rediriger
+        // Jeko — créer un lien de paiement, ouvrir dans un nouvel onglet et poller
         if ($this->payment_method === 'jeko') {
             $jeko       = app(\App\Services\JekoGateway::class)->forMarketplace($this->restaurant);
             $successUrl = route('r.order.success', [$this->restaurant->slug, $order]);
@@ -468,13 +468,14 @@ class Checkout extends Component
                 $order->update([
                     'payment_reference' => $result['payment_id'],
                     'payment_method'    => 'jeko',
-                    'payment_metadata'  => [
-                        'jeko_payment_id' => $result['payment_id'],
-                        'jeko_reference'  => $result['reference'] ?? null,
-                    ],
+                    'payment_metadata'  => ['jeko_link_id' => $result['payment_id']],
                 ]);
 
-                $this->redirect($result['payment_url'], navigate: false);
+                // Dispatch to JS: open Jeko in new tab + start polling
+                $this->dispatch('jeko-payment-started', [
+                    'paymentUrl' => $result['payment_url'],
+                    'pollUrl'    => route('r.jeko.status', [$this->restaurant->slug, $order->id]),
+                ]);
                 return;
             }
 

@@ -517,8 +517,88 @@
         </div>
     </div>
 
+    {{-- Jeko payment overlay: opens Jeko in new tab, polls until paid --}}
+    <div x-data="jekoPayment()" x-show="active" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-blue-50">
+            <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+        <h3 class="text-lg font-bold text-neutral-900 mb-2">Paiement Jeko en cours</h3>
+        <p class="text-sm text-neutral-500 mb-6">Effectuez votre paiement dans l'onglet Jeko qui vient de s'ouvrir. Cette page se mettra à jour automatiquement.</p>
+        <button @click="reopenTab()" class="w-full mb-3 py-3 px-4 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+            Rouvrir la page Jeko
+        </button>
+        <button @click="cancel()" class="w-full py-2 px-4 text-neutral-500 text-sm hover:text-neutral-700 transition-colors">
+            Annuler le paiement
+        </button>
+    </div>
+    </div>
+
+</div>
+
 @script
 <script>
+Alpine.data('jekoPayment', () => ({
+    active: false,
+    paymentUrl: '',
+    pollUrl: '',
+    pollInterval: null,
+    jekoTab: null,
+
+    init() {
+        this.$wire.on('jeko-payment-started', (data) => {
+            const d = Array.isArray(data) ? data[0] : data;
+            this.paymentUrl = d.paymentUrl;
+            this.pollUrl    = d.pollUrl;
+            this.active     = true;
+            this.jekoTab    = window.open(this.paymentUrl, '_blank');
+            this.startPolling();
+        });
+    },
+
+    startPolling() {
+        this.pollInterval = setInterval(async () => {
+            try {
+                const r = await fetch(this.pollUrl, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (data.paid) {
+                    this.stopPolling();
+                    if (this.jekoTab) this.jekoTab.close();
+                    window.location.href = data.redirect;
+                }
+            } catch (e) {}
+        }, 3000);
+    },
+
+    stopPolling() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+        }
+    },
+
+    reopenTab() {
+        if (this.jekoTab && !this.jekoTab.closed) {
+            this.jekoTab.focus();
+        } else {
+            this.jekoTab = window.open(this.paymentUrl, '_blank');
+        }
+    },
+
+    cancel() {
+        this.stopPolling();
+        if (this.jekoTab) this.jekoTab.close();
+        this.active = false;
+    }
+}));
+
 Alpine.data('deliveryAddress', () => ({
     cities: [],
     loadingCities: true,

@@ -527,6 +527,11 @@ Route::prefix('r/{slug}')->name('r.')->group(function () {
     // Payment Callbacks
     Route::get('/commande/{order}/success', [CheckoutController::class, 'success'])->name('order.success');
     Route::get('/commande/{order}/cancel', [CheckoutController::class, 'cancel'])->name('order.cancel');
+
+    // Jeko payment status polling (called from JS every 3s)
+    Route::get('/jeko/status/{order}', [CheckoutController::class, 'jekoStatus'])
+        ->name('jeko.status')
+        ->middleware('throttle:20,1');
     
     // Order Modifications (Public - secured with tracking token)
     Route::prefix('commande/{token}')->name('order.')->group(function () {
