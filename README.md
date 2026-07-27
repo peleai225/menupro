@@ -180,6 +180,32 @@ MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io
 ```
 
+## 💳 Intégration Jeko (Paiement Mobile)
+
+MenuPro supporte Jeko comme passerelle de paiement pour les commandes (Marketplace) et abonnements (API Normale).
+
+### Configuration
+
+1. **Créer un compte Jeko** sur [jeko.africa](https://jeko.africa) et récupérer vos clés API.
+
+2. **Configurer les clés via le backoffice super-admin** :
+   - Accéder à `Admin → Paramètres de paiement`
+   - Activer `jeko_marketplace` (commandes) et/ou `jeko_normal` (abonnements)
+   - Saisir la clé API et le webhook secret pour chaque gateway
+
+3. **Configurer le webhook Jeko** dans votre tableau de bord Jeko :
+   - URL : `https://votre-domaine.com/webhooks/jeko`
+   - Événements : `payment.success`, `payment.failed`
+
+4. **Onboarding restaurant** :
+   - Le restaurant accède à `Tableau de bord → Intégration Jeko`
+   - Soumet le formulaire KYC (nom légal, numéro mobile money, email)
+   - L'équipe MenuPro valide la demande → intégration automatique avec Jeko
+
+### Variables d'environnement
+
+Aucune clé API Jeko ne doit être stockée dans `.env`. Toutes les clés sont gérées via le backoffice super-admin et stockées chiffrées en base de données.
+
 ## 📦 Déploiement
 
 ### Préparation

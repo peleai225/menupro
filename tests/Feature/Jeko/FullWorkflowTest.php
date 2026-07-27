@@ -101,6 +101,7 @@ class FullWorkflowTest extends TestCase
 
     public function test_full_jeko_onboarding_to_integration_flow(): void
     {
+        Http::fake();
         Queue::fake();
 
         $superAdmin = $this->createSuperAdmin();
@@ -146,6 +147,7 @@ class FullWorkflowTest extends TestCase
 
     public function test_payment_initiation_and_webhook_success_flow(): void
     {
+        Http::fake();
         Queue::fake();
 
         $jekoMock = $this->mock(JekoGateway::class);
@@ -214,6 +216,8 @@ class FullWorkflowTest extends TestCase
 
     public function test_payment_webhook_payout_job_executes(): void
     {
+        Http::fake();
+
         // Step 1: Create INTEGRATED restaurant + paid order
         $restaurant = Restaurant::factory()->create();
         $this->createIntegratedSubMerchant($restaurant->id);
@@ -251,7 +255,6 @@ class FullWorkflowTest extends TestCase
         $job->handle($gatewayMock);
 
         // Step 6: Assert payout was called (verified by Mockery expectation above)
-        $this->assertTrue(true, 'Payout job executed successfully without exception');
     }
 
     public function test_rejected_restaurant_cannot_accept_jeko_payments(): void
