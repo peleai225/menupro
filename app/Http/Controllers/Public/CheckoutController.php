@@ -280,6 +280,42 @@ class CheckoutController extends Controller
                 ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
         }
 
+        // Jeko: verify payment link status
+        if ($order->payment_method === 'jeko' && !empty($order->payment_metadata['jeko_link_id'])) {
+            try {
+                $jeko   = app(\App\Services\JekoGateway::class)->forMarketplace($order->restaurant);
+                $result = $jeko->getPaymentStatus($order->payment_metadata['jeko_link_id']);
+
+                if ($result['success'] && ($result['status'] ?? '') === 'success') {
+                    $order->markAsPaid([
+                        'reference'      => $order->payment_metadata['jeko_link_id'],
+                        'method'         => 'jeko',
+                        'transaction_id' => $order->payment_metadata['jeko_link_id'],
+                        'metadata'       => $result['data'] ?? [],
+                    ]);
+
+                    \App\Models\PaymentTransaction::create([
+                        'order_id'               => $order->id,
+                        'restaurant_id'          => $order->restaurant_id,
+                        'gateway'                => 'jeko',
+                        'gateway_transaction_id' => $order->payment_metadata['jeko_link_id'],
+                        'amount'                 => $order->total,
+                        'currency'               => 'XOF',
+                        'status'                 => 'completed',
+                        'metadata'               => $result['data'] ?? [],
+                    ]);
+
+                    app(\App\Services\WalletService::class)->creditWallet($order->restaurant_id, \App\Models\PaymentTransaction::where('gateway_transaction_id', $order->payment_metadata['jeko_link_id'])->latest()->first()?->id);
+
+                    $restaurant->users()
+                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+                        ->each(fn ($user) => $user->notify(new \App\Notifications\NewOrderNotification($order)));
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Jeko verify on success fallback failed: ' . $e->getMessage());
+            }
+        }
+
         // Wave: verify checkout session status
         if ($order->payment_method === 'wave' && $order->payment_reference) {
             try {
