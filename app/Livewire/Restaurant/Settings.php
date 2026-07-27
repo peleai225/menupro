@@ -108,6 +108,7 @@ class Settings extends Component
     public bool $auto_payout_enabled = false;
     public int $min_payout_amount = 1000;
     public ?string $wallet_phone = null;
+    public string $jeko_mobile_money = '';
     public ?string $wallet_recipient_name = null;
 
     public function mount(): void
@@ -163,6 +164,12 @@ class Settings extends Component
             $this->min_payout_amount = $wallet->min_payout_amount ?? 1000;
             $this->wallet_phone = $wallet->phone;
             $this->wallet_recipient_name = $wallet->recipient_name;
+        }
+
+        // Jeko mobile money
+        $jeko = $this->restaurant->jekoSubMerchant;
+        if ($jeko && $jeko->isIntegrated()) {
+            $this->jeko_mobile_money = $jeko->mobile_money ?? '';
         }
 
         // Verification fields
@@ -357,6 +364,36 @@ class Settings extends Component
         ]);
 
         session()->flash('success', 'Paramètres de livraison mis à jour.');
+    }
+
+    public function saveJekoPhone(): void
+    {
+        $this->validate([
+            'jeko_mobile_money' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]{8,15}$/'],
+        ], [
+            'jeko_mobile_money.required' => 'Le numéro Mobile Money est obligatoire.',
+            'jeko_mobile_money.regex'    => 'Format invalide. Exemple : 0501062640 ou +2250501062640',
+        ]);
+
+        $jeko = $this->restaurant->jekoSubMerchant;
+        if (!$jeko || !$jeko->isIntegrated()) {
+            session()->flash('error', 'Jeko n\'est pas encore intégré.');
+            return;
+        }
+
+        // Normaliser en +225XXXXXXXXXX
+        $phone = preg_replace('/\D/', '', $this->jeko_mobile_money);
+        if (strlen($phone) === 10) {
+            $phone = '+225' . $phone;
+        } elseif (!str_starts_with($this->jeko_mobile_money, '+')) {
+            $phone = '+' . $phone;
+        } else {
+            $phone = '+' . $phone;
+        }
+
+        $jeko->update(['mobile_money' => $phone]);
+        $this->jeko_mobile_money = $phone;
+        session()->flash('success', 'Numéro de dépôt Jeko mis à jour.');
     }
 
     public function savePayment(): void

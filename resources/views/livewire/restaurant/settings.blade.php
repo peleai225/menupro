@@ -822,8 +822,26 @@
                     </div>
 
                     @if($jeko && $jeko->isIntegrated())
-                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
+                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800 mb-4">
                             Jeko est actif. Vos clients peuvent payer via Wave, Orange Money, MTN MoMo et Moov Money.
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-neutral-700 mb-1">
+                                Numéro de dépôt (Mobile Money)
+                                <span class="text-neutral-400 font-normal ml-1">— numéro sur lequel vous recevez les reversements</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="tel" wire:model="jeko_mobile_money"
+                                       class="input flex-1 @error('jeko_mobile_money') border-red-500 @enderror"
+                                       placeholder="0501062640 ou +2250501062640">
+                                <button type="button" wire:click="saveJekoPhone"
+                                        class="btn btn-secondary px-4 py-2 text-sm whitespace-nowrap">
+                                    Enregistrer
+                                </button>
+                            </div>
+                            @error('jeko_mobile_money')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     @elseif($jeko && $jeko->isRejected())
                         <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 mb-3">
