@@ -235,6 +235,25 @@
                     </div>
                 </div>
 
+                {{-- Jeko (lien vers page dédiée) --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="w-2 h-2 rounded-full" style="background:#f59e0b;"></span>
+                        <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Jeko</h2>
+                    </div>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
+                        Jeko Marketplace (paiements commandes) et Jeko Normal (abonnements). Clés API, webhook secrets et mode sandbox/production.
+                    </p>
+                    <a href="{{ route('super-admin.payment-settings.index') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition"
+                       style="background:var(--sa-primary);color:#fff;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Configurer Jeko
+                    </a>
+                </div>
+
                 {{-- ElevenLabs TTS --}}
                 <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
                     <div class="flex items-center gap-2 mb-1">
