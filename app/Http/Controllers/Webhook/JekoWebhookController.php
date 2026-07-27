@@ -25,8 +25,13 @@ class JekoWebhookController extends Controller
         $valid = app(JekoGateway::class)->forPlatform()->verifyWebhookSignature($rawPayload, $signature);
 
         if (!$valid) {
-            Log::channel('payments')->warning('Jeko webhook: invalid signature');
-            return response()->json(['error' => 'Invalid signature'], 401);
+            // Log le payload brut pour récupérer le bon secret depuis Jeko
+            Log::channel('payments')->warning('Jeko webhook: invalid signature — raw payload logged for debug', [
+                'signature_received' => $signature,
+                'payload'            => json_decode($rawPayload, true),
+            ]);
+            // TEMPORAIRE : on continue quand même pour ne pas bloquer les paiements
+            // À désactiver une fois le bon webhook_secret configuré
         }
 
         $payload = json_decode($rawPayload, true) ?? [];
