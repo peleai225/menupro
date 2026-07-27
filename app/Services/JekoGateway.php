@@ -95,7 +95,7 @@ class JekoGateway implements PaymentGatewayInterface
             : "SUB-{$entity->id}-" . now()->timestamp;
 
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout($this->timeout)
                 ->post("{$this->baseUrl}/demandes-de-paiement", [
                     'montant' => $amountFcfa,
@@ -159,7 +159,7 @@ class JekoGateway implements PaymentGatewayInterface
         }
 
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout(15)
                 ->get("{$this->baseUrl}/demandes-de-paiement/{$paymentId}");
 
@@ -212,7 +212,7 @@ class JekoGateway implements PaymentGatewayInterface
         $refClient = $reference;
 
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout($this->payoutTimeout)
                 ->post("{$this->baseUrl}/virements", [
                     'contact_id' => $contact['contact_id'],
@@ -274,7 +274,7 @@ class JekoGateway implements PaymentGatewayInterface
     public function createContact(string $mobile): array
     {
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout($this->timeout)
                 ->post("{$this->baseUrl}/contacts", [
                     'type' => 'mobile_money',
@@ -310,7 +310,7 @@ class JekoGateway implements PaymentGatewayInterface
     protected function getExistingContact(string $mobile): array
     {
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout($this->timeout)
                 ->get("{$this->baseUrl}/contacts", [
                     'mobile' => $mobile,
@@ -349,7 +349,7 @@ class JekoGateway implements PaymentGatewayInterface
         }
 
         try {
-            $response = Http::withToken($this->apiKey)
+            $response = Http::withHeaders(['X-API-KEY-ID' => $this->apiKey])
                 ->timeout($this->timeout)
                 ->post("{$this->baseUrl}/fournisseurs-de-services/integrer-entreprise", [
                     'nom_entreprise' => $subMerchant->legal_name,
