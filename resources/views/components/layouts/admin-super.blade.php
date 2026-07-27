@@ -98,6 +98,33 @@
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Utilisateurs</span>
                 </a>
 
+                <!-- Section: Paiements -->
+                <div class="pt-5 pb-1">
+                    <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
+                        Paiements
+                    </span>
+                    <div x-show="!expanded" class="h-px bg-neutral-800 mx-2"></div>
+                </div>
+
+                <a href="{{ route('super-admin.jeko.index') }}"
+                   class="nav-item {{ request()->routeIs('super-admin.jeko*') ? 'nav-active' : '' }}" title="Jeko KYC">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm flex-1">Jeko KYC</span>
+                    @if(($pendingJekoRequests ?? 0) > 0)
+                        <span class="bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full" x-show="expanded">{{ $pendingJekoRequests }}</span>
+                    @endif
+                </a>
+
+                <a href="{{ route('super-admin.payment-settings.index') }}"
+                   class="nav-item {{ request()->routeIs('super-admin.payment-settings*') ? 'nav-active' : '' }}" title="Config Paiement">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Config Paiement</span>
+                </a>
+
                 <a href="{{ route('super-admin.commando.agents.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.commando*') ? 'nav-active' : '' }}" title="Commando">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

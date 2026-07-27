@@ -273,7 +273,9 @@ class DashboardController extends Controller
             'firebase_vapid_key' => \App\Models\SystemSetting::get('firebase_vapid_key', ''),
         ];
 
-        return view('pages.super-admin.settings', compact('settings'));
+        $paymentSettings = \App\Models\SystemPaymentSetting::orderBy('gateway')->get()->keyBy('gateway');
+
+        return view('pages.super-admin.settings', compact('settings', 'paymentSettings'));
     }
 
     /**
@@ -302,6 +304,11 @@ class DashboardController extends Controller
             // Wave CI
             'wave_api_key' => ['nullable', 'string'],
             'wave_webhook_secret' => ['nullable', 'string'],
+            // Jeko Marketplace
+            'jeko_marketplace_api_key'        => ['nullable', 'string', 'max:1000'],
+            'jeko_marketplace_api_key_id'     => ['nullable', 'string', 'max:255'],
+            'jeko_marketplace_store_id'       => ['nullable', 'string', 'max:255'],
+            'jeko_marketplace_webhook_secret' => ['nullable', 'string', 'max:1000'],
             'smtp_host' => ['nullable', 'string', 'max:255'],
             'smtp_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
             'smtp_encryption' => ['nullable', 'string', 'in:tls,ssl,'],
@@ -409,6 +416,35 @@ class DashboardController extends Controller
         }
         if ($request->filled('wave_webhook_secret')) {
             \App\Models\SystemSetting::set('wave_webhook_secret', $request->wave_webhook_secret, 'string', 'Secret de signature des webhooks Wave');
+        }
+
+        // Jeko Marketplace
+        $jekoFields = array_filter([
+            'jeko_marketplace_api_key'        => $request->input('jeko_marketplace_api_key'),
+            'jeko_marketplace_api_key_id'     => $request->input('jeko_marketplace_api_key_id'),
+            'jeko_marketplace_store_id'       => $request->input('jeko_marketplace_store_id'),
+            'jeko_marketplace_webhook_secret' => $request->input('jeko_marketplace_webhook_secret'),
+        ]);
+        if (!empty($jekoFields)) {
+            $jekoSetting = \App\Models\SystemPaymentSetting::firstOrCreate(
+                ['gateway' => 'jeko_marketplace'],
+                ['mode' => 'production', 'is_active' => false]
+            );
+            if (!empty($jekoFields['jeko_marketplace_api_key'])) {
+                $jekoSetting->setEncryptedApiKey($jekoFields['jeko_marketplace_api_key']);
+            }
+            if (array_key_exists('jeko_marketplace_api_key_id', $jekoFields)) {
+                $jekoSetting->merchant_id = $jekoFields['jeko_marketplace_api_key_id'] ?: null;
+            }
+            if (array_key_exists('jeko_marketplace_store_id', $jekoFields)) {
+                $config = $jekoSetting->config ?? [];
+                $config['store_id'] = $jekoFields['jeko_marketplace_store_id'] ?: null;
+                $jekoSetting->config = $config;
+            }
+            if (!empty($jekoFields['jeko_marketplace_webhook_secret'])) {
+                $jekoSetting->setEncryptedWebhookSecret($jekoFields['jeko_marketplace_webhook_secret']);
+            }
+            $jekoSetting->save();
         }
 
         // SMTP Configuration

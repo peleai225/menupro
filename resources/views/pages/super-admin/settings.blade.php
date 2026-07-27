@@ -235,24 +235,80 @@
                     </div>
                 </div>
 
-                {{-- Jeko (lien vers page dédiée) --}}
-                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="w-2 h-2 rounded-full" style="background:#f59e0b;"></span>
-                        <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Jeko</h2>
+                {{-- Jeko Marketplace --}}
+                @php $jekoMarketplace = $paymentSettings->firstWhere('gateway', 'jeko_marketplace'); @endphp
+                @if($jekoMarketplace)
+                <div class="rounded-2xl border p-5 shadow-sm col-span-full" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded text-white text-[10px] font-black" style="background:#f59e0b;">J</span>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Jeko Marketplace</h2>
+                            @if($jekoMarketplace->is_active)
+                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full" style="background:rgba(16,185,129,0.12);color:#059669;">Actif</span>
+                            @else
+                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full" style="background:rgba(156,163,175,0.15);color:var(--sa-muted-fg);">Inactif</span>
+                            @endif
+                        </div>
+                        <a href="{{ route('super-admin.payment-settings.index') }}" class="text-xs underline" style="color:var(--sa-muted-fg);">
+                            Config avancée →
+                        </a>
                     </div>
                     <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
-                        Jeko Marketplace (paiements commandes) et Jeko Normal (abonnements). Clés API, webhook secrets et mode sandbox/production.
+                        Paiements commandes clients (Wave, Orange, MTN, Moov). Les restaurants doivent soumettre un dossier KYC.
                     </p>
-                    <a href="{{ route('super-admin.payment-settings.index') }}"
-                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition"
-                       style="background:var(--sa-primary);color:#fff;">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Configurer Jeko
-                    </a>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">
+                                Clé API (X-API-KEY)
+                                @if(!empty($jekoMarketplace->api_key))
+                                    <span class="ml-1 text-[10px]" style="color:#059669;">✓ Configurée</span>
+                                @endif
+                            </label>
+                            <input type="password" name="jeko_marketplace_api_key"
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">
+                                API Key ID (X-API-KEY-ID)
+                            </label>
+                            <input type="text" name="jeko_marketplace_api_key_id"
+                                   value="{{ old('jeko_marketplace_api_key_id', $jekoMarketplace->merchant_id) }}"
+                                   placeholder="UUID de la clé"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Store ID</label>
+                            <input type="text" name="jeko_marketplace_store_id"
+                                   value="{{ old('jeko_marketplace_store_id', $jekoMarketplace->config['store_id'] ?? '') }}"
+                                   placeholder="UUID du magasin"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">
+                                Webhook Secret
+                                @if(!empty($jekoMarketplace->webhook_secret))
+                                    <span class="ml-1 text-[10px]" style="color:#059669;">✓ Configuré</span>
+                                @endif
+                            </label>
+                            <input type="password" name="jeko_marketplace_webhook_secret"
+                                   placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                                   style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                        </div>
+                    </div>
+                    <div class="mt-3 rounded-lg border px-3 py-2 text-xs" style="background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25);color:#92400e;">
+                        Webhook : <code class="font-mono">{{ url('/webhooks/jeko') }}</code>
+                        &nbsp;·&nbsp;
+                        <a href="{{ route('super-admin.jeko.index') }}" style="color:var(--sa-primary);" class="underline">Voir les demandes KYC →</a>
+                    </div>
                 </div>
+                @endif
 
                 {{-- ElevenLabs TTS --}}
                 <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
