@@ -97,6 +97,7 @@ class Checkout extends Component
         }
         $methods = array_merge(
             $this->wavePaymentAvailable ? ['wave'] : [],
+            $this->jekoPaymentAvailable ? ['jeko'] : [],
             ($this->restaurant->cash_on_delivery ?? false) ? ['cash_on_delivery'] : []
         );
         if (count($methods) === 1) {

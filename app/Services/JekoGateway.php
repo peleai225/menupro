@@ -92,22 +92,33 @@ class JekoGateway implements PaymentGatewayInterface
             return ['success' => false, 'error' => 'Jeko API key not configured'];
         }
 
-        $amountCents = (int) ($entity instanceof Order ? $entity->total : $entity->amount_paid) * 100;
+        if ($entity instanceof Order) {
+            $amountCents = (int) $entity->total * 100;
+        } else {
+            // Pour un abonnement, amount_paid est 0 avant paiement — utiliser le prix du plan
+            $amountCents = (int) ($entity->amount_paid > 0 ? $entity->amount_paid : ($entity->plan?->price ?? 0)) * 100;
+        }
 
         $title = $entity instanceof Order
             ? "Commande #{$entity->id} — " . ($entity->restaurant->name ?? 'MenuPro')
             : "Abonnement MenuPro";
 
         try {
+            $payload = [
+                'storeId'               => $this->storeId,
+                'title'                 => mb_substr($title, 0, 255),
+                'amountCents'           => $amountCents,
+                'currency'              => $this->currency,
+                'allowMultiplePayments' => false,
+            ];
+
+            if (!empty($successUrl)) {
+                $payload['redirectUrl'] = $successUrl;
+            }
+
             $response = $this->client()
                 ->timeout($this->timeout)
-                ->post("{$this->baseUrl}/payment_links", [
-                    'storeId'              => $this->storeId,
-                    'title'                => mb_substr($title, 0, 255),
-                    'amountCents'          => $amountCents,
-                    'currency'             => $this->currency,
-                    'allowMultiplePayments' => false,
-                ]);
+                ->post("{$this->baseUrl}/payment_links", $payload);
 
             if ($response->successful()) {
                 $data = $response->json();

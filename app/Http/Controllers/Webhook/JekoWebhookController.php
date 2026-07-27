@@ -41,8 +41,12 @@ class JekoWebhookController extends Controller
         $status          = $data['status'] ?? '';
         $transactionType = $data['transactionType'] ?? '';
 
-        if ($status === 'success' && $transactionType === 'payment') {
-            $this->handlePaymentSuccess($data);
+        if ($transactionType === 'payment') {
+            if ($status === 'success') {
+                $this->handlePaymentSuccess($data);
+            } else {
+                $this->handlePaymentFailed($data);
+            }
         } elseif ($transactionType === 'transfer') {
             $this->handleTransferUpdate($data);
         }
