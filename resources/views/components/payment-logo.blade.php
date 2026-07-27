@@ -5,8 +5,14 @@
 @endphp
 
 @if($method === 'jeko')
-    <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg flex-shrink-0" style="background:#F59E0B;" title="Jeko">
-        <span class="text-white font-black text-sm">J</span>
+    <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #4F46E5, #7C3AED);" title="Jeko">
+        <svg viewBox="0 0 40 40" class="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- J letter stylized -->
+            <rect x="20" y="8" width="7" height="18" rx="3.5" fill="white"/>
+            <path d="M20 22 Q20 30 13 30 Q10 30 9 27" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <!-- dot bleu clair -->
+            <circle cx="13" cy="14" r="5" fill="#38BDF8"/>
+        </svg>
     </span>
 @elseif($method === 'wave')
     {{-- Wave - logo officiel PNG --}}
