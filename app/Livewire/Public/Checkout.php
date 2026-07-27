@@ -468,7 +468,10 @@ class Checkout extends Component
                 $order->update([
                     'payment_reference' => $result['payment_id'],
                     'payment_method'    => 'jeko',
-                    'payment_metadata'  => ['jeko_link_id' => $result['payment_id']],
+                    'payment_metadata'  => [
+                        'jeko_payment_id' => $result['payment_id'],
+                        'jeko_reference'  => $result['reference'] ?? null,
+                    ],
                 ]);
 
                 $this->redirect($result['payment_url'], navigate: false);
