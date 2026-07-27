@@ -70,30 +70,40 @@ class JekoTestController extends Controller
         }
 
         // Test 3 : POST /service_providers/business_onboarding — teste plusieurs catégories
-        // Test Service Provider avec données valides (retail = catégorie confirmée)
-        try {
-            $resp = Http::withHeaders([
-                'X-API-KEY'    => $apiKey,
-                'X-API-KEY-ID' => $apiKeyId,
-                'Accept'       => 'application/json',
-            ])->timeout(10)->post("{$baseUrl}/service_providers/business_onboarding", [
-                'owner'    => ['phone' => '+22501000001', 'firstName' => 'Test', 'lastName' => 'MenuPro', 'sex' => 'M'],
-                'business' => ['name' => 'Test MenuPro Retail', 'category' => 'retail'],
-            ]);
+        // Test Service Provider — deux formats de téléphone pour trouver le bon
+        $phoneFormats = [
+            '+2250700000000', // +225 + 10 chiffres (avec zéro initial)
+            '+225700000000',  // +225 + 9 chiffres (sans zéro initial)
+        ];
+        foreach ($phoneFormats as $testPhone) {
+            try {
+                $resp = Http::withHeaders([
+                    'X-API-KEY'    => $apiKey,
+                    'X-API-KEY-ID' => $apiKeyId,
+                    'Accept'       => 'application/json',
+                ])->timeout(10)->post("{$baseUrl}/service_providers/business_onboarding", [
+                    'owner'    => ['phone' => $testPhone, 'firstName' => 'Test', 'lastName' => 'MenuPro', 'sex' => 'M'],
+                    'business' => ['name' => 'Test MenuPro ' . $testPhone, 'category' => 'retail'],
+                ]);
 
-            $results['service_provider'] = [
-                'label'  => 'POST /service_providers/business_onboarding (category: retail)',
-                'status' => $resp->status(),
-                'ok'     => $resp->successful() || $resp->status() === 409,
-                'body'   => $resp->json() ?? $resp->body(),
-            ];
-        } catch (\Throwable $e) {
-            $results['service_provider'] = [
-                'label'  => 'POST /service_providers/business_onboarding (category: retail)',
-                'status' => 0,
-                'ok'     => false,
-                'body'   => $e->getMessage(),
-            ];
+                $results['phone_' . preg_replace('/\+/', '', $testPhone)] = [
+                    'label'  => "POST /service_providers/... — phone: {$testPhone}",
+                    'status' => $resp->status(),
+                    'ok'     => $resp->successful() || $resp->status() === 409,
+                    'body'   => $resp->json() ?? $resp->body(),
+                ];
+
+                if ($resp->successful() || $resp->status() === 409) {
+                    break;
+                }
+            } catch (\Throwable $e) {
+                $results['phone_' . preg_replace('/\+/', '', $testPhone)] = [
+                    'label'  => "POST /service_providers/... — phone: {$testPhone}",
+                    'status' => 0,
+                    'ok'     => false,
+                    'body'   => $e->getMessage(),
+                ];
+            }
         }
 
         return view('admin.jeko.test', compact('results'));
