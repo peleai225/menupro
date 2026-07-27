@@ -69,30 +69,38 @@ class JekoTestController extends Controller
             ];
         }
 
-        // Test 3 : POST /service_providers/business_onboarding avec données factices (vérifie Service Provider)
-        try {
-            $resp = Http::withHeaders([
-                'X-API-KEY'    => $apiKey,
-                'X-API-KEY-ID' => $apiKeyId,
-                'Accept'       => 'application/json',
-            ])->timeout(10)->post("{$baseUrl}/service_providers/business_onboarding", [
-                'owner'    => ['phone' => '+22500000000', 'firstName' => 'Test', 'lastName' => 'MenuPro', 'sex' => 'M'],
-                'business' => ['name' => 'Test MenuPro', 'category' => 'food_and_beverage'],
-            ]);
+        // Test 3 : POST /service_providers/business_onboarding — teste plusieurs catégories
+        $categories = ['food', 'food_and_beverage', 'restaurant', 'retail', 'services', 'other'];
+        foreach ($categories as $cat) {
+            try {
+                $resp = Http::withHeaders([
+                    'X-API-KEY'    => $apiKey,
+                    'X-API-KEY-ID' => $apiKeyId,
+                    'Accept'       => 'application/json',
+                ])->timeout(10)->post("{$baseUrl}/service_providers/business_onboarding", [
+                    'owner'    => ['phone' => '+22500000001', 'firstName' => 'Test', 'lastName' => 'MenuPro', 'sex' => 'M'],
+                    'business' => ['name' => 'Test MenuPro ' . $cat, 'category' => $cat],
+                ]);
 
-            $results['service_provider'] = [
-                'label'  => 'POST /service_providers/business_onboarding (test)',
-                'status' => $resp->status(),
-                'ok'     => $resp->successful() || $resp->status() === 409,
-                'body'   => $resp->json() ?? $resp->body(),
-            ];
-        } catch (\Throwable $e) {
-            $results['service_provider'] = [
-                'label'  => 'POST /service_providers/business_onboarding (test)',
-                'status' => 0,
-                'ok'     => false,
-                'body'   => $e->getMessage(),
-            ];
+                $results['category_' . $cat] = [
+                    'label'  => "POST /service_providers/business_onboarding — category: {$cat}",
+                    'status' => $resp->status(),
+                    'ok'     => $resp->successful() || $resp->status() === 409,
+                    'body'   => $resp->json() ?? $resp->body(),
+                ];
+
+                // Si une catégorie passe, inutile de tester les suivantes
+                if ($resp->successful() || $resp->status() === 409) {
+                    break;
+                }
+            } catch (\Throwable $e) {
+                $results['category_' . $cat] = [
+                    'label'  => "POST /service_providers/business_onboarding — category: {$cat}",
+                    'status' => 0,
+                    'ok'     => false,
+                    'body'   => $e->getMessage(),
+                ];
+            }
         }
 
         return view('admin.jeko.test', compact('results'));
