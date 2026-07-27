@@ -90,11 +90,10 @@ class JekoGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Crée un lien de paiement Jeko (Payment Link).
-     * Le client choisit son opérateur sur la page Jeko.
+     * Crée un paiement Jeko via payment_request (avec redirection).
      * Montant en FCFA — converti en centimes pour l'API.
      */
-    public function createPayment(Order|Subscription $entity, string $successUrl, string $errorUrl): array
+    public function createPayment(Order|Subscription $entity, string $successUrl, string $errorUrl, string $paymentMethod = 'wave'): array
     {
         if (!$this->isConfigured()) {
             return ['success' => false, 'error' => 'Jeko API key not configured'];
@@ -103,57 +102,56 @@ class JekoGateway implements PaymentGatewayInterface
         if ($entity instanceof Order) {
             $amountCents = (int) $entity->total * 100;
         } else {
-            // Pour un abonnement, amount_paid est 0 avant paiement — utiliser le prix du plan
             $amountCents = (int) ($entity->amount_paid > 0 ? $entity->amount_paid : ($entity->plan?->price ?? 0)) * 100;
         }
 
-        $title = $entity instanceof Order
-            ? "Commande #{$entity->id} — " . ($entity->restaurant->name ?? 'MenuPro')
-            : "Abonnement MenuPro";
+        $reference = $entity instanceof Order
+            ? 'ORDER-' . $entity->id . '-' . time()
+            : 'SUB-' . $entity->id . '-' . time();
 
         try {
-            $reference = $entity instanceof Order
-                ? 'ORDER-' . $entity->id . '-' . time()
-                : 'SUB-' . $entity->id . '-' . time();
-
             $payload = [
-                'storeId'               => $this->storeId,
-                'title'                 => mb_substr($title, 0, 255),
-                'amountCents'           => $amountCents,
-                'currency'              => $this->currency,
-                'allowMultiplePayments' => false,
-                'storeReference'        => $reference,
+                'storeId'        => $this->storeId,
+                'amountCents'    => $amountCents,
+                'currency'       => $this->currency,
+                'reference'      => $reference,
+                'paymentDetails' => [
+                    'type' => 'redirect',
+                    'data' => [
+                        'paymentMethod' => $paymentMethod,
+                        'successUrl'    => $successUrl,
+                        'errorUrl'      => $errorUrl,
+                    ],
+                ],
             ];
-
-            if (!empty($successUrl)) {
-                $payload['redirectUrl'] = $successUrl;
-            }
 
             $response = $this->client()
                 ->timeout($this->timeout)
-                ->post("{$this->baseUrl}/payment_links", $payload);
+                ->post("{$this->baseUrl}/payment_request", $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                Log::channel('payments')->info('Jeko payment link created', [
-                    'entity_type'  => $entity instanceof Order ? 'order' : 'subscription',
-                    'entity_id'    => $entity->id,
-                    'link_id'      => $data['id'] ?? null,
-                    'amount_cents' => $amountCents,
-                    'redirect_url' => $payload['redirectUrl'] ?? null,
-                    'store_id'     => $this->storeId,
+                Log::channel('payments')->info('Jeko payment request created', [
+                    'entity_type'    => $entity instanceof Order ? 'order' : 'subscription',
+                    'entity_id'      => $entity->id,
+                    'payment_id'     => $data['id'] ?? null,
+                    'amount_cents'   => $amountCents,
+                    'payment_method' => $paymentMethod,
+                    'success_url'    => $successUrl,
+                    'reference'      => $reference,
                 ]);
 
                 return [
                     'success'     => true,
-                    'payment_id'  => $data['id'],
-                    'payment_url' => $data['link'],
+                    'payment_id'  => $data['id'] ?? $reference,
+                    'payment_url' => $data['redirectUrl'] ?? $data['paymentUrl'] ?? $data['url'] ?? '',
+                    'reference'   => $reference,
                     'status'      => 'pending',
                 ];
             }
 
-            Log::channel('payments')->error('Jeko payment link failed', [
+            Log::channel('payments')->error('Jeko payment request failed', [
                 'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
                 'entity_id'   => $entity->id,
                 'status'      => $response->status(),

@@ -394,6 +394,20 @@
                                             <span class="text-xs text-neutral-500 ml-2">Wave, Orange, MTN, Moov</span>
                                         </div>
                                     </label>
+                                    @if($payment_method === 'jeko')
+                                        <div class="mt-2 px-1">
+                                            <p class="text-xs text-neutral-500 mb-2">Choisissez votre opérateur :</p>
+                                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                                @foreach(['wave' => 'Wave', 'orange' => 'Orange Money', 'mtn' => 'MTN MoMo', 'moov' => 'Moov Money'] as $op => $label)
+                                                    <label class="flex flex-col items-center gap-1 p-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-medium
+                                                        {{ $jeko_operator === $op ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 hover:border-neutral-300 text-neutral-600' }}">
+                                                        <input type="radio" wire:model="jeko_operator" value="{{ $op }}" class="sr-only">
+                                                        {{ $label }}
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
                                 @if($this->cashOnDeliveryAvailable)
                                     <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all {{ $payment_method === 'cash_on_delivery' ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300' }}">

@@ -56,7 +56,8 @@ class Checkout extends Component
     public ?string $promoError = null;
 
     // Payment Method
-    public ?string $payment_method = null; // 'wave' | 'cash_on_delivery'
+    public ?string $payment_method = null; // 'wave' | 'jeko' | 'cash_on_delivery'
+    public string $jeko_operator = 'wave'; // wave | orange | mtn | moov
 
     public function mount(string $slug): void
     {
@@ -461,7 +462,7 @@ class Checkout extends Component
             $jeko       = app(\App\Services\JekoGateway::class)->forMarketplace($this->restaurant);
             $successUrl = route('r.order.success', [$this->restaurant->slug, $order]);
             $errorUrl   = route('r.order.cancel',  [$this->restaurant->slug, $order]);
-            $result     = $jeko->createPayment($order, $successUrl, $errorUrl);
+            $result     = $jeko->createPayment($order, $successUrl, $errorUrl, $this->jeko_operator ?: 'wave');
 
             if ($result['success']) {
                 $order->update([
