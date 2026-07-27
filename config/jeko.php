@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'base_url' => env('JEKO_API_URL', 'https://api.jeko.africa/v1'),
+    'base_url' => env('JEKO_API_URL', 'https://api.jeko.africa/partner_api'),
 
     'timeout' => env('JEKO_TIMEOUT', 30), // Timeout HTTP en secondes
 

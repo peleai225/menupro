@@ -19,7 +19,8 @@ class JekoWebhookController extends Controller
     public function handle(Request $request): JsonResponse
     {
         $rawPayload = $request->getContent();
-        $signature = $request->header('X-Jeko-Signature', '');
+        // Header Jeko: "Jeko-Signature" (Laravel normalise en HTTP_JEKO_SIGNATURE)
+        $signature  = $request->header('Jeko-Signature', '');
 
         $valid = app(JekoGateway::class)->forPlatform()->verifyWebhookSignature($rawPayload, $signature);
 
@@ -29,31 +30,36 @@ class JekoWebhookController extends Controller
         }
 
         $payload = json_decode($rawPayload, true) ?? [];
-        $event = $payload['event'] ?? '';
+        $event   = $payload['event'] ?? '';
 
-        switch ($event) {
-            case 'payment.success':
-                $this->handlePaymentSuccess($payload);
-                break;
-            case 'payment.failed':
-                $this->handlePaymentFailed($payload);
-                break;
-            default:
-                return response()->json(['status' => 'ignored'], 200);
+        // Jeko n'a qu'un seul event: transaction.completed
+        if ($event !== 'transaction.completed') {
+            return response()->json(['status' => 'ignored'], 200);
+        }
+
+        $data            = $payload['data'] ?? [];
+        $status          = $data['status'] ?? '';
+        $transactionType = $data['transactionType'] ?? '';
+
+        if ($status === 'success' && $transactionType === 'payment') {
+            $this->handlePaymentSuccess($data);
+        } elseif ($transactionType === 'transfer') {
+            $this->handleTransferUpdate($data);
         }
 
         return response()->json(['status' => 'ok'], 200);
     }
 
-    protected function handlePaymentSuccess(array $payload): void
+    protected function handlePaymentSuccess(array $data): void
     {
-        $paymentId = $payload['payment_id'] ?? $payload['id'] ?? null;
-        $clientReference = $payload['reference_client'] ?? $payload['client_reference'] ?? '';
+        $transactionId = $data['id'] ?? null;
+        $details       = $data['transactionDetails'] ?? [];
+        $reference     = $details['reference'] ?? null;
         $orderToPayout = null;
 
-        DB::transaction(function () use ($paymentId, $clientReference, &$orderToPayout) {
+        DB::transaction(function () use ($transactionId, $reference, &$orderToPayout) {
             // ─── Order ────────────────────────────────────────────────────────
-            $order = $this->findOrder($paymentId, $clientReference);
+            $order = $this->findOrder($reference);
 
             if ($order) {
                 $order = Order::withoutGlobalScope('restaurant')
@@ -64,16 +70,15 @@ class JekoWebhookController extends Controller
                 if ($order && !$order->is_paid) {
                     $order->markAsPaid([
                         'method'    => 'jeko',
-                        'reference' => $paymentId,
-                        'metadata'  => ['jeko_payment_id' => $paymentId],
+                        'reference' => $transactionId,
+                        'metadata'  => ['jeko_transaction_id' => $transactionId],
                     ]);
-
                     $orderToPayout = $order;
                 }
             }
 
             // ─── Subscription ─────────────────────────────────────────────────
-            $subscription = $this->findSubscription($paymentId, $clientReference);
+            $subscription = $this->findSubscription($reference);
 
             if ($subscription) {
                 $subscription = Subscription::withoutGlobalScope('restaurant')
@@ -84,7 +89,7 @@ class JekoWebhookController extends Controller
                 if ($subscription && $subscription->status !== SubscriptionStatus::ACTIVE) {
                     $subscription->convertToPaid([
                         'method'    => 'jeko',
-                        'reference' => $paymentId,
+                        'reference' => $transactionId,
                     ]);
 
                     $restaurant = $subscription->restaurant;
@@ -103,84 +108,80 @@ class JekoWebhookController extends Controller
             ProcessJekoPayoutJob::dispatch($orderToPayout);
         }
 
-        Log::channel('payments')->info('Jeko webhook payment.success', [
-            'payment_id' => $paymentId,
-            'reference'  => $clientReference,
+        Log::channel('payments')->info('Jeko webhook transaction.completed (payment)', [
+            'transaction_id' => $transactionId,
+            'reference'      => $reference,
         ]);
     }
 
-    private function handlePaymentFailed(array $payload): void
+    protected function handleTransferUpdate(array $data): void
     {
-        $paymentId = $payload['payment_id'] ?? $payload['id'] ?? null;
-        $clientReference = $payload['reference_client'] ?? $payload['client_reference'] ?? '';
+        // Les virements sont traités par polling dans ProcessJekoPayoutJob.
+        // On logue simplement pour traçabilité.
+        Log::channel('payments')->info('Jeko webhook transaction.completed (transfer)', [
+            'transaction_id' => $data['id'] ?? null,
+            'status'         => $data['status'] ?? null,
+            'reference'      => $data['transactionDetails']['reference'] ?? null,
+        ]);
+    }
 
-        if (!$paymentId && !$clientReference) {
-            Log::channel('payments')->warning('Jeko webhook payment.failed: no identifier in payload');
+    protected function handlePaymentFailed(array $data): void
+    {
+        $reference = $data['transactionDetails']['reference'] ?? null;
+
+        if (!$reference) {
+            Log::channel('payments')->warning('Jeko webhook payment failed: no reference in payload');
             return;
         }
 
-        DB::transaction(function () use ($paymentId, $clientReference) {
-            $query = Order::withoutGlobalScope('restaurant')->lockForUpdate();
-
-            if ($paymentId && $clientReference) {
-                $query->where(function ($q) use ($paymentId, $clientReference) {
-                    $q->where('payment_reference', $paymentId)
-                      ->orWhere('payment_reference', $clientReference);
-                });
-            } elseif ($paymentId) {
-                $query->where('payment_reference', $paymentId);
-            } else {
-                $query->where('payment_reference', $clientReference);
+        DB::transaction(function () use ($reference) {
+            $order = $this->findOrder($reference);
+            if (!$order) {
+                return;
             }
 
-            $order = $query->first();
+            $order = Order::withoutGlobalScope('restaurant')
+                ->where('id', $order->id)
+                ->lockForUpdate()
+                ->first();
 
             if ($order && $order->payment_status === PaymentStatus::PENDING) {
                 $order->update(['payment_status' => PaymentStatus::FAILED]);
             }
         });
 
-        Log::channel('payments')->warning('Jeko webhook payment.failed', [
-            'payment_id' => $paymentId,
-            'reference' => $clientReference,
-        ]);
+        Log::channel('payments')->warning('Jeko webhook payment failed', ['reference' => $reference]);
     }
 
-    protected function findOrder(?string $paymentId, string $clientReference): ?Order
+    protected function findOrder(?string $reference): ?Order
     {
-        if ($paymentId) {
-            $order = Order::withoutGlobalScope('restaurant')
-                ->where('payment_reference', $paymentId)
-                ->first();
-
-            if ($order) {
-                return $order;
-            }
+        if (!$reference) {
+            return null;
         }
 
-        if ($clientReference && preg_match('/ORDER-(\d+)/', $clientReference, $matches)) {
+        // Format: ORDER-{id}-{reference}
+        if (preg_match('/^ORDER-(\d+)-/', $reference, $matches)) {
             return Order::withoutGlobalScope('restaurant')->find($matches[1]);
         }
 
-        return null;
+        return Order::withoutGlobalScope('restaurant')
+            ->where('payment_reference', $reference)
+            ->first();
     }
 
-    protected function findSubscription(?string $paymentId, string $clientReference): ?Subscription
+    protected function findSubscription(?string $reference): ?Subscription
     {
-        if ($paymentId) {
-            $sub = Subscription::withoutGlobalScope('restaurant')
-                ->where('payment_reference', $paymentId)
-                ->first();
-
-            if ($sub) {
-                return $sub;
-            }
+        if (!$reference) {
+            return null;
         }
 
-        if ($clientReference && preg_match('/SUB-(\d+)/', $clientReference, $matches)) {
+        // Format: SUB-{id}-{timestamp}
+        if (preg_match('/^SUB-(\d+)-/', $reference, $matches)) {
             return Subscription::withoutGlobalScope('restaurant')->find($matches[1]);
         }
 
-        return null;
+        return Subscription::withoutGlobalScope('restaurant')
+            ->where('payment_reference', $reference)
+            ->first();
     }
 }

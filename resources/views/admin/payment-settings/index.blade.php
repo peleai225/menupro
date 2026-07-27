@@ -179,17 +179,32 @@
                         </p>
                     </div>
 
-                    {{-- Merchant ID --}}
+                    {{-- API Key ID (X-API-KEY-ID) --}}
                     <div>
                         <label class="mb-1.5 block text-xs font-medium" style="color:var(--sa-muted-fg);">
-                            Merchant ID
+                            API Key ID <span class="text-[10px]" style="color:var(--sa-muted-fg);">(X-API-KEY-ID — UUID)</span>
                         </label>
                         <input type="text"
                                name="merchant_id"
                                value="{{ old('merchant_id', $setting->merchant_id) }}"
-                               placeholder="Identifiant marchand"
-                               class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                               placeholder="ex: 59ae202a-f583-4a15-970f-9e99bd1e0baa"
+                               class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 font-mono"
                                style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                        <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Identifiant de votre clé API (cockpit.jeko.africa → Paramètres → API & Webhooks).</p>
+                    </div>
+
+                    {{-- Store ID --}}
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium" style="color:var(--sa-muted-fg);">
+                            Store ID <span class="text-[10px]" style="color:var(--sa-muted-fg);">(UUID du magasin)</span>
+                        </label>
+                        <input type="text"
+                               name="store_id"
+                               value="{{ old('store_id', $setting->config['store_id'] ?? '') }}"
+                               placeholder="ex: 59ae202a-f583-4a15-970f-9e99bd1e0baa"
+                               class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 font-mono"
+                               style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                        <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">ID du magasin Jeko (cockpit.jeko.africa → Magasins).</p>
                     </div>
 
                     {{-- Submit --}}

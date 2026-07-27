@@ -26,11 +26,19 @@ class PaymentSettingsController extends Controller
             'api_key'        => ['nullable', 'string', 'max:1000'],
             'webhook_secret' => ['nullable', 'string', 'max:1000'],
             'merchant_id'    => ['nullable', 'string', 'max:255'],
+            'store_id'       => ['nullable', 'string', 'max:255'],
         ]);
 
         $paymentSetting->is_active   = $request->boolean('is_active');
         $paymentSetting->mode        = $validated['mode'];
         $paymentSetting->merchant_id = $validated['merchant_id'] ?? null;
+
+        // store_id stocké dans le champ config JSON
+        $config = $paymentSetting->config ?? [];
+        if (isset($validated['store_id'])) {
+            $config['store_id'] = $validated['store_id'] ?: null;
+        }
+        $paymentSetting->config = $config;
 
         if (!empty($validated['api_key'])) {
             $paymentSetting->setEncryptedApiKey($validated['api_key']);
