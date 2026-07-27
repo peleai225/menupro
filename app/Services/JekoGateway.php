@@ -346,20 +346,41 @@ class JekoGateway implements PaymentGatewayInterface
 
         $restaurant = $subMerchant->restaurant;
 
+        // Normalise le téléphone en +225XXXXXXXXXX
+        $phone = preg_replace('/\D/', '', $subMerchant->mobile_money);
+        if (strlen($phone) === 10) {
+            $phone = '+225' . $phone;
+        } elseif (!str_starts_with($phone, '+')) {
+            $phone = '+' . $phone;
+        }
+
+        // Catégories valides Jeko : retail, services
+        $categoryMap = [
+            'restaurant'       => 'retail',
+            'food_and_beverage'=> 'retail',
+            'food'             => 'retail',
+            'traiteur'         => 'retail',
+            'fast-food'        => 'retail',
+        ];
+        $category = $categoryMap[$subMerchant->business_type ?? ''] ?? ($subMerchant->business_type ?: 'retail');
+        if (!in_array($category, ['retail', 'services'])) {
+            $category = 'retail';
+        }
+
         try {
             // Étape 1 : onboarder l'entreprise
             $onboardResponse = $this->client()
                 ->timeout($this->timeout)
                 ->post("{$this->baseUrl}/service_providers/business_onboarding", [
                     'owner' => [
-                        'phone'     => $subMerchant->mobile_money,
+                        'phone'     => $phone,
                         'firstName' => $restaurant?->name ?? $subMerchant->legal_name,
                         'lastName'  => 'Restaurant',
                         'sex'       => 'M',
                     ],
                     'business' => [
                         'name'     => $subMerchant->legal_name,
-                        'category' => $subMerchant->business_type ?? 'food_and_beverage',
+                        'category' => $category,
                     ],
                 ]);
 
