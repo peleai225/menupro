@@ -188,7 +188,7 @@ class JekoGateway implements PaymentGatewayInterface
      * Effectue un payout (virement) vers un bénéficiaire.
      * $amount en FCFA — converti en centimes pour l'API.
      */
-    public function payout(string $recipient, int $amount, string $recipientName = '', string $reason = '', string $reference = ''): array
+    public function payout(string $recipient, int $amount, string $recipientName = '', string $reason = '', string $reference = '', string $paymentMethod = 'wave'): array
     {
         if (!$this->isConfigured()) {
             return ['success' => false, 'error' => 'Jeko API key not configured'];
@@ -205,7 +205,7 @@ class JekoGateway implements PaymentGatewayInterface
         $amountCents = $amount * 100;
         $description = $reason ?: 'Reversement commande MenuPro';
 
-        $contact = $this->createContact($recipient, $recipientName ?: 'Restaurant MenuPro');
+        $contact = $this->createContact($recipient, $recipientName ?: 'Restaurant MenuPro', $paymentMethod);
 
         if (!$contact['success']) {
             return $contact;

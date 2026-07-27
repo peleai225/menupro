@@ -166,7 +166,7 @@
                             id="mobile_money"
                             name="mobile_money"
                             value="{{ old('mobile_money') }}"
-                            placeholder="Ex : 0707000000"
+                            placeholder="Ex : 0707000000 ou +2250707000000"
                             class="w-full h-12 px-4 bg-white border @error('mobile_money') border-red-400 @else border-neutral-200 @enderror rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                         @error('mobile_money')

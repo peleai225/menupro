@@ -35,7 +35,7 @@ class JekoOnboardingController extends Controller
         $validated = $request->validate([
             'legal_name'            => ['required', 'string', 'max:255'],
             'business_type'         => ['nullable', 'string', 'max:100'],
-            'mobile_money'          => ['required', 'string', 'max:20', 'regex:/^[0-9+]{8,15}$/'],
+            'mobile_money'          => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]{8,15}$/'],
             'mobile_money_operator' => ['required', 'string', 'in:' . implode(',', array_column(MobileMoneyOperator::cases(), 'value'))],
             'email'                 => ['nullable', 'email', 'max:255'],
         ]);
@@ -46,7 +46,7 @@ class JekoOnboardingController extends Controller
                 'status'                => JekoSubMerchantStatus::PENDING,
                 'legal_name'            => $validated['legal_name'],
                 'business_type'         => $validated['business_type'] ?? 'restaurant',
-                'mobile_money'          => $validated['mobile_money'],
+                'mobile_money'          => $this->normalizePhone($validated['mobile_money']),
                 'mobile_money_operator' => $validated['mobile_money_operator'],
                 'email'                 => $validated['email'] ?? $restaurant->email,
             ]);
@@ -61,5 +61,19 @@ class JekoOnboardingController extends Controller
 
         return redirect()->route('restaurant.jeko.onboarding')
             ->with('success', 'Votre demande d\'intégration Jeko a été soumise. L\'équipe MenuPro va examiner votre dossier.');
+    }
+
+    // Normalise vers +225XXXXXXXX requis par l'API Jeko
+    private function normalizePhone(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone);
+
+        // Déjà avec indicatif 225
+        if (str_starts_with($digits, '225') && strlen($digits) >= 11) {
+            return '+' . $digits;
+        }
+
+        // Numéro local CI (8 ou 10 chiffres)
+        return '+225' . ltrim($digits, '0');
     }
 }

@@ -62,12 +62,15 @@ class ProcessJekoPayoutJob implements ShouldQueue
             return;
         }
 
+        $paymentMethod = $subMerchant->mobile_money_operator?->value ?? 'wave';
+
         $result = $gateway->forMarketplace($restaurant)->payout(
             $phone,
             $amount,
             $restaurant->name,
             "Reversement commande #{$this->order->id}",
-            $reference
+            $reference,
+            $paymentMethod
         );
 
         if ($result['success']) {
