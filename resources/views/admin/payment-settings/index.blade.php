@@ -179,7 +179,8 @@
                         </p>
                     </div>
 
-                    {{-- API Key ID (X-API-KEY-ID) --}}
+                    {{-- Champs spécifiques Jeko (API Key ID + Store ID) --}}
+                    @if(str_starts_with($setting->gateway, 'jeko'))
                     <div>
                         <label class="mb-1.5 block text-xs font-medium" style="color:var(--sa-muted-fg);">
                             API Key ID <span class="text-[10px]" style="color:var(--sa-muted-fg);">(X-API-KEY-ID — UUID)</span>
@@ -193,7 +194,6 @@
                         <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Identifiant de votre clé API (cockpit.jeko.africa → Paramètres → API & Webhooks).</p>
                     </div>
 
-                    {{-- Store ID --}}
                     <div>
                         <label class="mb-1.5 block text-xs font-medium" style="color:var(--sa-muted-fg);">
                             Store ID <span class="text-[10px]" style="color:var(--sa-muted-fg);">(UUID du magasin)</span>
@@ -206,6 +206,22 @@
                                style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
                         <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">ID du magasin Jeko (cockpit.jeko.africa → Magasins).</p>
                     </div>
+                    @endif
+
+                    {{-- Champ Merchant ID générique (non-Jeko : Wave, MoneyFusion, etc.) --}}
+                    @if(!str_starts_with($setting->gateway, 'jeko') && $setting->gateway !== 'wave')
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium" style="color:var(--sa-muted-fg);">
+                            Merchant ID
+                        </label>
+                        <input type="text"
+                               name="merchant_id"
+                               value="{{ old('merchant_id', $setting->merchant_id) }}"
+                               placeholder="Identifiant marchand"
+                               class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 font-mono"
+                               style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                    </div>
+                    @endif
 
                     {{-- Submit --}}
                     <div class="flex justify-end pt-2">
