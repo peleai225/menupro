@@ -22,7 +22,8 @@ class JekoWebhookController extends Controller
         // Header Jeko: "Jeko-Signature" (Laravel normalise en HTTP_JEKO_SIGNATURE)
         $signature  = $request->header('Jeko-Signature', '');
 
-        $valid = app(JekoGateway::class)->forPlatform()->verifyWebhookSignature($rawPayload, $signature);
+        // Le webhook secret est dans jeko_marketplace (pas jeko_normal)
+        $valid = app(JekoGateway::class)->forMarketplacePlatform()->verifyWebhookSignature($rawPayload, $signature);
 
         if (!$valid) {
             // Log le payload brut pour récupérer le bon secret depuis Jeko

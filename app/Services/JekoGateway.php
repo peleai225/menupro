@@ -49,6 +49,14 @@ class JekoGateway implements PaymentGatewayInterface
         return $this;
     }
 
+    public function forMarketplacePlatform(): static
+    {
+        $this->isMarketplaceMode = true;
+        $this->restaurant = null;
+        $this->loadConfig();
+        return $this;
+    }
+
     protected function loadConfig(): void
     {
         $gateway = $this->isMarketplaceMode ? 'jeko_marketplace' : 'jeko_normal';
