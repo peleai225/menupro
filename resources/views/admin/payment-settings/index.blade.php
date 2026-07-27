@@ -106,8 +106,8 @@
                             <input type="checkbox" name="is_active" value="1"
                                    class="sr-only peer"
                                    {{ $setting->is_active ? 'checked' : '' }}>
-                            <div class="peer h-6 w-11 rounded-full after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"
-                                 style="background:{{ $setting->is_active ? 'var(--sa-primary)' : 'var(--sa-border)' }};border:1px solid var(--sa-border);">
+                            <div class="peer h-6 w-11 rounded-full after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-[color:var(--sa-primary)] bg-[color:var(--sa-border)]"
+                                 style="border:1px solid var(--sa-border);">
                             </div>
                         </label>
                     </div>
@@ -186,7 +186,7 @@
                         </label>
                         <input type="text"
                                name="merchant_id"
-                               value="{{ old('merchant_id_'.$setting->id, $setting->merchant_id) }}"
+                               value="{{ old('merchant_id', $setting->merchant_id) }}"
                                placeholder="Identifiant marchand"
                                class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2"
                                style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">

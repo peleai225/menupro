@@ -99,10 +99,6 @@ class PaymentSettingsTest extends TestCase
 
         $response = $this->actingAs($regularUser)->get('/admin/payment-settings');
 
-        // Either 403 Forbidden or a redirect (e.g. back to login/home)
-        $this->assertTrue(
-            in_array($response->getStatusCode(), [403, 302]),
-            "Expected 403 or 302, got {$response->getStatusCode()}"
-        );
+        $response->assertForbidden();
     }
 }
