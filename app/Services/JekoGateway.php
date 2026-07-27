@@ -128,6 +128,8 @@ class JekoGateway implements PaymentGatewayInterface
                     'entity_id'    => $entity->id,
                     'link_id'      => $data['id'] ?? null,
                     'amount_cents' => $amountCents,
+                    'redirect_url' => $payload['redirectUrl'] ?? null,
+                    'store_id'     => $this->storeId,
                 ]);
 
                 return [
