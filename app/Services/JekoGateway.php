@@ -82,7 +82,8 @@ class JekoGateway implements PaymentGatewayInterface
     }
 
     /**
-     * Crée une demande de paiement Jeko (Pay-in redirect).
+     * Crée un lien de paiement Jeko (Payment Link).
+     * Le client choisit son opérateur sur la page Jeko.
      * Montant en FCFA — converti en centimes pour l'API.
      */
     public function createPayment(Order|Subscription $entity, string $successUrl, string $errorUrl): array
@@ -93,48 +94,40 @@ class JekoGateway implements PaymentGatewayInterface
 
         $amountCents = (int) ($entity instanceof Order ? $entity->total : $entity->amount_paid) * 100;
 
-        $reference = $entity instanceof Order
-            ? "ORDER-{$entity->id}-{$entity->reference}"
-            : "SUB-{$entity->id}-" . now()->timestamp;
+        $title = $entity instanceof Order
+            ? "Commande #{$entity->id} — " . ($entity->restaurant->name ?? 'MenuPro')
+            : "Abonnement MenuPro";
 
         try {
             $response = $this->client()
                 ->timeout($this->timeout)
-                ->post("{$this->baseUrl}/payment_requests", [
-                    'storeId'        => $this->storeId,
-                    'amountCents'    => $amountCents,
-                    'currency'       => $this->currency,
-                    'reference'      => $reference,
-                    'paymentDetails' => [
-                        'type' => 'redirect',
-                        'data' => [
-                            'paymentMethod' => 'wave',
-                            'successUrl'    => $successUrl,
-                            'errorUrl'      => $errorUrl,
-                        ],
-                    ],
+                ->post("{$this->baseUrl}/payment_links", [
+                    'storeId'              => $this->storeId,
+                    'title'                => mb_substr($title, 0, 255),
+                    'amountCents'          => $amountCents,
+                    'currency'             => $this->currency,
+                    'allowMultiplePayments' => false,
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                Log::channel('payments')->info('Jeko payment request created', [
-                    'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
-                    'entity_id'   => $entity->id,
-                    'payment_id'  => $data['id'] ?? null,
+                Log::channel('payments')->info('Jeko payment link created', [
+                    'entity_type'  => $entity instanceof Order ? 'order' : 'subscription',
+                    'entity_id'    => $entity->id,
+                    'link_id'      => $data['id'] ?? null,
                     'amount_cents' => $amountCents,
                 ]);
 
                 return [
                     'success'     => true,
                     'payment_id'  => $data['id'],
-                    'payment_url' => $data['redirectUrl'],
-                    'reference'   => $data['reference'],
-                    'status'      => $data['status'] ?? 'pending',
+                    'payment_url' => $data['link'],
+                    'status'      => 'pending',
                 ];
             }
 
-            Log::channel('payments')->error('Jeko payment request failed', [
+            Log::channel('payments')->error('Jeko payment link failed', [
                 'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
                 'entity_id'   => $entity->id,
                 'status'      => $response->status(),
@@ -143,10 +136,10 @@ class JekoGateway implements PaymentGatewayInterface
 
             return [
                 'success' => false,
-                'error'   => $response->json('message') ?? 'Erreur Jeko payment request',
+                'error'   => $response->json('message') ?? 'Erreur création lien de paiement Jeko',
             ];
         } catch (\Exception $e) {
-            Log::channel('payments')->error('Jeko payment request exception', [
+            Log::channel('payments')->error('Jeko payment link exception', [
                 'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
                 'entity_id'   => $entity->id,
                 'error'       => $e->getMessage(),
@@ -168,13 +161,19 @@ class JekoGateway implements PaymentGatewayInterface
         try {
             $response = $this->client()
                 ->timeout(15)
-                ->get("{$this->baseUrl}/payment_requests/{$paymentId}");
+                ->get("{$this->baseUrl}/payment_links/{$paymentId}");
 
             if ($response->successful()) {
+                $data = $response->json();
+                // Pour un lien à usage unique : canReceivePayments=false = paiement complété
+                $completed = isset($data['allowMultiplePayments'])
+                    && $data['allowMultiplePayments'] === false
+                    && ($data['canReceivePayments'] ?? true) === false;
+
                 return [
-                    'success' => true,
-                    'status'  => $response->json('status'),
-                    'data'    => $response->json(),
+                    'success'   => true,
+                    'status'    => $completed ? 'success' : 'pending',
+                    'data'      => $data,
                 ];
             }
 
