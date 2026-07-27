@@ -104,12 +104,17 @@ class JekoGateway implements PaymentGatewayInterface
             : "Abonnement MenuPro";
 
         try {
+            $reference = $entity instanceof Order
+                ? 'ORDER-' . $entity->id . '-' . time()
+                : 'SUB-' . $entity->id . '-' . time();
+
             $payload = [
                 'storeId'               => $this->storeId,
                 'title'                 => mb_substr($title, 0, 255),
                 'amountCents'           => $amountCents,
                 'currency'              => $this->currency,
                 'allowMultiplePayments' => false,
+                'storeReference'        => $reference,
             ];
 
             if (!empty($successUrl)) {
