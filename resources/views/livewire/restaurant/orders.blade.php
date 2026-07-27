@@ -288,6 +288,7 @@
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Client</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Type</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Paiement</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Statut</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-4 w-16"></th>
@@ -350,6 +351,32 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($order->total, 0, ',', ' ') }} F</span>
+                                </td>
+                                <td class="px-6 py-4 hidden sm:table-cell">
+                                    @php
+                                        $method = $order->payment_method;
+                                        $operator = $order->payment_metadata['jeko_operator'] ?? null;
+                                        $paymentLogos = ['wave' => 'wave.png', 'orange' => 'orange-money.png', 'mtn' => 'mtn-momo.png', 'moov' => 'moov-money.png'];
+                                        $paymentLabels = ['wave' => 'Wave', 'orange' => 'Orange Money', 'mtn' => 'MTN MoMo', 'moov' => 'Moov Money', 'cash_on_delivery' => 'Espèces'];
+                                    @endphp
+                                    @if($method === 'jeko' && $operator && isset($paymentLogos[$operator]))
+                                        <div class="flex items-center gap-2">
+                                            <img src="{{ asset('images/payments/' . $paymentLogos[$operator]) }}" alt="{{ $paymentLabels[$operator] ?? $operator }}" class="w-6 h-6 object-contain rounded">
+                                            <span class="text-sm text-neutral-700">{{ $paymentLabels[$operator] ?? $operator }}</span>
+                                        </div>
+                                    @elseif($method === 'wave')
+                                        <div class="flex items-center gap-2">
+                                            <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="w-6 h-6 object-contain rounded">
+                                            <span class="text-sm text-neutral-700">Wave</span>
+                                        </div>
+                                    @elseif($method === 'cash_on_delivery')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-neutral-100 text-neutral-600">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                            Espèces
+                                        </span>
+                                    @else
+                                        <span class="text-sm text-neutral-400">—</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     @php
@@ -544,6 +571,32 @@
                                 </div>
                             @endif
                         </div>
+
+                        <!-- Payment Method -->
+                        @php
+                            $pm = $selectedOrder->payment_method;
+                            $pmOperator = $selectedOrder->payment_metadata['jeko_operator'] ?? null;
+                            $pmLogos = ['wave' => 'wave.png', 'orange' => 'orange-money.png', 'mtn' => 'mtn-momo.png', 'moov' => 'moov-money.png'];
+                            $pmLabels = ['wave' => 'Wave', 'orange' => 'Orange Money', 'mtn' => 'MTN MoMo', 'moov' => 'Moov Money'];
+                        @endphp
+                        @if($pm)
+                        <div class="rounded-xl p-4 flex items-center gap-3" style="background: #f9fafb; border: 1px solid #e5e7eb;">
+                            <svg class="w-5 h-5 flex-shrink-0" style="color: #9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            @if($pm === 'jeko' && $pmOperator && isset($pmLogos[$pmOperator]))
+                                <img src="{{ asset('images/payments/' . $pmLogos[$pmOperator]) }}" alt="{{ $pmLabels[$pmOperator] }}" class="w-7 h-7 object-contain rounded">
+                                <span class="font-medium text-sm" style="color: #374151;">{{ $pmLabels[$pmOperator] }} <span style="color: #9ca3af;">(via Jeko)</span></span>
+                            @elseif($pm === 'wave')
+                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="w-7 h-7 object-contain rounded">
+                                <span class="font-medium text-sm" style="color: #374151;">Wave CI</span>
+                            @elseif($pm === 'cash_on_delivery')
+                                <span class="font-medium text-sm" style="color: #374151;">Paiement à la caisse</span>
+                            @else
+                                <span class="font-medium text-sm" style="color: #374151;">{{ $pm }}</span>
+                            @endif
+                        </div>
+                        @endif
 
                         <!-- Order Items -->
                         <div>
