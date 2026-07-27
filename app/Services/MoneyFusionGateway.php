@@ -37,7 +37,8 @@ class MoneyFusionGateway
 
     public function isConfigured(): bool
     {
-        return !empty($this->getApiUrl());
+        $active = (bool) SystemSetting::get('moneyfusion_active', true);
+        return $active && !empty($this->getApiUrl());
     }
 
     /**

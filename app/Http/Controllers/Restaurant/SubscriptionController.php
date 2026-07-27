@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionAddon;
+use App\Services\JekoGateway;
 use App\Services\MoneyFusionGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class SubscriptionController extends Controller
 {
     public function __construct(
         protected MoneyFusionGateway $moneyFusion,
+        protected JekoGateway $jeko,
     ) {}
 
     public function index(Request $request): View
@@ -86,6 +88,8 @@ class SubscriptionController extends Controller
             'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
+            'payment_gateway' => ['nullable', 'in:moneyfusion,jeko'],
+            'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
         ]);
 
         $plan = Plan::where('slug', $request->plan)->firstOrFail();
@@ -143,12 +147,14 @@ class SubscriptionController extends Controller
             }
         }
 
-        $result = $this->createSubscriptionPaymentSession($subscription);
+        $gateway = $request->input('payment_gateway', 'moneyfusion');
+        $jekoOperator = $request->input('jeko_operator', 'wave');
+        $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'], 'jeko_operator' => $result['jeko_operator'] ?? null],
             ]);
             return redirect($result['payment_url']);
         }
@@ -164,6 +170,8 @@ class SubscriptionController extends Controller
             'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
+            'payment_gateway' => ['nullable', 'in:moneyfusion,jeko'],
+            'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
         ]);
 
         $restaurant = $request->user()->restaurant;
@@ -207,12 +215,14 @@ class SubscriptionController extends Controller
             }
         }
 
-        $result = $this->createSubscriptionPaymentSession($subscription);
+        $gateway = $request->input('payment_gateway', 'moneyfusion');
+        $jekoOperator = $request->input('jeko_operator', 'wave');
+        $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'], 'jeko_operator' => $result['jeko_operator'] ?? null],
             ]);
             return redirect($result['payment_url']);
         }
@@ -330,12 +340,14 @@ class SubscriptionController extends Controller
                 ->with('error', 'Cet abonnement ne peut pas être payé à nouveau.');
         }
 
-        $result = $this->createSubscriptionPaymentSession($subscription);
+        $gateway      = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
+        $jekoOperator = $subscription->payment_metadata['jeko_operator'] ?? 'wave';
+        $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
         if ($result) {
             $subscription->update([
                 'payment_reference' => $result['payment_id'],
-                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway']],
+                'payment_metadata' => ['payment_url' => $result['payment_url'], 'gateway' => $result['gateway'], 'jeko_operator' => $result['jeko_operator'] ?? null],
             ]);
             return redirect($result['payment_url']);
         }
@@ -347,29 +359,63 @@ class SubscriptionController extends Controller
 
     protected ?string $lastPaymentError = null;
 
-    private function createSubscriptionPaymentSession(Subscription $subscription): ?array
+    private function createSubscriptionPaymentSession(Subscription $subscription, string $gateway = 'moneyfusion', string $jekoOperator = 'wave'): ?array
     {
+        $successUrl = route('restaurant.subscription.success', $subscription);
+
+        if ($gateway === 'jeko') {
+            $jekoConfigured = $this->jeko->forMarketplacePlatform()->isConfigured();
+            if (!$jekoConfigured) {
+                $this->lastPaymentError = 'Jeko non configuré';
+                \Log::channel('payments')->warning($this->lastPaymentError);
+                return null;
+            }
+
+            $errorUrl = route('restaurant.subscription');
+            $result   = $this->jeko->createPayment($subscription, $successUrl, $errorUrl, $jekoOperator);
+
+            \Log::channel('payments')->info('Jeko subscription payment created', [
+                'subscription_id' => $subscription->id,
+                'success'         => $result['success'],
+                'error'           => $result['error'] ?? null,
+                'payment_url'     => $result['payment_url'] ?? null,
+                'operator'        => $jekoOperator,
+            ]);
+
+            if ($result['success']) {
+                return [
+                    'payment_id'    => $result['payment_id'],
+                    'payment_url'   => $result['payment_url'],
+                    'gateway'       => 'jeko',
+                    'jeko_operator' => $jekoOperator,
+                ];
+            }
+
+            $this->lastPaymentError = $result['error'] ?? 'Erreur inconnue Jeko';
+            return null;
+        }
+
+        // MoneyFusion (défaut)
         if (!$this->moneyFusion->isConfigured()) {
-            $this->lastPaymentError = 'MoneyFusion non configuré (API URL manquante dans les paramètres)';
+            $this->lastPaymentError = 'MoneyFusion non configuré ou désactivé';
             \Log::channel('payments')->warning($this->lastPaymentError);
             return null;
         }
 
-        $returnUrl = route('restaurant.subscription.success', $subscription);
-        $result = $this->moneyFusion->createPayment($subscription, $returnUrl);
+        $result = $this->moneyFusion->createPayment($subscription, $successUrl);
 
         \Log::channel('payments')->info('MoneyFusion createPayment result', [
             'subscription_id' => $subscription->id,
-            'success' => $result['success'],
-            'error' => $result['error'] ?? null,
-            'payment_url' => $result['payment_url'] ?? null,
+            'success'         => $result['success'],
+            'error'           => $result['error'] ?? null,
+            'payment_url'     => $result['payment_url'] ?? null,
         ]);
 
         if ($result['success']) {
             return [
-                'payment_id' => $result['token'],
+                'payment_id'  => $result['token'],
                 'payment_url' => $result['payment_url'],
-                'gateway' => 'moneyfusion',
+                'gateway'     => 'moneyfusion',
             ];
         }
 
@@ -379,8 +425,15 @@ class SubscriptionController extends Controller
 
     private function verifySubscriptionPayment(Subscription $subscription): bool
     {
-        $ref = $subscription->payment_reference;
+        $ref     = $subscription->payment_reference;
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
+
         if (!$ref) {
+            return true;
+        }
+
+        // Jeko — le webhook a déjà activé l'abonnement avant la redirection
+        if ($gateway === 'jeko') {
             return true;
         }
 

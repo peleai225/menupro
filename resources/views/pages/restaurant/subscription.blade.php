@@ -180,6 +180,8 @@
                     @csrf
                     <input type="hidden" name="plan" value="stand">
                     <input type="hidden" name="billing_period" value="monthly">
+                    <input type="hidden" name="payment_gateway" x-bind:value="gateway ?? 'moneyfusion'">
+                    <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator ?? 'wave'">
                     <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm hover:shadow transition-all">
                         @if($isTrial)
                             Activer mon plan — 5 000 F/mois
@@ -202,7 +204,12 @@
         </div>
     </div>
     @else
-    <div x-data="{ period: 'monthly' }">
+    @php
+        $moneyFusionActive = (bool) \App\Models\SystemSetting::get('moneyfusion_active', true);
+        $moneyFusionConfigured = !empty(\App\Models\SystemSetting::get('moneyfusion_api_url', ''));
+        $jekoConfigured = \App\Models\SystemPaymentSetting::where('gateway', 'jeko_marketplace')->where('is_active', true)->exists();
+    @endphp
+    <div x-data="{ period: 'monthly', gateway: '{{ ($moneyFusionActive && $moneyFusionConfigured) ? 'moneyfusion' : 'jeko' }}', jeko_operator: 'wave' }">
 
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -230,6 +237,55 @@
                 @endforeach
             </div>
         </div>
+
+        {{-- Sélecteur moyen de paiement --}}
+        @if(($moneyFusionActive && $moneyFusionConfigured) || $jekoConfigured)
+        <div class="mb-6 p-4 bg-white rounded-2xl border border-neutral-200 shadow-sm">
+            <h3 class="text-sm font-semibold text-neutral-700 mb-3">Moyen de paiement</h3>
+            <div class="flex flex-col sm:flex-row gap-3">
+                @if($moneyFusionActive && $moneyFusionConfigured)
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all flex-1"
+                       :class="gateway === 'moneyfusion' ? 'border-blue-500 bg-blue-50' : 'border-neutral-200 hover:border-neutral-300'">
+                    <input type="radio" x-model="gateway" value="moneyfusion" class="sr-only">
+                    <span class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#2563eb;">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                    </span>
+                    <div>
+                        <p class="font-medium text-neutral-900 text-sm">MoneyFusion</p>
+                        <p class="text-xs text-neutral-500">Orange, MTN, Wave, Moov</p>
+                    </div>
+                </label>
+                @endif
+                @if($jekoConfigured)
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all flex-1"
+                       :class="gateway === 'jeko' ? 'border-purple-500 bg-purple-50' : 'border-neutral-200 hover:border-neutral-300'">
+                    <input type="radio" x-model="gateway" value="jeko" class="sr-only">
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">
+                        <svg viewBox="0 0 40 40" class="w-6 h-6" fill="none"><rect x="20" y="8" width="7" height="18" rx="3.5" fill="white"/><path d="M20 22 Q20 30 13 30 Q10 30 9 27" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="13" cy="14" r="5" fill="#38BDF8"/></svg>
+                    </span>
+                    <div>
+                        <p class="font-medium text-neutral-900 text-sm">Jeko</p>
+                        <p class="text-xs text-neutral-500">Wave, Orange, MTN, Moov</p>
+                    </div>
+                </label>
+                @endif
+            </div>
+            {{-- Sélecteur opérateur Jeko --}}
+            <div x-show="gateway === 'jeko'" x-transition class="mt-3">
+                <p class="text-xs text-neutral-500 mb-2">Choisissez votre opérateur :</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    @foreach(['wave' => ['label' => 'Wave', 'logo' => 'wave.png'], 'orange' => ['label' => 'Orange Money', 'logo' => 'orange-money.png'], 'mtn' => ['label' => 'MTN MoMo', 'logo' => 'mtn-momo.png'], 'moov' => ['label' => 'Moov Money', 'logo' => 'moov-money.png']] as $op => $info)
+                    <label class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all"
+                           :class="jeko_operator === '{{ $op }}' ? 'border-purple-500 bg-purple-50' : 'border-neutral-200 hover:border-neutral-300'">
+                        <input type="radio" x-model="jeko_operator" value="{{ $op }}" class="sr-only">
+                        <img src="{{ asset('images/payments/' . $info['logo']) }}" alt="{{ $info['label'] }}" class="h-8 w-auto object-contain">
+                        <span class="text-xs font-medium" :class="jeko_operator === '{{ $op }}' ? 'text-purple-700' : 'text-neutral-600'">{{ $info['label'] }}</span>
+                    </label>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
 
         {{-- Grille des plans --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -329,6 +385,8 @@
                         @csrf
                         <input type="hidden" name="plan" value="{{ $plan->slug }}">
                         <input type="hidden" name="billing_period" x-bind:value="period">
+                        <input type="hidden" name="payment_gateway" x-bind:value="gateway">
+                        <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator">
                         @if($isDisabled)
                             <button type="button" disabled
                                     class="w-full py-2.5 rounded-xl text-sm font-semibold bg-neutral-100 text-neutral-400 cursor-not-allowed">

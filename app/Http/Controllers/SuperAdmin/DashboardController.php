@@ -242,6 +242,7 @@ class DashboardController extends Controller
                 ? (int) \App\Models\SystemSetting::get('commando_commission_elite_cents', 700000)
                 : null,
             // MoneyFusion
+            'moneyfusion_active'  => (bool) \App\Models\SystemSetting::get('moneyfusion_active', true),
             'moneyfusion_api_url' => \App\Models\SystemSetting::get('moneyfusion_api_url', config('moneyfusion.api_url', '')),
             'moneyfusion_api_key' => \App\Models\SystemSetting::get('moneyfusion_api_key', config('moneyfusion.api_key', '')),
             // Wave CI
@@ -299,6 +300,7 @@ class DashboardController extends Controller
             'elevenlabs_api_key' => ['nullable', 'string', 'max:255'],
             'elevenlabs_voice_id' => ['nullable', 'string', 'max:255'],
             // MoneyFusion
+            'moneyfusion_active'  => ['boolean'],
             'moneyfusion_api_url' => ['nullable', 'string', function($a,$v,$f){ if($v && !filter_var($v,FILTER_VALIDATE_URL)) $f('Format URL invalide.'); }],
             'moneyfusion_api_key' => ['nullable', 'string'],
             // Wave CI
@@ -396,6 +398,7 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('geoapify_api_key', $request->geoapify_api_key, 'string', 'Clé API Geoapify (géocodage d\'adresses)');
         }
         // MoneyFusion
+        \App\Models\SystemSetting::set('moneyfusion_active', $request->boolean('moneyfusion_active'), 'boolean', 'MoneyFusion activé');
         if ($request->filled('moneyfusion_api_url')) {
             \App\Models\SystemSetting::set('moneyfusion_api_url', $request->moneyfusion_api_url, 'string', 'URL API MoneyFusion (depuis le dashboard)');
         }

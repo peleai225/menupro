@@ -177,9 +177,21 @@
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
                     {{-- MoneyFusion --}}
                     <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full" style="background:#2563eb;"></span>
-                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">MoneyFusion</h2>
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full" style="background:#2563eb;"></span>
+                                <h2 class="text-base font-semibold" style="color:var(--sa-fg);">MoneyFusion</h2>
+                            </div>
+                            {{-- Toggle activer/désactiver --}}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <span class="text-xs font-medium" style="color:var(--sa-muted-fg);">Activé</span>
+                                <div class="relative">
+                                    <input type="checkbox" name="moneyfusion_active" value="1" class="sr-only peer"
+                                           {{ old('moneyfusion_active', $settings['moneyfusion_active'] ?? true) ? 'checked' : '' }}>
+                                    <div class="w-9 h-5 rounded-full peer-checked:bg-blue-500 transition-colors" style="background:var(--sa-border);"></div>
+                                    <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-all peer-checked:translate-x-4"></div>
+                                </div>
+                            </label>
                         </div>
                         <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">
                             Paiements abonnements (Orange Money, MTN, Wave, Moov).
