@@ -45,7 +45,8 @@ class OrderController extends Controller
             'delivery_city'               => 'required|string|max:100',
             'delivery_instructions'       => 'nullable|string|max:300',
             'customer_notes'              => 'nullable|string|max:300',
-            'payment_method'              => 'required|in:wave,orange_money,mtn_money,cash_on_delivery',
+            'payment_method'              => 'required|in:wave,orange_money,mtn_money,cash_on_delivery,jeko',
+            'jeko_operator'               => 'nullable|in:wave,orange,mtn,moov',
         ]);
 
         $user     = $request->user()->load('customer.user');
@@ -58,6 +59,15 @@ class OrderController extends Controller
         $restaurant = Restaurant::where('is_on_platform', true)
             ->where('status', 'active')
             ->findOrFail($data['restaurant_id']);
+
+        if ($data['payment_method'] === 'jeko') {
+            $subMerchant = $restaurant->jekoSubMerchant;
+            if (!$subMerchant || !$subMerchant->isIntegrated()) {
+                return response()->json([
+                    'message' => 'Ce restaurant n\'est pas encore intégré avec Jeko.',
+                ], 422);
+            }
+        }
 
         if ($data['payment_method'] === 'cash_on_delivery' && !$restaurant->cash_on_delivery) {
             return response()->json([
@@ -123,6 +133,9 @@ class OrderController extends Controller
                 'delivery_instructions' => $data['delivery_instructions'] ?? null,
                 'customer_notes'      => $data['customer_notes'] ?? null,
                 'payment_method'      => $data['payment_method'],
+                'payment_metadata'    => $data['payment_method'] === 'jeko'
+                    ? ['jeko_operator' => $data['jeko_operator'] ?? 'wave']
+                    : null,
                 'payment_status'      => PaymentStatus::PENDING->value,
                 'estimated_prep_time' => $pricing['estimated_minutes'],
             ]);

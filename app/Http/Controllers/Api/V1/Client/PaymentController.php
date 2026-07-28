@@ -122,11 +122,13 @@ class PaymentController extends Controller
             }
 
             $gateway = app(JekoGateway::class)->forMarketplace($restaurant);
+            $jekoOperator = $order->payment_metadata['jeko_operator'] ?? 'wave';
 
             $result = $gateway->createPayment(
                 $order,
                 config('app.url') . '/api/v1/client/payment/success?token=' . $order->tracking_token,
                 config('app.url') . '/api/v1/client/payment/error?token=' . $order->tracking_token,
+                $jekoOperator,
             );
 
             if (!($result['success'] ?? false)) {
