@@ -143,7 +143,10 @@ class PaymentController extends Controller
             DB::transaction(function () use ($order, $result) {
                 $order->update([
                     'payment_reference' => $result['payment_id'],
-                    'payment_metadata'  => $result,
+                    'payment_metadata'  => array_merge(
+                        $order->payment_metadata ?? [],
+                        ['jeko_link_id' => $result['payment_id']]
+                    ),
                 ]);
 
                 PaymentTransaction::create([
