@@ -161,14 +161,20 @@
                         <label for="mobile_money" class="block text-sm font-medium text-neutral-700 mb-2">
                             Numéro Mobile Money <span class="text-red-500">*</span>
                         </label>
-                        <input
-                            type="tel"
-                            id="mobile_money"
-                            name="mobile_money"
-                            value="{{ old('mobile_money') }}"
-                            placeholder="Ex : 0707000000 ou +2250707000000"
-                            class="w-full h-12 px-4 bg-white border @error('mobile_money') border-red-400 @else border-neutral-200 @enderror rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        >
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <span class="text-neutral-500 font-medium">+225</span>
+                            </div>
+                            <input
+                                type="tel"
+                                id="mobile_money"
+                                name="mobile_money"
+                                value="{{ old('mobile_money') }}"
+                                placeholder="0707000000"
+                                class="w-full h-12 pl-16 pr-4 bg-white border @error('mobile_money') border-red-400 @else border-neutral-200 @enderror rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            >
+                        </div>
+                        <p class="mt-1 text-xs text-neutral-500">Entrez votre numéro à 10 chiffres (avec ou sans le 0)</p>
                         @error('mobile_money')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror

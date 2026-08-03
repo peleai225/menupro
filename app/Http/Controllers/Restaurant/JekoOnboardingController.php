@@ -69,11 +69,21 @@ class JekoOnboardingController extends Controller
         $digits = preg_replace('/\D/', '', $phone);
 
         // Déjà avec indicatif 225
-        if (str_starts_with($digits, '225') && strlen($digits) >= 11) {
+        if (str_starts_with($digits, '225') && strlen($digits) === 13) {
             return '+' . $digits;
         }
 
-        // Numéro local CI (8 ou 10 chiffres)
-        return '+225' . ltrim($digits, '0');
+        // Enlever UN SEUL zéro de début si présent (numéro local)
+        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
+            $digits = substr($digits, 1);
+        }
+
+        // Numéro local CI (9 chiffres après avoir enlevé le 0)
+        if (strlen($digits) === 9 || strlen($digits) === 10) {
+            return '+225' . $digits;
+        }
+
+        // Si déjà 10 chiffres sans 0 initial, ajouter +225
+        return '+225' . $digits;
     }
 }
