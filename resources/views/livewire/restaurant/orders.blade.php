@@ -455,27 +455,27 @@
                      x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                      x-transition:enter-end="opacity-100 scale-100 translate-y-0">
                     
-                    <!-- Header -->
-                    <div class="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-gray-200" style="background: #f8fafc;">
-                        <div class="flex items-center justify-between gap-4">
-                            <!-- Title & Info -->
+                    <!-- Header Compact -->
+                    <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200" style="background: #f8fafc;">
+                        <div class="flex items-center justify-between gap-2">
+                            <!-- Title & Badges -->
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h2 class="text-xl sm:text-2xl font-bold" style="color: #1f2937;">
-                                        #{{ $selectedOrder->reference }}
-                                    </h2>
+                                <h2 class="text-base font-bold truncate" style="color: #1f2937;">
+                                    #{{ $selectedOrder->reference }}
+                                </h2>
+                                <div class="flex items-center gap-1.5 mt-1">
                                     @if($selectedOrder->is_paid && !in_array($selectedOrder->status, [\App\Enums\OrderStatus::CANCELLED, \App\Enums\OrderStatus::REFUNDED]))
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background: #22c55e; color: white;">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" style="background: #22c55e; color: white;">
                                             PAYÉ
                                         </span>
                                     @endif
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background-color: {{ $selectedOrder->status->color() }}20; color: {{ $selectedOrder->status->color() }};">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background-color: {{ $selectedOrder->status->color() }}20; color: {{ $selectedOrder->status->color() }};">
                                         {{ $selectedOrder->status->label() }}
                                     </span>
+                                    <span class="text-[10px]" style="color: #9ca3af;">
+                                        {{ $selectedOrder->created_at->format('H:i') }}
+                                    </span>
                                 </div>
-                                <p class="text-sm mt-1" style="color: #6b7280;">
-                                    {{ $selectedOrder->created_at->locale('fr')->isoFormat('ddd D MMM YYYY [à] HH:mm') }}
-                                </p>
                             </div>
                             
                             <!-- Actions -->
@@ -517,43 +517,36 @@
                     <!-- Body - Scrollable -->
                     <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4" style="background: #ffffff;">
                         
-                        <!-- Type Badge & Table -->
-                        <div class="flex flex-wrap items-center gap-3">
-                            @php
-                                $typeConfig = match($selectedOrder->type) {
-                                    \App\Enums\OrderType::DINE_IN => ['bg' => '#dbeafe', 'text' => '#1d4ed8', 'icon' => 'M3 3h18v18H3zM12 8v8m-4-4h8'],
-                                    \App\Enums\OrderType::TAKEAWAY => ['bg' => '#f3e8ff', 'text' => '#7c3aed', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
-                                    \App\Enums\OrderType::DELIVERY => ['bg' => '#ffedd5', 'text' => '#c2410c', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
-                                };
-                            @endphp
-                            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold" 
-                                  style="background: {{ $typeConfig['bg'] }}; color: {{ $typeConfig['text'] }};">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $typeConfig['icon'] }}"/>
-                                </svg>
-                                {{ $selectedOrder->type->label() }}
-                            </span>
-                            @if($selectedOrder->table_number)
-                                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold" 
-                                      style="background: #fef3c7; color: #b45309;">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z"/>
-                                    </svg>
-                                    Table {{ $selectedOrder->table_number }}
+                        <!-- Info compacte : Type + Client -->
+                        <div class="rounded-xl p-3" style="background: #f9fafb; border: 1px solid #e5e7eb;">
+                            <!-- Type + Table -->
+                            <div class="flex items-center gap-2 mb-2">
+                                @php
+                                    $typeEmoji = match($selectedOrder->type) {
+                                        \App\Enums\OrderType::DINE_IN => '🍽️',
+                                        \App\Enums\OrderType::TAKEAWAY => '🛍️',
+                                        \App\Enums\OrderType::DELIVERY => '🚗',
+                                    };
+                                @endphp
+                                <span class="text-sm font-semibold" style="color: #1f2937;">
+                                    {{ $typeEmoji }} {{ $selectedOrder->type->label() }}
                                 </span>
-                            @endif
-                        </div>
+                                @if($selectedOrder->table_number)
+                                    <span class="px-2 py-0.5 rounded text-xs font-bold" style="background: #fef3c7; color: #b45309;">
+                                        Table {{ $selectedOrder->table_number }}
+                                    </span>
+                                @endif
+                            </div>
 
-                        <!-- Customer Card -->
-                        <div class="rounded-xl p-4" style="background: #f9fafb; border: 1px solid #e5e7eb;">
-                            <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0" 
+                            <!-- Client -->
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                                      style="background: linear-gradient(135deg, #f97316, #ea580c);">
                                     {{ strtoupper(substr($selectedOrder->customer_name ?? 'C', 0, 1)) }}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-semibold truncate" style="color: #1f2937;">{{ $selectedOrder->customer_name }}</p>
-                                    <p class="text-sm" style="color: #6b7280;">{{ $selectedOrder->customer_phone }}</p>
+                                    <p class="font-semibold truncate text-sm" style="color: #1f2937;">{{ $selectedOrder->customer_name }}</p>
+                                    <p class="text-xs truncate" style="color: #6b7280;">{{ $selectedOrder->customer_phone }}</p>
                                 </div>
                             </div>
                             @if($selectedOrder->customer_email || $selectedOrder->delivery_address)
@@ -728,9 +721,16 @@
                         </div>
                     </div>
 
-                    <!-- Actions Footer (Sticky) -->
+                    <!-- Footer : Total + Actions (Sticky) -->
                     @unless($selectedOrder->is_final)
-                        <div class="flex-shrink-0 border-t-2 border-gray-200 px-4 py-4 flex gap-2" style="background: #ffffff; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <div class="flex-shrink-0 border-t-2 border-gray-200" style="background: #ffffff; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);">
+                            <!-- Total compact -->
+                            <div class="px-4 py-2 flex items-center justify-between" style="background: #1f2937;">
+                                <span class="text-sm font-semibold" style="color: #9ca3af;">Total</span>
+                                <span class="text-lg font-bold tabular-nums" style="color: #f97316;">{{ number_format($selectedOrder->total, 0, ',', ' ') }} F</span>
+                            </div>
+                            <!-- Boutons -->
+                            <div class="px-4 py-3 flex gap-2">
                                 @if($selectedOrder->status === \App\Enums\OrderStatus::PENDING_PAYMENT || $selectedOrder->status === \App\Enums\OrderStatus::PAID)
                                     <button wire:click="updateStatus({{ $selectedOrder->id }}, 'confirmed')"
                                             wire:loading.attr="disabled"
@@ -801,6 +801,7 @@
                                     </svg>
                                     <span>Annuler</span>
                                 </button>
+                            </div>
                         </div>
                     @endunless
                 </div>
