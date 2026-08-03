@@ -447,10 +447,10 @@
                  @click="document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()"></div>
 
             <!-- Modal Container -->
-            <div class="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
+            <div class="fixed inset-0 flex items-center justify-center p-4">
                 <!-- Modal Content -->
-                <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-                     style="max-height: calc(100vh - 2rem);"
+                <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+                     style="max-height: calc(100vh - 2rem); height: calc(100vh - 2rem);"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                      x-transition:enter-end="opacity-100 scale-100 translate-y-0">
@@ -606,60 +606,63 @@
                                 </svg>
                                 Articles ({{ $selectedOrder->items->count() }})
                             </h3>
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 @foreach($selectedOrder->items as $item)
-                                    <div class="flex items-start gap-3 p-3 rounded-xl" style="background: #ffffff; border: 1px solid #e5e7eb;">
+                                    <div class="flex items-center gap-3 p-3 rounded-xl" style="background: #ffffff; border: 1px solid #e5e7eb;">
                                         <!-- Image du plat -->
                                         <div class="relative flex-shrink-0">
                                             @if($item->dish && $item->dish->image_url)
-                                                <img src="{{ $item->dish->image_url }}" 
+                                                <img src="{{ $item->dish->image_url }}"
                                                      alt="{{ $item->dish_name }}"
-                                                     class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover"
+                                                     class="w-14 h-14 rounded-lg object-cover"
                                                      style="border: 2px solid #f3f4f6;">
                                             @else
-                                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg flex items-center justify-center" 
+                                                <div class="w-14 h-14 rounded-lg flex items-center justify-center"
                                                      style="background: linear-gradient(135deg, #f3f4f6, #e5e7eb);">
-                                                    <svg class="w-8 h-8" style="color: #9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-6 h-6" style="color: #9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                     </svg>
                                                 </div>
                                             @endif
                                             <!-- Badge quantité -->
-                                            <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md" 
+                                            <span class="absolute -top-1 -right-1 min-w-[24px] h-6 px-1.5 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md"
                                                   style="background: linear-gradient(135deg, #f97316, #ea580c);">
                                                 {{ $item->quantity }}
                                             </span>
                                         </div>
-                                        
+
                                         <!-- Détails du plat -->
                                         <div class="flex-1 min-w-0">
-                                            <p class="font-semibold" style="color: #1f2937;">{{ $item->dish_name }}</p>
-                                            <p class="text-sm mt-0.5" style="color: #6b7280;">
-                                                {{ number_format($item->unit_price, 0, ',', ' ') }} F x {{ $item->quantity }}
+                                            <p class="font-semibold text-sm leading-tight truncate" style="color: #1f2937;">{{ $item->dish_name }}</p>
+                                            <p class="text-xs mt-0.5" style="color: #6b7280;">
+                                                {{ number_format($item->unit_price, 0, ',', ' ') }} F × {{ $item->quantity }}
                                             </p>
-                                            @if($item->selected_options)
-                                                <div class="flex flex-wrap gap-1 mt-2">
-                                                    @foreach(collect($item->selected_options)->pluck('name') as $option)
-                                                        <span class="inline-block px-2 py-0.5 rounded text-xs" 
+                                            @if($item->selected_options && count($item->selected_options) > 0)
+                                                <div class="flex flex-wrap gap-1 mt-1">
+                                                    @foreach(collect($item->selected_options)->pluck('name')->take(3) as $option)
+                                                        <span class="inline-block px-1.5 py-0.5 rounded text-[10px] leading-tight"
                                                               style="background: #fef3c7; color: #92400e;">
                                                             {{ $option }}
                                                         </span>
                                                     @endforeach
+                                                    @if(count($item->selected_options) > 3)
+                                                        <span class="inline-block px-1.5 py-0.5 rounded text-[10px] leading-tight"
+                                                              style="background: #f3f4f6; color: #6b7280;">
+                                                            +{{ count($item->selected_options) - 3 }}
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             @endif
                                             @if($item->special_instructions)
-                                                <p class="text-xs mt-2 italic flex items-start gap-1" style="color: #f97316;">
-                                                    <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                                                    </svg>
-                                                    {{ $item->special_instructions }}
+                                                <p class="text-[10px] mt-1 italic line-clamp-1" style="color: #f97316;">
+                                                    💬 {{ $item->special_instructions }}
                                                 </p>
                                             @endif
                                         </div>
-                                        
+
                                         <!-- Prix total -->
                                         <div class="text-right flex-shrink-0">
-                                            <span class="font-bold tabular-nums" style="color: #1f2937;">
+                                            <span class="font-bold text-sm tabular-nums whitespace-nowrap" style="color: #1f2937;">
                                                 {{ number_format($item->total_price, 0, ',', ' ') }} F
                                             </span>
                                         </div>
@@ -727,12 +730,12 @@
 
                     <!-- Actions Footer (Sticky) -->
                     @unless($selectedOrder->is_final)
-                        <div class="flex-shrink-0 border-t border-gray-200 px-4 sm:px-6 py-4 flex flex-wrap gap-2" style="background: #f9fafb;">
+                        <div class="flex-shrink-0 border-t-2 border-gray-200 px-4 py-4 flex gap-2" style="background: #ffffff; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);">
                                 @if($selectedOrder->status === \App\Enums\OrderStatus::PENDING_PAYMENT || $selectedOrder->status === \App\Enums\OrderStatus::PAID)
-                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'confirmed')" 
+                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'confirmed')"
                                             wire:loading.attr="disabled"
-                                            class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all"
-                                            style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
+                                            style="background: linear-gradient(135deg, #f97316, #ea580c); min-height: 52px;">
                                         <svg wire:loading.remove wire:target="updateStatus" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
@@ -744,10 +747,10 @@
                                         <span wire:loading wire:target="updateStatus">...</span>
                                     </button>
                                 @elseif($selectedOrder->status === \App\Enums\OrderStatus::CONFIRMED)
-                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'preparing')" 
+                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'preparing')"
                                             wire:loading.attr="disabled"
-                                            class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all"
-                                            style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
+                                            style="background: linear-gradient(135deg, #f97316, #ea580c); min-height: 52px;">
                                         <svg wire:loading.remove wire:target="updateStatus" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"/>
                                         </svg>
@@ -759,10 +762,10 @@
                                         <span wire:loading wire:target="updateStatus">...</span>
                                     </button>
                                 @elseif($selectedOrder->status === \App\Enums\OrderStatus::PREPARING)
-                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'ready')" 
+                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'ready')"
                                             wire:loading.attr="disabled"
-                                            class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all"
-                                            style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
+                                            style="background: linear-gradient(135deg, #22c55e, #16a34a); min-height: 52px;">
                                         <svg wire:loading.remove wire:target="updateStatus" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -774,10 +777,10 @@
                                         <span wire:loading wire:target="updateStatus">...</span>
                                     </button>
                                 @elseif($selectedOrder->status === \App\Enums\OrderStatus::READY)
-                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'completed')" 
+                                    <button wire:click="updateStatus({{ $selectedOrder->id }}, 'completed')"
                                             wire:loading.attr="disabled"
-                                            class="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white transition-all"
-                                            style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
+                                            style="background: linear-gradient(135deg, #22c55e, #16a34a); min-height: 52px;">
                                         <svg wire:loading.remove wire:target="updateStatus" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
@@ -789,14 +792,14 @@
                                         <span wire:loading wire:target="updateStatus">...</span>
                                     </button>
                                 @endif
-                                
-                                <button wire:click="openCancelModal({{ $selectedOrder->id }})" 
-                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all"
-                                        style="background: #fee2e2; color: #dc2626;">
+
+                                <button wire:click="openCancelModal({{ $selectedOrder->id }})"
+                                        class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold transition-all text-base touch-manipulation"
+                                        style="background: #fee2e2; color: #dc2626; min-height: 52px; min-width: 120px;">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
-                                    Annuler
+                                    <span>Annuler</span>
                                 </button>
                         </div>
                     @endunless
