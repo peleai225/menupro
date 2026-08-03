@@ -431,6 +431,7 @@ class Order extends Model
         }
 
         $wasPaid = $this->is_paid;
+        $paymentGateway = $this->payment_metadata['gateway'] ?? null;
 
         $this->status = OrderStatus::CANCELLED;
         $this->cancelled_at = now();
@@ -439,7 +440,20 @@ class Order extends Model
         $saved = $this->save();
 
         if ($saved && $wasPaid) {
+            // Restore dish stock
             $this->restoreDishStock();
+
+            // Initiate refund if paid via Jeko or Wave
+            if (in_array($paymentGateway, ['jeko', 'wave'])) {
+                // TODO: Implement automatic refund via gateway
+                // For now, mark as refund needed for manual processing
+                \Log::info('Refund needed for cancelled order', [
+                    'order_id' => $this->id,
+                    'amount' => $this->total,
+                    'gateway' => $paymentGateway,
+                    'customer' => $this->customer_phone,
+                ]);
+            }
         }
 
         return $saved;

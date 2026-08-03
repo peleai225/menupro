@@ -98,7 +98,14 @@ enum OrderStatus: string
 
     public function canBeCancelled(): bool
     {
-        return in_array($this, [self::DRAFT, self::PENDING_PAYMENT, self::PAID, self::CONFIRMED]);
+        return in_array($this, [
+            self::DRAFT,
+            self::PENDING_PAYMENT,
+            self::PAID,
+            self::CONFIRMED,
+            self::PREPARING,
+            self::READY
+        ]);
     }
 
     public function isActive(): bool
