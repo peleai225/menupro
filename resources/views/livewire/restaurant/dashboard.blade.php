@@ -43,133 +43,106 @@
         </div>
     @endif
 
-    <!-- Welcome Banner -->
-    <div class="relative bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-5 sm:p-7 mb-6 sm:mb-8 text-white overflow-hidden">
-        <!-- Decorative elements -->
-        <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute right-16 -bottom-8 w-32 h-32 bg-white/5 rounded-full pointer-events-none"></div>
-        <div class="absolute right-8 top-4 opacity-10 pointer-events-none">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="40" cy="40" r="36" stroke="white" stroke-width="2"/>
-                <circle cx="40" cy="40" r="24" stroke="white" stroke-width="2"/>
-                <circle cx="40" cy="40" r="12" stroke="white" stroke-width="2"/>
+    <!-- Welcome Banner - Mobile optimized -->
+    <div class="relative bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-4 sm:p-6 mb-6 text-white overflow-hidden">
+        <!-- Decorative elements - hidden on mobile -->
+        <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none hidden sm:block"></div>
+        <div class="absolute right-8 top-4 opacity-10 pointer-events-none hidden sm:block">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="24" stroke="white" stroke-width="2"/>
+                <circle cx="30" cy="30" r="16" stroke="white" stroke-width="2"/>
             </svg>
         </div>
-        <div class="relative z-10 flex flex-wrap items-center justify-between gap-y-3">
-            <div class="min-w-0">
-                <p class="text-primary-200 text-sm font-medium mb-1">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
-                <h1 class="text-xl sm:text-2xl font-bold truncate">Bonjour, {{ auth()->user()->name }} 👋</h1>
-                <p class="text-primary-100 mt-1 text-sm sm:text-base">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
-            </div>
-            <div class="hidden sm:flex items-center gap-3">
-                <a href="{{ route('restaurant.orders') }}" class="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-xl text-sm font-semibold transition-all duration-200 border border-white/20">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    Commandes
-                </a>
-            </div>
+        <div class="relative z-10">
+            <p class="text-primary-200 text-xs font-medium mb-1 hidden sm:block">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
+            <h1 class="text-lg sm:text-xl font-bold truncate">Bonjour, {{ auth()->user()->name }} 👋</h1>
+            <p class="text-primary-100 mt-1 text-sm hidden sm:block">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+    <!-- Stats Cards - Mobile optimized -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <!-- Orders Today -->
-        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-primary-200 hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+        <div class="group relative bg-white rounded-xl p-3 sm:p-4 border border-neutral-200/60 hover:border-primary-200 hover:shadow-lg transition-all overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary-500/10 to-transparent rounded-full blur-xl -translate-y-6 translate-x-6 hidden sm:block"></div>
             <div class="relative">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-md">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                     </div>
-                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $this->stats['orders_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }} flex items-center gap-0.5">
-                        @if($this->stats['orders_change'] >= 0)
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                        @else
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                        @endif
+                    <span class="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded {{ $this->stats['orders_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }}">
                         {{ $this->stats['orders_change'] >= 0 ? '+' : '' }}{{ $this->stats['orders_change'] }}%
                     </span>
                 </div>
-                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Commandes</p>
-                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['orders_today'] }}</p>
-                <p class="text-xs text-neutral-500 mt-2">aujourd'hui vs hier</p>
+                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">Commandes</p>
+                <p class="text-2xl sm:text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['orders_today'] }}</p>
+                <p class="text-[10px] sm:text-xs text-neutral-400 mt-1">vs hier</p>
             </div>
         </div>
 
         <!-- Revenue Today -->
-        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-secondary-200 hover:shadow-xl hover:shadow-secondary-500/5 transition-all duration-300 overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-secondary-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+        <div class="group relative bg-white rounded-xl p-3 sm:p-4 border border-neutral-200/60 hover:border-secondary-200 hover:shadow-lg transition-all overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-secondary-500/10 to-transparent rounded-full blur-xl -translate-y-6 translate-x-6 hidden sm:block"></div>
             <div class="relative">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-11 h-11 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center shadow-lg shadow-secondary-500/20">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-lg flex items-center justify-center shadow-md">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $this->stats['revenue_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }} flex items-center gap-0.5">
-                        @if($this->stats['revenue_change'] >= 0)
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                        @else
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                        @endif
+                    <span class="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded {{ $this->stats['revenue_change'] >= 0 ? 'bg-secondary-50 text-secondary-700' : 'bg-red-50 text-red-700' }}">
                         {{ $this->stats['revenue_change'] >= 0 ? '+' : '' }}{{ $this->stats['revenue_change'] }}%
                     </span>
                 </div>
-                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">CA brut</p>
-                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ number_format($this->stats['revenue_today'], 0, ',', ' ') }}<span class="text-lg text-neutral-500 font-medium ml-1">F</span></p>
-                <div class="flex items-center gap-3 mt-2">
-                    <p class="text-xs text-neutral-500">Net : <span class="font-semibold text-secondary-700">{{ number_format($this->stats['revenue_net_today'], 0, ',', ' ') }} F</span></p>
-                    @if($this->stats['average_ticket'] > 0)
-                        <p class="text-xs text-neutral-500">Panier : <span class="font-semibold text-neutral-700">{{ number_format($this->stats['average_ticket'], 0, ',', ' ') }} F</span></p>
-                    @endif
-                </div>
+                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">CA brut</p>
+                <p class="text-xl sm:text-2xl font-bold text-neutral-900 leading-none">{{ number_format($this->stats['revenue_today'], 0, ',', ' ') }}<span class="text-sm text-neutral-500 font-medium ml-0.5">F</span></p>
+                <p class="text-[10px] sm:text-xs text-neutral-400 mt-1 truncate">Net: {{ number_format($this->stats['revenue_net_today'], 0, ',', ' ') }}F</p>
             </div>
         </div>
 
         <!-- Pending Orders -->
-        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-accent-200 hover:shadow-xl hover:shadow-accent-500/5 transition-all duration-300 overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+        <div class="group relative bg-white rounded-xl p-3 sm:p-4 border border-neutral-200/60 hover:border-accent-200 hover:shadow-lg transition-all overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-accent-500/10 to-transparent rounded-full blur-xl -translate-y-6 translate-x-6 hidden sm:block"></div>
             <div class="relative">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-11 h-11 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl flex items-center justify-center shadow-lg shadow-accent-500/20">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-accent-500 to-accent-600 rounded-lg flex items-center justify-center shadow-md">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     @if($this->stats['pending_orders'] > 0)
-                        <span class="text-[11px] font-bold px-2 py-1 rounded-full bg-accent-50 text-accent-700 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 bg-accent-500 rounded-full animate-pulse"></span>
-                            Urgent
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-accent-50 text-accent-700 flex items-center gap-1">
+                            <span class="w-1 h-1 bg-accent-500 rounded-full animate-pulse"></span>
+                            <span class="hidden sm:inline">Urgent</span>
                         </span>
                     @endif
                 </div>
-                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">En attente</p>
-                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['pending_orders'] }}</p>
-                <p class="text-xs {{ $this->stats['pending_orders'] > 0 ? 'text-accent-600 font-medium' : 'text-neutral-500' }} mt-2">
-                    {{ $this->stats['pending_orders'] > 0 ? 'À traiter maintenant' : 'Rien en attente' }}
+                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">En attente</p>
+                <p class="text-2xl sm:text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['pending_orders'] }}</p>
+                <p class="text-[10px] sm:text-xs {{ $this->stats['pending_orders'] > 0 ? 'text-accent-600 font-medium' : 'text-neutral-400' }} mt-1">
+                    {{ $this->stats['pending_orders'] > 0 ? 'À traiter' : 'Rien' }}
                 </p>
             </div>
         </div>
 
         <!-- Total Dishes -->
-        <div class="group relative bg-white rounded-2xl p-5 border border-neutral-200/60 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-500/5 transition-all duration-300 overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-neutral-500/10 to-transparent rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform"></div>
+        <div class="group relative bg-white rounded-xl p-3 sm:p-4 border border-neutral-200/60 hover:border-neutral-300 hover:shadow-lg transition-all overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-neutral-500/10 to-transparent rounded-full blur-xl -translate-y-6 translate-x-6 hidden sm:block"></div>
             <div class="relative">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-11 h-11 bg-gradient-to-br from-neutral-700 to-neutral-900 rounded-xl flex items-center justify-center shadow-lg shadow-neutral-900/20">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-neutral-700 to-neutral-900 rounded-lg flex items-center justify-center shadow-md">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     </div>
                     @php $dishUsage = $this->stats['max_dishes'] > 0 ? round(($this->stats['dishes_count'] / $this->stats['max_dishes']) * 100) : 0; @endphp
-                    <span class="text-[11px] font-semibold px-2 py-1 rounded-full {{ $dishUsage > 80 ? 'bg-red-50 text-red-700' : ($dishUsage > 50 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-neutral-700') }}">{{ $dishUsage }}%</span>
+                    <span class="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded {{ $dishUsage > 80 ? 'bg-red-50 text-red-700' : ($dishUsage > 50 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-neutral-700') }}">{{ $dishUsage }}%</span>
                 </div>
-                <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">Plats au menu</p>
-                <p class="text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['dishes_count'] }}<span class="text-lg text-neutral-400 font-medium ml-1">/{{ $this->stats['max_dishes'] }}</span></p>
-                <div class="h-1.5 bg-neutral-100 rounded-full mt-3 overflow-hidden">
+                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">Plats</p>
+                <p class="text-2xl sm:text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['dishes_count'] }}<span class="text-sm text-neutral-400 font-medium ml-0.5">/{{ $this->stats['max_dishes'] }}</span></p>
+                <div class="h-1 bg-neutral-100 rounded-full mt-2 overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all" style="width: {{ min($dishUsage, 100) }}%"></div>
                 </div>
             </div>

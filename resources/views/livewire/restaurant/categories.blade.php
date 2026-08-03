@@ -1,26 +1,27 @@
 <div x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
-    <!-- Header with modern design -->
+    <!-- Header - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-3">
-                <span class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         class="flex items-center justify-between gap-3 mb-6">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 flex items-center gap-2 truncate">
+                <span class="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </span>
-                Catégories
+                <span class="truncate">Catégories</span>
             </h1>
-            <p class="text-neutral-500 mt-1">Organisez vos plats par catégorie pour un menu clair et attractif</p>
+            <p class="text-xs sm:text-sm text-neutral-500 mt-0.5 hidden sm:block">Organisez vos plats par catégorie</p>
         </div>
-        <button wire:click="openModal" 
-                class="btn btn-primary btn-glow px-6 py-3 flex items-center gap-2 group">
+        <button wire:click="openModal"
+                class="btn btn-primary px-4 sm:px-6 py-3 flex items-center gap-2 group min-h-[52px] touch-manipulation shrink-0">
             <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Nouvelle catégorie
+            <span class="hidden sm:inline">Nouvelle catégorie</span>
+            <span class="sm:hidden">Nouveau</span>
         </button>
     </div>
 
@@ -180,11 +181,11 @@
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex items-center gap-2 pt-4 border-t border-neutral-100">
-                            <button wire:click="openModal({{ $category->id }})" 
+                        <!-- Actions - Touch-friendly (52px min) -->
+                        <div class="flex items-center gap-2 pt-3 border-t border-neutral-100">
+                            <button wire:click="openModal({{ $category->id }})"
                                     wire:loading.attr="disabled"
-                                    class="flex-1 btn btn-secondary py-2.5 text-sm group/btn">
+                                    class="flex-1 btn btn-secondary py-3 text-sm group/btn min-h-[52px] touch-manipulation">
                                 <svg wire:loading.remove wire:target="openModal({{ $category->id }})" class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
@@ -194,10 +195,10 @@
                                 </svg>
                                 <span wire:loading.remove wire:target="openModal({{ $category->id }})">Modifier</span>
                             </button>
-                            
-                            <button wire:click="toggleActive({{ $category->id }})" 
+
+                            <button wire:click="toggleActive({{ $category->id }})"
                                     wire:loading.attr="disabled"
-                                    class="p-2.5 rounded-xl hover:bg-neutral-100 transition-all bounce-click"
+                                    class="p-3.5 rounded-xl hover:bg-neutral-100 transition-all touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center"
                                     title="{{ $category->is_active ? 'Masquer la catégorie' : 'Afficher la catégorie' }}">
                                 @if($category->is_active)
                                     <svg class="w-5 h-5 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,11 +211,11 @@
                                     </svg>
                                 @endif
                             </button>
-                            
-                            <button wire:click="delete({{ $category->id }})" 
+
+                            <button wire:click="delete({{ $category->id }})"
                                     wire:confirm="Êtes-vous sûr de vouloir supprimer cette catégorie ? Les plats associés ne seront pas supprimés."
                                     wire:loading.attr="disabled"
-                                    class="p-2.5 rounded-xl hover:bg-red-50 text-red-500 transition-all bounce-click"
+                                    class="p-3.5 rounded-xl hover:bg-red-50 text-red-500 transition-all touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center"
                                     title="Supprimer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -227,9 +228,9 @@
         </div>
     @endif
 
-    <!-- Modal - Enhanced -->
+    <!-- Modal - Mobile optimized avec max-height contrôlé -->
     @if($showModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" 
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
              x-data="{ show: @entangle('showModal') }"
              x-show="show"
              x-transition:enter="transition ease-out duration-300"
@@ -239,114 +240,104 @@
              x-init="document.body.classList.add('overflow-hidden')"
              x-on:remove="document.body.classList.remove('overflow-hidden')"
              @keydown.escape.window="document.body.classList.remove('overflow-hidden'); $wire.closeModal()">
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <!-- Backdrop -->
-                <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" 
-                     @click="document.body.classList.remove('overflow-hidden'); $wire.closeModal()"></div>
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                 @click="document.body.classList.remove('overflow-hidden'); $wire.closeModal()"></div>
 
-                <!-- Modal Content -->
-                <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                     x-transition:enter-end="opacity-100 scale-100 translate-y-0">
-                    <form wire:submit.prevent="save">
-                        <!-- Header with gradient -->
-                        <div class="bg-gradient-to-r from-neutral-900 to-neutral-800 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                        </svg>
-                                    </div>
-                                    <h2 class="text-xl font-bold">
-                                        {{ $editingId ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
-                                    </h2>
-                                </div>
-                                <button type="button" @click="document.body.classList.remove('overflow-hidden'); $wire.closeModal()" 
-                                        class="p-2 hover:bg-white/10 rounded-xl transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            <!-- Modal Content - Contrôle strict de hauteur -->
+            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col"
+                 style="max-height: min(90vh, calc(100vh - 80px));"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100">
+                <form wire:submit.prevent="save" class="flex flex-col h-full overflow-hidden">
+                    <!-- Header compact -->
+                    <div class="bg-gradient-to-r from-neutral-900 to-neutral-800 p-4 sm:p-5 text-white shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                     </svg>
-                                </button>
+                                </div>
+                                <h2 class="text-lg font-bold truncate">
+                                    {{ $editingId ? 'Modifier' : 'Nouvelle catégorie' }}
+                                </h2>
                             </div>
+                            <button type="button" @click="document.body.classList.remove('overflow-hidden'); $wire.closeModal()"
+                                    class="p-2 hover:bg-white/10 rounded-lg transition-colors shrink-0 touch-manipulation">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Body -->
-                        <div class="p-6 space-y-6">
+                    <!-- Body - Scrollable -->
+                    <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
                             <!-- Name -->
                             <div>
-                                <label for="name" class="block text-sm font-semibold text-neutral-700 mb-2">
+                                <label for="name" class="block text-sm font-medium text-neutral-700 mb-1.5">
                                     Nom de la catégorie <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" 
-                                       id="name" 
+                                <input type="text"
+                                       id="name"
                                        wire:model.blur="name"
                                        class="input h-12 @error('name') border-red-500 focus:ring-red-500 @enderror"
-                                       placeholder="Ex: Entrées, Plats principaux, Desserts...">
+                                       placeholder="Ex: Entrées, Plats principaux...">
                                 @error('name')
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        {{ $message }}
-                                    </p>
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <!-- Description -->
                             <div>
-                                <label for="description" class="block text-sm font-semibold text-neutral-700 mb-2">
-                                    Description <span class="text-neutral-400 font-normal">(optionnel)</span>
+                                <label for="description" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                                    Description <span class="text-neutral-400 font-normal text-xs">(optionnel)</span>
                                 </label>
-                                <textarea id="description" 
+                                <textarea id="description"
                                           wire:model.blur="description"
-                                          rows="3"
+                                          rows="2"
                                           class="input @error('description') border-red-500 focus:ring-red-500 @enderror"
-                                          placeholder="Une brève description de cette catégorie..."></textarea>
+                                          placeholder="Brève description..."></textarea>
                                 @error('description')
-                                    <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        {{ $message }}
-                                    </p>
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <!-- Active Toggle -->
-                            <div class="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl">
-                                <div>
-                                    <p class="font-semibold text-neutral-900">Visible sur le menu</p>
-                                    <p class="text-sm text-neutral-500">Les clients peuvent voir cette catégorie</p>
+                            <div class="flex items-center justify-between p-3 bg-neutral-50 rounded-xl">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-neutral-900">Visible sur le menu</p>
+                                    <p class="text-xs text-neutral-500">Les clients peuvent la voir</p>
                                 </div>
                                 <button type="button"
                                         wire:click="$toggle('is_active')"
-                                        class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 {{ $is_active ? 'bg-primary-500' : 'bg-neutral-300' }}">
-                                    <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform {{ $is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 shrink-0 touch-manipulation {{ $is_active ? 'bg-primary-500' : 'bg-neutral-300' }}">
+                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform {{ $is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Footer -->
-                        <div class="p-6 border-t border-neutral-100 flex items-center justify-end gap-3 bg-neutral-50">
-                            <button type="button" 
+                        <!-- Footer - Touch-friendly -->
+                        <div class="p-4 sm:p-5 border-t border-neutral-100 flex items-center justify-end gap-2 bg-neutral-50 shrink-0">
+                            <button type="button"
                                     wire:click="closeModal"
-                                    class="btn btn-ghost px-6 py-2.5">
+                                    class="btn btn-ghost px-4 py-3 text-sm min-h-[52px] touch-manipulation">
                                 Annuler
                             </button>
-                            <button type="submit" 
+                            <button type="submit"
                                     wire:loading.attr="disabled"
-                                    class="btn btn-primary btn-glow px-6 py-2.5">
-                                <svg wire:loading.remove wire:target="save" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="btn btn-primary px-4 sm:px-6 py-3 text-sm min-h-[52px] touch-manipulation">
+                                <svg wire:loading.remove wire:target="save" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                <svg wire:loading wire:target="save" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <svg wire:loading wire:target="save" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                                <span wire:loading.remove wire:target="save">{{ $editingId ? 'Enregistrer' : 'Créer la catégorie' }}</span>
-                                <span wire:loading wire:target="save">Enregistrement...</span>
+                                <span wire:loading.remove wire:target="save">{{ $editingId ? 'Enregistrer' : 'Créer' }}</span>
+                                <span wire:loading wire:target="save">...</span>
                             </button>
                         </div>
                     </form>

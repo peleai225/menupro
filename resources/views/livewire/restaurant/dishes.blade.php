@@ -1,47 +1,48 @@
 <div x-data="{ loaded: false, viewMode: 'grid' }" x-init="setTimeout(() => loaded = true, 100)">
-    <!-- Header -->
+    <!-- Header - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-3">
-                <span class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         class="flex items-center justify-between gap-3 mb-6">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 flex items-center gap-2 truncate">
+                <span class="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </span>
-                Plats
+                <span class="truncate">Plats</span>
             </h1>
-            <p class="text-neutral-500 mt-1">
-                <span class="font-semibold text-neutral-900">{{ $this->dishes->total() }}</span> plats dans votre menu
+            <p class="text-xs sm:text-sm text-neutral-500 mt-0.5">
+                <span class="font-semibold text-neutral-900">{{ $this->dishes->total() }}</span> au menu
             </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 shrink-0">
             <!-- View Mode Toggle -->
-            <div class="hidden sm:flex bg-neutral-100 rounded-xl p-1">
-                <button @click="viewMode = 'grid'" 
-                        :class="viewMode === 'grid' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'"
-                        class="p-2 rounded-lg transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="hidden sm:flex bg-neutral-100 rounded-lg p-1">
+                <button @click="viewMode = 'grid'"
+                        :class="viewMode === 'grid' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'"
+                        class="p-2 rounded-lg transition-all touch-manipulation">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
                 </button>
-                <button @click="viewMode = 'list'" 
-                        :class="viewMode === 'list' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'"
-                        class="p-2 rounded-lg transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="viewMode = 'list'"
+                        :class="viewMode === 'list' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'"
+                        class="p-2 rounded-lg transition-all touch-manipulation">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
                 </button>
             </div>
-            
+
             @if(auth()->user()->canManageRestaurant())
-            <a href="{{ route('restaurant.plats.create') }}" class="btn btn-primary btn-glow px-6 py-3 flex items-center gap-2 group">
+            <a href="{{ route('restaurant.plats.create') }}" class="btn btn-primary px-4 sm:px-6 py-3 flex items-center gap-2 group min-h-[52px] touch-manipulation">
                 <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Nouveau plat
+                <span class="hidden sm:inline">Nouveau plat</span>
+                <span class="sm:hidden">Nouveau</span>
             </a>
             @endif
         </div>
@@ -245,11 +246,11 @@
                             </span>
                         </div>
 
-                        <!-- Quick Actions Overlay -->
+                        <!-- Quick Actions Overlay - Touch-friendly buttons (52px min) -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-16">
                             <div class="flex items-center gap-2">
-                                <a href="{{ route('restaurant.plats.edit', $dish) }}" 
-                                   class="p-3 bg-white rounded-xl hover:bg-primary-50 hover:scale-110 transition-all shadow-lg bounce-click"
+                                <a href="{{ route('restaurant.plats.edit', $dish) }}"
+                                   class="p-3.5 sm:p-4 bg-white rounded-xl hover:bg-primary-50 hover:scale-105 transition-all shadow-lg touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center"
                                    title="Modifier">
                                     <svg class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -257,7 +258,7 @@
                                 </a>
                                 <button wire:click="toggleAvailability({{ $dish->id }})"
                                         wire:loading.attr="disabled"
-                                        class="p-3 bg-white rounded-xl hover:scale-110 transition-all shadow-lg bounce-click {{ $dish->is_active ? 'hover:bg-orange-50' : 'hover:bg-secondary-50' }}"
+                                        class="p-3.5 sm:p-4 bg-white rounded-xl hover:scale-105 transition-all shadow-lg touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center {{ $dish->is_active ? 'hover:bg-orange-50' : 'hover:bg-secondary-50' }}"
                                         title="{{ $dish->is_active ? 'Masquer du menu' : 'Afficher sur le menu' }}">
                                     @if($dish->is_active)
                                         <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,10 +271,10 @@
                                         </svg>
                                     @endif
                                 </button>
-                                <button wire:click="delete({{ $dish->id }})" 
+                                <button wire:click="delete({{ $dish->id }})"
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce plat ?"
                                         wire:loading.attr="disabled"
-                                        class="p-3 bg-white rounded-xl hover:bg-red-50 hover:scale-110 transition-all shadow-lg bounce-click"
+                                        class="p-3.5 sm:p-4 bg-white rounded-xl hover:bg-red-50 hover:scale-105 transition-all shadow-lg touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center"
                                         title="Supprimer">
                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
