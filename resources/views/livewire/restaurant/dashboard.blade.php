@@ -176,6 +176,33 @@
         </div>
     </div>
 
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Revenue Trend Chart -->
+        <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-neutral-200/60 shadow-sm">
+            <h3 class="text-lg font-bold text-neutral-900 mb-4">Évolution du CA Net (30 derniers jours)</h3>
+            <div class="h-64">
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Orders by Type Chart -->
+        <div class="bg-white rounded-2xl p-6 border border-neutral-200/60 shadow-sm">
+            <h3 class="text-lg font-bold text-neutral-900 mb-4">Types de commandes</h3>
+            <div class="h-64 flex items-center justify-center">
+                <canvas id="ordersByTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Dishes Chart -->
+    <div class="bg-white rounded-2xl p-6 border border-neutral-200/60 shadow-sm mb-8">
+        <h3 class="text-lg font-bold text-neutral-900 mb-4">Top 5 des plats vendus (30 derniers jours)</h3>
+        <div class="h-80">
+            <canvas id="topDishesChart"></canvas>
+        </div>
+    </div>
+
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Recent Orders -->
@@ -340,4 +367,200 @@
             @endif
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Revenue Trend Chart (Line)
+            const revenueTrendData = @js($this->revenueTrend);
+            if (revenueTrendData.labels.length > 0) {
+                const ctxRevenue = document.getElementById('revenueTrendChart');
+                new Chart(ctxRevenue, {
+                    type: 'line',
+                    data: {
+                        labels: revenueTrendData.labels,
+                        datasets: [{
+                            label: 'CA Net (FCFA)',
+                            data: revenueTrendData.data,
+                            borderColor: 'rgb(249, 115, 22)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: 'rgb(249, 115, 22)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'CA Net: ' + context.parsed.y.toLocaleString('fr-FR') + ' F';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('fr-FR') + ' F';
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Orders by Type Chart (Pie)
+            const ordersByTypeData = @js($this->ordersByType);
+            if (ordersByTypeData.labels.length > 0) {
+                const ctxType = document.getElementById('ordersByTypeChart');
+                new Chart(ctxType, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ordersByTypeData.labels,
+                        datasets: [{
+                            data: ordersByTypeData.data,
+                            backgroundColor: [
+                                'rgba(249, 115, 22, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(168, 85, 247, 0.8)'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 3,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 12, weight: '500' },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Top Dishes Chart (Horizontal Bar)
+            const topDishesData = @js($this->topDishes);
+            if (topDishesData.labels.length > 0) {
+                const ctxDishes = document.getElementById('topDishesChart');
+                new Chart(ctxDishes, {
+                    type: 'bar',
+                    data: {
+                        labels: topDishesData.labels,
+                        datasets: [{
+                            label: 'Quantité vendue',
+                            data: topDishesData.data,
+                            backgroundColor: [
+                                'rgba(249, 115, 22, 0.8)',
+                                'rgba(251, 146, 60, 0.8)',
+                                'rgba(253, 186, 116, 0.8)',
+                                'rgba(254, 215, 170, 0.8)',
+                                'rgba(255, 237, 213, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgb(249, 115, 22)',
+                                'rgb(251, 146, 60)',
+                                'rgb(253, 186, 116)',
+                                'rgb(254, 215, 170)',
+                                'rgb(255, 237, 213)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Vendu: ' + context.parsed.x + ' fois';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: { size: 12, weight: '500' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    @endpush
 </div>

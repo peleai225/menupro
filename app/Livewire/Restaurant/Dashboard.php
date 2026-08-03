@@ -143,6 +143,99 @@ class Dashboard extends Component
     }
 
     /**
+     * Get revenue trend for the last 30 days (for chart).
+     */
+    #[Computed]
+    public function revenueTrend(): array
+    {
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant) {
+            return ['labels' => [], 'data' => []];
+        }
+
+        $data = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->whereNotNull('paid_at')
+            ->validForReporting()
+            ->selectRaw('DATE(created_at) as date')
+            ->selectRaw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $labels = $data->pluck('date')->map(fn($date) => \Carbon\Carbon::parse($date)->format('d/m'))->toArray();
+        $values = $data->pluck('revenue_net')->map(fn($v) => (float) $v)->toArray();
+
+        return ['labels' => $labels, 'data' => $values];
+    }
+
+    /**
+     * Get orders distribution by type (for pie chart).
+     */
+    #[Computed]
+    public function ordersByType(): array
+    {
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant) {
+            return ['labels' => [], 'data' => []];
+        }
+
+        $data = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->whereNotNull('paid_at')
+            ->validForReporting()
+            ->selectRaw('type, COUNT(*) as count')
+            ->groupBy('type')
+            ->get();
+
+        $labels = $data->pluck('type')->map(function($type) {
+            return match($type) {
+                'delivery' => 'Livraison',
+                'takeaway' => 'À emporter',
+                'dine_in' => 'Sur place',
+                default => ucfirst($type)
+            };
+        })->toArray();
+
+        $values = $data->pluck('count')->map(fn($v) => (int) $v)->toArray();
+
+        return ['labels' => $labels, 'data' => $values];
+    }
+
+    /**
+     * Get top 5 dishes (for bar chart).
+     */
+    #[Computed]
+    public function topDishes(): array
+    {
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant) {
+            return ['labels' => [], 'data' => []];
+        }
+
+        $data = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('dishes', 'order_items.dish_id', '=', 'dishes.id')
+            ->where('orders.restaurant_id', $restaurant->id)
+            ->whereBetween('orders.created_at', [now()->subDays(30), now()])
+            ->whereNotNull('orders.paid_at')
+            ->whereNotIn('orders.status', ['draft', 'cancelled', 'refunded'])
+            ->select('dishes.name', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->groupBy('dishes.id', 'dishes.name')
+            ->orderByDesc('total_sold')
+            ->limit(5)
+            ->get();
+
+        $labels = $data->pluck('name')->toArray();
+        $values = $data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray();
+
+        return ['labels' => $labels, 'data' => $values];
+    }
+
+    /**
      * Get active announcements for this restaurant.
      */
     #[Computed]
@@ -150,7 +243,7 @@ class Dashboard extends Component
     {
         $restaurant = auth()->user()->restaurant;
         $user = auth()->user();
-        
+
         if (!$restaurant) {
             return collect();
         }
