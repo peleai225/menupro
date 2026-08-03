@@ -96,20 +96,26 @@ class Reports extends Component
         $orders = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->get();
 
-        $totalRevenue = $orders->sum('total');
+        $totalRevenueBrut = $orders->sum('total');
+        $totalCommission = $orders->sum('platform_commission');
+        $totalDeliveryFees = $orders->sum('delivery_fee');
+        $totalRevenueNet = $totalRevenueBrut - $totalCommission - $totalDeliveryFees;
         $totalOrders = $orders->count();
-        $averageOrder = $totalOrders > 0 ? round($totalRevenue / $totalOrders) : 0;
+        $averageOrder = $totalOrders > 0 ? round($totalRevenueBrut / $totalOrders) : 0;
 
         // Sales by day
         $salesByDay = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(*) as orders'),
-                DB::raw('SUM(total) as revenue')
+                DB::raw('SUM(total) as revenue_brut'),
+                DB::raw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
             )
             ->groupBy('date')
             ->orderBy('date')
@@ -118,7 +124,8 @@ class Reports extends Component
                 return [
                     'date' => $this->cleanString($item->date ?? ''),
                     'orders' => (int) ($item->orders ?? 0),
-                    'revenue' => (float) ($item->revenue ?? 0),
+                    'revenue_brut' => (float) ($item->revenue_brut ?? 0),
+                    'revenue_net' => (float) ($item->revenue_net ?? 0),
                 ];
             })
             ->values()
@@ -128,7 +135,13 @@ class Reports extends Component
         $salesByType = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
-            ->select('type', DB::raw('COUNT(*) as count'), DB::raw('SUM(total) as revenue'))
+            ->validForReporting()
+            ->select(
+                'type',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(total) as revenue_brut'),
+                DB::raw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
+            )
             ->groupBy('type')
             ->get()
             ->map(function ($item) {
@@ -136,7 +149,8 @@ class Reports extends Component
                 return [
                     'type' => $this->cleanString($type),
                     'count' => (int) $item->count,
-                    'revenue' => (float) $item->revenue,
+                    'revenue_brut' => (float) $item->revenue_brut,
+                    'revenue_net' => (float) $item->revenue_net,
                 ];
             })
             ->values()
@@ -145,6 +159,8 @@ class Reports extends Component
         // Sales by status
         $salesByStatus = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select('status', DB::raw('COUNT(*) as count'))
             ->groupBy('status')
             ->get()
@@ -159,7 +175,10 @@ class Reports extends Component
             ->toArray();
 
         return [
-            'total_revenue' => (float) $totalRevenue,
+            'total_revenue_brut' => (float) $totalRevenueBrut,
+            'total_revenue_net' => (float) $totalRevenueNet,
+            'total_commission' => (float) $totalCommission,
+            'total_delivery_fees' => (float) $totalDeliveryFees,
             'total_orders' => (int) $totalOrders,
             'average_order' => (float) $averageOrder,
             'sales_by_day' => $salesByDay,
@@ -170,6 +189,9 @@ class Reports extends Component
                     'id' => (int) $order->id,
                     'reference' => $this->cleanString($order->reference ?? ''),
                     'total' => (float) $order->total,
+                    'commission' => (float) ($order->platform_commission ?? 0),
+                    'delivery_fee' => (float) ($order->delivery_fee ?? 0),
+                    'net' => (float) ($order->total - ($order->platform_commission ?? 0) - ($order->delivery_fee ?? 0)),
                     'status' => $this->cleanString(is_object($order->status) ? $order->status->value : (string) $order->status),
                     'created_at' => $order->created_at ? $this->cleanString($order->created_at->toDateTimeString()) : null,
                 ];
@@ -185,6 +207,7 @@ class Reports extends Component
             ->where('orders.restaurant_id', $restaurantId)
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->whereNotNull('orders.paid_at')
+            ->whereNotIn('orders.status', ['draft', 'cancelled', 'refunded'])
             ->select(
                 'dishes.id',
                 'dishes.name',
@@ -217,6 +240,7 @@ class Reports extends Component
             ->where('orders.restaurant_id', $restaurantId)
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->whereNotNull('orders.paid_at')
+            ->whereNotIn('orders.status', ['draft', 'cancelled', 'refunded'])
             ->select(
                 'categories.id',
                 'categories.name',
@@ -248,6 +272,7 @@ class Reports extends Component
         $topCustomers = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select(
                 'customer_email',
                 'customer_name',
@@ -277,6 +302,7 @@ class Reports extends Component
         $newCustomers = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(DISTINCT customer_email) as new_customers')
@@ -297,6 +323,7 @@ class Reports extends Component
         $totalCustomers = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->distinct('customer_email')
             ->count('customer_email');
 
@@ -312,21 +339,26 @@ class Reports extends Component
         $orders = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->get();
 
-        $totalRevenue = $orders->sum('total');
+        $totalRevenueBrut = $orders->sum('total');
         $totalSubtotal = $orders->sum('subtotal');
         $totalDeliveryFees = $orders->sum('delivery_fee');
         $totalDiscounts = $orders->sum('discount_amount');
+        $totalCommission = $orders->sum('platform_commission');
+        $totalRevenueNet = $totalRevenueBrut - $totalCommission - $totalDeliveryFees;
 
         // Revenue by payment method
         $revenueByPayment = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select(
                 DB::raw("COALESCE(JSON_EXTRACT(payment_metadata, '$.method'), 'on_site') as payment_method"),
                 DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(total) as revenue')
+                DB::raw('SUM(total) as revenue_brut'),
+                DB::raw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
             )
             ->groupBy('payment_method')
             ->get()
@@ -337,7 +369,8 @@ class Reports extends Component
                 return [
                     'payment_method' => $this->cleanString($method),
                     'count' => (int) $item->count,
-                    'revenue' => (float) $item->revenue,
+                    'revenue_brut' => (float) $item->revenue_brut,
+                    'revenue_net' => (float) $item->revenue_net,
                 ];
             })
             ->values()
@@ -347,12 +380,15 @@ class Reports extends Component
         $dailyRevenue = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
+            ->validForReporting()
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total) as revenue'),
+                DB::raw('SUM(total) as revenue_brut'),
                 DB::raw('SUM(subtotal) as subtotal'),
                 DB::raw('SUM(delivery_fee) as delivery_fees'),
-                DB::raw('SUM(discount_amount) as discounts')
+                DB::raw('SUM(discount_amount) as discounts'),
+                DB::raw('SUM(COALESCE(platform_commission, 0)) as commission'),
+                DB::raw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
             )
             ->groupBy('date')
             ->orderBy('date')
@@ -360,17 +396,21 @@ class Reports extends Component
             ->map(function ($item) {
                 return [
                     'date' => $item->date,
-                    'revenue' => (float) $item->revenue,
+                    'revenue_brut' => (float) $item->revenue_brut,
+                    'revenue_net' => (float) $item->revenue_net,
                     'subtotal' => (float) $item->subtotal,
                     'delivery_fees' => (float) $item->delivery_fees,
                     'discounts' => (float) $item->discounts,
+                    'commission' => (float) $item->commission,
                 ];
             })
             ->values()
             ->toArray();
 
         return [
-            'total_revenue' => (float) $totalRevenue,
+            'total_revenue_brut' => (float) $totalRevenueBrut,
+            'total_revenue_net' => (float) $totalRevenueNet,
+            'total_commission' => (float) $totalCommission,
             'total_subtotal' => (float) $totalSubtotal,
             'total_delivery_fees' => (float) $totalDeliveryFees,
             'total_discounts' => (float) $totalDiscounts,
@@ -384,7 +424,8 @@ class Reports extends Component
         // Base query: paid orders in the period for this restaurant
         $baseQuery = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->paid();
+            ->paid()
+            ->validForReporting();
 
         // Per-waiter aggregates
         $waiterStats = $baseQuery
@@ -408,6 +449,7 @@ class Reports extends Component
         $primarySpaces = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->paid()
+            ->validForReporting()
             ->whereIn('waiter_id', $waiterIds)
             ->whereNotNull('space_id')
             ->select('waiter_id', 'space_id', DB::raw('COUNT(*) as cnt'))
