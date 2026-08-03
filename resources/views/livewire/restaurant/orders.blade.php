@@ -447,10 +447,10 @@
                  @click="document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()"></div>
 
             <!-- Modal Container -->
-            <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="fixed inset-0 flex items-center justify-center p-4 pb-safe">
                 <!-- Modal Content -->
                 <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-                     style="max-height: calc(100vh - 2rem); height: calc(100vh - 2rem);"
+                     style="max-height: min(90vh, calc(100vh - 120px));"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                      x-transition:enter-end="opacity-100 scale-100 translate-y-0">
