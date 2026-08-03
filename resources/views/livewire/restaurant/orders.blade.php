@@ -723,10 +723,11 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Actions -->
-                        @unless($selectedOrder->is_final)
-                            <div class="px-4 sm:px-6 py-4 flex flex-wrap gap-2" style="background: #f9fafb;">
+                    <!-- Actions Footer (Sticky) -->
+                    @unless($selectedOrder->is_final)
+                        <div class="flex-shrink-0 border-t border-gray-200 px-4 sm:px-6 py-4 flex flex-wrap gap-2" style="background: #f9fafb;">
                                 @if($selectedOrder->status === \App\Enums\OrderStatus::PENDING_PAYMENT || $selectedOrder->status === \App\Enums\OrderStatus::PAID)
                                     <button wire:click="updateStatus({{ $selectedOrder->id }}, 'confirmed')" 
                                             wire:loading.attr="disabled"
@@ -797,9 +798,8 @@
                                     </svg>
                                     Annuler
                                 </button>
-                            </div>
-                        @endunless
-                    </div>
+                        </div>
+                    @endunless
                 </div>
             </div>
         </div>
