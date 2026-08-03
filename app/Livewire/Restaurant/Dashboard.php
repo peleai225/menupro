@@ -191,11 +191,14 @@ class Dashboard extends Component
             ->get();
 
         $labels = $data->pluck('type')->map(function($type) {
-            return match($type) {
+            // Convert enum to string first
+            $typeValue = is_object($type) ? $type->value : (string) $type;
+
+            return match($typeValue) {
                 'delivery' => 'Livraison',
                 'takeaway' => 'À emporter',
                 'dine_in' => 'Sur place',
-                default => ucfirst($type)
+                default => ucfirst($typeValue)
             };
         })->toArray();
 
