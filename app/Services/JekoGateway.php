@@ -357,12 +357,32 @@ class JekoGateway implements PaymentGatewayInterface
 
         $restaurant = $subMerchant->restaurant;
 
-        // Normalise le téléphone en +225XXXXXXXXXX
-        $phone = preg_replace('/\D/', '', $subMerchant->mobile_money);
-        if (strlen($phone) === 10) {
-            $phone = '+225' . $phone;
-        } elseif (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        // Normalise le téléphone en +225XXXXXXXXXX (10 chiffres après +225)
+        $digits = preg_replace('/\D/', '', $subMerchant->mobile_money);
+
+        // Déjà avec indicatif 225 et 10 chiffres
+        if (str_starts_with($digits, '225') && strlen($digits) === 13) {
+            $phone = '+' . $digits;
+        }
+        // Indicatif 225 mais 9 chiffres → ajouter 0
+        elseif (str_starts_with($digits, '225') && strlen($digits) === 12) {
+            $phone = '+225' . '0' . substr($digits, 3);
+        }
+        // Numéro local 10 chiffres avec 0
+        elseif (str_starts_with($digits, '0') && strlen($digits) === 10) {
+            $phone = '+225' . $digits;
+        }
+        // Numéro local 9 chiffres sans 0 → ajouter 0
+        elseif (strlen($digits) === 9) {
+            $phone = '+225' . '0' . $digits;
+        }
+        // Numéro local 10 chiffres
+        elseif (strlen($digits) === 10) {
+            $phone = '+225' . $digits;
+        }
+        // Fallback
+        else {
+            $phone = '+225' . $digits;
         }
 
         // Catégories valides Jeko : retail, services

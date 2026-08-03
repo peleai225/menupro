@@ -63,27 +63,37 @@ class JekoOnboardingController extends Controller
             ->with('success', 'Votre demande d\'intégration Jeko a été soumise. L\'équipe MenuPro va examiner votre dossier.');
     }
 
-    // Normalise vers +225XXXXXXXX requis par l'API Jeko
+    // Normalise vers +225XXXXXXXXXX requis par l'API Jeko (10 chiffres après +225)
     private function normalizePhone(string $phone): string
     {
         $digits = preg_replace('/\D/', '', $phone);
 
-        // Déjà avec indicatif 225
+        // Déjà avec indicatif 225 et 10 chiffres (format correct)
         if (str_starts_with($digits, '225') && strlen($digits) === 13) {
             return '+' . $digits;
         }
 
-        // Enlever UN SEUL zéro de début si présent (numéro local)
-        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
-            $digits = substr($digits, 1);
+        // Indicatif 225 mais seulement 9 chiffres → ajouter 0
+        if (str_starts_with($digits, '225') && strlen($digits) === 12) {
+            return '+225' . '0' . substr($digits, 3);
         }
 
-        // Numéro local CI (9 chiffres après avoir enlevé le 0)
-        if (strlen($digits) === 9 || strlen($digits) === 10) {
+        // Numéro local avec 0 initial (10 chiffres)
+        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
             return '+225' . $digits;
         }
 
-        // Si déjà 10 chiffres sans 0 initial, ajouter +225
+        // Numéro local sans 0 (9 chiffres) → ajouter 0
+        if (strlen($digits) === 9) {
+            return '+225' . '0' . $digits;
+        }
+
+        // Numéro local avec 0 déjà présent (10 chiffres)
+        if (strlen($digits) === 10) {
+            return '+225' . $digits;
+        }
+
+        // Fallback : ajouter +225 tel quel
         return '+225' . $digits;
     }
 }
