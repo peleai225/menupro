@@ -464,7 +464,7 @@
                                     <h2 class="text-xl sm:text-2xl font-bold" style="color: #1f2937;">
                                         #{{ $selectedOrder->reference }}
                                     </h2>
-                                    @if($selectedOrder->is_paid)
+                                    @if($selectedOrder->is_paid && !in_array($selectedOrder->status, [\App\Enums\OrderStatus::CANCELLED, \App\Enums\OrderStatus::REFUNDED]))
                                         <span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background: #22c55e; color: white;">
                                             PAYÉ
                                         </span>
