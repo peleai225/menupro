@@ -197,6 +197,8 @@ class OrderController extends Controller
             ], 500);
         }
 
+        $order->load('items');
+
         $response = [
             'order'          => $this->formatOrder($order),
             'tracking_token' => $order->tracking_token,
