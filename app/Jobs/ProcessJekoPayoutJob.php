@@ -51,8 +51,13 @@ class ProcessJekoPayoutJob implements ShouldQueue
         }
 
         $reference = 'PAYOUT-ORDER-' . $this->order->id . '-' . $this->order->payment_reference;
-        $amount    = $this->order->total;
-        $phone     = $subMerchant->mobile_money;
+
+        // Montant net = total - commission plateforme - frais livraison (le livreur sera payé séparément)
+        $amount = $this->order->total
+            - ($this->order->platform_commission ?? 0)
+            - ($this->order->delivery_fee ?? 0);
+
+        $phone = $subMerchant->mobile_money;
 
         if (empty($phone)) {
             Log::channel('payments')->error('ProcessJekoPayoutJob: no mobile_money number on JekoSubMerchant', [
