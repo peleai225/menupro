@@ -89,7 +89,14 @@ class OrderController extends Controller
         }
 
         // Calculer les montants
-        $items     = $this->resolveItems($data['items'], $restaurant->id);
+        try {
+            $items = $this->resolveItems($data['items'], $restaurant->id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Un ou plusieurs plats ne sont plus disponibles.',
+            ], 422);
+        }
+
         $subtotal  = $items->sum('total_price');
         $deliveryFee = $pricing['fee'];
 
@@ -105,7 +112,8 @@ class OrderController extends Controller
 
         $isCashOnDelivery = $data['payment_method'] === 'cash_on_delivery';
 
-        $order = DB::transaction(function () use (
+        try {
+            $order = DB::transaction(function () use (
             $data, $user, $customer, $restaurant, $items,
             $subtotal, $deliveryFee, $commission, $total, $pricing, $isCashOnDelivery
         ) {
@@ -173,6 +181,21 @@ class OrderController extends Controller
 
             return $order;
         });
+        } catch (\App\Exceptions\QuotaExceededException $e) {
+            return response()->json([
+                'message' => 'Ce restaurant a atteint sa limite de commandes pour ce mois.',
+            ], 422);
+        } catch (\Throwable $e) {
+            \Log::error('API order creation failed', [
+                'restaurant_id' => $restaurant->id,
+                'customer_id'   => $customer->id,
+                'error'         => $e->getMessage(),
+                'trace'         => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'message' => 'Erreur lors de la création de la commande. Réessayez.',
+            ], 500);
+        }
 
         $response = [
             'order'          => $this->formatOrder($order),
