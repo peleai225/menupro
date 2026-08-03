@@ -79,13 +79,9 @@ class PaymentController extends Controller
                     'restaurant_id'          => $order->restaurant_id,
                     'gateway'                => 'wave',
                     'gateway_transaction_id' => $checkoutId,
-                    'wave_checkout_id'       => $checkoutId,
                     'amount'                 => $order->total,
-                    'commission'             => 0,
-                    'net_amount'             => $order->total,
-                    'currency'               => 'XOF',
                     'status'                 => 'pending',
-                    'client_reference'       => $order->reference,
+                    'metadata'               => ['wave_checkout_id' => $checkoutId, 'reference' => $order->reference],
                 ]);
             });
 
@@ -157,11 +153,7 @@ class PaymentController extends Controller
                     'jeko_payment_id'        => $result['payment_id'],
                     'jeko_reference'         => $order->reference,
                     'amount'                 => $order->total,
-                    'commission'             => 0,
-                    'net_amount'             => $order->total,
-                    'currency'               => 'XOF',
                     'status'                 => 'pending',
-                    'client_reference'       => $order->reference,
                 ]);
             });
 
