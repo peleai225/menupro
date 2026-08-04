@@ -11,6 +11,7 @@ use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReportsExport;
+use App\Services\RevenueCalculator;
 
 class Reports extends Component
 {
@@ -78,6 +79,7 @@ class Reports extends Component
                 'customers' => $this->getCustomersReport($restaurant->id, $startDate, $endDate),
                 'financial' => $this->getFinancialReport($restaurant->id, $startDate, $endDate),
                 'waiters' => $this->getWaitersReport($restaurant->id, $startDate, $endDate),
+                'daily'   => $this->getDailyReport($restaurant->id, $startDate, $endDate),
                 default => [],
             };
 
@@ -337,47 +339,24 @@ class Reports extends Component
 
     protected function getFinancialReport(int $restaurantId, $startDate, $endDate): array
     {
-        $orders = Order::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereNotNull('paid_at')
-            ->validForReporting()
-            ->get();
+        $calc = RevenueCalculator::for($restaurantId, $startDate, $endDate);
 
-        $totalRevenueBrut = $orders->sum('total');
-        $totalSubtotal = $orders->sum('subtotal');
-        $totalDeliveryFees = $orders->sum('delivery_fee');
-        $totalDiscounts = $orders->sum('discount_amount');
-        $totalCommission = $orders->sum('platform_commission');
-        $totalRevenueNet = $totalRevenueBrut - $totalCommission - $totalDeliveryFees;
+        // Période précédente de même durée
+        $duration  = $startDate->diffInDays($endDate);
+        $prevEnd   = $startDate->copy()->subDay()->endOfDay();
+        $prevStart = $prevEnd->copy()->subDays($duration)->startOfDay();
+        $calcPrev  = RevenueCalculator::for($restaurantId, $prevStart, $prevEnd);
 
-        // Revenue by payment method
-        $revenueByPayment = Order::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereNotNull('paid_at')
-            ->validForReporting()
-            ->select(
-                DB::raw("COALESCE(JSON_EXTRACT(payment_metadata, '$.method'), 'on_site') as payment_method"),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(total) as revenue_brut'),
-                DB::raw('SUM(total - COALESCE(platform_commission, 0) - COALESCE(delivery_fee, 0)) as revenue_net')
-            )
-            ->groupBy('payment_method')
-            ->get()
-            ->map(function ($item) {
-                $method = $item->payment_method ?? 'on_site';
-                // Remove quotes from JSON_EXTRACT result
-                $method = trim($method, '"\'');
-                return [
-                    'payment_method' => $this->cleanString($method),
-                    'count' => (int) $item->count,
-                    'revenue_brut' => (float) $item->revenue_brut,
-                    'revenue_net' => (float) $item->revenue_net,
-                ];
-            })
-            ->values()
-            ->toArray();
+        $byPayment = $calc->revenueByPaymentMethodDetailed();
+        $cancelled = $calc->cancellationStats();
 
-        // Daily revenue trend
+        $curRevenue  = $calc->grossRevenue();
+        $prevRevenue = $calcPrev->grossRevenue();
+        $changePct   = $prevRevenue > 0
+            ? (int) round((($curRevenue - $prevRevenue) / $prevRevenue) * 100)
+            : ($curRevenue > 0 ? 100 : 0);
+
+        // Daily revenue trend (inchangé)
         $dailyRevenue = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('paid_at')
@@ -394,31 +373,52 @@ class Reports extends Component
             ->groupBy('date')
             ->orderBy('date')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => $item->date,
-                    'revenue_brut' => (float) $item->revenue_brut,
-                    'revenue_net' => (float) $item->revenue_net,
-                    'subtotal' => (float) $item->subtotal,
-                    'delivery_fees' => (float) $item->delivery_fees,
-                    'discounts' => (float) $item->discounts,
-                    'commission' => (float) $item->commission,
-                ];
-            })
+            ->map(fn($item) => [
+                'date'          => $item->date,
+                'revenue_brut'  => (float) $item->revenue_brut,
+                'revenue_net'   => (float) $item->revenue_net,
+                'subtotal'      => (float) $item->subtotal,
+                'delivery_fees' => (float) $item->delivery_fees,
+                'discounts'     => (float) $item->discounts,
+                'commission'    => (float) $item->commission,
+            ])
             ->values()
             ->toArray();
 
-        return [
-            'total_revenue_brut' => (float) $totalRevenueBrut,
-            'total_revenue_net' => (float) $totalRevenueNet,
-            'total_revenue' => (float) $totalRevenueBrut, // alias attendu par la vue
-            'total_commission' => (float) $totalCommission,
-            'total_subtotal' => (float) $totalSubtotal,
-            'total_delivery_fees' => (float) $totalDeliveryFees,
-            'total_discounts' => (float) $totalDiscounts,
-            'revenue_by_payment' => array_map(fn($p) => array_merge($p, ['revenue' => $p['revenue_brut']]), $revenueByPayment),
+        // Totaux secondaires via requêtes directes
+        $baseQ = Order::where('restaurant_id', $restaurantId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('paid_at')
+            ->validForReporting();
+
+        $byPaymentArray = $byPayment->map(fn($p) => array_merge($p, [
+            'revenue'         => $p['total_amount'],
+            'revenue_brut'    => $p['total_amount'],
+            'payment_method'  => $p['method'],
+            'count'           => $p['orders_count'],
+        ]))->values()->toArray();
+
+        return $this->cleanArray([
+            'total_revenue_brut'  => $curRevenue,
+            'total_revenue_net'   => $calc->netRevenue(),
+            'total_revenue'       => $curRevenue,
+            'total_commission'    => $calc->totalCommissions(),
+            'total_subtotal'      => (int) (clone $baseQ)->sum('subtotal'),
+            'total_delivery_fees' => (int) (clone $baseQ)->sum('delivery_fee'),
+            'total_discounts'     => (int) (clone $baseQ)->sum('discount_amount'),
+            'cash_total'          => (int) $byPayment->where('is_cash', true)->sum('total_amount'),
+            'mobile_total'        => (int) $byPayment->where('is_cash', false)->sum('total_amount'),
+            'cancelled_count'     => $cancelled['count'],
+            'cancelled_lost'      => $cancelled['total_lost'],
+            'by_payment_detailed' => $byPayment->values()->toArray(),
+            'revenue_by_payment'  => $byPaymentArray,
+            'vs_previous'         => [
+                'revenue'    => $prevRevenue,
+                'orders'     => $calcPrev->validOrdersCount(),
+                'change_pct' => $changePct,
+            ],
             'daily_revenue' => $dailyRevenue,
-        ];
+        ]);
     }
 
     protected function getWaitersReport(int $restaurantId, $startDate, $endDate): array
@@ -609,6 +609,35 @@ class Reports extends Component
         }
         
         return $cleaned;
+    }
+
+    protected function getDailyReport(int $restaurantId, $startDate, $endDate): array
+    {
+        $calc = RevenueCalculator::for($restaurantId, $startDate, $endDate);
+
+        $byHour    = $calc->revenueByHourWithPayment();
+        $byPayment = $calc->revenueByPaymentMethodDetailed();
+        $cancelled = $calc->cancellationStats();
+
+        $cashTotal   = (int) $byPayment->where('is_cash', true)->sum('total_amount');
+        $mobileTotal = (int) $byPayment->where('is_cash', false)->sum('total_amount');
+
+        $peakHourRow = $byHour->sortByDesc('orders_count')->first();
+        $peakHour    = $peakHourRow ? $peakHourRow['hour_label'] : '—';
+
+        return $this->cleanArray([
+            'date'            => $startDate->toDateString(),
+            'total_revenue'   => $calc->grossRevenue(),
+            'total_orders'    => $calc->validOrdersCount(),
+            'average_ticket'  => $calc->averageTicket(),
+            'cash_total'      => $cashTotal,
+            'mobile_total'    => $mobileTotal,
+            'cancelled_count' => $cancelled['count'],
+            'cancelled_lost'  => $cancelled['total_lost'],
+            'peak_hour'       => $peakHour,
+            'by_hour'         => $byHour->values()->toArray(),
+            'by_payment'      => $byPayment->values()->toArray(),
+        ]);
     }
 
     public function export(string $format)
