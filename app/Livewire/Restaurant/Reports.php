@@ -177,12 +177,13 @@ class Reports extends Component
         return [
             'total_revenue_brut' => (float) $totalRevenueBrut,
             'total_revenue_net' => (float) $totalRevenueNet,
+            'total_revenue' => (float) $totalRevenueBrut, // alias attendu par la vue
             'total_commission' => (float) $totalCommission,
             'total_delivery_fees' => (float) $totalDeliveryFees,
             'total_orders' => (int) $totalOrders,
             'average_order' => (float) $averageOrder,
             'sales_by_day' => $salesByDay,
-            'sales_by_type' => $salesByType,
+            'sales_by_type' => array_map(fn($t) => array_merge($t, ['revenue' => $t['revenue_brut']]), $salesByType),
             'sales_by_status' => $salesByStatus,
             'orders' => $orders->take(50)->map(function ($order) {
                 return [
@@ -410,11 +411,12 @@ class Reports extends Component
         return [
             'total_revenue_brut' => (float) $totalRevenueBrut,
             'total_revenue_net' => (float) $totalRevenueNet,
+            'total_revenue' => (float) $totalRevenueBrut, // alias attendu par la vue
             'total_commission' => (float) $totalCommission,
             'total_subtotal' => (float) $totalSubtotal,
             'total_delivery_fees' => (float) $totalDeliveryFees,
             'total_discounts' => (float) $totalDiscounts,
-            'revenue_by_payment' => $revenueByPayment,
+            'revenue_by_payment' => array_map(fn($p) => array_merge($p, ['revenue' => $p['revenue_brut']]), $revenueByPayment),
             'daily_revenue' => $dailyRevenue,
         ];
     }
