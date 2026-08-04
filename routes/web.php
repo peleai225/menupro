@@ -428,6 +428,11 @@ Route::prefix('admin')
         Route::get('finances', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'index'])->name('finances.index');
         Route::get('finances/retraits', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'payouts'])->name('finances.payouts');
         Route::get('finances/commissions', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'commissions'])->name('finances.commissions');
+        // Gestion des reversements échoués
+        Route::get('finances/reversements-echoues', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'failedPayouts'])->name('finances.failed-payouts');
+        Route::post('finances/reversements/{order}/relancer', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'retryPayout'])->name('finances.retry-payout');
+        Route::post('finances/reversements/{order}/manuel', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'markPayoutManual'])->name('finances.mark-manual');
+        Route::post('finances/reversements/relancer-tous', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'retryAllPayouts'])->name('finances.retry-all');
         
         // Announcements
         Route::resource('annonces', \App\Http\Controllers\SuperAdmin\AnnouncementController::class)->parameters(['annonces' => 'announcement'])->names('announcements')->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);

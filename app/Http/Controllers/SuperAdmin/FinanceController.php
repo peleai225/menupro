@@ -7,8 +7,12 @@ use App\Models\RestaurantWallet;
 use App\Models\PaymentTransaction;
 use App\Models\PayoutTransaction;
 use App\Models\CommissionLog;
+use App\Models\Order;
+use App\Jobs\ProcessJekoPayoutJob;
+use App\Services\JekoGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FinanceController extends Controller
 {
@@ -91,6 +95,125 @@ class FinanceController extends Controller
             ->withQueryString();
 
         return view('pages.super-admin.payouts', compact('stats', 'payouts'));
+    }
+
+    /**
+     * Commandes payées via Jeko/Wave dont le reversement a échoué ou n'a pas été tenté
+     */
+    public function failedPayouts(Request $request)
+    {
+        // Commandes payées via Jeko avec reversement échoué dans les logs
+        // = commandes Jeko payées où le restaurant est intégré mais payout non fait
+        $failedOrders = Order::with(['restaurant.jekoSubMerchant'])
+            ->whereIn('payment_method', ['jeko', 'wave'])
+            ->whereNotNull('paid_at')
+            ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
+            ->where('paid_at', '>=', now()->subDays(30))
+            ->whereHas('restaurant', fn($q) => $q->whereHas('jekoSubMerchant'))
+            ->when($request->restaurant, fn($q) => $q->whereHas('restaurant', fn($r) =>
+                $r->where('name', 'like', "%{$request->restaurant}%")
+            ))
+            ->latest('paid_at')
+            ->paginate(30)
+            ->withQueryString();
+
+        $stats = [
+            'total_orders'  => Order::whereIn('payment_method', ['jeko', 'wave'])->whereNotNull('paid_at')->whereNotIn('status', ['cancelled','refunded','draft'])->where('paid_at', '>=', now()->subDays(30))->count(),
+            'total_amount'  => Order::whereIn('payment_method', ['jeko', 'wave'])->whereNotNull('paid_at')->whereNotIn('status', ['cancelled','refunded','draft'])->where('paid_at', '>=', now()->subDays(30))->sum('total'),
+        ];
+
+        return view('pages.super-admin.failed-payouts', compact('failedOrders', 'stats'));
+    }
+
+    /**
+     * Relancer le payout Jeko pour une commande spécifique
+     */
+    public function retryPayout(Request $request, Order $order)
+    {
+        $restaurant = $order->restaurant;
+        $subMerchant = $restaurant?->jekoSubMerchant;
+
+        if (!$subMerchant || !$subMerchant->isIntegrated()) {
+            return back()->with('error', "Le restaurant {$restaurant?->name} n'est pas intégré Jeko.");
+        }
+
+        if (!in_array($order->payment_method, ['jeko', 'wave']) || !$order->paid_at) {
+            return back()->with('error', "La commande #{$order->reference} n'est pas payée via Jeko/Wave.");
+        }
+
+        try {
+            ProcessJekoPayoutJob::dispatch($order);
+            Log::channel('payments')->info('Manual payout retry dispatched by super-admin', [
+                'order_id'      => $order->id,
+                'restaurant_id' => $restaurant->id,
+                'dispatched_by' => auth()->id(),
+            ]);
+            return back()->with('success', "Reversement relancé pour la commande #{$order->reference} ({$restaurant->name}).");
+        } catch (\Exception $e) {
+            return back()->with('error', "Erreur lors du lancement : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Relancer les payouts pour TOUTES les commandes d'un restaurant (30 derniers jours)
+     */
+    public function retryAllPayouts(Request $request)
+    {
+        $request->validate(['restaurant_id' => 'required|integer|exists:restaurants,id']);
+
+        $orders = Order::where('restaurant_id', $request->restaurant_id)
+            ->whereIn('payment_method', ['jeko', 'wave'])
+            ->whereNotNull('paid_at')
+            ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
+            ->where('paid_at', '>=', now()->subDays(30))
+            ->get();
+
+        $count = 0;
+        foreach ($orders as $order) {
+            try {
+                ProcessJekoPayoutJob::dispatch($order);
+                $count++;
+            } catch (\Exception $e) {
+                Log::channel('payments')->error('Bulk payout retry failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        Log::channel('payments')->info('Bulk payout retry by super-admin', [
+            'restaurant_id' => $request->restaurant_id,
+            'count'         => $count,
+            'by'            => auth()->id(),
+        ]);
+
+        return back()->with('success', "{$count} reversements relancés.");
+    }
+
+    /**
+     * Marquer un payout comme fait manuellement (virement fait hors système)
+     */
+    public function markPayoutManual(Request $request, Order $order)
+    {
+        $request->validate(['note' => 'nullable|string|max:255']);
+
+        $restaurant = $order->restaurant;
+
+        Log::channel('payments')->info('Payout marked as manual by super-admin', [
+            'order_id'      => $order->id,
+            'restaurant_id' => $restaurant?->id,
+            'amount'        => $order->total,
+            'note'          => $request->note,
+            'marked_by'     => auth()->id(),
+        ]);
+
+        // Enregistre dans les métadonnées de la commande
+        $order->payment_metadata = array_merge($order->payment_metadata ?? [], [
+            'manual_payout'      => true,
+            'manual_payout_by'   => auth()->id(),
+            'manual_payout_at'   => now()->toIso8601String(),
+            'manual_payout_note' => $request->note,
+        ]);
+        $order->save();
+
+        return back()->with('success', "Commande #{$order->reference} marquée comme reversée manuellement.");
     }
 
     public function commissions(Request $request)
