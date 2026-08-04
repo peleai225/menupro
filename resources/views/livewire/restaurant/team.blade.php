@@ -85,12 +85,12 @@
                             </div>
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Actions - Touch-friendly -->
                         <div class="flex items-center gap-2 ml-4">
                             @if($member->id !== auth()->id() && $member->id !== $member->restaurant->owner?->id)
-                                <button wire:click="resendInvitation({{ $member->id }})" 
+                                <button wire:click="resendInvitation({{ $member->id }})"
                                         wire:loading.attr="disabled"
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-primary-600 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+                                        class="btn btn-secondary px-3 py-3 text-sm hover:bg-primary-600 hover:text-white transition-all disabled:opacity-50 min-h-[52px] touch-manipulation"
                                         title="Renvoyer l'invitation">
                                     <svg wire:loading.remove wire:target="resendInvitation({{ $member->id }})" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -100,15 +100,15 @@
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 </button>
-                                <button wire:click="editUser({{ $member->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50"
+                                <button wire:click="editUser({{ $member->id }})"
+                                        class="btn btn-secondary px-3 py-3 text-sm hover:bg-neutral-700 transition-all disabled:opacity-50 min-h-[52px] touch-manipulation"
                                         title="Modifier">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button wire:click="toggleActive({{ $member->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50"
+                                <button wire:click="toggleActive({{ $member->id }})"
+                                        class="btn btn-secondary px-3 py-3 text-sm hover:bg-neutral-700 transition-all disabled:opacity-50 min-h-[52px] touch-manipulation"
                                         title="{{ $member->is_active ? 'Désactiver' : 'Activer' }}">
                                     @if($member->is_active)
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,9 +120,9 @@
                                         </svg>
                                     @endif
                                 </button>
-                                <button wire:click="removeUser({{ $member->id }})" 
+                                <button wire:click="removeUser({{ $member->id }})"
                                         wire:confirm="Êtes-vous sûr de vouloir supprimer ce membre de l'équipe ?"
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+                                        class="btn btn-secondary px-3 py-3 text-sm hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 min-h-[52px] touch-manipulation"
                                         title="Supprimer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -155,10 +155,10 @@
         </div>
     @endif
 
-    <!-- Invite/Edit Modal -->
+    <!-- Invite/Edit Modal - Mobile optimized -->
     @if($showInviteModal)
-        <div x-data="{ show: @entangle('showInviteModal') }" 
-             x-show="show" 
+        <div x-data="{ show: @entangle('showInviteModal') }"
+             x-show="show"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -178,106 +178,107 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
                  @click.away="document.body.classList.remove('overflow-hidden'); show = false; $wire.closeInviteModal()"
-                 class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                
-                <!-- Header -->
-                <div class="p-6 border-b border-neutral-200">
+                 class="bg-white rounded-2xl shadow-xl max-w-lg w-full flex flex-col"
+                 style="max-height: min(90vh, calc(100vh - 80px));">
+
+
+                <!-- Header compact -->
+                <div class="p-4 sm:p-5 border-b border-neutral-200 shrink-0">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-neutral-900">
-                            {{ $editingUser ? 'Modifier le membre' : 'Inviter un membre' }}
+                        <h2 class="text-lg font-bold text-neutral-900">
+                            {{ $editingUser ? 'Modifier' : 'Inviter un membre' }}
                         </h2>
-                        <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeInviteModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeInviteModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors p-2 touch-manipulation">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Form -->
-                <form wire:submit.prevent="invite" class="p-6 space-y-6">
+                <!-- Form - Scrollable -->
+                <form wire:submit.prevent="invite" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
                     <!-- First Name -->
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                        <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Prénom <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" wire:model="first_name" 
+                        <input type="text" wire:model="first_name"
                                placeholder="Jean"
                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('first_name') border-red-500 @enderror">
                         @error('first_name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Last Name -->
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                        <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Nom <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" wire:model="last_name" 
+                        <input type="text" wire:model="last_name"
                                placeholder="Dupont"
                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('last_name') border-red-500 @enderror">
                         @error('last_name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                        <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Email <span class="text-red-500">*</span>
                         </label>
-                        <input type="email" wire:model="email" 
+                        <input type="email" wire:model="email"
                                placeholder="jean.dupont@example.com"
                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('email') border-red-500 @enderror">
                         @error('email')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                         @if(!$editingUser)
-                            <p class="text-xs text-neutral-500 mt-1">Un email d'invitation sera envoyé à cette adresse</p>
+                            <p class="text-xs text-neutral-500 mt-1">Un email d'invitation sera envoyé</p>
                         @endif
                     </div>
 
                     <!-- Phone -->
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                        <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Téléphone
                         </label>
-                        <input type="tel" wire:model="phone" 
+                        <input type="tel" wire:model="phone"
                                placeholder="+225 07 00 00 00 00"
                                class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('phone') border-red-500 @enderror">
                         @error('phone')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Role -->
                     <div>
-                        <label class="block text-sm font-medium text-neutral-700 mb-2">
+                        <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                             Rôle <span class="text-red-500">*</span>
                         </label>
-                        <select wire:model="role" 
+                        <select wire:model="role"
                                 class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 @error('role') border-red-500 @enderror">
                             <option value="employee">Employé</option>
                             <option value="restaurant_admin">Administrateur</option>
                         </select>
                         @error('role')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                         <p class="text-xs text-neutral-500 mt-1">
-                            <strong>Employé :</strong> Accès limité aux fonctionnalités de base<br>
-                            <strong>Administrateur :</strong> Accès complet à toutes les fonctionnalités
+                            <strong>Employé:</strong> Accès limité / <strong>Admin:</strong> Accès complet
                         </p>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
-                        <button type="button" wire:click="closeInviteModal" 
-                                class="btn btn-secondary px-6 py-3 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm hover:shadow-md">
+                    <!-- Actions - Touch-friendly -->
+                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-200 shrink-0">
+                        <button type="button" wire:click="closeInviteModal"
+                                class="btn btn-secondary px-4 py-3 text-sm min-h-[52px] touch-manipulation">
                             Annuler
                         </button>
-                        <button type="submit" 
-                                class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:bg-primary-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md">
+                        <button type="submit"
+                                class="btn btn-primary px-4 sm:px-6 py-3 text-sm min-h-[52px] touch-manipulation">
                             {{ $editingUser ? 'Enregistrer' : 'Inviter' }}
                         </button>
                     </div>
