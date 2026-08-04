@@ -123,6 +123,9 @@ class JekoWebhookController extends Controller
         });
 
         if ($orderToPayout) {
+            // Marquer comme "en attente de reversement"
+            $orderToPayout->payout_status = 'pending';
+            $orderToPayout->save();
             ProcessJekoPayoutJob::dispatch($orderToPayout);
         }
 

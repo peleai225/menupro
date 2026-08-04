@@ -104,12 +104,16 @@ class FinanceController extends Controller
     {
         // Commandes payées via Jeko avec reversement échoué dans les logs
         // = commandes Jeko payées où le restaurant est intégré mais payout non fait
+        // Commandes Jeko/Wave : en attente OU échouées OU sans statut payout (anciennes)
         $failedOrders = Order::with(['restaurant.jekoSubMerchant'])
             ->whereIn('payment_method', ['jeko', 'wave'])
             ->whereNotNull('paid_at')
             ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
             ->where('paid_at', '>=', now()->subDays(30))
-            ->whereHas('restaurant', fn($q) => $q->whereHas('jekoSubMerchant'))
+            ->where(fn($q) => $q
+                ->whereNull('payout_status')
+                ->orWhereIn('payout_status', ['pending', 'failed'])
+            )
             ->when($request->restaurant, fn($q) => $q->whereHas('restaurant', fn($r) =>
                 $r->where('name', 'like', "%{$request->restaurant}%")
             ))
@@ -117,9 +121,15 @@ class FinanceController extends Controller
             ->paginate(30)
             ->withQueryString();
 
+        $baseQ = Order::whereIn('payment_method', ['jeko', 'wave'])
+            ->whereNotNull('paid_at')
+            ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
+            ->where('paid_at', '>=', now()->subDays(30));
+
         $stats = [
-            'total_orders'  => Order::whereIn('payment_method', ['jeko', 'wave'])->whereNotNull('paid_at')->whereNotIn('status', ['cancelled','refunded','draft'])->where('paid_at', '>=', now()->subDays(30))->count(),
-            'total_amount'  => Order::whereIn('payment_method', ['jeko', 'wave'])->whereNotNull('paid_at')->whereNotIn('status', ['cancelled','refunded','draft'])->where('paid_at', '>=', now()->subDays(30))->sum('total'),
+            'total_orders'     => (clone $baseQ)->where(fn($q) => $q->whereNull('payout_status')->orWhereIn('payout_status', ['pending', 'failed']))->count(),
+            'total_amount'     => (clone $baseQ)->where(fn($q) => $q->whereNull('payout_status')->orWhereIn('payout_status', ['pending', 'failed']))->sum('total'),
+            'completed_today'  => (clone $baseQ)->whereIn('payout_status', ['completed', 'manual'])->where('payout_at', '>=', today())->count(),
         ];
 
         return view('pages.super-admin.failed-payouts', compact('failedOrders', 'stats'));
@@ -204,7 +214,9 @@ class FinanceController extends Controller
             'marked_by'     => auth()->id(),
         ]);
 
-        // Enregistre dans les métadonnées de la commande
+        $order->payout_status    = 'manual';
+        $order->payout_at        = now();
+        $order->payout_reference = 'MANUAL-' . auth()->id();
         $order->payment_metadata = array_merge($order->payment_metadata ?? [], [
             'manual_payout'      => true,
             'manual_payout_by'   => auth()->id(),

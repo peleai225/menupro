@@ -33,14 +33,18 @@
     @endif
 
     {{-- Stats --}}
-    <div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="grid grid-cols-3 gap-4 mb-8">
         <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes Jeko/Wave (30j)</p>
-            <p class="text-3xl font-bold mt-1" style="color:var(--sa-fg);">{{ $stats['total_orders'] }}</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente / échoués (30j)</p>
+            <p class="text-3xl font-bold mt-1" style="color:#dc2626;">{{ $stats['total_orders'] }}</p>
         </div>
         <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Montant total concerné</p>
-            <p class="text-3xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($stats['total_amount'], 0, ',', ' ') }} F</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Montant à reverser</p>
+            <p class="text-3xl font-bold mt-1" style="color:#dc2626;">{{ number_format($stats['total_amount'], 0, ',', ' ') }} F</p>
+        </div>
+        <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Reversés aujourd'hui</p>
+            <p class="text-3xl font-bold mt-1" style="color:#16a34a;">{{ $stats['completed_today'] }}</p>
         </div>
     </div>
 
@@ -76,7 +80,9 @@
                         @php
                             $sub = $order->restaurant?->jekoSubMerchant;
                             $isIntegrated = $sub?->isIntegrated() ?? false;
-                            $isManual = $order->payment_metadata['manual_payout'] ?? false;
+                            $payoutStatus = $order->payout_status;
+                            $isDone = in_array($payoutStatus, ['completed', 'manual']);
+                            $isFailed = $payoutStatus === 'failed';
                             $operator = $order->payment_metadata['jeko_operator'] ?? $order->payment_metadata['operator'] ?? '';
                         @endphp
                         <tr style="background:{{ $isManual ? '#f0fdf4' : ($isIntegrated ? 'var(--sa-card)' : '#fef9c3') }}">
@@ -111,18 +117,24 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                @if($isManual)
+                                @if($payoutStatus === 'completed')
                                     <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#dcfce7;color:#166534;">
-                                        ✅ Manuel le {{ \Carbon\Carbon::parse($order->payment_metadata['manual_payout_at'])->format('d/m H:i') }}
+                                        ✅ Reversé {{ $order->payout_at?->format('d/m H:i') }}
                                     </span>
-                                @elseif($isIntegrated)
-                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#fee2e2;color:#991b1b;">❌ À reverser</span>
+                                @elseif($payoutStatus === 'manual')
+                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#dcfce7;color:#166534;">
+                                        ✅ Manuel {{ $order->payout_at?->format('d/m H:i') }}
+                                    </span>
+                                @elseif($payoutStatus === 'failed')
+                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#fee2e2;color:#991b1b;">❌ Échoué</span>
+                                @elseif($payoutStatus === 'pending')
+                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#fef9c3;color:#92400e;">⏳ En cours...</span>
                                 @else
-                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#fef9c3;color:#92400e;">⏳ Attente intégration</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg text-xs font-semibold" style="background:#fee2e2;color:#991b1b;">❌ À reverser</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                @if(!$isManual)
+                                @if(!$isDone)
                                 <div class="flex items-center justify-center gap-2">
                                     {{-- Relancer via API Jeko --}}
                                     @if($isIntegrated)

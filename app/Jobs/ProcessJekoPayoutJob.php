@@ -79,12 +79,22 @@ class ProcessJekoPayoutJob implements ShouldQueue
         );
 
         if ($result['success']) {
+            // Marquer la commande comme reversée
+            $this->order->payout_status    = 'completed';
+            $this->order->payout_at        = now();
+            $this->order->payout_reference = $result['transfer_id'] ?? $reference;
+            $this->order->save();
+
             Log::channel('payments')->info('Jeko payout dispatched', [
                 'order_id'   => $this->order->id,
                 'amount'     => $amount,
                 'payout_id'  => $result['transfer_id'] ?? null,
             ]);
         } else {
+            // Marquer comme échoué
+            $this->order->payout_status = 'failed';
+            $this->order->save();
+
             Log::channel('payments')->error('Jeko payout failed', [
                 'order_id' => $this->order->id,
                 'error'    => $result['error'] ?? 'unknown',
