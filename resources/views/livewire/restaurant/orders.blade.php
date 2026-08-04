@@ -280,8 +280,10 @@
              x-transition:enter-start="opacity-0 transform translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
              class="card overflow-hidden">
-            <div class="table-responsive">
-                <table class="w-full min-w-[700px]">
+            <!-- Table avec scroll horizontal sur mobile -->
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <div class="inline-block min-w-full align-middle">
+                    <table class="w-full min-w-[700px]">
                     <thead class="bg-gradient-to-r from-neutral-50 to-neutral-100 border-b border-neutral-200">
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Commande</th>
@@ -417,7 +419,8 @@
                             </tr>
                         @endforeach
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         </div>
 
