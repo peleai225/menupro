@@ -1,8 +1,8 @@
 <div>
     <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-neutral-900">Paramètres</h1>
-        <p class="text-neutral-500 mt-1">Configurez votre restaurant</p>
+    <div class="mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Paramètres</h1>
+        <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Configurez votre restaurant</p>
     </div>
 
     <!-- Flash Messages -->
@@ -74,11 +74,11 @@
         $tabs = $isStand ? collect($allTabs)->except($standHiddenTabs)->toArray() : $allTabs;
     @endphp
     <div x-data="{ activeTab: '{{ $activeTab }}' }" class="space-y-6">
-        <div class="flex overflow-x-auto gap-1.5 p-1.5 bg-neutral-100/80 rounded-2xl mb-8">
+        <div class="flex overflow-x-auto gap-1.5 p-1.5 bg-neutral-100/80 rounded-2xl mb-6">
             @foreach($tabs as $key => $tab)
                 <button @click="activeTab = '{{ $key }}'"
                         :class="activeTab === '{{ $key }}' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-xl transition-all duration-200">
+                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium whitespace-nowrap rounded-xl transition-all duration-200 touch-manipulation">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tab['icon'] }}"/>
                     </svg>
@@ -93,8 +93,8 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Public Link -->
-                    <div class="card p-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-2 border-primary-200">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+                    <div class="card p-4 sm:p-6 bg-gradient-to-r from-primary-50 to-secondary-50 border-2 border-primary-200">
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
                             <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                             </svg>
@@ -141,23 +141,23 @@
                     </div>
 
                     <!-- Basic Info -->
-                    <div class="card p-6">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations générales</h2>
-                        
-                        <div class="space-y-4">
+                    <div class="card p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Informations générales</h2>
+
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Nom du restaurant *</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Nom du restaurant *</label>
                                 <input type="text" wire:model="name" class="input @error('name') border-red-500 @enderror">
                                 @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Slogan</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Slogan</label>
                                 <input type="text" wire:model="tagline" class="input" placeholder="Ex: Le goût de l'authenticité">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Description</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Description</label>
                                 <textarea wire:model="description" rows="4" class="input" placeholder="Décrivez votre restaurant..."></textarea>
                             </div>
 
@@ -173,7 +173,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Site web</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Site web</label>
                                 <input type="url" wire:model="website" class="input" placeholder="https://...">
                             </div>
                         </div>
@@ -186,12 +186,12 @@
                         $defaultLat = (float) ($restaurant->latitude ?: ($defaultCenter?->center_latitude ?? 5.3600));
                         $defaultLng = (float) ($restaurant->longitude ?: ($defaultCenter?->center_longitude ?? -4.0083));
                     @endphp
-                    <div class="card p-6" x-data="restaurantLocationPicker(@js($defaultLat), @js($defaultLng), @js((bool)$restaurant->latitude), @js($deliveryCities->keyBy('name')->map(fn($c) => ['lat' => (float)$c->center_latitude, 'lng' => (float)$c->center_longitude])))">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-6">Adresse & Localisation</h2>
+                    <div class="card p-4 sm:p-6" x-data="restaurantLocationPicker(@js($defaultLat), @js($defaultLng), @js((bool)$restaurant->latitude), @js($deliveryCities->keyBy('name')->map(fn($c) => ['lat' => (float)$c->center_latitude, 'lng' => (float)$c->center_longitude])))">
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Adresse & Localisation</h2>
 
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Adresse</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Adresse</label>
                                 <input type="text" wire:model="address" class="input" placeholder="Rue, quartier...">
                             </div>
 
@@ -236,7 +236,7 @@
                                 </div>
 
                                 {{-- Carte Leaflet --}}
-                                <div wire:ignore id="restaurant-location-map" class="w-full h-52 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 z-0"></div>
+                                <div wire:ignore id="restaurant-location-map" class="w-full h-40 sm:h-52 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 z-0"></div>
                                 <p class="mt-1.5 text-xs text-neutral-400">Cliquez sur la carte ou utilisez "Ma position" pour placer le pin de votre restaurant.</p>
 
                                 {{-- Coordonnées en lecture --}}
@@ -256,8 +256,8 @@
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     <!-- Logo -->
-                    <div class="card p-6">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-4">Logo</h2>
+                    <div class="card p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Logo</h2>
                         
                         <div class="space-y-4">
                             <div class="w-32 h-32 mx-auto bg-neutral-100 rounded-xl overflow-hidden">
@@ -274,7 +274,7 @@
                                 @endif
                             </div>
 
-                            <label class="btn btn-secondary w-full cursor-pointer justify-center px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                            <label class="btn btn-secondary w-full cursor-pointer justify-center min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                                 <input type="file" wire:model="logo" accept="image/*" class="hidden">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -291,8 +291,8 @@
                     </div>
 
                     <!-- Banner -->
-                    <div class="card p-6">
-                        <h2 class="text-lg font-bold text-neutral-900 mb-4">Bannière</h2>
+                    <div class="card p-4 sm:p-6">
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Bannière</h2>
                         
                         <div class="space-y-4">
                             <div class="aspect-video bg-neutral-100 rounded-xl overflow-hidden">
@@ -309,7 +309,7 @@
                                 @endif
                             </div>
 
-                            <label class="btn btn-secondary w-full cursor-pointer justify-center px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                            <label class="btn btn-secondary w-full cursor-pointer justify-center min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                                 <input type="file" wire:model="banner" accept="image/*" class="hidden">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -326,7 +326,7 @@
                     </div>
 
                     <!-- Save -->
-                    <button type="submit" class="w-full btn btn-primary px-6 py-3 flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <button type="submit" class="w-full btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -394,11 +394,11 @@
                 @endif
 
                 <!-- Form -->
-                <form wire:submit="saveVerification" class="card p-6">
-                    <h2 class="text-lg font-bold text-neutral-900 mb-2">Documents d'entreprise</h2>
-                    <p class="text-neutral-600 mb-6">Ces informations permettent de vérifier votre établissement et d'afficher le badge "Vérifié" sur votre page publique.</p>
+                <form wire:submit="saveVerification" class="card p-4 sm:p-6">
+                    <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-2">Documents d'entreprise</h2>
+                    <p class="text-xs sm:text-sm text-neutral-600 mb-4">Ces informations permettent de vérifier votre établissement et d'afficher le badge "Vérifié" sur votre page publique.</p>
 
-                    <div class="space-y-5">
+                    <div class="space-y-4">
                         <!-- Company Name -->
                         <div>
                             <label for="company_name" class="block text-sm font-medium text-neutral-700 mb-2">
@@ -485,7 +485,7 @@
                     </div>
 
                     <div class="mt-6 pt-6 border-t border-neutral-200">
-                        <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2" wire:loading.attr="disabled">
+                        <button type="submit" class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 touch-manipulation" wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="saveVerification">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -534,9 +534,9 @@
         <!-- Appearance Tab -->
         <div x-show="activeTab === 'appearance'" x-cloak>
             <form wire:submit="saveAppearance" class="space-y-6">
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-6">Personnalisation des couleurs</h2>
-                <p class="text-neutral-600 mb-6">Personnalisez les couleurs de votre site public pour qu'il corresponde à votre identité visuelle.</p>
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Personnalisation des couleurs</h2>
+                <p class="text-xs sm:text-sm text-neutral-600 mb-4">Personnalisez les couleurs de votre site public pour qu'il corresponde à votre identité visuelle.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Primary Color -->
@@ -615,17 +615,17 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex items-center justify-end gap-3">
-                    <a href="{{ route('r.menu', $restaurant->slug) }}" 
+                <div class="mt-6 flex items-center justify-end gap-2">
+                    <a href="{{ route('r.menu', $restaurant->slug) }}"
                        target="_blank"
-                       class="btn btn-secondary px-4 py-2 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                       class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                         Voir le site
                     </a>
-                    <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                    <button type="submit" class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -640,7 +640,7 @@
         @if(!$isStand)
         <div x-show="activeTab === 'delivery'" x-cloak>
             <form wire:submit="saveDelivery" class="max-w-2xl">
-            <div class="card p-6 space-y-6">
+            <div class="card p-4 sm:p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-semibold text-neutral-900">Activer la livraison</h3>
@@ -653,9 +653,9 @@
                 </div>
 
                 @if($delivery_enabled)
-                    <div class="border-t border-neutral-200 pt-6 space-y-4">
+                    <div class="border-t border-neutral-200 pt-4 space-y-3">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Temps de préparation estimé (minutes)</label>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Temps de préparation estimé (minutes)</label>
                             <input type="number" wire:model="estimated_prep_time" class="input w-32" min="1">
                             <p class="text-xs text-neutral-500 mt-1">Temps moyen pour préparer une commande</p>
                         </div>
@@ -674,7 +674,7 @@
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                <button type="submit" class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -687,7 +687,7 @@
         <!-- Reservations Tab -->
         <div x-show="activeTab === 'reservations'" x-cloak>
             <form wire:submit="saveReservations" class="max-w-2xl">
-            <div class="card p-6 space-y-6">
+            <div class="card p-4 sm:p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-semibold text-neutral-900">Activer les réservations</h3>
@@ -700,9 +700,9 @@
                 </div>
 
                 @if($reservations_enabled)
-                    <div class="border-t border-neutral-200 pt-6 space-y-4">
+                    <div class="border-t border-neutral-200 pt-4 space-y-3">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nombre de tables</label>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Nombre de tables</label>
                             <input type="number" wire:model="number_of_tables" class="input w-32" min="1" max="500" placeholder="ex: 20">
                             <p class="text-xs text-neutral-500 mt-1">Capacité totale du restaurant (indicatif)</p>
                         </div>
@@ -721,7 +721,7 @@
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                <button type="submit" class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -735,7 +735,7 @@
         <!-- Payment Tab -->
         <div x-show="activeTab === 'payment'" x-cloak>
             <form wire:submit="savePayment" class="max-w-2xl">
-            <div class="card p-6 space-y-6">
+            <div class="card p-4 sm:p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="font-semibold text-neutral-900">Paiement à la livraison</h3>
@@ -748,8 +748,8 @@
                 </div>
 
                 <!-- Wave Business -->
-                <div class="border-t border-neutral-200 pt-6">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="border-t border-neutral-200 pt-4">
+                    <div class="flex items-center justify-between mb-3">
                         <div>
                             <h3 class="font-semibold text-neutral-900">Wave Business (paiement direct)</h3>
                             <p class="text-sm text-neutral-500">Recevez les paiements clients directement sur votre compte Wave Business</p>
@@ -761,7 +761,7 @@
                     </div>
 
                     @if($wave_business_enabled)
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg mb-2">
                                 <p class="text-xs text-emerald-800">
                                     <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -772,7 +772,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">
                                     Numéro Wave Business <span class="text-red-500">*</span>
                                 </label>
                                 <input type="tel" wire:model="wave_business_phone" class="input" placeholder="+225 07 XX XX XX XX">
@@ -787,7 +787,7 @@
 
                 <!-- Jeko -->
                 @php $jeko = $restaurant->jekoSubMerchant; @endphp
-                <div class="border-t border-neutral-200 pt-6">
+                <div class="border-t border-neutral-200 pt-4">
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <h3 class="font-semibold text-neutral-900 flex items-center gap-2">
@@ -869,7 +869,7 @@
                     @endif
                 </div>
 
-                <button type="submit" class="btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all mt-6">
+                <button type="submit" class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation mt-6">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -913,7 +913,7 @@
                     @elseif($this->payoutAvailable && $this->walletBalance >= 500)
                         <form wire:submit="requestPayout" class="mt-6 space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700 mb-2">Montant du retrait (FCFA) *</label>
+                                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Montant du retrait (FCFA) *</label>
                                 <input type="number" 
                                        wire:model="payoutAmount" 
                                        min="500" 
@@ -1009,10 +1009,10 @@
         <!-- Hours Tab -->
         <div x-show="activeTab === 'hours'" x-cloak>
             <form wire:submit="saveHours" class="max-w-2xl">
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-6">Horaires d'ouverture</h2>
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Horaires d'ouverture</h2>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
                     @php
                         $dayLabels = [
                             'monday' => 'Lundi',
@@ -1055,7 +1055,7 @@
                     @endforeach
                 </div>
 
-                <button type="submit" class="mt-6 btn btn-primary px-6 py-3 flex items-center gap-2 shadow-sm hover:shadow-md transition-all">
+                <button type="submit" class="mt-6 btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all touch-manipulation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -1069,16 +1069,16 @@
         @if(!$isStand)
         <div x-show="activeTab === 'kitchen'" x-cloak x-data="kitchenSettings()">
             <div class="max-w-2xl space-y-6">
-                <div class="card p-6">
-                    <h2 class="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
+                <div class="card p-4 sm:p-6">
+                    <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
                         <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
                         </svg>
                         Ecran Cuisine (KDS)
                     </h2>
-                    <p class="text-neutral-600 mb-6">Ouvrez ce lien sur une tablette ou un écran en cuisine. Les nouvelles commandes apparaissent automatiquement avec son et synthèse vocale — sans compte, sans login.</p>
+                    <p class="text-xs sm:text-sm text-neutral-600 mb-4">Ouvrez ce lien sur une tablette ou un écran en cuisine. Les nouvelles commandes apparaissent automatiquement avec son et synthèse vocale — sans compte, sans login.</p>
 
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         <div>
                             <label class="text-sm font-medium text-neutral-700 mb-2 block">Lien cuisine</label>
                             <div class="flex items-center gap-2">
@@ -1087,7 +1087,7 @@
                                        value="{{ route('kitchen.display', $restaurant->kitchen_token) }}"
                                        class="input flex-1 bg-neutral-50 text-sm font-mono">
                                 <button type="button" @click="copyKitchenLink()"
-                                        class="btn btn-primary px-4 py-2.5 flex items-center gap-2 shrink-0">
+                                        class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 shrink-0 touch-manipulation">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
                                     </svg>
@@ -1096,16 +1096,16 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <a href="{{ route('kitchen.display', $restaurant->kitchen_token) }}" target="_blank"
-                               class="btn bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 flex items-center gap-2">
+                               class="btn bg-emerald-500 hover:bg-emerald-600 text-white min-h-[52px] px-4 py-3.5 flex items-center gap-2 touch-manipulation">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                 </svg>
                                 Ouvrir l'écran cuisine
                             </a>
                             <button type="button" @click="regenerateToken()"
-                                    class="btn bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2.5 flex items-center gap-2"
+                                    class="btn bg-neutral-200 hover:bg-neutral-300 text-neutral-700 min-h-[52px] px-4 py-3.5 flex items-center gap-2 touch-manipulation"
                                     :disabled="loading"
                                     title="Générer un nouveau lien invalide l'ancien">
                                 <svg class="w-4 h-4" :class="loading && 'animate-spin'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1123,9 +1123,9 @@
                     </div>
                 </div>
 
-                <div class="card p-6">
-                    <h3 class="font-semibold text-neutral-900 mb-4">Comment ca marche ?</h3>
-                    <div class="space-y-3">
+                <div class="card p-4 sm:p-6">
+                    <h3 class="text-sm sm:text-base font-semibold text-neutral-900 mb-3">Comment ca marche ?</h3>
+                    <div class="space-y-2">
                         <div class="flex items-start gap-3">
                             <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 text-sm font-bold flex items-center justify-center shrink-0">1</span>
                             <p class="text-sm text-neutral-600">Generez le lien ci-dessus et ouvrez-le sur une tablette ou un ecran en cuisine</p>
@@ -1151,16 +1151,16 @@
         <!-- Security Tab -->
         <div x-show="activeTab === 'security'" x-cloak>
             <div class="max-w-lg">
-                <div class="card p-6">
-                    <h2 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
+                <div class="card p-4 sm:p-6">
+                    <h2 class="text-base sm:text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
                         <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                         </svg>
                         Changer le mot de passe
                     </h2>
-                    <p class="text-sm text-neutral-500 mb-6">Choisissez un mot de passe fort d'au moins 8 caractères.</p>
+                    <p class="text-xs sm:text-sm text-neutral-500 mb-4">Choisissez un mot de passe fort d'au moins 8 caractères.</p>
 
-                    <form wire:submit="changePassword" class="space-y-4">
+                    <form wire:submit="changePassword" class="space-y-3">
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-1.5">Mot de passe actuel</label>
                             <input type="password" wire:model="current_password"
@@ -1198,7 +1198,7 @@
                             <button type="submit"
                                     wire:loading.attr="disabled"
                                     wire:target="changePassword"
-                                    class="btn btn-primary flex items-center gap-2 disabled:opacity-60">
+                                    class="btn btn-primary min-h-[52px] px-4 py-3.5 flex items-center gap-2 disabled:opacity-60 touch-manipulation">
                                 <span wire:loading.remove wire:target="changePassword">Enregistrer le nouveau mot de passe</span>
                                 <span wire:loading wire:target="changePassword" class="inline-flex items-center gap-2">
                                     <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

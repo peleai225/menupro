@@ -14,7 +14,7 @@
     @endif
 
     <!-- Current Stock Display -->
-    <div class="card p-6 mb-6">
+    <div class="card p-4 sm:p-6 mb-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-neutral-500">Stock actuel</p>
@@ -51,7 +51,7 @@
         <!-- Tab buttons -->
         <div class="flex border-b border-neutral-200">
             <button wire:click="$set('activeTab', 'entry')"
-                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'entry' ? 'text-secondary-600 border-b-2 border-secondary-500 bg-secondary-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                    class="flex-1 py-2 px-2 text-sm font-medium transition-colors touch-manipulation {{ $activeTab === 'entry' ? 'text-secondary-600 border-b-2 border-secondary-500 bg-secondary-50' : 'text-neutral-500 hover:text-neutral-700' }}">
                 <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -62,7 +62,7 @@
                 <span class="block text-xs font-normal opacity-60 hidden sm:block">Achat / livraison</span>
             </button>
             <button wire:click="$set('activeTab', 'exit')"
-                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'exit' ? 'text-red-600 border-b-2 border-red-500 bg-red-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                    class="flex-1 py-2 px-2 text-sm font-medium transition-colors touch-manipulation {{ $activeTab === 'exit' ? 'text-red-600 border-b-2 border-red-500 bg-red-50' : 'text-neutral-500 hover:text-neutral-700' }}">
                 <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -73,7 +73,7 @@
                 <span class="block text-xs font-normal opacity-60 hidden sm:block">Consommation manuelle</span>
             </button>
             <button wire:click="$set('activeTab', 'adjustment')"
-                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'adjustment' ? 'text-accent-600 border-b-2 border-accent-500 bg-accent-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                    class="flex-1 py-2 px-2 text-sm font-medium transition-colors touch-manipulation {{ $activeTab === 'adjustment' ? 'text-accent-600 border-b-2 border-accent-500 bg-accent-50' : 'text-neutral-500 hover:text-neutral-700' }}">
                 <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -84,7 +84,7 @@
                 <span class="block text-xs font-normal opacity-60 hidden sm:block">Corriger le comptage</span>
             </button>
             <button wire:click="$set('activeTab', 'waste')"
-                    class="flex-1 py-3 px-2 text-sm font-medium transition-colors {{ $activeTab === 'waste' ? 'text-yellow-600 border-b-2 border-yellow-500 bg-yellow-50' : 'text-neutral-500 hover:text-neutral-700' }}">
+                    class="flex-1 py-2 px-2 text-sm font-medium transition-colors touch-manipulation {{ $activeTab === 'waste' ? 'text-yellow-600 border-b-2 border-yellow-500 bg-yellow-50' : 'text-neutral-500 hover:text-neutral-700' }}">
                 <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -97,14 +97,14 @@
         </div>
 
         <!-- Tab content -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
 
             {{-- ENTRY --}}
             @if($activeTab === 'entry')
-                <form wire:submit="addStock" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form wire:submit="addStock" class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-1">Quantité *</label>
+                            <label class="block text-sm font-medium text-neutral-700 mb-1.5">Quantité *</label>
                             <input type="number" wire:model="entryQuantity" step="0.01" min="0.01"
                                    placeholder="Ex: 10" class="input" required>
                             @error('entryQuantity') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -129,7 +129,7 @@
                             <input type="text" wire:model="entryReason" class="input" placeholder="Ex: Livraison hebdomadaire, Facture N°123">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-secondary w-full" wire:loading.attr="disabled" wire:target="addStock">
+                    <button type="submit" class="btn btn-secondary w-full min-h-[52px] px-4 py-3.5 touch-manipulation" wire:loading.attr="disabled" wire:target="addStock">
                         <span wire:loading.remove wire:target="addStock">Ajouter au stock</span>
                         <span wire:loading wire:target="addStock" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@
 
             {{-- EXIT --}}
             @if($activeTab === 'exit')
-                <form wire:submit="removeStock" class="space-y-4">
+                <form wire:submit="removeStock" class="space-y-3">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Quantité *</label>
                         <input type="number" wire:model="exitQuantity" step="0.01" min="0.01"
@@ -165,7 +165,7 @@
                         <input type="text" wire:model="exitReason" class="input" placeholder="Ou saisissez une raison..." required>
                         @error('exitReason') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <button type="submit" class="btn w-full bg-red-500 text-white hover:bg-red-600" wire:loading.attr="disabled" wire:target="removeStock">
+                    <button type="submit" class="btn w-full min-h-[52px] px-4 py-3.5 bg-red-500 text-white hover:bg-red-600 touch-manipulation" wire:loading.attr="disabled" wire:target="removeStock">
                         <span wire:loading.remove wire:target="removeStock">Retirer du stock</span>
                         <span wire:loading wire:target="removeStock" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@
 
             {{-- ADJUSTMENT --}}
             @if($activeTab === 'adjustment')
-                <form wire:submit="adjustStock" class="space-y-4">
+                <form wire:submit="adjustStock" class="space-y-3">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Nouvelle quantité *</label>
                         <input type="number" wire:model="adjustQuantity" step="0.01" min="0" class="input" required>
@@ -200,7 +200,7 @@
                         <input type="text" wire:model="adjustReason" class="input" placeholder="Ou saisissez une raison..." required>
                         @error('adjustReason') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <button type="submit" class="btn btn-outline w-full" wire:loading.attr="disabled" wire:target="adjustStock">
+                    <button type="submit" class="btn btn-outline w-full min-h-[52px] px-4 py-3.5 touch-manipulation" wire:loading.attr="disabled" wire:target="adjustStock">
                         <span wire:loading.remove wire:target="adjustStock">Ajuster le stock</span>
                         <span wire:loading wire:target="adjustStock" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -215,7 +215,7 @@
 
             {{-- WASTE --}}
             @if($activeTab === 'waste')
-                <form wire:submit="recordWaste" class="space-y-4">
+                <form wire:submit="recordWaste" class="space-y-3">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Quantité perdue *</label>
                         <input type="number" wire:model="wasteQuantity" step="0.01" min="0.01"
@@ -234,7 +234,7 @@
                         </div>
                         <input type="text" wire:model="wasteReason" class="input" placeholder="Ou saisissez une raison...">
                     </div>
-                    <button type="submit" class="btn w-full bg-yellow-500 text-white hover:bg-yellow-600" wire:loading.attr="disabled" wire:target="recordWaste">
+                    <button type="submit" class="btn w-full min-h-[52px] px-4 py-3.5 bg-yellow-500 text-white hover:bg-yellow-600 touch-manipulation" wire:loading.attr="disabled" wire:target="recordWaste">
                         <span wire:loading.remove wire:target="recordWaste">Enregistrer la perte</span>
                         <span wire:loading wire:target="recordWaste" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -251,8 +251,8 @@
 
     <!-- Recent Movements -->
     <div class="card">
-        <div class="p-6 border-b border-neutral-100 flex items-center justify-between">
-            <h2 class="text-lg font-bold text-neutral-900">Historique récent</h2>
+        <div class="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between">
+            <h2 class="text-base sm:text-lg font-bold text-neutral-900">Historique récent</h2>
             <a href="{{ route('restaurant.stock.ingredients.movements', $ingredient) }}"
                class="text-sm text-primary-600 hover:text-primary-700 font-medium">
                 Voir tout
