@@ -15,9 +15,10 @@ class ProcessJekoPayoutJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 5;
 
-    public int $backoff = 60;
+    // Backoff progressif : 5min, 15min, 30min, 1h, 2h
+    public array $backoff = [300, 900, 1800, 3600, 7200];
 
     public function __construct(public readonly Order $order)
     {

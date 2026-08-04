@@ -126,7 +126,8 @@ class JekoWebhookController extends Controller
             // Marquer comme "en attente de reversement"
             $orderToPayout->payout_status = 'pending';
             $orderToPayout->save();
-            ProcessJekoPayoutJob::dispatch($orderToPayout);
+            // Délai de 10 minutes : laisse le temps à Jeko de créditer le solde avant le virement
+            ProcessJekoPayoutJob::dispatch($orderToPayout)->delay(now()->addMinutes(10));
         }
 
         Log::channel('payments')->info('Jeko webhook transaction.completed (payment)', [
