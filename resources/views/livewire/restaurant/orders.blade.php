@@ -44,63 +44,63 @@
      }"
      x-init="setTimeout(() => loaded = true, 100)"
      x-on:new-order-received.window="playAlert()">
-    <!-- Header with gradient background -->
+    <!-- Header with gradient background - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform -translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+         class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-3">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-2 sm:gap-3">
                 Commandes
                 @if($this->statusCounts['pending'] > 0)
-                    <span class="relative flex h-6 w-6">
+                    <span class="relative flex h-5 w-5 sm:h-6 sm:w-6">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-6 w-6 bg-accent-500 text-white text-xs items-center justify-center font-bold">
+                        <span class="relative inline-flex rounded-full h-5 w-5 sm:h-6 sm:w-6 bg-accent-500 text-white text-[10px] sm:text-xs items-center justify-center font-bold">
                             {{ $this->statusCounts['pending'] }}
                         </span>
                     </span>
                 @endif
             </h1>
-            <p class="text-neutral-500 mt-1">
+            <p class="text-neutral-500 mt-0.5 sm:mt-1 text-xs sm:text-sm hidden sm:block">
                 Gérez les commandes de vos clients en temps réel.
             </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <button x-show="!soundEnabled" @click="enableSound()"
-                    class="btn btn-ghost px-3 py-2.5 flex items-center gap-2 text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100 animate-pulse">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="btn btn-ghost px-3 py-3 sm:py-2.5 min-h-[52px] sm:min-h-0 flex items-center gap-2 text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100 animate-pulse touch-manipulation">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                 </svg>
-                <span class="hidden sm:inline text-sm font-medium">Activer les alertes</span>
+                <span class="hidden sm:inline text-xs sm:text-sm font-medium">Activer les alertes</span>
             </button>
-            <span x-show="soundEnabled" class="px-3 py-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span x-show="soundEnabled" class="px-2.5 py-2 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-1.5">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                Alertes actives
+                <span class="hidden sm:inline">Alertes actives</span>
             </span>
             <a href="{{ route('restaurant.orders.rush') }}"
-               class="btn btn-primary btn-glow px-4 py-2.5 flex items-center gap-2 group">
-                <span class="px-2 py-0.5 bg-white/20 text-white rounded text-xs font-bold">RUSH</span>
-                <span class="hidden sm:inline">Mode Rush</span>
-                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="btn btn-primary btn-glow px-3 py-3 sm:px-4 sm:py-2.5 min-h-[52px] sm:min-h-0 flex items-center gap-1.5 sm:gap-2 group touch-manipulation">
+                <span class="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-white/20 text-white rounded text-[10px] sm:text-xs font-bold">RUSH</span>
+                <span class="hidden sm:inline text-sm">Mode Rush</span>
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
             </a>
-            <a href="{{ route('restaurant.orders.kanban') }}" 
-               class="btn btn-secondary px-4 py-2.5 flex items-center gap-2 hover:shadow-md transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('restaurant.orders.kanban') }}"
+               class="btn btn-secondary px-3 py-3 sm:px-4 sm:py-2.5 min-h-[52px] sm:min-h-0 flex items-center gap-1.5 sm:gap-2 hover:shadow-md transition-all touch-manipulation">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
                 </svg>
-                <span class="hidden sm:inline">Kanban</span>
+                <span class="hidden sm:inline text-sm">Kanban</span>
             </a>
-            <a href="{{ route('restaurant.orders.board') }}" 
+            <a href="{{ route('restaurant.orders.board') }}"
                target="_blank"
-               class="btn btn-ghost px-4 py-2.5 flex items-center gap-2 hover:shadow-md transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="btn btn-ghost px-3 py-3 sm:px-4 sm:py-2.5 min-h-[52px] sm:min-h-0 flex items-center gap-1.5 sm:gap-2 hover:shadow-md transition-all touch-manipulation">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
-                <span class="hidden sm:inline">Board</span>
+                <span class="hidden sm:inline text-sm">Board</span>
             </a>
         </div>
     </div>
@@ -155,61 +155,61 @@
         </div>
     @endif
 
-    <!-- Status Tabs with modern pills design -->
+    <!-- Status Tabs with modern pills design - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300 delay-100"
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="bg-white rounded-2xl p-2 shadow-sm border border-neutral-100 mb-6">
-        <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+         class="bg-white rounded-2xl p-1.5 sm:p-2 shadow-sm border border-neutral-100 mb-4 sm:mb-6">
+        <div class="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-1 sm:pb-2">
             <button wire:click="$set('status', '')"
                     wire:loading.attr="disabled"
-                    class="relative px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base transition-all duration-200 whitespace-nowrap {{ !$status ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'text-neutral-600 hover:bg-neutral-100' }}">
+                    class="relative px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base transition-all duration-200 whitespace-nowrap touch-manipulation {{ !$status ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'text-neutral-600 hover:bg-neutral-100' }}">
                 <span class="relative z-10">Toutes</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ !$status ? 'bg-white/20' : 'bg-neutral-200' }}">
+                <span class="ml-1 sm:ml-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ !$status ? 'bg-white/20' : 'bg-neutral-200' }}">
                     {{ $this->statusCounts['all'] }}
                 </span>
             </button>
             <button wire:click="$set('status', 'pending_payment')"
-                    class="relative px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'pending_payment' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'text-neutral-600 hover:bg-yellow-50' }}">
+                    class="relative px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap transition-all duration-200 touch-manipulation {{ $status === 'pending_payment' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'text-neutral-600 hover:bg-yellow-50' }}">
                 @if($this->statusCounts['pending'] > 0)
                     <span class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-500 rounded-full animate-ping"></span>
                     <span class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-500 rounded-full"></span>
                 @endif
                 <span>En attente</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'pending_payment' ? 'bg-white/20' : 'bg-yellow-100 text-yellow-700' }}">
+                <span class="ml-1 sm:ml-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $status === 'pending_payment' ? 'bg-white/20' : 'bg-yellow-100 text-yellow-700' }}">
                     {{ $this->statusCounts['pending'] }}
                 </span>
             </button>
             <button wire:click="$set('status', 'confirmed')"
-                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'confirmed' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-neutral-600 hover:bg-blue-50' }}">
+                    class="px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap transition-all duration-200 touch-manipulation {{ $status === 'confirmed' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-neutral-600 hover:bg-blue-50' }}">
                 <span>Confirmées</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'confirmed' ? 'bg-white/20' : 'bg-blue-100 text-blue-700' }}">
+                <span class="ml-1 sm:ml-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $status === 'confirmed' ? 'bg-white/20' : 'bg-blue-100 text-blue-700' }}">
                     {{ $this->statusCounts['confirmed'] }}
                 </span>
             </button>
             <button wire:click="$set('status', 'preparing')"
-                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'preparing' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-neutral-600 hover:bg-indigo-50' }}">
+                    class="px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap transition-all duration-200 touch-manipulation {{ $status === 'preparing' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-neutral-600 hover:bg-indigo-50' }}">
                 <span>En préparation</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'preparing' ? 'bg-white/20' : 'bg-indigo-100 text-indigo-700' }}">
+                <span class="ml-1 sm:ml-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $status === 'preparing' ? 'bg-white/20' : 'bg-indigo-100 text-indigo-700' }}">
                     {{ $this->statusCounts['preparing'] }}
                 </span>
             </button>
             <button wire:click="$set('status', 'ready')"
-                    class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 {{ $status === 'ready' ? 'bg-secondary-500 text-white shadow-lg shadow-secondary-500/30' : 'text-neutral-600 hover:bg-secondary-50' }}">
+                    class="px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap transition-all duration-200 touch-manipulation {{ $status === 'ready' ? 'bg-secondary-500 text-white shadow-lg shadow-secondary-500/30' : 'text-neutral-600 hover:bg-secondary-50' }}">
                 <span>Prêtes</span>
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold {{ $status === 'ready' ? 'bg-white/20' : 'bg-secondary-100 text-secondary-700' }}">
+                <span class="ml-1 sm:ml-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $status === 'ready' ? 'bg-white/20' : 'bg-secondary-100 text-secondary-700' }}">
                     {{ $this->statusCounts['ready'] }}
                 </span>
             </button>
         </div>
     </div>
 
-    <!-- Filters with enhanced design -->
+    <!-- Filters with enhanced design - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300 delay-200"
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="card p-4 mb-6">
-        <div class="flex flex-col lg:flex-row gap-4">
+         class="card p-3 sm:p-4 mb-4 sm:mb-6">
+        <div class="flex flex-col lg:flex-row gap-3 sm:gap-4">
             <!-- Search -->
             <div class="flex-1">
                 <div class="relative group">
