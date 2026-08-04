@@ -1,21 +1,21 @@
 <div>
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Rapports Détaillés</h1>
-            <p class="text-neutral-500 mt-1">Analysez vos performances en détail et exportez vos données.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Rapports Détaillés</h1>
+            <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Analysez vos performances en détail et exportez vos données.</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
             {{-- PDF export temporairement désactivé --}}
-            {{-- <button wire:click="export('pdf')" 
-                    class="btn btn-secondary px-4 py-2 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all">
+            {{-- <button wire:click="export('pdf')"
+                    class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all touch-manipulation">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
                 Export PDF
             </button> --}}
-            <button wire:click="export('excel')" 
-                    class="btn btn-secondary px-4 py-2 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all">
+            <button wire:click="export('excel')"
+                    class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all touch-manipulation">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -25,11 +25,11 @@
     </div>
 
     <!-- Filters -->
-    <div class="card p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="card p-4 sm:p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
             <!-- Report Type -->
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Type de rapport</label>
+                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Type de rapport</label>
                 <select wire:model.live="reportType"
                         class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="sales">Ventes</option>
@@ -44,7 +44,7 @@
 
             <!-- Period -->
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Période</label>
+                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Période</label>
                 <select wire:model.live="period" 
                         class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
                     <option value="7">7 derniers jours</option>
@@ -57,14 +57,14 @@
 
             <!-- Start Date -->
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Date de début</label>
+                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Date de début</label>
                 <input type="date" wire:model.live="startDate" 
                        class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
 
             <!-- End Date -->
             <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-2">Date de fin</label>
+                <label class="block text-sm font-medium text-neutral-700 mb-1.5">Date de fin</label>
                 <input type="date" wire:model.live="endDate" 
                        class="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
@@ -141,10 +141,11 @@
             </div>
 
             <!-- Recent Orders -->
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4">Commandes récentes</h2>
-                <div class="table-responsive">
-                    <table class="w-full min-w-[400px]">
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Commandes récentes</h2>
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full">
                         <thead>
                             <tr class="border-b border-neutral-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Date</th>
@@ -178,6 +179,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,10 +189,11 @@
     @if($reportType === 'dishes' && !empty($data))
         <div class="space-y-6">
             <!-- Top Dishes -->
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4">Plats les plus vendus</h2>
-                <div class="table-responsive">
-                    <table class="w-full min-w-[400px]">
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Plats les plus vendus</h2>
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full">
                         <thead>
                             <tr class="border-b border-neutral-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Plat</th>
@@ -217,11 +220,12 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Dishes by Category -->
-            <div class="card p-6">
+            <div class="card p-4 sm:p-6">
                 <h2 class="text-lg font-bold text-neutral-900 mb-4">Ventes par catégorie</h2>
                 <div class="space-y-4">
                     @forelse($data['dishes_by_category'] ?? [] as $category)
@@ -256,10 +260,11 @@
             </div>
 
             <!-- Top Customers -->
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4">Meilleurs clients</h2>
-                <div class="table-responsive">
-                    <table class="w-full min-w-[500px]">
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Meilleurs clients</h2>
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full">
                         <thead>
                             <tr class="border-b border-neutral-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Client</th>
@@ -285,6 +290,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -347,10 +353,11 @@
             </div>
 
             <!-- Waiters Table -->
-            <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4">Performance par serveur</h2>
-                <div class="table-responsive">
-                    <table class="w-full min-w-[600px]">
+            <div class="card p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Performance par serveur</h2>
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full">
                         <thead>
                             <tr class="border-b border-neutral-200">
                                 <th class="text-left py-3 px-4 text-sm font-semibold text-neutral-700">Serveur</th>
@@ -378,6 +385,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

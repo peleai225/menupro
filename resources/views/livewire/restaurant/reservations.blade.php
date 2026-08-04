@@ -14,10 +14,10 @@
     @endif
 
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Réservations</h1>
-            <p class="text-neutral-500 mt-1">Gérez toutes vos réservations de table.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Réservations</h1>
+            <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Gérez toutes vos réservations de table.</p>
         </div>
     </div>
 
@@ -104,12 +104,12 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('restaurant.reservations.show', $reservation) }}" class="btn btn-ghost btn-sm">
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('restaurant.reservations.show', $reservation) }}" class="btn btn-ghost min-h-[52px] px-4 py-3.5 touch-manipulation">
                                 Voir détails
                             </a>
                             @if($reservation->status === 'pending')
-                                <button wire:click="confirmReservation({{ $reservation->id }})" class="btn btn-primary btn-sm">
+                                <button wire:click="confirmReservation({{ $reservation->id }})" class="btn btn-primary min-h-[52px] px-4 py-3.5 touch-manipulation">
                                     <span wire:loading.remove wire:target="confirmReservation({{ $reservation->id }})">Confirmer</span>
                                     <span wire:loading wire:target="confirmReservation({{ $reservation->id }})">...</span>
                                 </button>

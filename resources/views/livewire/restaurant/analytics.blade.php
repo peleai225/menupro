@@ -1,9 +1,9 @@
 <div>
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Statistiques & Analytics</h1>
-            <p class="text-neutral-500 mt-1">Analysez les performances de votre restaurant en détail.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Statistiques & Analytics</h1>
+            <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Analysez les performances de votre restaurant en détail.</p>
         </div>
         <div class="flex items-center gap-3">
             <select wire:model.live="period" class="h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
@@ -22,7 +22,7 @@
     <!-- Key Metrics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Total Revenue -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-sm font-medium text-neutral-500">Chiffre d'affaires</p>
                 <div class="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center">
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Total Orders -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-sm font-medium text-neutral-500">Commandes</p>
                 <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
@@ -74,7 +74,7 @@
         </div>
 
         <!-- Average Order -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-sm font-medium text-neutral-500">Panier moyen</p>
                 <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center">
@@ -93,7 +93,7 @@
     <!-- Charts Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Revenue Chart -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Évolution du chiffre d'affaires</h2>
             <div class="relative h-64">
                 <canvas id="revenueChart"></canvas>
@@ -101,7 +101,7 @@
         </div>
 
         <!-- Orders by Status -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Commandes par statut</h2>
             <div class="relative h-64">
                 <canvas id="statusChart"></canvas>
@@ -112,7 +112,7 @@
     <!-- Additional Stats -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Orders by Type -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Commandes par type</h2>
             <div class="space-y-4">
                 @php
@@ -142,7 +142,7 @@
         </div>
 
         <!-- Peak Hours -->
-        <div class="card p-6">
+        <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Heures de pointe</h2>
             <div class="space-y-3">
                 @forelse($stats['peak_hours'] ?? [] as $peak)
