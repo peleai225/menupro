@@ -149,6 +149,35 @@
         </div>
     </div>
 
+    <!-- KPI temps réel du jour -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4">
+            <p class="text-[10px] sm:text-xs font-semibold text-green-600 uppercase tracking-wide mb-0.5">Espèces aujourd'hui</p>
+            <p class="text-lg sm:text-xl font-bold text-green-800 tabular-nums leading-tight">{{ number_format($this->todayKpi['cash_today'], 0, ',', ' ') }} F</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+            <p class="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wide mb-0.5">Mobile Money</p>
+            <p class="text-lg sm:text-xl font-bold text-blue-800 tabular-nums leading-tight">{{ number_format($this->todayKpi['mobile_today'], 0, ',', ' ') }} F</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4">
+            <p class="text-[10px] sm:text-xs font-semibold text-red-600 uppercase tracking-wide mb-0.5">Annulées</p>
+            <p class="text-lg sm:text-xl font-bold text-red-700 leading-tight">
+                {{ $this->todayKpi['cancelled_today'] }}
+                <span class="text-xs font-normal text-neutral-500">cmd</span>
+            </p>
+            @if($this->todayKpi['cancelled_lost'] > 0)
+                <p class="text-[10px] text-red-400 tabular-nums">{{ number_format($this->todayKpi['cancelled_lost'], 0, ',', ' ') }} F perdus</p>
+            @endif
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 sm:p-4">
+            <p class="text-[10px] sm:text-xs font-semibold text-amber-600 uppercase tracking-wide mb-0.5">Heure de pointe</p>
+            <p class="text-lg sm:text-xl font-bold text-amber-800 leading-tight">{{ $this->todayKpi['peak_hour'] }}</p>
+            <p class="text-[10px] text-neutral-500">
+                {{ $this->todayKpi['vs_yesterday_pct'] >= 0 ? '+' : '' }}{{ $this->todayKpi['vs_yesterday_pct'] }}% vs hier
+            </p>
+        </div>
+    </div>
+
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Revenue Trend Chart -->

@@ -76,6 +76,38 @@ class Dashboard extends Component
         ];
     }
 
+    #[Computed]
+    public function todayKpi(): array
+    {
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant) {
+            return ['cash_today' => 0, 'mobile_today' => 0, 'cancelled_today' => 0, 'cancelled_lost' => 0, 'peak_hour' => '—', 'vs_yesterday_pct' => 0];
+        }
+
+        $calc      = RevenueCalculator::for($restaurant->id, today()->startOfDay(), now());
+        $byPayment = $calc->revenueByPaymentMethodDetailed();
+        $cancelled = $calc->cancellationStats();
+        $byHour    = $calc->revenueByHourWithPayment();
+        $peak      = $byHour->sortByDesc('orders_count')->first();
+
+        $yesterday    = RevenueCalculator::for($restaurant->id, now()->subDay()->startOfDay(), now()->subDay()->endOfDay());
+        $revYesterday = $yesterday->grossRevenue();
+        $revToday     = $calc->grossRevenue();
+        $changePct    = $revYesterday > 0
+            ? (int) round((($revToday - $revYesterday) / $revYesterday) * 100)
+            : ($revToday > 0 ? 100 : 0);
+
+        return [
+            'cash_today'       => (int) $byPayment->where('is_cash', true)->sum('total_amount'),
+            'mobile_today'     => (int) $byPayment->where('is_cash', false)->sum('total_amount'),
+            'cancelled_today'  => $cancelled['count'],
+            'cancelled_lost'   => $cancelled['total_lost'],
+            'peak_hour'        => $peak ? $peak['hour_label'] : '—',
+            'vs_yesterday_pct' => $changePct,
+        ];
+    }
+
     /**
      * Get recent orders.
      */
