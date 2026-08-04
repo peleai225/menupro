@@ -280,47 +280,50 @@
              x-transition:enter-start="opacity-0 transform translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
              class="card overflow-hidden">
-            <div class="table-responsive">
-                <table class="w-full min-w-[700px]">
-                    <thead class="bg-gradient-to-r from-neutral-50 to-neutral-100 border-b border-neutral-200">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Commande</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Client</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Total</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Paiement</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Statut</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-4 w-16"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-100">
+            <!-- Table wrapper with horizontal scroll on mobile -->
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <div class="inline-block min-w-full align-middle">
+                    <div class="overflow-hidden">
+                        <table class="min-w-full">
+                            <thead class="bg-gradient-to-r from-neutral-50 to-neutral-100 border-b border-neutral-200">
+                                <tr>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Commande</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Client</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden lg:table-cell">Type</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden xl:table-cell">Paiement</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Statut</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden md:table-cell">Date</th>
+                                    <th class="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-neutral-100">
                         @foreach($this->orders as $index => $order)
-                            <tr class="table-row-interactive cursor-pointer group" 
+                            <tr class="table-row-interactive cursor-pointer group touch-manipulation"
                                 wire:click="viewOrder({{ $order->id }})"
                                 wire:loading.class="opacity-50"
                                 wire:target="viewOrder"
                                 style="animation: fade-slide-up 0.3s ease-out {{ $index * 50 }}ms both;">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl {{ $order->status->value === 'pending_payment' || $order->status->value === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-primary-100 text-primary-600' }} flex items-center justify-center font-mono font-bold text-sm">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <div class="flex items-center gap-2 sm:gap-3">
+                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl {{ $order->status->value === 'pending_payment' || $order->status->value === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-primary-100 text-primary-600' }} flex items-center justify-center font-mono font-bold text-xs sm:text-sm">
                                             {{ substr($order->reference, -3) }}
                                         </div>
-                                        <span class="font-mono font-semibold text-neutral-900">#{{ $order->reference }}</span>
+                                        <span class="font-mono font-semibold text-xs sm:text-sm text-neutral-900 hidden sm:inline">#{{ $order->reference }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="avatar avatar-sm bg-gradient-to-br from-neutral-300 to-neutral-400 text-white">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <div class="flex items-center gap-2 sm:gap-3">
+                                        <div class="avatar avatar-sm bg-gradient-to-br from-neutral-300 to-neutral-400 text-white text-xs sm:text-sm">
                                             {{ strtoupper(substr($order->customer_name ?? 'C', 0, 1)) }}
                                         </div>
-                                        <div>
-                                            <p class="font-medium text-neutral-900">{{ $order->customer_name }}</p>
-                                            <p class="text-sm text-neutral-500">{{ $order->customer_phone }}</p>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-xs sm:text-sm text-neutral-900 truncate">{{ $order->customer_name }}</p>
+                                            <p class="text-[10px] sm:text-xs text-neutral-500 truncate hidden sm:block">{{ $order->customer_phone }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                                     @php
                                         $typeConfig = match($order->type) {
                                             \App\Enums\OrderType::DINE_IN => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700'],
@@ -328,31 +331,31 @@
                                             \App\Enums\OrderType::DELIVERY => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
                                         };
                                     @endphp
-                                    <div class="flex flex-col gap-1">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium {{ $typeConfig['bg'] }} {{ $typeConfig['text'] }}">
+                                    <div class="flex flex-col gap-0.5 sm:gap-1">
+                                        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-medium {{ $typeConfig['bg'] }} {{ $typeConfig['text'] }}">
                                             @if($order->type === \App\Enums\OrderType::DINE_IN)
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3zM12 8v8m-4-4h8"/></svg>
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3zM12 8v8m-4-4h8"/></svg>
                                             @elseif($order->type === \App\Enums\OrderType::TAKEAWAY)
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                                             @else
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                                             @endif
-                                            {{ $order->type->label() }}
+                                            <span class="hidden sm:inline">{{ $order->type->label() }}</span>
                                         </span>
                                         @if($order->type === \App\Enums\OrderType::DINE_IN && $order->table_number)
-                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <span class="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-xs font-bold bg-amber-100 text-amber-700">
+                                                <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/>
                                                 </svg>
-                                                Table {{ $order->table_number }}
+                                                T{{ $order->table_number }}
                                             </span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($order->total, 0, ',', ' ') }} F</span>
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <span class="font-bold text-xs sm:text-sm text-neutral-900 tabular-nums whitespace-nowrap">{{ number_format($order->total, 0, ',', ' ') }} F</span>
                                 </td>
-                                <td class="px-6 py-4 hidden sm:table-cell">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden xl:table-cell">
                                     @php
                                         $method = $order->payment_method;
                                         $operator = $order->payment_metadata['jeko_operator'] ?? null;
@@ -378,7 +381,7 @@
                                         <span class="text-sm text-neutral-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
                                     @php
                                         $statusClasses = [
                                             'pending_payment' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -394,22 +397,23 @@
                                         $statusClass = $statusClasses[$order->status->value] ?? 'bg-neutral-100 text-neutral-700';
                                         $isPending = in_array($order->status->value, ['pending', 'pending_payment', 'preparing']);
                                     @endphp
-                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border {{ $statusClass }}">
+                                    <span class="inline-flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-medium border {{ $statusClass }} whitespace-nowrap">
                                         @if($isPending)
-                                            <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
+                                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-current animate-pulse"></span>
                                         @endif
-                                        {{ $order->status->label() }}
+                                        <span class="hidden sm:inline">{{ $order->status->label() }}</span>
+                                        <span class="sm:hidden">{{ substr($order->status->label(), 0, 4) }}</span>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                                     <div>
-                                        <p class="font-medium text-neutral-900">{{ $order->created_at->format('d/m/Y') }}</p>
-                                        <p class="text-sm text-neutral-500">{{ $order->created_at->format('H:i') }}</p>
+                                        <p class="font-medium text-xs sm:text-sm text-neutral-900 whitespace-nowrap">{{ $order->created_at->format('d/m/Y') }}</p>
+                                        <p class="text-[10px] sm:text-xs text-neutral-500">{{ $order->created_at->format('H:i') }}</p>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <button class="p-2 rounded-xl hover:bg-primary-50 text-neutral-400 group-hover:text-primary-500 transition-all">
-                                        <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <button class="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-primary-50 text-neutral-400 group-hover:text-primary-500 transition-all touch-manipulation">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                         </svg>
                                     </button>
@@ -417,7 +421,9 @@
                             </tr>
                         @endforeach
                     </tbody>
-                </table>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
