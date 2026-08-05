@@ -110,7 +110,9 @@
                             <div class="px-4 pt-10 pb-4 text-white" style="background:#D45E0C">
                                 <div class="flex items-center justify-between mb-1">
                                     <div class="flex items-center gap-2.5">
-                                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-lg">🍽️</div>
+                                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+                                        </div>
                                         <div>
                                             <div class="font-black text-sm">Maquis Chez Awa</div>
                                             <div class="flex items-center gap-1 text-[11px] text-white/75"><span class="w-1.5 h-1.5 rounded-full bg-green-300"></span>Ouvert · 08h–22h</div>
@@ -136,9 +138,13 @@
                             </div>
                             {{-- Items --}}
                             <div class="px-3 py-2 space-y-2">
-                                @foreach([['🍗','Poulet Braisé','Avec alloco et sauce','5 500 F','#fef3c7'],['🐟','Attieké Poisson','Légumes frais','4 500 F','#dcfce7'],['🥤','Jus Bissap','Naturel & frais','1 500 F','#fce7f3']] as $d)
+                                @foreach([['meal','Poulet Braisé','Avec alloco et sauce','5 500 F','#fef3c7'],['fish','Attieké Poisson','Légumes frais','4 500 F','#dcfce7'],['drink','Jus Bissap','Naturel & frais','1 500 F','#fce7f3']] as $d)
                                 <div class="bg-white rounded-2xl p-2.5 flex gap-2.5 shadow-sm border border-neutral-100">
-                                    <div class="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center text-2xl" style="background:{{ $d[4] }}">{{ $d[0] }}</div>
+                                    <div class="w-12 h-12 rounded-xl shrink-0 overflow-hidden" style="background:{{ $d[4] }}">
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                        </div>
+                                    </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="font-black text-xs text-neutral-800">{{ $d[1] }}</div>
                                         <div class="text-[10px] text-neutral-400">{{ $d[2] }}</div>
@@ -174,7 +180,9 @@
 
                     {{-- Notif commande --}}
                     <div class="fl2 absolute -bottom-5 -left-10 bg-white rounded-2xl shadow-2xl border border-neutral-100 px-3.5 py-3 flex items-center gap-2.5 w-48">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style="background:#fef3c7">🔔</div>
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.1)">
+                            <svg class="w-5 h-5" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        </div>
                         <div>
                             <div class="text-xs font-black text-neutral-800">Nouvelle commande</div>
                             <div class="text-[11px] text-neutral-500">Table 7 · Poulet braisé</div>
@@ -265,13 +273,23 @@
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 fu">
             @foreach([
-                ['🥪','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','border-orange-200 bg-orange-50','text-orange-600','5 000 F/mois'],
-                ['🍽️','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','border-neutral-200 bg-white','text-neutral-600','15 000 F/mois'],
-                ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','border-primary-200','text-primary-600','Gold'],
-                ['🛵','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','border-secondary-200 bg-secondary-50','text-secondary-600','Pro'],
+                ['stand','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','border-orange-200 bg-orange-50','text-orange-600','5 000 F/mois'],
+                ['restaurant','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','border-neutral-200 bg-white','text-neutral-600','15 000 F/mois'],
+                ['hotel','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','border-primary-200','text-primary-600','Gold'],
+                ['delivery','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','border-secondary-200 bg-secondary-50','text-secondary-600','Pro'],
             ] as $who)
             <div class="rounded-3xl p-6 border-2 {{ $who[3] }} hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
-                <div class="text-4xl mb-4">{{ $who[0] }}</div>
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 {{ $who[4] }}" style="background:currentColor;background:rgba(0,0,0,0.06)">
+                    @if($who[0]==='stand')
+                    <svg class="w-6 h-6 {{ $who[4] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    @elseif($who[0]==='restaurant')
+                    <svg class="w-6 h-6 {{ $who[4] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+                    @elseif($who[0]==='hotel')
+                    <svg class="w-6 h-6 {{ $who[4] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    @else
+                    <svg class="w-6 h-6 {{ $who[4] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    @endif
+                </div>
                 <h3 class="font-black text-neutral-900 text-lg mb-2">{{ $who[1] }}</h3>
                 <p class="text-neutral-500 text-sm leading-relaxed mb-5">{{ $who[2] }}</p>
                 <span class="inline-block text-xs font-black {{ $who[4] }} border border-current/20 bg-white px-3 py-1.5 rounded-full">À partir de {{ $who[5] }}</span>
@@ -296,15 +314,29 @@
 
         <div class="grid md:grid-cols-3 gap-5 fu">
             @foreach([
-                ['📱','Commandes en direct','Vos clients commandent depuis leur téléphone. QR code sur les tables, lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié.'],
-                ['💳','Paiement Mobile Money','Wave, Orange Money, MTN, Moov. L\'argent arrive directement sur votre compte sans délai ni intermédiaire.'],
-                ['📊','Analytics & Rapports','Bilan journalier par heure de caisse, CA espèces vs mobile money, plats les plus vendus, taux d\'annulation.'],
-                ['📦','Gestion de stock','Alertes de rupture automatiques, mouvements d\'inventaire, gestion des ingrédients. Plus jamais à court.'],
-                ['🏨','Mode Hôtel','QR par chambre, room service, voix IA qui annonce les commandes. Appel addition, appel ménage.'],
-                ['🛵','Livraison intégrée','Gérez vos propres livreurs avec suivi temps réel. Vos clients voient leur commande avancer. Zéro commission.'],
+                ['orders','Commandes en direct','Vos clients commandent depuis leur téléphone. QR code sur les tables, lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié.'],
+                ['payment','Paiement Mobile Money','Wave, Orange Money, MTN, Moov. L\'argent arrive directement sur votre compte sans délai ni intermédiaire.'],
+                ['analytics','Analytics & Rapports','Bilan journalier par heure de caisse, CA espèces vs mobile money, plats les plus vendus, taux d\'annulation.'],
+                ['stock','Gestion de stock','Alertes de rupture automatiques, mouvements d\'inventaire, gestion des ingrédients. Plus jamais à court.'],
+                ['hotel','Mode Hôtel','QR par chambre, room service, voix IA qui annonce les commandes. Appel addition, appel ménage.'],
+                ['delivery','Livraison intégrée','Gérez vos propres livreurs avec suivi temps réel. Vos clients voient leur commande avancer. Zéro commission.'],
             ] as $i => $f)
             <div class="bg-neutral-900 rounded-3xl p-7 border border-neutral-800 hover:border-primary-500/40 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 group fu" style="transition-delay:{{ $i*0.08 }}s">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 transition-transform" style="background:rgba(212,94,12,.15);border:1px solid rgba(212,94,12,.2)">{{ $f[0] }}</div>
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform" style="background:rgba(212,94,12,.15);border:1px solid rgba(212,94,12,.25)">
+                    @if($f[0]==='orders')
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    @elseif($f[0]==='payment')
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    @elseif($f[0]==='analytics')
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    @elseif($f[0]==='stock')
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    @elseif($f[0]==='hotel')
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    @else
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    @endif
+                </div>
                 <h3 class="font-black text-white text-lg mb-3">{{ $f[1] }}</h3>
                 <p class="text-neutral-500 text-sm leading-relaxed">{{ $f[2] }}</p>
                 <div class="mt-5 flex items-center gap-1.5 font-bold text-sm" style="color:#D45E0C">
@@ -497,7 +529,9 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
             {{-- Stand --}}
             <div class="bg-white rounded-3xl p-7 border-2 border-neutral-200 hover:border-primary-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
-                <div class="text-3xl mb-4">🥪</div>
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style="background:rgba(212,94,12,.1)">
+                    <svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
                 <div class="text-xs font-black uppercase tracking-widest mb-3" style="color:#D45E0C">Stand</div>
                 <div class="flex items-baseline gap-1 mb-1"><span class="text-4xl font-black text-neutral-900">5 000</span><span class="text-neutral-400 text-sm">F/mois</span></div>
                 <p class="text-sm text-neutral-400 mb-6">Vendeurs de rue et stands</p>
@@ -506,7 +540,9 @@
             </div>
             {{-- Essentiel --}}
             <div class="bg-white rounded-3xl p-7 border-2 border-neutral-200 hover:border-primary-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
-                <div class="text-3xl mb-4">🍽️</div>
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-neutral-100">
+                    <svg class="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+                </div>
                 <div class="text-xs font-black text-neutral-400 uppercase tracking-widest mb-3">Essentiel</div>
                 <div class="flex items-baseline gap-1 mb-1"><span class="text-4xl font-black text-neutral-900">15 000</span><span class="text-neutral-400 text-sm">F/mois</span></div>
                 <p class="text-sm text-neutral-400 mb-6">Maquis et petits restaurants</p>
@@ -516,7 +552,9 @@
             {{-- Pro (featured) --}}
             <div class="rounded-3xl p-7 border-2 shadow-2xl relative hover:-translate-y-1 transition-all duration-300 flex flex-col text-white" style="background:#161616;border-color:#D45E0C;box-shadow:0 0 40px rgba(212,94,12,.2)">
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-white text-xs font-black px-5 py-1.5 rounded-full shadow-lg" style="background:#D45E0C">⭐ Populaire</div>
-                <div class="text-3xl mb-4">🚀</div>
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style="background:rgba(212,94,12,.2)">
+                    <svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
                 <div class="text-xs font-black uppercase tracking-widest mb-3" style="color:#D45E0C">Pro</div>
                 <div class="flex items-baseline gap-1 mb-1"><span class="text-4xl font-black text-white">25 000</span><span class="text-neutral-400 text-sm">F/mois</span></div>
                 <p class="text-sm text-neutral-400 mb-6">Stock, livraison, analytics</p>
@@ -525,7 +563,9 @@
             </div>
             {{-- Gold --}}
             <div class="rounded-3xl p-7 border-2 border-neutral-800 shadow-xl hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-300 flex flex-col" style="background:#0f172a">
-                <div class="text-3xl mb-4">✨</div>
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style="background:rgba(246,178,133,.15)">
+                    <svg class="w-6 h-6" style="color:#f6b285" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                </div>
                 <div class="text-xs font-black uppercase tracking-widest mb-3" style="color:#f6b285">Gold</div>
                 <div class="flex items-baseline gap-1 mb-1"><span class="text-4xl font-black gt-light">85 000</span><span class="text-neutral-500 text-sm">F/mois</span></div>
                 <p class="text-sm text-neutral-500 mb-6">Multi-espaces, hôtels, VIP</p>
