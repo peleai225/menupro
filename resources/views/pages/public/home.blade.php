@@ -9,143 +9,225 @@
         "operatingSystem": "Web",
         "url": "{{ url('/') }}",
         "description": "Plateforme SaaS de commande en ligne pour restaurants en Cote d'Ivoire. Paiement Mobile Money, QR codes, gestion de stock.",
-        "offers": {
-            "@@type": "Offer",
-            "price": "15000",
-            "priceCurrency": "XOF"
-        },
-        "author": {
-            "@@type": "Organization",
-            "name": "MenuPro",
-            "url": "{{ url('/') }}"
-        }
+        "offers": { "@@type": "Offer", "price": "15000", "priceCurrency": "XOF" },
+        "author": { "@@type": "Organization", "name": "MenuPro", "url": "{{ url('/') }}" }
     }
     </script>
     <style>
-        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
-        .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
-        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; pointer-events: none; }
+        /* Animations */
+        .fade-up { opacity: 0; transform: translateY(32px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+        .fade-up.visible { opacity: 1; transform: none; }
+        .fade-up.delay-1 { transition-delay: .1s; }
+        .fade-up.delay-2 { transition-delay: .2s; }
+        .fade-up.delay-3 { transition-delay: .3s; }
+        .fade-up.delay-4 { transition-delay: .4s; }
+
+        /* Hero gradient mesh */
+        .hero-mesh {
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 0%, rgba(59,130,246,.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(99,102,241,.15) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(16,185,129,.08) 0%, transparent 70%),
+                #0f172a;
+        }
+
+        /* Ticker */
+        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .ticker-track { display: flex; width: max-content; animation: ticker 28s linear infinite; }
+        .ticker-track:hover { animation-play-state: paused; }
+
+        /* Card glow on hover */
+        .card-glow:hover { box-shadow: 0 0 0 1px rgba(59,130,246,.3), 0 8px 32px rgba(59,130,246,.12); }
+
+        /* Gradient text */
+        .text-gradient { background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .text-gradient-orange { background: linear-gradient(135deg, #fb923c, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        /* Pulse ring */
+        @keyframes ping-slow { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.6);opacity:0} }
+        .ping-slow { animation: ping-slow 2.5s ease-in-out infinite; }
+
+        /* Notification float */
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        .float { animation: float 4s ease-in-out infinite; }
+
+        /* Step connector */
+        .step-line::after {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: calc(100% + 16px);
+            width: calc(100% - 16px);
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, transparent);
+        }
     </style>
     @endpush
 
-    {{-- HERO — Fond clair avec blobs --}}
-    <section class="relative min-h-[92vh] flex items-center overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30">
-        <div class="blob w-[500px] h-[500px] bg-primary-400 -top-40 -left-40"></div>
-        <div class="blob w-[400px] h-[400px] bg-indigo-400 bottom-0 right-0"></div>
-        <div class="blob w-[300px] h-[300px] bg-emerald-300 top-1/2 left-1/3"></div>
+    {{-- ══════════════════════════════════════
+         HERO — Dark gradient mesh
+    ══════════════════════════════════════ --}}
+    <section class="hero-mesh relative min-h-screen flex items-center overflow-hidden">
 
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        {{-- Grid pattern overlay --}}
+        <div class="absolute inset-0 opacity-[0.04]" style="background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:40px 40px"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
+            <div class="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
                 {{-- Left: Copy --}}
                 <div class="text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-neutral-200 rounded-full text-neutral-700 text-sm font-medium mb-6 shadow-sm">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span>7 jours d'essai gratuit</span>
+
+                    {{-- Badge --}}
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur border border-white/20 rounded-full text-white/90 text-sm font-medium mb-8 fade-up visible">
+                        <span class="relative flex h-2 w-2">
+                            <span class="ping-slow absolute inline-flex h-full w-full rounded-full bg-emerald-400"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+                        </span>
+                        7 jours d'essai gratuit — sans carte bancaire
                     </div>
 
-                    <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-neutral-900 leading-[1.1] tracking-tight">
-                        Restaurant, hotel ou stand —
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-indigo-600">commandes et paiements</span>
-                        en direct.
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight fade-up visible">
+                        Votre restaurant<br>
+                        commande et paye<br>
+                        <span class="text-gradient">en 15 minutes.</span>
                     </h1>
 
-                    <p class="mt-6 text-lg text-neutral-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                        De la vendeuse de panini au grand hotel, MenuPro digitalise votre activite en 15 minutes. Vos clients paient par <strong class="text-neutral-900">Wave, Orange Money, MTN, Moov</strong> — l'argent arrive directement sur votre compte.
+                    <p class="mt-6 text-lg sm:text-xl text-white/60 max-w-lg mx-auto lg:mx-0 leading-relaxed fade-up visible delay-1">
+                        De la vendeuse de panini au grand hotel, MenuPro digitalise votre activite. Vos clients paient par <span class="text-white font-semibold">Wave, Orange Money, MTN, Moov</span> — l'argent arrive directement sur votre compte.
                     </p>
 
-                    <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                        <a href="{{ route('register') }}" class="group inline-flex items-center gap-2 px-7 py-3.5 bg-neutral-900 text-white font-bold rounded-xl hover:bg-neutral-800 shadow-lg shadow-neutral-900/20 transition-all duration-200 hover:-translate-y-0.5 w-full sm:w-auto justify-center">
-                            Creer mon restaurant
-                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start fade-up visible delay-2">
+                        <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-neutral-900 font-bold rounded-2xl hover:bg-blue-50 shadow-2xl shadow-white/20 transition-all duration-200 hover:-translate-y-0.5 text-base">
+                            Créer mon restaurant gratuit
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                         </a>
-                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-neutral-800 font-semibold rounded-xl border border-neutral-200 hover:border-neutral-300 hover:shadow-md transition-all w-full sm:w-auto justify-center">
-                            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            Voir la demo
+                        <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/10 transition-all text-base backdrop-blur">
+                            <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            Voir la démo
                         </a>
                     </div>
 
                     {{-- Trust stats --}}
-                    <div class="mt-10 flex flex-wrap items-center gap-4 sm:gap-8 justify-center lg:justify-start">
-                        <div>
-                            <div class="text-2xl font-bold text-neutral-900" x-data="counter({{ $stats['raw']['restaurants'] }})" x-intersect.once="startCount()">
+                    <div class="mt-12 flex flex-wrap items-center gap-6 sm:gap-10 justify-center lg:justify-start fade-up visible delay-3">
+                        <div class="text-center lg:text-left">
+                            <div class="text-3xl font-extrabold text-white" x-data="counter({{ $stats['raw']['restaurants'] }})" x-intersect.once="startCount()">
                                 <span x-text="displayCount"></span>
                             </div>
-                            <div class="text-neutral-500 text-xs mt-0.5">Restaurants</div>
+                            <div class="text-white/50 text-xs mt-0.5 uppercase tracking-widest">Restaurants</div>
                         </div>
-                        <div class="w-px h-10 bg-neutral-200 hidden sm:block"></div>
-                        <div>
-                            <div class="text-2xl font-bold text-neutral-900" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()">
+                        <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                        <div class="text-center lg:text-left">
+                            <div class="text-3xl font-extrabold text-white" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()">
                                 <span x-text="displayCount"></span>
                             </div>
-                            <div class="text-neutral-500 text-xs mt-0.5">Commandes</div>
+                            <div class="text-white/50 text-xs mt-0.5 uppercase tracking-widest">Commandes</div>
                         </div>
-                        <div class="w-px h-10 bg-neutral-200 hidden sm:block"></div>
-                        <div>
-                            <div class="text-2xl font-bold text-neutral-900">15 000 F</div>
-                            <div class="text-neutral-500 text-xs mt-0.5">A partir de</div>
+                        <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                        <div class="text-center lg:text-left">
+                            <div class="text-3xl font-extrabold text-white">5 000 F</div>
+                            <div class="text-white/50 text-xs mt-0.5 uppercase tracking-widest">A partir de</div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Right: App mockup --}}
-                <div class="relative flex justify-center lg:justify-end">
-                    @php
-                        $heroImage = \App\Models\SystemSetting::get('hero_image', '');
-                    @endphp
+                {{-- Right: App mockup + notification --}}
+                <div class="relative flex justify-center lg:justify-end fade-up visible delay-2">
+
+                    {{-- Glow behind mockup --}}
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="w-80 h-80 bg-blue-500 rounded-full blur-3xl opacity-20"></div>
+                    </div>
+
+                    {{-- Phone mockup --}}
+                    @php $heroImage = \App\Models\SystemSetting::get('hero_image', ''); @endphp
                     @if($heroImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImage))
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}"
-                             alt="MenuPro - Interface de commande"
-                             width="380" height="700"
-                             class="w-full max-w-[320px] sm:max-w-[360px] rounded-3xl shadow-2xl shadow-neutral-900/20 border border-neutral-200"
+                             alt="MenuPro - Interface de commande" width="360" height="680"
+                             class="relative w-full max-w-[300px] sm:max-w-[340px] rounded-3xl shadow-2xl border border-white/10"
                              loading="eager">
                     @else
-                        <div class="w-[300px] sm:w-[340px] bg-white rounded-[2rem] p-1.5 shadow-2xl shadow-neutral-400/30 border border-neutral-200">
-                            <div class="rounded-[1.7rem] overflow-hidden bg-neutral-50">
-                                <div class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 pt-10 pb-5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-sm">Le Maquis d'Abidjan</div>
-                                            <div class="text-xs text-white/80 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 bg-green-300 rounded-full"></span> Ouvert
+                        <div class="relative w-[290px] sm:w-[330px]">
+                            {{-- Phone frame --}}
+                            <div class="bg-neutral-900 rounded-[2.5rem] p-1.5 shadow-2xl border border-white/10">
+                                <div class="rounded-[2.2rem] overflow-hidden bg-white">
+                                    {{-- Status bar --}}
+                                    <div class="bg-blue-600 text-white px-5 pt-8 pb-5">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                                </div>
+                                                <div>
+                                                    <div class="font-bold text-sm">Le Maquis d'Abidjan</div>
+                                                    <div class="text-[11px] text-white/70 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-300 rounded-full"></span> Ouvert maintenant</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-xs text-white/70">Livraison</div>
+                                                <div class="text-xs font-bold">30 min</div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex gap-2 p-3 border-b border-neutral-100">
-                                    <span class="px-3 py-1.5 bg-primary-500 text-white text-xs font-semibold rounded-full">Populaires</span>
-                                    <span class="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs rounded-full">Plats</span>
-                                    <span class="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs rounded-full">Boissons</span>
-                                </div>
-                                <div class="p-3 space-y-3">
-                                    @foreach([
-                                        ['Poulet Braise', 'Avec alloco et sauce', '5 500 F', 'from-amber-100 to-orange-100'],
-                                        ['Attieke Poisson', 'Poisson braise, legumes', '4 500 F', 'from-yellow-100 to-amber-100'],
-                                        ['Salade Africaine', 'Legumes frais, vinaigrette', '2 500 F', 'from-green-100 to-emerald-100'],
-                                    ] as $dish)
-                                    <div class="bg-white rounded-xl p-3 flex gap-3 shadow-sm border border-neutral-100">
-                                        <div class="w-14 h-14 bg-gradient-to-br {{ $dish[3] }} rounded-lg shrink-0"></div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="font-bold text-sm text-neutral-800">{{ $dish[0] }}</div>
-                                            <div class="text-xs text-neutral-500">{{ $dish[1] }}</div>
-                                            <div class="flex items-center justify-between mt-1.5">
-                                                <span class="text-primary-600 font-bold text-sm">{{ $dish[2] }}</span>
-                                                <span class="w-6 h-6 bg-primary-500 text-white rounded-full flex items-center justify-center text-xs font-bold">+</span>
+                                    {{-- Categories --}}
+                                    <div class="flex gap-2 px-3 py-2.5 border-b border-neutral-100 overflow-x-auto">
+                                        <span class="px-3 py-1.5 bg-blue-600 text-white text-[11px] font-bold rounded-full whitespace-nowrap">🔥 Populaires</span>
+                                        <span class="px-3 py-1.5 bg-neutral-100 text-neutral-500 text-[11px] rounded-full whitespace-nowrap">Plats</span>
+                                        <span class="px-3 py-1.5 bg-neutral-100 text-neutral-500 text-[11px] rounded-full whitespace-nowrap">Boissons</span>
+                                    </div>
+                                    {{-- Dishes --}}
+                                    <div class="p-3 space-y-2.5">
+                                        @foreach([
+                                            ['Poulet Braisé', 'Avec alloco et sauce', '5 500 F', 'from-amber-200 to-orange-200', '⭐4.9'],
+                                            ['Attieke Poisson', 'Légumes & sauce tomate', '4 500 F', 'from-yellow-200 to-amber-200', '⭐4.7'],
+                                            ['Jus de Bissap', 'Frais & naturel', '1 500 F', 'from-rose-200 to-pink-200', '⭐4.8'],
+                                        ] as $d)
+                                        <div class="bg-white rounded-xl p-2.5 flex gap-2.5 shadow-sm border border-neutral-100">
+                                            <div class="w-12 h-12 bg-gradient-to-br {{ $d[3] }} rounded-lg shrink-0 flex items-center justify-center text-xl">{{ explode(' ', $d[0])[0] === 'Poulet' ? '🍗' : (explode(' ', $d[0])[0] === 'Attieke' ? '🍲' : '🥤') }}</div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="font-bold text-xs text-neutral-800 truncate">{{ $d[0] }}</div>
+                                                <div class="text-[10px] text-neutral-400 truncate">{{ $d[1] }}</div>
+                                                <div class="flex items-center justify-between mt-1.5">
+                                                    <span class="text-blue-600 font-bold text-xs">{{ $d[2] }}</span>
+                                                    <span class="text-[10px] text-amber-500">{{ $d[4] }}</span>
+                                                </div>
                                             </div>
+                                            <button class="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-base font-bold self-center">+</button>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    {{-- Cart bar --}}
+                                    <div class="px-3 pb-4">
+                                        <div class="bg-blue-600 text-white rounded-xl px-4 py-2.5 flex items-center justify-between shadow-lg">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[11px] font-bold">3</span>
+                                                <span class="text-xs font-medium">Voir mon panier</span>
+                                            </div>
+                                            <span class="font-bold text-sm">11 500 F</span>
                                         </div>
                                     </div>
-                                    @endforeach
                                 </div>
-                                <div class="p-3">
-                                    <div class="bg-primary-500 text-white rounded-xl p-3 flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <span class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                                            <span class="text-sm font-medium">Voir le panier</span>
-                                        </div>
-                                        <span class="font-bold">12 500 F</span>
-                                    </div>
+                            </div>
+
+                            {{-- Floating notification --}}
+                            <div class="float absolute -top-4 -right-8 bg-white rounded-2xl shadow-xl border border-neutral-100 p-3 flex items-center gap-3 w-52">
+                                <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-neutral-800">Paiement reçu !</div>
+                                    <div class="text-[11px] text-neutral-500">Wave · 5 500 F</div>
+                                </div>
+                            </div>
+
+                            {{-- Floating order card --}}
+                            <div class="float absolute -bottom-4 -left-8 bg-white rounded-2xl shadow-xl border border-neutral-100 p-3 flex items-center gap-3 w-48" style="animation-delay:.8s">
+                                <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-neutral-800">Nouvelle commande</div>
+                                    <div class="text-[11px] text-neutral-500">Table 4 · 2 plats</div>
                                 </div>
                             </div>
                         </div>
@@ -153,321 +235,267 @@
                 </div>
             </div>
         </div>
+
+        {{-- Bottom wave --}}
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-14">
+                <path d="M0 60L1440 60L1440 20C1200 50 960 10 720 30C480 50 240 10 0 20L0 60Z" fill="white"/>
+            </svg>
+        </div>
     </section>
 
-    {{-- LOGO TICKER — Payment methods --}}
-    <section class="py-10 bg-white border-y border-neutral-100">
+    {{-- ══════════════════════════════════════
+         TICKER — Paiements acceptés
+    ══════════════════════════════════════ --}}
+    <section class="py-8 bg-white border-b border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-                <span class="text-sm text-neutral-500 font-semibold whitespace-nowrap uppercase tracking-wide">Paiements acceptes</span>
-                <div class="flex items-center gap-4 sm:gap-6 md:gap-10">
-                    <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
-                        <span class="text-xs text-neutral-500 font-medium">Wave</span>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
+                <p class="text-xs font-bold text-neutral-400 uppercase tracking-[0.2em] whitespace-nowrap shrink-0">Paiements acceptés</p>
+                <div class="flex items-center gap-6 sm:gap-10 flex-wrap justify-center">
+                    @foreach([
+                        ['wave.png', 'Wave', 'bg-sky-50'],
+                        ['orange-money.png', 'Orange Money', 'bg-orange-50'],
+                        ['mtn-momo.png', 'MTN MoMo', 'bg-yellow-50'],
+                        ['moov-money.png', 'Moov Money', 'bg-blue-50'],
+                    ] as $p)
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 {{ $p[2] }} rounded-2xl flex items-center justify-center border border-neutral-100">
+                            <img src="{{ asset('images/payments/'.$p[0]) }}" alt="{{ $p[1] }}" class="h-9 w-9 object-contain" loading="lazy">
+                        </div>
+                        <span class="text-xs text-neutral-500 font-medium">{{ $p[1] }}</span>
                     </div>
-                    <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
-                        <span class="text-xs text-neutral-500 font-medium">Orange Money</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
-                        <span class="text-xs text-neutral-500 font-medium">MTN MoMo</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1.5">
-                        <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16 object-contain hover:scale-110 transition-transform" loading="lazy">
-                        <span class="text-xs text-neutral-500 font-medium">Moov Money</span>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- FEATURES — Bento Grid --}}
-    <section class="py-20 sm:py-28 bg-gradient-to-b from-white to-blue-50/30 relative overflow-hidden">
-        <div class="blob w-[600px] h-[600px] bg-blue-300 -bottom-60 -right-40"></div>
+    {{-- ══════════════════════════════════════
+         FEATURES — Bento Grid amélioré
+    ══════════════════════════════════════ --}}
+    <section class="py-24 sm:py-32 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(59,130,246,.05),transparent)]"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 border border-primary-100 rounded-full text-primary-700 text-xs font-semibold mb-4">FONCTIONNALITES</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
-                    Tout pour gerer votre restaurant en ligne
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-blue-600 text-xs font-bold tracking-wider uppercase mb-5">Fonctionnalités</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
+                    Tout pour gérer votre<br>restaurant en ligne
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Une plateforme unique, pensee pour les restaurateurs ivoiriens.
+                <p class="text-neutral-500 text-lg mt-4 leading-relaxed">
+                    Une plateforme unique, pensée pour les restaurateurs africains.
                 </p>
             </div>
 
-            {{-- Bento Grid --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-on-scroll">
-                {{-- Large card --}}
-                <div class="lg:col-span-2 bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex items-start gap-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center shrink-0">
-                            <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4 sm:gap-5">
+
+                {{-- Large: Commandes temps réel --}}
+                <div class="md:col-span-4 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 fade-up">
+                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-white/5 rounded-full"></div>
+                    <div class="absolute right-8 bottom-8 w-32 h-32 bg-white/5 rounded-full"></div>
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-neutral-900 mb-2">Commandes en temps reel</h3>
-                            <p class="text-neutral-600 leading-relaxed">Vos clients commandent depuis leur telephone. QR code sur les tables ou lien partage par WhatsApp. Notification instantanee sur votre dashboard et ecran cuisine.</p>
-                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3">Commandes en temps réel</h3>
+                        <p class="text-white/75 leading-relaxed max-w-lg">Vos clients commandent depuis leur téléphone. QR code sur les tables ou lien WhatsApp. Notification instantanée sur votre dashboard avec alerte sonore.</p>
                     </div>
                 </div>
 
-                {{-- Card --}}
-                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{-- Paiement Mobile Money --}}
+                <div class="md:col-span-2 bg-emerald-50 border border-emerald-100 rounded-3xl p-6 hover:border-emerald-300 card-glow transition-all duration-300 group fade-up delay-1">
+                    <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Paiement Mobile Money</h3>
+                    <h3 class="text-lg font-extrabold text-neutral-900 mb-2">Paiement Mobile Money</h3>
                     <p class="text-neutral-600 text-sm leading-relaxed">Wave, Orange Money, MTN, Moov. L'argent arrive directement sur votre compte.</p>
                 </div>
 
-                {{-- Card --}}
-                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                {{-- Zéro commission --}}
+                <div class="md:col-span-2 bg-amber-50 border border-amber-100 rounded-3xl p-6 hover:border-amber-300 card-glow transition-all duration-300 group fade-up">
+                    <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Gestion complete</h3>
-                    <p class="text-neutral-600 text-sm leading-relaxed">Menu, stock, commandes, equipe, statistiques. Un seul dashboard pour tout piloter.</p>
+                    <h3 class="text-lg font-extrabold text-neutral-900 mb-2">0% de commission</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">Forfait fixe à partir de 5 000 F/mois. Pas de 20% par commande.</p>
                 </div>
 
-                {{-- Card --}}
-                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                {{-- Gestion complète --}}
+                <div class="md:col-span-2 bg-violet-50 border border-violet-100 rounded-3xl p-6 hover:border-violet-300 card-glow transition-all duration-300 group fade-up delay-1">
+                    <div class="w-12 h-12 bg-violet-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Zero commission</h3>
-                    <p class="text-neutral-600 text-sm leading-relaxed">Pas de 20% par commande. Un forfait fixe a partir de 15 000 F/mois.</p>
+                    <h3 class="text-lg font-extrabold text-neutral-900 mb-2">Gestion complète</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">Menu, stock, commandes, équipe, statistiques. Un seul dashboard pour tout piloter.</p>
                 </div>
 
-                {{-- Large card --}}
-                <div class="lg:col-span-2 bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex items-start gap-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-violet-100 to-violet-200 rounded-2xl flex items-center justify-center shrink-0">
-                            <svg class="w-7 h-7 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                {{-- Livraison --}}
+                <div class="md:col-span-3 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 rounded-3xl p-7 hover:border-rose-300 card-glow transition-all duration-300 group fade-up">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-neutral-900 mb-2">Livraison integree</h3>
-                            <p class="text-neutral-600 leading-relaxed">Gerez vos livreurs, suivez en temps reel, et vos clients voient leur commande avancer. Comme Glovo mais avec VOS livreurs.</p>
+                            <h3 class="text-lg font-extrabold text-neutral-900 mb-2">Livraison intégrée</h3>
+                            <p class="text-neutral-600 text-sm leading-relaxed">Gérez vos livreurs, suivez en temps réel, vos clients voient leur commande avancer. Comme Glovo mais avec VOS livreurs.</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card Hôtel / Chambres --}}
-                <div class="lg:col-span-2 bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex items-start gap-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-sky-100 to-sky-200 rounded-2xl flex items-center justify-center shrink-0">
-                            <svg class="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                {{-- Hotel --}}
+                <div class="md:col-span-3 bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-100 rounded-3xl p-7 hover:border-sky-300 card-glow transition-all duration-300 group fade-up delay-1">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-neutral-900 mb-2">Mode Hotel — QR par chambre</h3>
-                            <p class="text-neutral-600 leading-relaxed">Chaque chambre a son propre QR code. Le client commande depuis son lit, appelle le service depuis son telephone. La voix annonce les nouvelles commandes en cuisine et au personnel.</p>
+                            <h3 class="text-lg font-extrabold text-neutral-900 mb-2">Mode Hôtel — QR par chambre</h3>
+                            <p class="text-neutral-600 text-sm leading-relaxed">Chaque chambre a son propre QR code. Le client commande depuis son lit, la voix IA annonce les commandes en cuisine.</p>
                         </div>
                     </div>
-                </div>
-
-                {{-- Card Interface Personnel --}}
-                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Interface Personnel dédiée</h3>
-                    <p class="text-neutral-600 text-sm leading-relaxed">Un lien sécurisé pour votre équipe. Ils reçoivent les appels clients avec voix en temps réel — sans connexion requise.</p>
-                </div>
-
-                {{-- Card Voix TTS --}}
-                <div class="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-gradient-to-br from-fuchsia-100 to-fuchsia-200 rounded-xl flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-neutral-900 mb-2">Voix sur nouvelles commandes</h3>
-                    <p class="text-neutral-600 text-sm leading-relaxed">Nouvelle commande à la Chambre 3, Appel addition à la Table 7. La voix IA lit les commandes et appels en temps réel.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- STATS — 4 colonnes --}}
-    <section class="py-16 bg-white border-y border-neutral-100">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center animate-on-scroll">
-                <div>
-                    <div class="text-4xl sm:text-5xl font-bold text-neutral-900">15 min</div>
-                    <div class="text-neutral-500 text-sm mt-2">Pour etre en ligne</div>
-                </div>
-                <div>
-                    <div class="text-4xl sm:text-5xl font-bold text-neutral-900">0%</div>
-                    <div class="text-neutral-500 text-sm mt-2">Commission par commande</div>
-                </div>
-                <div>
-                    <div class="text-4xl sm:text-5xl font-bold text-primary-600">4</div>
-                    <div class="text-neutral-500 text-sm mt-2">Moyens de paiement</div>
-                </div>
-                <div>
-                    <div class="text-4xl sm:text-5xl font-bold text-neutral-900">24/7</div>
-                    <div class="text-neutral-500 text-sm mt-2">Commandes sans interruption</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- HOW IT WORKS — 3 steps --}}
-    <section id="how-it-works" class="py-20 sm:py-28 bg-gradient-to-b from-blue-50/30 to-white relative overflow-hidden">
-        <div class="blob w-[400px] h-[400px] bg-primary-300 top-20 -left-40"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-xs font-semibold mb-4">COMMENT CA MARCHE</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
-                    De zero au premier client en 15 minutes
-                </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Pas besoin d'etre developpeur. Juste votre restaurant et l'envie de recevoir des commandes.
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8 animate-on-scroll">
+    {{-- ══════════════════════════════════════
+         STATS — Impact chiffré
+    ══════════════════════════════════════ --}}
+    <section class="py-20 bg-neutral-950 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(59,130,246,.12),transparent)]"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center fade-up">
                 @foreach([
-                    ['1', 'Creez votre compte', 'Nom du restaurant, email, telephone. En 2 minutes, votre espace est pret.', '~2 minutes', 'primary'],
-                    ['2', 'Ajoutez votre menu', 'Photos, prix, categories. Configurez vos horaires et moyens de paiement.', '~10 minutes', 'primary'],
-                    ['3', 'Recevez des commandes', 'Partagez votre lien ou QR code. Les commandes arrivent en temps reel.', 'Immediat', 'emerald'],
-                ] as $step)
-                <div class="relative bg-white rounded-2xl p-8 border border-neutral-100 shadow-sm hover:shadow-lg transition-all duration-300">
-                    <div class="w-12 h-12 bg-{{ $step[4] }}-500 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-5">{{ $step[0] }}</div>
-                    <h3 class="text-xl font-bold text-neutral-900 mb-3">{{ $step[1] }}</h3>
-                    <p class="text-neutral-600 leading-relaxed">{{ $step[2] }}</p>
-                    <span class="inline-block mt-4 text-xs font-semibold text-{{ $step[4] }}-600 bg-{{ $step[4] }}-50 px-3 py-1 rounded-full">{{ $step[3] }}</span>
+                    ['15 min', 'Pour être en ligne', 'text-blue-400'],
+                    ['0%', 'Commission par commande', 'text-emerald-400'],
+                    ['4', 'Moyens de paiement', 'text-amber-400'],
+                    ['24/7', 'Commandes sans interruption', 'text-violet-400'],
+                ] as $s)
+                <div>
+                    <div class="text-5xl sm:text-6xl font-extrabold {{ $s[2] }} tabular-nums leading-none">{{ $s[0] }}</div>
+                    <div class="text-neutral-500 text-sm mt-3 leading-snug">{{ $s[1] }}</div>
                 </div>
                 @endforeach
             </div>
         </div>
     </section>
 
-    {{-- QR CODE — Parcours client visuel --}}
-    <section class="py-20 sm:py-28 bg-gradient-to-b from-indigo-50/40 to-white relative overflow-hidden">
-        <div class="blob w-[500px] h-[500px] bg-indigo-300 -top-40 -right-60"></div>
-        <div class="blob w-[300px] h-[300px] bg-primary-200 bottom-20 -left-20"></div>
+    {{-- ══════════════════════════════════════
+         HOW IT WORKS — 3 étapes
+    ══════════════════════════════════════ --}}
+    <section id="how-it-works" class="py-24 sm:py-32 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_0%_50%,rgba(59,130,246,.06),transparent)]"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-14 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-4">QR CODE</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
-                    Du scan au paiement en 2 minutes
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-600 text-xs font-bold tracking-wider uppercase mb-5">Comment ça marche</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
+                    Du zéro au premier client<br>en 15 minutes
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Vos clients scannent le QR code sur la table, commandent et paient — sans telecharger d'application.
+                <p class="text-neutral-500 text-lg mt-4">
+                    Pas besoin d'être développeur. Juste votre restaurant et l'envie de recevoir des commandes.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 sm:gap-8 fade-up">
+                @foreach([
+                    ['01', 'Créez votre compte', 'Nom du restaurant, email, téléphone. En 2 minutes, votre espace est prêt.', '~2 min', 'bg-blue-600', 'text-blue-100', 'bg-blue-50 border-blue-100'],
+                    ['02', 'Ajoutez votre menu', 'Photos, prix, catégories. Configurez vos horaires et moyens de paiement.', '~10 min', 'bg-violet-600', 'text-violet-100', 'bg-violet-50 border-violet-100'],
+                    ['03', 'Recevez des commandes', 'Partagez votre lien ou QR code. Les commandes arrivent en temps réel.', 'Immédiat', 'bg-emerald-600', 'text-emerald-100', 'bg-emerald-50 border-emerald-100'],
+                ] as $i => $step)
+                <div class="relative bg-white rounded-3xl p-8 border border-neutral-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-5xl font-black text-neutral-100">{{ $step[0] }}</span>
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $step[2] }} border {{ explode(' ', $step[7] ?? $step[6])[1] ?? 'border-neutral-100' }}" style="background: {{ str_contains($step[6], 'blue') ? '#eff6ff' : (str_contains($step[6], 'violet') ? '#f5f3ff' : '#f0fdf4') }}; color: {{ str_contains($step[6], 'blue') ? '#2563eb' : (str_contains($step[6], 'violet') ? '#7c3aed' : '#16a34a') }}">{{ $step[3] }}</span>
+                    </div>
+                    <div class="w-12 h-12 {{ $step[4] }} rounded-2xl flex items-center justify-center mb-5 shadow-lg">
+                        <span class="text-white font-black text-lg">{{ $i + 1 }}</span>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-neutral-900 mb-3">{{ $step[1] }}</h3>
+                    <p class="text-neutral-500 leading-relaxed text-sm">{{ $step[2] }}</p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════
+         QR CODE — Parcours client
+    ══════════════════════════════════════ --}}
+    <section class="py-24 sm:py-32 bg-neutral-50 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 text-xs font-bold tracking-wider uppercase mb-5">QR Code</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
+                    Du scan au paiement<br>en 2 minutes
+                </h2>
+                <p class="text-neutral-500 text-lg mt-4">
+                    Vos clients scannent, commandent et paient — sans télécharger d'application.
                 </p>
             </div>
 
             @php
                 $qrSteps = [
-                    ['title' => 'Scanner le QR code', 'desc' => 'Le client scanne le QR code sur la table ou le support avec son telephone. Aucune application a telecharger.', 'image' => 'images/home/qr-step-1.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>', 'color' => 'indigo'],
-                    ['title' => 'Choisir avec photos et prix', 'desc' => 'Il parcourt votre menu complet avec photos appetissantes, prix clairs et categories intuitives.', 'image' => 'images/home/qr-step-2.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>', 'color' => 'primary'],
-                    ['title' => 'La commande part en cuisine', 'desc' => 'Transmission instantanee a votre ecran cuisine. Zero erreur, zero delai, zero papier.', 'image' => 'images/home/qr-step-3.png', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>', 'color' => 'amber'],
-                    ['title' => 'Payer par Mobile Money', 'desc' => 'Le client paie directement depuis son telephone : Wave, Orange Money, MTN ou Moov. L\'argent arrive sur votre compte.', 'image' => null, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>', 'color' => 'emerald'],
+                    ['Scanner le QR', 'Le client scanne le QR code sur la table avec son téléphone. Aucune app à télécharger.', '🔲', 'bg-indigo-500'],
+                    ['Choisir son plat', 'Il parcourt votre menu complet avec photos, prix et catégories.', '🍽️', 'bg-blue-500'],
+                    ['Commande en cuisine', 'Transmission instantanée à votre écran cuisine. Zéro erreur, zéro papier.', '⚡', 'bg-amber-500'],
+                    ['Payer par Mobile Money', 'Wave, Orange Money, MTN ou Moov. L\'argent arrive directement sur votre compte.', '💳', 'bg-emerald-500'],
                 ];
             @endphp
 
-            {{-- Stepper horizontal (desktop) --}}
-            <div class="hidden lg:flex items-center justify-center gap-0 mb-10 animate-on-scroll">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fade-up">
                 @foreach($qrSteps as $i => $step)
-                    <div class="flex items-center">
-                        <div class="flex items-center gap-2 px-4 py-2 rounded-full {{ $i === 0 ? 'bg-indigo-100 text-indigo-700' : ($i === 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-neutral-100 text-neutral-600') }}">
-                            <span class="w-6 h-6 rounded-full bg-{{ $step['color'] }}-500 text-white text-xs font-bold flex items-center justify-center">{{ $i + 1 }}</span>
-                            <span class="text-sm font-semibold whitespace-nowrap">{{ $step['title'] }}</span>
-                        </div>
-                        @if($i < 3)
-                        <svg class="w-6 h-6 text-neutral-300 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        @endif
+                <div class="bg-white rounded-3xl p-6 border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 {{ $step[3] }} rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-md">{{ $i + 1 }}</div>
+                        <div class="h-px flex-1 bg-neutral-100"></div>
+                        <span class="text-2xl">{{ $step[2] }}</span>
                     </div>
-                @endforeach
-            </div>
-
-            {{-- Grille 2x2 --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6 animate-on-scroll">
-                @foreach($qrSteps as $i => $step)
-                <div class="group relative bg-white rounded-2xl border border-neutral-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                    @if($step['image'])
-                    {{-- Carte avec image --}}
-                    <div class="grid grid-cols-1 sm:grid-rows-[180px_1fr]">
-                        <div class="w-full h-44 sm:h-full overflow-hidden bg-neutral-50">
-                            <img src="{{ asset($step['image']) }}" alt="{{ $step['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
-                        </div>
-                        <div class="p-5 sm:p-6">
-                            <div class="flex items-center gap-3 mb-3">
-                                <span class="w-9 h-9 bg-{{ $step['color'] }}-500 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">{{ $i + 1 }}</span>
-                                <h3 class="font-bold text-neutral-900 text-lg">{{ $step['title'] }}</h3>
-                            </div>
-                            <p class="text-sm text-neutral-500 leading-relaxed">{{ $step['desc'] }}</p>
-                        </div>
-                    </div>
-                    @else
-                    {{-- Carte sans image (paiement) — design enrichi --}}
-                    <div class="p-6 sm:p-8 h-full flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="w-9 h-9 bg-{{ $step['color'] }}-500 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">{{ $i + 1 }}</span>
-                                <h3 class="font-bold text-neutral-900 text-lg">{{ $step['title'] }}</h3>
-                            </div>
-                            <p class="text-sm text-neutral-500 leading-relaxed mb-6">{{ $step['desc'] }}</p>
-                        </div>
-                        {{-- Logos paiement --}}
-                        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-5 border border-emerald-100">
-                            <div class="flex items-center justify-center gap-4 flex-wrap">
-                                <img src="{{ asset('images/payments/wave.png') }}" alt="Wave" class="h-10 w-10 object-contain" loading="lazy">
-                                <img src="{{ asset('images/payments/orange-money.png') }}" alt="Orange Money" class="h-10 w-10 object-contain" loading="lazy">
-                                <img src="{{ asset('images/payments/mtn-momo.png') }}" alt="MTN MoMo" class="h-10 w-10 object-contain" loading="lazy">
-                                <img src="{{ asset('images/payments/moov-money.png') }}" alt="Moov Money" class="h-10 w-10 object-contain" loading="lazy">
-                            </div>
-                            <p class="text-center text-xs text-emerald-600 font-medium mt-3">Paiement instantane — argent sur votre compte</p>
-                        </div>
+                    <h3 class="font-extrabold text-neutral-900 mb-2">{{ $step[0] }}</h3>
+                    <p class="text-sm text-neutral-500 leading-relaxed">{{ $step[1] }}</p>
+                    @if($i === 3)
+                    <div class="mt-4 flex items-center gap-2 flex-wrap">
+                        @foreach(['wave.png','orange-money.png','mtn-momo.png','moov-money.png'] as $logo)
+                        <img src="{{ asset('images/payments/'.$logo) }}" class="h-7 w-7 rounded-lg object-contain" alt="">
+                        @endforeach
                     </div>
                     @endif
                 </div>
                 @endforeach
             </div>
 
-            {{-- CTA vers commande supports QR --}}
-            <div class="mt-10 text-center animate-on-scroll">
-                <a href="{{ url('/supports-qr') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                    Commander vos supports QR
+            <div class="mt-10 text-center fade-up">
+                <a href="{{ url('/supports-qr') }}" class="inline-flex items-center gap-2 px-6 py-3.5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5">
+                    Commander vos supports QR imprimés
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
-                <p class="text-sm text-neutral-500 mt-2">Supports rigides ou autocollants — livres a votre restaurant</p>
+                <p class="text-sm text-neutral-400 mt-2">Supports rigides ou autocollants — livrés à votre restaurant</p>
             </div>
         </div>
     </section>
 
-    {{-- VIDEO DEMO --}}
+    {{-- ══════════════════════════════════════
+         VIDEO DEMO
+    ══════════════════════════════════════ --}}
     @if(!empty($videos))
-    <section class="py-20 sm:py-28 bg-gradient-to-b from-blue-50/40 to-white relative overflow-hidden">
-        <div class="blob w-[400px] h-[400px] bg-primary-300 bottom-0 left-0"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-600 text-xs font-semibold mb-4">VIDEO</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
+    <section class="py-24 sm:py-32 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-600 text-xs font-bold tracking-wider uppercase mb-5">Vidéo</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
                     Voyez MenuPro en action
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Decouvrez comment nos restaurateurs utilisent MenuPro au quotidien.
+                <p class="text-neutral-500 text-lg mt-4">
+                    Découvrez comment nos restaurateurs utilisent MenuPro au quotidien.
                 </p>
             </div>
-
-            <div class="grid md:grid-cols-{{ count($videos) > 1 ? '2' : '1' }} gap-8 max-w-5xl mx-auto animate-on-scroll">
+            <div class="grid md:grid-cols-{{ count($videos) > 1 ? '2' : '1' }} gap-8 max-w-5xl mx-auto fade-up">
                 @foreach($videos as $video)
-                <div class="group">
-                    <div class="relative aspect-video bg-neutral-900 rounded-2xl overflow-hidden shadow-xl border border-neutral-200">
-                        <iframe
-                            src="{{ $video['url'] }}"
-                            title="{{ $video['title'] }}"
-                            class="w-full h-full"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                            loading="lazy">
-                        </iframe>
+                <div>
+                    <div class="relative aspect-video bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl border border-neutral-200">
+                        <iframe src="{{ $video['url'] }}" title="{{ $video['title'] }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                     </div>
                     <div class="mt-4 text-center">
                         <h3 class="font-bold text-neutral-900">{{ $video['title'] }}</h3>
-                        @if($video['description'])
-                        <p class="text-sm text-neutral-500 mt-1">{{ $video['description'] }}</p>
-                        @endif
+                        @if($video['description'])<p class="text-sm text-neutral-500 mt-1">{{ $video['description'] }}</p>@endif
                     </div>
                 </div>
                 @endforeach
@@ -476,74 +504,47 @@
     </section>
     @endif
 
-    {{-- TEMOIGNAGES --}}
-    <section class="py-20 sm:py-28 bg-white relative overflow-hidden">
-        <div class="blob w-[400px] h-[400px] bg-emerald-200 -top-40 -left-40"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-xs font-semibold mb-4">TEMOIGNAGES</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
-                    Ils utilisent MenuPro au quotidien
+    {{-- ══════════════════════════════════════
+         TÉMOIGNAGES
+    ══════════════════════════════════════ --}}
+    <section class="py-24 sm:py-32 bg-neutral-50 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-600 text-xs font-bold tracking-wider uppercase mb-5">Témoignages</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
+                    Ils utilisent MenuPro<br>au quotidien
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Des restaurateurs comme vous qui ont fait le pas vers la digitalisation.
+                <p class="text-neutral-500 text-lg mt-4">
+                    Des restaurateurs comme vous qui ont fait le pas.
                 </p>
             </div>
 
             @php
                 $testimonials = \App\Models\SystemSetting::get('home_testimonials', [
-                    [
-                        'name' => 'Awa Kone',
-                        'role' => 'Proprietaire, Maquis Chez Awa',
-                        'city' => 'Daloa',
-                        'text' => 'Depuis que j\'utilise MenuPro, mes clients commandent directement avec leur telephone. Plus besoin d\'attendre le serveur. Mon chiffre d\'affaires a augmente de 30%.',
-                        'avatar' => '',
-                        'stars' => 5,
-                    ],
-                    [
-                        'name' => 'Kouame Jean',
-                        'role' => 'Gerant, Restaurant Le Delice',
-                        'city' => 'Abidjan',
-                        'text' => 'Le QR code sur les tables a tout change. Les clients scannent, commandent et paient par Wave. C\'est rapide et je recois l\'argent immediatement.',
-                        'avatar' => '',
-                        'stars' => 5,
-                    ],
-                    [
-                        'name' => 'Marie Toure',
-                        'role' => 'Fondatrice, Saveurs d\'Afrique',
-                        'city' => 'Bouake',
-                        'text' => 'A 15 000 F par mois, c\'est le meilleur investissement pour mon restaurant. Pas de commission, pas de surprise. Je recommande a tous les restaurateurs.',
-                        'avatar' => '',
-                        'stars' => 5,
-                    ],
+                    ['name'=>'Awa Koné','role'=>'Propriétaire, Maquis Chez Awa','city'=>'Daloa','text'=>'Depuis que j\'utilise MenuPro, mes clients commandent directement avec leur téléphone. Plus besoin d\'attendre le serveur. Mon chiffre d\'affaires a augmenté de 30%.','avatar'=>'','stars'=>5],
+                    ['name'=>'Kouamé Jean','role'=>'Gérant, Restaurant Le Délice','city'=>'Abidjan','text'=>'Le QR code sur les tables a tout changé. Les clients scannent, commandent et paient par Wave. Je reçois l\'argent immédiatement.','avatar'=>'','stars'=>5],
+                    ['name'=>'Marie Touré','role'=>'Fondatrice, Saveurs d\'Afrique','city'=>'Bouaké','text'=>'À 15 000 F par mois, c\'est le meilleur investissement pour mon restaurant. Pas de commission, pas de surprise.','avatar'=>'','stars'=>5],
                 ]);
             @endphp
 
-            <div class="grid md:grid-cols-3 gap-6 animate-on-scroll">
+            <div class="grid md:grid-cols-3 gap-6 fade-up">
                 @foreach($testimonials as $t)
-                <div class="bg-white rounded-2xl p-7 border border-neutral-100 shadow-sm hover:shadow-lg transition-all duration-300">
-                    {{-- Stars --}}
-                    <div class="flex gap-0.5 mb-4">
-                        @for($i = 0; $i < ($t['stars'] ?? 5); $i++)
-                        <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <div class="bg-white rounded-3xl p-7 border border-neutral-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                    <div class="flex gap-1 mb-5">
+                        @for($i=0;$i<($t['stars']??5);$i++)
+                        <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                         @endfor
                     </div>
-
-                    {{-- Quote --}}
-                    <p class="text-neutral-700 leading-relaxed mb-6 text-sm">"{{ $t['text'] }}"</p>
-
-                    {{-- Author --}}
-                    <div class="flex items-center gap-3">
+                    <p class="text-neutral-700 leading-relaxed mb-6 flex-1 text-sm">"{{ $t['text'] }}"</p>
+                    <div class="flex items-center gap-3 pt-5 border-t border-neutral-100">
                         @if(!empty($t['avatar']) && file_exists(public_path($t['avatar'])))
                             <img src="{{ asset($t['avatar']) }}" alt="{{ $t['name'] }}" class="w-10 h-10 rounded-full object-cover border border-neutral-100">
                         @else
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold text-sm">
-                                {{ strtoupper(substr($t['name'], 0, 1)) }}
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">{{ strtoupper(substr($t['name'],0,1)) }}</div>
                         @endif
                         <div>
                             <div class="font-bold text-sm text-neutral-900">{{ $t['name'] }}</div>
-                            <div class="text-xs text-neutral-500">{{ $t['role'] }} — {{ $t['city'] }}</div>
+                            <div class="text-xs text-neutral-400">{{ $t['role'] }} — {{ $t['city'] }}</div>
                         </div>
                     </div>
                 </div>
@@ -552,211 +553,172 @@
         </div>
     </section>
 
-    {{-- LOGOS CLIENTS — Vrais restaurants de la plateforme --}}
-    <section class="py-16 bg-neutral-50 border-y border-neutral-100">
+    {{-- ══════════════════════════════════════
+         RESTAURANTS QUI NOUS FONT CONFIANCE
+    ══════════════════════════════════════ --}}
+    <section class="py-16 bg-white border-y border-neutral-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 animate-on-scroll">
-                <h3 class="text-lg font-bold text-neutral-900 mb-2">Ils nous font confiance</h3>
-                <p class="text-sm text-neutral-500">Restaurants et maquis qui utilisent MenuPro au quotidien</p>
+            <div class="text-center mb-10 fade-up">
+                <h3 class="text-lg font-bold text-neutral-900 mb-1">Ils nous font confiance</h3>
+                <p class="text-sm text-neutral-400">Restaurants et maquis actifs sur MenuPro</p>
             </div>
-
             @php
                 $trustedRestaurants = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)
-                    ->whereNotNull('logo_path')
-                    ->where('logo_path', '!=', '')
-                    ->latest()
-                    ->take(12)
-                    ->get(['name', 'slug', 'logo_path', 'city']);
+                    ->whereNotNull('logo_path')->where('logo_path','!=','')->latest()->take(12)->get(['name','slug','logo_path','city']);
+                if($trustedRestaurants->isEmpty()) {
+                    $trustedRestaurants = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(6)->get(['name','slug','city']);
+                }
             @endphp
-
-            @if($trustedRestaurants->count() > 0)
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center animate-on-scroll">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 fade-up">
                 @foreach($trustedRestaurants as $resto)
-                <a href="{{ route('r.menu', $resto->slug) }}" target="_blank" class="group flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-neutral-100 hover:border-primary-200 hover:shadow-md transition-all w-full">
-                    <img src="{{ Storage::url($resto->logo_path) }}"
-                         alt="{{ $resto->name }}"
-                         class="w-14 h-14 rounded-xl object-cover border border-neutral-100 group-hover:scale-105 transition-transform"
-                         loading="lazy">
-                    <div class="text-center">
-                        <span class="text-xs font-semibold text-neutral-700 block truncate max-w-[100px]">{{ $resto->name }}</span>
-                        @if($resto->city)
-                        <span class="text-[10px] text-neutral-400">{{ $resto->city }}</span>
-                        @endif
-                    </div>
+                <a href="{{ route('r.menu', $resto->slug) }}" target="_blank" class="group flex flex-col items-center justify-center gap-2 p-4 bg-neutral-50 rounded-2xl border border-neutral-100 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-md transition-all">
+                    @if($resto->logo_path)
+                        <img src="{{ Storage::url($resto->logo_path) }}" alt="{{ $resto->name }}" class="w-12 h-12 rounded-xl object-cover border border-neutral-100 group-hover:scale-110 transition-transform" loading="lazy">
+                    @else
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform">{{ strtoupper(substr($resto->name,0,1)) }}</div>
+                    @endif
+                    <span class="text-[11px] font-semibold text-neutral-700 truncate max-w-[80px] text-center">{{ $resto->name }}</span>
                 </a>
                 @endforeach
             </div>
-            @else
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center animate-on-scroll">
-                @php
-                    $placeholderRestaurants = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)
-                        ->latest()
-                        ->take(6)
-                        ->get(['name', 'slug', 'city']);
-                @endphp
-                @foreach($placeholderRestaurants as $resto)
-                <a href="{{ route('r.menu', $resto->slug) }}" target="_blank" class="group flex flex-col items-center justify-center gap-2 p-4 bg-white rounded-2xl border border-neutral-100 hover:border-primary-200 hover:shadow-md transition-all w-full">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold text-lg group-hover:scale-105 transition-transform">
-                        {{ strtoupper(substr($resto->name, 0, 1)) }}
-                    </div>
-                    <div class="text-center">
-                        <span class="text-xs font-semibold text-neutral-700 block truncate max-w-[100px]">{{ $resto->name }}</span>
-                        @if($resto->city)
-                        <span class="text-[10px] text-neutral-400">{{ $resto->city }}</span>
-                        @endif
-                    </div>
-                </a>
-                @endforeach
-            </div>
-            @endif
         </div>
     </section>
 
-    {{-- PRICING — 3 plans --}}
-    <section id="pricing" class="py-20 sm:py-28 bg-white relative">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16 animate-on-scroll">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-700 text-xs font-semibold mb-4">TARIFS</div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
-                    Un prix simple, pas de surprise
+    {{-- ══════════════════════════════════════
+         TARIFS
+    ══════════════════════════════════════ --}}
+    <section id="pricing" class="py-24 sm:py-32 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_100%,rgba(99,102,241,.07),transparent)]"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-100 rounded-full text-amber-600 text-xs font-bold tracking-wider uppercase mb-5">Tarifs</span>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight tracking-tight">
+                    Un prix simple,<br>pas de surprise
                 </h2>
-                <p class="text-neutral-600 text-lg mt-4">
-                    Du stand de rue au grand restaurant. Pas de commission par commande. Un forfait mensuel fixe.
+                <p class="text-neutral-500 text-lg mt-4">
+                    Du stand de rue au grand restaurant. Pas de commission par commande.
                 </p>
             </div>
 
-            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6 animate-on-scroll">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fade-up">
                 {{-- Stand --}}
-                <div class="bg-white rounded-2xl p-7 border border-orange-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300">
-                    <div class="text-xs font-semibold text-orange-600 uppercase tracking-wider mb-3">Stand</div>
-                    <div class="flex items-baseline gap-1 mb-2">
-                        <span class="text-4xl font-bold text-neutral-900">5 000</span>
-                        <span class="text-neutral-500 text-sm">F/mois</span>
+                <div class="bg-white rounded-3xl p-7 border border-orange-200 hover:border-orange-400 hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="text-xs font-extrabold text-orange-500 uppercase tracking-widest mb-4">Stand</div>
+                    <div class="flex items-baseline gap-1 mb-1">
+                        <span class="text-4xl font-black text-neutral-900">5 000</span>
+                        <span class="text-neutral-400 text-sm">F/mois</span>
                     </div>
-                    <p class="text-sm text-neutral-500 mb-6">Vendeurs de rue, stands panini, tacos, jus...</p>
-                    <ul class="space-y-3 mb-8">
-                        @foreach(['15 plats', '100 commandes/mois', 'QR code personnalisé', 'Wave & Orange Money', 'Sans ordinateur requis'] as $f)
+                    <p class="text-sm text-neutral-400 mb-6">Vendeurs de rue, stands, tacos, jus...</p>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        @foreach(['15 plats','100 commandes/mois','QR code personnalisé','Wave & Orange Money','Sans ordinateur requis'] as $f)
                         <li class="flex items-center gap-2.5 text-sm text-neutral-700">
-                            <svg class="w-4 h-4 text-orange-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            {{ $f }}
+                            <svg class="w-4 h-4 text-orange-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-orange-100 text-orange-900 hover:bg-orange-200 transition-all">
-                        Essai gratuit 7j
-                    </a>
+                    <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3.5 px-6 rounded-2xl font-bold text-sm bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition-all">Essai gratuit 7j</a>
                 </div>
 
                 {{-- Essentiel --}}
-                <div class="bg-white rounded-2xl p-7 border border-neutral-200 hover:border-neutral-300 hover:shadow-lg transition-all duration-300">
-                    <div class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Essentiel</div>
-                    <div class="flex items-baseline gap-1 mb-2">
-                        <span class="text-4xl font-bold text-neutral-900">15 000</span>
-                        <span class="text-neutral-500 text-sm">F/mois</span>
+                <div class="bg-white rounded-3xl p-7 border border-neutral-200 hover:border-neutral-300 hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="text-xs font-extrabold text-neutral-400 uppercase tracking-widest mb-4">Essentiel</div>
+                    <div class="flex items-baseline gap-1 mb-1">
+                        <span class="text-4xl font-black text-neutral-900">15 000</span>
+                        <span class="text-neutral-400 text-sm">F/mois</span>
                     </div>
-                    <p class="text-sm text-neutral-500 mb-6">Pour les petits maquis qui demarrent</p>
-                    <ul class="space-y-3 mb-8">
-                        @foreach(['25 plats, 8 categories', '200 commandes/mois', 'Mobile Money + QR codes', 'Support WhatsApp'] as $f)
+                    <p class="text-sm text-neutral-400 mb-6">Pour les petits maquis qui démarrent</p>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        @foreach(['25 plats, 8 catégories','200 commandes/mois','Mobile Money + QR codes','Support WhatsApp'] as $f)
                         <li class="flex items-center gap-2.5 text-sm text-neutral-700">
-                            <svg class="w-4.5 h-4.5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            {{ $f }}
+                            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-all">
-                        Essai gratuit 7j
-                    </a>
+                    <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 px-6 rounded-2xl font-bold text-sm bg-neutral-100 text-neutral-800 hover:bg-neutral-200 border border-neutral-200 transition-all">Essai gratuit 7j</a>
                 </div>
 
                 {{-- Pro (featured) --}}
-                <div class="bg-white rounded-2xl p-7 border-2 border-primary-500 shadow-xl shadow-primary-100/50 relative hover:shadow-2xl transition-all duration-300">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-xs font-bold px-4 py-1 rounded-full">Populaire</div>
-                    <div class="text-xs font-semibold text-primary-600 uppercase tracking-wider mb-3">Pro</div>
-                    <div class="flex items-baseline gap-1 mb-2">
-                        <span class="text-4xl font-bold text-neutral-900">25 000</span>
-                        <span class="text-neutral-500 text-sm">F/mois</span>
+                <div class="bg-blue-600 rounded-3xl p-7 border-2 border-blue-500 shadow-2xl shadow-blue-500/30 relative hover:shadow-3xl hover:scale-[1.02] transition-all duration-300 flex flex-col">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-blue-600 text-xs font-extrabold px-4 py-1.5 rounded-full shadow-lg border border-blue-100">⭐ Populaire</div>
+                    <div class="text-xs font-extrabold text-blue-200 uppercase tracking-widest mb-4">Pro</div>
+                    <div class="flex items-baseline gap-1 mb-1">
+                        <span class="text-4xl font-black text-white">25 000</span>
+                        <span class="text-blue-200 text-sm">F/mois</span>
                     </div>
-                    <p class="text-sm text-neutral-500 mb-6">Stock, livraison et analytics inclus</p>
-                    <ul class="space-y-3 mb-8">
-                        @foreach(['80 plats, 3 employes', '1 000 commandes/mois', 'Gestion stock complete', 'Livraison integree', 'Analytics & rapports'] as $f)
-                        <li class="flex items-center gap-2.5 text-sm text-neutral-700">
-                            <svg class="w-4.5 h-4.5 text-primary-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            {{ $f }}
+                    <p class="text-sm text-blue-200 mb-6">Stock, livraison et analytics inclus</p>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        @foreach(['80 plats, 3 employés','1 000 commandes/mois','Gestion stock complète','Livraison intégrée','Analytics & rapports'] as $f)
+                        <li class="flex items-center gap-2.5 text-sm text-white">
+                            <svg class="w-4 h-4 text-blue-200 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}?plan=pro" class="group block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-primary-500 text-white hover:bg-primary-600 shadow-md shadow-primary-500/20 transition-all">
-                        Essai gratuit 7j
-                    </a>
+                    <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 px-6 rounded-2xl font-extrabold text-sm bg-white text-blue-700 hover:bg-blue-50 shadow-lg transition-all">Essai gratuit 7j</a>
                 </div>
 
-                {{-- GOLD (Premium) --}}
-                <div class="bg-gradient-to-br from-primary-50 to-accent-50 rounded-2xl p-7 border-2 border-primary-400 shadow-xl shadow-primary-200/50 relative hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold px-4 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                        Premium
+                {{-- Gold --}}
+                <div class="bg-gradient-to-br from-neutral-900 to-indigo-950 rounded-3xl p-7 border border-indigo-500/30 shadow-xl relative hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex flex-col">
+                    <div class="text-xs font-extrabold text-indigo-300 uppercase tracking-widest mb-4">Gold ✨</div>
+                    <div class="flex items-baseline gap-1 mb-1">
+                        <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">85 000</span>
+                        <span class="text-neutral-400 text-sm">F/mois</span>
                     </div>
-                    <div class="text-xs font-semibold text-primary-700 uppercase tracking-wider mb-3">Gold</div>
-                    <div class="flex items-baseline gap-1 mb-2">
-                        <span class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">85 000</span>
-                        <span class="text-primary-700 text-sm">F/mois</span>
-                    </div>
-                    <p class="text-sm text-primary-900/70 mb-6">Multi-espaces pour complexes VIP & hotels</p>
-                    <ul class="space-y-3 mb-8">
-                        @foreach(['Multi-espaces illimites', 'Serveurs avec PIN dedie', 'Rapports par espace', 'QR chambres hotel', 'Formation personnalisee'] as $f)
-                        <li class="flex items-center gap-2.5 text-sm text-primary-900">
-                            <svg class="w-4.5 h-4.5 text-primary-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            {{ $f }}
+                    <p class="text-sm text-neutral-400 mb-6">Multi-espaces pour complexes VIP & hotels</p>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        @foreach(['Multi-espaces illimités','Serveurs avec PIN dédié','Rapports par espace','QR chambres hotel','Formation personnalisée'] as $f)
+                        <li class="flex items-center gap-2.5 text-sm text-neutral-300">
+                            <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-lg shadow-primary-500/30 transition-all">
-                        Essai gratuit 7j
-                    </a>
+                    <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3.5 px-6 rounded-2xl font-extrabold text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg transition-all">Essai gratuit 7j</a>
                 </div>
             </div>
 
-            <p class="text-center text-neutral-500 text-sm mt-8">
-                7 jours d'essai gratuit. Sans engagement.
-                <a href="{{ route('pricing') }}" class="text-primary-600 hover:text-primary-700 font-medium">Voir comparaison detaillee &rarr;</a>
+            <p class="text-center text-neutral-400 text-sm mt-8">
+                7 jours d'essai gratuit. Sans engagement. Sans carte bancaire.
+                <a href="{{ route('pricing') }}" class="text-blue-600 hover:text-blue-700 font-semibold ml-1">Voir la comparaison détaillée →</a>
             </p>
         </div>
     </section>
 
-    {{-- CTA FINAL --}}
-    <section class="py-20 sm:py-28 bg-gradient-to-br from-neutral-900 via-neutral-900 to-indigo-950 relative overflow-hidden">
-        <div class="blob w-[500px] h-[500px] bg-primary-500 opacity-10 top-0 right-0"></div>
+    {{-- ══════════════════════════════════════
+         CTA FINAL
+    ══════════════════════════════════════ --}}
+    <section class="py-24 sm:py-32 bg-neutral-950 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(59,130,246,.15),transparent)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_20%_80%,rgba(99,102,241,.1),transparent)]"></div>
         <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Pret a digitaliser votre restaurant ?
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 border border-white/20 rounded-full text-white/70 text-sm font-medium mb-8">
+                <span class="relative flex h-2 w-2"><span class="ping-slow absolute inline-flex h-full w-full rounded-full bg-emerald-400"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span></span>
+                {{ $stats['raw']['restaurants'] ?? '100' }}+ restaurants actifs
+            </span>
+
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight">
+                Prêt à digitaliser<br>votre restaurant ?
             </h2>
-            <p class="text-lg text-neutral-400 mt-4 max-w-xl mx-auto">
-                Rejoignez les restaurateurs ivoiriens qui recoivent des commandes en ligne et sont payes directement sur leur Mobile Money.
+            <p class="text-lg sm:text-xl text-neutral-400 mt-6 max-w-xl mx-auto leading-relaxed">
+                Rejoignez les restaurateurs ivoiriens qui reçoivent des commandes en ligne et sont payés directement sur leur Mobile Money.
             </p>
 
-            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="{{ route('register') }}" class="group inline-flex items-center gap-2 px-8 py-4 bg-white text-neutral-900 font-bold rounded-xl hover:bg-neutral-100 shadow-lg transition-all duration-200 hover:-translate-y-0.5">
-                    Creer mon restaurant
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 bg-white text-neutral-900 font-extrabold rounded-2xl hover:bg-blue-50 shadow-2xl shadow-white/10 transition-all duration-200 hover:-translate-y-0.5 text-base">
+                    Créer mon restaurant — C'est gratuit
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
-                <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold rounded-xl border border-white/20 hover:bg-white/5 transition-all">
-                    Voir la demo
+                <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/10 transition-all text-base">
+                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    Voir la démo
                 </a>
             </div>
 
-            <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-neutral-500">
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    Configuration en 15 min
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-sm text-neutral-600">
+                @foreach(['Configuration en 15 min', 'Support WhatsApp', 'A partir de 5 000 F/mois', 'Sans engagement'] as $t)
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    {{ $t }}
                 </span>
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    Support WhatsApp
-                </span>
-                <span class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    A partir de 15 000 F/mois
-                </span>
+                @endforeach
             </div>
         </div>
     </section>
@@ -765,40 +727,22 @@
     <script>
         function counter(target) {
             return {
-                count: 0,
-                target: target,
-                displayCount: '0',
+                count: 0, target: target, displayCount: '0',
                 startCount() {
-                    const duration = 1500;
-                    const steps = 40;
-                    const stepValue = this.target / steps;
-                    const stepDuration = duration / steps;
-                    const interval = setInterval(() => {
-                        this.count += stepValue;
-                        if (this.count >= this.target) {
-                            this.count = this.target;
-                            clearInterval(interval);
-                        }
-                        if (this.count >= 1000) {
-                            this.displayCount = Math.round(this.count / 1000) + 'K+';
-                        } else {
-                            this.displayCount = Math.round(this.count).toString();
-                        }
-                    }, stepDuration);
+                    const steps = 40, duration = 1600;
+                    const sv = this.target / steps, sd = duration / steps;
+                    const iv = setInterval(() => {
+                        this.count += sv;
+                        if (this.count >= this.target) { this.count = this.target; clearInterval(iv); }
+                        this.displayCount = this.count >= 1000 ? Math.round(this.count/1000)+'K+' : Math.round(this.count).toString();
+                    }, sd);
                 }
             }
         }
-
-        // Scroll animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
         }, { threshold: 0.1 });
-
-        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+        document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
     </script>
     @endpush
 </x-layouts.public>
