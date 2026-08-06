@@ -11,13 +11,9 @@
 .gt{background:linear-gradient(120deg,#D45E0C,#ef8a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gt-light{background:linear-gradient(120deg,#f6b285,#fad2b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* Hero bg — blanc pur */
-.hero-bg{background:#ffffff !important}
-/* Blobs orange décoratifs */
-.hero-blob{position:absolute;bottom:-20%;left:-10%;width:65%;padding-bottom:65%;border-radius:50% 50% 60% 40% / 40% 50% 50% 60%;background:rgba(212,94,12,.07);pointer-events:none;z-index:0}
-.hero-blob2{position:absolute;top:-15%;right:-8%;width:45%;padding-bottom:45%;border-radius:40% 60% 50% 50% / 50% 40% 60% 50%;background:rgba(212,94,12,.05);pointer-events:none;z-index:0}
-/* Forme orange vif bas-droite pour contraste */
-.hero-shape{position:absolute;bottom:0;right:0;width:40%;height:55%;background:linear-gradient(135deg,rgba(212,94,12,.12),rgba(212,94,12,.04));border-radius:80% 0 0 0;pointer-events:none;z-index:0}
+/* Hero bg — blanc pur, aucun fond parasite */
+.hero-bg{background:#ffffff !important;background-color:#ffffff !important}
+.hero-blob,.hero-blob2,.hero-shape{display:none}
 /* Badge rotatif */
 @keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .spin-slow{animation:spin-slow 12s linear infinite}
@@ -50,15 +46,13 @@
      1. HERO — Fond blanc + accent orange
      Inspiré du design Food Delivery ref
 ══════════════════════════════════════ --}}
-<section class="hero-bg relative overflow-hidden" style="min-height:100vh;background:#ffffff !important;background-color:#ffffff !important">
+<section class="hero-bg relative overflow-hidden" style="min-height:100vh;background-color:#ffffff">
 
-    {{-- Formes décoratives oranges --}}
-    <div class="hero-blob"></div>
-    <div class="hero-blob2"></div>
-    <div class="hero-shape"></div>
+    {{-- Décoration : ligne orange subtile en haut --}}
+    <div class="pointer-events-none absolute top-0 left-0 right-0 h-1" style="background:linear-gradient(90deg,transparent,#D45E0C 30%,#ef8a4d 70%,transparent)"></div>
+    {{-- Cercle décoratif bas-droite --}}
+    <div class="pointer-events-none absolute -bottom-32 -right-32 w-96 h-96 rounded-full" style="background:radial-gradient(circle,rgba(212,94,12,.08),transparent 70%)"></div>
 
-    {{-- Grain texture overlay --}}
-    <div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="grid lg:grid-cols-2 gap-0 lg:gap-8 items-center min-h-screen py-20 lg:py-0">
