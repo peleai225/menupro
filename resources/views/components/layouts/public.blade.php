@@ -231,13 +231,14 @@
                 <span class="text-[10px] font-semibold leading-tight">Accueil</span>
             </a>
 
-            {{-- Fonctionnalités --}}
-            <a href="{{ route('home') }}#how-it-works"
+            {{-- L'App --}}
+            <a href="https://mpa-five.vercel.app/"
+               target="_blank"
                class="flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
-                <span class="text-[10px] font-semibold leading-tight">Features</span>
+                <span class="text-[10px] font-semibold leading-tight">L'App</span>
             </a>
 
             {{-- Tarifs --}}
