@@ -253,21 +253,22 @@
                 <span class="text-[10px] font-semibold leading-tight">Tarifs</span>
             </a>
 
-            {{-- Contact --}}
-            <a href="{{ route('contact') }}"
-               class="relative flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('contact'))
+            {{-- Connexion — visible pour les clients existants --}}
+            <a href="{{ route('login') }}"
+               class="relative flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl {{ request()->routeIs('login') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if(request()->routeIs('login'))
                     <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
                 @endif
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                 </svg>
-                <span class="text-[10px] font-semibold leading-tight">Contact</span>
+                <span class="text-[10px] font-semibold leading-tight">Connexion</span>
             </a>
 
-            {{-- Démarrer (CTA principal) --}}
+            {{-- Démarrer (CTA pour nouveaux) --}}
             <a href="{{ route('register') }}"
-               class="flex flex-col items-center justify-center min-w-[64px] py-2 px-3 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all touch-manipulation">
+               class="flex flex-col items-center justify-center min-w-[64px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
+               style="background:#D45E0C">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
