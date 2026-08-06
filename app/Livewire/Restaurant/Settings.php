@@ -467,21 +467,40 @@ class Settings extends Component
     {
         try {
             $this->validate([
-                'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'primary_color'  => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
                 'secondary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+                'banner'         => 'nullable|mimes:jpeg,jpg,png,webp|max:5120',
             ]);
 
-            $this->restaurant->update([
-                'primary_color' => $this->primary_color ?? '#f97316',
+            $data = [
+                'primary_color'  => $this->primary_color ?? '#f97316',
                 'secondary_color' => $this->secondary_color ?? '#1c1917',
                 'settings' => array_merge($this->restaurant->settings ?? [], [
                     'show_banner' => $this->show_banner,
                 ]),
-            ]);
+            ];
 
-            session()->flash('success', 'Apparence mise à jour.');
+            // Gestion upload bannière
+            if ($this->banner) {
+                $uploader = app(MediaUploader::class);
+                $bannerPath = $uploader->upload($this->banner, "restaurants/{$this->restaurant->id}/banner");
+                if ($bannerPath) {
+                    if ($this->existingBanner) {
+                        Storage::disk('public')->delete($this->existingBanner);
+                    }
+                    $data['banner_path']     = $bannerPath;
+                    $this->existingBanner    = $bannerPath;
+                    $this->banner            = null;
+                }
+            }
+
+            $this->restaurant->update($data);
+
+            session()->flash('success', 'Apparence mise à jour avec succès.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
-            session()->flash('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
+            session()->flash('error', 'Erreur : ' . $e->getMessage());
         }
     }
 
