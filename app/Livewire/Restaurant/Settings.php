@@ -86,6 +86,9 @@ class Settings extends Component
     #[Rule('nullable|string|regex:/^#[0-9A-Fa-f]{6}$/')]
     public ?string $secondary_color = null;
 
+    // Appearance / Banner hero
+    public bool $show_banner = true;
+
     // Opening Hours
     public array $opening_hours = [];
 
@@ -155,6 +158,7 @@ class Settings extends Component
         $this->wave_business_phone = $this->restaurant->wave_business_phone;
         $this->primary_color = $this->restaurant->primary_color ?? '#f97316';
         $this->secondary_color = $this->restaurant->secondary_color ?? '#1c1917';
+        $this->show_banner = $this->restaurant->settings['show_banner'] ?? true;
         $this->opening_hours = $this->restaurant->opening_hours ?? $this->getDefaultOpeningHours();
         
         // Auto-payout (wallet settings)
@@ -470,6 +474,9 @@ class Settings extends Component
             $this->restaurant->update([
                 'primary_color' => $this->primary_color ?? '#f97316',
                 'secondary_color' => $this->secondary_color ?? '#1c1917',
+                'settings' => array_merge($this->restaurant->settings ?? [], [
+                    'show_banner' => $this->show_banner,
+                ]),
             ]);
 
             session()->flash('success', 'Apparence mise à jour.');

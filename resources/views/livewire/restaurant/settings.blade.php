@@ -534,6 +534,103 @@
         <!-- Appearance Tab -->
         <div x-show="activeTab === 'appearance'" x-cloak>
             <form wire:submit="saveAppearance" class="space-y-6">
+
+            {{-- ─── Section Bannière Hero ─── --}}
+            <div class="card p-4 sm:p-6">
+                <div class="flex items-start justify-between gap-4 mb-5">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-neutral-900">Bannière & Logo</h2>
+                        <p class="text-xs sm:text-sm text-neutral-500 mt-1">Personnalisez l'image de couverture affichée sur votre menu public.</p>
+                    </div>
+                    {{-- Toggle show_banner --}}
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-sm font-medium text-neutral-600">Afficher la bannière</span>
+                        <button type="button" wire:click="$toggle('show_banner')"
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                                style="{{ $show_banner ? 'background:var(--color-primary-500)' : 'background:#d1d5db' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {{ $show_banner ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Prévisualisation carte restaurant --}}
+                <div class="mb-6">
+                    <p class="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Aperçu de votre carte</p>
+                    <div class="max-w-xs mx-auto bg-white rounded-2xl overflow-hidden border border-neutral-100 shadow-lg">
+                        {{-- Bannière --}}
+                        <div class="relative h-28 overflow-hidden {{ $show_banner ? '' : 'hidden' }}"
+                             id="banner-preview-wrapper"
+                             style="{{ $show_banner ? '' : 'display:none' }}">
+                            @if($banner)
+                                <img src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover" alt="Bannière">
+                            @elseif($existingBanner)
+                                <img src="{{ Storage::url($existingBanner) }}" class="w-full h-full object-cover" alt="Bannière">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center" style="background:linear-gradient(135deg,{{ $primary_color ?? '#f97316' }},{{ $secondary_color ?? '#1c1917' }})">
+                                    <svg class="w-10 h-10 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                            @endif
+                        </div>
+                        {{-- Logo chevauchant --}}
+                        <div class="px-4 pb-3 {{ $show_banner ? '' : 'pt-4' }}">
+                            <div class="{{ $show_banner ? '-mt-6 mb-2' : 'mb-2' }}">
+                                <div class="w-12 h-12 rounded-xl border-2 border-white shadow-md overflow-hidden bg-white inline-block">
+                                    @if($logo)
+                                        <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover" alt="Logo">
+                                    @elseif($existingLogo)
+                                        <img src="{{ Storage::url($existingLogo) }}" class="w-full h-full object-cover" alt="Logo">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-white text-lg font-black" style="background:{{ $primary_color ?? '#f97316' }}">
+                                            {{ strtoupper(substr($restaurant->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <p class="font-black text-sm text-neutral-900 truncate">{{ $restaurant->name }}</p>
+                            @if($restaurant->city)
+                            <p class="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                {{ $restaurant->city }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Upload bannière --}}
+                <div class="space-y-3">
+                    <div class="aspect-video bg-neutral-50 rounded-xl overflow-hidden border-2 border-dashed border-neutral-200">
+                        @if($banner)
+                            <img src="{{ $banner->temporaryUrl() }}" alt="Aperçu bannière" class="w-full h-full object-cover">
+                        @elseif($existingBanner)
+                            <img src="{{ Storage::url($existingBanner) }}" alt="Bannière" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex flex-col items-center justify-center gap-2 text-neutral-300">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs text-neutral-400">Format 16:9 recommandé</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex gap-2">
+                        <label class="btn btn-secondary flex-1 cursor-pointer justify-center min-h-[48px] px-4 py-3 flex items-center gap-2 touch-manipulation">
+                            <input type="file" wire:model="banner" accept="image/*" class="hidden">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            {{ $existingBanner ? 'Changer la bannière' : 'Ajouter une bannière' }}
+                        </label>
+                        @if($existingBanner)
+                        <button type="button" wire:click="deleteMedia('banner')"
+                                class="px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 border border-red-200 transition-colors min-h-[48px] touch-manipulation">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                        @endif
+                    </div>
+                    @error('banner')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- ─── Couleurs ─── --}}
             <div class="card p-4 sm:p-6">
                 <h2 class="text-base sm:text-lg font-bold text-neutral-900 mb-4">Personnalisation des couleurs</h2>
                 <p class="text-xs sm:text-sm text-neutral-600 mb-4">Personnalisez les couleurs de votre site public pour qu'il corresponde à votre identité visuelle.</p>
