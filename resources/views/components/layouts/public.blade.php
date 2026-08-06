@@ -25,21 +25,24 @@
                     @endif
                 </a>
 
-                <!-- Desktop Nav Links — style référence: texte neutre, actif orange -->
+                <!-- Desktop Nav Links -->
                 <div class="hidden md:flex items-center gap-1">
                     @php
                         $navLinks = [
-                            ['Accueil', route('home'), request()->routeIs('home')],
                             ['Fonctionnalités', route('home').'#how-it-works', false],
-                            ['Comment ça marche', route('home').'#how-it-works', false],
                             ['Tarifs', route('pricing'), request()->routeIs('pricing')],
+                            ['L\'App', 'https://mpa-five.vercel.app/', false, true],
                             ['Contact', route('contact'), request()->routeIs('contact')],
                         ];
                     @endphp
                     @foreach($navLinks as $link)
                     <a href="{{ $link[1] }}"
-                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 {{ $link[2] ? 'text-primary-500' : 'text-neutral-600 hover:text-primary-500 hover:bg-primary-50' }}">
+                       @if(!empty($link[3])) target="_blank" @endif
+                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 {{ $link[2] ? 'text-primary-500' : 'text-neutral-600 hover:text-primary-500 hover:bg-primary-50' }}">
                         {{ $link[0] }}
+                        @if(!empty($link[3]))
+                        <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        @endif
                     </a>
                     @endforeach
                 </div>

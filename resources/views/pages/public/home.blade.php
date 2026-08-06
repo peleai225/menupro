@@ -449,7 +449,83 @@
 
 
 {{-- ══════════════════════════════════════
-     9. VIDÉO
+     9. TÉLÉCHARGER L'APPLICATION
+══════════════════════════════════════ --}}
+<section class="py-20 bg-neutral-950 relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 60% 60% at 80% 50%,rgba(212,94,12,.15),transparent)"></div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            {{-- Texte --}}
+            <div class="text-center lg:text-left fu">
+                <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
+                <h2 class="text-4xl sm:text-5xl font-black text-white leading-tight">
+                    Téléchargez<br>
+                    <span class="gt">l'application</span><br>
+                    MenuPro
+                </h2>
+                <p class="text-neutral-400 text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                    Commandez dans vos restaurants préférés directement depuis votre téléphone. Paiement Mobile Money, suivi en temps réel.
+                </p>
+
+                <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                    <a href="https://mpa-five.vercel.app/"
+                       target="_blank"
+                       class="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 text-white font-black rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                       style="background:#D45E0C">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        <div class="text-left">
+                            <div class="text-[10px] text-white/70 leading-none">Disponible sur</div>
+                            <div class="text-base leading-tight">Android & iOS</div>
+                        </div>
+                        <svg class="w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+
+                {{-- Badges stats --}}
+                <div class="mt-8 flex flex-wrap items-center gap-6 justify-center lg:justify-start">
+                    @foreach([
+                        ['4.8/5','Note moyenne'],
+                        [$stats['restaurants'].'+ ','Restaurants'],
+                        ['100%','Gratuit'],
+                    ] as $s)
+                    <div class="text-center lg:text-left">
+                        <div class="text-2xl font-black text-white leading-none">{{ $s[0] }}</div>
+                        <div class="text-neutral-500 text-xs mt-0.5">{{ $s[1] }}</div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Visuel QR + captures --}}
+            <div class="flex flex-col items-center gap-6 fu d2">
+
+                {{-- QR Code --}}
+                <div class="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-xs w-full">
+                    <p class="text-sm font-black text-neutral-700">Scannez pour télécharger</p>
+                    {{-- QR généré dynamiquement via Google Charts API --}}
+                    <div class="w-40 h-40 rounded-2xl overflow-hidden bg-neutral-50 flex items-center justify-center border border-neutral-100">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-five.vercel.app/') }}&color=D45E0C&bgcolor=FFFFFF&margin=10"
+                             alt="QR Code application MenuPro"
+                             class="w-full h-full object-cover"
+                             loading="lazy">
+                    </div>
+                    <p class="text-xs text-neutral-400 text-center">Pointez votre caméra sur le QR code</p>
+                    <a href="https://mpa-five.vercel.app/"
+                       target="_blank"
+                       class="w-full text-center py-3 rounded-xl text-sm font-black text-white transition-all hover:opacity-90"
+                       style="background:#D45E0C">
+                        Ouvrir l'application →
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════════════════════════════════
+     10. VIDÉO
 ══════════════════════════════════════ --}}
 @if(!empty($videos))
 <section class="py-24 bg-white">
