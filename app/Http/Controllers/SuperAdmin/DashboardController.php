@@ -730,7 +730,9 @@ class DashboardController extends Controller
             ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->get()
-            ->mapWithKeys(fn($item) => [$item->status => $item->count]);
+            ->mapWithKeys(fn($item) => [
+                (is_object($item->status) ? $item->status->value : (string) $item->status) => $item->count
+            ]);
 
         // Hourly orders (for line chart) — 1 requête GROUP BY au lieu de 24 requêtes séparées
         $hourlyRaw = DB::table('orders')
