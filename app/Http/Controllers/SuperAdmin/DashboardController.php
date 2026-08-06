@@ -298,6 +298,7 @@ class DashboardController extends Controller
      */
     public function updateSettings(Request $request): RedirectResponse
     {
+        try {
         // Get current values or defaults
         $defaultAppName = config('app.name') ?: 'MenuPro';
         $defaultAppUrl = config('app.url') ?: 'http://127.0.0.1:8000';
@@ -672,6 +673,13 @@ class DashboardController extends Controller
         }
 
         return back()->with('success', 'Paramètres mis à jour avec succès.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('updateSettings error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Erreur : ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
