@@ -329,26 +329,6 @@
 </section>
 
 
-{{-- ══════════════════════════════════════
-     4. STATS CHOC — Fond noir + orange
-══════════════════════════════════════ --}}
-<section class="py-16 bg-neutral-950">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center fu">
-            @foreach([
-                ['15 min','Pour être en ligne'],
-                ['0%','Commission / commande'],
-                ['4','Moyens de paiement'],
-                ['24/7','Commandes reçues'],
-            ] as $s)
-            <div>
-                <div class="text-5xl sm:text-6xl font-black leading-none tabular-nums gt">{{ $s[0] }}</div>
-                <div class="text-neutral-500 text-sm mt-3 leading-tight">{{ $s[1] }}</div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
 
 
 {{-- ══════════════════════════════════════
