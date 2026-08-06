@@ -182,135 +182,72 @@
 
                 @php $heroImage = \App\Models\SystemSetting::get('hero_image',''); @endphp
                 @if($heroImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImage))
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}" alt="MenuPro" class="relative w-full max-w-[280px] sm:max-w-[320px] rounded-3xl shadow-2xl" loading="eager" width="320" height="640">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}"
+                         alt="MenuPro"
+                         class="relative w-full max-w-[400px] sm:max-w-[460px] rounded-3xl shadow-2xl"
+                         loading="eager" width="460" height="500">
                 @else
-                <div class="relative w-[265px] sm:w-[295px]">
+                {{-- Illustration fallback : cartes flottantes sans téléphone --}}
+                <div class="relative w-full max-w-[420px]">
 
-                    {{-- Téléphone --}}
-                    <div class="bg-neutral-900 rounded-[2.8rem] p-1.5 shadow-[0_30px_60px_rgba(0,0,0,0.2)] ring-1 ring-neutral-800">
-                        <div class="rounded-[2.5rem] overflow-hidden bg-white">
+                    {{-- Fond cercle orange --}}
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="w-72 h-72 rounded-full" style="background:radial-gradient(circle,rgba(212,94,12,.1),transparent 70%)"></div>
+                    </div>
 
-                            {{-- Status bar --}}
-                            <div class="px-5 pt-3 pb-1 flex items-center justify-between bg-white">
-                                <span class="text-[10px] font-black text-neutral-800">9:41</span>
-                                <div class="flex items-center gap-1">
-                                    <svg class="w-3 h-3 text-neutral-700" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5C4.5 5.5 7.9 4 12 4s7.5 1.5 10.5 4.5L21 11c-2.5-2.5-5.3-3.8-9-3.8S6.5 8.5 4 11L1.5 8.5z"/><path d="M4.5 11.5C7 9 9.4 8 12 8s5 1 7.5 3.5l-1.5 1.5c-2-2-4-3-6-3s-4 1-6 3l-1.5-1.5z"/><circle cx="12" cy="17" r="2"/></svg>
-                                    <div class="flex gap-0.5 items-end">
-                                        <div class="w-0.5 h-1 bg-neutral-800 rounded-sm"></div>
-                                        <div class="w-0.5 h-1.5 bg-neutral-800 rounded-sm"></div>
-                                        <div class="w-0.5 h-2 bg-neutral-800 rounded-sm"></div>
-                                        <div class="w-0.5 h-2.5 bg-neutral-800 rounded-sm"></div>
-                                    </div>
-                                </div>
+                    {{-- Carte principale : commande en cours --}}
+                    <div class="relative bg-white rounded-3xl shadow-2xl border border-neutral-100 p-5 mx-auto max-w-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-xs text-neutral-400 font-semibold uppercase tracking-wide">Commande en cours</p>
+                                <p class="font-black text-neutral-900 text-base">#CMD-260805-AWA3</p>
                             </div>
-
-                            {{-- App header --}}
-                            <div class="px-4 pt-2 pb-4 text-white" style="background:#D45E0C">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2.5">
-                                        <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                        </div>
-                                        <div>
-                                            <div class="font-black text-sm leading-tight">Maquis Chez Awa</div>
-                                            <div class="flex items-center gap-1 text-[11px] text-white/80">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-green-300"></span>
-                                                Ouvert · 08h–22h
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center">
-                                        <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                    </div>
+                            <span class="px-3 py-1.5 rounded-full text-xs font-black text-white" style="background:#D45E0C">En préparation</span>
+                        </div>
+                        <div class="space-y-3">
+                            @foreach([['Poulet Braisé + Alloco','5 500 F','#fef3c7'],['Jus Bissap naturel','1 500 F','#fce7f3']] as $item)
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl shrink-0" style="background:{{ $item[2] }}"></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-neutral-800">{{ $item[0] }}</p>
                                 </div>
-                                {{-- Search in header --}}
-                                <div class="mt-3 bg-white/15 backdrop-blur rounded-xl px-3 py-2 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <span class="text-white/70 text-[11px]">Rechercher un plat, restaurant...</span>
-                                </div>
+                                <span class="font-black text-sm" style="color:#D45E0C">{{ $item[1] }}</span>
                             </div>
-
-                            {{-- Banner promo --}}
-                            <div class="mx-3 mt-3 rounded-2xl overflow-hidden" style="background:linear-gradient(120deg,#161616,#2d1608)">
-                                <div class="px-4 py-3 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-[10px] text-white/60 font-semibold uppercase tracking-wide">Offre du jour</div>
-                                        <div class="text-white font-black text-sm leading-tight">Commandez & économisez</div>
-                                        <div class="text-white/50 text-[10px]">Livraison offerte ce soir</div>
-                                    </div>
-                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:#D45E0C">
-                                        <span class="text-white font-black text-lg">30%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Categories --}}
-                            <div class="flex gap-2 px-3 pt-3 pb-1 overflow-x-hidden">
-                                @foreach([['Populaires',true],['Plats',false],['Boissons',false],['Desserts',false]] as $c)
-                                <span class="px-3 py-1.5 text-[10px] font-black rounded-full whitespace-nowrap shrink-0 {{ $c[1] ? 'text-white' : 'bg-neutral-100 text-neutral-500' }}" @if($c[1]) style="background:#D45E0C" @endif>{{ $c[0] }}</span>
-                                @endforeach
-                            </div>
-
-                            {{-- Items --}}
-                            <div class="px-3 pt-2 pb-1 space-y-2">
-                                @foreach([
-                                    ['Poulet Braisé','Alloco + sauce tomate','5 500 F','#fef3c7','⭐ 4.9'],
-                                    ['Attieké Poisson','Légumes frais + sauce','4 500 F','#dcfce7','⭐ 4.7'],
-                                ] as $d)
-                                <div class="bg-white rounded-2xl p-2.5 flex gap-2.5 shadow-sm border border-neutral-100">
-                                    <div class="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center border border-neutral-200" style="background:{{ $d[4+1] ?? $d[3] }}">
-                                        <svg class="w-5 h-5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-black text-xs text-neutral-800 leading-tight">{{ $d[0] }}</div>
-                                        <div class="text-[10px] text-neutral-400 truncate">{{ $d[1] }}</div>
-                                        <div class="flex items-center justify-between mt-1">
-                                            <span class="font-black text-xs" style="color:#D45E0C">{{ $d[2] }}</span>
-                                            <span class="text-[10px] text-amber-500">{{ $d[4] }}</span>
-                                        </div>
-                                    </div>
-                                    <button class="w-7 h-7 rounded-xl flex items-center justify-center text-white font-black text-sm self-center shrink-0" style="background:#D45E0C">+</button>
-                                </div>
-                                @endforeach
-                            </div>
-
-                            {{-- Cart button --}}
-                            <div class="px-3 pb-4 pt-2">
-                                <div class="text-white rounded-2xl px-4 py-3 flex items-center justify-between" style="background:linear-gradient(135deg,#b84e0a,#D45E0C)">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[11px] font-black">2</span>
-                                        <span class="text-xs font-bold">Voir mon panier</span>
-                                    </div>
-                                    <span class="font-black text-sm">10 000 F</span>
-                                </div>
-                            </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between">
+                            <span class="text-sm text-neutral-500">Total</span>
+                            <span class="font-black text-lg text-neutral-900">7 000 F</span>
                         </div>
                     </div>
 
-                    {{-- Notif paiement Wave (flottante haut droite) --}}
-                    <div class="fl absolute -top-4 -right-12 bg-white rounded-2xl shadow-xl border border-neutral-100 px-3 py-2.5 flex items-center gap-2.5" style="width:200px">
+                    {{-- Carte flottante : paiement Wave --}}
+                    <div class="fl absolute -top-6 -right-4 bg-white rounded-2xl shadow-xl border border-neutral-100 px-4 py-3 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:#e0f2fe">
                             <img src="{{ asset('images/payments/wave.png') }}" class="w-5 h-5 object-contain" alt="Wave">
                         </div>
                         <div>
-                            <div class="text-xs font-black text-neutral-800">Paiement reçu ✓</div>
-                            <div class="text-[10px] text-neutral-500">Wave · 5 500 F</div>
+                            <p class="text-xs font-black text-neutral-800">Paiement reçu ✓</p>
+                            <p class="text-[11px] text-neutral-500">Wave · 7 000 F</p>
                         </div>
                     </div>
 
-                    {{-- Notif nouvelle commande (flottante bas gauche) --}}
-                    <div class="fl2 absolute -bottom-4 -left-12 bg-white rounded-2xl shadow-xl border border-neutral-100 px-3 py-2.5 flex items-center gap-2.5" style="width:185px">
+                    {{-- Carte flottante : nouvelle commande --}}
+                    <div class="fl2 absolute -bottom-5 -left-4 bg-white rounded-2xl shadow-xl border border-neutral-100 px-4 py-3 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.1)">
                             <svg class="w-5 h-5" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </div>
                         <div>
-                            <div class="text-xs font-black text-neutral-800">Nouvelle commande</div>
-                            <div class="text-[10px] text-neutral-500">Table 7 · Poulet braisé</div>
+                            <p class="text-xs font-black text-neutral-800">Nouvelle commande !</p>
+                            <p class="text-[11px] text-neutral-500">Table 4 · 2 plats</p>
                         </div>
                     </div>
 
-                    {{-- Tag flottant --}}
-                    <div class="absolute top-1/3 -left-8 bg-neutral-900 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg">#Délicieux</div>
+                    {{-- Stat flottante : restaurants --}}
+                    <div class="absolute top-1/2 -left-8 bg-white rounded-2xl shadow-lg border border-neutral-100 px-3 py-2.5 text-center">
+                        <p class="font-black text-xl" style="color:#D45E0C">{{ $stats['restaurants'] }}+</p>
+                        <p class="text-[10px] text-neutral-500 leading-tight">Restaurants<br>actifs</p>
+                    </div>
                 </div>
                 @endif
             </div>
