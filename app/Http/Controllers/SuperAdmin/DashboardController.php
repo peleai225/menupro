@@ -280,6 +280,20 @@ class DashboardController extends Controller
     }
 
     /**
+     * Delete hero image.
+     */
+    public function deleteHeroImage(): RedirectResponse
+    {
+        $heroImage = \App\Models\SystemSetting::get('hero_image', '');
+        if ($heroImage && Storage::disk('public')->exists($heroImage)) {
+            Storage::disk('public')->delete($heroImage);
+        }
+        \App\Models\SystemSetting::set('hero_image', '', 'string', 'Image hero de la page d\'accueil');
+
+        return back()->with('success', 'Image hero supprimée avec succès.');
+    }
+
+    /**
      * Update system settings.
      */
     public function updateSettings(Request $request): RedirectResponse

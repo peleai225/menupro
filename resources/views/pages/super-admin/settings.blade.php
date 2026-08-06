@@ -502,9 +502,8 @@
                     <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">Logo et Favicon</h2>
                     <div class="space-y-5">
                         @foreach([
-                            ['name' => 'logo',       'label' => 'Logo',    'accept' => 'image/*',       'hint' => 'PNG, SVG. Max 2 MB'],
-                            ['name' => 'favicon',    'label' => 'Favicon', 'accept' => 'image/*',       'hint' => 'ICO, PNG. Max 512 KB'],
-                            ['name' => 'hero_image', 'label' => 'Image Hero (page d\'accueil)', 'accept' => 'image/*', 'hint' => 'PNG, JPG, WebP. Max 5 MB'],
+                            ['name' => 'logo',    'label' => 'Logo',    'accept' => 'image/*', 'hint' => 'PNG, SVG. Max 2 MB'],
+                            ['name' => 'favicon', 'label' => 'Favicon', 'accept' => 'image/*', 'hint' => 'ICO, PNG. Max 512 KB'],
                         ] as $f)
                         <div>
                             <label class="block text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">{{ $f['label'] }}</label>
@@ -513,8 +512,6 @@
                                     <img src="{{ asset('storage/' . ltrim($settings['logo'], '/')) }}" alt="Logo" class="h-12 w-auto object-contain rounded-lg p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                                 @elseif($f['name'] === 'favicon' && !empty($settings['favicon'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['favicon']))
                                     <img src="{{ asset('storage/' . ltrim($settings['favicon'], '/')) }}" alt="Favicon" class="h-8 w-8 object-contain rounded p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
-                                @elseif($f['name'] === 'hero_image' && !empty($settings['hero_image'] ?? '') && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings['hero_image']))
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($settings['hero_image']) }}" alt="Hero" class="h-20 w-auto object-contain rounded-lg p-1" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
                                 @endif
                                 <input type="file" name="{{ $f['name'] }}" accept="{{ $f['accept'] }}"
                                        class="flex-1 h-10 rounded-xl border text-sm px-3 py-2"
@@ -523,6 +520,55 @@
                             <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">{{ $f['hint'] }}</p>
                         </div>
                         @endforeach
+                    </div>
+                </div>
+
+                {{-- Image Hero — Section dédiée --}}
+                @php $heroImage = $settings['hero_image'] ?? ''; $hasHero = $heroImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImage); @endphp
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Image Hero — Page d'accueil</h2>
+                            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">Affiché à droite du texte principal sur la page d'accueil du site.</p>
+                        </div>
+                        @if($hasHero)
+                        <form method="POST" action="{{ route('super-admin.settings.delete-hero-image') }}" onsubmit="return confirm('Supprimer l\'image hero ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 border border-red-200 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Supprimer
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+
+                    {{-- Aperçu carte hero --}}
+                    @if($hasHero)
+                    <div class="mb-4 rounded-2xl overflow-hidden border" style="border-color:var(--sa-border)">
+                        <div class="relative" style="max-height:200px;overflow:hidden;background:var(--sa-muted)">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}"
+                                 alt="Image hero actuelle"
+                                 class="w-full object-cover"
+                                 style="max-height:200px">
+                            <div class="absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-bold text-white" style="background:rgba(0,0,0,.5)">
+                                Image actuelle
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="mb-4 rounded-2xl border-2 border-dashed flex items-center justify-center py-10 gap-3" style="border-color:var(--sa-border);background:var(--sa-muted)">
+                        <svg class="w-8 h-8" style="color:var(--sa-muted-fg)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="text-sm" style="color:var(--sa-muted-fg)">Aucune image hero — le mockup téléphone s'affiche à la place</span>
+                    </div>
+                    @endif
+
+                    <div>
+                        <label class="block text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">{{ $hasHero ? 'Remplacer l\'image' : 'Ajouter une image hero' }}</label>
+                        <input type="file" name="hero_image" accept="image/*"
+                               class="w-full h-10 rounded-xl border text-sm px-3 py-2"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                        <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">PNG, JPG, WebP. Max 5 MB. Format portrait recommandé (ex: 400×700px).</p>
                     </div>
                 </div>
 

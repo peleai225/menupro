@@ -485,6 +485,7 @@ Route::prefix('admin')
         // System Settings
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
+        Route::delete('parametres/hero-image', [SuperAdminDashboardController::class, 'deleteHeroImage'])->name('settings.delete-hero-image');
         Route::post('parametres/test-whatsapp', [SuperAdminDashboardController::class, 'testWhatsapp'])->name('settings.test-whatsapp');
 
         // Jeko Sub-Merchants
