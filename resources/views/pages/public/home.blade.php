@@ -93,34 +93,68 @@
                 </div>
 
                 {{-- Social proof --}}
-                <div class="mt-10 flex flex-col sm:flex-row items-center lg:items-start gap-6 justify-center lg:justify-start">
-                    {{-- Avatars + note --}}
+                @php
+                    $proofRestaurants = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)
+                        ->whereNotNull('logo_path')
+                        ->where('logo_path', '!=', '')
+                        ->latest()
+                        ->take(5)
+                        ->get(['name', 'logo_path']);
+                    $hasLogos = $proofRestaurants->count() >= 3;
+                @endphp
+                <div class="mt-10 flex flex-wrap items-center gap-5 justify-center lg:justify-start">
+
+                    {{-- Logos ou initiales --}}
                     <div class="flex items-center gap-3">
                         <div class="flex -space-x-2.5">
-                            @foreach(['A','K','M','F','S'] as $l)
-                            <div class="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-black shadow-sm" style="background:{{ ['#D45E0C','#22c55e','#3b82f6','#a855f7','#f59e0b'][$loop->index] }}">{{ $l }}</div>
-                            @endforeach
+                            @if($hasLogos)
+                                @foreach($proofRestaurants as $r)
+                                <div class="w-9 h-9 rounded-full border-2 border-white shadow-sm overflow-hidden bg-white">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}"
+                                         alt="{{ $r->name }}"
+                                         class="w-full h-full object-cover"
+                                         loading="lazy">
+                                </div>
+                                @endforeach
+                            @else
+                                @php
+                                    $fallbackRestaurants = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['name']);
+                                    $colors = ['#D45E0C','#22c55e','#3b82f6','#a855f7','#f59e0b'];
+                                @endphp
+                                @foreach($fallbackRestaurants as $r)
+                                <div class="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-black shadow-sm"
+                                     style="background:{{ $colors[$loop->index % 5] }}">
+                                    {{ strtoupper(substr($r->name, 0, 1)) }}
+                                </div>
+                                @endforeach
+                            @endif
                         </div>
                         <div class="text-left">
-                            <div class="flex items-center gap-1">
-                                @for($i=0;$i<5;$i++)<svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor
+                            <div class="flex items-center gap-0.5 mb-0.5">
+                                @for($i=0;$i<5;$i++)<svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor
                             </div>
-                            <div class="text-xs text-neutral-600 font-semibold">{{ $stats['restaurants'] }}+ restaurants actifs</div>
+                            <div class="text-xs font-black text-neutral-800">{{ $stats['restaurants'] }}+ restaurants actifs</div>
                         </div>
                     </div>
 
-                    {{-- Stats --}}
-                    <div class="hidden sm:flex items-center gap-6">
-                        <div class="w-px h-10 bg-neutral-200"></div>
-                        <div class="text-center">
-                            <div class="text-2xl font-black text-neutral-900" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()"><span x-text="displayCount"></span></div>
-                            <div class="text-xs text-neutral-500">Commandes traitées</div>
+                    <div class="w-px h-8 bg-neutral-200 hidden sm:block"></div>
+
+                    {{-- Commandes --}}
+                    <div class="text-center sm:text-left">
+                        <div class="text-xl font-black text-neutral-900 leading-none"
+                             x-data="counter({{ $stats['raw']['orders'] }})"
+                             x-intersect.once="startCount()">
+                            <span x-text="displayCount"></span>
                         </div>
-                        <div class="w-px h-10 bg-neutral-200"></div>
-                        <div class="text-center">
-                            <div class="text-2xl font-black text-neutral-900">5 000 F</div>
-                            <div class="text-xs text-neutral-500">À partir de / mois</div>
-                        </div>
+                        <div class="text-xs text-neutral-500 mt-0.5">Commandes traitées</div>
+                    </div>
+
+                    <div class="w-px h-8 bg-neutral-200 hidden sm:block"></div>
+
+                    {{-- Prix --}}
+                    <div class="text-center sm:text-left">
+                        <div class="text-xl font-black leading-none" style="color:#D45E0C">5 000 F</div>
+                        <div class="text-xs text-neutral-500 mt-0.5">À partir de / mois</div>
                     </div>
                 </div>
             </div>
