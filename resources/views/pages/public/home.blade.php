@@ -575,23 +575,84 @@
 
 
 {{-- ══════════════════════════════════════
-     11. RESTAURANTS
+     11. RESTAURANTS — Cartes bannière+logo
 ══════════════════════════════════════ --}}
-<section class="py-16 bg-white border-y border-neutral-100">
+<section class="py-20 bg-neutral-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mb-10 fu">Ils nous font confiance</p>
+        <div class="text-center mb-12 fu">
+            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Ils nous font confiance</span>
+            <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 mt-3">Découvrez nos restaurants</h2>
+            <p class="text-neutral-500 text-sm mt-2">Commandez directement depuis leur menu en ligne</p>
+        </div>
         @php
-            $trs = \App\Models\Restaurant::where('status',\App\Enums\RestaurantStatus::ACTIVE)->whereNotNull('logo_path')->where('logo_path','!=','')->latest()->take(12)->get(['name','slug','logo_path','city']);
-            if($trs->isEmpty()) $trs=\App\Models\Restaurant::where('status',\App\Enums\RestaurantStatus::ACTIVE)->latest()->take(8)->get(['name','slug','city']);
+            $trs = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)
+                ->latest()
+                ->take(8)
+                ->get(['name', 'slug', 'logo_path', 'banner_path', 'city', 'cuisine_type']);
         @endphp
-        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 fu">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
             @foreach($trs as $r)
-            <a href="{{ route('r.menu',$r->slug) }}" target="_blank" class="group flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-neutral-50 border border-neutral-100 hover:border-primary-200 hover:bg-primary-50/50 hover:shadow-md transition-all">
-                @if(isset($r->logo_path) && $r->logo_path)<img src="{{ Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-10 h-10 rounded-xl object-cover group-hover:scale-110 transition-transform" loading="lazy">
-                @else<div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base group-hover:scale-110 transition-transform" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>@endif
-                <span class="text-[10px] font-semibold text-neutral-600 truncate w-full text-center">{{ Str::limit($r->name,10) }}</span>
+            <a href="{{ route('r.menu', $r->slug) }}"
+               target="_blank"
+               class="group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
+
+                {{-- Bannière --}}
+                <div class="relative h-28 overflow-hidden bg-neutral-200">
+                    @if($r->banner_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->banner_path))
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->banner_path) }}"
+                             alt="Bannière {{ $r->name }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             loading="lazy">
+                    @else
+                        {{-- Bannière placeholder avec dégradé --}}
+                        <div class="w-full h-full" style="background:linear-gradient(135deg,#D45E0C,#b84e0a)">
+                            <div class="w-full h-full flex items-center justify-center opacity-20">
+                                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Badge "Voir le menu" au hover --}}
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span class="text-white text-xs font-black px-3 py-1.5 rounded-full border-2 border-white">Voir le menu →</span>
+                    </div>
+                </div>
+
+                {{-- Logo chevauchant la bannière --}}
+                <div class="px-4 pb-4">
+                    <div class="relative -mt-6 mb-3">
+                        <div class="w-12 h-12 rounded-xl border-2 border-white shadow-md overflow-hidden bg-white">
+                            @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}"
+                                     alt="{{ $r->name }}"
+                                     class="w-full h-full object-cover"
+                                     loading="lazy">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-white font-black text-lg" style="background:#D45E0C">
+                                    {{ strtoupper(substr($r->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Infos --}}
+                    <h3 class="font-black text-sm text-neutral-900 truncate">{{ $r->name }}</h3>
+                    @if($r->city)
+                    <p class="text-xs text-neutral-400 mt-0.5 flex items-center gap-1">
+                        <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        {{ $r->city }}
+                    </p>
+                    @endif
+                </div>
             </a>
             @endforeach
+        </div>
+
+        <div class="text-center mt-10 fu">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-sm font-black hover:underline" style="color:#D45E0C">
+                Voir tous les restaurants
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
         </div>
     </div>
 </section>
