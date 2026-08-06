@@ -7,9 +7,9 @@
 .fu.in{opacity:1;transform:none}
 .fu.d1{transition-delay:.1s}.fu.d2{transition-delay:.18s}.fu.d3{transition-delay:.26s}.fu.d4{transition-delay:.34s}
 
-/* Gradient text */
-.gt{background:linear-gradient(120deg,#D45E0C,#ef8a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.gt-light{background:linear-gradient(120deg,#f6b285,#fad2b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* Gradient text — padding-right pour éviter la coupure en italic */
+.gt{background:linear-gradient(120deg,#D45E0C,#ef8a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-right:.1em;display:inline-block}
+.gt-light{background:linear-gradient(120deg,#f6b285,#fad2b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-right:.1em;display:inline-block}
 
 /* Hero bg — blanc pur, aucun fond parasite */
 .hero-bg{background:#ffffff !important;background-color:#ffffff !important}
