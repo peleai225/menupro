@@ -11,8 +11,14 @@
 .gt{background:linear-gradient(120deg,#D45E0C,#ef8a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gt-light{background:linear-gradient(120deg,#f6b285,#fad2b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* Hero bg */
-.hero-bg{background:linear-gradient(160deg,#161616 0%,#1a1a1a 60%,#1f1208 100%)}
+/* Hero bg — blanc avec forme orange */
+.hero-bg{background:#ffffff}
+/* Blob orange décoratif */
+.hero-blob{position:absolute;bottom:-20%;left:-10%;width:65%;padding-bottom:65%;border-radius:50% 50% 60% 40% / 40% 50% 50% 60%;background:#D45E0C;opacity:.08;pointer-events:none}
+.hero-blob2{position:absolute;top:-15%;right:-8%;width:45%;padding-bottom:45%;border-radius:40% 60% 50% 50% / 50% 40% 60% 50%;background:#D45E0C;opacity:.06;pointer-events:none}
+/* Badge rotatif */
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spin-slow{animation:spin-slow 12s linear infinite}
 
 /* Ticker */
 @keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -39,164 +45,250 @@
 @endpush
 
 {{-- ══════════════════════════════════════
-     1. HERO — Fond noir, accent orange
+     1. HERO — Fond blanc + accent orange
+     Inspiré du design Food Delivery ref
 ══════════════════════════════════════ --}}
-<section class="hero-bg relative min-h-screen flex flex-col justify-center overflow-hidden">
+<section class="hero-bg relative overflow-hidden" style="min-height:100vh">
 
-    {{-- Déco orbs --}}
-    <div class="pointer-events-none absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl opacity-20" style="background:radial-gradient(circle,#D45E0C,transparent 70%)"></div>
-    <div class="pointer-events-none absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-3xl opacity-10" style="background:radial-gradient(circle,#D45E0C,transparent 70%)"></div>
+    {{-- Formes décoratives organiques orange --}}
+    <div class="hero-blob"></div>
+    <div class="hero-blob2"></div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 w-full">
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+    {{-- Grain texture overlay --}}
+    <div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
 
-            {{-- Copy --}}
-            <div class="text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 border border-primary-500/40 bg-primary-500/10 rounded-full text-primary-300 text-sm font-bold mb-8">
-                    <span class="relative flex h-2 w-2 shrink-0"><span class="ps absolute inline-flex h-full w-full rounded-full bg-primary-400"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-primary-400"></span></span>
-                    #Top Solution Restaurants CI · 7 jours gratuits
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="grid lg:grid-cols-2 gap-0 lg:gap-8 items-center min-h-screen py-20 lg:py-0">
+
+            {{-- ─── Left: Copy ─── --}}
+            <div class="text-center lg:text-left order-2 lg:order-1 pb-10 lg:pb-0">
+
+                {{-- Badge #Top Rated --}}
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-8 border" style="background:rgba(212,94,12,.08);border-color:rgba(212,94,12,.2);color:#D45E0C">
+                    <span class="relative flex h-2 w-2 shrink-0">
+                        <span class="ps absolute inline-flex h-full w-full rounded-full" style="background:#D45E0C"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
+                    </span>
+                    #Top Solution Restaurants CI
                 </div>
 
-                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.02] tracking-tight">
+                {{-- Headline --}}
+                <h1 class="text-5xl sm:text-6xl lg:text-[4rem] xl:text-[4.5rem] font-black text-neutral-900 leading-[1.05] tracking-tight">
                     The Ultimate<br>
-                    <span class="gt">Restaurant</span><br>
-                    Experience!
+                    <span class="gt italic">Restaurant</span><br>
+                    <span class="text-neutral-900">Experience!</span>
                 </h1>
 
-                <p class="mt-6 text-xl text-white/55 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                    Digitalisez votre restaurant en <strong class="text-white">15 minutes</strong>. Menu en ligne, QR codes, commandes temps réel, paiements <strong class="text-white">Wave · Orange · MTN · Moov</strong> — argent sur votre compte.
+                <p class="mt-5 text-lg text-neutral-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                    Digitalisez votre restaurant en <strong class="text-neutral-900">15 minutes</strong>. Menu en ligne, QR codes, commandes temps réel, paiements <strong class="text-neutral-900">Wave · Orange · MTN · Moov</strong> — argent directement sur votre compte.
                 </p>
 
-                <div class="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center lg:justify-start">
-                    <a href="{{ route('register') }}" class="group inline-flex items-center justify-center gap-2.5 px-8 py-4 font-black rounded-2xl text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl text-lg glow-orange" style="background:#D45E0C">
+                {{-- CTAs --}}
+                <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center lg:justify-start">
+                    <a href="{{ route('register') }}" class="group inline-flex items-center justify-center gap-2 px-8 py-4 font-black rounded-2xl text-white text-base transition-all hover:-translate-y-0.5 glow-orange" style="background:#D45E0C">
                         Créer mon restaurant — Gratuit
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
-                    <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white/70 hover:text-white font-semibold rounded-2xl border border-white/15 hover:bg-white/8 transition-all text-lg">
-                        <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold text-neutral-700 rounded-2xl border-2 border-neutral-200 hover:border-primary-300 hover:text-primary-600 transition-all text-base bg-white">
+                        <svg class="w-5 h-5" style="color:#D45E0C" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         Voir la démo live
                     </a>
                 </div>
 
-                {{-- Social proof avatars --}}
-                <div class="mt-10 flex items-center gap-4 justify-center lg:justify-start">
-                    <div class="flex -space-x-3">
-                        @foreach(['A','K','M','F','S'] as $l)
-                        <div class="w-9 h-9 rounded-full border-2 border-neutral-900 flex items-center justify-center text-white text-xs font-black" style="background:{{ ['#D45E0C','#22c55e','#3b82f6','#a855f7','#f59e0b'][$loop->index] }}">{{ $l }}</div>
-                        @endforeach
+                {{-- Social proof --}}
+                <div class="mt-10 flex flex-col sm:flex-row items-center lg:items-start gap-6 justify-center lg:justify-start">
+                    {{-- Avatars + note --}}
+                    <div class="flex items-center gap-3">
+                        <div class="flex -space-x-2.5">
+                            @foreach(['A','K','M','F','S'] as $l)
+                            <div class="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-black shadow-sm" style="background:{{ ['#D45E0C','#22c55e','#3b82f6','#a855f7','#f59e0b'][$loop->index] }}">{{ $l }}</div>
+                            @endforeach
+                        </div>
+                        <div class="text-left">
+                            <div class="flex items-center gap-1">
+                                @for($i=0;$i<5;$i++)<svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor
+                            </div>
+                            <div class="text-xs text-neutral-600 font-semibold">{{ $stats['restaurants'] }}+ restaurants actifs</div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="text-white font-black text-sm">{{ $stats['restaurants'] }}+ restaurants actifs</div>
-                        <div class="text-white/40 text-xs">{{ $stats['orders'] }} commandes traitées</div>
+
+                    {{-- Stats --}}
+                    <div class="hidden sm:flex items-center gap-6">
+                        <div class="w-px h-10 bg-neutral-200"></div>
+                        <div class="text-center">
+                            <div class="text-2xl font-black text-neutral-900" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()"><span x-text="displayCount"></span></div>
+                            <div class="text-xs text-neutral-500">Commandes traitées</div>
+                        </div>
+                        <div class="w-px h-10 bg-neutral-200"></div>
+                        <div class="text-center">
+                            <div class="text-2xl font-black text-neutral-900">5 000 F</div>
+                            <div class="text-xs text-neutral-500">À partir de / mois</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Mockup --}}
-            <div class="relative flex justify-center lg:justify-end">
-                <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div class="w-80 h-80 rounded-full blur-3xl opacity-25" style="background:#D45E0C"></div>
+            {{-- ─── Right: Phone mockup centré ─── --}}
+            <div class="relative flex justify-center items-center order-1 lg:order-2 pt-8 lg:pt-0">
+
+                {{-- Cercle orange décoratif derrière le téléphone --}}
+                <div class="absolute w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,94,12,.12) 0%,rgba(212,94,12,.04) 60%,transparent 80%)"></div>
+
+                {{-- Badge rotatif "Quick · MenuPro ·" --}}
+                <div class="absolute top-4 right-4 lg:top-8 lg:right-0 w-24 h-24 pointer-events-none">
+                    <svg class="w-full h-full spin-slow" viewBox="0 0 100 100">
+                        <defs><path id="circle" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"/></defs>
+                        <text class="text-[11px]" fill="#D45E0C" font-size="11" font-weight="700" letter-spacing="3">
+                            <textPath href="#circle">MENUPRO · RESTAURANT · QR ·</textPath>
+                        </text>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#D45E0C">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                        </div>
+                    </div>
                 </div>
 
                 @php $heroImage = \App\Models\SystemSetting::get('hero_image',''); @endphp
                 @if($heroImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImage))
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}" alt="MenuPro" class="relative w-full max-w-[310px] sm:max-w-[350px] rounded-3xl shadow-2xl" loading="eager" width="350" height="680">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}" alt="MenuPro" class="relative w-full max-w-[280px] sm:max-w-[320px] rounded-3xl shadow-2xl" loading="eager" width="320" height="640">
                 @else
-                <div class="relative w-[280px] sm:w-[310px]">
-                    {{-- Phone --}}
-                    <div class="bg-neutral-950 rounded-[2.5rem] p-1.5 shadow-2xl ring-1 ring-white/5">
-                        <div class="rounded-[2.2rem] overflow-hidden bg-white">
-                            {{-- Header app --}}
-                            <div class="px-4 pt-10 pb-4 text-white" style="background:#D45E0C">
-                                <div class="flex items-center justify-between mb-1">
+                <div class="relative w-[265px] sm:w-[295px]">
+
+                    {{-- Téléphone --}}
+                    <div class="bg-neutral-900 rounded-[2.8rem] p-1.5 shadow-[0_30px_60px_rgba(0,0,0,0.2)] ring-1 ring-neutral-800">
+                        <div class="rounded-[2.5rem] overflow-hidden bg-white">
+
+                            {{-- Status bar --}}
+                            <div class="px-5 pt-3 pb-1 flex items-center justify-between bg-white">
+                                <span class="text-[10px] font-black text-neutral-800">9:41</span>
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-neutral-700" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5C4.5 5.5 7.9 4 12 4s7.5 1.5 10.5 4.5L21 11c-2.5-2.5-5.3-3.8-9-3.8S6.5 8.5 4 11L1.5 8.5z"/><path d="M4.5 11.5C7 9 9.4 8 12 8s5 1 7.5 3.5l-1.5 1.5c-2-2-4-3-6-3s-4 1-6 3l-1.5-1.5z"/><circle cx="12" cy="17" r="2"/></svg>
+                                    <div class="flex gap-0.5 items-end">
+                                        <div class="w-0.5 h-1 bg-neutral-800 rounded-sm"></div>
+                                        <div class="w-0.5 h-1.5 bg-neutral-800 rounded-sm"></div>
+                                        <div class="w-0.5 h-2 bg-neutral-800 rounded-sm"></div>
+                                        <div class="w-0.5 h-2.5 bg-neutral-800 rounded-sm"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- App header --}}
+                            <div class="px-4 pt-2 pb-4 text-white" style="background:#D45E0C">
+                                <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2.5">
-                                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+                                        <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                         </div>
                                         <div>
-                                            <div class="font-black text-sm">Maquis Chez Awa</div>
-                                            <div class="flex items-center gap-1 text-[11px] text-white/75"><span class="w-1.5 h-1.5 rounded-full bg-green-300"></span>Ouvert · 08h–22h</div>
+                                            <div class="font-black text-sm leading-tight">Maquis Chez Awa</div>
+                                            <div class="flex items-center gap-1 text-[11px] text-white/80">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-green-300"></span>
+                                                Ouvert · 08h–22h
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                        <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    </div>
+                                </div>
+                                {{-- Search in header --}}
+                                <div class="mt-3 bg-white/15 backdrop-blur rounded-xl px-3 py-2 flex items-center gap-2">
+                                    <svg class="w-3.5 h-3.5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    <span class="text-white/70 text-[11px]">Rechercher un plat, restaurant...</span>
+                                </div>
+                            </div>
+
+                            {{-- Banner promo --}}
+                            <div class="mx-3 mt-3 rounded-2xl overflow-hidden" style="background:linear-gradient(120deg,#161616,#2d1608)">
+                                <div class="px-4 py-3 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-[10px] text-white/60 font-semibold uppercase tracking-wide">Offre du jour</div>
+                                        <div class="text-white font-black text-sm leading-tight">Commandez & économisez</div>
+                                        <div class="text-white/50 text-[10px]">Livraison offerte ce soir</div>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:#D45E0C">
+                                        <span class="text-white font-black text-lg">30%</span>
                                     </div>
                                 </div>
                             </div>
-                            {{-- Search --}}
-                            <div class="px-3 py-2.5 bg-neutral-50 border-b border-neutral-100">
-                                <div class="bg-white rounded-xl px-3 py-2 flex items-center gap-2 border border-neutral-200">
-                                    <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <span class="text-neutral-400 text-xs">Rechercher un plat...</span>
-                                </div>
-                            </div>
-                            {{-- Cats --}}
-                            <div class="flex gap-2 px-3 pt-2.5 pb-1 overflow-x-hidden">
-                                @foreach([['🔥 Populaires',true],['Plats',false],['Boissons',false]] as $c)
-                                <span class="px-3 py-1.5 text-[11px] font-black rounded-full whitespace-nowrap shrink-0 {{ $c[1] ? 'text-white' : 'bg-neutral-100 text-neutral-500' }}" @if($c[1]) style="background:#D45E0C" @endif>{{ $c[0] }}</span>
+
+                            {{-- Categories --}}
+                            <div class="flex gap-2 px-3 pt-3 pb-1 overflow-x-hidden">
+                                @foreach([['Populaires',true],['Plats',false],['Boissons',false],['Desserts',false]] as $c)
+                                <span class="px-3 py-1.5 text-[10px] font-black rounded-full whitespace-nowrap shrink-0 {{ $c[1] ? 'text-white' : 'bg-neutral-100 text-neutral-500' }}" @if($c[1]) style="background:#D45E0C" @endif>{{ $c[0] }}</span>
                                 @endforeach
                             </div>
+
                             {{-- Items --}}
-                            <div class="px-3 py-2 space-y-2">
-                                @foreach([['meal','Poulet Braisé','Avec alloco et sauce','5 500 F','#fef3c7'],['fish','Attieké Poisson','Légumes frais','4 500 F','#dcfce7'],['drink','Jus Bissap','Naturel & frais','1 500 F','#fce7f3']] as $d)
+                            <div class="px-3 pt-2 pb-1 space-y-2">
+                                @foreach([
+                                    ['Poulet Braisé','Alloco + sauce tomate','5 500 F','#fef3c7','⭐ 4.9'],
+                                    ['Attieké Poisson','Légumes frais + sauce','4 500 F','#dcfce7','⭐ 4.7'],
+                                ] as $d)
                                 <div class="bg-white rounded-2xl p-2.5 flex gap-2.5 shadow-sm border border-neutral-100">
-                                    <div class="w-12 h-12 rounded-xl shrink-0 overflow-hidden" style="background:{{ $d[4] }}">
-                                        <div class="w-full h-full flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                                        </div>
+                                    <div class="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center border border-neutral-200" style="background:{{ $d[4+1] ?? $d[3] }}">
+                                        <svg class="w-5 h-5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="font-black text-xs text-neutral-800">{{ $d[1] }}</div>
-                                        <div class="text-[10px] text-neutral-400">{{ $d[2] }}</div>
-                                        <div class="font-black text-xs mt-1" style="color:#D45E0C">{{ $d[3] }}</div>
+                                        <div class="font-black text-xs text-neutral-800 leading-tight">{{ $d[0] }}</div>
+                                        <div class="text-[10px] text-neutral-400 truncate">{{ $d[1] }}</div>
+                                        <div class="flex items-center justify-between mt-1">
+                                            <span class="font-black text-xs" style="color:#D45E0C">{{ $d[2] }}</span>
+                                            <span class="text-[10px] text-amber-500">{{ $d[4] }}</span>
+                                        </div>
                                     </div>
-                                    <button class="w-7 h-7 rounded-xl flex items-center justify-center text-white font-black text-base self-center shrink-0" style="background:#D45E0C">+</button>
+                                    <button class="w-7 h-7 rounded-xl flex items-center justify-center text-white font-black text-sm self-center shrink-0" style="background:#D45E0C">+</button>
                                 </div>
                                 @endforeach
                             </div>
-                            {{-- Cart --}}
-                            <div class="px-3 pb-4 pt-1">
-                                <div class="text-white rounded-2xl px-4 py-3 flex items-center justify-between shadow-lg" style="background:#D45E0C">
+
+                            {{-- Cart button --}}
+                            <div class="px-3 pb-4 pt-2">
+                                <div class="text-white rounded-2xl px-4 py-3 flex items-center justify-between" style="background:linear-gradient(135deg,#b84e0a,#D45E0C)">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[11px] font-black">3</span>
-                                        <span class="text-xs font-bold">Voir panier</span>
+                                        <span class="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-[11px] font-black">2</span>
+                                        <span class="text-xs font-bold">Voir mon panier</span>
                                     </div>
-                                    <span class="font-black text-sm">11 500 F</span>
+                                    <span class="font-black text-sm">10 000 F</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Notif Wave --}}
-                    <div class="fl absolute -top-5 -right-10 bg-white rounded-2xl shadow-2xl border border-neutral-100 px-3.5 py-3 flex items-center gap-2.5 w-52">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-sky-50">
+                    {{-- Notif paiement Wave (flottante haut droite) --}}
+                    <div class="fl absolute -top-4 -right-12 bg-white rounded-2xl shadow-xl border border-neutral-100 px-3 py-2.5 flex items-center gap-2.5" style="width:200px">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:#e0f2fe">
                             <img src="{{ asset('images/payments/wave.png') }}" class="w-5 h-5 object-contain" alt="Wave">
                         </div>
                         <div>
                             <div class="text-xs font-black text-neutral-800">Paiement reçu ✓</div>
-                            <div class="text-[11px] text-neutral-500">Wave · 5 500 F → votre compte</div>
+                            <div class="text-[10px] text-neutral-500">Wave · 5 500 F</div>
                         </div>
                     </div>
 
-                    {{-- Notif commande --}}
-                    <div class="fl2 absolute -bottom-5 -left-10 bg-white rounded-2xl shadow-2xl border border-neutral-100 px-3.5 py-3 flex items-center gap-2.5 w-48">
+                    {{-- Notif nouvelle commande (flottante bas gauche) --}}
+                    <div class="fl2 absolute -bottom-4 -left-12 bg-white rounded-2xl shadow-xl border border-neutral-100 px-3 py-2.5 flex items-center gap-2.5" style="width:185px">
                         <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.1)">
                             <svg class="w-5 h-5" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </div>
                         <div>
                             <div class="text-xs font-black text-neutral-800">Nouvelle commande</div>
-                            <div class="text-[11px] text-neutral-500">Table 7 · Poulet braisé</div>
+                            <div class="text-[10px] text-neutral-500">Table 7 · Poulet braisé</div>
                         </div>
                     </div>
+
+                    {{-- Tag #Fresh / #Délicieux --}}
+                    <div class="absolute top-1/3 -left-8 bg-neutral-900 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg">#Délicieux</div>
                 </div>
                 @endif
             </div>
         </div>
     </div>
 
-    {{-- Wave --}}
-    <div class="absolute bottom-0 left-0 right-0 leading-none">
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-14" fill="white"><path d="M0,60 C400,10 800,50 1200,15 C1340,0 1400,30 1440,20 L1440,60Z"/></svg>
+    {{-- Séparateur bas vers section blanche --}}
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="w-full h-10" fill="#f5f5f5"><path d="M0,40 C480,0 960,30 1440,0 L1440,40Z"/></svg>
     </div>
 </section>
 
