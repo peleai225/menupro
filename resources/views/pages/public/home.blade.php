@@ -588,7 +588,7 @@
             $trs = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)
                 ->latest()
                 ->take(8)
-                ->get(['name', 'slug', 'logo_path', 'banner_path', 'city', 'cuisine_type']);
+                ->get(['name', 'slug', 'logo_path', 'banner_path', 'city']);
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
             @foreach($trs as $r)
