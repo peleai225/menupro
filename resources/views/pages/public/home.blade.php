@@ -159,8 +159,8 @@
                 </div>
             </div>
 
-            {{-- ─── Right: Phone mockup centré ─── --}}
-            <div class="relative flex justify-center items-center order-1 lg:order-2 pt-8 lg:pt-0">
+            {{-- ─── Right: illustration (cachée sur mobile) ─── --}}
+            <div class="relative hidden lg:flex justify-center items-center order-1 lg:order-2 pt-8 lg:pt-0">
 
                 {{-- Cercle orange décoratif derrière le téléphone --}}
                 <div class="absolute w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,94,12,.12) 0%,rgba(212,94,12,.04) 60%,transparent 80%)"></div>
