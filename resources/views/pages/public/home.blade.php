@@ -11,11 +11,13 @@
 .gt{background:linear-gradient(120deg,#D45E0C,#ef8a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gt-light{background:linear-gradient(120deg,#f6b285,#fad2b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* Hero bg — blanc avec forme orange */
-.hero-bg{background:#ffffff}
-/* Blob orange décoratif */
-.hero-blob{position:absolute;bottom:-20%;left:-10%;width:65%;padding-bottom:65%;border-radius:50% 50% 60% 40% / 40% 50% 50% 60%;background:#D45E0C;opacity:.08;pointer-events:none}
-.hero-blob2{position:absolute;top:-15%;right:-8%;width:45%;padding-bottom:45%;border-radius:40% 60% 50% 50% / 50% 40% 60% 50%;background:#D45E0C;opacity:.06;pointer-events:none}
+/* Hero bg — blanc pur */
+.hero-bg{background:#ffffff !important}
+/* Blobs orange décoratifs */
+.hero-blob{position:absolute;bottom:-20%;left:-10%;width:65%;padding-bottom:65%;border-radius:50% 50% 60% 40% / 40% 50% 50% 60%;background:rgba(212,94,12,.07);pointer-events:none;z-index:0}
+.hero-blob2{position:absolute;top:-15%;right:-8%;width:45%;padding-bottom:45%;border-radius:40% 60% 50% 50% / 50% 40% 60% 50%;background:rgba(212,94,12,.05);pointer-events:none;z-index:0}
+/* Forme orange vif bas-droite pour contraste */
+.hero-shape{position:absolute;bottom:0;right:0;width:40%;height:55%;background:linear-gradient(135deg,rgba(212,94,12,.12),rgba(212,94,12,.04));border-radius:80% 0 0 0;pointer-events:none;z-index:0}
 /* Badge rotatif */
 @keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .spin-slow{animation:spin-slow 12s linear infinite}
@@ -48,11 +50,12 @@
      1. HERO — Fond blanc + accent orange
      Inspiré du design Food Delivery ref
 ══════════════════════════════════════ --}}
-<section class="hero-bg relative overflow-hidden" style="min-height:100vh">
+<section class="hero-bg relative overflow-hidden" style="min-height:100vh;background:#ffffff !important;background-color:#ffffff !important">
 
-    {{-- Formes décoratives organiques orange --}}
+    {{-- Formes décoratives oranges --}}
     <div class="hero-blob"></div>
     <div class="hero-blob2"></div>
+    <div class="hero-shape"></div>
 
     {{-- Grain texture overlay --}}
     <div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')"></div>
@@ -69,14 +72,14 @@
                         <span class="ps absolute inline-flex h-full w-full rounded-full" style="background:#D45E0C"></span>
                         <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
                     </span>
-                    #Top Solution Restaurants CI
+                    #1 Solution Restaurants en Côte d'Ivoire
                 </div>
 
                 {{-- Headline --}}
                 <h1 class="text-5xl sm:text-6xl lg:text-[4rem] xl:text-[4.5rem] font-black text-neutral-900 leading-[1.05] tracking-tight">
-                    The Ultimate<br>
-                    <span class="gt italic">Restaurant</span><br>
-                    <span class="text-neutral-900">Experience!</span>
+                    La meilleure<br>
+                    <span class="gt italic">expérience</span><br>
+                    <span class="text-neutral-900">restaurant !</span>
                 </h1>
 
                 <p class="mt-5 text-lg text-neutral-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
@@ -139,7 +142,7 @@
                     <svg class="w-full h-full spin-slow" viewBox="0 0 100 100">
                         <defs><path id="circle" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"/></defs>
                         <text class="text-[11px]" fill="#D45E0C" font-size="11" font-weight="700" letter-spacing="3">
-                            <textPath href="#circle">MENUPRO · RESTAURANT · QR ·</textPath>
+                            <textPath href="#circle">MENUPRO · RESTAURANT · COMMANDE ·</textPath>
                         </text>
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
@@ -278,7 +281,7 @@
                         </div>
                     </div>
 
-                    {{-- Tag #Fresh / #Délicieux --}}
+                    {{-- Tag flottant --}}
                     <div class="absolute top-1/3 -left-8 bg-neutral-900 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg">#Délicieux</div>
                 </div>
                 @endif
@@ -400,7 +403,7 @@
         <div class="text-center mb-14 fu">
             <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">— Pourquoi choisir MenuPro</span>
             <h2 class="text-4xl sm:text-5xl font-black text-white mt-3 leading-tight">
-                Enjoy <span class="gt">Exclusive Benefits</span><br>with MenuPro
+                Profitez d'<span class="gt">avantages exclusifs</span><br>avec MenuPro
             </h2>
         </div>
 
