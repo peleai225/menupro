@@ -440,52 +440,29 @@
 
 
 {{-- ══════════════════════════════════════
-     7. COMPARAISON
+     7. CHIFFRES CLÉS
 ══════════════════════════════════════ --}}
-<section class="py-24 bg-white">
+<section class="py-20 bg-white">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Pourquoi MenuPro ?</span>
+        <div class="text-center mb-12 fu">
+            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Nos chiffres</span>
             <h2 class="text-4xl sm:text-5xl font-black text-neutral-900 mt-3 leading-tight">
-                Glovo prend 30%.<br><span class="gt">Nous, zéro.</span>
+                Tout ce dont votre<br><span class="gt">restaurant a besoin</span>
             </h2>
         </div>
-        <div class="rounded-3xl border-2 border-neutral-100 overflow-hidden shadow-xl fu">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b-2 border-neutral-100">
-                        <th class="text-left py-5 px-6 text-sm font-bold text-neutral-500">Critère</th>
-                        <th class="py-5 px-6 text-center text-sm font-black w-1/4" style="background:rgba(212,94,12,.06);color:#D45E0C">MenuPro ✓</th>
-                        <th class="py-5 px-6 text-center text-sm font-bold text-neutral-400 w-1/4">Glovo / Yango</th>
-                        <th class="py-5 px-6 text-center text-sm font-bold text-neutral-400 w-1/4">WhatsApp seul</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach([
-                        ['Commission par commande','0%','20 – 30%','0% (pertes cachées)'],
-                        ['Paiement mobile money','✓ 4 opérateurs','✓ partiel','✗ manuel'],
-                        ['Vos propres clients','✓ vous les gardez','✗ base Glovo','✓'],
-                        ['Analytics & rapports','✓ complet','✓ partiel','✗ aucun'],
-                        ['Gestion stock','✓','✗','✗'],
-                        ['Livraison propres livreurs','✓','✗ leurs livreurs','✗'],
-                        ['Mode hôtel QR chambre','✓','✗','✗'],
-                        ['Prix mensuel','5 000 F fixe','0 F + 20-30%/cmd','0 F + désorganisation'],
-                    ] as $row)
-                    <tr class="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
-                        <td class="py-4 px-6 text-sm text-neutral-700 font-medium">{{ $row[0] }}</td>
-                        <td class="py-4 px-6 text-center text-sm font-black yes" style="background:rgba(212,94,12,.04)">{{ $row[1] }}</td>
-                        <td class="py-4 px-6 text-center text-sm {{ str_starts_with($row[2],'✗') || str_contains($row[2],'20') ? 'no' : 'text-neutral-500' }}">{{ $row[2] }}</td>
-                        <td class="py-4 px-6 text-center text-sm {{ str_starts_with($row[3],'✗') || str_contains($row[3],'désorg') || str_contains($row[3],'pertes') ? 'no' : 'text-neutral-500' }}">{{ $row[3] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        <div class="text-center mt-10 fu d2">
-            <a href="{{ route('register') }}" class="inline-flex items-center gap-2 px-8 py-4 text-white font-black rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-xl text-lg" style="background:#D45E0C">
-                Passer à MenuPro maintenant
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 fu">
+            @foreach([
+                ['0%','Commission par commande','Gardez 100% de vos revenus.','border-primary-200','text-primary-500'],
+                ['15 min','Pour être en ligne','Menu, QR code, paiements prêts.','border-neutral-200','text-neutral-900'],
+                ['4','Moyens de paiement','Wave, Orange, MTN, Moov.','border-secondary-200','text-secondary-600'],
+                ['24/7','Commandes reçues','Même quand vous dormez.','border-neutral-200','text-neutral-900'],
+            ] as $kpi)
+            <div class="rounded-3xl p-6 border-2 {{ $kpi[3] }} bg-white text-center hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                <div class="text-4xl sm:text-5xl font-black {{ $kpi[4] }} leading-none mb-3">{{ $kpi[0] }}</div>
+                <div class="font-black text-neutral-900 text-sm mb-1.5">{{ $kpi[1] }}</div>
+                <div class="text-neutral-400 text-xs leading-relaxed">{{ $kpi[2] }}</div>
+            </div>
+            @endforeach
         </div>
     </div>
 </section>

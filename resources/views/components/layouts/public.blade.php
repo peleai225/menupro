@@ -1,11 +1,14 @@
 @props(['title' => null, 'description' => null, 'canonical' => null])
 <x-layouts.app :title="$title" :description="$description" :canonical="$canonical">
-    <!-- Navigation -->
-    <nav class="navbar" x-data="{ mobileOpen: false, scrolled: false }" 
-         @scroll.window="scrolled = window.scrollY > 20"
-         :class="{ 'shadow-soft': scrolled }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-            <div class="flex items-center justify-between h-full">
+    <!-- Navigation — Inspirée design Food Delivery ref -->
+    <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+         x-data="{ mobileOpen: false, scrolled: false }"
+         @scroll.window="scrolled = window.scrollY > 10"
+         :style="scrolled ? 'background:rgba(255,255,255,0.97);box-shadow:0 2px 20px rgba(0,0,0,0.08);backdrop-filter:blur(12px)' : 'background:rgba(255,255,255,0.95);backdrop-filter:blur(8px)'">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-18">
+
                 <!-- Logo -->
                 @php
                     $logo = \App\Models\SystemSetting::get('logo', '');
@@ -14,122 +17,114 @@
                         ? \Illuminate\Support\Facades\Storage::url($logo)
                         : null;
                 @endphp
-                <a href="{{ route('home') }}" class="flex items-center gap-3">
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 shrink-0">
                     @if($logoUrl)
-                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="120" height="40" class="h-10 w-auto object-contain">
+                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="120" height="40" class="h-9 w-auto object-contain">
                     @else
                         <img src="{{ asset('images/logo-menupro.png') }}" alt="{{ $appName }}" width="108" height="36" class="h-9 w-auto object-contain">
                     @endif
                 </a>
 
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('home') }}#how-it-works" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group">
-                        Fonctionnalités
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-200 rounded-full"></span>
+                <!-- Desktop Nav Links — style référence: texte neutre, actif orange -->
+                <div class="hidden md:flex items-center gap-1">
+                    @php
+                        $navLinks = [
+                            ['Accueil', route('home'), request()->routeIs('home')],
+                            ['Fonctionnalités', route('home').'#how-it-works', false],
+                            ['Comment ça marche', route('home').'#how-it-works', false],
+                            ['Tarifs', route('pricing'), request()->routeIs('pricing')],
+                            ['Contact', route('contact'), request()->routeIs('contact')],
+                        ];
+                    @endphp
+                    @foreach($navLinks as $link)
+                    <a href="{{ $link[1] }}"
+                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 {{ $link[2] ? 'text-primary-500' : 'text-neutral-600 hover:text-primary-500 hover:bg-primary-50' }}">
+                        {{ $link[0] }}
                     </a>
-                    <a href="{{ route('pricing') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('pricing') ? 'text-primary-600' : '' }}">
-                        Tarifs
-                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('pricing') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
-                    </a>
-                    <a href="{{ route('faq') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('faq') ? 'text-primary-600' : '' }}">
-                        FAQ
-                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('faq') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
-                    </a>
-                    <a href="{{ route('contact') }}" class="relative text-neutral-600 hover:text-neutral-900 font-medium transition-colors group {{ request()->routeIs('contact') ? 'text-primary-600' : '' }}">
-                        Contact
-                        <span class="absolute -bottom-1 left-0 h-0.5 bg-primary-500 rounded-full transition-all duration-200 {{ request()->routeIs('contact') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
-                    </a>
+                    @endforeach
                 </div>
 
-                <!-- CTA Buttons -->
-                <div class="hidden md:flex items-center gap-4">
+                <!-- Desktop CTA -->
+                <div class="hidden md:flex items-center gap-3">
                     @auth
-                        <a href="{{ route(auth()->user()->getDashboardRoute()) }}" class="btn btn-primary btn-sm flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
+                        <a href="{{ route(auth()->user()->getDashboardRoute()) }}"
+                           class="px-5 py-2.5 text-sm font-black text-white rounded-full transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                           style="background:#D45E0C">
                             Dashboard
                         </a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="btn btn-ghost btn-sm flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                                Déconnexion
-                            </button>
-                        </form>
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-ghost btn-sm">
+                        <a href="{{ route('login') }}"
+                           class="px-4 py-2 text-sm font-semibold text-neutral-600 hover:text-primary-500 rounded-lg transition-colors">
                             Connexion
                         </a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">
-                            Créer mon restaurant
+                        <a href="{{ route('register') }}"
+                           class="px-5 py-2.5 text-sm font-black text-white rounded-full transition-all hover:-translate-y-0.5 hover:shadow-lg whitespace-nowrap"
+                           style="background:#D45E0C">
+                            Démarrer gratuitement
                         </a>
                     @endauth
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2.5 rounded-lg hover:bg-neutral-100 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Menu">
-                    <svg x-show="!mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <button @click="mobileOpen = !mobileOpen"
+                        class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl transition-colors hover:bg-neutral-100"
+                        aria-label="Menu">
+                    <svg x-show="!mobileOpen" class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
-                    <svg x-show="mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    <svg x-show="mobileOpen" class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div x-show="mobileOpen" 
+        <div x-show="mobileOpen"
              x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-4"
-             class="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-neutral-200 shadow-lg"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="md:hidden bg-white border-t border-neutral-100 shadow-xl"
              x-cloak>
-            <div class="px-4 py-6 space-y-4">
-                <a href="{{ route('home') }}#how-it-works" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
+            <div class="px-4 py-5 space-y-1">
+                <a href="{{ route('home') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('home') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
+                    Accueil
+                </a>
+                <a href="{{ route('home') }}#how-it-works" @click="mobileOpen=false" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-neutral-700 hover:bg-neutral-50">
                     Fonctionnalités
                 </a>
-                <a href="{{ route('pricing') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
+                <a href="{{ route('pricing') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('pricing') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
                     Tarifs
                 </a>
-                <a href="{{ route('faq') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
+                <a href="{{ route('faq') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('faq') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
                     FAQ
                 </a>
-                <a href="{{ route('contact') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
+                <a href="{{ route('contact') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('contact') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
                     Contact
                 </a>
-                <hr class="border-neutral-200">
-                @auth
-                    <a href="{{ route(auth()->user()->getDashboardRoute()) }}" class="btn btn-primary w-full flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        Dashboard
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <button type="submit" class="btn btn-ghost w-full flex items-center justify-center gap-2 text-neutral-600 hover:text-primary-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                            Déconnexion
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
-                        Connexion
-                    </a>
-                    <a href="{{ route('register') }}" class="btn btn-primary w-full">
-                        Créer mon restaurant
-                    </a>
-                @endauth
+
+                <div class="pt-3 mt-2 border-t border-neutral-100 space-y-2">
+                    @auth
+                        <a href="{{ route(auth()->user()->getDashboardRoute()) }}"
+                           class="flex items-center justify-center w-full py-3.5 text-sm font-black text-white rounded-2xl"
+                           style="background:#D45E0C">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}"
+                           class="flex items-center justify-center w-full py-3.5 text-sm font-semibold text-neutral-700 rounded-2xl border-2 border-neutral-200 hover:border-primary-300">
+                            Connexion
+                        </a>
+                        <a href="{{ route('register') }}"
+                           class="flex items-center justify-center w-full py-3.5 text-sm font-black text-white rounded-2xl"
+                           style="background:#D45E0C">
+                            Démarrer gratuitement
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
     </nav>
