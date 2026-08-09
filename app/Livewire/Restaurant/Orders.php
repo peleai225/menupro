@@ -5,7 +5,11 @@ namespace App\Livewire\Restaurant;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
+use App\Models\DeliveryDriver;
+use App\Models\DriverCashRemittance;
+use App\Models\DriverEarning;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -323,6 +327,77 @@ class Orders extends Component
 
         $this->selectedOrder = $order->fresh(['items.dish']);
         session()->flash('success', 'Paiement cash confirmé.');
+    }
+
+    #[Computed]
+    public function pendingRemittances()
+    {
+        $restaurantId = auth()->user()->restaurant_id;
+
+        return DriverCashRemittance::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')
+            ->with(['driver.user:id,name', 'debt.order:id,reference,total,delivery_fee', 'debt.delivery'])
+            ->latest()
+            ->get();
+    }
+
+    /**
+     * Restaurant confirme avoir reçu le reversement cash du livreur.
+     */
+    public function confirmRemittance(int $remittanceId): void
+    {
+        $restaurantId = auth()->user()->restaurant_id;
+
+        $remittance = DriverCashRemittance::where('restaurant_id', $restaurantId)
+            ->where('status', 'pending')
+            ->findOrFail($remittanceId);
+
+        DB::transaction(function () use ($remittance) {
+            // Confirmer le reversement
+            $remittance->update([
+                'status'       => 'confirmed',
+                'confirmed_by' => auth()->id(),
+                'confirmed_at' => now(),
+            ]);
+
+            // Solder la dette
+            $debt = $remittance->debt;
+            $debt->update([
+                'status'     => 'settled',
+                'settled_at' => now(),
+            ]);
+
+            // Marquer la commande comme soldée
+            $order = $debt->order;
+            $order->update(['payout_status' => 'completed']);
+
+            // Créditer les gains du livreur (différé depuis DELIVERED)
+            $delivery = $debt->delivery;
+            if ($delivery && $delivery->driver_id) {
+                $gross       = (int) $order->delivery_fee;
+                $platformCut = (int) round($gross * 0.20);
+                $net         = $gross - $platformCut;
+
+                if ($gross > 0) {
+                    DriverEarning::create([
+                        'driver_id'    => $delivery->driver_id,
+                        'order_id'     => $order->id,
+                        'delivery_id'  => $delivery->id,
+                        'gross_amount' => $gross,
+                        'platform_cut' => $platformCut,
+                        'net_amount'   => $net,
+                        'status'       => 'available',
+                    ]);
+
+                    DeliveryDriver::where('id', $delivery->driver_id)
+                        ->increment('total_earnings_xof', $net);
+                }
+            }
+        });
+
+        unset($this->pendingRemittances);
+
+        session()->flash('success', 'Reversement confirmé. Les gains du livreur ont été crédités.');
     }
 
     public function render()
