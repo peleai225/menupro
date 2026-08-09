@@ -161,6 +161,11 @@ Route::prefix('v1')
             Route::get('/earnings',         [EarningsController::class, 'summary'])->name('earnings.summary');
             Route::get('/earnings/history', [EarningsController::class, 'history'])->name('earnings.history');
 
+            // Cash on delivery — gestion des dettes et reversements
+            Route::get('/cash-balance',      [\App\Http\Controllers\Api\V1\Driver\CashController::class, 'balance'])->name('cash.balance');
+            Route::get('/cash-remittances',  [\App\Http\Controllers\Api\V1\Driver\CashController::class, 'remittances'])->name('cash.remittances');
+            Route::post('/cash-remittances', [\App\Http\Controllers\Api\V1\Driver\CashController::class, 'storeRemittance'])->name('cash.remittances.store');
+
             // Virements — max 3/jour
             Route::middleware('throttle:api.payout')->group(function () {
                 Route::post('/earnings/payout', [EarningsController::class, 'requestPayout'])->name('earnings.payout');
