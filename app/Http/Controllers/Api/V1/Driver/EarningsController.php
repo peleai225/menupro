@@ -91,6 +91,17 @@ class EarningsController extends Controller
         ]);
 
         $driver    = $request->user()->deliveryDriver;
+
+        // Bloquer le payout si le livreur a trop de dettes cash en attente
+        $totalCashDebt = \App\Models\DriverCashDebt::totalPendingForDriver($driver->id);
+        $debtThreshold = 25000; // 25 000 FCFA
+        if ($totalCashDebt > $debtThreshold) {
+            return response()->json([
+                'message'       => 'Tu as ' . number_format($totalCashDebt, 0, ',', ' ') . ' F à reverser aux restaurants avant de retirer tes gains.',
+                'cash_debt_xof' => $totalCashDebt,
+            ], 422);
+        }
+
         $available = (int) DriverEarning::where('driver_id', $driver->id)
             ->where('status', 'available')
             ->sum('net_amount');
