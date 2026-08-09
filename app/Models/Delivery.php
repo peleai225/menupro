@@ -32,6 +32,9 @@ class Delivery extends Model
         'cancelled_at',
         'cancellation_reason',
         'estimated_minutes',
+        'cash_collected',
+        'cash_collected_amount_xof',
+        'cash_owed_to_restaurant_xof',
     ];
 
     protected $casts = [
@@ -47,6 +50,9 @@ class Delivery extends Model
         'picked_up_at' => 'datetime',
         'delivered_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'cash_collected' => 'boolean',
+        'cash_collected_amount_xof' => 'integer',
+        'cash_owed_to_restaurant_xof' => 'integer',
     ];
 
     public function order(): BelongsTo
