@@ -57,26 +57,45 @@
 
     <!-- Open Graph / Social -->
     @php
+        // Image OG : hero_image uploadée en priorité, sinon logo
         $heroImg = \App\Models\SystemSetting::get('hero_image', '');
         $ogImage = ($heroImg && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImg))
             ? \Illuminate\Support\Facades\Storage::url($heroImg)
             : asset('images/logo-menupro.png');
-        $ogImage = str_starts_with($ogImage, 'http') ? $ogImage : request()->getSchemeAndHttpHost() . $ogImage;
+        // S'assurer que l'URL est absolue (Facebook rejette les URLs relatives)
+        if (!str_starts_with($ogImage, 'http')) {
+            $ogImage = request()->getSchemeAndHttpHost() . $ogImage;
+        }
+        // Forcer www pour cohérence avec canonical
+        $ogImage = str_replace('https://menupro.ci/', 'https://www.menupro.ci/', $ogImage);
+
+        $fbAppId = \App\Models\SystemSetting::get('facebook_app_id', '');
+        $ogTitle = $title
+            ? $title . ' · ' . $appName
+            : $appName . ' — Menu en ligne & commandes restaurant Côte d\'Ivoire';
+        $ogDesc = $description
+            ?? 'Digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, commandes temps réel, paiements Wave · Orange · MTN · Moov.';
     @endphp
+
+    @if($fbAppId)
+    <meta property="fb:app_id" content="{{ $fbAppId }}">
+    @endif
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:title" content="{{ $title ? $title . ' · ' . $appName : $appName . ' — Menu en ligne & commandes restaurant Côte d\'Ivoire' }}">
-    <meta property="og:description" content="{{ $description ?? 'Digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, commandes temps réel, paiements Wave · Orange · MTN · Moov.' }}">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDesc }}">
     <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:locale" content="fr_CI">
     <meta property="og:site_name" content="{{ $appName }}">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $title ?? $appName . ' — Menu en ligne & commandes restaurant' }}">
-    <meta name="twitter:description" content="{{ $description ?? 'Digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, paiements Mobile Money.' }}">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
 
     <!-- PWA -->

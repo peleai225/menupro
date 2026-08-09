@@ -222,7 +222,8 @@ class DashboardController extends Controller
             'banner_text' => \App\Models\SystemSetting::get('banner_text', ''),
             'banner_link' => \App\Models\SystemSetting::get('banner_link', ''),
             'banner_color' => \App\Models\SystemSetting::get('banner_color', 'primary'),
-            'facebook_pixel_id' => \App\Models\SystemSetting::get('facebook_pixel_id', ''),
+            'facebook_app_id'    => \App\Models\SystemSetting::get('facebook_app_id', ''),
+            'facebook_pixel_id'  => \App\Models\SystemSetting::get('facebook_pixel_id', ''),
             'google_analytics_id' => \App\Models\SystemSetting::get('google_analytics_id', ''),
             // Commando – commissions agents (priorité au backoffice, sinon config)
             'commando_commission_cents_first_payment' => \App\Models\SystemSetting::has('commando_commission_cents_first_payment')
@@ -357,7 +358,8 @@ class DashboardController extends Controller
             'banner_text' => ['nullable', 'string', 'max:255'],
             'banner_link' => ['nullable', 'string'],
             'banner_color' => ['nullable', 'string', 'in:primary,success,warning,dark'],
-            'facebook_pixel_id' => ['nullable', 'string', 'max:50'],
+            'facebook_app_id'    => ['nullable', 'string', 'max:30'],
+            'facebook_pixel_id'  => ['nullable', 'string', 'max:50'],
             'google_analytics_id' => ['nullable', 'string', 'max:50'],
             // WhatsApp Business API (Meta)
             'whatsapp_enabled' => ['boolean'],
@@ -616,6 +618,9 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('banner_text', $request->banner_text ?? '', 'string', 'Texte de la bannière');
             \App\Models\SystemSetting::set('banner_link', $request->banner_link ?? '', 'string', 'Lien de la bannière');
             \App\Models\SystemSetting::set('banner_color', $request->banner_color ?? 'primary', 'string', 'Couleur de la bannière');
+        }
+        if ($request->has('facebook_app_id')) {
+            \App\Models\SystemSetting::set('facebook_app_id', $request->facebook_app_id ?? '', 'string', 'ID application Facebook (og:)');
         }
         if ($request->has('facebook_pixel_id')) {
             \App\Models\SystemSetting::set('facebook_pixel_id', $request->facebook_pixel_id ?? '', 'string', 'ID du Facebook Pixel');

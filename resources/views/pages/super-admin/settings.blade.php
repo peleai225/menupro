@@ -664,6 +664,19 @@
                     </div>
                 </div>
 
+                {{-- Facebook App ID (og:) --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Facebook App ID</h2>
+                    <p class="text-xs mb-4" style="color:var(--sa-muted-fg);">Requis pour les aperçus de partage Facebook (og:). <a href="https://developers.facebook.com/apps/" target="_blank" class="underline">Créer une app →</a></p>
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">ID de l'application Facebook</label>
+                        <input type="text" name="facebook_app_id" value="{{ old('facebook_app_id', $settings['facebook_app_id'] ?? '') }}"
+                               class="w-full h-10 px-3 rounded-xl border text-sm outline-none font-mono"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="123456789012345">
+                        <p class="text-xs mt-1.5" style="color:var(--sa-muted-fg);">Ajoute <code>fb:app_id</code> dans les meta tags Open Graph de toutes les pages.</p>
+                    </div>
+                </div>
+
                 {{-- Facebook Pixel --}}
                 <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
                     <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Facebook Pixel</h2>
