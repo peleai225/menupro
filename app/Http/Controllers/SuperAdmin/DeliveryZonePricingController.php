@@ -32,15 +32,38 @@ class DeliveryZonePricingController extends Controller
     {
         $prices = $request->input('prices', []);
 
-        foreach ($prices as $fromId => $toMap) {
-            foreach ($toMap as $toId => $price) {
-                $priceInt = (int) $price;
+        // Load valid zones for ownership validation
+        $zones = DeliveryZone::where('delivery_city_id', $city->id)
+            ->where('is_active', true)
+            ->pluck('id');
 
-                if ($priceInt <= 0) {
+        foreach ($prices as $fromId => $toMap) {
+            // Validate zone ownership
+            if (!$zones->contains((int) $fromId)) {
+                continue;
+            }
+
+            foreach ($toMap as $toId => $price) {
+                $toZoneId = ($toId === 'fallback') ? null : (int) $toId;
+
+                // Validate to_zone ownership
+                if ($toZoneId !== null && !$zones->contains($toZoneId)) {
                     continue;
                 }
 
-                $toZoneId = ($toId === 'fallback') ? null : (int) $toId;
+                $priceInt = (int) $price;
+
+                if ($priceInt <= 0) {
+                    // Supprimer l'entrée existante si elle existe (permet de revenir au calcul km)
+                    DeliveryZonePrice::where('from_zone_id', (int) $fromId)
+                        ->where(function ($q) use ($toZoneId) {
+                            $toZoneId === null
+                                ? $q->whereNull('to_zone_id')
+                                : $q->where('to_zone_id', $toZoneId);
+                        })
+                        ->delete();
+                    continue;
+                }
 
                 DeliveryZonePrice::updateOrCreate(
                     [
