@@ -50,6 +50,17 @@ class CashController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
+        // Empêcher plusieurs déclarations en attente pour la même dette
+        $existingPending = DriverCashRemittance::where('debt_id', $debt->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->exists();
+
+        if ($existingPending) {
+            return response()->json([
+                'error' => 'Un reversement est déjà en cours pour cette dette.',
+            ], 422);
+        }
+
         $remittance = DriverCashRemittance::create([
             'driver_id'      => $driver->id,
             'restaurant_id'  => $debt->restaurant_id,

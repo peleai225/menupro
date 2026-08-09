@@ -289,13 +289,14 @@ class DeliveryController extends Controller
                 'cash_owed_to_restaurant_xof' => $amountOwed,
             ]);
 
-            $order->update([
-                'payment_status' => \App\Enums\PaymentStatus::COMPLETED,
-                'paid_at'        => now(),
-                'payout_status'  => 'cash_pending',
-            ]);
-
             if ($amountOwed > 0) {
+                // Livreur doit reverser la différence au restaurant
+                $order->update([
+                    'payment_status' => \App\Enums\PaymentStatus::COMPLETED,
+                    'paid_at'        => now(),
+                    'payout_status'  => 'cash_pending',
+                ]);
+
                 \App\Models\DriverCashDebt::create([
                     'driver_id'     => $driver->id,
                     'restaurant_id' => $order->restaurant_id,
@@ -304,6 +305,32 @@ class DeliveryController extends Controller
                     'amount_xof'    => $amountOwed,
                     'status'        => 'pending',
                 ]);
+            } else {
+                // Montant exact — pas de reversement nécessaire, créditer directement
+                $order->update([
+                    'payment_status' => \App\Enums\PaymentStatus::COMPLETED,
+                    'paid_at'        => now(),
+                    'payout_status'  => 'completed',
+                ]);
+
+                $gross       = (int) $order->delivery_fee;
+                $platformCut = (int) round($gross * \App\Services\DriverAssignmentService::PLATFORM_CUT_RATE);
+                $net         = $gross - $platformCut;
+
+                if ($gross > 0) {
+                    \App\Models\DriverEarning::create([
+                        'driver_id'    => $driver->id,
+                        'order_id'     => $order->id,
+                        'delivery_id'  => $delivery->id,
+                        'gross_amount' => $gross,
+                        'platform_cut' => $platformCut,
+                        'net_amount'   => $net,
+                        'status'       => 'available',
+                    ]);
+
+                    \App\Models\DeliveryDriver::where('id', $driver->id)
+                        ->increment('total_earnings_xof', $net);
+                }
             }
 
             return ['success' => true, 'amount_owed' => $amountOwed, 'restaurant' => $order->restaurant->name ?? ''];

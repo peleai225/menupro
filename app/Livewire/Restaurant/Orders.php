@@ -348,11 +348,11 @@ class Orders extends Component
     {
         $restaurantId = auth()->user()->restaurant_id;
 
-        $remittance = DriverCashRemittance::where('restaurant_id', $restaurantId)
-            ->where('status', 'pending')
-            ->findOrFail($remittanceId);
-
-        DB::transaction(function () use ($remittance) {
+        DB::transaction(function () use ($restaurantId, $remittanceId) {
+            $remittance = DriverCashRemittance::where('restaurant_id', $restaurantId)
+                ->where('status', 'pending')
+                ->lockForUpdate()
+                ->findOrFail($remittanceId);
             // Confirmer le reversement
             $remittance->update([
                 'status'       => 'confirmed',
@@ -375,7 +375,7 @@ class Orders extends Component
             $delivery = $debt->delivery;
             if ($delivery && $delivery->driver_id) {
                 $gross       = (int) $order->delivery_fee;
-                $platformCut = (int) round($gross * 0.20);
+                $platformCut = (int) round($gross * \App\Services\DriverAssignmentService::PLATFORM_CUT_RATE);
                 $net         = $gross - $platformCut;
 
                 if ($gross > 0) {

@@ -19,7 +19,7 @@ class DriverAssignmentService
     private const SEARCH_RADII_KM = [3, 6, 10];
 
     // Commission plateforme sur les frais de livraison (20%)
-    private const PLATFORM_CUT_RATE = 0.20;
+    public const PLATFORM_CUT_RATE = 0.20;
 
     public function __construct(private GeocodingService $geo) {}
 
