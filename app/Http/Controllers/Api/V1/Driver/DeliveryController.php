@@ -249,6 +249,73 @@ class DeliveryController extends Controller
         return response()->json(['data' => $this->formatDeliveryDetail($delivery->load(['order', 'restaurant']))]);
     }
 
+    /**
+     * Le livreur confirme avoir collecté l'argent cash auprès du client.
+     * Crée une dette envers le restaurant et marque la commande comme payée.
+     */
+    public function confirmCashCollected(Request $request, int $deliveryId): JsonResponse
+    {
+        $data = $request->validate([
+            'amount_collected' => 'required|integer|min:1',
+        ]);
+
+        $driver   = $request->user()->deliveryDriver;
+        $delivery = \App\Models\Delivery::where('driver_id', $driver->id)
+            ->whereIn('status', ['delivering', 'delivered'])
+            ->findOrFail($deliveryId);
+
+        $order = $delivery->order;
+
+        if ($order->payment_method !== 'cash_on_delivery') {
+            return response()->json(['error' => 'Cette commande n\'est pas en paiement cash.'], 422);
+        }
+
+        if ($delivery->cash_collected) {
+            return response()->json(['error' => 'La collecte a déjà été confirmée.'], 422);
+        }
+
+        $amountCollected = (int) $data['amount_collected'];
+        $amountOwed      = max(0, $amountCollected - (int) $order->delivery_fee);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($delivery, $order, $driver, $amountCollected, $amountOwed) {
+            $delivery->update([
+                'cash_collected'              => true,
+                'cash_collected_amount_xof'   => $amountCollected,
+                'cash_owed_to_restaurant_xof' => $amountOwed,
+            ]);
+
+            $order->update([
+                'payment_status' => \App\Enums\PaymentStatus::COMPLETED,
+                'paid_at'        => now(),
+                'payout_status'  => 'cash_pending',
+            ]);
+
+            if ($amountOwed > 0) {
+                \App\Models\DriverCashDebt::create([
+                    'driver_id'     => $driver->id,
+                    'restaurant_id' => $order->restaurant_id,
+                    'order_id'      => $order->id,
+                    'delivery_id'   => $delivery->id,
+                    'amount_xof'    => $amountOwed,
+                    'status'        => 'pending',
+                ]);
+            }
+
+            \Illuminate\Support\Facades\Log::channel('payments')->info('Driver confirmed cash collected', [
+                'driver_id'        => $driver->id,
+                'delivery_id'      => $delivery->id,
+                'amount_collected' => $amountCollected,
+                'amount_owed'      => $amountOwed,
+            ]);
+        });
+
+        return response()->json([
+            'message'     => 'Collecte confirmée.',
+            'amount_owed' => $amountOwed,
+            'restaurant'  => $order->restaurant->name,
+        ]);
+    }
+
     // -------------------------------------------------------------------------
 
     private function validateStatusTransition(Delivery $delivery, DeliveryStatus $new): void
