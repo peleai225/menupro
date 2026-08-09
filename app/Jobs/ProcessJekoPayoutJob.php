@@ -51,6 +51,14 @@ class ProcessJekoPayoutJob implements ShouldQueue
             return;
         }
 
+        // Ne pas reverser via Jeko pour les paiements cash — le livreur collecte directement.
+        if ($this->order->payment_method === 'cash_on_delivery') {
+            Log::channel('payments')->info('ProcessJekoPayoutJob: skipped for cash_on_delivery', [
+                'order_id' => $this->order->id,
+            ]);
+            return;
+        }
+
         $reference = 'PAYOUT-ORDER-' . $this->order->id . '-' . $this->order->payment_reference;
 
         // Montant net = total - commission plateforme - frais livraison (le livreur sera payé séparément)

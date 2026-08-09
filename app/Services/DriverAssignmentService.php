@@ -189,6 +189,17 @@ class DriverAssignmentService
     private function creditDriverEarning(Delivery $delivery): void
     {
         $order = $delivery->order;
+
+        // Pour cash_on_delivery, le livreur collecte l'argent physiquement.
+        // Les gains seront crédités après confirmation du reversement au restaurant (Plan B).
+        if ($order->payment_method === 'cash_on_delivery') {
+            Log::info('creditDriverEarning: skipped for cash_on_delivery', [
+                'delivery_id' => $delivery->id,
+                'order_id'    => $order->id,
+            ]);
+            return;
+        }
+
         $gross = $order->delivery_fee;
 
         if ($gross <= 0) {
