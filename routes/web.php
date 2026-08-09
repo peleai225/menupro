@@ -271,6 +271,7 @@ Route::prefix('dashboard')
             Route::get('codes-promo', \App\Livewire\Restaurant\PromoCodes::class)->name('promo-codes');
             Route::get('statistiques', \App\Livewire\Restaurant\Analytics::class)->name('analytics');
             Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
+            Route::get('rapports/export-pdf', [\App\Http\Controllers\Restaurant\ReportExportController::class, 'pdf'])->name('reports.export-pdf');
             Route::get('depenses', \App\Livewire\Restaurant\Expenses::class)->name('expenses');
             Route::get('rentabilite', \App\Livewire\Restaurant\DishProfitability::class)->name('profitability');
         });

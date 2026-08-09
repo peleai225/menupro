@@ -6,17 +6,15 @@
             <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Analysez vos performances en détail et exportez vos données.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button wire:click="export('pdf')"
-                    wire:loading.attr="disabled"
-                    wire:target="export"
-                    class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 active:scale-95 transition-all touch-manipulation">
-                <svg wire:loading.remove wire:target="export" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {{-- Lien direct vers le contrôleur PDF (évite le bug Livewire + StreamedResponse) --}}
+            <a href="{{ route('restaurant.reports.export-pdf', ['type' => $reportType, 'start' => $startDate, 'end' => $endDate]) }}"
+               target="_blank"
+               class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 transition-all touch-manipulation">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
-                <svg wire:loading wire:target="export" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                <span wire:loading.remove wire:target="export">Export PDF</span>
-                <span wire:loading wire:target="export">Génération...</span>
-            </button>
+                Export PDF
+            </a>
             <button wire:click="export('excel')"
                     class="btn btn-secondary min-h-[52px] px-4 py-3.5 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all touch-manipulation">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -61,6 +61,25 @@ class Reports extends Component
         }
     }
 
+    public function getReportDataPublic(int $restaurantId, $startDate, $endDate): array
+    {
+        try {
+            $data = match ($this->reportType) {
+                'sales'     => $this->getSalesReport($restaurantId, $startDate, $endDate),
+                'dishes'    => $this->getDishesReport($restaurantId, $startDate, $endDate),
+                'customers' => $this->getCustomersReport($restaurantId, $startDate, $endDate),
+                'financial' => $this->getFinancialReport($restaurantId, $startDate, $endDate),
+                'waiters'   => $this->getWaitersReport($restaurantId, $startDate, $endDate),
+                'daily'     => $this->getDailyReport($restaurantId, $startDate, $endDate),
+                default     => [],
+            };
+            return $this->cleanArray($data);
+        } catch (\Exception $e) {
+            \Log::error('getReportDataPublic error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     protected function getReportData(): array
     {
         try {
