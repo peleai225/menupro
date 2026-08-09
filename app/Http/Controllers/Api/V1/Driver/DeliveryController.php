@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Support\StorageUrl;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
@@ -255,29 +256,33 @@ class DeliveryController extends Controller
      */
     public function confirmCashCollected(Request $request, int $deliveryId): JsonResponse
     {
-        $data = $request->validate([
-            'amount_collected' => 'required|integer|min:1',
-        ]);
-
-        $driver   = $request->user()->deliveryDriver;
-        $delivery = \App\Models\Delivery::where('driver_id', $driver->id)
-            ->whereIn('status', ['delivering', 'delivered'])
-            ->findOrFail($deliveryId);
-
-        $order = $delivery->order;
-
-        if ($order->payment_method !== 'cash_on_delivery') {
-            return response()->json(['error' => 'Cette commande n\'est pas en paiement cash.'], 422);
-        }
-
-        if ($delivery->cash_collected) {
-            return response()->json(['error' => 'La collecte a déjà été confirmée.'], 422);
-        }
-
+        $data = $request->validate(['amount_collected' => 'required|integer|min:1']);
+        $driver = $request->user()->deliveryDriver;
         $amountCollected = (int) $data['amount_collected'];
-        $amountOwed      = max(0, $amountCollected - (int) $order->delivery_fee);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($delivery, $order, $driver, $amountCollected, $amountOwed) {
+        $result = DB::transaction(function () use ($driver, $deliveryId, $amountCollected) {
+            // Lock the row to prevent concurrent duplicate processing
+            $delivery = \App\Models\Delivery::where('driver_id', $driver->id)
+                ->whereIn('status', ['delivering', 'delivered'])
+                ->lockForUpdate()
+                ->find($deliveryId);
+
+            if (!$delivery) {
+                return ['error' => 'Course introuvable.', 'status' => 404];
+            }
+
+            $order = $delivery->order;
+
+            if ($order->payment_method !== 'cash_on_delivery') {
+                return ['error' => 'Cette commande n\'est pas en paiement cash.', 'status' => 422];
+            }
+
+            if ($delivery->cash_collected) {
+                return ['error' => 'La collecte a déjà été confirmée.', 'status' => 422];
+            }
+
+            $amountOwed = max(0, $amountCollected - (int) $order->delivery_fee);
+
             $delivery->update([
                 'cash_collected'              => true,
                 'cash_collected_amount_xof'   => $amountCollected,
@@ -301,18 +306,25 @@ class DeliveryController extends Controller
                 ]);
             }
 
-            \Illuminate\Support\Facades\Log::channel('payments')->info('Driver confirmed cash collected', [
-                'driver_id'        => $driver->id,
-                'delivery_id'      => $delivery->id,
-                'amount_collected' => $amountCollected,
-                'amount_owed'      => $amountOwed,
-            ]);
+            return ['success' => true, 'amount_owed' => $amountOwed, 'restaurant' => $order->restaurant->name ?? ''];
         });
+
+        // Log AFTER transaction committed (not inside)
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        Log::channel('payments')->info('Driver confirmed cash collected', [
+            'driver_id'        => $driver->id,
+            'delivery_id'      => $deliveryId,
+            'amount_collected' => $amountCollected,
+            'amount_owed'      => $result['amount_owed'],
+        ]);
 
         return response()->json([
             'message'     => 'Collecte confirmée.',
-            'amount_owed' => $amountOwed,
-            'restaurant'  => $order->restaurant->name,
+            'amount_owed' => $result['amount_owed'],
+            'restaurant'  => $result['restaurant'],
         ]);
     }
 
