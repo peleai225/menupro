@@ -3,6 +3,8 @@
 namespace App\Livewire\Restaurant;
 
 use App\Enums\OrderStatus;
+use App\Enums\OrderType;
+use App\Enums\PaymentStatus;
 use App\Models\Order;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -264,6 +266,57 @@ class Orders extends Component
 
         unset($this->orders);
         unset($this->statusCounts);
+    }
+
+    /**
+     * Mode Restaurant : le restaurant marque la commande comme livrée.
+     * Uniquement pour les commandes delivery dont les livreurs sont gérés par le restaurant (source != platform_app).
+     */
+    public function markDelivered(int $orderId): void
+    {
+        $order = Order::where('restaurant_id', auth()->user()->restaurant_id)
+            ->where('type', OrderType::DELIVERY)
+            ->where('status', OrderStatus::DELIVERING)
+            ->findOrFail($orderId);
+
+        if ($order->source === 'platform_app') {
+            session()->flash('error', 'Cette commande est gérée par les livreurs MenuPro.');
+            return;
+        }
+
+        $order->update([
+            'status'       => OrderStatus::COMPLETED,
+            'completed_at' => now(),
+        ]);
+
+        $this->selectedOrder = $order->fresh();
+        session()->flash('success', 'Commande marquée comme livrée.');
+    }
+
+    /**
+     * Mode Restaurant : le restaurant confirme avoir reçu l'argent cash.
+     * Uniquement pour cash_on_delivery géré par le restaurant lui-même.
+     */
+    public function markCashReceived(int $orderId): void
+    {
+        $order = Order::where('restaurant_id', auth()->user()->restaurant_id)
+            ->where('type', OrderType::DELIVERY)
+            ->where('payment_method', 'cash_on_delivery')
+            ->findOrFail($orderId);
+
+        if ($order->source === 'platform_app') {
+            session()->flash('error', 'Utilisez la section Reversements pour les livraisons MenuPro.');
+            return;
+        }
+
+        $order->update([
+            'payment_status' => PaymentStatus::COMPLETED,
+            'paid_at'        => now(),
+            'payout_status'  => 'manual',
+        ]);
+
+        $this->selectedOrder = $order->fresh();
+        session()->flash('success', 'Paiement cash confirmé.');
     }
 
     public function render()
