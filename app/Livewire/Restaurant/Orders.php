@@ -284,12 +284,15 @@ class Orders extends Component
             return;
         }
 
-        $order->update([
-            'status'       => OrderStatus::COMPLETED,
-            'completed_at' => now(),
-        ]);
+        if (!$order->transitionTo(OrderStatus::COMPLETED)) {
+            session()->flash('error', 'Impossible de marquer cette commande comme livrée.');
+            return;
+        }
 
-        $this->selectedOrder = $order->fresh();
+        unset($this->orders);
+        unset($this->statusCounts);
+
+        $this->selectedOrder = $order->fresh(['items.dish']);
         session()->flash('success', 'Commande marquée comme livrée.');
     }
 
@@ -315,7 +318,10 @@ class Orders extends Component
             'payout_status'  => 'manual',
         ]);
 
-        $this->selectedOrder = $order->fresh();
+        unset($this->orders);
+        unset($this->statusCounts);
+
+        $this->selectedOrder = $order->fresh(['items.dish']);
         session()->flash('success', 'Paiement cash confirmé.');
     }
 
