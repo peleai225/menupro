@@ -252,7 +252,7 @@ class DishForm extends Component
             try {
                 $uploader = app(MediaUploader::class);
                 $restaurantId = auth()->user()->restaurant_id;
-                $data['image_path'] = $uploader->upload($this->image, "restaurants/{$restaurantId}/dishes");
+                $data['image_path'] = $uploader->upload($this->image, "restaurants/{$restaurantId}/dishes", ['width' => 800, 'height' => 600]);
 
                 // Delete old image if editing
                 if ($this->dish && $this->existingImage) {

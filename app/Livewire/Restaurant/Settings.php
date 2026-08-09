@@ -299,7 +299,7 @@ class Settings extends Component
         if ($this->logo) {
             try {
                 $uploader = app(MediaUploader::class);
-                $data['logo_path'] = $uploader->upload($this->logo, "restaurants/{$this->restaurant->id}/logo");
+                $data['logo_path'] = $uploader->upload($this->logo, "restaurants/{$this->restaurant->id}/logo", ['width' => 400, 'height' => 400]);
 
                 if ($this->existingLogo) {
                     Storage::disk('public')->delete($this->existingLogo);
@@ -316,7 +316,7 @@ class Settings extends Component
         if ($this->banner) {
             try {
                 $uploader = app(MediaUploader::class);
-                $data['banner_path'] = $uploader->upload($this->banner, "restaurants/{$this->restaurant->id}/banner");
+                $data['banner_path'] = $uploader->upload($this->banner, "restaurants/{$this->restaurant->id}/banner", ['width' => 1920, 'height' => 600]);
 
                 if ($this->existingBanner) {
                     Storage::disk('public')->delete($this->existingBanner);
