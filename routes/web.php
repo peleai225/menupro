@@ -472,6 +472,10 @@ Route::prefix('admin')
         Route::post('villes-livraison/{city}/zones', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'storeZone'])->name('delivery-cities.zones.store');
         Route::post('villes-livraison/zones/{zone}/toggle', [\App\Http\Controllers\SuperAdmin\DeliveryCityController::class, 'toggleZone'])->name('delivery-cities.zones.toggle');
 
+        // Tarifs par quartiers (matrice zone→zone)
+        Route::get('villes-livraison/{city}/tarifs-quartiers', [\App\Http\Controllers\SuperAdmin\DeliveryZonePricingController::class, 'index'])->name('delivery.zone-pricing.index');
+        Route::post('villes-livraison/{city}/tarifs-quartiers', [\App\Http\Controllers\SuperAdmin\DeliveryZonePricingController::class, 'store'])->name('delivery.zone-pricing.store');
+
         // Zones de livraison (legacy)
         Route::get('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'index'])->name('delivery-zones.index');
         Route::post('zones-livraison', [\App\Http\Controllers\SuperAdmin\DeliveryZoneController::class, 'store'])->name('delivery-zones.store');

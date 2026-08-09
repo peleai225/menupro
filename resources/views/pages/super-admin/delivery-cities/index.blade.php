@@ -199,13 +199,22 @@
                         <span class="font-semibold" style="color:var(--sa-fg);" x-text="(city.delivery_base_fee / 100).toFixed(0) + ' FCFA'"></span>
                     </div>
 
-                    <a :href="'{{ url('/admin/villes-livraison') }}/' + city.id"
-                       class="block w-full text-center h-9 leading-9 rounded-xl text-sm font-medium transition-colors"
-                       style="background:rgba(243,242,239,0.60);color:var(--sa-fg);"
-                       onmouseover="this.style.background='rgba(194,98,31,0.10)';this.style.color='var(--sa-primary)';"
-                       onmouseout="this.style.background='rgba(243,242,239,0.60)';this.style.color='var(--sa-fg)';">
-                        Configurer
-                    </a>
+                    <div class="flex gap-2">
+                        <a :href="'{{ url('/admin/villes-livraison') }}/' + city.id"
+                           class="flex-1 block text-center h-9 leading-9 rounded-xl text-sm font-medium transition-colors"
+                           style="background:rgba(243,242,239,0.60);color:var(--sa-fg);"
+                           onmouseover="this.style.background='rgba(194,98,31,0.10)';this.style.color='var(--sa-primary)';"
+                           onmouseout="this.style.background='rgba(243,242,239,0.60)';this.style.color='var(--sa-fg)';">
+                            Configurer
+                        </a>
+                        <a :href="'{{ url('/admin/villes-livraison') }}/' + city.id + '/tarifs-quartiers'"
+                           class="flex-1 block text-center h-9 leading-9 rounded-xl text-sm font-medium transition-colors"
+                           style="background:rgba(59,111,212,0.10);color:var(--sa-info);"
+                           onmouseover="this.style.background='rgba(59,111,212,0.18)';"
+                           onmouseout="this.style.background='rgba(59,111,212,0.10)';">
+                            Tarifs quartiers
+                        </a>
+                    </div>
                 </div>
             </template>
         </div>

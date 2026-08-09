@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\DeliveryCity;
 use App\Models\DeliveryZone;
+use App\Models\DeliveryZonePrice;
 use App\Models\Restaurant;
 
 class DeliveryPricingService
@@ -74,14 +75,25 @@ class DeliveryPricingService
         }
 
         $isPeak = $deliveryCity->isPeakHour();
-        $baseFee = $deliveryCity->delivery_base_fee;
-        $feePerKm = $deliveryCity->delivery_fee_per_km;
-        $distanceFee = (int) round($distanceKm * $feePerKm);
-        $rawFee = $baseFee + $distanceFee;
 
-        $fee = $isPeak
-            ? (int) round($rawFee * (1 + $deliveryCity->peak_hour_surcharge_percent / 100))
-            : $rawFee;
+        // Essaie d'abord la matrice de tarification par zones
+        $matrixFee = $this->calculateByZoneMatrix($fromLat, $fromLng, $customerLat, $customerLng, $deliveryCity);
+
+        if ($matrixFee !== null) {
+            $fee = $isPeak
+                ? (int) round($matrixFee * (1 + $deliveryCity->peak_hour_surcharge_percent / 100))
+                : $matrixFee;
+        } else {
+            // Fallback : calcul km classique
+            $baseFee = $deliveryCity->delivery_base_fee;
+            $feePerKm = $deliveryCity->delivery_fee_per_km;
+            $distanceFee = (int) round($distanceKm * $feePerKm);
+            $rawFee = $baseFee + $distanceFee;
+
+            $fee = $isPeak
+                ? (int) round($rawFee * (1 + $deliveryCity->peak_hour_surcharge_percent / 100))
+                : $rawFee;
+        }
 
         $prepTime = $restaurant->avg_prep_time_minutes ?? $restaurant->estimated_prep_time ?? 20;
         $transitMinutes = $this->geo->estimatedMinutes($distanceKm);
@@ -94,11 +106,12 @@ class DeliveryPricingService
             'distance_km' => round($distanceKm, 2),
             'estimated_minutes' => $estimatedTotal,
             'breakdown' => [
-                'base_fee' => $baseFee,
-                'distance_fee' => $distanceFee,
-                'peak_surcharge' => $isPeak ? ($fee - $rawFee) : 0,
+                'base_fee' => $matrixFee ?? ($deliveryCity->delivery_base_fee),
+                'distance_fee' => $matrixFee !== null ? 0 : (int) round($distanceKm * $deliveryCity->delivery_fee_per_km),
+                'peak_surcharge' => $isPeak ? ($fee - ($matrixFee ?? ($deliveryCity->delivery_base_fee + (int) round($distanceKm * $deliveryCity->delivery_fee_per_km)))) : 0,
                 'prep_minutes' => $prepTime,
                 'transit_minutes' => $transitMinutes,
+                'zone_matrix' => $matrixFee !== null,
             ],
             'is_peak' => $isPeak,
             'within_range' => true,
@@ -115,6 +128,54 @@ class DeliveryPricingService
     public function isDeliverable(Restaurant $restaurant, float $lat, float $lng): bool
     {
         return $this->calculate($restaurant, $lat, $lng)['within_range'];
+    }
+
+    /**
+     * Calcule le prix de livraison via la matrice zone→zone.
+     * Retourne null si aucun prix de matrice n'est configuré (fallback km).
+     */
+    public function calculateByZoneMatrix(
+        float $restaurantLat,
+        float $restaurantLng,
+        float $customerLat,
+        float $customerLng,
+        DeliveryCity $city
+    ): ?int {
+        $zones = DeliveryZone::where('delivery_city_id', $city->id)
+            ->where('is_active', true)
+            ->get();
+
+        if ($zones->isEmpty()) {
+            return null;
+        }
+
+        // Détermine la zone du restaurant
+        $restaurantZone = null;
+        foreach ($zones as $zone) {
+            if ($zone->containsPoint($restaurantLat, $restaurantLng)) {
+                $restaurantZone = $zone;
+                break;
+            }
+        }
+
+        // Si le restaurant n'est dans aucune zone, pas de matrice applicable
+        if (!$restaurantZone) {
+            return null;
+        }
+
+        // Détermine la zone du client (peut être null = hors-zone)
+        $customerZone = null;
+        foreach ($zones as $zone) {
+            if ($zone->containsPoint($customerLat, $customerLng)) {
+                $customerZone = $zone;
+                break;
+            }
+        }
+
+        // Cherche le prix dans la matrice (exact ou fallback hors-zone)
+        $priceModel = DeliveryZonePrice::findPrice($restaurantZone->id, $customerZone?->id);
+
+        return $priceModel?->price_xof;
     }
 
     private function detectCityByName(?string $cityName): ?DeliveryCity
