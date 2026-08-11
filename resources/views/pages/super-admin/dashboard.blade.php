@@ -327,6 +327,46 @@
                 </div>
             </div>
 
+            {{-- Livraison & Cash Flow --}}
+            <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Livraison & Flux cash</h2>
+                    <a href="{{ route('super-admin.finances.failed-payouts') }}"
+                       class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                       style="background:rgba(255,97,0,.1);color:#FF6100">
+                        Voir reversements →
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="rounded-xl p-3 text-center" style="background:var(--sa-muted)">
+                        <p class="text-2xl font-black" style="color:var(--sa-fg)">{{ $driverStats['total_drivers'] }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">Livreurs inscrits</p>
+                    </div>
+                    <div class="rounded-xl p-3 text-center" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+                        <p class="text-2xl font-black text-green-600">{{ $driverStats['online_drivers'] }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">En ligne maintenant</p>
+                    </div>
+                    @if($driverStats['cash_pending_orders'] > 0)
+                    <div class="rounded-xl p-3 text-center" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
+                        <p class="text-2xl font-black text-amber-600">{{ $driverStats['cash_pending_orders'] }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">Cash en attente</p>
+                    </div>
+                    @endif
+                    @if($driverStats['cash_debts_total'] > 0)
+                    <div class="rounded-xl p-3 text-center col-span-2 sm:col-span-1" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)">
+                        <p class="text-xl font-black text-red-600">{{ number_format($driverStats['cash_debts_total'], 0, ',', ' ') }} F</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">Dettes cash livreurs</p>
+                    </div>
+                    @endif
+                    @if($driverStats['remittances_pending'] > 0)
+                    <div class="rounded-xl p-3 text-center" style="background:rgba(255,97,0,.08);border:1px solid rgba(255,97,0,.2)">
+                        <p class="text-2xl font-black" style="color:#FF6100">{{ $driverStats['remittances_pending'] }}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">Reversements à confirmer</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Expiring Subscriptions --}}
             @if($expiringSubscriptions->isNotEmpty())
                 <div class="rounded-2xl border p-5 shadow-sm"

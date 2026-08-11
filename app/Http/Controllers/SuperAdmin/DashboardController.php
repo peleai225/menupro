@@ -141,6 +141,16 @@ class DashboardController extends Controller
             $ordersByDay['revenues'][] = $dayData ? (float) $dayData->revenue : 0.0;
         }
 
+        // Delivery driver stats (cash flow)
+        $driverStats = [
+            'total_drivers'       => \App\Models\DeliveryDriver::count(),
+            'online_drivers'      => \App\Models\DeliveryDriver::where('is_available', true)->count(),
+            'cash_pending_orders' => DB::table('orders')->where('payout_status', 'cash_pending')->count(),
+            'cash_pending_amount' => (int) DB::table('orders')->where('payout_status', 'cash_pending')->sum('total'),
+            'cash_debts_total'    => (int) DB::table('driver_cash_debts')->where('status', 'pending')->sum('amount_xof'),
+            'remittances_pending' => DB::table('driver_cash_remittances')->where('status', 'pending')->count(),
+        ];
+
         // Orders by status (all time) for donut chart
         $ordersByStatusRaw = DB::table('orders')
             ->selectRaw('status, COUNT(*) as count')
@@ -172,7 +182,8 @@ class DashboardController extends Controller
             'revenueByPlan',
             'topRestaurants',
             'ordersByDay',
-            'ordersByStatus'
+            'ordersByStatus',
+            'driverStats'
         ));
     }
 
