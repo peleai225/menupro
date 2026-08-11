@@ -43,7 +43,15 @@ fi
 echo " Lien symbolique storage..."
 ln -sfn ~/MenuPro/storage/app/public ~/public_html/storage 2>/dev/null || true
 
-# 2c. Corriger APP_URL et FILESYSTEM_DISK si valeurs de dev présentes
+# 2c. Créer et fixer permissions répertoires drivers (upload photos/docs)
+echo " Fix permissions répertoires drivers..."
+mkdir -p ~/MenuPro/storage/app/public/drivers/{photos,cni,license,vehicle}
+chmod 775 ~/MenuPro/storage/app/public/drivers/photos
+chmod 775 ~/MenuPro/storage/app/public/drivers/cni
+chmod 775 ~/MenuPro/storage/app/public/drivers/license
+chmod 775 ~/MenuPro/storage/app/public/drivers/vehicle
+
+# 2d. Corriger APP_URL et FILESYSTEM_DISK si valeurs de dev présentes
 if grep -q "APP_URL=http://MenuPro.test" ~/MenuPro/.env 2>/dev/null; then
     sed -i 's|APP_URL=http://MenuPro.test|APP_URL=https://www.menupro.ci|g' ~/MenuPro/.env
     echo " APP_URL corrigé → https://www.menupro.ci"

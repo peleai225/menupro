@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -43,9 +44,9 @@ class AuthController extends Controller
         $user->role = UserRole::DELIVERY_DRIVER;
         $user->save();
 
-        $cniPath     = $request->file('cni_photo')->store('drivers/cni', 'public');
-        $licensePath = $request->file('license_photo')->store('drivers/license', 'public');
-        $vehiclePath = $request->file('vehicle_photo')->store('drivers/vehicle', 'public');
+        $cniPath     = $this->storeDriverFile($request->file('cni_photo'), 'drivers/cni');
+        $licensePath = $this->storeDriverFile($request->file('license_photo'), 'drivers/license');
+        $vehiclePath = $this->storeDriverFile($request->file('vehicle_photo'), 'drivers/vehicle');
 
         DeliveryDriver::create([
             'user_id'             => $user->id,
@@ -132,7 +133,13 @@ class AuthController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('drivers/photos', 'public');
+            $path = $this->storeDriverFile($request->file('photo'), 'drivers/photos');
+            if ($path) {
+                if ($driver->photo_path) {
+                    Storage::disk('public')->delete($driver->photo_path);
+                }
+                $data['photo_path'] = $path;
+            }
         }
         unset($data['photo']);
 
@@ -153,6 +160,39 @@ class AuthController extends Controller
         $data = $request->validate(['fcm_token' => 'required|string|max:255']);
         $request->user()->deliveryDriver->update(['fcm_token' => $data['fcm_token']]);
         return response()->json(['message' => 'Token FCM mis à jour.']);
+    }
+
+    private function storeDriverFile($file, string $directory): ?string
+    {
+        $disk = Storage::disk('public');
+        $dirPath = $disk->path($directory);
+
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0775, true);
+        }
+
+        if (!is_writable($dirPath)) {
+            @chmod($dirPath, 0775);
+        }
+
+        $path = $file->store($directory, 'public');
+
+        if (!$path) {
+            Log::error("Driver file upload failed", [
+                'directory' => $directory,
+                'dir_path' => $dirPath,
+                'is_dir' => is_dir($dirPath),
+                'is_writable' => is_writable($dirPath),
+                'file_size' => $file->getSize(),
+                'file_error' => $file->getError(),
+            ]);
+            return null;
+        }
+
+        $fullPath = $disk->path($path);
+        @chmod($fullPath, 0664);
+
+        return $path;
     }
 
     private function formatDriver(DeliveryDriver $driver): array
