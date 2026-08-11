@@ -2,8 +2,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Dépenses & Rentabilité</h1>
-            <p class="text-sm text-neutral-500 mt-1">Suivez vos charges et votre rentabilité réelle</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Dépenses & Rentabilité</h1>
+            <p class="text-sm text-neutral-500 mt-1 hidden sm:block">Suivez vos charges et votre rentabilité réelle</p>
         </div>
         <div class="flex items-center gap-3">
             <select wire:model.live="period" class="text-sm border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
@@ -12,7 +12,7 @@
                 <option value="last_month">Mois dernier</option>
                 <option value="year">Cette année</option>
             </select>
-            <button wire:click="openModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium">
+            <button wire:click="openModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium min-h-[52px] touch-manipulation">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/></svg>
                 Ajouter
             </button>
@@ -100,7 +100,7 @@
                 </div>
                 <h3 class="text-lg font-semibold text-neutral-900 mb-1">Aucune dépense</h3>
                 <p class="text-sm text-neutral-500 mb-4">Commencez à enregistrer vos charges pour suivre votre rentabilité</p>
-                <button wire:click="openModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium">
+                <button wire:click="openModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium min-h-[52px] touch-manipulation">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/></svg>
                     Ajouter une dépense
                 </button>
@@ -217,10 +217,10 @@
                         </div>
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" wire:click="closeModal" class="flex-1 px-4 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition text-sm">
+                        <button type="button" wire:click="closeModal" class="flex-1 px-4 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition text-sm min-h-[52px] touch-manipulation">
                             Annuler
                         </button>
-                        <button type="submit" class="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition text-sm">
+                        <button type="submit" class="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition text-sm min-h-[52px] touch-manipulation">
                             {{ $editingId ? 'Enregistrer' : 'Ajouter' }}
                         </button>
                     </div>

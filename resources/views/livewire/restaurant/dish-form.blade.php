@@ -1,17 +1,17 @@
 <div>
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('restaurant.plats.index') }}" class="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+    <div class="flex items-center justify-between mb-6 sm:mb-8">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="{{ route('restaurant.plats.index') }}" class="p-2 hover:bg-neutral-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation">
                 <svg class="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-neutral-900">
+                <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">
                     {{ $dish ? 'Modifier le plat' : 'Nouveau plat' }}
                 </h1>
-                <p class="text-neutral-500 mt-1">
+                <p class="text-neutral-500 mt-1 hidden sm:block">
                     {{ $dish ? 'Modifiez les informations de votre plat' : 'Ajoutez un nouveau plat à votre menu' }}
                 </p>
             </div>
@@ -32,12 +32,12 @@
         </div>
     @endif
 
-    <form wire:submit="save" class="space-y-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <form wire:submit="save" class="space-y-6 sm:space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Basic Info -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations générales</h2>
                     
                     <div class="space-y-6">
@@ -121,7 +121,7 @@
                 </div>
 
                 <!-- Options -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-lg font-bold text-neutral-900">Options et variantes</h2>
@@ -145,7 +145,7 @@
                             @foreach($optionGroups as $groupIndex => $group)
                                 <div class="border border-neutral-200 rounded-xl p-4">
                                     <div class="flex items-start justify-between mb-4">
-                                        <div class="flex-1 grid grid-cols-3 gap-4">
+                                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                                             <div>
                                                 <label class="block text-xs font-medium text-neutral-500 mb-1">Nom du groupe</label>
                                                 <input type="text" 
@@ -221,7 +221,7 @@
 
                 <!-- Ingredients (if stock management) -->
                 @if(auth()->user()->restaurant?->currentPlan?->has_stock_management)
-                    <div class="card p-6">
+                    <div class="card p-4 sm:p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h2 class="text-lg font-bold text-neutral-900">Ingrédients (recette)</h2>
@@ -387,7 +387,7 @@
                 @endif
 
                 <!-- Nutrition -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations nutritionnelles</h2>
                     <p class="text-sm text-neutral-500 mb-4">Optionnel - Aidez vos clients à faire des choix éclairés</p>
                     
@@ -415,7 +415,7 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Image -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-4">Image</h2>
                     
                     <div class="space-y-4">
@@ -451,7 +451,7 @@
                 </div>
 
                 <!-- Status -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-4">Statut</h2>
                     
                     <div class="space-y-4">
@@ -482,10 +482,10 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="card p-6">
+                <div class="card p-4 sm:p-6">
                     <div class="space-y-3">
-                        <button type="submit" 
-                                class="w-full btn btn-primary px-6 py-3 flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all"
+                        <button type="submit"
+                                class="w-full btn btn-primary px-6 py-3 flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all min-h-[52px] touch-manipulation"
                                 wire:loading.attr="disabled"
                                 @if(!$this->canAddDish && !$dish) disabled @endif>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,7 +503,7 @@
                             </span>
                         </button>
                         
-                        <a href="{{ route('restaurant.plats.index') }}" class="block w-full btn btn-secondary px-6 py-3 text-center flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
+                        <a href="{{ route('restaurant.plats.index') }}" class="block w-full btn btn-secondary px-6 py-3 text-center flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all min-h-[52px] touch-manipulation">
                             Annuler
                         </a>
                     </div>

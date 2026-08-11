@@ -1,6 +1,6 @@
 <div>
     <!-- Trigger Button -->
-    <button wire:click="openModal" class="btn btn-outline flex items-center gap-2">
+    <button wire:click="openModal" class="btn btn-outline flex items-center gap-2 min-h-[44px] touch-manipulation">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
@@ -12,15 +12,15 @@
     <div class="fixed inset-0 z-50 overflow-y-auto" x-data x-init="document.body.classList.add('overflow-hidden')" x-on:remove="document.body.classList.remove('overflow-hidden')">
         <div class="flex min-h-screen items-start justify-center p-4 pt-16">
             <div class="fixed inset-0 bg-black/50" wire:click="closeModal"></div>
-            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl">
+            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl flex flex-col" style="max-height: min(90vh, calc(100vh - 80px))">
                 <!-- Header -->
-                <div class="p-6 border-b border-neutral-100">
+                <div class="flex-shrink-0 p-6 border-b border-neutral-100">
                     <div class="flex items-center justify-between">
                         <div>
                             <h2 class="text-xl font-bold text-neutral-900">Importer des ingrédients</h2>
-                            <p class="text-sm text-neutral-500 mt-1">Sélectionnez les ingrédients courants pour votre restaurant</p>
+                            <p class="text-sm text-neutral-500 mt-1 hidden sm:block">Sélectionnez les ingrédients courants pour votre restaurant</p>
                         </div>
-                        <button wire:click="closeModal" class="p-2 hover:bg-neutral-100 rounded-lg">
+                        <button wire:click="closeModal" class="p-2 hover:bg-neutral-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation">
                             <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -53,7 +53,7 @@
                 @endif
 
                 <!-- Categories & Ingredients -->
-                <div class="p-6 max-h-[50vh] overflow-y-auto space-y-6">
+                <div class="flex-1 overflow-y-auto p-6 space-y-6">
                     @foreach($library as $categoryName => $ingredients)
                         @php
                             $categoryKeys = array_map(fn($i) => $categoryName . '::' . $i['name'], $ingredients);
@@ -115,14 +115,14 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="p-6 border-t border-neutral-100 flex items-center justify-between">
-                    <button wire:click="closeModal" class="btn btn-outline px-6">
+                <div class="flex-shrink-0 p-6 border-t border-neutral-100 flex items-center justify-between">
+                    <button wire:click="closeModal" class="btn btn-outline px-6 min-h-[52px] touch-manipulation">
                         {{ str_starts_with($importResult, 'success:') ? 'Fermer' : 'Annuler' }}
                     </button>
                     @if(!str_starts_with($importResult ?: '', 'success:'))
                         <button wire:click="import"
                                 wire:loading.attr="disabled"
-                                class="btn btn-primary px-6 flex items-center gap-2"
+                                class="btn btn-primary px-6 flex items-center gap-2 min-h-[52px] touch-manipulation"
                                 {{ empty($selected) ? 'disabled' : '' }}>
                             <span wire:loading.remove wire:target="import">
                                 Importer {{ count($selected) }} ingrédient(s)

@@ -97,7 +97,7 @@
                         <button wire:click="markDone({{ $req->id }})"
                                 wire:loading.attr="disabled"
                                 wire:target="markDone({{ $req->id }})"
-                                class="flex-shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5">
+                                class="flex-shrink-0 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-1.5 min-h-[44px] touch-manipulation">
                             <span wire:loading.remove wire:target="markDone({{ $req->id }})">✓ Traité</span>
                             <span wire:loading wire:target="markDone({{ $req->id }})">...</span>
                         </button>

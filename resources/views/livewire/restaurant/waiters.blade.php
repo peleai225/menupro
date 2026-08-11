@@ -6,17 +6,17 @@
     </div>
     @endif
 
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Serveurs</h1>
-            <p class="text-neutral-500 text-sm mt-1">Chaque serveur s'identifie avec un PIN à 4 chiffres sur sa tablette</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Serveurs</h1>
+            <p class="text-neutral-500 text-sm mt-1 hidden sm:block">Chaque serveur s'identifie avec un PIN à 4 chiffres sur sa tablette</p>
         </div>
         @php $waiterUrl = ($this->restaurant?->waiter_token && \Illuminate\Support\Facades\Route::has('waiter.display'))
             ? route('waiter.display', $this->restaurant->waiter_token)
             : null @endphp
         @if($waiterUrl)
         <a href="{{ $waiterUrl }}" target="_blank"
-            class="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-sm font-semibold rounded-xl hover:bg-neutral-800 transition">
+            class="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-sm font-semibold rounded-xl hover:bg-neutral-800 transition min-h-[44px] touch-manipulation self-start sm:self-auto">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             Ouvrir l'interface serveur
         </a>
@@ -32,13 +32,13 @@
     </div>
 
     {{-- Formulaire --}}
-    <div class="bg-white rounded-2xl border border-neutral-200 p-6 mb-8">
+    <div class="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="font-bold text-neutral-900 mb-4">{{ $editingId ? 'Modifier le serveur' : 'Nouveau serveur' }}</h2>
         <form wire:submit="save" class="grid sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-neutral-700 mb-1">Nom *</label>
                 <input type="text" wire:model="name" placeholder="Ex: Koffi, Aya, Jean..."
-                    class="w-full border border-neutral-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent h-12">
                 @error('name') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
 
@@ -47,7 +47,7 @@
                     PIN (4 chiffres) {{ $editingId ? '— laisser vide pour ne pas changer' : '*' }}
                 </label>
                 <input type="password" wire:model="pin" placeholder="••••" maxlength="4" pattern="[0-9]{4}"
-                    class="w-full border border-neutral-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent h-12">
                 @error('pin') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
 
@@ -64,7 +64,7 @@
             <div>
                 <label class="block text-sm font-medium text-neutral-700 mb-1">Espace assigné (optionnel)</label>
                 <select wire:model="spaceId"
-                    class="w-full border border-neutral-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent h-12">
                     <option value="">Tous les espaces</option>
                     @foreach($this->spaces as $space)
                     <option value="{{ $space->id }}">{{ $space->name }}</option>
@@ -86,7 +86,7 @@
                 </button>
                 @endif
                 <button type="submit"
-                    class="px-6 py-2.5 text-sm font-bold bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition">
+                    class="px-6 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition min-h-[52px] touch-manipulation">
                     {{ $editingId ? 'Mettre à jour' : 'Créer le serveur' }}
                 </button>
             </div>

@@ -2,8 +2,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Avis Clients</h1>
-            <p class="text-neutral-500 mt-1">Gérez les avis et commentaires de vos clients.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Avis Clients</h1>
+            <p class="text-neutral-500 mt-1 hidden sm:block">Gérez les avis et commentaires de vos clients.</p>
         </div>
     </div>
 
@@ -13,11 +13,11 @@
 
     <!-- Stats -->
     @if($showStats && !empty($stats))
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="card p-6">
-                <p class="text-sm font-medium text-neutral-500 mb-2">Note moyenne</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+            <div class="card p-3 sm:p-6">
+                <p class="text-xs sm:text-sm font-medium text-neutral-500 mb-2">Note moyenne</p>
                 <div class="flex items-center gap-2">
-                    <p class="text-3xl font-bold text-neutral-900">{{ $stats['average_rating'] ?? 0 }}</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-neutral-900">{{ $stats['average_rating'] ?? 0 }}</p>
                     <div class="flex text-yellow-400">
                         @for($i = 1; $i <= 5; $i++)
                             <svg class="w-5 h-5 {{ $i <= ($stats['average_rating'] ?? 0) ? 'fill-current' : 'text-neutral-300' }}" fill="currentColor" viewBox="0 0 20 20">
@@ -27,17 +27,17 @@
                     </div>
                 </div>
             </div>
-            <div class="card p-6">
-                <p class="text-sm font-medium text-neutral-500 mb-2">Total avis</p>
-                <p class="text-3xl font-bold text-neutral-900">{{ $stats['total'] ?? 0 }}</p>
+            <div class="card p-3 sm:p-6">
+                <p class="text-xs sm:text-sm font-medium text-neutral-500 mb-2">Total avis</p>
+                <p class="text-2xl sm:text-3xl font-bold text-neutral-900">{{ $stats['total'] ?? 0 }}</p>
             </div>
-            <div class="card p-6">
-                <p class="text-sm font-medium text-neutral-500 mb-2">Approuvés</p>
-                <p class="text-3xl font-bold text-secondary-600">{{ $stats['approved'] ?? 0 }}</p>
+            <div class="card p-3 sm:p-6">
+                <p class="text-xs sm:text-sm font-medium text-neutral-500 mb-2">Approuvés</p>
+                <p class="text-2xl sm:text-3xl font-bold text-secondary-600">{{ $stats['approved'] ?? 0 }}</p>
             </div>
-            <div class="card p-6">
-                <p class="text-sm font-medium text-neutral-500 mb-2">En attente</p>
-                <p class="text-3xl font-bold text-accent-600">{{ $stats['pending'] ?? 0 }}</p>
+            <div class="card p-3 sm:p-6">
+                <p class="text-xs sm:text-sm font-medium text-neutral-500 mb-2">En attente</p>
+                <p class="text-2xl sm:text-3xl font-bold text-accent-600">{{ $stats['pending'] ?? 0 }}</p>
             </div>
         </div>
 
@@ -162,31 +162,31 @@
                         <!-- Actions -->
                         <div class="flex items-center gap-2 flex-shrink-0">
                             @if(!$review->is_approved)
-                                <button wire:click="approve({{ $review->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-green-600 hover:text-white active:scale-95 transition-all"
+                                <button wire:click="approve({{ $review->id }})"
+                                        class="btn btn-secondary p-2.5 text-sm hover:bg-green-600 hover:text-white active:scale-95 transition-all min-h-[44px] min-w-[44px] touch-manipulation"
                                         title="Approuver">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </button>
-                                <button wire:click="reject({{ $review->id }})" 
-                                        class="btn btn-secondary px-4 py-2 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all"
+                                <button wire:click="reject({{ $review->id }})"
+                                        class="btn btn-secondary p-2.5 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all min-h-[44px] min-w-[44px] touch-manipulation"
                                         title="Rejeter">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
                             @endif
-                            <button wire:click="openResponseModal({{ $review->id }})" 
-                                    class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all"
+                            <button wire:click="openResponseModal({{ $review->id }})"
+                                    class="btn btn-secondary p-2.5 text-sm hover:bg-neutral-700 active:scale-95 transition-all min-h-[44px] min-w-[44px] touch-manipulation"
                                     title="Répondre">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                 </svg>
                             </button>
-                            <button wire:click="delete({{ $review->id }})" 
+                            <button wire:click="delete({{ $review->id }})"
                                     wire:confirm="Êtes-vous sûr de vouloir supprimer cet avis ?"
-                                    class="btn btn-secondary px-4 py-2 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all"
+                                    class="btn btn-secondary p-2.5 text-sm hover:bg-red-600 hover:text-white active:scale-95 transition-all min-h-[44px] min-w-[44px] touch-manipulation"
                                     title="Supprimer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -291,12 +291,12 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
-                        <button type="button" wire:click="closeResponseModal" 
-                                class="btn btn-secondary px-6 py-3 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm hover:shadow-md">
+                        <button type="button" wire:click="closeResponseModal"
+                                class="btn btn-secondary px-6 py-3 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm hover:shadow-md min-h-[52px] touch-manipulation">
                             Annuler
                         </button>
-                        <button type="submit" 
-                                class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:bg-primary-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md">
+                        <button type="submit"
+                                class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:bg-primary-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md min-h-[52px] touch-manipulation">
                             Enregistrer la réponse
                         </button>
                     </div>

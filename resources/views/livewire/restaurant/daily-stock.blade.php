@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-3">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900 flex items-center gap-3">
                 <span class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -15,7 +15,7 @@
         <div class="flex items-center gap-3">
             <button wire:click="saveAll"
                     wire:loading.attr="disabled"
-                    class="btn btn-primary px-5 py-2.5 flex items-center gap-2">
+                    class="btn btn-primary px-5 py-2.5 flex items-center gap-2 min-h-[52px] touch-manipulation">
                 <svg wire:loading.remove wire:target="saveAll" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
@@ -26,7 +26,7 @@
                 Sauvegarder tout
             </button>
             <button @click="confirmReset = true"
-                    class="btn btn-outline text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 px-4 py-2.5 flex items-center gap-2">
+                    class="btn btn-outline text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 px-4 py-2.5 flex items-center gap-2 min-h-[52px] touch-manipulation">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
@@ -292,9 +292,9 @@
                     Cela remettra a zero le stock de <strong>tous les plats suivis</strong>. Cette action est irreversible.
                 </p>
                 <div class="flex gap-3">
-                    <button @click="confirmReset = false" class="btn btn-outline flex-1">Annuler</button>
+                    <button @click="confirmReset = false" class="btn btn-outline flex-1 min-h-[52px] touch-manipulation">Annuler</button>
                     <button wire:click="resetAll" @click="confirmReset = false"
-                            class="btn flex-1 bg-red-500 text-white hover:bg-red-600">
+                            class="btn flex-1 bg-red-500 text-white hover:bg-red-600 min-h-[52px] touch-manipulation">
                         Confirmer
                     </button>
                 </div>

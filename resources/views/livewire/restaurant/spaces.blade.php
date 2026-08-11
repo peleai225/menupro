@@ -6,15 +6,15 @@
     </div>
     @endif
 
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-6 sm:mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Espaces</h1>
-            <p class="text-neutral-500 text-sm mt-1">Gérez les espaces de votre établissement (VIP, Salle, Bar...)</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Espaces</h1>
+            <p class="text-neutral-500 text-sm mt-1 hidden sm:block">Gérez les espaces de votre établissement (VIP, Salle, Bar...)</p>
         </div>
     </div>
 
     {{-- Formulaire création/édition --}}
-    <div class="bg-white rounded-2xl border border-neutral-200 p-6 mb-8">
+    <div class="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-6 mb-6 sm:mb-8">
         <h2 class="font-bold text-neutral-900 mb-4">
             {{ $editingId ? 'Modifier l\'espace' : 'Nouvel espace' }}
         </h2>
@@ -22,7 +22,7 @@
             <div>
                 <label class="block text-sm font-medium text-neutral-700 mb-1">Nom *</label>
                 <input type="text" wire:model="name" placeholder="Ex: VIP, Salle, Bar, Terrasse..."
-                    class="w-full border border-neutral-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent h-12">
                 @error('name') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
 
@@ -38,7 +38,7 @@
             <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-neutral-700 mb-1">Description (optionnel)</label>
                 <input type="text" wire:model="description" placeholder="Description courte..."
-                    class="w-full border border-neutral-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent h-12">
             </div>
 
             <div class="flex items-center gap-2">
@@ -54,7 +54,7 @@
                 </button>
                 @endif
                 <button type="submit"
-                    class="px-6 py-2.5 text-sm font-bold bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition">
+                    class="px-6 py-3 text-sm font-bold bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition min-h-[52px] touch-manipulation">
                     {{ $editingId ? 'Mettre à jour' : 'Créer l\'espace' }}
                 </button>
             </div>

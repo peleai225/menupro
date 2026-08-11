@@ -2,12 +2,12 @@
     {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Mode Caisse (POS)</h1>
-            <p class="text-neutral-500 text-sm">Créez une commande pour un client</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Mode Caisse (POS)</h1>
+            <p class="text-neutral-500 text-sm hidden sm:block">Créez une commande pour un client</p>
         </div>
         <div class="flex items-center gap-3">
             {{-- Cart toggle mobile --}}
-            <button @click="showCart = !showCart" class="lg:hidden relative btn btn-primary">
+            <button @click="showCart = !showCart" class="lg:hidden relative btn btn-primary min-h-[52px] touch-manipulation">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
                 </svg>
@@ -247,13 +247,13 @@
                         {{-- Action buttons --}}
                         <div class="mt-4 space-y-2">
                             <button wire:click="confirmOrder" wire:loading.attr="disabled"
-                                    class="w-full btn btn-primary py-3 text-base font-bold">
+                                    class="w-full btn btn-primary py-3 text-base font-bold min-h-[52px] touch-manipulation">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 Valider la commande
                             </button>
-                            <button wire:click="clearCart" class="w-full btn btn-outline text-sm">
+                            <button wire:click="clearCart" class="w-full btn btn-outline text-sm min-h-[52px] touch-manipulation">
                                 Vider le panier
                             </button>
                         </div>
@@ -268,8 +268,11 @@
     {{-- ═══════════════════════════════════════════ --}}
     @if($showConfirmModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" wire:click.self="$set('showConfirmModal', false)">
-            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
-                <h3 class="text-xl font-bold text-neutral-900 mb-4">Confirmer la commande</h3>
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 flex flex-col" style="max-height: min(90vh, calc(100vh - 80px))">
+                <div class="flex-shrink-0 p-6 border-b border-neutral-100">
+                <h3 class="text-xl font-bold text-neutral-900">Confirmer la commande</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6">
 
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between">
@@ -310,14 +313,17 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-6">
-                    <button wire:click="$set('showConfirmModal', false)" class="flex-1 btn btn-outline">
+                </div>
+                <div class="flex-shrink-0 p-6 border-t border-neutral-100">
+                <div class="flex gap-3">
+                    <button wire:click="$set('showConfirmModal', false)" class="flex-1 btn btn-outline min-h-[52px] touch-manipulation">
                         Annuler
                     </button>
-                    <button wire:click="submitOrder" wire:loading.attr="disabled" class="flex-1 btn btn-primary">
+                    <button wire:click="submitOrder" wire:loading.attr="disabled" class="flex-1 btn btn-primary min-h-[52px] touch-manipulation">
                         <span wire:loading.remove wire:target="submitOrder">Confirmer</span>
                         <span wire:loading wire:target="submitOrder">Création...</span>
                     </button>
+                </div>
                 </div>
             </div>
         </div>

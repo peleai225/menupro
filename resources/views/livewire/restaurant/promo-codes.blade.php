@@ -2,10 +2,10 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Codes Promo</h1>
-            <p class="text-neutral-500 mt-1">Créez et gérez vos codes promotionnels pour attirer et fidéliser vos clients.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Codes Promo</h1>
+            <p class="text-neutral-500 mt-1 hidden sm:block">Créez et gérez vos codes promotionnels pour attirer et fidéliser vos clients.</p>
         </div>
-        <button wire:click="openCreateModal" class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md">
+        <button wire:click="openCreateModal" class="btn btn-primary px-4 py-3 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md min-h-[52px] touch-manipulation self-start sm:self-auto">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
@@ -39,8 +39,8 @@
         <div class="grid grid-cols-1 gap-4">
             @foreach($promoCodes as $promo)
                 <div class="card p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-3 mb-2">
                                 <span class="text-2xl font-bold text-primary-600">{{ $promo->code }}</span>
                                 @if($promo->is_valid)
@@ -98,7 +98,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 ml-4">
+                        <div class="flex items-center gap-2 flex-shrink-0">
                             <button wire:click="openEditModal({{ $promo->id }})" 
                                     class="btn btn-secondary px-4 py-2 text-sm hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -343,12 +343,12 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
-                        <button type="button" wire:click="closeModal" 
-                                class="btn btn-secondary px-6 py-3 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm hover:shadow-md">
+                        <button type="button" wire:click="closeModal"
+                                class="btn btn-secondary px-6 py-3 flex items-center gap-2 hover:bg-neutral-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm hover:shadow-md min-h-[52px] touch-manipulation">
                             Annuler
                         </button>
-                        <button type="submit" 
-                                class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:bg-primary-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md">
+                        <button type="submit"
+                                class="btn btn-primary px-6 py-3 flex items-center gap-2 hover:bg-primary-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md min-h-[52px] touch-manipulation">
                             {{ $editingPromo ? 'Enregistrer' : 'Créer' }}
                         </button>
                     </div>

@@ -2,17 +2,17 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900">Rentabilité des plats</h1>
-            <p class="text-sm text-neutral-500 mt-1">Coût, marge et profit par plat</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Rentabilité des plats</h1>
+            <p class="text-sm text-neutral-500 mt-1 hidden sm:block">Coût, marge et profit par plat</p>
         </div>
-        <div class="flex items-center gap-3">
-            <select wire:model.live="period" class="text-sm border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+        <div class="flex flex-wrap items-center gap-3">
+            <select wire:model.live="period" class="text-sm border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 h-10">
                 <option value="7">7 derniers jours</option>
                 <option value="30">30 derniers jours</option>
                 <option value="90">3 mois</option>
                 <option value="365">1 an</option>
             </select>
-            <select wire:model.live="sort" class="text-sm border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+            <select wire:model.live="sort" class="text-sm border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 h-10">
                 <option value="margin_desc">Marge (haute → basse)</option>
                 <option value="margin_asc">Marge (basse → haute)</option>
                 <option value="profit_desc">Profit total</option>

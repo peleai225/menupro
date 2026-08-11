@@ -8,8 +8,8 @@
                 </svg>
                 Retour au stock
             </a>
-            <h1 class="text-2xl font-bold text-neutral-900">Mise à jour en masse</h1>
-            <p class="text-neutral-500 mt-1">Mettez à jour toutes les quantités d'un coup, comme un inventaire.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">Mise à jour en masse</h1>
+            <p class="text-neutral-500 mt-1 hidden sm:block">Mettez à jour toutes les quantités d'un coup, comme un inventaire.</p>
         </div>
     </div>
 
@@ -41,7 +41,7 @@
             </div>
             <button wire:click="saveAll"
                     wire:loading.attr="disabled"
-                    class="btn btn-primary px-6 py-3 flex items-center gap-2 shrink-0 {{ $this->changedCount === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                    class="btn btn-primary px-6 py-3 flex items-center gap-2 shrink-0 min-h-[52px] touch-manipulation {{ $this->changedCount === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                     {{ $this->changedCount === 0 ? 'disabled' : '' }}>
                 <span wire:loading.remove wire:target="saveAll">
                     Enregistrer ({{ $this->changedCount }} modif.)
