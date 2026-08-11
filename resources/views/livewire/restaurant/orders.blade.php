@@ -718,7 +718,8 @@
                     </div>
 
                     <!-- Footer - Totals & Actions -->
-                    <div class="flex-shrink-0 border-t" style="border-color: #e5e7eb;">
+                    {{-- Quand commande finale : pb-16 lg:pb-0 pour passer au-dessus de la navbar mobile --}}
+                    <div class="flex-shrink-0 border-t {{ $selectedOrder->is_final ? 'pb-16 lg:pb-0' : '' }}" style="border-color: #e5e7eb;">
                         <!-- Totals -->
                         <div class="px-4 sm:px-6 py-4" style="background: #1f2937;">
                             <div class="space-y-2 text-sm">
