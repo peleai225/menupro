@@ -469,33 +469,36 @@
         </div>
     @endif
 
-    <!-- Order Detail Modal - Modern Design -->
+    <!-- Order Detail — Barre latérale (slide depuis la droite) -->
     @if($selectedOrder)
-        <div class="fixed inset-0 z-50" 
-             wire:key="order-modal-{{ $selectedOrder->id }}"
-             x-data="{ show: true }"
-             x-show="show"
-             x-cloak
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-init="document.body.classList.add('overflow-hidden')"
+        <div class="fixed inset-0 z-50"
+             wire:key="order-panel-{{ $selectedOrder->id }}"
+             x-data="{ show: false }"
+             x-init="$nextTick(() => { show = true }); document.body.classList.add('overflow-hidden')"
              x-on:remove="document.body.classList.remove('overflow-hidden')"
              @keydown.escape.window="document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()">
-            
-            <!-- Backdrop -->
-            <div class="fixed inset-0" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);" 
-                 @click="document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()"></div>
 
-            <!-- Modal Container -->
-            <div class="fixed inset-0 flex items-center justify-center p-4 pb-safe">
-                <!-- Modal Content -->
-                <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-                     style="max-height: min(90vh, calc(100vh - 120px));"
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                     x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+            <!-- Backdrop — tap pour fermer sur mobile -->
+            <div class="fixed inset-0 transition-opacity duration-300"
+                 style="background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);"
+                 x-show="show"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 @click="show = false; document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()">
+            </div>
+
+            <!-- Panneau latéral — glisse depuis la droite -->
+            <div class="fixed top-0 right-0 h-full flex flex-col bg-white shadow-2xl"
+                 style="width: min(480px, 100vw);"
+                 x-show="show"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="translate-x-full"
+                 @click.stop>
                     
                     <!-- Header Compact -->
                     <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200" style="background: #f8fafc;">
@@ -544,7 +547,7 @@
                                     </svg>
                                     <span class="hidden sm:inline">Imprimer</span>
                                 </a>
-                                <button @click="document.body.classList.remove('overflow-hidden'); $wire.closeOrderModal()" 
+                                <button @click="show = false; document.body.classList.remove('overflow-hidden'); setTimeout(() => $wire.closeOrderModal(), 200)"
                                         class="p-2 rounded-lg transition-colors"
                                         style="background: #fee2e2; color: #dc2626;"
                                         title="Fermer">
@@ -896,7 +899,6 @@
                         </div>
                     </div>
                     @endif
-                </div>
             </div>
         </div>
     @endif
