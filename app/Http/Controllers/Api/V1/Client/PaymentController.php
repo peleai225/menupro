@@ -181,16 +181,15 @@ class PaymentController extends Controller
      * La modification d'état (markAsPaid, assignation livreur) est exclusivement gérée par
      * le webhook signé afin d'éviter toute manipulation via un appel GET non authentifié.
      */
-    public function success(Request $request): JsonResponse
+    public function success(Request $request)
     {
         $order = Order::where('tracking_token', $request->token)->firstOrFail();
 
-        return response()->json([
-            'message'        => 'Redirection paiement reçue. Statut en cours de vérification.',
-            'tracking_token' => $order->tracking_token,
-            'order_status'   => $order->status,
-            'payment_status' => $order->payment_status,
-        ]);
+        // Rediriger vers la PWA avec le tracking token — le frontend détecte
+        // ce paramètre et navigue directement vers la page de suivi.
+        $frontendUrl = env('FRONTEND_URL', 'https://mpa-five.vercel.app');
+
+        return redirect($frontendUrl . '?tracking=' . $order->tracking_token);
     }
 
     /**
@@ -199,16 +198,12 @@ class PaymentController extends Controller
      * Ce callback GET ne modifie pas l'état de la commande — la mise à jour du statut de
      * paiement est réservée au webhook signé.
      */
-    public function error(Request $request): JsonResponse
+    public function error(Request $request)
     {
-        $order = Order::where('tracking_token', $request->token)->first();
+        $frontendUrl = env('FRONTEND_URL', 'https://mpa-five.vercel.app');
 
-        return response()->json([
-            'message'        => 'Le paiement a échoué ou été annulé. Veuillez réessayer.',
-            'tracking_token' => $request->token,
-            'order_status'   => $order?->status,
-            'payment_status' => $order?->payment_status,
-        ], 400);
+        // Rediriger vers la PWA — l'utilisateur peut réessayer via "Finaliser le paiement"
+        return redirect($frontendUrl . '?tracking=' . $request->token . '&payment_error=1');
     }
 
     /**
