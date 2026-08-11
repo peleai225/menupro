@@ -22,6 +22,7 @@ class DeliveryZoneController extends Controller
         $data = $request->validate([
             'name'             => 'required|string|max:100',
             'city'             => 'required|string|max:100',
+            'delivery_city_id' => 'nullable|integer|exists:delivery_cities,id',
             'radius_km'        => 'required|integer|min:1|max:50',
             'center_latitude'  => 'nullable|numeric|between:-90,90',
             'center_longitude' => 'nullable|numeric|between:-180,180',

@@ -136,8 +136,8 @@
                     {{-- Footer --}}
                     <div class="px-6 py-4 border-t flex items-center justify-between gap-4" style="border-color:var(--sa-border);">
                         <p class="text-xs" style="color:var(--sa-muted-fg);">
-                            Les prix sont en <strong>centimes XOF</strong> (ex : 150000 = 1 500 FCFA).
-                            Les entrées à 0 ou vides ne sont pas enregistrées.
+                            Prix en <strong style="color:var(--sa-fg)">FCFA entiers</strong> (ex : 500, 1000, 1500).
+                            Case vide ou 0 = calcul au km automatique.
                         </p>
                         <button type="submit"
                                 class="h-10 px-6 rounded-xl text-sm font-medium flex items-center gap-2 transition-opacity hover:opacity-90 shrink-0"
@@ -150,6 +150,47 @@
                     </div>
                 </div>
             </form>
+
+            {{-- Ajouter un nouveau quartier --}}
+            <div class="rounded-2xl border shadow-sm p-5" style="border-color:var(--sa-border);background:var(--sa-card);">
+                <h2 class="text-base font-semibold mb-4" style="color:var(--sa-fg);">
+                    Ajouter un quartier à {{ $city->name }}
+                </h2>
+                <form method="POST" action="{{ route('super-admin.delivery-zones.store') }}"
+                      class="flex flex-wrap gap-3 items-end">
+                    @csrf
+                    {{-- Champs cachés --}}
+                    <input type="hidden" name="delivery_city_id" value="{{ $city->id }}">
+                    <input type="hidden" name="city" value="{{ $city->name }}">
+                    <input type="hidden" name="is_active" value="1">
+
+                    <div class="flex-1 min-w-48">
+                        <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Nom du quartier</label>
+                        <input type="text" name="name" required
+                               placeholder="ex: Tazibouo, Corridor, Zone industrielle..."
+                               class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none focus:ring-2"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                    </div>
+                    <div class="w-32">
+                        <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Rayon (km)</label>
+                        <input type="number" name="radius_km" value="3" min="1" max="50"
+                               class="w-full h-10 px-3 rounded-xl border text-sm focus:outline-none focus:ring-2"
+                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
+                    </div>
+                    <button type="submit"
+                            class="h-10 px-5 rounded-xl text-sm font-medium flex items-center gap-2 transition-opacity hover:opacity-90"
+                            style="background:var(--sa-primary);color:var(--sa-primary-fg);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Ajouter le quartier
+                    </button>
+                </form>
+                @if(session('success') && str_contains(session('success'), 'créée'))
+                    <p class="text-sm mt-3" style="color:var(--sa-success);">✅ Quartier ajouté. La matrice se met à jour automatiquement.</p>
+                @endif
+            </div>
+
         @endif
     </div>
 </x-layouts.admin-super>
