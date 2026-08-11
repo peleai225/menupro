@@ -310,20 +310,20 @@
              x-transition:enter-start="opacity-0 transform translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
              class="card overflow-hidden">
-            <!-- Table avec scroll horizontal sur mobile -->
+            <!-- Table — responsive : 4 colonnes sur mobile, toutes sur desktop -->
             <div class="overflow-x-auto -mx-4 sm:mx-0">
                 <div class="inline-block min-w-full align-middle">
-                    <table class="w-full min-w-[700px]">
+                    <table class="w-full">
                     <thead class="bg-gradient-to-r from-neutral-50 to-neutral-100 border-b border-neutral-200">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Commande</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Client</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Total</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Paiement</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Statut</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-neutral-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-4 w-16"></th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Commande</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Client</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden md:table-cell">Type</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Total</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden lg:table-cell">Paiement</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Date</th>
+                            <th class="px-2 sm:px-4 py-3 sm:py-4 w-10 sm:w-16"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100">
@@ -333,26 +333,26 @@
                                 wire:loading.class="opacity-50"
                                 wire:target="viewOrder"
                                 style="animation: fade-slide-up 0.3s ease-out {{ $index * 50 }}ms both;">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl {{ $order->status->value === 'pending_payment' || $order->status->value === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-primary-100 text-primary-600' }} flex items-center justify-center font-mono font-bold text-sm">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <div class="flex items-center gap-2 sm:gap-3">
+                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl {{ $order->status->value === 'pending_payment' || $order->status->value === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-primary-100 text-primary-600' }} flex items-center justify-center font-mono font-bold text-xs sm:text-sm shrink-0">
                                             {{ substr($order->reference, -3) }}
                                         </div>
-                                        <span class="font-mono font-semibold text-neutral-900">#{{ $order->reference }}</span>
+                                        <span class="font-mono font-semibold text-xs sm:text-sm text-neutral-900 truncate max-w-[80px] sm:max-w-none">#{{ $order->reference }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="avatar avatar-sm bg-gradient-to-br from-neutral-300 to-neutral-400 text-white">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
+                                    <div class="flex items-center gap-2 sm:gap-3">
+                                        <div class="avatar avatar-sm bg-gradient-to-br from-neutral-300 to-neutral-400 text-white shrink-0">
                                             {{ strtoupper(substr($order->customer_name ?? 'C', 0, 1)) }}
                                         </div>
-                                        <div>
-                                            <p class="font-medium text-neutral-900">{{ $order->customer_name }}</p>
-                                            <p class="text-sm text-neutral-500">{{ $order->customer_phone }}</p>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-sm text-neutral-900 truncate">{{ $order->customer_name }}</p>
+                                            <p class="text-xs text-neutral-500 truncate">{{ $order->customer_phone }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                                     @php
                                         $typeConfig = match($order->type) {
                                             \App\Enums\OrderType::DINE_IN => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700'],
@@ -381,10 +381,10 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($order->total, 0, ',', ' ') }} F</span>
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <span class="font-bold text-sm text-neutral-900 tabular-nums whitespace-nowrap">{{ number_format($order->total, 0, ',', ' ') }} F</span>
                                 </td>
-                                <td class="px-6 py-4 hidden sm:table-cell">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                                     @php
                                         $method = $order->payment_method;
                                         $operator = $order->payment_metadata['jeko_operator'] ?? null;
@@ -410,7 +410,7 @@
                                         <span class="text-sm text-neutral-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
                                     @php
                                         $statusClasses = [
                                             'pending_payment' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -426,21 +426,21 @@
                                         $statusClass = $statusClasses[$order->status->value] ?? 'bg-neutral-100 text-neutral-700';
                                         $isPending = in_array($order->status->value, ['pending', 'pending_payment', 'preparing']);
                                     @endphp
-                                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border {{ $statusClass }}">
+                                    <span class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold border {{ $statusClass }} whitespace-nowrap">
                                         @if($isPending)
                                             <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
                                         @endif
                                         {{ $order->status->label() }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                                     <div>
-                                        <p class="font-medium text-neutral-900">{{ $order->created_at->format('d/m/Y') }}</p>
-                                        <p class="text-sm text-neutral-500">{{ $order->created_at->format('H:i') }}</p>
+                                        <p class="font-medium text-xs sm:text-sm text-neutral-900 whitespace-nowrap">{{ $order->created_at->format('d/m/Y') }}</p>
+                                        <p class="text-[10px] sm:text-xs text-neutral-500">{{ $order->created_at->format('H:i') }}</p>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <button class="p-2 rounded-xl hover:bg-primary-50 text-neutral-400 group-hover:text-primary-500 transition-all">
+                                <td class="px-2 sm:px-4 py-3 sm:py-4">
+                                    <button class="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-primary-50 text-neutral-400 group-hover:text-primary-500 transition-all touch-manipulation">
                                         <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                         </svg>
