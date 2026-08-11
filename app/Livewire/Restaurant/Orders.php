@@ -378,7 +378,8 @@ class Orders extends Component
                 $platformCut = (int) round($gross * \App\Services\DriverAssignmentService::PLATFORM_CUT_RATE);
                 $net         = $gross - $platformCut;
 
-                if ($gross > 0) {
+                // firstOrCreate évite le double-earning si confirmRemittance est appelé deux fois
+                if ($gross > 0 && !DriverEarning::where('delivery_id', $delivery->id)->exists()) {
                     DriverEarning::create([
                         'driver_id'    => $delivery->driver_id,
                         'order_id'     => $order->id,

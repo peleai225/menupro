@@ -125,6 +125,18 @@ class DriverManagementController extends Controller
         $driver = DeliveryDriver::findOrFail($id);
 
         DB::transaction(function () use ($driver) {
+            // Annuler la livraison active si elle existe
+            $activeDelivery = $driver->activeDelivery();
+            if ($activeDelivery) {
+                $activeDelivery->update([
+                    'status'           => \App\Enums\DeliveryStatus::CANCELLED->value,
+                    'cancelled_at'     => now(),
+                    'cancellation_reason' => 'Livreur suspendu par un administrateur.',
+                ]);
+                // Remettre la commande en attente de nouveau livreur
+                $activeDelivery->order?->update(['driver_assigned_at' => null]);
+            }
+
             $driver->update([
                 'verification_status' => 'suspended',
                 'is_active'           => false,

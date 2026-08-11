@@ -443,6 +443,26 @@ class Order extends Model
 
         $saved = $this->save();
 
+        if ($saved) {
+            // Annuler la livraison active si le livreur est en route
+            $activeDelivery = $this->delivery()
+                ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up', 'delivering'])
+                ->first();
+
+            if ($activeDelivery) {
+                $activeDelivery->update([
+                    'status'              => \App\Enums\DeliveryStatus::CANCELLED->value,
+                    'cancelled_at'        => now(),
+                    'cancellation_reason' => 'Commande annulée par le restaurant.',
+                ]);
+                // Remettre le livreur disponible
+                if ($activeDelivery->driver_id) {
+                    \App\Models\DeliveryDriver::where('id', $activeDelivery->driver_id)
+                        ->update(['is_available' => true]);
+                }
+            }
+        }
+
         if ($saved && $wasPaid) {
             // Restore dish stock
             $this->restoreDishStock();
