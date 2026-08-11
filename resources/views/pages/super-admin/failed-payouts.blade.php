@@ -81,6 +81,7 @@
                             $sub = $order->restaurant?->jekoSubMerchant;
                             $isIntegrated = $sub?->isIntegrated() ?? false;
                             $payoutStatus = $order->payout_status;
+                            $isManual = $payoutStatus === 'manual';
                             $isDone = in_array($payoutStatus, ['completed', 'manual']);
                             $isFailed = $payoutStatus === 'failed';
                             $operator = $order->payment_metadata['jeko_operator'] ?? $order->payment_metadata['operator'] ?? '';
