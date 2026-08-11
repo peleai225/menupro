@@ -62,6 +62,9 @@ class Order extends Model
         'completed_at',
         'cancelled_at',
         'cancellation_reason',
+        'payout_status',
+        'payout_at',
+        'payout_reference',
     ];
 
     protected $casts = [
@@ -82,6 +85,7 @@ class Order extends Model
         'ready_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'payout_at' => 'datetime',
         'estimated_prep_time' => 'integer',
     ];
 

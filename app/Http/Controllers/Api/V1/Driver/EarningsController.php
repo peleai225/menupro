@@ -120,20 +120,14 @@ class EarningsController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($driver, $data) {
-                // Marquer les gains comme paid
-                DriverEarning::where('driver_id', $driver->id)
-                    ->where('status', 'available')
-                    ->orderBy('created_at')
-                    ->limit($this->countEarningsUpTo($driver->id, $data['amount']))
-                    ->update([
-                        'status'         => 'paid',
-                        'paid_at'        => now(),
-                        'payment_method' => $data['payment_method'],
-                    ]);
-            });
+            // Récupérer les IDs exacts des gains à marquer paid (déterministe)
+            $earningIds = $this->getEarningIdsUpTo($driver->id, $data['amount']);
 
-            // Initier le virement Wave
+            if (empty($earningIds)) {
+                return response()->json(['message' => 'Solde insuffisant.'], 422);
+            }
+
+            // Initier le virement Wave EN PREMIER — ne marquer paid qu'en cas de succès
             $payout = $this->wave->createPayout(
                 amount: $data['amount'] / 100,
                 mobile: $data['mobile'],
@@ -141,9 +135,20 @@ class EarningsController extends Controller
                 reference: 'DRIVER-' . $driver->id . '-' . now()->format('YmdHis'),
             );
 
+            // Virement réussi → marquer les gains comme paid avec les IDs exacts
+            DB::transaction(function () use ($earningIds, $data, $payout) {
+                DriverEarning::whereIn('id', $earningIds)
+                    ->update([
+                        'status'         => 'paid',
+                        'paid_at'        => now(),
+                        'payment_method' => $data['payment_method'],
+                    ]);
+            });
+
             Log::info('Driver payout requested', [
-                'driver_id' => $driver->id,
-                'amount'    => $data['amount'],
+                'driver_id'  => $driver->id,
+                'amount'     => $data['amount'],
+                'payout_ref' => $payout['id'] ?? null,
             ]);
 
             return response()->json([
@@ -157,20 +162,22 @@ class EarningsController extends Controller
         }
     }
 
-    private function countEarningsUpTo(int $driverId, int $amount): int
+    /** Retourne les IDs exacts des gains à marquer paid pour couvrir le montant demandé. */
+    private function getEarningIdsUpTo(int $driverId, int $amount): array
     {
-        $count = 0;
-        $sum   = 0;
+        $ids = [];
+        $sum = 0;
 
         DriverEarning::where('driver_id', $driverId)
             ->where('status', 'available')
             ->orderBy('created_at')
-            ->each(function ($e) use (&$count, &$sum, $amount) {
+            ->select('id', 'net_amount')
+            ->each(function ($e) use (&$ids, &$sum, $amount) {
                 if ($sum >= $amount) return false;
                 $sum += $e->net_amount;
-                $count++;
+                $ids[] = $e->id;
             });
 
-        return $count;
+        return $ids;
     }
 }

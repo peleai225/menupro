@@ -171,11 +171,13 @@ class FinanceController extends Controller
     {
         $request->validate(['restaurant_id' => 'required|integer|exists:restaurants,id']);
 
+        // Ne relancer QUE les commandes non encore reversées (éviter les double-virements)
         $orders = Order::where('restaurant_id', $request->restaurant_id)
             ->whereIn('payment_method', ['jeko', 'wave'])
             ->whereNotNull('paid_at')
             ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
             ->where('paid_at', '>=', now()->subDays(30))
+            ->where(fn($q) => $q->whereNull('payout_status')->orWhereIn('payout_status', ['pending', 'failed']))
             ->get();
 
         $count = 0;

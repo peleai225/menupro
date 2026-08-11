@@ -86,12 +86,12 @@ class DeliveryCity extends Model
 
     public function getFormattedBaseFeeAttribute(): string
     {
-        return number_format($this->delivery_base_fee / 100, 0, ',', ' ') . ' FCFA';
+        return number_format($this->delivery_base_fee, 0, ',', ' ') . ' FCFA';
     }
 
     public function getFormattedFeePerKmAttribute(): string
     {
-        return number_format($this->delivery_fee_per_km / 100, 0, ',', ' ') . ' FCFA/km';
+        return number_format($this->delivery_fee_per_km, 0, ',', ' ') . ' FCFA/km';
     }
 
     public static function haversineKm(float $lat1, float $lng1, float $lat2, float $lng2): float

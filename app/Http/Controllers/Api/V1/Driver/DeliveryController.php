@@ -117,8 +117,7 @@ class DeliveryController extends Controller
      */
     public function accept(Request $request, int $deliveryId): JsonResponse
     {
-        $driver   = $request->user()->deliveryDriver;
-        $delivery = Delivery::where('status', DeliveryStatus::PENDING->value)->findOrFail($deliveryId);
+        $driver = $request->user()->deliveryDriver;
 
         if (!$driver->is_available) {
             return response()->json(['message' => 'Vous n\'êtes pas disponible.'], 422);
@@ -128,7 +127,16 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Vous avez déjà une course en cours.'], 422);
         }
 
-        DB::transaction(function () use ($delivery, $driver) {
+        // lockForUpdate() dans la transaction pour éviter que 2 livreurs acceptent simultanément
+        $accepted = DB::transaction(function () use ($driver, $deliveryId) {
+            $delivery = Delivery::where('status', DeliveryStatus::PENDING->value)
+                ->lockForUpdate()
+                ->find($deliveryId);
+
+            if (!$delivery) {
+                return null; // Course déjà prise par un autre livreur
+            }
+
             $delivery->update([
                 'driver_id'   => $driver->id,
                 'status'      => DeliveryStatus::ASSIGNED->value,
@@ -136,13 +144,18 @@ class DeliveryController extends Controller
             ]);
 
             $driver->update(['is_available' => false]);
-
             $delivery->order->update(['driver_assigned_at' => now()]);
+
+            return $delivery;
         });
+
+        if (!$accepted) {
+            return response()->json(['message' => 'Cette course a déjà été prise par un autre livreur.'], 409);
+        }
 
         return response()->json([
             'message' => 'Course acceptée.',
-            'data'    => $this->formatDeliveryDetail($delivery->fresh()->load(['order.items', 'restaurant'])),
+            'data'    => $this->formatDeliveryDetail($accepted->fresh()->load(['order.items', 'restaurant'])),
         ]);
     }
 
@@ -281,7 +294,10 @@ class DeliveryController extends Controller
                 return ['error' => 'La collecte a déjà été confirmée.', 'status' => 422];
             }
 
-            $amountOwed = max(0, $amountCollected - (int) $order->delivery_fee);
+            // La dette envers le restaurant = total de la commande MOINS les frais de livraison (qui restent au livreur).
+            // On utilise order->total et delivery_fee de la commande, pas le montant déclaré par le livreur,
+            // pour éviter que le livreur puisse diminuer sa propre dette en déclarant un montant inférieur.
+            $amountOwed = max(0, (int) $order->total - (int) $order->delivery_fee);
 
             $delivery->update([
                 'cash_collected'              => true,
