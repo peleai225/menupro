@@ -525,6 +525,79 @@
 </section>
 
 {{-- ══════════════════════════════════════
+     9b. APP LIVREURS
+══════════════════════════════════════ --}}
+<section class="py-20 bg-white relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 50% 60% at 20% 50%,rgba(255,97,0,.08),transparent)"></div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            {{-- Visuel --}}
+            <div class="flex flex-col items-center gap-6 fu order-2 lg:order-1">
+                <div class="bg-neutral-900 rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-xs w-full">
+                    <p class="text-sm font-black text-white">Application Livreurs</p>
+                    <div class="w-40 h-40 rounded-2xl overflow-hidden bg-neutral-800 flex items-center justify-center border border-neutral-700">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-driver.vercel.app/') }}&color=FF6100&bgcolor=1a1a1a&margin=10"
+                             alt="QR Code app livreurs MenuPro"
+                             class="w-full h-full object-cover"
+                             loading="lazy">
+                    </div>
+                    <p class="text-xs text-neutral-500 text-center">Scannez pour ouvrir l'app livreur</p>
+                    <a href="https://mpa-driver.vercel.app/"
+                       target="_blank"
+                       class="w-full text-center py-3 rounded-xl text-sm font-black text-white transition-all hover:opacity-90"
+                       style="background:#FF6100">
+                        Ouvrir l'app livreur →
+                    </a>
+                </div>
+            </div>
+
+            {{-- Texte --}}
+            <div class="text-center lg:text-left fu order-1 lg:order-2">
+                <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
+                <h2 class="text-4xl sm:text-5xl font-black text-neutral-900 leading-tight">
+                    Livrez avec<br>
+                    <span style="background:linear-gradient(120deg,#FF6100,#FF3301);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">MenuPro</span>
+                </h2>
+                <p class="text-neutral-500 text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                    Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.
+                </p>
+
+                <div class="mt-8 space-y-4">
+                    @foreach([
+                        ['Inscription rapide','Créez votre compte en 2 minutes avec votre CNI et permis.'],
+                        ['Courses en temps réel','Recevez les commandes proches de vous avec alerte sonore.'],
+                        ['Paiement Wave automatique','Vos gains sont virés sur demande, sans délai.'],
+                        ['Zéro frais','Aucun abonnement. Vous gagnez à chaque course effectuée.'],
+                    ] as $f)
+                    <div class="flex items-start gap-3 text-left">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background:rgba(255,97,0,.12)">
+                            <svg class="w-3.5 h-3.5" style="color:#FF6100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-black text-neutral-900 text-sm">{{ $f[0] }}</p>
+                            <p class="text-neutral-500 text-xs mt-0.5">{{ $f[1] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <div class="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
+                    <a href="https://mpa-driver.vercel.app/"
+                       target="_blank"
+                       class="group inline-flex items-center justify-center gap-2 px-7 py-4 text-white font-black rounded-2xl transition-all hover:-translate-y-0.5"
+                       style="background:#FF6100;box-shadow:0 0 30px rgba(255,97,0,.25)">
+                        🏍️ S'inscrire comme livreur
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{{-- ══════════════════════════════════════
      10. VIDÉO
 ══════════════════════════════════════ --}}
 @if(!empty($videos))
