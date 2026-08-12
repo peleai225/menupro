@@ -142,7 +142,7 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::prefix('dashboard')
     ->name('restaurant.')
-    ->middleware(['auth', 'set.restaurant.scope'])
+    ->middleware(['auth', 'set.restaurant.scope', 'restaurant.active'])
     ->group(function () {
         // Dashboard (Livewire) - tous
         Route::get('/', \App\Livewire\Restaurant\Dashboard::class)->name('dashboard');
