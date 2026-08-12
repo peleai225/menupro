@@ -580,8 +580,11 @@ Route::prefix('personnel/{token}')->name('staff.')->middleware('throttle:120,1')
 Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function () {
     Route::get('/',  [\App\Http\Controllers\Restaurant\KitchenController::class, 'display'])->name('kitchen.display');
     Route::get('/data', [\App\Http\Controllers\Restaurant\KitchenController::class, 'data'])->name('kitchen.data');
+    Route::get('/summary', [\App\Http\Controllers\Restaurant\KitchenController::class, 'dailySummary'])->name('kitchen.summary');
     Route::post('/tts', [\App\Http\Controllers\Restaurant\KitchenController::class, 'tts'])->name('kitchen.tts');
     Route::post('/orders/{order}/status', [\App\Http\Controllers\Restaurant\KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
+    Route::post('/items/{item}/prepared', [\App\Http\Controllers\Restaurant\KitchenController::class, 'markItemPrepared'])->name('kitchen.item-prepared');
+    Route::delete('/items/{item}/prepared', [\App\Http\Controllers\Restaurant\KitchenController::class, 'unmarkItemPrepared'])->name('kitchen.item-unprepared');
     Route::post('/service-requests/{serviceRequest}/done', [\App\Http\Controllers\Restaurant\KitchenController::class, 'serviceRequestDone'])->name('kitchen.service-request.done');
 });
 

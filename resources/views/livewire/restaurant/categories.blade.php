@@ -156,6 +156,9 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ ($category->preparation_station ?? 'cuisine') === 'bar' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700' }}">
+                                    {{ ($category->preparation_station ?? 'cuisine') === 'bar' ? '🍹 Bar' : '🍳 Cuisine' }}
+                                </span>
                                 @if(!$category->is_active)
                                     <span class="badge bg-neutral-800 text-white">Masqué</span>
                                 @endif
@@ -303,6 +306,20 @@
                                 @error('description')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
+                            </div>
+
+                            <!-- Poste de préparation -->
+                            <div>
+                                <label for="preparation_station" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                                    Poste de préparation
+                                </label>
+                                <select id="preparation_station"
+                                        wire:model="preparation_station"
+                                        class="input h-12">
+                                    <option value="cuisine">🍳 Cuisine</option>
+                                    <option value="bar">🍹 Bar / Boissons</option>
+                                </select>
+                                <p class="mt-1 text-xs text-neutral-500">Détermine sur quel écran les commandes de cette catégorie apparaissent</p>
                             </div>
 
                             <!-- Active Toggle -->

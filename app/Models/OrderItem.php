@@ -20,6 +20,8 @@ class OrderItem extends Model
         'selected_options',
         'options_price',
         'special_instructions',
+        'prepared_at',
+        'prepared_by',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class OrderItem extends Model
         'total_price' => 'integer',
         'selected_options' => 'array',
         'options_price' => 'integer',
+        'prepared_at' => 'datetime',
     ];
 
     // =========================================================================

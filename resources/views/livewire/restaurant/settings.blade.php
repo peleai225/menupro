@@ -1206,7 +1206,14 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                 </svg>
-                                Ouvrir l'écran cuisine
+                                🍳 Ecran Cuisine
+                            </a>
+                            <a href="{{ route('kitchen.display', [$restaurant->kitchen_token, 'station' => 'bar']) }}" target="_blank"
+                               class="btn bg-purple-500 hover:bg-purple-600 text-white min-h-[52px] px-4 py-3.5 flex items-center gap-2 touch-manipulation">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                🍹 Ecran Bar
                             </a>
                             <button type="button" @click="regenerateToken()"
                                     class="btn bg-neutral-200 hover:bg-neutral-300 text-neutral-700 min-h-[52px] px-4 py-3.5 flex items-center gap-2 touch-manipulation"

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Restaurant;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Restaurant;
 use App\Models\ServiceRequest;
 use Illuminate\Http\JsonResponse;
@@ -32,9 +33,10 @@ class KitchenController extends Controller
     /**
      * Kitchen display screen (no auth required, token-secured).
      */
-    public function display(string $token): View
+    public function display(string $token, Request $request): View
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+        $station = $request->query('station', 'cuisine');
 
         $orders = Order::withoutGlobalScope('restaurant')
             ->where('restaurant_id', $restaurant->id)
@@ -49,9 +51,11 @@ class KitchenController extends Controller
             ->oldest()
             ->get();
 
-        $ordersJson = $orders->map(fn($order) => $this->serializeOrder($order))->values();
+        $ordersJson = $orders->map(fn($order) => $this->serializeOrder($order, $station))
+            ->filter(fn($o) => count($o['items']) > 0)
+            ->values();
 
-        return view('pages.kitchen.display', compact('restaurant', 'ordersJson', 'token'));
+        return view('pages.kitchen.display', compact('restaurant', 'ordersJson', 'token', 'station'));
     }
 
     /**
@@ -133,9 +137,10 @@ class KitchenController extends Controller
     /**
      * Get orders data (AJAX polling from kitchen display).
      */
-    public function data(string $token): JsonResponse
+    public function data(string $token, Request $request): JsonResponse
     {
         $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+        $station = $request->query('station', 'cuisine');
 
         $orders = Order::withoutGlobalScope('restaurant')
             ->where('restaurant_id', $restaurant->id)
@@ -149,7 +154,9 @@ class KitchenController extends Controller
             ->with('items.dish.category')
             ->oldest()
             ->get()
-            ->map(fn($order) => $this->serializeOrder($order));
+            ->map(fn($order) => $this->serializeOrder($order, $station))
+            ->filter(fn($o) => count($o['items']) > 0)
+            ->values();
 
         $serviceRequests = ServiceRequest::where('restaurant_id', $restaurant->id)
             ->where('status', 'pending')
@@ -240,8 +247,100 @@ class KitchenController extends Controller
         return response()->json(['success' => true, 'new_status' => $newStatus->value]);
     }
 
-    private function serializeOrder(Order $order): array
+    /**
+     * Mark a single order item as prepared (kitchen bon tracking).
+     */
+    public function markItemPrepared(string $token, OrderItem $item): JsonResponse
     {
+        $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+        $order = Order::withoutGlobalScope('restaurant')->findOrFail($item->order_id);
+
+        if ((int) $order->restaurant_id !== (int) $restaurant->id) {
+            abort(403);
+        }
+
+        $item->update(['prepared_at' => now()]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Unmark a single order item (undo prepared).
+     */
+    public function unmarkItemPrepared(string $token, OrderItem $item): JsonResponse
+    {
+        $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+        $order = Order::withoutGlobalScope('restaurant')->findOrFail($item->order_id);
+
+        if ((int) $order->restaurant_id !== (int) $restaurant->id) {
+            abort(403);
+        }
+
+        $item->update(['prepared_at' => null]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Kitchen daily summary (bon recap).
+     */
+    public function dailySummary(string $token): JsonResponse
+    {
+        $restaurant = Restaurant::where('kitchen_token', $token)->firstOrFail();
+
+        $today = now()->startOfDay();
+
+        $orders = Order::withoutGlobalScope('restaurant')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('created_at', '>=', $today)
+            ->whereIn('status', [
+                OrderStatus::CONFIRMED,
+                OrderStatus::PREPARING,
+                OrderStatus::READY,
+                OrderStatus::COMPLETED,
+            ])
+            ->with('items.dish.category')
+            ->get();
+
+        $kitchenItems = $orders->flatMap(fn($o) => $o->items)
+            ->filter(fn($item) => ($item->dish?->category?->preparation_station ?? 'cuisine') === 'cuisine');
+
+        $totalItems = $kitchenItems->count();
+        $preparedItems = $kitchenItems->whereNotNull('prepared_at')->count();
+
+        return response()->json([
+            'date'           => now()->format('d/m/Y'),
+            'total_orders'   => $orders->count(),
+            'total_items'    => $totalItems,
+            'prepared_items' => $preparedItems,
+            'pending_items'  => $totalItems - $preparedItems,
+            'completion_pct' => $totalItems > 0 ? round(($preparedItems / $totalItems) * 100) : 0,
+        ]);
+    }
+
+    private function serializeOrder(Order $order, ?string $station = null): array
+    {
+        $items = $order->items->map(function ($item) {
+            $cat = $item->dish?->category;
+            return [
+                'id'        => $item->id,
+                'quantity'  => $item->quantity,
+                'name'      => $item->dish?->name ?? $item->dish_name ?? 'Plat',
+                'category'  => $cat?->name ?? '',
+                'station'   => $cat?->preparation_station ?? 'cuisine',
+                'photo'     => $item->dish?->image_path
+                                ? \Illuminate\Support\Facades\Storage::url($item->dish->image_path)
+                                : null,
+                'options'      => $item->selected_options ?? [],
+                'instructions' => $item->special_instructions,
+                'prepared_at'  => $item->prepared_at?->format('H:i'),
+            ];
+        });
+
+        if ($station) {
+            $items = $items->filter(fn($i) => $i['station'] === $station)->values();
+        }
+
         return [
             'id'             => $order->id,
             'reference'      => $order->reference,
@@ -254,16 +353,7 @@ class KitchenController extends Controller
             'created_at'     => $order->created_at->format('H:i'),
             'minutes_ago'    => $order->created_at->diffInMinutes(now()),
             'ready_at'       => $order->ready_at?->format('H:i'),
-            'items'          => $order->items->map(fn($item) => [
-                'quantity'     => $item->quantity,
-                'name'         => $item->dish?->name ?? $item->dish_name ?? 'Plat',
-                'category'     => $item->dish?->category?->name ?? '',
-                'photo'        => $item->dish?->image_path
-                                    ? \Illuminate\Support\Facades\Storage::url($item->dish->image_path)
-                                    : null,
-                'options'      => $item->selected_options ?? [],
-                'instructions' => $item->special_instructions,
-            ])->values()->all(),
+            'items'          => $items->all(),
         ];
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Cuisine — {{ $restaurant->name }}</title>
+    <title>{{ $station === 'bar' ? 'Bar' : 'Cuisine' }} — {{ $restaurant->name }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,7 +40,7 @@
         #tabs .tb-cnt.svc  { background: #8b5cf6; }
 
         /* ── LAYOUT ────────────────────────────────────────── */
-        #main { display: flex; height: calc(100vh - 52px); }
+        #main { display: flex; height: calc(100vh - 52px - 32px); }
         .col { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #181818; min-width: 0; }
         .col:last-child { border-right: none; }
 
@@ -106,6 +106,18 @@
         .rdy-lbl { text-align: center; font-size: 12px; color: #4ade80; font-weight: 700; padding: 8px; background: rgba(34,197,94,.07); border-radius: 8px; margin-top: 9px; }
         .empty { display: flex; align-items: center; justify-content: center; height: 100px; color: #252525; font-size: 13px; }
 
+        /* ── CHECKBOXES ITEMS (BONS) ─────────────────────── */
+        .ichk { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #333; background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: 2px; }
+        .ichk:hover { border-color: #f97316; }
+        .ichk.done { background: #22c55e; border-color: #22c55e; }
+        .ichk.done::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 900; }
+        .item.prepared .iname { text-decoration: line-through; opacity: .5; }
+
+        /* ── RECAP BANNER ────────────────────────────────── */
+        #recap { height: 32px; background: #111; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 12px; font-weight: 600; color: #9ca3af; flex-shrink: 0; }
+        #recap .rval { color: #f97316; font-weight: 900; }
+        #recap .rval.green { color: #22c55e; }
+
         /* ── ALERTE ────────────────────────────────────────── */
         #alrt { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 150; align-items: center; justify-content: center; }
         #alrt.on { display: flex; }
@@ -118,7 +130,7 @@
         /* ── RESPONSIVE ─────────────────────────────────────── */
         @media (max-width: 767px) {
             #tabs { display: flex; }
-            #main { height: calc(100vh - 52px - 42px); }
+            #main { height: calc(100vh - 52px - 32px - 42px); }
             .col { display: none; }
             .col.active { display: flex; flex: 1; border-right: none; }
         }
@@ -135,8 +147,8 @@
 
 {{-- SPLASH --}}
 <div id="splash">
-    <div id="splash-icon">🍳</div>
-    <h2>Écran Cuisine</h2>
+    <div id="splash-icon">{{ $station === 'bar' ? '🍹' : '🍳' }}</div>
+    <h2>Écran {{ $station === 'bar' ? 'Bar' : 'Cuisine' }}</h2>
     <p>{{ $restaurant->name }}</p>
     <button id="splash-btn" onclick="kdsStart()">▶&nbsp;&nbsp;Démarrer</button>
 </div>
@@ -163,6 +175,14 @@
         <span id="clk"></span>
     </div>
 </header>
+
+{{-- RECAP QUOTIDIEN --}}
+<div id="recap">
+    <span>📋 Aujourd'hui :</span>
+    <span><span class="rval" id="rc-prep">0</span> préparés</span>
+    <span><span class="rval" id="rc-pend">0</span> en attente</span>
+    <span><span class="rval green" id="rc-pct">0%</span></span>
+</div>
 
 {{-- TABS (mobile uniquement) --}}
 <div id="tabs">
@@ -213,6 +233,7 @@
 <script>
 (function(){
     var TOKEN   = '{{ $token }}';
+    var STATION = '{{ $station }}';
     var CSRF    = document.querySelector('meta[name="csrf-token"]').content;
     // JSON encodé en base64 pour éviter tout conflit avec quotes/caractères spéciaux
     var INITIAL = JSON.parse(atob('{{ base64_encode(json_encode($ordersJson)) }}'));
@@ -231,9 +252,9 @@
     render(INITIAL);
     firstRender = false;
 
-    fetch('/cuisine/'+TOKEN+'/data').then(handleData).catch(function(){ setDot(false); });
+    fetch('/cuisine/'+TOKEN+'/data?station='+STATION).then(handleData).catch(function(){ setDot(false); });
     setInterval(function(){
-        fetch('/cuisine/'+TOKEN+'/data').then(handleData).catch(function(){ setDot(false); });
+        fetch('/cuisine/'+TOKEN+'/data?station='+STATION).then(handleData).catch(function(){ setDot(false); });
     }, 5000);
 
     startClock();
@@ -279,6 +300,38 @@
             renderService(svcList);
         });
     }
+
+    /* ══ TOGGLE ITEM PRÉPARÉ ═════════════════════════════ */
+    window.toggleItem = function(itemId, markDone, btn) {
+        btn.disabled = true;
+        var method = markDone ? 'POST' : 'DELETE';
+        fetch('/cuisine/'+TOKEN+'/items/'+itemId+'/prepared', {
+            method: method,
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':CSRF},
+            body: JSON.stringify({})
+        }).then(function(r){
+            if (r.ok) {
+                fetch('/cuisine/'+TOKEN+'/data?station='+STATION).then(handleData);
+                loadSummary();
+            }
+            btn.disabled = false;
+        }).catch(function(){ btn.disabled=false; });
+    };
+
+    /* ══ RECAP QUOTIDIEN ═════════════════════════════════ */
+    function loadSummary() {
+        fetch('/cuisine/'+TOKEN+'/summary?station='+STATION).then(function(r){
+            if (!r.ok) return;
+            r.json().then(function(d){
+                var el = document.getElementById;
+                document.getElementById('rc-prep').textContent = d.prepared_items;
+                document.getElementById('rc-pend').textContent = d.pending_items;
+                document.getElementById('rc-pct').textContent = d.completion_pct + '%';
+            });
+        }).catch(function(){});
+    }
+    loadSummary();
+    setInterval(loadSummary, 30000);
 
     /* ══ ACTION SERVICE ═══════════════════════════════════ */
     window.svcDone = function(id, btn) {
@@ -365,7 +418,12 @@
             }).join('');
             var note = it.instructions ? '<div class="inote">&#9888; '+h(it.instructions)+'</div>' : '';
             var photo = it.photo ? '<img class="iphoto" src="'+h(it.photo)+'" alt="'+h(it.name||'')+'" loading="lazy">' : '';
-            return '<div class="item">'
+            var isDone = !!it.prepared_at;
+            var chkClass = 'ichk' + (isDone ? ' done' : '');
+            var itemClass = 'item' + (isDone ? ' prepared' : '');
+            var chk = it.id ? '<button class="'+chkClass+'" onclick="toggleItem('+parseInt(it.id,10)+','+(isDone?'false':'true')+',this)" title="'+(isDone?'Annuler':'Marquer préparé')+'"></button>' : '';
+            return '<div class="'+itemClass+'">'
+                +chk
                 +'<span class="iqty">'+h(it.quantity)+'x</span>'
                 +photo
                 +'<div style="min-width:0;flex:1;"><span class="iname">'+h(it.name||'Plat')+'</span>'

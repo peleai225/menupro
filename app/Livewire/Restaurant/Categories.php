@@ -19,6 +19,9 @@ class Categories extends Component
     #[Rule('nullable|string|max:500')]
     public ?string $description = null;
 
+    #[Rule('required|in:cuisine,bar')]
+    public string $preparation_station = 'cuisine';
+
     public bool $is_active = true;
 
     #[Computed]
@@ -33,13 +36,14 @@ class Categories extends Component
     public function openModal(?int $id = null): void
     {
         $this->resetValidation();
-        $this->reset(['name', 'description', 'is_active']);
-        
+        $this->reset(['name', 'description', 'is_active', 'preparation_station']);
+
         if ($id) {
             $category = Category::findOrFail($id);
             $this->editingId = $id;
             $this->name = $category->name;
             $this->description = $category->description;
+            $this->preparation_station = $category->preparation_station ?? 'cuisine';
             $this->is_active = $category->is_active;
         } else {
             $this->editingId = null;
@@ -62,6 +66,7 @@ class Categories extends Component
             $data = [
                 'name' => $this->name,
                 'description' => $this->description,
+                'preparation_station' => $this->preparation_station,
                 'is_active' => $this->is_active,
             ];
 
