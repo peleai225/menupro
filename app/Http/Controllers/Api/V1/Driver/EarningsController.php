@@ -84,6 +84,11 @@ class EarningsController extends Controller
      */
     public function requestPayout(Request $request): JsonResponse
     {
+        Log::info('Payout request received', [
+            'driver_id' => $request->user()->deliveryDriver?->id,
+            'payload'   => $request->only(['amount', 'mobile', 'payment_method', 'phone']),
+        ]);
+
         $data = $request->validate([
             'amount'         => 'required|integer|min:500',
             'mobile'         => 'required|string|max:20',

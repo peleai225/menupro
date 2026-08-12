@@ -126,6 +126,13 @@ class AuthController extends Controller
     {
         $driver = $request->user()->deliveryDriver;
 
+        Log::info('Driver updateProfile called', [
+            'driver_id'  => $driver?->id,
+            'fields'     => array_keys($request->all()),
+            'has_photo'  => $request->hasFile('photo'),
+            'method'     => $request->method(),
+        ]);
+
         $data = $request->validate([
             'name'          => 'sometimes|string|max:100',
             'city'          => 'sometimes|string|max:100',
