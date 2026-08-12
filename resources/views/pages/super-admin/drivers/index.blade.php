@@ -109,10 +109,22 @@
                         onmouseout="this.style.background='transparent'">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                <span class="flex w-9 h-9 items-center justify-center rounded-xl text-sm font-bold text-white flex-shrink-0"
-                                      style="background:linear-gradient(135deg,var(--sa-primary),#7c5c9e);">
-                                    {{ strtoupper(substr($driver->name, 0, 1)) }}
-                                </span>
+                                @if($driver->photo_path)
+                                    <img src="{{ \App\Support\StorageUrl::url($driver->photo_path) }}"
+                                         alt="{{ $driver->name }}"
+                                         class="w-9 h-9 rounded-xl object-cover flex-shrink-0 border"
+                                         style="border-color:var(--sa-border);"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <span class="w-9 h-9 items-center justify-center rounded-xl text-sm font-bold text-white flex-shrink-0"
+                                          style="display:none;background:linear-gradient(135deg,var(--sa-primary),#7c5c9e);">
+                                        {{ strtoupper(substr($driver->name, 0, 1)) }}
+                                    </span>
+                                @else
+                                    <span class="flex w-9 h-9 items-center justify-center rounded-xl text-sm font-bold text-white flex-shrink-0"
+                                          style="background:linear-gradient(135deg,var(--sa-primary),#7c5c9e);">
+                                        {{ strtoupper(substr($driver->name, 0, 1)) }}
+                                    </span>
+                                @endif
                                 <div>
                                     <a href="{{ route('super-admin.drivers.show', $driver) }}"
                                        class="font-semibold hover:underline"

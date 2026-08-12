@@ -13,9 +13,20 @@
             {{-- Profil --}}
             <div class="rounded-2xl border shadow-sm p-6 space-y-4" style="background:var(--sa-card);border-color:var(--sa-border);">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-2xl">
-                        {{ strtoupper(substr($driver->name, 0, 1)) }}
-                    </div>
+                    @if($driver->photo_path)
+                        <img src="{{ \App\Support\StorageUrl::url($driver->photo_path) }}"
+                             alt="{{ $driver->name }}"
+                             class="w-16 h-16 rounded-2xl object-cover border"
+                             style="border-color:var(--sa-border);"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 items-center justify-center text-white font-bold text-2xl" style="display:none;">
+                            {{ strtoupper(substr($driver->name, 0, 1)) }}
+                        </div>
+                    @else
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-2xl">
+                            {{ strtoupper(substr($driver->name, 0, 1)) }}
+                        </div>
+                    @endif
                     <div>
                         <h2 class="font-bold text-lg" style="color:var(--sa-fg);">{{ $driver->name }}</h2>
                         @if($driver->verification_status === 'approved' && $driver->is_active && $driver->is_available)
