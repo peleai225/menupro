@@ -28,6 +28,9 @@ return [
     'allowed_origins_patterns' => [
         // Tous les déploiements preview Vercel pour ce projet
         '#^https://mpa-[a-z0-9]+-peleai225s-projects\.vercel\.app$#',
+        // Flutter web dev (ports aléatoires)
+        '#^http://localhost:[0-9]+$#',
+        '#^http://127\.0\.0\.1:[0-9]+$#',
     ],
 
     'allowed_headers' => ['*'],
