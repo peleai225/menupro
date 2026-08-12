@@ -29,6 +29,7 @@ class AuthController extends Controller
             'vehicle_type'       => 'required|in:moto,velo,voiture',
             'vehicle_plate'      => 'nullable|string|max:20',
             'cni_number'         => 'required|string|max:30',
+            'photo'              => 'nullable|file|image|max:5120',
             'cni_photo'          => 'required|file|image|max:5120',
             'license_photo'      => 'required|file|image|max:5120',
             'vehicle_photo'      => 'required|file|image|max:5120',
@@ -44,6 +45,7 @@ class AuthController extends Controller
         $user->role = UserRole::DELIVERY_DRIVER;
         $user->save();
 
+        $photoPath   = $request->hasFile('photo') ? $this->storeDriverFile($request->file('photo'), 'drivers/photos') : null;
         $cniPath     = $this->storeDriverFile($request->file('cni_photo'), 'drivers/cni');
         $licensePath = $this->storeDriverFile($request->file('license_photo'), 'drivers/license');
         $vehiclePath = $this->storeDriverFile($request->file('vehicle_photo'), 'drivers/vehicle');
@@ -59,6 +61,7 @@ class AuthController extends Controller
             'vehicle_plate'       => $data['vehicle_plate'] ?? null,
             'token'               => Str::random(64),
             'cni_number'          => $data['cni_number'],
+            'photo_path'          => $photoPath,
             'cni_photo_path'      => $cniPath,
             'license_photo_path'  => $licensePath,
             'vehicle_photo_path'  => $vehiclePath,
