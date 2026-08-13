@@ -224,6 +224,7 @@ class DashboardController extends Controller
             'hero_image'   => \App\Models\SystemSetting::get('hero_image', ''),
             'hero_image_2' => \App\Models\SystemSetting::get('hero_image_2', ''),
             'hero_image_3' => \App\Models\SystemSetting::get('hero_image_3', ''),
+            'apk_download_url' => \App\Models\SystemSetting::get('apk_download_url', ''),
             'social_facebook' => \App\Models\SystemSetting::get('social_facebook', ''),
             'social_twitter' => \App\Models\SystemSetting::get('social_twitter', ''),
             'social_instagram' => \App\Models\SystemSetting::get('social_instagram', ''),
@@ -398,6 +399,7 @@ class DashboardController extends Controller
             'hero_image_1' => ['nullable', 'image', 'max:5120'],
             'hero_image_2' => ['nullable', 'image', 'max:5120'],
             'hero_image_3' => ['nullable', 'image', 'max:5120'],
+            'apk_download_url' => ['nullable', 'string', 'max:1000'],
             'social_facebook' => ['nullable', 'string'],
             'social_twitter' => ['nullable', 'string'],
             'social_instagram' => ['nullable', 'string'],
@@ -573,6 +575,9 @@ class DashboardController extends Controller
                 \App\Models\SystemSetting::set($settingKey, $newPath, 'string', 'Image hero page d\'accueil');
             }
         }
+
+        // APK download URL (lien externe Google Drive / GitHub / etc.)
+        \App\Models\SystemSetting::set('apk_download_url', $request->apk_download_url ?? '', 'string', 'URL téléchargement APK Android');
 
         // Social links (save even if empty to allow clearing)
         \App\Models\SystemSetting::set('social_facebook', $request->social_facebook ?? '', 'string', 'Lien Facebook');

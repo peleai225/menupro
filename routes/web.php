@@ -47,15 +47,19 @@ Route::middleware(\App\Http\Middleware\SetPublicCache::class . ':300')->group(fu
 });
 
 Route::get('/telecharger/android', function () {
-    $path = public_path('downloads/menupro.apk');
-    if (!file_exists($path)) {
-        abort(404, 'Le fichier APK n\'est pas encore disponible. Revenez bientôt !');
+    $url = \App\Models\SystemSetting::get('apk_download_url', '');
+    if ($url) {
+        return redirect()->away($url);
     }
-    return response()->download($path, 'MenuPro.apk', [
-        'Content-Type'        => 'application/vnd.android.package-archive',
-        'Content-Disposition' => 'attachment; filename="MenuPro.apk"',
-    ]);
-})->name('download.apk')->middleware('throttle:30,1');
+    $path = public_path('downloads/menupro.apk');
+    if (file_exists($path)) {
+        return response()->download($path, 'MenuPro.apk', [
+            'Content-Type'        => 'application/vnd.android.package-archive',
+            'Content-Disposition' => 'attachment; filename="MenuPro.apk"',
+        ]);
+    }
+    abort(404, 'Le fichier APK n\'est pas encore disponible. Revenez bientôt !');
+})->name('download.apk')->middleware('throttle:60,1');
 
 Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
 Route::post('/qr-supports/order', [\App\Http\Controllers\Public\QrSupportOrderController::class, 'store'])->name('qr-supports.order')->middleware('throttle:5,1');

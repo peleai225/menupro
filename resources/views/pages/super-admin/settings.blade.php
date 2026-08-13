@@ -616,6 +616,34 @@
                     </div>
                 </div>
 
+                {{-- URL téléchargement APK --}}
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.15)">
+                            <svg class="w-4 h-4" style="color:#3DDC84" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18C4 12.36 4.98 11.38 6.18 11.38c1.2 0 2.18.98 2.18 2.18-.01 1.2-.98 2.08-2.18 2.08m11.64 0a2.18 2.18 0 0 1-2.18-2.18c0-1.2.98-2.18 2.18-2.18 1.2 0 2.18.98 2.18 2.18 0 1.2-.98 2.08-2.18 2.08M18.42 7l1.79-3.1-.9-.52L17.5 6.5A9.7 9.7 0 0 0 12 5a9.7 9.7 0 0 0-5.5 1.5L4.69 3.38l-.9.52L5.58 7A9.82 9.82 0 0 0 2 14h20A9.82 9.82 0 0 0 18.42 7z"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Lien téléchargement APK Android</h2>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">Google Drive, GitHub Releases ou tout lien direct. Laissez vide si vous utilisez le serveur local.</p>
+                        </div>
+                    </div>
+                    <input type="url" name="apk_download_url"
+                           value="{{ old('apk_download_url', $settings['apk_download_url'] ?? '') }}"
+                           class="w-full h-10 px-3 rounded-xl border text-sm outline-none"
+                           style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);"
+                           placeholder="https://drive.google.com/uc?export=download&id=...">
+                    @if(!empty($settings['apk_download_url'] ?? ''))
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs" style="color:var(--sa-success);">✓ Lien actif — le bouton Android redirige vers cette URL</p>
+                        <a href="{{ route('download.apk') }}" target="_blank" class="text-xs underline" style="color:var(--sa-primary);">Tester →</a>
+                    </div>
+                    @else
+                    <p class="text-xs mt-2" style="color:var(--sa-muted-fg);">
+                        Google Drive : partager le fichier → copier le lien → remplacer <code>/view</code> par <code>?export=download</code>
+                    </p>
+                    @endif
+                </div>
+
                 <div class="flex justify-end">
                     <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
                             style="background:var(--sa-primary);color:var(--sa-primary-fg);">
