@@ -450,76 +450,126 @@
 
 {{-- ══════════════════════════════════════
      9. TÉLÉCHARGER L'APPLICATION
+     Android → APK  |  iPhone → PWA
 ══════════════════════════════════════ --}}
-<section class="py-20 bg-neutral-950 relative overflow-hidden">
-    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 60% 60% at 80% 50%,rgba(212,94,12,.15),transparent)"></div>
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
+<section id="app" class="py-24 bg-neutral-950 relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(212,94,12,.1),transparent)"></div>
 
-            {{-- Texte --}}
-            <div class="text-center lg:text-left fu">
-                <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
-                <h2 class="text-4xl sm:text-5xl font-black text-white leading-tight">
-                    Téléchargez<br>
-                    <span class="gt">l'application</span><br>
-                    MenuPro
-                </h2>
-                <p class="text-neutral-400 text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                    Commandez dans vos restaurants préférés directement depuis votre téléphone. Paiement Mobile Money, suivi en temps réel.
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        {{-- En-tête --}}
+        <div class="text-center mb-14 fu">
+            <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
+            <h2 class="text-4xl sm:text-5xl font-black text-white leading-tight">
+                Commandez où<br>
+                <span class="gt">vous voulez</span>
+            </h2>
+            <p class="text-neutral-400 mt-4 max-w-lg mx-auto text-lg leading-relaxed">
+                Disponible sur Android et iPhone. Choisissez votre téléphone ci-dessous.
+            </p>
+        </div>
+
+        {{-- Deux cartes --}}
+        <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+
+            {{-- ─── Android ─── --}}
+            <div class="fu rounded-3xl p-8 border border-neutral-800 flex flex-col items-center text-center hover:border-green-500/40 hover:-translate-y-1 transition-all duration-300" style="background:#0f0f0f">
+
+                {{-- Icône Android --}}
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.2)">
+                    <svg class="w-8 h-8" style="color:#3DDC84" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18C4 12.36 4.98 11.38 6.18 11.38c1.2 0 2.18.98 2.18 2.18-.01 1.2-.98 2.08-2.18 2.08m11.64 0a2.18 2.18 0 0 1-2.18-2.18c0-1.2.98-2.18 2.18-2.18 1.2 0 2.18.98 2.18 2.18 0 1.2-.98 2.08-2.18 2.08M18.42 7l1.79-3.1-.9-.52L17.5 6.5A9.7 9.7 0 0 0 12 5a9.7 9.7 0 0 0-5.5 1.5L4.69 3.38l-.9.52L5.58 7A9.82 9.82 0 0 0 2 14h20A9.82 9.82 0 0 0 18.42 7z"/>
+                    </svg>
+                </div>
+
+                <div class="text-xs font-black uppercase tracking-widest mb-2" style="color:#3DDC84">Android</div>
+                <h3 class="text-xl font-black text-white mb-2">Télécharger l'APK</h3>
+                <p class="text-neutral-500 text-sm mb-6 leading-relaxed">
+                    Installez l'application directement sur votre téléphone Android en un clic.
                 </p>
 
-                <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                    <a href="https://mpa-five.vercel.app/"
-                       target="_blank"
-                       class="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 text-white font-black rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                       style="background:#D45E0C">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        <div class="text-left">
-                            <div class="text-[10px] text-white/70 leading-none">Disponible sur</div>
-                            <div class="text-base leading-tight">Android & iOS</div>
-                        </div>
-                        <svg class="w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                    </a>
+                {{-- QR Code --}}
+                <div class="w-36 h-36 rounded-2xl overflow-hidden bg-white flex items-center justify-center mb-6 p-1" style="border:3px solid rgba(61,220,132,.3)">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=144x144&data={{ urlencode('https://www.menupro.ci/downloads/menupro.apk') }}&color=1a1a1a&bgcolor=FFFFFF&margin=6"
+                         alt="QR Code APK Android"
+                         class="w-full h-full object-cover rounded-xl"
+                         loading="lazy">
                 </div>
+                <p class="text-xs text-neutral-600 mb-5">Scannez ou cliquez pour télécharger</p>
 
-                {{-- Badges stats --}}
-                <div class="mt-8 flex flex-wrap items-center gap-6 justify-center lg:justify-start">
-                    @foreach([
-                        ['4.8/5','Note moyenne'],
-                        [$stats['restaurants'].'+ ','Restaurants'],
-                        ['100%','Gratuit'],
-                    ] as $s)
-                    <div class="text-center lg:text-left">
-                        <div class="text-2xl font-black text-white leading-none">{{ $s[0] }}</div>
-                        <div class="text-neutral-500 text-xs mt-0.5">{{ $s[1] }}</div>
-                    </div>
-                    @endforeach
-                </div>
+                <a href="{{ asset('downloads/menupro.apk') }}"
+                   download
+                   class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-neutral-950 font-black text-sm transition-all hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg"
+                   style="background:#3DDC84;box-shadow:0 0 30px rgba(61,220,132,.2)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Télécharger · Android
+                </a>
             </div>
 
-            {{-- Visuel QR + captures --}}
-            <div class="flex flex-col items-center gap-6 fu d2">
+            {{-- ─── iPhone / PWA ─── --}}
+            <div class="fu d1 rounded-3xl p-8 border border-neutral-800 flex flex-col items-center text-center hover:border-primary-500/40 hover:-translate-y-1 transition-all duration-300" style="background:#0f0f0f">
+
+                {{-- Icône Apple --}}
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/>
+                    </svg>
+                </div>
+
+                <div class="text-xs font-black uppercase tracking-widest mb-2 text-neutral-400">iPhone · iPad</div>
+                <h3 class="text-xl font-black text-white mb-2">
+                    Application Web
+                    <span class="inline-block text-[10px] font-black px-2 py-0.5 rounded-md align-middle ml-1" style="background:rgba(212,94,12,.2);color:#D45E0C">PWA</span>
+                </h3>
+                <p class="text-neutral-500 text-sm mb-6 leading-relaxed">
+                    Ouvrez avec <strong class="text-neutral-300">Safari</strong> et ajoutez à l'écran d'accueil pour une expérience identique à une app native.
+                </p>
 
                 {{-- QR Code --}}
-                <div class="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-xs w-full">
-                    <p class="text-sm font-black text-neutral-700">Scannez pour télécharger</p>
-                    {{-- QR généré dynamiquement via Google Charts API --}}
-                    <div class="w-40 h-40 rounded-2xl overflow-hidden bg-neutral-50 flex items-center justify-center border border-neutral-100">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-five.vercel.app/') }}&color=D45E0C&bgcolor=FFFFFF&margin=10"
-                             alt="QR Code application MenuPro"
-                             class="w-full h-full object-cover"
-                             loading="lazy">
-                    </div>
-                    <p class="text-xs text-neutral-400 text-center">Pointez votre caméra sur le QR code</p>
-                    <a href="https://mpa-five.vercel.app/"
-                       target="_blank"
-                       class="w-full text-center py-3 rounded-xl text-sm font-black text-white transition-all hover:opacity-90"
-                       style="background:#D45E0C">
-                        Ouvrir l'application →
-                    </a>
+                <div class="w-36 h-36 rounded-2xl overflow-hidden bg-white flex items-center justify-center mb-6 p-1" style="border:3px solid rgba(212,94,12,.3)">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=144x144&data={{ urlencode('https://mpa-five.vercel.app/') }}&color=1a1a1a&bgcolor=FFFFFF&margin=6"
+                         alt="QR Code PWA iPhone"
+                         class="w-full h-full object-cover rounded-xl"
+                         loading="lazy">
                 </div>
+                <p class="text-xs text-neutral-600 mb-5">Scannez avec Safari pour ouvrir</p>
 
+                <a href="https://mpa-five.vercel.app/"
+                   target="_blank"
+                   class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-white font-black text-sm transition-all hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg"
+                   style="background:#D45E0C;box-shadow:0 0 30px rgba(212,94,12,.2)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    Ouvrir · iPhone
+                </a>
+
+                {{-- Guide installation --}}
+                <div class="mt-5 w-full rounded-2xl p-4 text-left" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
+                    <p class="text-xs font-black text-neutral-500 mb-3 uppercase tracking-wider">Comment installer sur iPhone :</p>
+                    <div class="space-y-2">
+                        @foreach(['Ouvrez le lien dans Safari','Appuyez sur le bouton Partager ⬆','Choisissez "Sur l\'écran d\'accueil"','Appuyez sur "Ajouter"'] as $i => $step)
+                        <div class="flex items-center gap-3 text-xs text-neutral-500">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0" style="background:rgba(212,94,12,.15);color:#D45E0C">{{ $i+1 }}</span>
+                            {{ $step }}
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
+        </div>
+
+        {{-- Stats --}}
+        <div class="mt-14 flex flex-wrap items-center justify-center gap-10 fu d2">
+            @foreach([
+                ['4.8★','Note moyenne'],
+                [$stats['restaurants'].'+ ','Restaurants partenaires'],
+                ['100%','Gratuit'],
+                ['24/7','Disponible'],
+            ] as $s)
+            <div class="text-center">
+                <div class="text-2xl font-black text-white leading-none">{{ $s[0] }}</div>
+                <div class="text-neutral-600 text-xs mt-1">{{ $s[1] }}</div>
+            </div>
+            @endforeach
         </div>
     </div>
 </section>
