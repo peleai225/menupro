@@ -729,7 +729,9 @@
                 .catch(function(err) {
                     if (err && err.json) {
                         err.json().then(function(body) {
-                            var msg = (body.errors ? Object.values(body.errors).flat()[0] : null) || body.message || 'Une erreur est survenue.';
+                            if (body.errors) console.error('[ajaxForm] Validation errors:', body.errors);
+                            var msgs = body.errors ? Object.values(body.errors).flat() : [];
+                            var msg = msgs.join(' | ') || body.message || 'Une erreur est survenue.';
                             adminToast(msg, 'error');
                         }).catch(function() { adminToast('Erreur réseau.', 'error'); });
                     } else {

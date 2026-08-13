@@ -741,6 +741,10 @@ class DashboardController extends Controller
         return back()->with('success', 'Paramètres mis à jour avec succès.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('updateSettings validation failed', [
+                'errors' => $e->errors(),
+                'input_keys' => array_keys(request()->all()),
+            ]);
             throw $e;
         } catch (\Exception $e) {
             \Log::error('updateSettings error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
