@@ -491,6 +491,7 @@ Route::prefix('admin')
         Route::get('parametres', [SuperAdminDashboardController::class, 'settings'])->name('settings');
         Route::post('parametres', [SuperAdminDashboardController::class, 'updateSettings'])->name('settings.update');
         Route::post('parametres/hero-image/supprimer', [SuperAdminDashboardController::class, 'deleteHeroImage'])->name('settings.delete-hero-image');
+        Route::post('parametres/hero-image/{slot}/supprimer', [SuperAdminDashboardController::class, 'deleteHeroSlot'])->name('settings.delete-hero-slot')->whereIn('slot', ['1', '2', '3']);
         Route::post('parametres/apk', [SuperAdminDashboardController::class, 'uploadApk'])->name('settings.upload-apk');
         Route::post('parametres/test-whatsapp', [SuperAdminDashboardController::class, 'testWhatsapp'])->name('settings.test-whatsapp');
 

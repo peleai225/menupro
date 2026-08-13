@@ -102,10 +102,58 @@
                 </div>
             </div>
 
-            {{-- Phone mockup --}}
+            {{-- Hero visual: images carousel OR phone mockup --}}
+            @php
+                $heroRaw = [
+                    \App\Models\SystemSetting::get('hero_image', ''),
+                    \App\Models\SystemSetting::get('hero_image_2', ''),
+                    \App\Models\SystemSetting::get('hero_image_3', ''),
+                ];
+                $heroImagesUrls = array_values(array_filter(array_map(function($p) {
+                    return ($p && \Illuminate\Support\Facades\Storage::disk('public')->exists($p))
+                        ? \Illuminate\Support\Facades\Storage::url($p)
+                        : null;
+                }, $heroRaw)));
+                $hasHeroImages = count($heroImagesUrls) > 0;
+            @endphp
+
             <div class="relative flex items-center justify-center order-1 lg:order-2 fu d1">
                 <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 50% 50%,rgba(212,94,12,.1),transparent 65%)"></div>
 
+            @if($hasHeroImages)
+                {{-- Hero images carousel --}}
+                <div class="relative w-full max-w-sm lg:max-w-md"
+                     x-data="{ active: 0, total: {{ count($heroImagesUrls) }}, timer: null }"
+                     x-init="timer = setInterval(() => active = (active + 1) % total, 4500)">
+                    @foreach($heroImagesUrls as $i => $url)
+                    <div x-show="active === {{ $i }}"
+                         x-transition:enter="transition ease-out duration-700"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-300"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="rounded-3xl overflow-hidden glow"
+                         style="aspect-ratio:3/4;max-height:520px">
+                        <img src="{{ $url }}" alt="MenuPro hero {{ $i + 1 }}"
+                             class="w-full h-full object-cover" loading="{{ $i === 0 ? 'eager' : 'lazy' }}">
+                    </div>
+                    @endforeach
+
+                    {{-- Dots --}}
+                    @if(count($heroImagesUrls) > 1)
+                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                        @foreach($heroImagesUrls as $i => $url)
+                        <button @click="active = {{ $i }}; clearInterval(timer); timer = setInterval(() => active = (active + 1) % total, 4500)"
+                                class="rounded-full transition-all duration-300"
+                                :class="active === {{ $i }} ? 'w-6 h-2.5' : 'w-2.5 h-2.5'"
+                                :style="active === {{ $i }} ? 'background:#D45E0C' : 'background:rgba(255,255,255,.25)'">
+                        </button>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+            @else
                 {{-- Rotating badge --}}
                 <div class="absolute top-2 right-2 lg:top-4 lg:right-0 w-24 h-24 pointer-events-none z-20">
                     <svg class="w-full h-full sp" viewBox="0 0 100 100">
@@ -202,6 +250,7 @@
                         </div>
                     </div>
                 </div>
+            @endif
             </div>
         </div>
     </div>

@@ -523,51 +523,62 @@
                     </div>
                 </div>
 
-                {{-- Image Hero — Section dédiée --}}
-                @php $heroImage = $settings['hero_image'] ?? ''; $hasHero = $heroImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($heroImage); @endphp
+                {{-- Images Hero (3 slots) --}}
+                @php
+                    $heroSlots = [
+                        ['key' => 'hero_image',   'input' => 'hero_image_1', 'label' => 'Image Hero 1', 'slot' => 1],
+                        ['key' => 'hero_image_2', 'input' => 'hero_image_2', 'label' => 'Image Hero 2', 'slot' => 2],
+                        ['key' => 'hero_image_3', 'input' => 'hero_image_3', 'label' => 'Image Hero 3', 'slot' => 3],
+                    ];
+                @endphp
                 <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <div>
-                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">Image Hero — Page d'accueil</h2>
-                            <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">Affiché à droite du texte principal sur la page d'accueil du site.</p>
-                        </div>
-                        @if($hasHero)
-                        <button type="button"
-                                onclick="if(confirm('Supprimer l\'image hero ?')) { document.getElementById('delete-hero-form').submit(); }"
-                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 border border-red-200 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            Supprimer
-                        </button>
-                        @endif
-                    </div>
+                    <h2 class="text-base font-semibold mb-1" style="color:var(--sa-fg);">Images Hero — Page d'accueil</h2>
+                    <p class="text-xs mb-5" style="color:var(--sa-muted-fg);">Jusqu'à 3 images affichées en diaporama automatique à droite du texte principal. Si aucune image, le mockup téléphone s'affiche à la place.</p>
 
-                    {{-- Aperçu carte hero --}}
-                    @if($hasHero)
-                    <div class="mb-4 rounded-2xl overflow-hidden border" style="border-color:var(--sa-border)">
-                        <div class="relative" style="max-height:200px;overflow:hidden;background:var(--sa-muted)">
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($heroImage) }}"
-                                 alt="Image hero actuelle"
-                                 class="w-full object-cover"
-                                 style="max-height:200px">
-                            <div class="absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-bold text-white" style="background:rgba(0,0,0,.5)">
-                                Image actuelle
+                    <div class="grid md:grid-cols-3 gap-4">
+                        @foreach($heroSlots as $hs)
+                        @php
+                            $hPath = $settings[$hs['key']] ?? '';
+                            $hExists = $hPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($hPath);
+                        @endphp
+                        <div class="rounded-xl border overflow-hidden" style="border-color:var(--sa-border);background:var(--sa-muted)">
+                            {{-- Preview --}}
+                            @if($hExists)
+                            <div class="relative" style="height:140px;overflow:hidden;background:#111">
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($hPath) }}"
+                                     alt="{{ $hs['label'] }}"
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <form method="POST" action="{{ route('super-admin.settings.delete-hero-slot', $hs['slot']) }}"
+                                          onsubmit="return confirm('Supprimer {{ $hs['label'] }} ?')">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-red-600 text-white">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                                <span class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md text-white" style="background:rgba(0,0,0,.55)">{{ $hs['label'] }}</span>
+                            </div>
+                            @else
+                            <div class="flex flex-col items-center justify-center gap-2 py-8" style="height:140px">
+                                <svg class="w-7 h-7" style="color:var(--sa-muted-fg)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs font-semibold" style="color:var(--sa-muted-fg)">{{ $hs['label'] }}</span>
+                                <span class="text-[10px]" style="color:var(--sa-muted-fg)">Vide</span>
+                            </div>
+                            @endif
+
+                            {{-- Upload --}}
+                            <div class="p-3 border-t" style="border-color:var(--sa-border)">
+                                <label class="block text-[10px] font-semibold mb-1.5" style="color:var(--sa-muted-fg);">{{ $hExists ? 'Remplacer' : 'Ajouter' }}</label>
+                                <input type="file" name="{{ $hs['input'] }}" accept="image/*"
+                                       class="w-full text-xs rounded-lg border px-2 py-1.5"
+                                       style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
                             </div>
                         </div>
+                        @endforeach
                     </div>
-                    @else
-                    <div class="mb-4 rounded-2xl border-2 border-dashed flex items-center justify-center py-10 gap-3" style="border-color:var(--sa-border);background:var(--sa-muted)">
-                        <svg class="w-8 h-8" style="color:var(--sa-muted-fg)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span class="text-sm" style="color:var(--sa-muted-fg)">Aucune image hero — le mockup téléphone s'affiche à la place</span>
-                    </div>
-                    @endif
-
-                    <div>
-                        <label class="block text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">{{ $hasHero ? 'Remplacer l\'image' : 'Ajouter une image hero' }}</label>
-                        <input type="file" name="hero_image" accept="image/*"
-                               class="w-full h-10 rounded-xl border text-sm px-3 py-2"
-                               style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);">
-                        <p class="text-[10px] mt-1" style="color:var(--sa-muted-fg);">PNG, JPG, WebP. Max 5 MB. Format portrait recommandé (ex: 400×700px).</p>
-                    </div>
+                    <p class="text-[10px] mt-3" style="color:var(--sa-muted-fg);">PNG, JPG, WebP. Max 5 Mo par image. Format portrait conseillé (ex: 500×800 px).</p>
                 </div>
 
                 {{-- Footer --}}
@@ -1268,12 +1279,5 @@
     </script>
     @endpush
 
-    {{-- Form de suppression hero image — hors des autres forms pour éviter le nesting --}}
-    <form id="delete-hero-form"
-          method="POST"
-          action="{{ route('super-admin.settings.delete-hero-image') }}"
-          style="display:none">
-        @csrf
-    </form>
 
 </x-layouts.admin-super>

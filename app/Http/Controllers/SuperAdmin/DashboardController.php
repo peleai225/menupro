@@ -221,7 +221,9 @@ class DashboardController extends Controller
             'log_logins' => \App\Models\SystemSetting::get('log_logins', true),
             'logo' => \App\Models\SystemSetting::get('logo', ''),
             'favicon' => \App\Models\SystemSetting::get('favicon', ''),
-            'hero_image' => \App\Models\SystemSetting::get('hero_image', ''),
+            'hero_image'   => \App\Models\SystemSetting::get('hero_image', ''),
+            'hero_image_2' => \App\Models\SystemSetting::get('hero_image_2', ''),
+            'hero_image_3' => \App\Models\SystemSetting::get('hero_image_3', ''),
             'social_facebook' => \App\Models\SystemSetting::get('social_facebook', ''),
             'social_twitter' => \App\Models\SystemSetting::get('social_twitter', ''),
             'social_instagram' => \App\Models\SystemSetting::get('social_instagram', ''),
@@ -289,6 +291,21 @@ class DashboardController extends Controller
         $paymentSettings = \App\Models\SystemPaymentSetting::orderBy('gateway')->get()->keyBy('gateway');
 
         return view('pages.super-admin.settings', compact('settings', 'paymentSettings'));
+    }
+
+    /**
+     * Delete one of the 3 hero image slots.
+     */
+    public function deleteHeroSlot(int $slot): RedirectResponse
+    {
+        $key  = $slot === 1 ? 'hero_image' : "hero_image_{$slot}";
+        $path = \App\Models\SystemSetting::get($key, '');
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+        \App\Models\SystemSetting::set($key, '', 'string', 'Image hero page d\'accueil');
+
+        return back()->with('success', "Image hero {$slot} supprimée avec succès.");
     }
 
     /**
@@ -378,7 +395,9 @@ class DashboardController extends Controller
             'log_logins' => ['boolean'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'favicon' => ['nullable', 'image', 'max:512'],
-            'hero_image' => ['nullable', 'image', 'max:5120'],
+            'hero_image_1' => ['nullable', 'image', 'max:5120'],
+            'hero_image_2' => ['nullable', 'image', 'max:5120'],
+            'hero_image_3' => ['nullable', 'image', 'max:5120'],
             'social_facebook' => ['nullable', 'string'],
             'social_twitter' => ['nullable', 'string'],
             'social_instagram' => ['nullable', 'string'],
@@ -542,15 +561,17 @@ class DashboardController extends Controller
             \App\Models\SystemSetting::set('favicon', $faviconPath, 'string', 'Favicon de la plateforme');
         }
 
-        // Handle hero image upload
-        if ($request->hasFile('hero_image')) {
-            $heroImagePath = $request->file('hero_image')->store('system', 'public');
-            // Delete old hero image if exists
-            $oldHeroImage = \App\Models\SystemSetting::get('hero_image', '');
-            if ($oldHeroImage && Storage::disk('public')->exists($oldHeroImage)) {
-                Storage::disk('public')->delete($oldHeroImage);
+        // Handle hero images upload (slots 1, 2, 3)
+        $heroSlots = ['hero_image_1' => 'hero_image', 'hero_image_2' => 'hero_image_2', 'hero_image_3' => 'hero_image_3'];
+        foreach ($heroSlots as $inputName => $settingKey) {
+            if ($request->hasFile($inputName)) {
+                $newPath = $request->file($inputName)->store('system', 'public');
+                $oldPath = \App\Models\SystemSetting::get($settingKey, '');
+                if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+                \App\Models\SystemSetting::set($settingKey, $newPath, 'string', 'Image hero page d\'accueil');
             }
-            \App\Models\SystemSetting::set('hero_image', $heroImagePath, 'string', 'Image hero de la page d\'accueil');
         }
 
         // Social links (save even if empty to allow clearing)
