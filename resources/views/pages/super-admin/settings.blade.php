@@ -576,7 +576,7 @@
                         </div>
                         @endforeach
                     </div>
-                    <p class="text-[10px] mt-3" style="color:var(--sa-muted-fg);">PNG, JPG, WebP. Max 5 Mo par image. Format portrait conseillé (ex: 500×800 px).</p>
+                    <p class="text-[10px] mt-3" style="color:var(--sa-muted-fg);">PNG, JPG, WebP. Max 5 Mo par image. Format carré recommandé : <strong>1080×1080 px</strong>.</p>
                 </div>
 
                 {{-- Footer --}}

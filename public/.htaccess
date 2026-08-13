@@ -1,9 +1,21 @@
-# Upload limits (APK ~150 Mo, images hero)
+# Upload limits (APK ~160 Mo, images hero)
 <IfModule mod_php.c>
     php_value upload_max_filesize 160M
     php_value post_max_size       160M
     php_value max_execution_time  300
     php_value max_input_time      300
+</IfModule>
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 160M
+    php_value post_max_size       160M
+    php_value max_execution_time  300
+    php_value max_input_time      300
+</IfModule>
+# Apache — limite requête globale
+LimitRequestBody 167772160
+# LiteSpeed
+<IfModule LiteSpeed>
+    SecRequestBodyLimit 167772160
 </IfModule>
 
 # CORS headers for static image/media files (LiteSpeed/Apache compatible)

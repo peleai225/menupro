@@ -134,7 +134,7 @@
                          x-transition:leave-start="opacity-100"
                          x-transition:leave-end="opacity-0"
                          class="rounded-3xl overflow-hidden glow"
-                         style="aspect-ratio:3/4;max-height:520px">
+                         style="aspect-ratio:1/1;max-height:540px;width:100%">
                         <img src="{{ $url }}" alt="MenuPro hero {{ $i + 1 }}"
                              class="w-full h-full object-cover" loading="{{ $i === 0 ? 'eager' : 'lazy' }}">
                     </div>
