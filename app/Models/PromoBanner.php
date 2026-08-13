@@ -12,6 +12,8 @@ class PromoBanner extends Model
         'restaurant_id',
         'title',
         'subtitle',
+        'color_start',
+        'color_end',
         'image_path',
         'link_type',
         'link_value',

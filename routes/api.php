@@ -55,6 +55,9 @@ Route::prefix('v1')
     Route::middleware('throttle:api.public')->group(function () {
         Route::get('/ticker', [AnnouncementController::class, 'ticker'])->name('ticker.index');
 
+        // Bannières globales plateforme (public, sans auth)
+        Route::get('/banners', [PromoBannerController::class, 'indexGlobal'])->name('banners.index');
+
         // PromoBanners — bannières promotionnelles par restaurant (public)
         Route::get('/restaurants/{restaurantId}/banners', [PromoBannerController::class, 'index'])->name('restaurants.banners.index');
     });
