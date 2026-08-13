@@ -688,7 +688,13 @@
         // options: { onSuccess, onError, btnText }
         function ajaxForm(form, options) {
             options = options || {};
-            var btn = form.querySelector('[type="submit"]');
+            // Cibler le bouton submit qui appartient DIRECTEMENT à ce form (pas aux forms imbriqués)
+            var btn = null;
+            var allBtns = form.querySelectorAll('[type="submit"]');
+            for (var i = 0; i < allBtns.length; i++) {
+                if (allBtns[i].form === form || !allBtns[i].form) { btn = allBtns[i]; break; }
+            }
+            if (!btn) btn = allBtns[allBtns.length - 1] || null;
             var originalText = btn ? btn.innerHTML : '';
 
             form.addEventListener('submit', function(e) {
@@ -704,6 +710,7 @@
 
                 fetch(form.action, {
                     method: method === 'GET' ? 'GET' : 'POST',
+                    credentials: 'same-origin',
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',

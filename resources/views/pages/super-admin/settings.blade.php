@@ -549,14 +549,12 @@
                                      alt="{{ $hs['label'] }}"
                                      class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <form method="POST" action="{{ route('super-admin.settings.delete-hero-slot', $hs['slot']) }}"
-                                          onsubmit="return confirm('Supprimer {{ $hs['label'] }} ?')">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-red-600 text-white">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            Supprimer
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            onclick="if(confirm('Supprimer {{ $hs['label'] }} ?')) document.getElementById('del-hero-{{ $hs['slot'] }}').submit()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-red-600 text-white">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        Supprimer
+                                    </button>
                                 </div>
                                 <span class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md text-white" style="background:rgba(0,0,0,.55)">{{ $hs['label'] }}</span>
                             </div>
@@ -626,6 +624,13 @@
                     </button>
                 </div>
             </form>
+
+            {{-- Hidden delete forms for hero slots (hors du form principal pour éviter le nesting) --}}
+            @foreach([['slot'=>1,'key'=>'hero_image'],['slot'=>2,'key'=>'hero_image_2'],['slot'=>3,'key'=>'hero_image_3']] as $hs)
+            <form id="del-hero-{{ $hs['slot'] }}" method="POST"
+                  action="{{ route('super-admin.settings.delete-hero-slot', $hs['slot']) }}"
+                  style="display:none">@csrf</form>
+            @endforeach
 
             {{-- APK Android — formulaire séparé --}}
             @php
