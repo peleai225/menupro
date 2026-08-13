@@ -121,33 +121,39 @@
                 <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 50% 50%,rgba(212,94,12,.1),transparent 65%)"></div>
 
             @if($hasHeroImages)
-                {{-- Hero images carousel --}}
+                {{-- Hero images carousel — empilés en absolute pour cross-fade fluide --}}
                 <div class="relative w-full max-w-sm lg:max-w-md"
-                     x-data="{ active: 0, total: {{ count($heroImagesUrls) }}, timer: null }"
-                     x-init="timer = setInterval(() => active = (active + 1) % total, 4500)">
-                    @foreach($heroImagesUrls as $i => $url)
-                    <div x-show="active === {{ $i }}"
-                         x-transition:enter="transition ease-out duration-700"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-300"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
-                         class="rounded-3xl overflow-hidden glow"
-                         style="aspect-ratio:1/1;max-height:540px;width:100%">
-                        <img src="{{ $url }}" alt="MenuPro hero {{ $i + 1 }}"
-                             class="w-full h-full object-cover" loading="{{ $i === 0 ? 'eager' : 'lazy' }}">
+                     x-data="{ active: 0, total: {{ count($heroImagesUrls) }} }"
+                     x-init="setInterval(() => { active = (active + 1) % total }, 4500)">
+
+                    {{-- Conteneur carré fixe — tous les slides empilés dedans --}}
+                    <div class="relative rounded-3xl overflow-hidden glow" style="aspect-ratio:1/1;width:100%">
+                        @foreach($heroImagesUrls as $i => $url)
+                        <div class="absolute inset-0"
+                             style="transition:opacity .8s ease, transform .8s ease;"
+                             :style="active === {{ $i }}
+                                 ? 'opacity:1;transform:scale(1);z-index:10'
+                                 : 'opacity:0;transform:scale(1.04);z-index:0'">
+                            <img src="{{ $url }}"
+                                 alt="MenuPro hero {{ $i + 1 }}"
+                                 class="w-full h-full object-cover"
+                                 loading="{{ $i === 0 ? 'eager' : 'lazy' }}">
+                        </div>
+                        @endforeach
+
+                        {{-- Overlay gradient bas --}}
+                        <div class="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+                             style="background:linear-gradient(to top,rgba(8,8,8,.6),transparent)"></div>
                     </div>
-                    @endforeach
 
                     {{-- Dots --}}
                     @if(count($heroImagesUrls) > 1)
-                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                    <div class="flex gap-2 justify-center mt-4">
                         @foreach($heroImagesUrls as $i => $url)
-                        <button @click="active = {{ $i }}; clearInterval(timer); timer = setInterval(() => active = (active + 1) % total, 4500)"
+                        <button @click="active = {{ $i }}"
                                 class="rounded-full transition-all duration-300"
-                                :class="active === {{ $i }} ? 'w-6 h-2.5' : 'w-2.5 h-2.5'"
-                                :style="active === {{ $i }} ? 'background:#D45E0C' : 'background:rgba(255,255,255,.25)'">
+                                :class="active === {{ $i }} ? 'w-6 h-2.5' : 'w-2.5 h-2.5 opacity-40'"
+                                style="background:#D45E0C">
                         </button>
                         @endforeach
                     </div>
