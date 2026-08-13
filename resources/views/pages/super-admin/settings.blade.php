@@ -615,6 +615,97 @@
                     </button>
                 </div>
             </form>
+
+            {{-- APK Android — formulaire séparé --}}
+            @php
+                $apkPath      = public_path('downloads/menupro.apk');
+                $apkExists    = file_exists($apkPath);
+                $apkSize      = $apkExists ? round(filesize($apkPath) / 1048576, 1) . ' Mo' : null;
+                $apkUploadedAt = \App\Models\SystemSetting::get('apk_uploaded_at');
+            @endphp
+            <form id="apk" method="POST" action="{{ route('super-admin.settings.upload-apk') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h2 class="text-base font-semibold" style="color:var(--sa-fg);">APK Android</h2>
+                            <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Fichier téléchargeable par les utilisateurs Android depuis la page d'accueil.</p>
+                        </div>
+                        @if($apkExists)
+                        <a href="{{ asset('downloads/menupro.apk') }}" target="_blank"
+                           class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition"
+                           style="background:rgba(61,220,132,.1);color:#3DDC84;border:1px solid rgba(61,220,132,.2);">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Tester le lien
+                        </a>
+                        @endif
+                    </div>
+
+                    {{-- Statut actuel --}}
+                    <div class="rounded-xl p-4 mb-4 flex items-center gap-4" style="background:var(--sa-muted);border:1px solid var(--sa-border);">
+                        @if($apkExists)
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(61,220,132,.12);">
+                                <svg class="w-5 h-5" style="color:#3DDC84" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18C4 12.36 4.98 11.38 6.18 11.38c1.2 0 2.18.98 2.18 2.18-.01 1.2-.98 2.08-2.18 2.08m11.64 0a2.18 2.18 0 0 1-2.18-2.18c0-1.2.98-2.18 2.18-2.18 1.2 0 2.18.98 2.18 2.18 0 1.2-.98 2.08-2.18 2.08M18.42 7l1.79-3.1-.9-.52L17.5 6.5A9.7 9.7 0 0 0 12 5a9.7 9.7 0 0 0-5.5 1.5L4.69 3.38l-.9.52L5.58 7A9.82 9.82 0 0 0 2 14h20A9.82 9.82 0 0 0 18.42 7z"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold" style="color:var(--sa-fg);">menupro.apk — {{ $apkSize }}</p>
+                                @if($apkUploadedAt)
+                                    <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Mis en ligne le {{ \Carbon\Carbon::parse($apkUploadedAt)->format('d/m/Y à H:i') }}</p>
+                                @endif
+                                <p class="text-xs mt-0.5 break-all" style="color:var(--sa-muted-fg);">{{ url('downloads/menupro.apk') }}</p>
+                            </div>
+                            <span class="shrink-0 text-xs font-black px-2.5 py-1 rounded-full" style="background:rgba(61,220,132,.12);color:#3DDC84;">En ligne ✓</span>
+                        @else
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(220,38,38,.1);">
+                                <svg class="w-5 h-5" style="color:var(--sa-danger)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold" style="color:var(--sa-fg);">Aucun APK en ligne</p>
+                                <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Uploadez un fichier .apk ci-dessous pour activer le téléchargement Android.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Upload --}}
+                    <div x-data="{ fileName: '' }">
+                        <label class="block text-xs font-medium mb-2" style="color:var(--sa-muted-fg);">
+                            {{ $apkExists ? 'Remplacer le fichier APK' : 'Uploader le fichier APK' }}
+                            <span class="ml-1 font-normal" style="color:var(--sa-muted-fg);">(max 150 Mo)</span>
+                        </label>
+                        <div class="relative rounded-xl border-2 border-dashed p-6 text-center transition-colors"
+                             :class="fileName ? 'border-green-500/40 bg-green-500/5' : ''"
+                             style="border-color:var(--sa-border);"
+                             @dragover.prevent @drop.prevent="fileName = $event.dataTransfer.files[0]?.name; $refs.apkInput.files = $event.dataTransfer.files">
+                            <input x-ref="apkInput" type="file" name="apk_file" accept=".apk" required
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                   @change="fileName = $event.target.files[0]?.name">
+                            <div x-show="!fileName">
+                                <svg class="w-8 h-8 mx-auto mb-2" style="color:var(--sa-muted-fg)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <p class="text-sm font-medium" style="color:var(--sa-fg);">Glissez votre APK ici ou <span style="color:var(--sa-primary);">parcourir</span></p>
+                                <p class="text-xs mt-1" style="color:var(--sa-muted-fg);">.apk uniquement — 150 Mo max</p>
+                            </div>
+                            <div x-show="fileName" class="flex items-center justify-center gap-3">
+                                <svg class="w-5 h-5 shrink-0" style="color:#3DDC84" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18C4 12.36 4.98 11.38 6.18 11.38c1.2 0 2.18.98 2.18 2.18-.01 1.2-.98 2.08-2.18 2.08m11.64 0a2.18 2.18 0 0 1-2.18-2.18c0-1.2.98-2.18 2.18-2.18 1.2 0 2.18.98 2.18 2.18 0 1.2-.98 2.08-2.18 2.08M18.42 7l1.79-3.1-.9-.52L17.5 6.5A9.7 9.7 0 0 0 12 5a9.7 9.7 0 0 0-5.5 1.5L4.69 3.38l-.9.52L5.58 7A9.82 9.82 0 0 0 2 14h20A9.82 9.82 0 0 0 18.42 7z"/></svg>
+                                <span class="text-sm font-semibold truncate" style="color:var(--sa-fg);" x-text="fileName"></span>
+                                <button type="button" @click.stop="fileName = ''; $refs.apkInput.value = ''"
+                                        class="text-xs px-2 py-1 rounded-lg" style="color:var(--sa-muted-fg);background:var(--sa-muted);">Annuler</button>
+                            </div>
+                        </div>
+                        @error('apk_file')
+                            <p class="mt-1.5 text-xs" style="color:var(--sa-danger);">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex justify-end mt-4">
+                        <button type="submit"
+                                class="inline-flex h-9 items-center gap-2 rounded-lg px-5 text-sm font-semibold shadow-sm transition"
+                                style="background:#3DDC84;color:#0a0a0a;">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Mettre en ligne l'APK
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
         {{-- ─── MARKETING ──────────────────────────────────────────────────── --}}

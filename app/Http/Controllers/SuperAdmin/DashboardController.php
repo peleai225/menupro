@@ -292,6 +292,35 @@ class DashboardController extends Controller
     }
 
     /**
+     * Upload Android APK to public/downloads/menupro.apk.
+     */
+    public function uploadApk(\Illuminate\Http\Request $request): RedirectResponse
+    {
+        $request->validate([
+            'apk_file' => ['required', 'file', 'max:153600'], // 150 MB max
+        ], [
+            'apk_file.required' => 'Veuillez sélectionner un fichier APK.',
+            'apk_file.max'      => 'Le fichier ne doit pas dépasser 150 Mo.',
+        ]);
+
+        if (strtolower($request->file('apk_file')->getClientOriginalExtension()) !== 'apk') {
+            return back()->withErrors(['apk_file' => 'Le fichier doit être un APK Android (.apk).'])->withFragment('apk');
+        }
+
+        $dest = public_path('downloads');
+        if (! is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+
+        $request->file('apk_file')->move($dest, 'menupro.apk');
+
+        \App\Models\SystemSetting::set('apk_uploaded_at', now()->toIso8601String(), 'string', 'Date dernier upload APK');
+        \App\Models\SystemSetting::set('apk_original_name', $request->file('apk_file')->getClientOriginalName(), 'string', 'Nom original APK');
+
+        return back()->with('success', 'APK mis en ligne avec succès. Les utilisateurs Android peuvent maintenant le télécharger.')->withFragment('apk');
+    }
+
+    /**
      * Delete hero image.
      */
     public function deleteHeroImage(): RedirectResponse
