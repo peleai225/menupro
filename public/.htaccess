@@ -1,8 +1,8 @@
-# CORS headers for static files (images) served from /storage/
+# CORS headers for static image/media files (LiteSpeed/Apache compatible)
 <IfModule mod_headers.c>
-    <If "%{REQUEST_URI} =~ m#^/storage/#">
-        Header set Access-Control-Allow-Origin "*"
-    </If>
+    <FilesMatch "\.(webp|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|otf|mp4|webm)$">
+        Header always set Access-Control-Allow-Origin "*"
+    </FilesMatch>
 </IfModule>
 
 <IfModule mod_rewrite.c>
