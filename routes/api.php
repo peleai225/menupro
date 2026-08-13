@@ -121,37 +121,6 @@ Route::prefix('v1')
     });
 
     // -----------------------------------------------------------------------
-    // LIVREUR
-    // Diagnostic temporaire — vérifier permissions storage drivers (à supprimer après fix)
-    Route::get('driver/storage-check', function () {
-        $disk = \Illuminate\Support\Facades\Storage::disk('public');
-        $dirs = ['drivers/photos', 'drivers/cni', 'drivers/license', 'drivers/vehicle'];
-        $results = [];
-        foreach ($dirs as $dir) {
-            $path = $disk->path($dir);
-            $results[$dir] = [
-                'full_path'   => $path,
-                'exists'      => is_dir($path),
-                'writable'    => is_writable($path),
-                'permissions' => is_dir($path) ? substr(sprintf('%o', fileperms($path)), -4) : null,
-                'owner'       => is_dir($path) ? (function_exists('posix_getpwuid') ? posix_getpwuid(fileowner($path))['name'] ?? fileowner($path) : fileowner($path)) : null,
-                'php_user'    => function_exists('posix_getpwuid') ? posix_getpwuid(posix_geteuid())['name'] ?? posix_geteuid() : get_current_user(),
-            ];
-        }
-
-        // Test écriture réelle
-        $testPath = 'drivers/photos/.write_test_' . time();
-        $writeOk = $disk->put($testPath, 'test');
-        if ($writeOk) $disk->delete($testPath);
-
-        return response()->json([
-            'directories' => $results,
-            'write_test'  => $writeOk ? 'SUCCESS' : 'FAILED',
-            'disk_root'   => $disk->path(''),
-        ]);
-    });
-
-    // -----------------------------------------------------------------------
     Route::prefix('driver')->name('driver.')->group(function () {
 
         Route::middleware('throttle:api.auth')->group(function () {
