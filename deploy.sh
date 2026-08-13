@@ -30,6 +30,7 @@ cp public/firebase-messaging-sw.js ~/public_html/ 2>/dev/null
 cp public/offline.html ~/public_html/ 2>/dev/null
 cp public/favicon.svg ~/public_html/ 2>/dev/null
 cp public/robots.txt ~/public_html/ 2>/dev/null
+cp public/.htaccess ~/public_html/.htaccess && echo " .htaccess copié" || echo " ERREUR copie .htaccess"
 
 # Copier aussi vers menupro.ci/ si le dossier existe (domaine sans www)
 if [ -d ~/menupro.ci ]; then
@@ -37,6 +38,7 @@ if [ -d ~/menupro.ci ]; then
     cp public/manifest.json ~/menupro.ci/ 2>/dev/null
     cp public/sw.js ~/menupro.ci/ 2>/dev/null
     cp public/firebase-messaging-sw.js ~/menupro.ci/ 2>/dev/null
+    cp public/.htaccess ~/menupro.ci/.htaccess 2>/dev/null
 fi
 
 # 2b. Symlink storage (images téléchargées via Storage::url)
