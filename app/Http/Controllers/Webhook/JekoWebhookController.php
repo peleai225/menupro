@@ -160,18 +160,30 @@ class JekoWebhookController extends Controller
         }
 
         DB::transaction(function () use ($reference, $paymentLinkId) {
+            // Order
             $order = $this->findOrder($reference, $paymentLinkId);
-            if (!$order) {
-                return;
+            if ($order) {
+                $order = Order::withoutGlobalScope('restaurant')
+                    ->where('id', $order->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($order && $order->payment_status === PaymentStatus::PENDING) {
+                    $order->update(['payment_status' => PaymentStatus::FAILED]);
+                }
             }
 
-            $order = Order::withoutGlobalScope('restaurant')
-                ->where('id', $order->id)
-                ->lockForUpdate()
-                ->first();
+            // Subscription — marquer FAILED pour que le restaurant puisse relancer
+            $subscription = $this->findSubscription($reference);
+            if ($subscription) {
+                $subscription = Subscription::withoutGlobalScope('restaurant')
+                    ->where('id', $subscription->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            if ($order && $order->payment_status === PaymentStatus::PENDING) {
-                $order->update(['payment_status' => PaymentStatus::FAILED]);
+                if ($subscription && $subscription->status === SubscriptionStatus::PENDING) {
+                    $subscription->update(['status' => SubscriptionStatus::FAILED]);
+                }
             }
         });
 

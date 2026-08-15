@@ -215,6 +215,21 @@ class SubscriptionController extends Controller
             }
         }
 
+        // Recalculer le total avec les addons (cohérent avec convertTrial)
+        $addonsTotal = 0;
+        if ($request->has('addons') && is_array($request->addons)) {
+            $availableAddons = SubscriptionAddon::getAvailableAddons();
+            $months = $durationDays / 30;
+            foreach ($request->addons as $addonType) {
+                if (isset($availableAddons[$addonType])) {
+                    $addonsTotal += $availableAddons[$addonType]['price'] * $months;
+                }
+            }
+        }
+        if ($addonsTotal > 0) {
+            $subscription->update(['amount_paid' => $priceCalculation['final_price'] + $addonsTotal]);
+        }
+
         $gateway = $request->input('payment_gateway', 'moneyfusion');
         $jekoOperator = $request->input('jeko_operator', 'wave');
         $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
@@ -235,6 +250,11 @@ class SubscriptionController extends Controller
     public function success(Request $request, int $subscription): RedirectResponse
     {
         $subscription = Subscription::withoutGlobalScope('restaurant')->findOrFail($subscription);
+
+        // Vérification propriétaire — empêche l'activation d'une sub d'un autre restaurant
+        if ($subscription->restaurant_id !== $request->user()->restaurant?->id) {
+            abort(403);
+        }
 
         if ($subscription->status === SubscriptionStatus::ACTIVE) {
             return redirect()->route('restaurant.subscription')

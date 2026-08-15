@@ -27,6 +27,14 @@ class ProcessJekoPayoutJob implements ShouldQueue
 
     public function handle(JekoGateway $gateway): void
     {
+        // Idempotence : ne pas relancer si le payout a déjà réussi
+        if ($this->order->payout_status === 'completed') {
+            Log::channel('payments')->info('ProcessJekoPayoutJob: already completed, skipping', [
+                'order_id' => $this->order->id,
+            ]);
+            return;
+        }
+
         $restaurant = $this->order->restaurant;
 
         if (!$restaurant) {

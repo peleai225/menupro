@@ -416,8 +416,21 @@ class JekoGateway implements PaymentGatewayInterface
                 ]);
 
             if (!$onboardResponse->successful()) {
-                // 409 = déjà onboardé, continuer avec la création de clé si on a le businessId
-                if ($onboardResponse->status() !== 409) {
+                if ($onboardResponse->status() === 409) {
+                    // Restaurant déjà onboardé — récupérer le businessId déjà stocké en DB
+                    $existingBusinessId = $subMerchant->jeko_merchant_id
+                        ?? ($subMerchant->integration_metadata['business_id'] ?? null);
+
+                    if (!$existingBusinessId) {
+                        Log::channel('payments')->error('Jeko 409 but no stored businessId', [
+                            'restaurant_id' => $subMerchant->restaurant_id,
+                        ]);
+                        return ['success' => false, 'error' => 'Restaurant déjà onboardé Jeko mais businessId inconnu — contactez le support Jeko.'];
+                    }
+
+                    // Continuer avec le businessId connu
+                    $onboardData = ['business' => ['id' => $existingBusinessId]];
+                } else {
                     Log::channel('payments')->error('Jeko onboarding failed', [
                         'restaurant_id' => $subMerchant->restaurant_id,
                         'status'        => $onboardResponse->status(),
@@ -428,10 +441,11 @@ class JekoGateway implements PaymentGatewayInterface
                         'error'   => $onboardResponse->json('message') ?? 'Onboarding Jeko échoué',
                     ];
                 }
+            } else {
+                $onboardData = $onboardResponse->json();
             }
 
-            $onboardData = $onboardResponse->json();
-            $businessId  = $onboardData['business']['id'] ?? null;
+            $businessId = $onboardData['business']['id'] ?? null;
 
             if (!$businessId) {
                 return ['success' => false, 'error' => 'Jeko onboarding: businessId manquant dans la réponse'];
