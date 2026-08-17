@@ -19,6 +19,11 @@
     {{-- Grain subtil en fond --}}
     <div class="pointer-events-none absolute inset-0 opacity-[0.025]" style="background-image:url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");background-size:200px"></div>
 
+    {{-- Grand chiffre décoratif en fond — ancre visuelle --}}
+    <div class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 select-none hidden lg:block" aria-hidden="true">
+        <span class="font-display font-normal leading-none" style="font-size:28vw;color:#1A1614;opacity:0.035;letter-spacing:-0.04em">{{ $stats['raw']['restaurants'] ?? $stats['restaurants'] }}</span>
+    </div>
+
     <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center lg:text-left">
 
         {{-- Badge --}}
@@ -27,27 +32,27 @@
                 <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
             </span>
-            {{ $stats['restaurants'] }} restaurants actifs en Côte d'Ivoire
+            {{ $stats['restaurants'] }} restaurants actifs · Côte d'Ivoire
         </div>
 
         {{-- Titre massif --}}
-        <h1 class="font-display font-normal leading-[1.04] tracking-tight text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem] fu d1" style="color:#1A1614">
+        <h1 class="font-display font-normal leading-[1.0] tracking-tight text-[4rem] sm:text-[5.5rem] lg:text-[7rem] xl:text-[8rem] fu d1" style="color:#1A1614">
             La plateforme<br>
-            <span class="not-italic" style="color:#D45E0C">restaurants</span><br>
+            <i style="color:#D45E0C;font-style:italic">restaurants</i><br>
             qui fait vendre.
         </h1>
 
         {{-- Sous-titre --}}
-        <p class="text-lg lg:text-xl mt-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
-            Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov.<br>
-            En ligne en <strong style="color:#1A1614">15 minutes</strong>. Zéro commission. Zéro technique.
+        <p class="text-lg lg:text-xl mt-8 max-w-xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
+            Menu · QR code · Wave · Orange · MTN · Moov.<br>
+            En ligne en <strong style="color:#1A1614;font-weight:600">15 minutes</strong>. Zéro commission.
         </p>
 
         {{-- CTA --}}
         <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start fu d2">
-            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 24px rgba(212,94,12,.35)">
+            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 32px rgba(212,94,12,.4)">
                 Démarrer gratuitement
-                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
             <a href="#how-it-works" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:white;border:1.5px solid #E8E0D5;color:#3D3330;box-shadow:0 2px 12px rgba(26,22,20,.06)">
                 Voir comment ça marche
@@ -58,7 +63,7 @@
         <div class="mt-12 flex items-center gap-4 justify-center lg:justify-start fu d3">
             <div class="flex -space-x-2.5">
                 @foreach(\App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['logo_path','name']) as $r)
-                <div class="w-9 h-9 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
+                <div class="w-10 h-10 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
                     @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover">
                     @else
