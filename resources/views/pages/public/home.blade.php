@@ -1,270 +1,83 @@
 <x-layouts.public title="MenuPro — Solution #1 pour restaurants en Côte d'Ivoire" description="MenuPro : digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov. Zéro commission.">
 @push('head')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Plateforme SaaS de commande en ligne pour restaurants en Cote d'Ivoire.","offers":{"@@type":"Offer","price":"5000","priceCurrency":"XOF"}}</script>
 <style>
-:root{--o:#D45E0C;--o2:#FF8C42;--dark:#080808;--dark2:#111111}
-.fd{font-family:'Bricolage Grotesque',sans-serif}
+:root{--c1:#FAF8F5;--c2:#F2EDE6;--warm:#1A1614;--o:#D45E0C;--o2:#FF8C42}
 .fu{opacity:0;transform:translateY(26px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
 .fu.in{opacity:1;transform:none}
 .fu.d1{transition-delay:.1s}.fu.d2{transition-delay:.2s}.fu.d3{transition-delay:.3s}.fu.d4{transition-delay:.4s}
-.gt{background:linear-gradient(135deg,#D45E0C,#FF8C42);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-right:.08em;display:inline-block}
-.gt-gold{background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-right:.08em;display:inline-block}
-@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@keyframes fl2{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes pr{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.9);opacity:0}}
-@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.fl{animation:fl 5s ease-in-out infinite}
-.fl2{animation:fl2 6s ease-in-out 1.5s infinite}
-.pr{animation:pr 2.5s ease-in-out infinite}
-.sp{animation:sp 14s linear infinite}
 .tk-w{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .tk-t{display:flex;width:max-content;animation:tk 28s linear infinite}.tk-t:hover{animation-play-state:paused}
-.glow{box-shadow:0 0 50px rgba(212,94,12,.3),0 0 100px rgba(212,94,12,.08)}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fl{animation:fl 4s ease-in-out infinite}
 </style>
 @endpush
 
 {{-- ══════════ 1. HERO ══════════ --}}
-<section class="relative overflow-hidden" style="background:var(--dark);min-height:100vh">
-    <div class="pointer-events-none absolute inset-0">
-        <div class="absolute -top-48 -left-48 w-[700px] h-[700px] rounded-full" style="background:radial-gradient(circle,rgba(212,94,12,.14) 0%,transparent 60%)"></div>
-        <div class="absolute inset-0 opacity-[0.025]" style="background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:56px 56px"></div>
-    </div>
+<section class="font-grotesk min-h-screen flex flex-col justify-center relative overflow-hidden" style="background:#FAF8F5">
+    {{-- Grain subtil en fond --}}
+    <div class="pointer-events-none absolute inset-0 opacity-[0.025]" style="background-image:url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");background-size:200px"></div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center" style="min-height:100vh">
-        <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center w-full py-24 lg:py-0">
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center lg:text-left">
 
-            {{-- Copy --}}
-            <div class="order-2 lg:order-1 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-sm font-bold mb-8 border fu" style="background:rgba(212,94,12,.1);border-color:rgba(212,94,12,.25);color:#FF8C42">
-                    <span class="relative flex h-2 w-2 shrink-0">
-                        <span class="pr absolute inline-flex h-full w-full rounded-full" style="background:#D45E0C"></span>
-                        <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
-                    </span>
-                    {{ $stats['restaurants'] }} restaurants actifs en ce moment
-                </div>
+        {{-- Badge --}}
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-10 fu" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.18);color:#D45E0C">
+            <span class="relative flex h-2 w-2 shrink-0">
+                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
+            </span>
+            {{ $stats['restaurants'] }} restaurants actifs en Côte d'Ivoire
+        </div>
 
-                <h1 class="fd text-5xl sm:text-6xl lg:text-[4rem] xl:text-[4.6rem] font-extrabold text-white leading-[1.03] tracking-tight fu d1">
-                    La solution<br>
-                    <span class="gt">#1 pour</span><br>
-                    les restaurants
-                </h1>
+        {{-- Titre massif --}}
+        <h1 class="font-display font-normal leading-[1.04] tracking-tight text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem] fu d1" style="color:#1A1614">
+            La plateforme<br>
+            <em class="not-italic" style="color:#D45E0C">restaurants</em><br>
+            qui fait vendre.
+        </h1>
 
-                <p class="mt-6 text-lg text-neutral-400 max-w-lg mx-auto lg:mx-0 leading-relaxed fu d2">
-                    Menu en ligne, QR codes, paiements <strong class="text-white">Wave · Orange · MTN · Moov</strong> — l'argent directement sur votre compte en moins de 15 minutes.
-                </p>
+        {{-- Sous-titre --}}
+        <p class="text-lg lg:text-xl mt-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
+            Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov.<br>
+            En ligne en <strong style="color:#1A1614">15 minutes</strong>. Zéro commission. Zéro technique.
+        </p>
 
-                <div class="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center lg:justify-start fu d2">
-                    <a href="{{ route('register') }}" class="group inline-flex items-center justify-center gap-2 px-8 py-4 font-extrabold rounded-2xl text-white text-base transition-all hover:-translate-y-0.5 glow" style="background:linear-gradient(135deg,#D45E0C,#b84e0a)">
-                        Démarrer — C'est gratuit
-                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                    </a>
-                    <a href="{{ route('r.menu', ['slug' => 'demo']) }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-7 py-4 font-semibold text-white/60 hover:text-white rounded-2xl border transition-all text-base" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.04)">
-                        <svg class="w-4 h-4" style="color:#D45E0C" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        Voir la démo live
-                    </a>
-                </div>
+        {{-- CTA --}}
+        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start fu d2">
+            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 24px rgba(212,94,12,.35)">
+                Démarrer gratuitement
+                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="#how-it-works" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:white;border:1.5px solid #E8E0D5;color:#3D3330;box-shadow:0 2px 12px rgba(26,22,20,.06)">
+                Voir comment ça marche
+            </a>
+        </div>
 
-                @php
-                    $proofResto = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->whereNotNull('logo_path')->where('logo_path','!=','')->latest()->take(5)->get(['name','logo_path']);
-                    $hasLogos = $proofResto->count() >= 3;
-                @endphp
-                <div class="mt-10 flex flex-wrap items-center gap-6 justify-center lg:justify-start fu d3">
-                    <div class="flex items-center gap-3">
-                        <div class="flex -space-x-2">
-                            @if($hasLogos)
-                                @foreach($proofResto as $r)
-                                <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-neutral-800"><img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover"></div>
-                                @endforeach
-                            @else
-                                @php $cols=['#D45E0C','#22c55e','#3b82f6','#a855f7','#f59e0b'];$fb=\App\Models\Restaurant::where('status',\App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['name']); @endphp
-                                @foreach($fb as $r)<div class="w-9 h-9 rounded-full border-2 border-neutral-800 flex items-center justify-center text-white text-xs font-black" style="background:{{ $cols[$loop->index%5] }}">{{ strtoupper(substr($r->name,0,1)) }}</div>@endforeach
-                            @endif
-                        </div>
-                        <div>
-                            <div class="flex gap-0.5 mb-0.5">@for($i=0;$i<5;$i++)<svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor</div>
-                            <div class="text-xs font-black text-white">{{ $stats['restaurants'] }}+ restaurants actifs</div>
-                        </div>
-                    </div>
-                    <div class="w-px h-8 bg-neutral-800 hidden sm:block"></div>
-                    <div>
-                        <div class="text-xl font-extrabold text-white leading-none fd" x-data="counter({{ $stats['raw']['orders'] }})" x-intersect.once="startCount()"><span x-text="displayCount"></span></div>
-                        <div class="text-xs text-neutral-500 mt-0.5">Commandes traitées</div>
-                    </div>
-                    <div class="w-px h-8 bg-neutral-800 hidden sm:block"></div>
-                    <div>
-                        <div class="text-xl font-extrabold fd leading-none" style="color:#D45E0C">5 000 F</div>
-                        <div class="text-xs text-neutral-500 mt-0.5">À partir de / mois</div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Hero visual: images carousel OR phone mockup --}}
-            @php
-                $heroRaw = [
-                    \App\Models\SystemSetting::get('hero_image', ''),
-                    \App\Models\SystemSetting::get('hero_image_2', ''),
-                    \App\Models\SystemSetting::get('hero_image_3', ''),
-                ];
-                $heroImagesUrls = array_values(array_filter(array_map(function($p) {
-                    return ($p && \Illuminate\Support\Facades\Storage::disk('public')->exists($p))
-                        ? \Illuminate\Support\Facades\Storage::url($p)
-                        : null;
-                }, $heroRaw)));
-                $hasHeroImages = count($heroImagesUrls) > 0;
-            @endphp
-
-            <div class="relative flex items-center justify-center order-1 lg:order-2 fu d1">
-                <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at 50% 50%,rgba(212,94,12,.1),transparent 65%)"></div>
-
-            @if($hasHeroImages)
-                {{-- Hero images carousel — empilés en absolute pour cross-fade fluide --}}
-                <div class="relative w-full max-w-sm lg:max-w-md"
-                     x-data="{ active: 0, total: {{ count($heroImagesUrls) }} }"
-                     x-init="setInterval(() => { active = (active + 1) % total }, 4500)">
-
-                    {{-- Conteneur carré fixe — tous les slides empilés dedans --}}
-                    <div class="relative rounded-3xl overflow-hidden glow" style="aspect-ratio:1/1;width:100%">
-                        @foreach($heroImagesUrls as $i => $url)
-                        <div class="absolute inset-0"
-                             style="transition:opacity .8s ease, transform .8s ease;"
-                             :style="active === {{ $i }}
-                                 ? 'opacity:1;transform:scale(1);z-index:10'
-                                 : 'opacity:0;transform:scale(1.04);z-index:0'">
-                            <img src="{{ $url }}"
-                                 alt="MenuPro hero {{ $i + 1 }}"
-                                 class="w-full h-full object-cover"
-                                 loading="{{ $i === 0 ? 'eager' : 'lazy' }}">
-                        </div>
-                        @endforeach
-
-                        {{-- Overlay gradient bas --}}
-                        <div class="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
-                             style="background:linear-gradient(to top,rgba(8,8,8,.6),transparent)"></div>
-                    </div>
-
-                    {{-- Dots --}}
-                    @if(count($heroImagesUrls) > 1)
-                    <div class="flex gap-2 justify-center mt-4">
-                        @foreach($heroImagesUrls as $i => $url)
-                        <button @click="active = {{ $i }}"
-                                class="rounded-full transition-all duration-300"
-                                :class="active === {{ $i }} ? 'w-6 h-2.5' : 'w-2.5 h-2.5 opacity-40'"
-                                style="background:#D45E0C">
-                        </button>
-                        @endforeach
-                    </div>
+        {{-- Social proof --}}
+        <div class="mt-12 flex items-center gap-4 justify-center lg:justify-start fu d3">
+            <div class="flex -space-x-2.5">
+                @foreach(\App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['logo_path','name']) as $r)
+                <div class="w-9 h-9 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
+                    @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
                     @endif
                 </div>
-            @else
-                {{-- Rotating badge --}}
-                <div class="absolute top-2 right-2 lg:top-4 lg:right-0 w-24 h-24 pointer-events-none z-20">
-                    <svg class="w-full h-full sp" viewBox="0 0 100 100">
-                        <defs><path id="cb" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"/></defs>
-                        <text fill="#D45E0C" font-size="10.5" font-weight="800" letter-spacing="3.5"><textPath href="#cb">MENUPRO · RESTAURANT · </textPath></text>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:#D45E0C">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Phone --}}
-                <div class="fl relative" style="width:236px">
-                    <div class="rounded-[3rem] overflow-hidden border-[7px]" style="border-color:#1c1c1c;background:#0a0a0a;box-shadow:0 60px 120px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04)">
-                        {{-- Status bar --}}
-                        <div class="flex items-center justify-between px-5 py-2.5" style="background:#0a0a0a">
-                            <span class="text-[10px] text-white font-bold">9:41</span>
-                            <div class="flex items-center gap-1.5">
-                                <div class="flex items-end gap-px h-3">
-                                    @foreach([4,6,8,10,12] as $h)<div class="w-1 rounded-sm" style="height:{{ $h }}px;background:{{ $h >= 8 ? '#fff' : 'rgba(255,255,255,.3)' }}"></div>@endforeach
-                                </div>
-                                <div class="w-5 h-2.5 rounded-sm border border-white/40 p-px"><div class="h-full w-4/5 rounded-[1px] bg-white"></div></div>
-                            </div>
-                        </div>
-                        {{-- App --}}
-                        <div style="background:#f7f6f4;height:446px;overflow:hidden">
-                            {{-- Header --}}
-                            <div class="px-4 pt-4 pb-3 bg-white" style="border-bottom:1px solid #f0eeec">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div>
-                                        <p class="text-[9px] text-neutral-400 font-medium">Bonjour 👋</p>
-                                        <p class="text-[13px] font-extrabold text-neutral-900" style="font-family:'Bricolage Grotesque',sans-serif">Que manger aujourd'hui ?</p>
-                                    </div>
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-black shrink-0" style="background:#D45E0C">AK</div>
-                                </div>
-                                <div class="rounded-xl px-3 py-2 flex items-center gap-2" style="background:#f2f1ef">
-                                    <svg class="w-3 h-3 text-neutral-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <span class="text-[10px] text-neutral-400">Rechercher un plat...</span>
-                                </div>
-                            </div>
-                            {{-- Banner --}}
-                            <div class="mx-3 mt-3 rounded-2xl p-3.5 flex items-center justify-between" style="background:linear-gradient(135deg,#D45E0C,#a84509)">
-                                <div>
-                                    <p class="text-[8px] text-orange-200 font-bold uppercase tracking-wider mb-0.5">Offre du jour</p>
-                                    <p class="text-[12px] text-white font-extrabold leading-tight">Poulet Braisé<br>+ Alloco</p>
-                                    <p class="text-[9px] text-orange-200 mt-1">🕐 Livré en 25 min</p>
-                                </div>
-                                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style="background:rgba(255,255,255,.12)">🍗</div>
-                            </div>
-                            {{-- Categories --}}
-                            <div class="flex gap-2 px-3 mt-3 overflow-hidden">
-                                @foreach([['🍽','Tout',true],['🍗','Poulet',false],['🐟','Poisson',false],['🍕','Pizza',false]] as $c)
-                                <div class="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-bold" style="{{ $c[2] ? 'background:#D45E0C;color:#fff' : 'background:#ede9e5;color:#666' }}">{{ $c[0] }} {{ $c[1] }}</div>
-                                @endforeach
-                            </div>
-                            {{-- Cards --}}
-                            <div class="px-3 mt-3 space-y-2">
-                                @foreach([['Chez Awa','Abidjan · Maquis','25 min','4.9','🍖'],['La Belle Vue','Bouaké · Restaurant','30 min','4.7','🥗'],['Snack Délice','Abidjan · Street','15 min','4.8','🌯']] as $r)
-                                <div class="bg-white rounded-2xl p-2.5 flex items-center gap-2.5" style="box-shadow:0 1px 4px rgba(0,0,0,.06)">
-                                    <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style="background:#fff8f5">{{ $r[4] }}</div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-[10px] font-extrabold text-neutral-900 truncate">{{ $r[0] }}</p>
-                                        <p class="text-[8px] text-neutral-400 mt-0.5">{{ $r[1] }}</p>
-                                    </div>
-                                    <div class="text-right shrink-0">
-                                        <p class="text-[9px] font-bold" style="color:#D45E0C">{{ $r[2] }}</p>
-                                        <p class="text-[8px] text-amber-500">★ {{ $r[3] }}</p>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Floating cards --}}
-                    <div class="fl2 absolute -right-16 top-16 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5" style="min-width:155px;box-shadow:0 8px 30px rgba(0,0,0,.15);border:1px solid rgba(0,0,0,.05)">
-                        <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:#e0f2fe">
-                            <img src="{{ asset('images/payments/wave.png') }}" class="w-5 h-5 object-contain" alt="Wave">
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-extrabold text-neutral-900">Paiement reçu ✓</p>
-                            <p class="text-[9px] text-neutral-400">Wave · 7 500 F</p>
-                        </div>
-                    </div>
-                    <div class="fl absolute -left-16 bottom-32 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5" style="min-width:145px;box-shadow:0 8px 30px rgba(0,0,0,.15);border:1px solid rgba(0,0,0,.05)">
-                        <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.1)">
-                            <svg class="w-4 h-4" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-extrabold text-neutral-900">Nouvelle commande !</p>
-                            <p class="text-[9px] text-neutral-400">Table 5 · 3 plats</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
+                @endforeach
             </div>
+            <p class="text-sm" style="color:#7C6F65">
+                <span class="font-semibold" style="color:#1A1614">{{ $stats['restaurants'] }}+</span> restaurateurs nous font confiance
+            </p>
         </div>
     </div>
-    <div class="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 50" preserveAspectRatio="none" style="width:100%;height:50px;fill:#fff" ><path d="M0,50 C400,10 1040,42 1440,8 L1440,50Z"/></svg>
+
+    {{-- Indicateur scroll bas --}}
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 fl" style="color:#D4C8B8">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
     </div>
 </section>
-
 
 {{-- ══════════ 2. PAIEMENTS + TICKER ══════════ --}}
 <section class="bg-white py-12 border-b border-neutral-100">
