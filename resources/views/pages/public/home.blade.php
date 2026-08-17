@@ -36,7 +36,7 @@
         </div>
 
         {{-- Titre massif --}}
-        <h1 class="font-display font-normal leading-[1.0] tracking-tight text-[4rem] sm:text-[5.5rem] lg:text-[7rem] xl:text-[8rem] fu d1" style="color:#1A1614">
+        <h1 class="font-display font-normal fu d1" style="color:#1A1614;font-size:clamp(3.2rem,9vw,8rem);line-height:1.0;letter-spacing:-0.02em">
             La plateforme<br>
             <i style="color:#D45E0C;font-style:italic">restaurants</i><br>
             qui fait vendre.
