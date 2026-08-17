@@ -255,126 +255,101 @@
 
 
 {{-- ══════════ 7. APP — Android + iPhone ══════════ --}}
-<section id="app" class="py-24 relative overflow-hidden" style="background:#080808">
-    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 70% 50% at 20% 60%,rgba(61,220,132,.06),transparent),radial-gradient(ellipse 50% 40% at 80% 40%,rgba(212,94,12,.07),transparent)"></div>
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+<section id="app" class="font-grotesk py-24" style="background:#F2EDE6">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="fu grid lg:grid-cols-2 gap-16 items-center">
 
-        <div class="fu flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-
-            {{-- Gauche : texte --}}
-            <div class="flex-1 text-center lg:text-left">
-                <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
-                <h2 class="fd text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-5">
-                    Commandez<br><span class="gt">où vous voulez</span>
+            {{-- Texte gauche --}}
+            <div class="text-center lg:text-left">
+                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
+                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight mb-5" style="color:#1A1614">
+                    Commandez<br>où vous voulez
                 </h2>
-                <p class="text-neutral-400 text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
-                    Disponible sur <strong class="text-white">Android</strong> et <strong class="text-white">iPhone</strong>.<br>
+                <p class="text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0" style="color:#7C6F65">
+                    Disponible sur <strong style="color:#1A1614">Android</strong> et <strong style="color:#1A1614">iPhone</strong>.<br>
                     Téléchargez l'app ou utilisez la version web — expérience identique.
                 </p>
-
-                {{-- Badges plateformes --}}
-                <div class="flex flex-wrap gap-3 justify-center lg:justify-start text-xs">
-                    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold" style="border-color:rgba(61,220,132,.3);color:#3DDC84;background:rgba(61,220,132,.07)">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18C4 12.36 4.98 11.38 6.18 11.38c1.2 0 2.18.98 2.18 2.18-.01 1.2-.98 2.08-2.18 2.08m11.64 0a2.18 2.18 0 0 1-2.18-2.18c0-1.2.98-2.18 2.18-2.18 1.2 0 2.18.98 2.18 2.18 0 1.2-.98 2.08-2.18 2.08M18.42 7l1.79-3.1-.9-.52L17.5 6.5A9.7 9.7 0 0 0 12 5a9.7 9.7 0 0 0-5.5 1.5L4.69 3.38l-.9.52L5.58 7A9.82 9.82 0 0 0 2 14h20A9.82 9.82 0 0 0 18.42 7z"/></svg>
-                        Android APK
-                    </span>
-                    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold" style="border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7);background:rgba(255,255,255,.05)">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
-                        iPhone PWA
-                    </span>
-                    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold" style="border-color:rgba(212,94,12,.3);color:#D45E0C;background:rgba(212,94,12,.07)">
-                        100% Gratuit
-                    </span>
-                </div>
             </div>
 
-            {{-- Droite : 2 boutons empilés --}}
-            <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0">
-
-                {{-- Bouton Android APK --}}
+            {{-- Boutons droite --}}
+            <div class="flex flex-col gap-4 max-w-sm mx-auto lg:mx-0 w-full">
+                {{-- Android APK --}}
                 <a href="{{ route('download.apk') }}"
-                   class="group flex items-center gap-4 px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5"
-                   style="background:#0f0f0f;border-color:rgba(61,220,132,.25);box-shadow:0 0 0 0 rgba(61,220,132,0);"
-                   onmouseover="this.style.boxShadow='0 0 32px rgba(61,220,132,.15)'"
-                   onmouseout="this.style.boxShadow='0 0 0 0 rgba(61,220,132,0)'">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300" style="background:rgba(61,220,132,.12);border:1px solid rgba(61,220,132,.2)">
-                        <svg class="w-6 h-6" style="color:#3DDC84" viewBox="0 0 24 24" fill="currentColor"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
+                   style="border-color:#E8E0D5">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.2)">
+                        <svg class="w-6 h-6" style="color:#22c55e" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-xs font-black uppercase tracking-widest mb-0.5" style="color:#3DDC84">Android</div>
-                        <div class="text-white font-extrabold text-base leading-tight">Télécharger l'APK</div>
-                        <div class="text-neutral-500 text-xs mt-0.5">Installation directe · ~60 Mo</div>
+                    <div class="flex-1">
+                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5" style="color:#22c55e">Android</div>
+                        <div class="font-semibold text-base" style="color:#1A1614">Télécharger l'APK</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Installation directe · ~60 Mo</div>
                     </div>
-                    <svg class="w-4 h-4 text-neutral-600 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
 
-                {{-- Bouton iPhone PWA --}}
+                {{-- iPhone PWA --}}
                 <a href="https://mpa-five.vercel.app/" target="_blank"
-                   class="group flex items-center gap-4 px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5"
-                   style="background:#0f0f0f;border-color:rgba(212,94,12,.25);box-shadow:0 0 0 0 rgba(212,94,12,0);"
-                   onmouseover="this.style.boxShadow='0 0 32px rgba(212,94,12,.15)'"
-                   onmouseout="this.style.boxShadow='0 0 0 0 rgba(212,94,12,0)'">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.12);border:1px solid rgba(212,94,12,.2)">
-                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
+                   style="border-color:#E8E0D5">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
+                        <svg class="w-6 h-6" style="color:#D45E0C" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-xs font-black uppercase tracking-widest mb-0.5 flex items-center gap-1.5" style="color:#D45E0C">
-                            iPhone · iPad
-                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:rgba(212,94,12,.2);color:#D45E0C">PWA</span>
+                    <div class="flex-1">
+                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5 flex items-center gap-1.5" style="color:#D45E0C">
+                            iPhone · iPad <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:rgba(212,94,12,.12)">PWA</span>
                         </div>
-                        <div class="text-white font-extrabold text-base leading-tight">Ouvrir dans Safari</div>
-                        <div class="text-neutral-500 text-xs mt-0.5">Ajouter à l'écran d'accueil</div>
+                        <div class="font-semibold text-base" style="color:#1A1614">Ouvrir dans Safari</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Ajouter à l'écran d'accueil</div>
                     </div>
-                    <svg class="w-4 h-4 text-neutral-600 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
-
-                {{-- Note iPhone --}}
-                <p class="text-center text-xs text-neutral-600 px-2">
-                    iPhone : ouvrez dans <strong class="text-neutral-500">Safari</strong> → Partager ⬆ → "Sur l'écran d'accueil"
-                </p>
+                <p class="text-center text-xs px-2" style="color:#B8AFA8">iPhone : ouvrez dans <strong style="color:#7C6F65">Safari</strong> → Partager ⬆ → "Sur l'écran d'accueil"</p>
             </div>
-
         </div>
     </div>
 </section>
 
 
 {{-- ══════════ 8. DRIVER APP ══════════ --}}
-<section class="py-24 bg-white relative overflow-hidden">
-    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 50% 60% at 15% 50%,rgba(255,97,0,.05),transparent)"></div>
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+<section class="font-grotesk py-24" style="background:#FAF8F5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            {{-- Card QR code --}}
             <div class="flex flex-col items-center fu order-2 lg:order-1">
-                <div class="rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-5 max-w-xs w-full border border-neutral-900" style="background:#0f0f0f">
-                    <p class="text-sm font-extrabold text-white fd">Application Livreurs</p>
-                    <div class="w-40 h-40 rounded-2xl overflow-hidden bg-neutral-800 flex items-center justify-center p-1" style="border:3px solid rgba(255,97,0,.25)">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-driver.vercel.app/') }}&color=FF6100&bgcolor=111111&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                <div class="bg-white rounded-2xl p-8 border flex flex-col items-center gap-5 max-w-xs w-full" style="border-color:#E8E0D5;box-shadow:0 8px 40px rgba(26,22,20,.06)">
+                    <p class="font-semibold text-sm" style="color:#1A1614">Application Livreurs</p>
+                    <div class="w-40 h-40 rounded-2xl overflow-hidden flex items-center justify-center p-1" style="border:2px solid rgba(255,97,0,.2);background:#FAF8F5">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-driver.vercel.app/') }}&color=FF6100&bgcolor=FAF8F5&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     </div>
-                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-black text-white transition-all hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
+                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
                 </div>
             </div>
+
+            {{-- Texte --}}
             <div class="text-center lg:text-left fu order-1 lg:order-2">
-                <span class="text-xs font-black uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
-                <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 leading-tight">
+                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
+                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight" style="color:#1A1614">
                     Livrez avec<br>
-                    <span style="background:linear-gradient(120deg,#FF6100,#FF3301);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">MenuPro</span>
+                    <em class="not-italic" style="color:#FF6100">MenuPro</em>
                 </h2>
-                <p class="text-neutral-500 text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0">Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.</p>
+                <p class="text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0" style="color:#7C6F65">Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.</p>
                 <div class="mt-7 space-y-4">
                     @foreach([['Inscription rapide','Créez votre compte en 2 minutes avec votre CNI et permis.'],['Courses en temps réel','Recevez les commandes proches de vous avec alerte sonore.'],['Paiement Wave automatique','Vos gains sont virés sur demande, sans délai.'],['Zéro frais','Aucun abonnement. Vous gagnez à chaque course effectuée.']] as $f)
                     <div class="flex items-start gap-3 text-left">
-                        <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background:rgba(255,97,0,.1)">
-                            <svg class="w-3.5 h-3.5" style="color:#FF6100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background:rgba(255,97,0,.1)">
+                            <svg class="w-3 h-3" style="color:#FF6100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                         </div>
                         <div>
-                            <p class="font-extrabold text-neutral-900 text-sm">{{ $f[0] }}</p>
-                            <p class="text-neutral-500 text-xs mt-0.5">{{ $f[1] }}</p>
+                            <p class="font-semibold text-sm" style="color:#1A1614">{{ $f[0] }}</p>
+                            <p class="text-xs mt-0.5" style="color:#7C6F65">{{ $f[1] }}</p>
                         </div>
                     </div>
                     @endforeach
                 </div>
                 <div class="mt-8">
-                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-extrabold rounded-2xl transition-all hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 0 30px rgba(255,97,0,.22)">
+                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-semibold rounded-2xl transition hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 4px 20px rgba(255,97,0,.25)">
                         🏍️ S'inscrire comme livreur
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
@@ -387,19 +362,19 @@
 
 {{-- ══════════ VIDÉOS ══════════ --}}
 @if(!empty($videos))
-<section class="py-24 bg-white">
+<section class="font-grotesk py-24 bg-white" style="border-top:1px solid #E8E0D5">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Vidéo</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 mt-3">Voyez MenuPro en action</h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Vidéo</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Voyez MenuPro en action</h2>
         </div>
-        <div class="grid md:grid-cols-{{ count($videos)>1?'2':'1' }} gap-8 fu">
+        <div class="grid md:grid-cols-{{ count($videos)>1?'2':'1' }} gap-6 fu">
             @foreach($videos as $v)
-            <div>
-                <div class="aspect-video bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl">
-                    <iframe src="{{ $v['url'] }}" title="{{ $v['title'] }}" class="w-full h-full" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+            <div class="rounded-2xl overflow-hidden border" style="border-color:#E8E0D5">
+                <div class="relative" style="padding-bottom:56.25%;height:0">
+                    <iframe class="absolute inset-0 w-full h-full" src="{{ $v['url'] }}" title="{{ $v['title'] }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 </div>
-                @if($v['title'])<p class="mt-3 text-center font-bold text-neutral-700">{{ $v['title'] }}</p>@endif
+                @if($v['title'])<p class="px-4 py-3 text-sm font-semibold" style="color:#1A1614;background:#FAF8F5">{{ $v['title'] }}</p>@endif
             </div>
             @endforeach
         </div>
@@ -409,11 +384,11 @@
 
 
 {{-- ══════════ TÉMOIGNAGES ══════════ --}}
-<section class="py-24" style="background:#f7f6f4">
+<section class="font-grotesk py-24" style="background:#F2EDE6">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Témoignages</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 mt-3 leading-tight">Ils en parlent<br>mieux que nous</h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Témoignages</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Ils en parlent<br>mieux que nous</h2>
         </div>
         @php
             $testimonials = \App\Models\SystemSetting::get('home_testimonials', [
@@ -424,14 +399,15 @@
         @endphp
         <div class="grid md:grid-cols-3 gap-6 fu">
             @foreach($testimonials as $t)
-            <div class="bg-white rounded-3xl p-7 border border-neutral-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div class="flex gap-1 mb-5">@for($i=0;$i<($t['stars']??5);$i++)<svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor</div>
-                <p class="text-neutral-600 leading-relaxed flex-1 text-sm">"{{ $t['text'] }}"</p>
-                <div class="flex items-center gap-3 mt-6 pt-5 border-t border-neutral-100">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-black shrink-0" style="background:#D45E0C">{{ strtoupper(substr($t['name'],0,1)) }}</div>
+            <div class="bg-white rounded-2xl p-8 border flex flex-col hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
+                {{-- Guillemets décoratifs --}}
+                <p class="font-display text-6xl font-normal leading-none mb-2" style="color:#E8E0D5">"</p>
+                <blockquote class="font-display italic text-lg leading-snug flex-1 -mt-4" style="color:#3D3330">"{{ $t['text'] }}"</blockquote>
+                <div class="flex items-center gap-3 mt-6 pt-5" style="border-top:1px solid #F2EDE6">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0" style="background:#D45E0C">{{ strtoupper(substr($t['name'],0,1)) }}</div>
                     <div>
-                        <div class="font-extrabold text-sm text-neutral-900">{{ $t['name'] }}</div>
-                        <div class="text-xs text-neutral-400">{{ $t['role'] }} · {{ $t['city'] }}</div>
+                        <div class="font-semibold text-sm" style="color:#1A1614">{{ $t['name'] }}</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">{{ $t['role'] }} · {{ $t['city'] }}</div>
                     </div>
                 </div>
             </div>
@@ -442,41 +418,41 @@
 
 
 {{-- ══════════ RESTAURANTS ══════════ --}}
-<section class="py-24 bg-white">
+<section class="font-grotesk py-24 bg-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Ils nous font confiance</span>
-            <h2 class="fd text-3xl sm:text-4xl font-extrabold text-neutral-900 mt-3">Découvrez nos restaurants</h2>
-            <p class="text-neutral-400 text-sm mt-2">Commandez directement depuis leur menu en ligne</p>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Ils nous font confiance</span>
+            <h2 class="font-display text-3xl sm:text-4xl font-normal mt-4" style="color:#1A1614">Découvrez nos restaurants</h2>
+            <p class="text-sm mt-2" style="color:#7C6F65">Commandez directement depuis leur menu en ligne</p>
         </div>
         @php
             $trs = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(8)->get(['name','slug','logo_path','banner_path','city']);
         @endphp
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 fu">
             @foreach($trs as $r)
-            <a href="{{ route('r.menu', $r->slug) }}" target="_blank" class="group bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block">
-                <div class="relative h-28 overflow-hidden bg-neutral-100">
+            <a href="{{ route('r.menu', $r->slug) }}" target="_blank" class="group bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated block" style="border-color:#E8E0D5">
+                <div class="relative h-28 overflow-hidden" style="background:#FAF8F5">
                     @if($r->banner_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->banner_path))
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($r->banner_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
                     @else
-                        <div class="w-full h-full" style="background:linear-gradient(135deg,#D45E0C,#a84509)"></div>
+                        <div class="w-full h-full" style="background:linear-gradient(135deg,#F2EDE6,#E8E0D5)"></div>
                     @endif
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span class="text-white text-xs font-black px-3 py-1.5 rounded-full border-2 border-white">Voir le menu →</span>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style="background:rgba(26,22,20,.6)">
+                        <span class="text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/30">Voir le menu →</span>
                     </div>
                 </div>
                 <div class="px-4 pb-4">
-                    <div class="relative -mt-6 mb-3">
-                        <div class="w-12 h-12 rounded-xl border-2 border-white shadow-md overflow-hidden bg-white">
+                    <div class="relative -mt-5 mb-3">
+                        <div class="w-10 h-10 rounded-xl border-2 overflow-hidden bg-white shadow-sm" style="border-color:#FAF8F5">
                             @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
                                 <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover" loading="lazy">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-white font-black text-lg" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
+                                <div class="w-full h-full flex items-center justify-center text-white font-semibold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
                             @endif
                         </div>
                     </div>
-                    <h3 class="font-extrabold text-sm text-neutral-900 truncate">{{ $r->name }}</h3>
-                    @if($r->city)<p class="text-xs text-neutral-400 mt-0.5">📍 {{ $r->city }}</p>@endif
+                    <h3 class="font-semibold text-sm truncate" style="color:#1A1614">{{ $r->name }}</h3>
+                    @if($r->city)<p class="text-xs mt-0.5" style="color:#B8AFA8">📍 {{ $r->city }}</p>@endif
                 </div>
             </a>
             @endforeach
