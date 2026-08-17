@@ -11,6 +11,13 @@
 .tk-t{display:flex;width:max-content;animation:tk 28s linear infinite}.tk-t:hover{animation-play-state:paused}
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .fl{animation:fl 4s ease-in-out infinite}
+/* Legacy classes — needed by sections 2-14 until they are rewritten in Tasks 3-5 */
+.fd{font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 125}
+.gt{background:linear-gradient(135deg,#D45E0C,#FF8C42);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gt-gold{background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.glow{box-shadow:0 0 32px rgba(168,69,9,.5),0 0 64px rgba(212,94,12,.3)}
+@keyframes pr{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.95)}}
+.pr{animation:pr 2s ease-in-out infinite}
 </style>
 @endpush
 
