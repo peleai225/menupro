@@ -105,7 +105,22 @@
     --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Editorial redesign — Cream & Warm palette */
+    --color-cream-50:  #FDFCFA;
+    --color-cream-100: #FAF8F5;
+    --color-cream-200: #F2EDE6;
+    --color-cream-300: #E8E0D5;
+    --color-cream-400: #D4C8B8;
+    --color-warm-900:  #1A1614;
+    --color-warm-700:  #3D3330;
+    --color-warm-500:  #7C6F65;
+    --color-warm-300:  #B8AFA8;
 }
+
+/* Editorial typography utilities */
+.font-display { font-family: 'Instrument Serif', Georgia, serif; }
+.font-grotesk { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Base Styles
