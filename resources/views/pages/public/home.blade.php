@@ -87,27 +87,27 @@
 </section>
 
 {{-- ══════════ 2. PAIEMENTS + TICKER ══════════ --}}
-<section class="bg-white py-12 border-b border-neutral-100">
+<section class="font-grotesk bg-white py-10" style="border-top:1px solid #E8E0D5;border-bottom:1px solid #E8E0D5">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <p class="text-center text-[11px] font-black text-neutral-300 uppercase tracking-[0.3em] mb-7">Paiements Mobile Money acceptés</p>
-        <div class="flex items-center justify-center gap-5 sm:gap-10 flex-wrap fu">
+        <p class="text-center text-[10px] font-semibold uppercase tracking-[0.25em] mb-7 fu" style="color:#B8AFA8">Paiements Mobile Money acceptés</p>
+        <div class="flex items-center justify-center gap-6 sm:gap-10 flex-wrap fu d1">
             @foreach([['wave.png','Wave','#e0f2fe'],['orange-money.png','Orange Money','#fff7ed'],['mtn-momo.png','MTN MoMo','#fefce8'],['moov-money.png','Moov Money','#eff6ff']] as $i => $p)
             <div class="flex flex-col items-center gap-2" style="transition-delay:{{ $i*0.08 }}s">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center border border-neutral-100 hover:shadow-md hover:-translate-y-0.5 transition-all" style="background:{{ $p[2] }}">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center border hover:shadow-md hover:-translate-y-0.5 transition-all" style="background:{{ $p[2] }};border-color:#E8E0D5">
                     <img src="{{ asset('images/payments/'.$p[0]) }}" alt="{{ $p[1] }}" class="h-8 w-8 object-contain" loading="lazy">
                 </div>
-                <span class="text-[10px] font-semibold text-neutral-400">{{ $p[1] }}</span>
+                <span class="text-[10px] font-medium" style="color:#B8AFA8">{{ $p[1] }}</span>
             </div>
             @endforeach
         </div>
     </div>
-    <div class="tk-w border-t border-neutral-100 pt-5">
+    <div class="tk-w" style="border-top:1px solid #F2EDE6;padding-top:1.25rem">
         <div class="tk-t">
             @foreach(array_fill(0,2,['Poulet Braisé','Attieké Poisson','Jus Naturels','Pizza','Burgers','Maquis','Hôtel','Livraison','Paninis','Tacos','Riz Sauce','Café']) as $items)
             @foreach($items as $item)
             <div class="flex items-center gap-3 px-5">
-                <span class="text-neutral-200 font-black">·</span>
-                <span class="text-sm font-semibold text-neutral-400 whitespace-nowrap">{{ $item }}</span>
+                <span style="color:#E8E0D5;font-weight:900">·</span>
+                <span class="text-sm font-medium whitespace-nowrap" style="color:#B8AFA8">{{ $item }}</span>
             </div>
             @endforeach
             @endforeach
@@ -117,24 +117,24 @@
 
 
 {{-- ══════════ 3. POUR QUI ══════════ --}}
-<section class="py-24 sm:py-28 bg-white">
+<section class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Pour qui ?</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 mt-3 leading-tight">De la vendeuse de panini<br>au grand hôtel</h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pour qui ?</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">De la vendeuse de panini<br>au grand hôtel</h2>
         </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach([
-                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','#fff8f5','#D45E0C','5 000 F/mois'],
-                ['🍽','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','#fafafa','#525252','15 000 F/mois'],
-                ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','#f0f7ff','#3b82f6','Gold'],
-                ['🏍','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','#f0fdf4','#16a34a','Pro'],
-            ] as $w)
-            <div class="rounded-3xl p-7 border-2 border-transparent hover:border-neutral-200 hover:-translate-y-1 hover:shadow-xl transition-all duration-300" style="background:{{ $w[3] }}">
-                <div class="text-3xl mb-5">{{ $w[0] }}</div>
-                <h3 class="fd font-extrabold text-neutral-900 text-lg mb-2">{{ $w[1] }}</h3>
-                <p class="text-neutral-500 text-sm leading-relaxed mb-5">{{ $w[2] }}</p>
-                <span class="inline-block text-xs font-black px-3 py-1.5 rounded-full" style="background:rgba(0,0,0,.06);color:{{ $w[4] }}">À partir de {{ $w[5] }}</span>
+                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','5 000 F/mois'],
+                ['🍽️','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','15 000 F/mois'],
+                ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','Gold'],
+                ['🏍️','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','Pro'],
+            ] as $i => $w)
+            <div class="fu bg-white rounded-2xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated flex flex-col" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
+                <div class="text-3xl mb-6">{{ $w[0] }}</div>
+                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $w[1] }}</h3>
+                <p class="text-sm leading-relaxed flex-1 mb-6" style="color:#7C6F65">{{ $w[2] }}</p>
+                <span class="inline-block self-start text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#FAF8F5;border:1px solid #E8E0D5;color:#D45E0C">À partir de {{ $w[3] }}</span>
             </div>
             @endforeach
         </div>
@@ -142,45 +142,45 @@
 </section>
 
 
-{{-- ══════════ 4. FEATURES — Dark ══════════ --}}
-<section class="py-24 sm:py-28" style="background:#080808">
+{{-- ══════════ 4. FEATURES ══════════ --}}
+<section class="font-grotesk py-24 sm:py-28" style="background:#F2EDE6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Pourquoi MenuPro</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-white mt-3 leading-tight">
-                Tout ce dont votre<br><span class="gt">restaurant a besoin</span>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pourquoi MenuPro</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">
+                Tout ce dont votre<br>restaurant a besoin
             </h2>
         </div>
 
-        {{-- 2 featured --}}
+        {{-- 2 grandes features --}}
         <div class="grid lg:grid-cols-5 gap-5 mb-5">
-            <div class="lg:col-span-3 rounded-3xl p-8 border border-neutral-800 hover:border-orange-900/50 transition-all duration-300 fu" style="background:#111">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.15);border:1px solid rgba(212,94,12,.2)">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
                     <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                 </div>
-                <h3 class="fd text-2xl font-extrabold text-white mb-3">Commandes en direct</h3>
-                <p class="text-neutral-500 leading-relaxed max-w-sm">Vos clients commandent via QR code ou lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié, impression automatique.</p>
+                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Commandes en direct</h3>
+                <p class="text-sm leading-relaxed max-w-sm" style="color:#7C6F65">Vos clients commandent via QR code ou lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié, impression automatique.</p>
                 <div class="mt-6 flex items-center gap-2 flex-wrap">
                     @foreach(['QR Code','WhatsApp','Cuisine','Alertes sonores'] as $tag)
-                    <span class="text-xs font-black px-3 py-1.5 rounded-full" style="{{ $loop->first ? 'background:#D45E0C;color:#fff' : 'background:#1e1e1e;color:#666;border:1px solid #2a2a2a' }}">{{ $tag }}</span>
+                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="{{ $loop->first ? 'background:#D45E0C;color:white' : 'background:#FAF8F5;border:1px solid #E8E0D5;color:#7C6F65' }}">{{ $tag }}</span>
                     @endforeach
                 </div>
             </div>
-            <div class="lg:col-span-2 rounded-3xl p-8 border border-neutral-800 hover:border-orange-900/50 transition-all duration-300 fu d1" style="background:#111">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.15);border:1px solid rgba(212,94,12,.2)">
+            <div class="lg:col-span-2 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu d1" style="border-color:#E8E0D5">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
                     <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <h3 class="fd text-2xl font-extrabold text-white mb-3">Paiement Mobile Money</h3>
-                <p class="text-neutral-500 leading-relaxed">Wave, Orange Money, MTN, Moov. L'argent arrive directement sur votre compte — sans délai ni intermédiaire.</p>
+                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Paiement Mobile Money</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">Wave, Orange Money, MTN, Moov. L'argent arrive directement sur votre compte — sans délai ni intermédiaire.</p>
                 <div class="mt-6 flex -space-x-2">
                     @foreach([['wave.png','#e0f2fe'],['orange-money.png','#fff7ed'],['mtn-momo.png','#fefce8'],['moov-money.png','#eff6ff']] as $p)
-                    <div class="w-9 h-9 rounded-full border-2 border-neutral-900 flex items-center justify-center" style="background:{{ $p[1] }}"><img src="{{ asset('images/payments/'.$p[0]) }}" class="w-5 h-5 object-contain" alt=""></div>
+                    <div class="w-9 h-9 rounded-full border-2 flex items-center justify-center" style="background:{{ $p[1] }};border-color:#FAF8F5"><img src="{{ asset('images/payments/'.$p[0]) }}" class="w-5 h-5 object-contain" alt=""></div>
                     @endforeach
                 </div>
             </div>
         </div>
 
-        {{-- 4 small --}}
+        {{-- 4 petites features --}}
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach([
                 ['analytics','Analytics & Rapports','Bilan journalier, CA par heure, plats les plus vendus, taux d\'annulation.'],
@@ -188,15 +188,15 @@
                 ['hotel','Mode Hôtel','QR par chambre, room service, voix IA, appel addition, appel ménage.'],
                 ['delivery','Livraison intégrée','Gérez vos livreurs avec suivi GPS. Vos clients voient la progression. Zéro commission.'],
             ] as $i => $f)
-            <div class="rounded-3xl p-7 border border-neutral-800 hover:border-orange-900/30 hover:-translate-y-0.5 transition-all duration-300 fu" style="background:#111;transition-delay:{{ $i*0.07 }}s">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(212,94,12,.1)">
+            <div class="bg-white rounded-2xl p-6 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(212,94,12,.08)">
                     @if($f[0]==='analytics')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     @elseif($f[0]==='stock')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     @elseif($f[0]==='hotel')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     @else<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>@endif
                 </div>
-                <h3 class="fd font-extrabold text-white text-base mb-2">{{ $f[1] }}</h3>
-                <p class="text-neutral-500 text-sm leading-relaxed">{{ $f[2] }}</p>
+                <h3 class="font-display text-lg font-normal mb-2" style="color:#1A1614">{{ $f[1] }}</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $f[2] }}</p>
             </div>
             @endforeach
         </div>
@@ -205,7 +205,7 @@
 
 
 {{-- ══════════ 5. STATS STRIP ══════════ --}}
-<section class="py-16" style="background:linear-gradient(135deg,#a84509,#D45E0C,#e8751a)">
+<section class="font-grotesk py-20" style="background:#1A1614">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center fu">
             @foreach([
@@ -215,9 +215,9 @@
                 ['24/7','Disponible','Même quand vous dormez.'],
             ] as $k)
             <div>
-                <div class="fd text-5xl sm:text-6xl font-extrabold text-white leading-none mb-2">{{ $k[0] }}</div>
-                <div class="font-extrabold text-white text-sm mb-1">{{ $k[1] }}</div>
-                <div class="text-orange-200 text-xs">{{ $k[2] }}</div>
+                <div class="font-display text-5xl sm:text-6xl font-normal leading-none mb-2 text-white">{{ $k[0] }}</div>
+                <div class="font-semibold text-sm mb-1 text-white">{{ $k[1] }}</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)">{{ $k[2] }}</div>
             </div>
             @endforeach
         </div>
@@ -226,26 +226,27 @@
 
 
 {{-- ══════════ 6. HOW IT WORKS ══════════ --}}
-<section id="how-it-works" class="py-24 sm:py-28 bg-white">
+<section id="how-it-works" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Comment ça marche</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 mt-3 leading-tight">En ligne en 15 minutes<br>chrono</h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Comment ça marche</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">En ligne en 15 minutes<br>chrono</h2>
         </div>
         <div class="grid md:grid-cols-3 gap-6 fu relative">
-            <div class="hidden md:block absolute h-px top-11 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)]" style="background:linear-gradient(90deg,transparent,#D45E0C 20%,#D45E0C 80%,transparent)"></div>
+            {{-- Ligne de connexion desktop --}}
+            <div class="hidden md:block absolute h-px top-7 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)]" style="background:linear-gradient(90deg,transparent,#D45E0C 20%,#D45E0C 80%,transparent)"></div>
             @foreach([
                 ['01','Créez votre compte','Nom, email, téléphone. Votre espace est prêt en 2 minutes.','~2 min'],
                 ['02','Ajoutez votre menu','Photos, prix, catégories. Configurez horaires et paiements Mobile Money.','~10 min'],
                 ['03','Recevez des commandes','Partagez votre lien ou imprimez votre QR code. Commandes et paiements en direct.','Immédiat'],
             ] as $step)
-            <div class="bg-neutral-50 rounded-3xl p-8 border border-neutral-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
                 <div class="flex items-start justify-between mb-6">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center fd font-extrabold text-lg text-white" style="background:#D45E0C">{{ $step[0] }}</div>
-                    <span class="text-xs font-black px-3 py-1.5 rounded-full text-white" style="background:#161616">{{ $step[3] }}</span>
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-xl font-normal text-white" style="background:#D45E0C">{{ $step[0] }}</div>
+                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#1A1614;color:white">{{ $step[3] }}</span>
                 </div>
-                <h3 class="fd text-xl font-extrabold text-neutral-900 mb-3">{{ $step[1] }}</h3>
-                <p class="text-neutral-500 text-sm leading-relaxed">{{ $step[2] }}</p>
+                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $step[1] }}</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $step[2] }}</p>
             </div>
             @endforeach
         </div>
