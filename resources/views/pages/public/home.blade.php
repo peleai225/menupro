@@ -11,13 +11,6 @@
 .tk-t{display:flex;width:max-content;animation:tk 28s linear infinite}.tk-t:hover{animation-play-state:paused}
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .fl{animation:fl 4s ease-in-out infinite}
-/* Legacy classes — needed by sections 2-14 until they are rewritten in Tasks 3-5 */
-.fd{font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 125}
-.gt{background:linear-gradient(135deg,#D45E0C,#FF8C42);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.gt-gold{background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.glow{box-shadow:0 0 32px rgba(168,69,9,.5),0 0 64px rgba(212,94,12,.3)}
-@keyframes pr{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.95)}}
-.pr{animation:pr 2s ease-in-out infinite}
 </style>
 @endpush
 
@@ -461,59 +454,65 @@
 </section>
 
 
-{{-- ══════════ TARIFS — Dark ══════════ --}}
-<section id="pricing" class="py-24 sm:py-28" style="background:#080808">
+{{-- ══════════ TARIFS ══════════ --}}
+<section id="pricing" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">Tarifs</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-white mt-3 leading-tight">Simple. Transparent.<br><span class="gt">Zéro commission.</span></h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Tarifs</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Simple. Transparent.<br>Zéro commission.</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
             {{-- Stand --}}
-            <div class="rounded-3xl p-7 border border-neutral-800 hover:border-neutral-700 hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 flex flex-col" style="background:#111">
-                <div class="text-xs font-black uppercase tracking-widest mb-4" style="color:#D45E0C">Stand</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="fd text-4xl font-extrabold text-white">5 000</span><span class="text-neutral-500 text-sm">F/mois</span></div>
-                <p class="text-sm text-neutral-500 mb-6">Vendeurs de rue et stands</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['15 plats','100 cmd/mois','QR code inclus','Wave & Orange Money','Sans PC requis'] as $f)<li class="flex items-center gap-2 text-sm text-neutral-400"><svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3.5 rounded-2xl font-black text-sm transition-all border" style="border-color:#D45E0C;color:#D45E0C;background:rgba(212,94,12,.08)" onmouseover="this.style.background='rgba(212,94,12,.14)'" onmouseout="this.style.background='rgba(212,94,12,.08)'">Essai 7j gratuit</a>
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#D45E0C">Stand</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">5 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Vendeurs de rue et stands</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['15 plats','100 cmd/mois','QR code inclus','Wave & Orange Money','Sans PC requis'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="border:1.5px solid #D45E0C;color:#D45E0C;background:rgba(212,94,12,.05)" onmouseover="this.style.background='rgba(212,94,12,.1)'" onmouseout="this.style.background='rgba(212,94,12,.05)'">Essai 7j gratuit</a>
             </div>
+
             {{-- Essentiel --}}
-            <div class="rounded-3xl p-7 border border-neutral-800 hover:border-neutral-700 hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 flex flex-col" style="background:#111">
-                <div class="text-xs font-black text-neutral-500 uppercase tracking-widest mb-4">Essentiel</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="fd text-4xl font-extrabold text-white">15 000</span><span class="text-neutral-500 text-sm">F/mois</span></div>
-                <p class="text-sm text-neutral-500 mb-6">Maquis et petits restaurants</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['25 plats, 8 catégories','200 cmd/mois','Mobile Money + QR','Support WhatsApp'] as $f)<li class="flex items-center gap-2 text-sm text-neutral-400"><svg class="w-4 h-4 text-neutral-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-2xl font-black text-sm transition-all" style="background:#1a1a1a;color:#888;border:1px solid #2a2a2a" onmouseover="this.style.background='#222'" onmouseout="this.style.background='#1a1a1a'">Essai 7j gratuit</a>
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#7C6F65">Essentiel</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">15 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Maquis et petits restaurants</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['25 plats, 8 catégories','200 cmd/mois','Mobile Money + QR','Support WhatsApp'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#E8E0D5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="background:#FAF8F5;border:1.5px solid #E8E0D5;color:#7C6F65" onmouseover="this.style.background='#F2EDE6'" onmouseout="this.style.background='#FAF8F5'">Essai 7j gratuit</a>
             </div>
-            {{-- Pro --}}
-            <div class="rounded-3xl p-7 border-2 shadow-2xl relative hover:-translate-y-1 transition-all duration-300 flex flex-col" style="background:#D45E0C;border-color:#D45E0C;box-shadow:0 0 60px rgba(212,94,12,.25)">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-xs font-black px-5 py-1.5 rounded-full" style="color:#D45E0C">⭐ Populaire</div>
-                <div class="text-xs font-black uppercase tracking-widest mb-4 text-orange-200">Pro</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="fd text-4xl font-extrabold text-white">25 000</span><span class="text-orange-200 text-sm">F/mois</span></div>
+
+            {{-- Pro — highlighted --}}
+            <div class="rounded-2xl p-7 border-2 relative hover:-translate-y-1 transition-all duration-300 flex flex-col" style="background:#D45E0C;border-color:#D45E0C;box-shadow:0 8px 40px rgba(212,94,12,.3)">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1.5 rounded-full bg-white" style="color:#D45E0C">⭐ Populaire</div>
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4 text-orange-200">Pro</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal text-white">25 000</span><span class="text-sm text-orange-200">F/mois</span></div>
                 <p class="text-sm text-orange-200 mb-6">Stock, livraison, analytics</p>
                 <ul class="space-y-2.5 flex-1 mb-8">@foreach(['80 plats, 3 employés','1 000 cmd/mois','Stock complet','Livraison intégrée','Analytics & rapports'] as $f)<li class="flex items-center gap-2 text-sm text-white"><svg class="w-4 h-4 shrink-0 text-orange-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-2xl font-black text-sm hover:opacity-90 transition-all bg-white" style="color:#D45E0C">Essai 7j gratuit</a>
+                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-white hover:opacity-90 transition-all" style="color:#D45E0C">Essai 7j gratuit</a>
             </div>
+
             {{-- Gold --}}
-            <div class="rounded-3xl p-7 border border-neutral-800 hover:border-yellow-900/60 hover:-translate-y-0.5 transition-all duration-300 flex flex-col" style="background:#0c0b08">
-                <div class="text-xs font-black uppercase tracking-widest mb-4" style="color:#f6b285">Gold</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="fd text-4xl font-extrabold gt-gold">85 000</span><span class="text-neutral-600 text-sm">F/mois</span></div>
-                <p class="text-sm text-neutral-600 mb-6">Multi-espaces, hôtels, VIP</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces illimités','PIN serveurs','Rapports par espace','QR chambres hôtel','Formation personnalisée'] as $f)<li class="flex items-center gap-2 text-sm text-neutral-400"><svg class="w-4 h-4 shrink-0" style="color:#f6b285" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3.5 rounded-2xl font-black text-sm hover:opacity-90 transition-all text-white" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Essai 7j gratuit</a>
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#f6b285">Gold</div>
+                <div class="flex items-baseline gap-1 mb-1">
+                    <span class="font-display text-4xl font-normal" style="background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">85 000</span>
+                    <span class="text-sm" style="color:#B8AFA8">F/mois</span>
+                </div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Multi-espaces, hôtels, VIP</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces illimités','PIN serveurs','Rapports par espace','QR chambres hôtel','Formation personnalisée'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#f6b285" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-all" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Essai 7j gratuit</a>
             </div>
         </div>
-        <p class="text-center text-neutral-600 text-sm mt-8">Sans engagement · Sans carte bancaire · <a href="{{ route('pricing') }}" class="font-black hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
+        <p class="text-center text-sm mt-8" style="color:#B8AFA8">Sans engagement · Sans carte bancaire · <a href="{{ route('pricing') }}" class="font-semibold hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
     </div>
 </section>
 
 
 {{-- ══════════ FAQ ══════════ --}}
-<section class="py-24 bg-white">
+<section class="font-grotesk py-24 bg-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14 fu">
-            <span class="text-xs font-black uppercase tracking-widest" style="color:#D45E0C">FAQ</span>
-            <h2 class="fd text-4xl sm:text-5xl font-extrabold text-neutral-900 mt-3">Questions fréquentes</h2>
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">FAQ</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Questions fréquentes</h2>
         </div>
         @php
             $faqs = [
@@ -525,17 +524,17 @@
                 ['Puis-je annuler à tout moment ?','Oui, sans engagement et sans frais. Annulez depuis votre compte quand vous voulez.'],
             ];
         @endphp
-        <div class="space-y-3 fu">
+        <div class="fu" style="border-top:1px solid #E8E0D5">
             @foreach($faqs as $i => $faq)
-            <div class="rounded-2xl border border-neutral-100 overflow-hidden" x-data="{ open: {{ $i===0?'true':'false' }} }">
-                <button @click="open=!open" class="w-full flex items-center justify-between px-6 py-5 text-left font-extrabold text-neutral-900 hover:bg-neutral-50 transition-colors bg-white">
-                    <span class="text-sm sm:text-base">{{ $faq[0] }}</span>
-                    <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ml-4 transition-transform duration-300" :class="open&&'rotate-45'" style="background:rgba(212,94,12,.08);color:#D45E0C">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <div x-data="{ open: {{ $i===0?'true':'false' }} }" style="border-bottom:1px solid #E8E0D5">
+                <button @click="open=!open" class="w-full flex items-center justify-between py-5 text-left transition-colors" style="background:transparent">
+                    <span class="font-semibold text-sm sm:text-base pr-4" style="color:#1A1614">{{ $faq[0] }}</span>
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300" :class="open&&'rotate-45'" style="background:rgba(212,94,12,.08);color:#D45E0C">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     </span>
                 </button>
                 <div x-show="open" x-collapse>
-                    <p class="px-6 pb-5 text-neutral-500 text-sm leading-relaxed">{{ $faq[1] }}</p>
+                    <p class="pb-5 text-sm leading-relaxed" style="color:#7C6F65">{{ $faq[1] }}</p>
                 </div>
             </div>
             @endforeach
@@ -545,27 +544,39 @@
 
 
 {{-- ══════════ CTA FINAL ══════════ --}}
-<section class="relative py-24 sm:py-32 overflow-hidden" style="background:#080808">
-    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(212,94,12,.14),transparent)"></div>
-    <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center fu">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 border rounded-full text-sm font-bold mb-8" style="border-color:rgba(212,94,12,.3);background:rgba(212,94,12,.08);color:#FF8C42">
-            <span class="relative flex h-2 w-2 shrink-0"><span class="pr absolute inline-flex h-full w-full rounded-full" style="background:#D45E0C"></span><span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span></span>
+<section class="font-grotesk relative py-32 overflow-hidden text-center" style="background:#1A1614">
+    {{-- Radial glow subtil --}}
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,94,12,.12),transparent)"></div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 fu">
+        {{-- Badge live --}}
+        <div class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-semibold mb-10" style="border-color:rgba(212,94,12,.25);background:rgba(212,94,12,.08);color:#FF8C42">
+            <span class="relative flex h-2 w-2 shrink-0">
+                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
+            </span>
             {{ $stats['restaurants'] }} restaurants actifs ce soir
         </div>
-        <h2 class="fd text-5xl sm:text-6xl lg:text-[4.5rem] font-extrabold text-white leading-[1.02] tracking-tight">
-            Votre prochain<br>client commande<br><span class="gt">dans 15 minutes.</span>
+
+        {{-- Titre massif --}}
+        <h2 class="font-display font-normal leading-[1.04] text-5xl sm:text-6xl lg:text-[4.5rem]" style="color:#FAF8F5">
+            Votre prochain<br>client commande<br>
+            <em class="not-italic" style="color:#D45E0C">dans 15 minutes.</em>
         </h2>
-        <p class="text-xl text-white/40 mt-6 max-w-lg mx-auto leading-relaxed">Rejoignez les restaurateurs ivoiriens qui encaissent en direct sur leur Mobile Money.</p>
+        <p class="text-lg mt-6 max-w-lg mx-auto leading-relaxed" style="color:rgba(250,248,245,.4)">Rejoignez les restaurateurs ivoiriens qui encaissent en direct sur leur Mobile Money.</p>
+
+        {{-- CTA --}}
         <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-4 text-white font-extrabold rounded-2xl transition-all hover:-translate-y-0.5 text-lg glow" style="background:linear-gradient(135deg,#D45E0C,#a84509)">
+            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-4 text-white font-semibold rounded-2xl transition-all hover:-translate-y-0.5 text-base" style="background:#D45E0C;box-shadow:0 8px 32px rgba(212,94,12,.4)">
                 Créer mon restaurant — C'est gratuit
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
-            <a href="{{ route('contact') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl border transition-all text-base" style="color:rgba(255,255,255,.45);border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.03)" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.45)'">
+            <a href="{{ route('contact') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl border transition-all text-base" style="color:rgba(250,248,245,.45);border-color:rgba(250,248,245,.1);background:rgba(250,248,245,.03)" onmouseover="this.style.color='rgba(250,248,245,.85)'" onmouseout="this.style.color='rgba(250,248,245,.45)'">
                 Parler à un expert
             </a>
         </div>
-        <div class="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-neutral-700">
+
+        {{-- Reassurance --}}
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm" style="color:rgba(250,248,245,.35)">
             @foreach(['15 min pour être en ligne','Support WhatsApp inclus','À partir de 5 000 F/mois','Annulation libre'] as $t)
             <span class="flex items-center gap-2">
                 <svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
