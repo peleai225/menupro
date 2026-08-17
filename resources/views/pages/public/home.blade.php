@@ -24,7 +24,7 @@
         <span class="font-display font-normal leading-none" style="font-size:28vw;color:#1A1614;opacity:0.035;letter-spacing:-0.04em">{{ $stats['raw']['restaurants'] ?? $stats['restaurants'] }}</span>
     </div>
 
-    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center lg:text-left">
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center">
 
         {{-- Badge --}}
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-10 fu" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.18);color:#D45E0C">
@@ -36,7 +36,7 @@
         </div>
 
         {{-- Titre massif --}}
-        <h1 class="font-display font-normal fu d1" style="color:#1A1614;font-size:clamp(3.2rem,9vw,8rem);line-height:1.0;letter-spacing:-0.02em">
+        <h1 class="font-display font-normal fu d1" style="color:#1A1614;font-size:clamp(2.6rem,5.5vw,5rem);line-height:1.08;letter-spacing:-0.02em">
             La plateforme<br>
             <i style="color:#D45E0C;font-style:italic">restaurants</i><br>
             qui fait vendre.
@@ -49,7 +49,7 @@
         </p>
 
         {{-- CTA --}}
-        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start fu d2">
+        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center fu d2">
             <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 32px rgba(212,94,12,.4)">
                 Démarrer gratuitement
                 <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -60,7 +60,7 @@
         </div>
 
         {{-- Social proof --}}
-        <div class="mt-12 flex items-center gap-4 justify-center lg:justify-start fu d3">
+        <div class="mt-12 flex items-center gap-4 justify-center fu d3">
             <div class="flex -space-x-2.5">
                 @foreach(\App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['logo_path','name']) as $r)
                 <div class="w-10 h-10 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
