@@ -33,7 +33,7 @@
         {{-- Titre massif --}}
         <h1 class="font-display font-normal leading-[1.04] tracking-tight text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem] fu d1" style="color:#1A1614">
             La plateforme<br>
-            <em class="not-italic" style="color:#D45E0C">restaurants</em><br>
+            <span class="not-italic" style="color:#D45E0C">restaurants</span><br>
             qui fait vendre.
         </h1>
 
@@ -325,7 +325,7 @@
                 <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
                 <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight" style="color:#1A1614">
                     Livrez avec<br>
-                    <em class="not-italic" style="color:#FF6100">MenuPro</em>
+                    <span class="not-italic" style="color:#FF6100">MenuPro</span>
                 </h2>
                 <p class="text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0" style="color:#7C6F65">Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.</p>
                 <div class="mt-7 space-y-4">
@@ -527,7 +527,7 @@
         <div class="fu" style="border-top:1px solid #E8E0D5">
             @foreach($faqs as $i => $faq)
             <div x-data="{ open: {{ $i===0?'true':'false' }} }" style="border-bottom:1px solid #E8E0D5">
-                <button @click="open=!open" class="w-full flex items-center justify-between py-5 text-left transition-colors" style="background:transparent">
+                <button @click="open=!open" :aria-expanded="open.toString()" class="w-full flex items-center justify-between py-5 text-left transition-colors" style="background:transparent">
                     <span class="font-semibold text-sm sm:text-base pr-4" style="color:#1A1614">{{ $faq[0] }}</span>
                     <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300" :class="open&&'rotate-45'" style="background:rgba(212,94,12,.08);color:#D45E0C">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -560,7 +560,7 @@
         {{-- Titre massif --}}
         <h2 class="font-display font-normal leading-[1.04] text-5xl sm:text-6xl lg:text-[4.5rem]" style="color:#FAF8F5">
             Votre prochain<br>client commande<br>
-            <em class="not-italic" style="color:#D45E0C">dans 15 minutes.</em>
+            <span class="not-italic" style="color:#D45E0C">dans 15 minutes.</span>
         </h2>
         <p class="text-lg mt-6 max-w-lg mx-auto leading-relaxed" style="color:rgba(250,248,245,.4)">Rejoignez les restaurateurs ivoiriens qui encaissent en direct sur leur Mobile Money.</p>
 
@@ -589,7 +589,6 @@
 
 @push('scripts')
 <script>
-function counter(target){return{count:0,target:target,displayCount:'0',startCount(){const s=40,d=1600,sv=this.target/s,sd=d/s;const iv=setInterval(()=>{this.count+=sv;if(this.count>=this.target){this.count=this.target;clearInterval(iv);}this.displayCount=this.count>=1000?Math.round(this.count/1000)+'K+':Math.round(this.count).toString();},sd);}}}
 const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{threshold:.08});
 document.querySelectorAll('.fu').forEach(el=>io.observe(el));
 </script>
