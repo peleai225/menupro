@@ -388,8 +388,8 @@
                             <div class="flex items-center justify-between p-3 rounded-xl"
                                  style="background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.15);">
                                 <div class="min-w-0">
-                                    <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $subscription->restaurant->name }}</p>
-                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan->name }}</p>
+                                    <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $subscription->restaurant?->name ?? '(restaurant supprimé)' }}</p>
+                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan?->name ?? '—' }}</p>
                                 </div>
                                 <span class="text-[10px] font-semibold whitespace-nowrap ml-2" style="color:var(--sa-danger);">
                                     {{ $subscription->ends_at->diffForHumans() }}
