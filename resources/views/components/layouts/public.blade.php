@@ -2,7 +2,7 @@
 <x-layouts.app :title="$title" :description="$description" :canonical="$canonical">
     <!-- Navigation — Inspirée design Food Delivery ref -->
     <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-         x-data="{ mobileOpen: false, scrolled: false }"
+         x-data="{ scrolled: false }"
          @scroll.window="scrolled = window.scrollY > 10"
          :style="scrolled ? 'background:rgba(255,255,255,0.97);box-shadow:0 2px 20px rgba(0,0,0,0.08);backdrop-filter:blur(12px)' : 'background:rgba(255,255,255,0.95);backdrop-filter:blur(8px)'">
 
@@ -68,66 +68,6 @@
                     @endauth
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button @click="mobileOpen = !mobileOpen"
-                        class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl transition-colors hover:bg-neutral-100"
-                        aria-label="Menu">
-                    <svg x-show="!mobileOpen" class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                    <svg x-show="mobileOpen" class="w-5 h-5 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div x-show="mobileOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             class="md:hidden bg-white border-t border-neutral-100 shadow-xl"
-             x-cloak>
-            <div class="px-4 py-5 space-y-1">
-                <a href="{{ route('home') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('home') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
-                    Accueil
-                </a>
-                <a href="{{ route('home') }}#how-it-works" @click="mobileOpen=false" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-neutral-700 hover:bg-neutral-50">
-                    Fonctionnalités
-                </a>
-                <a href="{{ route('pricing') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('pricing') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
-                    Tarifs
-                </a>
-                <a href="{{ route('faq') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('faq') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
-                    FAQ
-                </a>
-                <a href="{{ route('contact') }}" class="flex items-center px-4 py-3 rounded-xl text-sm font-semibold {{ request()->routeIs('contact') ? 'text-primary-500 bg-primary-50' : 'text-neutral-700 hover:bg-neutral-50' }}">
-                    Contact
-                </a>
-
-                <div class="pt-3 mt-2 border-t border-neutral-100 space-y-2">
-                    @auth
-                        <a href="{{ route(auth()->user()->getDashboardRoute()) }}"
-                           class="flex items-center justify-center w-full py-3.5 text-sm font-black text-white rounded-2xl"
-                           style="background:#D45E0C">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}"
-                           class="flex items-center justify-center w-full py-3.5 text-sm font-semibold text-neutral-700 rounded-2xl border-2 border-neutral-200 hover:border-primary-300">
-                            Connexion
-                        </a>
-                        <a href="{{ route('register') }}"
-                           class="flex items-center justify-center w-full py-3.5 text-sm font-black text-white rounded-2xl"
-                           style="background:#D45E0C">
-                            Démarrer gratuitement
-                        </a>
-                    @endauth
-                </div>
             </div>
         </div>
     </nav>
@@ -222,68 +162,126 @@
         </a>
     @endif
 
-    <!-- Bottom Navigation Mobile (PWA) - Toujours visible sur mobile -->
+    <!-- Bottom Navigation Mobile (PWA) -->
     @guest
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-inset-bottom">
         <div class="flex items-center justify-around px-1 py-2.5 max-w-md mx-auto">
             {{-- Accueil --}}
             <a href="{{ route('home') }}"
-               class="relative flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
                 @if(request()->routeIs('home'))
                     <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
                 @endif
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
                 <span class="text-[10px] font-semibold leading-tight">Accueil</span>
             </a>
 
-            {{-- L'App --}}
-            <a href="https://mpa-five.vercel.app/"
-               target="_blank"
-               class="flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            {{-- Fonctionnalités --}}
+            <a href="{{ route('home') }}#how-it-works"
+               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                 </svg>
-                <span class="text-[10px] font-semibold leading-tight">L'App</span>
+                <span class="text-[10px] font-semibold leading-tight">Fonctions</span>
             </a>
 
             {{-- Tarifs --}}
             <a href="{{ route('pricing') }}"
-               class="relative flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
                 @if(request()->routeIs('pricing'))
                     <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
                 @endif
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
                 <span class="text-[10px] font-semibold leading-tight">Tarifs</span>
             </a>
 
-            {{-- Connexion — visible pour les clients existants --}}
-            <a href="{{ route('login') }}"
-               class="relative flex flex-col items-center justify-center min-w-[64px] py-2 px-2 rounded-2xl {{ request()->routeIs('login') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('login'))
+            {{-- Contact --}}
+            <a href="{{ route('contact') }}"
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if(request()->routeIs('contact'))
                     <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
                 @endif
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                <span class="text-[10px] font-semibold leading-tight">Connexion</span>
+                <span class="text-[10px] font-semibold leading-tight">Contact</span>
             </a>
 
-            {{-- Démarrer (CTA pour nouveaux) --}}
+            {{-- Démarrer (CTA) --}}
             <a href="{{ route('register') }}"
-               class="flex flex-col items-center justify-center min-w-[64px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
+               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
                style="background:#D45E0C">
-                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
                 <span class="text-[10px] font-bold leading-tight">Démarrer</span>
             </a>
         </div>
     </nav>
-    @endguest
+    @else
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-inset-bottom">
+        <div class="flex items-center justify-around px-1 py-2.5 max-w-md mx-auto">
+            {{-- Accueil --}}
+            <a href="{{ route('home') }}"
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if(request()->routeIs('home'))
+                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
+                @endif
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-[10px] font-semibold leading-tight">Accueil</span>
+            </a>
+
+            {{-- Fonctionnalités --}}
+            <a href="{{ route('home') }}#how-it-works"
+               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                </svg>
+                <span class="text-[10px] font-semibold leading-tight">Fonctions</span>
+            </a>
+
+            {{-- Tarifs --}}
+            <a href="{{ route('pricing') }}"
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if(request()->routeIs('pricing'))
+                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
+                @endif
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                <span class="text-[10px] font-semibold leading-tight">Tarifs</span>
+            </a>
+
+            {{-- Contact --}}
+            <a href="{{ route('contact') }}"
+               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if(request()->routeIs('contact'))
+                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
+                @endif
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-[10px] font-semibold leading-tight">Contact</span>
+            </a>
+
+            {{-- Dashboard (CTA pour connectés) --}}
+            <a href="{{ route(auth()->user()->getDashboardRoute()) }}"
+               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
+               style="background:#D45E0C">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-[10px] font-bold leading-tight">Dashboard</span>
+            </a>
+        </div>
+    </nav>
+    @endauth
 
     <!-- Footer -->
     <footer class="bg-neutral-900 text-white">
