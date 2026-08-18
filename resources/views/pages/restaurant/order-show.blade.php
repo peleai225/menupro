@@ -11,25 +11,25 @@
     @endphp
 
     <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{{ route('restaurant.orders') }}" class="p-2 hover:bg-neutral-100 rounded-lg">
+    <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <a href="{{ route('restaurant.orders') }}" class="p-2 hover:bg-neutral-100 rounded-lg flex-shrink-0">
             <svg class="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
             </svg>
         </a>
-        <div class="flex-1">
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold text-neutral-900">Commande #{{ $order->reference }}</h1>
-                <span class="badge {{ $statusColor }}">{{ $order->status->label() }}</span>
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 truncate">Commande #{{ $order->reference }}</h1>
+                <span class="badge {{ $statusColor }} flex-shrink-0">{{ $order->status->label() }}</span>
             </div>
-            <p class="text-neutral-500 mt-1">
+            <p class="text-neutral-500 mt-1 text-sm sm:text-base">
                 Reçue {{ $order->created_at->locale('fr')->diffForHumans() }}
             </p>
         </div>
         @if($order->can_be_modified_by_manager)
-            <button 
+            <button
                 onclick="openModifyModal()"
-                class="btn btn-primary flex items-center gap-2">
+                class="hidden sm:flex btn btn-primary items-center gap-2 flex-shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
@@ -51,12 +51,12 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <!-- Order Details -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Items -->
             <div class="card" id="order-items-card">
-                <div class="p-6 border-b border-neutral-100 flex items-center justify-between">
+                <div class="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-neutral-900">Articles commandés</h2>
                     @if($order->can_be_modified_by_manager)
                         <button 
@@ -71,12 +71,12 @@
                         <div class="p-4 flex items-center justify-between" data-item-id="{{ $item->id }}">
                             <div class="flex items-center gap-4 flex-1">
                                 @if($item->dish && $item->dish->image_path)
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($item->dish->image_path) }}" 
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($item->dish->image_path) }}"
                                          alt="{{ $item->dish_name }}"
-                                         class="w-16 h-16 object-cover rounded-xl">
+                                         class="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-xl flex-shrink-0">
                                 @else
-                                    <div class="w-16 h-16 bg-neutral-200 rounded-xl flex items-center justify-center">
-                                        <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                         </svg>
                                     </div>
@@ -110,7 +110,7 @@
                         </div>
                     @endforeach
                 </div>
-                <div class="p-6 bg-neutral-50 border-t border-neutral-100" id="order-totals">
+                <div class="p-4 sm:p-6 bg-neutral-50 border-t border-neutral-100" id="order-totals">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-neutral-600">Sous-total</span>
                         <span class="font-medium text-neutral-900" id="order-subtotal">
@@ -271,12 +271,12 @@
             <!-- Actions -->
             <div class="space-y-3">
                 @if(count($allowedTransitions) > 0)
-                    <form action="{{ route('restaurant.orders.status', $order) }}" method="POST" class="space-y-2">
+                    <form action="{{ route('restaurant.orders.status', $order) }}" method="POST" id="status-form-sidebar">
                         @csrf
                         @method('PATCH')
-                        <select name="status" 
+                        <select name="status"
                                 onchange="this.form.submit()"
-                                class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
                             <option value="">Changer le statut...</option>
                             @foreach($allowedTransitions as $transition)
                                 <option value="{{ $transition->value }}">{{ $transition->label() }}</option>
@@ -285,31 +285,63 @@
                     </form>
                 @endif
 
-                <a href="{{ route('restaurant.orders.print', $order) }}" 
-                   target="_blank"
-                   class="btn btn-outline w-full flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                    </svg>
-                    Imprimer le ticket
-                </a>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <a href="{{ route('restaurant.orders.print', $order) }}"
+                       target="_blank"
+                       class="btn btn-outline flex-1 flex items-center justify-center gap-2 min-h-[44px]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Imprimer le ticket
+                    </a>
 
-                @if($order->can_be_cancelled)
-                    <form action="{{ route('restaurant.orders.cancel', $order) }}" 
-                          method="POST"
-                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
-                        @csrf
-                        <button type="submit" class="btn btn-ghost w-full text-red-600 hover:bg-red-50 flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            Annuler la commande
-                        </button>
-                    </form>
-                @endif
+                    @if($order->can_be_cancelled)
+                        <form action="{{ route('restaurant.orders.cancel', $order) }}"
+                              method="POST"
+                              class="flex-1"
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost w-full text-red-600 hover:bg-red-50 flex items-center justify-center gap-2 min-h-[44px]">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Annuler
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
+
+    {{-- Sticky action bar mobile — statut commande --}}
+    @if(count($allowedTransitions) > 0)
+        <div class="fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
+            <form action="{{ route('restaurant.orders.status', $order) }}" method="POST" class="flex-1">
+                @csrf
+                @method('PATCH')
+                <select name="status"
+                        onchange="this.form.submit()"
+                        class="w-full px-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm font-medium bg-white min-h-[44px]">
+                    <option value="">Changer le statut…</option>
+                    @foreach($allowedTransitions as $transition)
+                        <option value="{{ $transition->value }}">{{ $transition->label() }}</option>
+                    @endforeach
+                </select>
+            </form>
+            @if($order->can_be_modified_by_manager)
+                <button
+                    onclick="openModifyModal()"
+                    class="px-4 py-2.5 rounded-xl border-2 border-primary-500 text-primary-600 text-sm font-semibold flex items-center gap-1.5 flex-shrink-0 min-h-[44px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Modifier
+                </button>
+            @endif
+        </div>
+        <div class="h-16 lg:hidden"></div>
+    @endif
 
     <!-- Modify Order Modal -->
     @if($order->can_be_modified_by_manager)
