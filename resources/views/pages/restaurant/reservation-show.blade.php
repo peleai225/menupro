@@ -12,9 +12,9 @@
         </div>
     </div>
 
-    <div class="grid lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Main Info -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="space-y-6">
             <!-- Customer Info -->
             <div class="card p-6">
                 <h2 class="text-lg font-semibold text-neutral-900 mb-4">Informations client</h2>
@@ -88,7 +88,7 @@
                         placeholder="Ajoutez des notes internes sur cette réservation..."
                     >{{ old('notes', $reservation->notes) }}</textarea>
                     <div class="mt-4 flex gap-3">
-                        <button type="submit" name="status" value="{{ $reservation->status }}" class="btn btn-primary btn-sm">Enregistrer les notes</button>
+                        <button type="submit" name="status" value="{{ $reservation->status }}" class="btn btn-primary btn-sm w-full sm:w-auto">Enregistrer les notes</button>
                     </div>
                 </form>
             </div>

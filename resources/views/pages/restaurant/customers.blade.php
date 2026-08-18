@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-neutral-900">Clients</h1>
             <p class="text-neutral-500 mt-1">Historique de vos clients et leurs commandes.</p>
         </div>
-        <a href="{{ route('restaurant.customers.export') }}" class="btn btn-outline">
+        <a href="{{ route('restaurant.customers.export') }}" class="btn btn-outline w-full sm:w-auto">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
@@ -74,13 +74,43 @@
                 <option value="orders_count" {{ request('sort') === 'orders_count' ? 'selected' : '' }}>Plus de commandes</option>
                 <option value="last_order_at" {{ request('sort') === 'last_order_at' ? 'selected' : '' }}>Commande récente</option>
             </select>
-            <button type="submit" class="btn-primary">Filtrer</button>
+            <button type="submit" class="btn-primary w-full sm:w-auto">Filtrer</button>
         </div>
     </form>
 
-    <!-- Customers Table -->
-    <div class="card overflow-hidden">
-        <div class="table-responsive">
+    <!-- Mobile: card stack -->
+    <div class="block lg:hidden space-y-3 mb-6">
+        @forelse($customers as $customer)
+            <a href="{{ route('restaurant.customers.show', ['customer' => $customer->customer_email]) }}"
+               class="card p-4 flex items-center gap-3 hover:shadow-md transition-shadow min-h-[64px]">
+                <div class="w-11 h-11 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="font-bold text-primary-600 text-lg">{{ strtoupper(substr($customer->customer_name, 0, 1)) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-neutral-900 truncate">{{ $customer->customer_name }}</p>
+                    <p class="text-sm text-neutral-500 truncate">{{ $customer->customer_email }}</p>
+                    @if($customer->customer_phone)
+                        <p class="text-sm text-neutral-500">{{ $customer->customer_phone }}</p>
+                    @endif
+                    <div class="flex items-center gap-2 mt-1 text-xs text-neutral-400">
+                        <span>{{ number_format($customer->orders_count) }} commande(s)</span>
+                        <span>·</span>
+                        <span class="font-medium">{{ number_format($customer->total_spent, 0, ',', ' ') }} F</span>
+                    </div>
+                </div>
+                <span class="text-primary-600 font-medium text-sm flex-shrink-0">Voir →</span>
+            </a>
+        @empty
+            <div class="card p-8 text-center">
+                <p class="text-neutral-500">Aucun client trouvé</p>
+                <p class="text-sm text-neutral-400 mt-1">Les clients apparaîtront ici après leurs premières commandes.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Desktop: Customers Table -->
+    <div class="hidden lg:block card overflow-hidden">
+        <div class="overflow-x-auto">
             <table class="w-full min-w-[600px]">
                 <thead class="bg-neutral-50 border-b border-neutral-200">
                     <tr>
@@ -99,7 +129,8 @@
                                     <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                                         <span class="font-bold text-primary-600">{{ strtoupper(substr($customer->customer_name, 0, 1)) }}</span>
                                     </div>
-                                    <span class="font-medium text-neutral-900">{{ $customer->customer_name }}</span>
+                                    <a href="{{ route('restaurant.customers.show', ['customer' => $customer->customer_email]) }}"
+                                       class="font-medium text-neutral-900 hover:text-primary-600">{{ $customer->customer_name }}</a>
                                 </div>
                             </td>
                             <td class="px-6 py-4">

@@ -1,7 +1,7 @@
 <x-layouts.admin-restaurant title="Client — {{ $customer->customer_name }}">
     <!-- Header -->
     <div class="flex items-center gap-4 mb-8">
-        <a href="{{ route('restaurant.customers') }}" class="p-2 hover:bg-neutral-100 rounded-lg">
+        <a href="{{ route('restaurant.customers') }}" class="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-neutral-100 rounded-lg">
             <svg class="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
             </svg>
