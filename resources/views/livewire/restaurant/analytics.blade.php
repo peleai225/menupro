@@ -6,7 +6,7 @@
             <p class="text-xs sm:text-sm text-neutral-500 mt-1 hidden sm:block">Analysez les performances de votre restaurant en détail.</p>
         </div>
         <div class="flex items-center gap-3">
-            <select wire:model.live="period" class="h-12 px-4 bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select wire:model.live="period" class="h-12 px-4 w-full sm:w-auto bg-white border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
                 <option value="7">7 derniers jours</option>
                 <option value="30">30 derniers jours</option>
                 <option value="90">3 derniers mois</option>
@@ -20,7 +20,7 @@
     @endphp
 
     <!-- Key Metrics -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Revenue -->
         <div class="card p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
@@ -95,7 +95,7 @@
         <!-- Revenue Chart -->
         <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Évolution du chiffre d'affaires</h2>
-            <div class="relative h-64">
+            <div class="relative h-64 w-full overflow-hidden">
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
@@ -103,7 +103,7 @@
         <!-- Orders by Status -->
         <div class="card p-4 sm:p-6">
             <h2 class="text-lg font-bold text-neutral-900 mb-4">Commandes par statut</h2>
-            <div class="relative h-64">
+            <div class="relative h-64 w-full overflow-hidden">
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
@@ -169,7 +169,23 @@
     <!-- Top Dishes -->
     <div class="card p-6">
         <h2 class="text-lg font-bold text-neutral-900 mb-4">Plats les plus vendus</h2>
-        <div class="table-responsive">
+        {{-- Card stack mobile --}}
+        <div class="block lg:hidden space-y-3 py-2">
+            @forelse($stats['top_dishes'] ?? [] as $dish)
+            <div class="bg-white rounded-2xl border border-neutral-200 p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-semibold text-sm text-neutral-900">{{ $dish->name }}</span>
+                    <span class="text-xs font-bold text-primary-600">{{ number_format($dish->total_revenue, 0, ',', ' ') }} F</span>
+                </div>
+                <p class="text-xs text-neutral-500">{{ number_format($dish->price, 0, ',', ' ') }} F · {{ $dish->total_sold }} vendus</p>
+            </div>
+            @empty
+            <p class="text-center text-neutral-500 text-sm py-4">Aucune donnée disponible</p>
+            @endforelse
+        </div>
+
+        {{-- Table desktop --}}
+        <div class="hidden lg:block table-responsive">
             <table class="w-full min-w-[600px]">
                 <thead>
                     <tr class="border-b border-neutral-200">

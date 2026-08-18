@@ -288,7 +288,7 @@
         @endif
 
         {{-- Grille des plans --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             @foreach($plans as $plan)
                 @php
                     $isCurrentPlan = $currentPlan && $currentPlan->id === $plan->id && $isActive;

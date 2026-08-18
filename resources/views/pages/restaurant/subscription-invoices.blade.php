@@ -6,7 +6,22 @@
 
     <div class="card p-6">
         @if($invoices->count() > 0)
-            <div class="overflow-x-auto">
+            {{-- Card stack mobile --}}
+            <div class="block lg:hidden space-y-3 px-0 py-3">
+                @foreach($invoices as $invoice)
+                <div class="bg-white rounded-2xl border border-neutral-200 p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-sm">{{ $invoice->payment_reference ?? '#'.$invoice->id }}</span>
+                        <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Actif</span>
+                    </div>
+                    <p class="text-xs text-neutral-500 mb-1">{{ $invoice->created_at->format('d/m/Y') }} · {{ $invoice->plan->name }}</p>
+                    <p class="text-sm font-semibold text-neutral-900">{{ number_format($invoice->amount_paid, 0, ',', ' ') }} F</p>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- Table desktop --}}
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="w-full">
                     <thead>
                         <tr class="border-b border-neutral-200">
