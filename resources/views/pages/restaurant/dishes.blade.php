@@ -15,7 +15,7 @@
 
     <!-- Filters -->
     <div class="card p-4 mb-6">
-        <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex flex-col sm:flex-row gap-2">
             <div class="flex-1">
                 <div class="relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,9 +38,55 @@
         </div>
     </div>
 
-    <!-- Dishes Table -->
-    <div class="card overflow-hidden">
-        <div class="table-responsive">
+    @php
+    $dishesList = [
+        ['id' => 1, 'name' => 'Poulet braisé', 'category' => 'Grillades', 'price' => '4 500', 'status' => 'active', 'image' => null],
+        ['id' => 2, 'name' => 'Attiéké poisson', 'category' => 'Plats principaux', 'price' => '3 500', 'status' => 'active', 'image' => null],
+        ['id' => 3, 'name' => 'Alloco garni', 'category' => 'Accompagnements', 'price' => '2 000', 'status' => 'active', 'image' => null],
+        ['id' => 4, 'name' => 'Salade composée', 'category' => 'Entrées', 'price' => '1 500', 'status' => 'inactive', 'image' => null],
+        ['id' => 5, 'name' => 'Jus de bissap', 'category' => 'Boissons', 'price' => '500', 'status' => 'active', 'image' => null],
+    ];
+    @endphp
+
+    <!-- Mobile Card Stack -->
+    <div class="block lg:hidden space-y-3 mb-6">
+        @foreach($dishesList as $dish)
+        <div class="card p-4 flex items-center gap-3">
+            @if($dish['image'])
+                <img src="{{ $dish['image'] }}" alt="{{ $dish['name'] }}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+            @else
+                <div class="w-14 h-14 bg-neutral-200 rounded-xl flex-shrink-0"></div>
+            @endif
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-neutral-900 truncate">{{ $dish['name'] }}</p>
+                <p class="text-sm text-neutral-500">{{ $dish['category'] }} · {{ $dish['price'] }} F</p>
+                <div class="mt-1">
+                    @if($dish['status'] === 'active')
+                        <span class="badge badge-success">Actif</span>
+                    @else
+                        <span class="badge badge-neutral">Inactif</span>
+                    @endif
+                </div>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <button class="inline-flex items-center justify-center w-11 h-11 rounded-xl hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </button>
+                <button class="inline-flex items-center justify-center w-11 h-11 rounded-xl hover:bg-red-50 text-neutral-400 hover:text-red-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    <!-- Dishes Table (desktop) -->
+    <div class="hidden lg:block card overflow-hidden">
+        <div class="overflow-x-auto">
             <table class="w-full min-w-[500px]">
                 <thead class="bg-neutral-50 border-b border-neutral-200">
                     <tr>
@@ -52,17 +98,15 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-neutral-100">
-                    @foreach([
-                        ['id' => 1, 'name' => 'Poulet braisé', 'category' => 'Grillades', 'price' => '4 500', 'status' => 'active', 'image' => null],
-                        ['id' => 2, 'name' => 'Attiéké poisson', 'category' => 'Plats principaux', 'price' => '3 500', 'status' => 'active', 'image' => null],
-                        ['id' => 3, 'name' => 'Alloco garni', 'category' => 'Accompagnements', 'price' => '2 000', 'status' => 'active', 'image' => null],
-                        ['id' => 4, 'name' => 'Salade composée', 'category' => 'Entrées', 'price' => '1 500', 'status' => 'inactive', 'image' => null],
-                        ['id' => 5, 'name' => 'Jus de bissap', 'category' => 'Boissons', 'price' => '500', 'status' => 'active', 'image' => null],
-                    ] as $dish)
+                    @foreach($dishesList as $dish)
                     <tr class="hover:bg-neutral-50">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-neutral-200 rounded-xl flex-shrink-0"></div>
+                                @if($dish['image'])
+                                    <img src="{{ $dish['image'] }}" alt="{{ $dish['name'] }}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
+                                @else
+                                    <div class="w-12 h-12 bg-neutral-200 rounded-xl flex-shrink-0"></div>
+                                @endif
                                 <div>
                                     <p class="font-medium text-neutral-900">{{ $dish['name'] }}</p>
                                     <p class="text-sm text-neutral-500">#{{ $dish['id'] }}</p>
@@ -103,4 +147,3 @@
         </div>
     </div>
 </x-layouts.admin-restaurant>
-

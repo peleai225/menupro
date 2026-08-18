@@ -12,10 +12,10 @@
         </div>
     </div>
 
-    <form class="max-w-3xl">
+    <form id="dish-form" class="max-w-3xl">
         <div class="card p-6 mb-6">
             <h2 class="text-lg font-semibold text-neutral-900 mb-4">Informations générales</h2>
-            
+
             <div class="space-y-5">
                 <!-- Name -->
                 <div>
@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Category & Price -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 mb-2">
                             Catégorie <span class="text-red-500">*</span>
@@ -66,7 +66,7 @@
         <!-- Image -->
         <div class="card p-6 mb-6">
             <h2 class="text-lg font-semibold text-neutral-900 mb-4">Image du plat</h2>
-            
+
             <div x-data="{ preview: null }">
                 <div class="border-2 border-dashed border-neutral-300 rounded-2xl p-8 text-center hover:border-primary-400 hover:bg-primary-50/50 transition-colors">
                     <template x-if="preview">
@@ -95,7 +95,7 @@
         <!-- Options -->
         <div class="card p-6 mb-6">
             <h2 class="text-lg font-semibold text-neutral-900 mb-4">Options</h2>
-            
+
             <div class="space-y-4">
                 <label class="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" name="is_available" checked class="w-5 h-5 rounded border-neutral-300 text-primary-500 focus:ring-primary-500">
@@ -114,8 +114,8 @@
             </div>
         </div>
 
-        <!-- Actions -->
-        <div class="flex items-center justify-end gap-4">
+        <!-- Actions (desktop) -->
+        <div class="hidden lg:flex items-center justify-end gap-4">
             <a href="{{ route('restaurant.plats.index') }}" class="btn btn-ghost">Annuler</a>
             <button type="submit" class="btn btn-primary">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,5 +125,11 @@
             </button>
         </div>
     </form>
-</x-layouts.admin-restaurant>
 
+    <!-- Sticky Save Bar (mobile) -->
+    <div class="fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
+        <a href="{{ route('restaurant.plats.index') }}" class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-neutral-200 text-sm font-semibold text-neutral-700">Annuler</a>
+        <button type="submit" form="dish-form" class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:#D45E0C">Enregistrer</button>
+    </div>
+    <div class="h-20 lg:hidden"></div>
+</x-layouts.admin-restaurant>

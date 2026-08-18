@@ -17,7 +17,7 @@
     </div>
 
     <!-- Categories Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
         @foreach([
             ['id' => 1, 'name' => 'Entrées', 'dishes_count' => 8, 'color' => 'bg-primary-500'],
             ['id' => 2, 'name' => 'Plats principaux', 'dishes_count' => 15, 'color' => 'bg-secondary-500'],
