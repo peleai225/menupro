@@ -26,7 +26,7 @@
             </div>
         @endif
 
-        <div class="grid lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {{-- ==================== LEFT COLUMN ==================== --}}
             <div class="space-y-6">
                 <!-- QR Code Preview -->
@@ -34,9 +34,11 @@
                     <div class="text-center">
                         <h2 class="text-lg font-semibold text-neutral-800 mb-6">QR Code général</h2>
 
-                        <div class="inline-block bg-white p-6 rounded-2xl border-2 border-dashed border-neutral-200 mb-6">
-                            <div class="mx-auto" style="width: 250px; height: 250px;">
-                                {!! $qrSvg !!}
+                        <div class="flex justify-center mb-6">
+                            <div class="bg-white p-4 sm:p-6 rounded-2xl border-2 border-dashed border-neutral-200">
+                                <div class="w-48 h-48 lg:w-64 lg:h-64 [&>svg]:w-full [&>svg]:h-full">
+                                    {!! $qrSvg !!}
+                                </div>
                             </div>
                         </div>
 
