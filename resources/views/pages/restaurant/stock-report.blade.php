@@ -89,8 +89,9 @@
             <h2 class="text-lg font-bold text-neutral-900">Inventaire complet</h2>
             <p class="text-sm text-neutral-500 mt-1">Généré le {{ now()->locale('fr')->isoFormat('D MMMM YYYY [à] HH:mm') }}</p>
         </div>
-        <div class="table-responsive">
-            <table class="w-full min-w-[600px]">
+        <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div class="min-w-[600px]">
+            <table class="w-full">
                 <thead class="bg-neutral-50 border-b border-neutral-200">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Ingrédient</th>
@@ -143,6 +144,7 @@
                     </tr>
                 </tfoot>
             </table>
+            </div>
         </div>
     </div>
 </x-layouts.admin-restaurant>

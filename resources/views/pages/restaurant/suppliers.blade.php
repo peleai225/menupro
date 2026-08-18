@@ -25,8 +25,44 @@
         </div>
     @endif
 
-    <!-- Suppliers Table -->
-    <div class="card overflow-hidden">
+    <!-- Suppliers Table — Mobile card stack -->
+    <div class="block lg:hidden space-y-3 mb-6">
+        @forelse($suppliers as $supplier)
+            <div class="card p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-neutral-900">{{ $supplier->name }}</p>
+                        @if($supplier->city)
+                            <p class="text-sm text-neutral-500">{{ $supplier->city }}</p>
+                        @endif
+                        @if($supplier->contact_name)
+                            <p class="text-sm text-neutral-600 mt-1">{{ $supplier->contact_name }}</p>
+                        @endif
+                        @if($supplier->email)
+                            <p class="text-sm text-neutral-500">{{ $supplier->email }}</p>
+                        @endif
+                        @if($supplier->phone)
+                            <p class="text-sm text-neutral-500">{{ $supplier->phone }}</p>
+                        @endif
+                    </div>
+                    <a href="{{ route('restaurant.stock.fournisseurs.show', $supplier) }}"
+                       class="flex items-center justify-center min-w-[44px] min-h-[44px] bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-colors text-sm font-medium px-3 flex-shrink-0">
+                        Voir
+                    </a>
+                </div>
+            </div>
+        @empty
+            <div class="card p-8 text-center">
+                <p class="text-neutral-500">Aucun fournisseur enregistré</p>
+            </div>
+        @endforelse
+        @if($suppliers->hasPages())
+            <div class="mt-2">{{ $suppliers->links() }}</div>
+        @endif
+    </div>
+
+    <!-- Suppliers Table — Desktop -->
+    <div class="hidden lg:block card overflow-hidden">
         <div class="table-responsive">
             <table class="w-full min-w-[600px]">
                 <thead class="bg-neutral-50 border-b border-neutral-200">

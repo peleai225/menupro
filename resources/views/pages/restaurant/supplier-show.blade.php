@@ -173,7 +173,7 @@
             <h2 class="text-lg font-semibold mb-4">Modifier le fournisseur</h2>
             <form action="{{ route('restaurant.stock.fournisseurs.update', $supplier) }}" method="POST">
                 @csrf @method('PUT')
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-neutral-700 mb-1">Nom *</label>
                         <input type="text" name="name" value="{{ old('name', $supplier->name) }}" required

@@ -265,8 +265,68 @@
         </div>
     </form>
 
-    <!-- Ingredients Table -->
-    <div class="card overflow-hidden">
+    <!-- Ingredients Table — Mobile card stack -->
+    <div class="block lg:hidden space-y-3 mb-6">
+        @forelse($ingredients as $ingredient)
+            <div class="card p-4">
+                <div class="flex items-center gap-3">
+                    @if($ingredient->image_url)
+                        <img src="{{ $ingredient->image_url }}" alt="{{ $ingredient->name }}"
+                             class="w-11 h-11 rounded-xl object-cover border border-neutral-200 flex-shrink-0">
+                    @else
+                        <div class="w-11 h-11 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                    @endif
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-neutral-900 truncate">{{ $ingredient->name }}</p>
+                        <p class="text-sm text-neutral-500">{{ $ingredient->category?->name ?? '—' }}</p>
+                    </div>
+                    @if($ingredient->current_quantity <= 0)
+                        <span class="badge bg-red-100 text-red-700 flex-shrink-0">Rupture</span>
+                    @elseif($ingredient->current_quantity <= $ingredient->min_quantity)
+                        <span class="badge bg-yellow-100 text-yellow-700 flex-shrink-0">Stock faible</span>
+                    @else
+                        <span class="badge badge-success flex-shrink-0">En stock</span>
+                    @endif
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="text-sm">
+                        <span class="font-semibold text-neutral-900">{{ number_format($ingredient->current_quantity, 2) }} {{ $ingredient->unit->value ?? '' }}</span>
+                        <span class="text-neutral-400 ml-1">/ min {{ number_format($ingredient->min_quantity, 2) }} {{ $ingredient->unit->value ?? '' }}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <a href="{{ route('restaurant.stock.ingredients.show', $ingredient) }}"
+                           class="flex items-center justify-center min-w-[44px] min-h-[44px] hover:bg-neutral-100 rounded-lg transition-colors"
+                           title="Voir détails">
+                            <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </a>
+                        @can('update', $ingredient)
+                        <a href="{{ route('restaurant.stock.ingredients.edit', $ingredient) }}"
+                           class="flex items-center justify-center min-w-[44px] min-h-[44px] hover:bg-neutral-100 rounded-lg transition-colors"
+                           title="Modifier">
+                            <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </a>
+                        @endcan
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="card p-8 text-center">
+                <p class="text-neutral-500">Aucun ingrédient trouvé</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Ingredients Table — Desktop -->
+    <div class="hidden lg:block card overflow-hidden">
         <div class="table-responsive">
             <table class="w-full min-w-[600px]">
                 <thead class="bg-neutral-50 border-b border-neutral-200">
@@ -322,8 +382,8 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('restaurant.stock.ingredients.show', $ingredient) }}" 
-                                       class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                                    <a href="{{ route('restaurant.stock.ingredients.show', $ingredient) }}"
+                                       class="flex items-center justify-center min-w-[44px] min-h-[44px] hover:bg-neutral-100 rounded-lg transition-colors"
                                        title="Voir détails">
                                         <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -331,8 +391,8 @@
                                         </svg>
                                     </a>
                                     @can('update', $ingredient)
-                                    <a href="{{ route('restaurant.stock.ingredients.edit', $ingredient) }}" 
-                                       class="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                                    <a href="{{ route('restaurant.stock.ingredients.edit', $ingredient) }}"
+                                       class="flex items-center justify-center min-w-[44px] min-h-[44px] hover:bg-neutral-100 rounded-lg transition-colors"
                                        title="Modifier">
                                         <svg class="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>

@@ -53,7 +53,7 @@
                 <!-- Read-only view -->
                 <div class="card p-6 mb-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations du stock</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <p class="text-sm text-neutral-500">Quantité actuelle</p>
                             <p class="text-2xl font-bold text-neutral-900 mt-1">
