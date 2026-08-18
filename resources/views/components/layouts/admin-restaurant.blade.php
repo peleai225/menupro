@@ -556,7 +556,7 @@
         <div :class="expanded ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 ml-0">
             <!-- Top Bar -->
             <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
-                <div class="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-8 gap-2">
+                <div class="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 lg:px-8 gap-2">
                     <!-- Mobile Menu Button -->
                     <button @click="toggleMobile()" class="lg:hidden p-2.5 -ml-1 rounded-lg hover:bg-neutral-100 min-h-[44px] min-w-[44px] flex items-center justify-center">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -658,7 +658,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-24 lg:pb-8">
+            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-20 lg:pb-0">
                 {{ $slot }}
             </main>
         </div>
