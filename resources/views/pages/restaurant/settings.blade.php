@@ -7,8 +7,9 @@
         </div>
 
         <!-- Tabs -->
+        <form id="settings-form">
         <div x-data="{ tab: 'restaurant' }" class="space-y-6">
-            <div class="flex gap-2 border-b border-neutral-200">
+            <div class="flex overflow-x-auto gap-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap pb-1 border-b border-neutral-200">
                 <button @click="tab = 'restaurant'" 
                         :class="tab === 'restaurant' ? 'border-primary-500 text-primary-600' : 'border-transparent text-neutral-500 hover:text-neutral-700'"
                         class="px-4 py-3 border-b-2 font-medium transition-colors">
@@ -61,7 +62,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">Logo</label>
-                            <div class="w-32 h-32 bg-neutral-100 rounded-2xl border-2 border-dashed border-neutral-300 flex items-center justify-center">
+                            <div class="w-full h-32 bg-neutral-100 rounded-2xl border-2 border-dashed border-neutral-300 flex items-center justify-center">
                                 <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
@@ -160,6 +161,15 @@
                 </div>
             </div>
         </div>
+        </form>
     </div>
+
+    {{-- Sticky save bar — mobile only --}}
+    <div class="fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 lg:hidden">
+        <button type="submit" form="settings-form" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:#D45E0C">
+            Enregistrer les modifications
+        </button>
+    </div>
+    <div class="h-20 lg:hidden"></div>
 </x-layouts.admin-restaurant>
 
