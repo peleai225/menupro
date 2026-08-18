@@ -163,125 +163,55 @@
     @endif
 
     <!-- Bottom Navigation Mobile (PWA) -->
-    @guest
+    @php
+        $navItems = [
+            ['label' => 'Accueil',   'href' => route('home'),           'active' => request()->routeIs('home'),    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+            ['label' => 'Fonctions', 'href' => route('home').'#how-it-works', 'active' => false,                  'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
+            ['label' => 'Tarifs',    'href' => route('pricing'),        'active' => request()->routeIs('pricing'), 'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
+            ['label' => 'Contact',   'href' => route('contact'),        'active' => request()->routeIs('contact'), 'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+        ];
+    @endphp
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-inset-bottom">
-        <div class="flex items-center justify-around px-1 py-2.5 max-w-md mx-auto">
-            {{-- Accueil --}}
-            <a href="{{ route('home') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('home'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
+        <div class="flex items-center px-3 py-2 max-w-md mx-auto gap-0">
+            {{-- 4 nav items --}}
+            @foreach($navItems as $item)
+            <a href="{{ $item['href'] }}"
+               class="relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl {{ $item['active'] ? 'text-primary-600' : 'text-neutral-500' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
+                @if($item['active'])
+                    <span class="absolute inset-x-3 top-0 h-0.5 bg-primary-500 rounded-full"></span>
                 @endif
                 <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                 </svg>
-                <span class="text-[10px] font-semibold leading-tight">Accueil</span>
+                <span class="text-[10px] font-semibold leading-tight">{{ $item['label'] }}</span>
             </a>
+            @endforeach
 
-            {{-- Fonctionnalités --}}
-            <a href="{{ route('home') }}#how-it-works"
-               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Fonctions</span>
-            </a>
+            {{-- Séparateur --}}
+            <div class="w-px h-8 bg-neutral-200 mx-2 shrink-0"></div>
 
-            {{-- Tarifs --}}
-            <a href="{{ route('pricing') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('pricing'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
-                @endif
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Tarifs</span>
-            </a>
-
-            {{-- Contact --}}
-            <a href="{{ route('contact') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('contact'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
-                @endif
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Contact</span>
-            </a>
-
-            {{-- Démarrer (CTA) --}}
+            {{-- CTA --}}
+            @guest
             <a href="{{ route('register') }}"
-               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
-               style="background:#D45E0C">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+               class="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-white font-bold text-sm active:scale-95 transition-all touch-manipulation"
+               style="background:#D45E0C;box-shadow:0 4px 14px rgba(212,94,12,0.35)">
+                Démarrer
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
-                <span class="text-[10px] font-bold leading-tight">Démarrer</span>
             </a>
-        </div>
-    </nav>
-    @else
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-inset-bottom">
-        <div class="flex items-center justify-around px-1 py-2.5 max-w-md mx-auto">
-            {{-- Accueil --}}
-            <a href="{{ route('home') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('home') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('home'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
-                @endif
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Accueil</span>
-            </a>
-
-            {{-- Fonctionnalités --}}
-            <a href="{{ route('home') }}#how-it-works"
-               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl text-neutral-600 hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Fonctions</span>
-            </a>
-
-            {{-- Tarifs --}}
-            <a href="{{ route('pricing') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('pricing') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('pricing'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
-                @endif
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Tarifs</span>
-            </a>
-
-            {{-- Contact --}}
-            <a href="{{ route('contact') }}"
-               class="relative flex flex-col items-center justify-center min-w-[60px] py-2 px-2 rounded-2xl {{ request()->routeIs('contact') ? 'text-primary-600' : 'text-neutral-600' }} hover:text-primary-500 active:scale-95 transition-all touch-manipulation">
-                @if(request()->routeIs('contact'))
-                    <span class="absolute inset-x-2 top-0 h-1 bg-primary-500 rounded-full"></span>
-                @endif
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <span class="text-[10px] font-semibold leading-tight">Contact</span>
-            </a>
-
-            {{-- Dashboard (CTA pour connectés) --}}
+            @else
             <a href="{{ route(auth()->user()->getDashboardRoute()) }}"
-               class="flex flex-col items-center justify-center min-w-[60px] py-2 px-3 rounded-2xl text-white active:scale-95 transition-all touch-manipulation shadow-lg"
-               style="background:#D45E0C">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+               class="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-white font-bold text-sm active:scale-95 transition-all touch-manipulation"
+               style="background:#D45E0C;box-shadow:0 4px 14px rgba(212,94,12,0.35)">
+                Dashboard
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
-                <span class="text-[10px] font-bold leading-tight">Dashboard</span>
             </a>
+            @endauth
         </div>
     </nav>
-    @endauth
 
     <!-- Footer -->
     <footer class="bg-neutral-900 text-white">
