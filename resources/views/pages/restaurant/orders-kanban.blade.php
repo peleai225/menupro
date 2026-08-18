@@ -66,9 +66,9 @@
         </div>
 
         <!-- Kanban Board -->
-        <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 overflow-x-auto pb-4">
+        <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 lg:mx-0 lg:px-0 lg:overflow-visible">
             <!-- Pending Payment -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -89,7 +89,7 @@
             </div>
 
             <!-- Paid -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-emerald-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -110,7 +110,7 @@
             </div>
 
             <!-- Confirmed -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-blue-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -131,7 +131,7 @@
             </div>
 
             <!-- Preparing -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-amber-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -152,7 +152,7 @@
             </div>
 
             <!-- Ready -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-purple-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -173,7 +173,7 @@
             </div>
 
             <!-- Delivering -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-indigo-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -194,7 +194,7 @@
             </div>
 
             <!-- Completed -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col min-w-[280px] max-h-[calc(100vh-250px)]">
+            <div class="snap-start flex-shrink-0 w-[82vw] sm:w-72 lg:w-auto lg:flex-1 bg-white rounded-xl shadow-sm border border-neutral-200 flex flex-col max-h-[calc(100vh-250px)]">
                 <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 rounded-t-xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">

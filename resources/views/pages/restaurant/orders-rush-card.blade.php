@@ -35,42 +35,42 @@
         </div>
         <div class="flex flex-col gap-2">
             @if($order->status === \App\Enums\OrderStatus::PAID)
-                <form action="{{ route('restaurant.orders.rush.confirm', $order) }}" method="POST" class="inline">
+                <form action="{{ route('restaurant.orders.rush.confirm', $order) }}" method="POST" class="block">
                     @csrf
                     <button type="submit" class="btn-primary btn-sm whitespace-nowrap w-full">
                         ✓ Confirmer
                     </button>
                 </form>
-                <form action="{{ route('restaurant.orders.rush.prepare', $order) }}" method="POST" class="inline">
+                <form action="{{ route('restaurant.orders.rush.prepare', $order) }}" method="POST" class="block">
                     @csrf
                     <button type="submit" class="btn-secondary btn-sm whitespace-nowrap w-full">
                         🍳 Préparer
                     </button>
                 </form>
             @elseif($order->status === \App\Enums\OrderStatus::CONFIRMED)
-                <form action="{{ route('restaurant.orders.rush.prepare', $order) }}" method="POST" class="inline">
+                <form action="{{ route('restaurant.orders.rush.prepare', $order) }}" method="POST" class="block">
                     @csrf
                     <button type="submit" class="btn-primary btn-sm whitespace-nowrap w-full">
                         🍳 Préparer
                     </button>
                 </form>
             @elseif($order->status === \App\Enums\OrderStatus::PREPARING)
-                <form action="{{ route('restaurant.orders.rush.ready', $order) }}" method="POST" class="inline">
+                <form action="{{ route('restaurant.orders.rush.ready', $order) }}" method="POST" class="block">
                     @csrf
                     <button type="submit" class="btn-primary btn-sm whitespace-nowrap w-full">
                         ✓ Prête
                     </button>
                 </form>
             @elseif($order->status === \App\Enums\OrderStatus::READY)
-                <form action="{{ route('restaurant.orders.rush.complete', $order) }}" method="POST" class="inline">
+                <form action="{{ route('restaurant.orders.rush.complete', $order) }}" method="POST" class="block">
                     @csrf
                     <button type="submit" class="btn-primary btn-sm whitespace-nowrap w-full">
                         ✓ Terminer
                     </button>
                 </form>
             @endif
-            <a href="{{ route('restaurant.orders.show', $order) }}" 
-               class="btn-ghost btn-sm text-center whitespace-nowrap">
+            <a href="{{ route('restaurant.orders.show', $order) }}"
+               class="btn-ghost btn-sm text-center whitespace-nowrap w-full">
                 Détails
             </a>
         </div>

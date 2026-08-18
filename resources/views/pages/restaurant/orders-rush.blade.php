@@ -62,7 +62,7 @@
         </div>
 
         <!-- Orders List -->
-        <div class="space-y-3" id="orders-list">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="orders-list">
             @forelse($orders as $order)
                 @include('pages.restaurant.orders-rush-card', ['order' => $order])
             @empty
