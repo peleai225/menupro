@@ -150,8 +150,9 @@
         }
     @endphp
     @if($bannerEnabled && $bannerText)
+    <div x-data="{ showBanner: !sessionStorage.getItem('banner_closed_{{ md5($bannerText) }}') }">
         <div class="fixed top-16 left-0 right-0 z-40 {{ $bannerColor === 'primary' ? 'bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600' : ($bannerColor === 'success' ? 'bg-gradient-to-r from-secondary-600 via-secondary-500 to-secondary-600' : ($bannerColor === 'warning' ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600' : 'bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900')) }} text-white text-sm font-medium shadow-md overflow-hidden"
-             x-data="{ showBanner: !sessionStorage.getItem('banner_closed_{{ md5($bannerText) }}') }" x-show="showBanner" x-cloak
+             x-show="showBanner" x-cloak
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="-translate-y-full opacity-0"
              x-transition:enter-end="translate-y-0 opacity-100"
@@ -177,12 +178,18 @@
                 </button>
             </div>
         </div>
-    @endif
 
+        <!-- Main Content -->
+        <main :class="showBanner ? 'pt-[104px]' : 'pt-16'" class="pb-20 md:pb-0">
+            {{ $slot }}
+        </main>
+    </div>
+    @else
     <!-- Main Content -->
-    <main class="{{ ($bannerEnabled && $bannerText) ? 'pt-[104px]' : 'pt-16' }} pb-20 md:pb-0">
+    <main class="pt-16 pb-20 md:pb-0">
         {{ $slot }}
     </main>
+    @endif
 
     <!-- Floating WhatsApp Button -->
     @php
