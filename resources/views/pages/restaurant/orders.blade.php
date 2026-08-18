@@ -38,73 +38,106 @@
 
     <!-- Filters -->
     <div class="card p-4 mb-6">
-        <div class="flex flex-wrap gap-2">
-            <button class="px-4 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium">Toutes</button>
-            <button class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">En attente (5)</button>
-            <button class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">En préparation (3)</button>
-            <button class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">Prêtes (2)</button>
-            <button class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">Terminées</button>
+        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+            <button class="w-full sm:w-auto px-4 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium">Toutes</button>
+            <button class="w-full sm:w-auto px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">En attente (5)</button>
+            <button class="w-full sm:w-auto px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">En préparation (3)</button>
+            <button class="w-full sm:w-auto px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">Prêtes (2)</button>
+            <button class="w-full sm:w-auto px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-200">Terminées</button>
         </div>
     </div>
 
-    <!-- Orders List -->
-    <div class="space-y-4">
-        @foreach([
+    @php
+        $orders = [
             ['id' => 'CMD-2024', 'client' => 'Jean Kouassi', 'phone' => '+225 07 00 00 01', 'items' => 3, 'total' => '12 500', 'status' => 'pending', 'time' => '2 min', 'type' => 'delivery'],
             ['id' => 'CMD-2023', 'client' => 'Marie Bamba', 'phone' => '+225 07 00 00 02', 'items' => 2, 'total' => '8 900', 'status' => 'preparing', 'time' => '15 min', 'type' => 'pickup'],
             ['id' => 'CMD-2022', 'client' => 'Yao Koné', 'phone' => '+225 07 00 00 03', 'items' => 4, 'total' => '15 200', 'status' => 'ready', 'time' => '25 min', 'type' => 'dine_in'],
             ['id' => 'CMD-2021', 'client' => 'Awa Diallo', 'phone' => '+225 07 00 00 04', 'items' => 1, 'total' => '6 500', 'status' => 'completed', 'time' => '1h', 'type' => 'delivery'],
             ['id' => 'CMD-2020', 'client' => 'Moussa Traoré', 'phone' => '+225 07 00 00 05', 'items' => 5, 'total' => '22 000', 'status' => 'completed', 'time' => '2h', 'type' => 'pickup'],
-        ] as $order)
-        <div class="card p-4 hover:shadow-md transition-shadow">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div class="flex items-start gap-4">
-                    <div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span class="text-lg font-bold text-neutral-600">{{ substr($order['client'], 0, 1) }}</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-bold text-neutral-900">#{{ $order['id'] }}</span>
-                            @php
-                                $typeColors = ['delivery' => 'bg-blue-100 text-blue-700', 'pickup' => 'bg-purple-100 text-purple-700', 'dine_in' => 'bg-green-100 text-green-700'];
-                                $typeLabels = ['delivery' => 'Livraison', 'pickup' => 'À emporter', 'dine_in' => 'Sur place'];
-                            @endphp
-                            <span class="badge {{ $typeColors[$order['type']] }} text-xs">{{ $typeLabels[$order['type']] }}</span>
-                        </div>
-                        <p class="text-neutral-700">{{ $order['client'] }}</p>
-                        <p class="text-sm text-neutral-500">{{ $order['phone'] }} · {{ $order['items'] }} articles · Il y a {{ $order['time'] }}</p>
-                    </div>
+        ];
+        $statusColors = [
+            'pending'   => 'bg-yellow-100 text-yellow-700',
+            'preparing' => 'bg-blue-100 text-blue-700',
+            'ready'     => 'bg-primary-100 text-primary-700',
+            'completed' => 'bg-secondary-100 text-secondary-700',
+        ];
+        $statusLabels = [
+            'pending'   => 'En attente',
+            'preparing' => 'En préparation',
+            'ready'     => 'Prêt',
+            'completed' => 'Terminé',
+        ];
+        $typeColors = ['delivery' => 'bg-blue-100 text-blue-700', 'pickup' => 'bg-purple-100 text-purple-700', 'dine_in' => 'bg-green-100 text-green-700'];
+        $typeLabels = ['delivery' => 'Livraison', 'pickup' => 'À emporter', 'dine_in' => 'Sur place'];
+    @endphp
+
+    {{-- Vue mobile (card stack) --}}
+    <div class="block lg:hidden space-y-3 px-0 py-1 mb-4">
+        @forelse($orders as $order)
+        <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="font-semibold text-sm text-neutral-900">#{{ $order['id'] }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $typeColors[$order['type']] }}">
+                        {{ $typeLabels[$order['type']] }}
+                    </span>
                 </div>
-                <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4">
-                    <div class="text-right">
-                        <p class="text-lg sm:text-xl font-bold text-neutral-900">{{ $order['total'] }} F</p>
-                        @php
-                            $statusColors = [
-                                'pending' => 'bg-yellow-100 text-yellow-700',
-                                'preparing' => 'bg-blue-100 text-blue-700',
-                                'ready' => 'bg-primary-100 text-primary-700',
-                                'completed' => 'bg-secondary-100 text-secondary-700',
-                            ];
-                            $statusLabels = [
-                                'pending' => 'En attente',
-                                'preparing' => 'En préparation',
-                                'ready' => 'Prêt',
-                                'completed' => 'Terminé',
-                            ];
-                        @endphp
-                        <span class="badge {{ $statusColors[$order['status']] }}">{{ $statusLabels[$order['status']] }}</span>
-                    </div>
-                    <a href="{{ route('restaurant.orders.show', $order['id']) }}" class="btn btn-outline btn-sm">
-                        Voir
-                    </a>
-                </div>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $statusColors[$order['status']] }}">
+                    {{ $statusLabels[$order['status']] }}
+                </span>
+            </div>
+            <p class="text-sm text-neutral-700 font-medium truncate mb-0.5">{{ $order['client'] }}</p>
+            <p class="text-xs text-neutral-400 mb-3">{{ $order['phone'] }} · {{ $order['items'] }} articles · Il y a {{ $order['time'] }}</p>
+            <div class="flex items-center justify-between">
+                <span class="text-base font-bold text-neutral-900">{{ $order['total'] }} F</span>
+                <a href="{{ route('restaurant.orders.show', $order['id']) }}"
+                   class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                   style="background:#D45E0C">
+                    Voir
+                </a>
             </div>
         </div>
-        @endforeach
+        @empty
+        <p class="text-center text-neutral-400 py-8">Aucune commande</p>
+        @endforelse
+    </div>
+
+    {{-- Vue desktop (liste détaillée) --}}
+    <div class="hidden lg:block">
+        <div class="space-y-4">
+            @foreach($orders as $order)
+            <div class="card p-4 hover:shadow-md transition-shadow">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-lg font-bold text-neutral-600">{{ substr($order['client'], 0, 1) }}</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-neutral-900">#{{ $order['id'] }}</span>
+                                <span class="badge {{ $typeColors[$order['type']] }} text-xs">{{ $typeLabels[$order['type']] }}</span>
+                            </div>
+                            <p class="text-neutral-700">{{ $order['client'] }}</p>
+                            <p class="text-sm text-neutral-500">{{ $order['phone'] }} · {{ $order['items'] }} articles · Il y a {{ $order['time'] }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4">
+                        <div class="text-right">
+                            <p class="text-lg sm:text-xl font-bold text-neutral-900">{{ $order['total'] }} F</p>
+                            <span class="badge {{ $statusColors[$order['status']] }}">{{ $statusLabels[$order['status']] }}</span>
+                        </div>
+                        <a href="{{ route('restaurant.orders.show', $order['id']) }}" class="btn btn-outline btn-sm">
+                            Voir
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-center mt-8">
+    <div class="px-4 py-3 flex items-center justify-center mt-8">
         <nav class="flex items-center gap-1">
             <button class="p-2 rounded-lg hover:bg-neutral-100 text-neutral-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,4 +155,3 @@
         </nav>
     </div>
 </x-layouts.admin-restaurant>
-
