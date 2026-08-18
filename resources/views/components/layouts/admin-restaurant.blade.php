@@ -663,62 +663,74 @@
             </main>
         </div>
 
-        {{-- Bottom Navigation Bar (Mobile) — Style app mobile --}}
-        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        {{-- Bottom Navigation Bar (Mobile) --}}
+        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
              x-data="{ more: false }">
-            <div class="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
+            @php
+                $menuActive = request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*');
+            @endphp
+            <div class="flex items-center px-2 py-1 max-w-lg mx-auto">
+
                 {{-- Dashboard --}}
                 <a href="{{ route('restaurant.dashboard') }}"
-                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.dashboard') ? 'text-primary-600' : 'text-neutral-500' }}">
-                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.dashboard') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.dashboard') ? '0' : '1.5' }}" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                    <span class="text-[10px] font-medium">Accueil</span>
+                   class="relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl {{ request()->routeIs('restaurant.dashboard') ? 'text-primary-600' : 'text-neutral-500' }} active:scale-95 transition-all touch-manipulation">
                     @if(request()->routeIs('restaurant.dashboard'))
-                    <span class="absolute top-1 w-1 h-1 bg-primary-500 rounded-full"></span>
+                        <span class="absolute inset-x-2 top-0 h-0.5 bg-primary-500 rounded-full"></span>
                     @endif
+                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] font-semibold leading-tight">Dashboard</span>
                 </a>
 
                 {{-- Commandes --}}
                 <a href="{{ route('restaurant.orders') }}"
-                   class="relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.orders*') ? 'text-primary-600' : 'text-neutral-500' }}">
-                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.orders*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.orders*') ? '0' : '1.5' }}" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                   class="relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl {{ request()->routeIs('restaurant.orders*') ? 'text-primary-600' : 'text-neutral-500' }} active:scale-95 transition-all touch-manipulation">
+                    @if(request()->routeIs('restaurant.orders*'))
+                        <span class="absolute inset-x-2 top-0 h-0.5 bg-primary-500 rounded-full"></span>
+                    @endif
+                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                     </svg>
-                    <span class="text-[10px] font-medium">Commandes</span>
+                    <span class="text-[10px] font-semibold leading-tight">Commandes</span>
                     @if(isset($pendingOrders) && $pendingOrders > 0)
-                    <span class="absolute top-0 right-1 w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ $pendingOrders > 9 ? '9+' : $pendingOrders }}</span>
+                        <span class="absolute top-1 right-2 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center" style="background:#ef4444">{{ $pendingOrders > 9 ? '9+' : $pendingOrders }}</span>
                     @endif
                 </a>
 
-                {{-- Plats (centre, plus gros) --}}
+                {{-- Menu FAB (centre) --}}
                 <a href="{{ route('restaurant.plats.index') }}"
-                   class="relative flex flex-col items-center justify-center gap-0.5 -mt-4">
-                    <span class="flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg {{ request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*') ? 'bg-primary-500 text-white' : 'bg-neutral-900 text-white' }}">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                   class="relative flex flex-col items-center justify-center -mt-5 px-2 flex-shrink-0 active:scale-95 transition-all touch-manipulation">
+                    <span class="flex items-center justify-center w-14 h-14 rounded-2xl text-white transition-all"
+                          style="{{ $menuActive ? 'background:#D45E0C;box-shadow:0 4px 16px rgba(212,94,12,0.4)' : 'background:#1a1614;box-shadow:0 4px 14px rgba(0,0,0,0.25)' }}">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     </span>
-                    <span class="text-[10px] font-medium mt-0.5 {{ request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*') ? 'text-primary-600' : 'text-neutral-500' }}">Menu</span>
+                    <span class="text-[10px] font-semibold mt-1 leading-tight {{ $menuActive ? 'text-primary-600' : 'text-neutral-500' }}">Menu</span>
                 </a>
 
                 {{-- QR Code --}}
                 <a href="{{ route('restaurant.qrcode') }}"
-                   class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('restaurant.qrcode*') ? 'text-primary-600' : 'text-neutral-500' }}">
-                    <svg class="w-6 h-6" fill="{{ request()->routeIs('restaurant.qrcode*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('restaurant.qrcode*') ? '0' : '1.5' }}" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                   class="relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl {{ request()->routeIs('restaurant.qrcode*') ? 'text-primary-600' : 'text-neutral-500' }} active:scale-95 transition-all touch-manipulation">
+                    @if(request()->routeIs('restaurant.qrcode*'))
+                        <span class="absolute inset-x-2 top-0 h-0.5 bg-primary-500 rounded-full"></span>
+                    @endif
+                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                     </svg>
-                    <span class="text-[10px] font-medium">QR Code</span>
+                    <span class="text-[10px] font-semibold leading-tight">QR Code</span>
                 </a>
 
-                {{-- Plus (menu) --}}
+                {{-- Plus --}}
                 <button @click="more = !more"
-                        :class="more ? 'text-primary-600' : 'text-neutral-500'"
-                        class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px]">
-                    <svg class="w-6 h-6 transition-transform" :class="more && 'rotate-45'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                        class="relative flex-1 flex flex-col items-center justify-center py-2 rounded-xl active:scale-95 transition-all touch-manipulation"
+                        :class="more ? 'text-primary-600' : 'text-neutral-500'">
+                    <span x-show="more" class="absolute inset-x-2 top-0 h-0.5 bg-primary-500 rounded-full" x-cloak></span>
+                    <svg class="w-5 h-5 mb-1 transition-transform duration-200" :class="more ? 'rotate-45' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
-                    <span class="text-[10px] font-medium">Plus</span>
+                    <span class="text-[10px] font-semibold leading-tight">Plus</span>
                 </button>
             </div>
 
