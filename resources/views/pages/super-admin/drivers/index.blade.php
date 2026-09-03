@@ -1,6 +1,23 @@
 <x-layouts.admin-super title="Livreurs">
     <div class="space-y-6">
 
+        {{-- Header --}}
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold" style="color:var(--sa-fg);">Livreurs</h1>
+                <p class="text-sm mt-0.5" style="color:var(--sa-muted-fg);">Gérez les livreurs de la plateforme.</p>
+            </div>
+            <a href="{{ route('super-admin.drivers.create') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+               style="background:var(--sa-primary);color:var(--sa-primary-fg);"
+               onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Ajouter un livreur
+            </a>
+        </div>
+
         {{-- Stats --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Livreurs actifs --}}

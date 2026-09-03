@@ -467,6 +467,8 @@ Route::prefix('admin')
         
         // Livreurs
         Route::get('livreurs', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'index'])->name('drivers.index');
+        Route::get('livreurs/create', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'create'])->name('drivers.create');
+        Route::post('livreurs', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'store'])->name('drivers.store');
         Route::get('livreurs/{driver}', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'show'])->name('drivers.show');
         Route::post('livreurs/{driver}/approve', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'approve'])->name('drivers.approve');
         Route::post('livreurs/{driver}/reject', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'reject'])->name('drivers.reject');
