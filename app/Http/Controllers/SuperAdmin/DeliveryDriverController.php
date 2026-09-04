@@ -9,6 +9,7 @@ use App\Models\DeliveryDriver;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -62,7 +63,7 @@ class DeliveryDriverController extends Controller
     {
         $data = $request->validate([
             'name'         => 'required|string|max:100',
-            'phone'        => 'required|string|max:20|unique:delivery_drivers,phone|unique:users,phone',
+            'phone'        => 'required|string|max:20|unique:delivery_drivers,phone',
             'email'        => 'nullable|email|max:150|unique:users,email',
             'password'     => ['required', Password::min(6)],
             'city'         => 'required|string|max:100',
@@ -77,38 +78,42 @@ class DeliveryDriverController extends Controller
             'vehicle_photo'=> 'nullable|file|image|max:5120',
         ]);
 
-        $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'] ?? null,
-            'phone'    => $data['phone'],
-            'password' => Hash::make($data['password']),
-        ]);
-        $user->role = UserRole::DELIVERY_DRIVER;
-        $user->save();
-
         $storeFile = fn($file, $dir) => $file ? $file->store($dir, 'public') : null;
-
         $approveNow = (bool) ($data['approve_now'] ?? false);
 
-        $driver = DeliveryDriver::create([
-            'user_id'             => $user->id,
-            'name'                => $data['name'],
-            'phone'               => $data['phone'],
-            'email'               => $data['email'] ?? null,
-            'city'                => $data['city'],
-            'zone'                => $data['zone'] ?? null,
-            'vehicle_type'        => $data['vehicle_type'],
-            'vehicle_plate'       => $data['vehicle_plate'] ?? null,
-            'token'               => Str::random(64),
-            'cni_number'          => $data['cni_number'] ?? null,
-            'photo_path'          => $storeFile($request->file('photo'), 'drivers/photos'),
-            'cni_photo_path'      => $storeFile($request->file('cni_photo'), 'drivers/cni'),
-            'license_photo_path'  => $storeFile($request->file('license_photo'), 'drivers/license'),
-            'vehicle_photo_path'  => $storeFile($request->file('vehicle_photo'), 'drivers/vehicle'),
-            'verification_status' => $approveNow ? 'approved' : 'pending',
-            'is_active'           => $approveNow,
-            'is_available'        => false,
-        ]);
+        $driver = DB::transaction(function () use ($data, $request, $storeFile, $approveNow) {
+            // Réutiliser un User orphelin (même téléphone, pas encore de livreur)
+            $user = User::firstOrCreate(
+                ['phone' => $data['phone']],
+                [
+                    'name'     => $data['name'],
+                    'email'    => $data['email'] ?? null,
+                    'password' => Hash::make($data['password']),
+                ]
+            );
+            $user->role = UserRole::DELIVERY_DRIVER;
+            $user->save();
+
+            return DeliveryDriver::create([
+                'user_id'             => $user->id,
+                'name'                => $data['name'],
+                'phone'               => $data['phone'],
+                'email'               => $data['email'] ?? null,
+                'city'                => $data['city'],
+                'zone'                => $data['zone'] ?? null,
+                'vehicle_type'        => $data['vehicle_type'],
+                'vehicle_plate'       => $data['vehicle_plate'] ?? null,
+                'token'               => Str::random(64),
+                'cni_number'          => $data['cni_number'] ?? null,
+                'photo_path'          => $storeFile($request->file('photo'), 'drivers/photos'),
+                'cni_photo_path'      => $storeFile($request->file('cni_photo'), 'drivers/cni'),
+                'license_photo_path'  => $storeFile($request->file('license_photo'), 'drivers/license'),
+                'vehicle_photo_path'  => $storeFile($request->file('vehicle_photo'), 'drivers/vehicle'),
+                'verification_status' => $approveNow ? 'approved' : 'pending',
+                'is_active'           => $approveNow,
+                'is_available'        => false,
+            ]);
+        });
 
         return redirect()
             ->route('super-admin.drivers.show', $driver)
