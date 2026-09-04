@@ -28,11 +28,11 @@ class AuthController extends Controller
             'zone'               => 'nullable|string|max:100',
             'vehicle_type'       => 'required|in:moto,velo,voiture',
             'vehicle_plate'      => 'nullable|string|max:20',
-            'cni_number'         => 'required|string|max:30',
+            'cni_number'         => 'nullable|string|max:30',
             'photo'              => 'nullable|file|image|max:5120',
-            'cni_photo'          => 'required|file|image|max:5120',
-            'license_photo'      => 'required|file|image|max:5120',
-            'vehicle_photo'      => 'required|file|image|max:5120',
+            'cni_photo'          => 'nullable|file|image|max:5120',
+            'license_photo'      => 'nullable|file|image|max:5120',
+            'vehicle_photo'      => 'nullable|file|image|max:5120',
         ]);
 
         $user = User::create([
@@ -45,10 +45,10 @@ class AuthController extends Controller
         $user->role = UserRole::DELIVERY_DRIVER;
         $user->save();
 
-        $photoPath   = $request->hasFile('photo') ? $this->storeDriverFile($request->file('photo'), 'drivers/photos') : null;
-        $cniPath     = $this->storeDriverFile($request->file('cni_photo'), 'drivers/cni');
-        $licensePath = $this->storeDriverFile($request->file('license_photo'), 'drivers/license');
-        $vehiclePath = $this->storeDriverFile($request->file('vehicle_photo'), 'drivers/vehicle');
+        $photoPath   = $request->hasFile('photo')         ? $this->storeDriverFile($request->file('photo'),         'drivers/photos')  : null;
+        $cniPath     = $request->hasFile('cni_photo')     ? $this->storeDriverFile($request->file('cni_photo'),     'drivers/cni')     : null;
+        $licensePath = $request->hasFile('license_photo') ? $this->storeDriverFile($request->file('license_photo'), 'drivers/license') : null;
+        $vehiclePath = $request->hasFile('vehicle_photo') ? $this->storeDriverFile($request->file('vehicle_photo'), 'drivers/vehicle') : null;
 
         DeliveryDriver::create([
             'user_id'             => $user->id,
