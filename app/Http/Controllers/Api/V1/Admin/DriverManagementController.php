@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Api\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryDriver;
 use App\Models\User;
+use App\Services\FcmService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DriverManagementController extends Controller
 {
+    public function __construct(private FcmService $fcm) {}
+
     /**
      * Liste tous les livreurs avec filtres.
      */
@@ -98,6 +102,19 @@ class DriverManagementController extends Controller
             $driver->user?->update(['is_active' => true]);
         });
 
+        if ($driver->fcm_token) {
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '✅ Dossier approuvé',
+                    'Félicitations ! Votre dossier MenuPro Livreur a été approuvé. Vous pouvez maintenant vous connecter.',
+                    ['type' => 'account_approved'],
+                );
+            } catch (\Throwable $e) {
+                Log::warning('FCM driver approved notification failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         return response()->json(['message' => "Livreur {$driver->name} approuvé."]);
     }
 
@@ -111,7 +128,18 @@ class DriverManagementController extends Controller
 
         $driver->update(['verification_status' => 'rejected']);
 
-        // TODO: envoyer SMS/notification au livreur avec la raison
+        if ($driver->fcm_token) {
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '❌ Dossier non retenu',
+                    "Votre dossier n'a pas été retenu. Raison : {$data['reason']}. Contactez le support pour plus d'infos.",
+                    ['type' => 'account_rejected'],
+                );
+            } catch (\Throwable $e) {
+                Log::warning('FCM driver rejected notification failed', ['error' => $e->getMessage()]);
+            }
+        }
 
         return response()->json(['message' => "Dossier rejeté. Raison : {$data['reason']}"]);
     }
@@ -146,6 +174,19 @@ class DriverManagementController extends Controller
             $driver->user?->update(['is_active' => false]);
         });
 
+        if ($driver->fcm_token) {
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '⚠️ Compte suspendu',
+                    "Votre compte a été suspendu. Raison : {$data['reason']}. Contactez le support.",
+                    ['type' => 'account_suspended'],
+                );
+            } catch (\Throwable $e) {
+                Log::warning('FCM driver suspended notification failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         return response()->json(['message' => "Livreur {$driver->name} suspendu."]);
     }
 
@@ -164,6 +205,19 @@ class DriverManagementController extends Controller
 
             $driver->user?->update(['is_active' => true]);
         });
+
+        if ($driver->fcm_token) {
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '✅ Compte réactivé',
+                    'Votre compte MenuPro Livreur a été réactivé. Vous pouvez reprendre les livraisons.',
+                    ['type' => 'account_reactivated'],
+                );
+            } catch (\Throwable $e) {
+                Log::warning('FCM driver reactivated notification failed', ['error' => $e->getMessage()]);
+            }
+        }
 
         return response()->json(['message' => "Livreur {$driver->name} réactivé."]);
     }

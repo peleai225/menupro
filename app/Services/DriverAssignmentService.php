@@ -10,6 +10,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryDriver;
 use App\Models\DriverEarning;
 use App\Models\Order;
+use App\Services\FcmService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +22,10 @@ class DriverAssignmentService
     // Commission plateforme sur les frais de livraison (20%)
     public const PLATFORM_CUT_RATE = 0.20;
 
-    public function __construct(private GeocodingService $geo) {}
+    public function __construct(
+        private GeocodingService $geo,
+        private FcmService $fcm,
+    ) {}
 
     /**
      * Trouve et assigne le livreur disponible le plus proche du restaurant.
@@ -184,6 +188,20 @@ class DriverAssignmentService
         });
 
         broadcast(new DriverAssigned($delivery->fresh()->load(['order', 'restaurant']), $driver));
+
+        if ($driver->fcm_token) {
+            $restaurant = $delivery->restaurant->name ?? 'Restaurant';
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '🛵 Nouvelle course assignée',
+                    "Vous avez une course depuis {$restaurant}. Ouvrez l'application pour accepter.",
+                    ['type' => 'delivery_assigned', 'delivery_id' => (string) $delivery->id],
+                );
+            } catch (\Throwable $e) {
+                Log::warning('FCM driver assignment notification failed', ['error' => $e->getMessage()]);
+            }
+        }
     }
 
     private function creditDriverEarning(Delivery $delivery): void
