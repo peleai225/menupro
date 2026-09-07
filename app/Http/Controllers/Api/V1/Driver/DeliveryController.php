@@ -439,6 +439,140 @@ class DeliveryController extends Controller
         ];
     }
 
+    /**
+     * Upload photo de preuve de livraison
+     */
+    public function uploadProof(Request $request, int $deliveryId): JsonResponse
+    {
+        $data = $request->validate([
+            'photo' => 'required|image|max:5120', // 5MB max
+        ]);
+
+        $driver = $request->user()->deliveryDriver;
+        $delivery = Delivery::where('driver_id', $driver->id)
+            ->whereIn('status', ['delivering', 'delivered'])
+            ->findOrFail($deliveryId);
+
+        $path = $request->file('photo')->store('delivery-proofs', 'public');
+
+        $delivery->update(['proof_photo_path' => $path]);
+
+        return response()->json([
+            'message'   => 'Photo enregistrée.',
+            'photo_url' => StorageUrl::url($path),
+        ]);
+    }
+
+    /**
+     * Vérifier code client avant livraison
+     */
+    public function verifyCode(Request $request, int $deliveryId): JsonResponse
+    {
+        $data = $request->validate([
+            'code' => 'required|digits:4',
+        ]);
+
+        $driver = $request->user()->deliveryDriver;
+        $delivery = Delivery::where('driver_id', $driver->id)
+            ->whereIn('status', ['delivering'])
+            ->findOrFail($deliveryId);
+
+        $order = $delivery->order;
+
+        // Si pas de code défini, on accepte n'importe quel code (rétrocompatibilité)
+        if (!$order->verification_code) {
+            return response()->json(['message' => 'Code vérifié (aucun code requis).']);
+        }
+
+        if ($order->verification_code !== $data['code']) {
+            return response()->json(['message' => 'Code incorrect.'], 422);
+        }
+
+        return response()->json(['message' => 'Code vérifié.']);
+    }
+
+    /**
+     * Signaler un problème durant la livraison
+     */
+    public function reportIssue(Request $request, int $deliveryId): JsonResponse
+    {
+        $data = $request->validate([
+            'issue_type'    => 'required|in:client_absent,address_not_found,order_refused,order_damaged,accident,restaurant_closed,order_not_ready,items_missing,order_cancelled_by_restaurant',
+            'issue_details' => 'nullable|string|max:500',
+        ]);
+
+        $driver = $request->user()->deliveryDriver;
+        $delivery = Delivery::where('driver_id', $driver->id)
+            ->findOrFail($deliveryId);
+
+        \App\Models\DeliveryIssue::create([
+            'delivery_id'   => $delivery->id,
+            'driver_id'     => $driver->id,
+            'issue_type'    => $data['issue_type'],
+            'issue_details' => $data['issue_details'] ?? null,
+            'reported_at'   => now(),
+        ]);
+
+        Log::info('Delivery issue reported', [
+            'delivery_id' => $delivery->id,
+            'driver_id'   => $driver->id,
+            'issue_type'  => $data['issue_type'],
+        ]);
+
+        return response()->json(['message' => 'Problème signalé.']);
+    }
+
+    /**
+     * Annuler une livraison en cours (après acceptation)
+     */
+    public function cancel(Request $request, int $deliveryId): JsonResponse
+    {
+        $data = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $driver = $request->user()->deliveryDriver;
+        $delivery = Delivery::where('driver_id', $driver->id)
+            ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up'])
+            ->findOrFail($deliveryId);
+
+        DB::transaction(function () use ($delivery, $driver, $data) {
+            $delivery->update([
+                'status'             => 'cancelled',
+                'cancelled_by'       => 'driver',
+                'cancellation_reason' => $data['reason'],
+                'cancelled_at'       => now(),
+            ]);
+
+            // Remettre la commande en attente ou l'annuler selon le statut
+            if ($delivery->status === DeliveryStatus::PICKED_UP->value) {
+                // Si déjà récupérée, on annule la commande complètement
+                $delivery->order->update(['status' => OrderStatus::CANCELLED->value]);
+            } else {
+                // Sinon on remet en attente d'assignation
+                $delivery->order->update([
+                    'status'             => OrderStatus::CONFIRMED->value,
+                    'driver_assigned_at' => null,
+                ]);
+
+                // Créer une nouvelle livraison en attente pour réassignation
+                $this->assignment->unassign($delivery, 'Annulation livreur: ' . $data['reason']);
+            }
+
+            $driver->update(['is_available' => true]);
+        });
+
+        Log::warning('Delivery cancelled by driver', [
+            'delivery_id' => $delivery->id,
+            'driver_id'   => $driver->id,
+            'reason'      => $data['reason'],
+        ]);
+
+        return response()->json(['message' => 'Course annulée.']);
+    }
+
+    // -------------------------------------------------------------------------
+
     private function formatDeliveryDetail(Delivery $delivery): array
     {
         $order = $delivery->order;

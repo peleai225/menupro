@@ -181,6 +181,7 @@ class AppServiceProvider extends ServiceProvider
 
         Order::observe(OrderWhatsAppObserver::class);
         Order::observe(\App\Observers\OrderCustomerNotifyObserver::class);
+        Order::observe(\App\Observers\OrderObserver::class);
 
         Restaurant::observe(AdminNotificationObserver::class);
         Subscription::observe(SubscriptionAdminObserver::class);

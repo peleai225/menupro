@@ -159,6 +159,12 @@ Route::prefix('v1')
             Route::post('/deliveries/{id}/cash-collected',   [DeliveryController::class, 'confirmCashCollected'])->name('deliveries.cash-collected');
             Route::patch('/deliveries/{id}/status', [DeliveryController::class, 'updateDeliveryStatus'])->name('deliveries.status');
 
+            // Preuves de livraison et signalements
+            Route::post('/deliveries/{id}/upload-proof', [DeliveryController::class, 'uploadProof'])->name('deliveries.proof');
+            Route::post('/deliveries/{id}/verify-code',  [DeliveryController::class, 'verifyCode'])->name('deliveries.verify');
+            Route::post('/deliveries/{id}/report-issue', [DeliveryController::class, 'reportIssue'])->name('deliveries.report');
+            Route::post('/deliveries/{id}/cancel',       [DeliveryController::class, 'cancel'])->name('deliveries.cancel');
+
             Route::get('/earnings',         [EarningsController::class, 'summary'])->name('earnings.summary');
             Route::get('/earnings/history', [EarningsController::class, 'history'])->name('earnings.history');
 
