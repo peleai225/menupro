@@ -12,10 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('deliveries', function (Blueprint $table) {
+            // Ajouter uniquement les nouvelles colonnes (cancelled_at et cancellation_reason existent déjà)
             $table->string('proof_photo_path')->nullable()->after('delivered_at');
-            $table->string('cancelled_by')->nullable()->after('proof_photo_path'); // 'driver', 'restaurant', 'admin', 'customer'
-            $table->text('cancellation_reason')->nullable()->after('cancelled_by');
-            $table->timestamp('cancelled_at')->nullable()->after('cancellation_reason');
+            $table->string('cancelled_by')->nullable()->after('cancellation_reason'); // 'driver', 'restaurant', 'admin', 'customer'
         });
     }
 
@@ -25,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('deliveries', function (Blueprint $table) {
-            $table->dropColumn(['proof_photo_path', 'cancelled_by', 'cancellation_reason', 'cancelled_at']);
+            $table->dropColumn(['proof_photo_path', 'cancelled_by']);
         });
     }
 };
