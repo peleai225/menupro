@@ -571,6 +571,65 @@ class DeliveryController extends Controller
         return response()->json(['message' => 'Course annulée.']);
     }
 
+    /**
+     * Historique complet des courses (terminées + annulées)
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $driver = $request->user()->deliveryDriver;
+
+        $deliveries = Delivery::where('driver_id', $driver->id)
+            ->whereIn('status', [DeliveryStatus::DELIVERED->value, DeliveryStatus::CANCELLED->value])
+            ->with(['order.items', 'restaurant'])
+            ->latest('updated_at')
+            ->paginate(20);
+
+        return response()->json([
+            'data' => $deliveries->map(function ($delivery) use ($driver) {
+                $order = $delivery->order;
+                $statusValue = $delivery->status instanceof DeliveryStatus
+                    ? $delivery->status->value
+                    : $delivery->status;
+
+                // Récupérer le gain associé
+                $earning = DriverEarning::where('driver_id', $driver->id)
+                    ->where('delivery_id', $delivery->id)
+                    ->first();
+
+                return [
+                    'id'         => $delivery->id,
+                    'status'     => $statusValue,
+                    'order_ref'  => $order->reference ?? '',
+                    'restaurant' => [
+                        'name'     => $delivery->restaurant->name ?? '',
+                        'address'  => $delivery->restaurant->address ?? '',
+                        'logo_url' => StorageUrl::url($delivery->restaurant->logo_path),
+                    ],
+                    'customer' => [
+                        'address' => $delivery->delivery_address,
+                        'phone'   => $delivery->delivery_phone,
+                    ],
+                    'earning' => [
+                        'gross_amount' => $earning?->gross_amount ?? 0,
+                        'net_amount'   => $earning?->net_amount ?? 0,
+                        'status'       => $earning?->status ?? null,
+                    ],
+                    'delivered_at'        => $delivery->delivered_at?->toIso8601String(),
+                    'cancelled_at'        => $delivery->cancelled_at?->toIso8601String(),
+                    'cancellation_reason' => $delivery->cancellation_reason,
+                    'cancelled_by'        => $delivery->cancelled_by,
+                    'created_at'          => $delivery->created_at->toIso8601String(),
+                ];
+            }),
+            'meta' => [
+                'current_page' => $deliveries->currentPage(),
+                'last_page'    => $deliveries->lastPage(),
+                'per_page'     => $deliveries->perPage(),
+                'total'        => $deliveries->total(),
+            ],
+        ]);
+    }
+
     // -------------------------------------------------------------------------
 
     private function formatDeliveryDetail(Delivery $delivery): array

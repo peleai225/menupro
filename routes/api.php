@@ -154,6 +154,7 @@ Route::prefix('v1')
 
             Route::get('/deliveries/pending',       [DeliveryController::class, 'pendingOrders'])->name('deliveries.pending');
             Route::get('/deliveries/active',        [DeliveryController::class, 'activeDelivery'])->name('deliveries.active');
+            Route::get('/deliveries/history',       [DeliveryController::class, 'history'])->name('deliveries.history');
             Route::post('/deliveries/{id}/accept',  [DeliveryController::class, 'accept'])->name('deliveries.accept');
             Route::post('/deliveries/{id}/decline',         [DeliveryController::class, 'decline'])->name('deliveries.decline');
             Route::post('/deliveries/{id}/cash-collected',   [DeliveryController::class, 'confirmCashCollected'])->name('deliveries.cash-collected');
