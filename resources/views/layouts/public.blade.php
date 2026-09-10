@@ -32,6 +32,9 @@
                     <a href="{{ route('home') }}#contact" class="text-neutral-600 hover:text-neutral-900 font-medium transition-colors">
                         Contact
                     </a>
+                    <a href="{{ route('devenir-livreur') }}" class="font-semibold transition-colors" style="color:#FF6100">
+                        🏍️ Devenir livreur
+                    </a>
                 </div>
 
                 <!-- CTA Buttons -->
@@ -78,6 +81,9 @@
                 </a>
                 <a href="{{ route('home') }}#contact" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
                     Contact
+                </a>
+                <a href="{{ route('devenir-livreur') }}" class="block py-2 font-semibold" style="color:#FF6100">
+                    🏍️ Devenir livreur
                 </a>
                 <hr class="border-neutral-200">
                 <a href="{{ route('login') }}" class="block py-2 text-neutral-600 hover:text-primary-500 font-medium">
@@ -137,7 +143,7 @@
                         <li><a href="{{ route('home') }}#features" class="text-neutral-400 hover:text-primary-400 transition-colors">Fonctionnalités</a></li>
                         <li><a href="{{ route('pricing') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Tarifs</a></li>
                         <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
-                        <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Témoignages</a></li>
+                        <li><a href="{{ route('devenir-livreur') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Devenir livreur</a></li>
                     </ul>
                 </div>
 

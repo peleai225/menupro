@@ -44,6 +44,7 @@ Route::middleware(\App\Http\Middleware\SetPublicCache::class . ':300')->group(fu
     Route::get('/conditions', fn () => view('pages.public.legal.terms'))->name('terms');
     Route::get('/confidentialite', fn () => view('pages.public.legal.privacy'))->name('privacy');
     Route::get('/mentions-legales', fn () => view('pages.public.legal.mentions'))->name('mentions-legales');
+    Route::get('/devenir-livreur', fn () => view('pages.public.devenir-livreur'))->name('devenir-livreur');
 });
 
 Route::get('/telecharger/android', function () {

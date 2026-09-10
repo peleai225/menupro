@@ -347,7 +347,7 @@
                     @endforeach
                 </div>
                 <div class="mt-8">
-                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-semibold rounded-2xl transition hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 4px 20px rgba(255,97,0,.25)">
+                    <a href="{{ route('devenir-livreur') }}" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-semibold rounded-2xl transition hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 4px 20px rgba(255,97,0,.25)">
                         🏍️ S'inscrire comme livreur
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
