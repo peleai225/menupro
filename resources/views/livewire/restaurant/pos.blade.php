@@ -21,14 +21,23 @@
 
     {{-- Success message --}}
     @if($posSuccessMessage)
-        <div class="mb-6 p-4 bg-secondary-50 border border-secondary-200 rounded-xl text-secondary-800 flex items-center gap-3">
+        <div class="mb-6 p-4 bg-secondary-50 border border-secondary-200 rounded-2xl text-secondary-800 flex flex-wrap items-center gap-3">
             <svg class="w-5 h-5 text-secondary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span class="font-medium">{{ $posSuccessMessage }}</span>
-            @if($lastOrderId)
-                <a href="{{ route('restaurant.orders.show', $lastOrderId) }}" class="ml-auto text-sm text-secondary-600 hover:underline">Voir la commande →</a>
-            @endif
+            <div class="ml-auto flex items-center gap-2">
+                @if($lastOrderId)
+                    <a href="{{ route('restaurant.orders.print', $lastOrderId) }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-secondary-600 text-white hover:bg-secondary-700 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Imprimer le ticket
+                    </a>
+                    <a href="{{ route('restaurant.orders.show', $lastOrderId) }}" class="text-sm text-secondary-600 hover:underline">Voir →</a>
+                @endif
+            </div>
         </div>
     @endif
 
