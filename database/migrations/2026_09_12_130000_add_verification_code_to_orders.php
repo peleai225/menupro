@@ -6,23 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->string('verification_code', 4)->nullable()->after('delivery_instructions');
-        });
+        if (!Schema::hasColumn('orders', 'verification_code')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->string('verification_code', 4)->nullable()->after('delivery_instructions');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('verification_code');
-        });
+        if (Schema::hasColumn('orders', 'verification_code')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->dropColumn('verification_code');
+            });
+        }
     }
 };

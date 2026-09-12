@@ -65,7 +65,7 @@ fi
 
 # 3. Migrations
 echo " Migrations..."
-php artisan migrate --force 2>/dev/null || true
+php artisan migrate --force && echo " Migrations OK" || echo " ERREUR migrations (voir logs)"
 
 # 4. Vider les caches Laravel
 echo " Nettoyage cache..."
