@@ -1,4 +1,5 @@
-<div class="p-4 lg:p-6" x-data="{ showCart: window.innerWidth >= 1024 }">
+<div class="p-4 lg:p-6" x-data="{ showCart: window.innerWidth >= 1024 }"
+    @print-order.window="window.open($event.detail.url, '_blank')">
     {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -32,7 +33,6 @@
     @endif
 
     @error('cart') <div class="mb-4 text-red-600 text-sm font-medium">{{ $message }}</div> @enderror
-    @error('submit') <div class="mb-4 text-red-600 text-sm font-medium">{{ $message }}</div> @enderror
 
     <div class="grid lg:grid-cols-3 gap-6">
         {{-- ═══════════════════════════════════════════ --}}
@@ -315,6 +315,11 @@
 
                 </div>
                 <div class="flex-shrink-0 p-6 border-t border-neutral-100">
+                @error('submit')
+                    <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+                        ⚠️ {{ $message }}
+                    </div>
+                @enderror
                 <div class="flex gap-3">
                     <button wire:click="$set('showConfirmModal', false)" class="flex-1 btn btn-outline min-h-[52px] touch-manipulation">
                         Annuler
