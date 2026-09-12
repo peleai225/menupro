@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use Illuminate\Support\Facades\Schema;
 
 class OrderObserver
 {
@@ -12,10 +13,13 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        // Générer un code aléatoire à 4 chiffres si pas encore défini
+        if (!Schema::hasColumn('orders', 'verification_code')) {
+            return;
+        }
+
         if (empty($order->verification_code)) {
             $order->verification_code = str_pad((string) random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
-            $order->saveQuietly(); // saveQuietly pour éviter de retrigger l'observer
+            $order->saveQuietly();
         }
     }
 
