@@ -6,25 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('deliveries', function (Blueprint $table) {
-            // Ajouter uniquement les nouvelles colonnes (cancelled_at et cancellation_reason existent déjà)
-            $table->string('proof_photo_path')->nullable()->after('delivered_at');
-            $table->string('cancelled_by')->nullable()->after('cancellation_reason'); // 'driver', 'restaurant', 'admin', 'customer'
+            if (!Schema::hasColumn('deliveries', 'proof_photo_path')) {
+                $table->string('proof_photo_path')->nullable()->after('delivered_at');
+            }
+            if (!Schema::hasColumn('deliveries', 'cancelled_by')) {
+                $table->string('cancelled_by')->nullable()->after('cancellation_reason');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('deliveries', function (Blueprint $table) {
-            $table->dropColumn(['proof_photo_path', 'cancelled_by']);
+            $columns = array_filter(['proof_photo_path', 'cancelled_by'], fn($c) => Schema::hasColumn('deliveries', $c));
+            if (!empty($columns)) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };
