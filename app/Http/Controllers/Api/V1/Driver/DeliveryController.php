@@ -436,6 +436,8 @@ class DeliveryController extends Controller
             'distance_km'             => $distToPickup,
             'estimated_minutes'       => $delivery->estimated_minutes,
             'driver_earning_estimate' => (int) round(($order->delivery_fee ?? 0) * 0.80),
+            'assigned_at'             => $delivery->assigned_at?->toIso8601String(),
+            'created_at'              => $delivery->created_at->toIso8601String(),
         ];
     }
 
