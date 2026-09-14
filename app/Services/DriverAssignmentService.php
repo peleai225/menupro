@@ -28,14 +28,15 @@ class DriverAssignmentService
     ) {}
 
     /**
-     * Trouve et assigne le livreur disponible le plus proche du restaurant.
-     * Retourne le livreur assigné ou null si aucun disponible.
+     * Notifie les livreurs disponibles les plus proches qu'une course est disponible.
+     * La course reste PENDING — le premier livreur qui accepte la prend.
      */
-    public function assign(Delivery $delivery): ?DeliveryDriver
+    public function notifyNearbyDrivers(Delivery $delivery, int $attempt = 1): int
     {
-        $driver = $this->findNearest($delivery);
+        $radiusKm = self::SEARCH_RADII_KM[min($attempt - 1, count(self::SEARCH_RADII_KM) - 1)];
 
-        // Toujours broadcaster la disponibilité de la course à tous les livreurs de la ville
+        $drivers = $this->findNearbyDrivers($delivery, $radiusKm);
+
         $city = $delivery->restaurant->city ?? '';
         if ($city) {
             try {
@@ -45,17 +46,85 @@ class DriverAssignmentService
             }
         }
 
-        if (!$driver) {
+        if ($drivers->isEmpty()) {
             Log::info('DriverAssignment: aucun livreur disponible', [
                 'delivery_id' => $delivery->id,
-                'order_id'    => $delivery->order_id,
+                'radius_km'   => $radiusKm,
             ]);
+            return 0;
+        }
+
+        $restaurant = $delivery->restaurant->name ?? 'Restaurant';
+        $notified = 0;
+
+        foreach ($drivers as $driver) {
+            if (!$driver->fcm_token) {
+                continue;
+            }
+
+            try {
+                $this->fcm->sendToToken(
+                    $driver->fcm_token,
+                    '🛵 Nouvelle course disponible',
+                    "Course disponible depuis {$restaurant}. Ouvrez l'application pour accepter.",
+                    ['type' => 'new_delivery', 'delivery_id' => (string) $delivery->id],
+                );
+                $notified++;
+            } catch (\Throwable $e) {
+                Log::warning('FCM notification failed', [
+                    'driver_id' => $driver->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('DriverAssignment: livreurs notifiés', [
+            'delivery_id'    => $delivery->id,
+            'radius_km'      => $radiusKm,
+            'found'          => $drivers->count(),
+            'notified'       => $notified,
+        ]);
+
+        return $notified;
+    }
+
+    /**
+     * Assigne un livreur spécifique (appelé par accept()).
+     */
+    public function assign(Delivery $delivery): ?DeliveryDriver
+    {
+        $driver = $this->findNearest($delivery);
+
+        if (!$driver) {
             return null;
         }
 
         $this->doAssign($delivery, $driver);
 
         return $driver;
+    }
+
+    /**
+     * Trouve les livreurs disponibles dans un rayon donné, triés par distance.
+     */
+    public function findNearbyDrivers(Delivery $delivery, float $radiusKm = 3): \Illuminate\Support\Collection
+    {
+        $pickupLat = (float) $delivery->pickup_latitude;
+        $pickupLng = (float) $delivery->pickup_longitude;
+
+        return DeliveryDriver::available()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->selectRaw(
+                '*, ( 6371 * acos( cos(radians(?)) * cos(radians(latitude))
+                    * cos(radians(longitude) - radians(?))
+                    + sin(radians(?)) * sin(radians(latitude)) ) ) AS distance_km',
+                [$pickupLat, $pickupLng, $pickupLat]
+            )
+            ->having('distance_km', '<=', $radiusKm)
+            ->orderBy('distance_km')
+            ->limit(5)
+            ->get();
     }
 
     /**

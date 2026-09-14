@@ -17,11 +17,11 @@ class AssignDriverJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
-    public $backoff = [60, 180, 300]; // Retry après 1, 3, 5 minutes
+    public $backoff = [60, 120, 180];
 
     public function __construct(
         public int $deliveryId,
-        public bool $isRetry = false,
+        public int $attempt = 1,
     ) {}
 
     public function handle(DriverAssignmentService $driverAssignment): void
@@ -33,7 +33,6 @@ class AssignDriverJob implements ShouldQueue
             return;
         }
 
-        // Guard 1 : Vérifier que la commande n'est pas annulée/remboursée
         if ($delivery->order->status->isFinal()) {
             Log::info('AssignDriverJob: skipped, order is final', [
                 'delivery_id' => $this->deliveryId,
@@ -42,41 +41,33 @@ class AssignDriverJob implements ShouldQueue
             return;
         }
 
-        // Guard 2 : Vérifier que le livreur n'est pas déjà assigné
         if ($delivery->status !== DeliveryStatus::PENDING) {
-            Log::info('AssignDriverJob: skipped, already assigned', [
+            Log::info('AssignDriverJob: skipped, already accepted', [
                 'delivery_id' => $this->deliveryId,
                 'delivery_status' => $delivery->status->value,
             ]);
             return;
         }
 
-        // Tentative d'assignation
-        $driver = $driverAssignment->assign($delivery);
+        $notifiedCount = $driverAssignment->notifyNearbyDrivers($delivery, $this->attempt);
 
-        if (!$driver && !$this->isRetry) {
-            // Aucun livreur disponible → Retry dans 3 minutes
-            Log::warning('AssignDriverJob: no driver available, scheduling retry', [
+        if ($notifiedCount === 0 && $this->attempt < 3) {
+            Log::warning('AssignDriverJob: no drivers found, retrying with wider radius', [
                 'delivery_id' => $this->deliveryId,
+                'attempt' => $this->attempt,
             ]);
 
-            self::dispatch($this->deliveryId, isRetry: true)
-                ->delay(now()->addMinutes(3));
-
-            // TODO : Notifier restaurant qu'aucun livreur n'est disponible
-            // NotifyRestaurant::dispatch($delivery, 'no_driver_available');
-        } elseif (!$driver && $this->isRetry) {
-            // Toujours aucun livreur après retry
-            Log::error('AssignDriverJob: no driver available after retry', [
+            self::dispatch($this->deliveryId, attempt: $this->attempt + 1)
+                ->delay(now()->addMinutes(2));
+        } elseif ($notifiedCount === 0) {
+            Log::error('AssignDriverJob: no drivers available after all attempts', [
                 'delivery_id' => $this->deliveryId,
             ]);
-
-            // TODO : Alerte critique restaurant + support
         } else {
-            Log::info('AssignDriverJob: driver assigned successfully', [
+            Log::info('AssignDriverJob: drivers notified', [
                 'delivery_id' => $this->deliveryId,
-                'driver_id' => $driver->id,
-                'driver_name' => $driver->name,
+                'notified_count' => $notifiedCount,
+                'attempt' => $this->attempt,
             ]);
         }
     }
