@@ -204,7 +204,7 @@ class OrderController extends Controller
         // Auto-assignation livreur pour paiement cash
         if ($isCashOnDelivery && $order->delivery) {
             \App\Jobs\AssignDriverJob::dispatch($order->delivery->id)
-                ->delay(now()->addMinutes(5));
+                ->delay(now()->addSeconds(30));
         }
 
         $response = [

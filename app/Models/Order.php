@@ -394,7 +394,7 @@ class Order extends Model
             // Auto-assignation livreur pour commandes plateforme avec livraison
             if ($this->source === 'platform_web' && $this->type === OrderType::DELIVERY && $this->delivery) {
                 \App\Jobs\AssignDriverJob::dispatch($this->delivery->id)
-                    ->delay(now()->addMinutes(5));
+                    ->delay(now()->addSeconds(30));
             }
         }
 
