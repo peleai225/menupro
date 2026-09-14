@@ -201,6 +201,12 @@ class OrderController extends Controller
 
         $order->load('restaurant', 'items');
 
+        // Auto-assignation livreur pour paiement cash
+        if ($isCashOnDelivery && $order->delivery) {
+            \App\Jobs\AssignDriverJob::dispatch($order->delivery->id)
+                ->delay(now()->addMinutes(5));
+        }
+
         $response = [
             'order'          => $this->formatOrder($order),
             'tracking_token' => $order->tracking_token,
