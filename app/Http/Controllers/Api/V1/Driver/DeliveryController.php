@@ -178,7 +178,7 @@ class DeliveryController extends Controller
             })
             ->findOrFail($deliveryId);
 
-        if ($delivery->status === DeliveryStatus::ASSIGNED->value && $delivery->driver_id === $driver->id) {
+        if ($delivery->status === DeliveryStatus::ASSIGNED && $delivery->driver_id === $driver->id) {
             $this->assignment->unassign($delivery, 'Refus livreur');
         }
         // Pour une course pending, on ne fait rien côté DB — on retire juste du cache local
@@ -548,7 +548,7 @@ class DeliveryController extends Controller
             ]);
 
             // Remettre la commande en attente ou l'annuler selon le statut
-            if ($delivery->status === DeliveryStatus::PICKED_UP->value) {
+            if ($delivery->status === DeliveryStatus::PICKED_UP) {
                 // Si déjà récupérée, on annule la commande complètement
                 $delivery->order->update(['status' => OrderStatus::CANCELLED->value]);
             } else {
