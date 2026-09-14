@@ -9,6 +9,7 @@ use App\Events\DriverLocationUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\DeliveryDriver;
+use App\Models\DriverEarning;
 use App\Models\Order;
 use App\Services\DriverAssignmentService;
 use App\Services\GeocodingService;
