@@ -43,10 +43,10 @@ class AssignDriverJob implements ShouldQueue
         }
 
         // Guard 2 : Vérifier que le livreur n'est pas déjà assigné
-        if ($delivery->status !== DeliveryStatus::PENDING->value) {
+        if ($delivery->status !== DeliveryStatus::PENDING) {
             Log::info('AssignDriverJob: skipped, already assigned', [
                 'delivery_id' => $this->deliveryId,
-                'delivery_status' => $delivery->status,
+                'delivery_status' => $delivery->status->value,
             ]);
             return;
         }
