@@ -299,6 +299,9 @@ class OrderController extends Controller
                 ] : null,
                 'created_at' => $order->created_at,
             ],
+            'verification_code' => in_array($statusValue, ['delivering', 'ready', 'preparing'])
+                ? $order->verification_code
+                : null,
             'delivery' => $deliveryStatus ? [
                 'status'       => $deliveryStatus->value,
                 'status_label' => $deliveryStatus->label(),
