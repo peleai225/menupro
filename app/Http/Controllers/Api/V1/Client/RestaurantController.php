@@ -126,9 +126,8 @@ class RestaurantController extends Controller
 
         $limit = (int) ($request->limit ?? 12);
 
-        $dishes = \App\Models\Dish::with('restaurant')
+        $dishes = \App\Models\Dish::with(['restaurant', 'orderItems'])
             ->where('is_active', true)
-            ->where('is_featured', true)
             ->whereHas('restaurant', function ($q) use ($request) {
                 $q->where('is_on_platform', true)->where('status', 'active');
                 if ($request->filled('city')) {
@@ -136,7 +135,10 @@ class RestaurantController extends Controller
                 }
             })
             ->inStock()
-            ->inRandomOrder()
+            ->withCount('orderItems')
+            ->orderByDesc('is_featured')
+            ->orderByDesc('order_items_count')
+            ->orderBy('sort_order')
             ->limit($limit)
             ->get()
             ->map(fn($dish) => [
