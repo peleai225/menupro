@@ -114,6 +114,54 @@ class RestaurantController extends Controller
     }
 
     /**
+     * Plats vedettes de tous les restaurants actifs (is_featured = true).
+     * Utilisé sur la homepage pour le carousel "Plats populaires".
+     */
+    public function featuredDishes(Request $request): JsonResponse
+    {
+        $request->validate([
+            'city'  => 'nullable|string|max:100',
+            'limit' => 'nullable|integer|min:1|max:30',
+        ]);
+
+        $limit = (int) ($request->limit ?? 12);
+
+        $dishes = \App\Models\Dish::with('restaurant')
+            ->where('is_active', true)
+            ->where('is_featured', true)
+            ->whereHas('restaurant', function ($q) use ($request) {
+                $q->where('is_on_platform', true)->where('status', 'active');
+                if ($request->filled('city')) {
+                    $q->where('city', $request->city);
+                }
+            })
+            ->inStock()
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get()
+            ->map(fn($dish) => [
+                'id'          => $dish->id,
+                'name'        => $dish->name,
+                'price'       => $dish->price,
+                'compare_price' => $dish->compare_price,
+                'image_url'   => $dish->image_path ? asset('storage/' . $dish->image_path) : null,
+                'is_spicy'    => $dish->is_spicy,
+                'is_vegetarian' => $dish->is_vegetarian,
+                'prep_time'   => $dish->prep_time,
+                'restaurant'  => [
+                    'id'       => $dish->restaurant->id,
+                    'name'     => $dish->restaurant->name,
+                    'logo_url' => $dish->restaurant->logo_path
+                        ? asset('storage/' . $dish->restaurant->logo_path)
+                        : null,
+                    'is_open'  => $dish->restaurant->isOpenNow(),
+                ],
+            ]);
+
+        return response()->json(['data' => $dishes]);
+    }
+
+    /**
      * Détail d'un restaurant.
      */
     public function show(int $id): JsonResponse

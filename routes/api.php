@@ -116,6 +116,7 @@ Route::prefix('v1')
         // Suivi public (sans auth)
         Route::middleware('throttle:api.public')->group(function () {
             Route::get('/orders/track/{token}', [ClientOrderController::class, 'track'])->name('orders.track');
+            Route::get('/restaurants/featured-dishes', [RestaurantController::class, 'featuredDishes'])->name('restaurants.featured-dishes');
         });
 
         // Callbacks Wave (sans auth, sans throttle — viennent de Wave)
