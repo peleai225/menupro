@@ -456,6 +456,10 @@ class Order extends Model
                 ->first();
 
             if ($activeDelivery) {
+                $oldStatus = $activeDelivery->status instanceof \App\Enums\DeliveryStatus
+                    ? $activeDelivery->status->value
+                    : $activeDelivery->status;
+
                 $activeDelivery->update([
                     'status'              => \App\Enums\DeliveryStatus::CANCELLED->value,
                     'cancelled_at'        => now(),
@@ -465,6 +469,16 @@ class Order extends Model
                 if ($activeDelivery->driver_id) {
                     \App\Models\DeliveryDriver::where('id', $activeDelivery->driver_id)
                         ->update(['is_available' => true]);
+                }
+
+                try {
+                    broadcast(new \App\Events\DeliveryStatusChanged(
+                        delivery:  $activeDelivery->fresh()->load(['order', 'driver', 'restaurant']),
+                        oldStatus: $oldStatus,
+                        newStatus: \App\Enums\DeliveryStatus::CANCELLED->value,
+                    ));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('DeliveryStatusChanged broadcast on cancel failed', ['error' => $e->getMessage()]);
                 }
             }
         }

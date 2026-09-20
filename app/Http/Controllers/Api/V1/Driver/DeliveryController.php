@@ -219,6 +219,13 @@ class DeliveryController extends Controller
                 $delivery->order->update(['picked_up_at' => now()]);
             }
 
+            if ($newStatus === DeliveryStatus::DELIVERING) {
+                $order = $delivery->order;
+                if ($order->status === OrderStatus::READY || $order->status->value === 'ready') {
+                    $order->update(['status' => OrderStatus::DELIVERING->value]);
+                }
+            }
+
             if ($newStatus === DeliveryStatus::DELIVERED) {
                 $updates['delivered_at'] = now();
                 $delivery->order->update([
@@ -647,9 +654,15 @@ class DeliveryController extends Controller
             'quantity' => $i->quantity,
         ])->values()->toArray();
 
+        $orderStatusValue = $order->status instanceof \App\Enums\OrderStatus
+            ? $order->status->value
+            : $order->status;
+
         return [
             'id'     => $delivery->id,
             'status' => $statusValue,
+            'order_status'    => $orderStatusValue,
+            'tracking_token'  => $order->tracking_token,
             'order'  => [
                 'reference'             => $order->reference ?? '',
                 'delivery_address'      => $delivery->delivery_address,
