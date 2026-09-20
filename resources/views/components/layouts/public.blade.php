@@ -31,7 +31,7 @@
                         $navLinks = [
                             ['Fonctionnalités', route('home').'#how-it-works', false],
                             ['Tarifs', route('pricing'), request()->routeIs('pricing')],
-                            ['L\'App', 'https://mpa-five.vercel.app/', false, true],
+                            ['L\'App', 'https://app.menupro.ci', false, true],
                             ['Contact', route('contact'), request()->routeIs('contact')],
                         ];
                     @endphp

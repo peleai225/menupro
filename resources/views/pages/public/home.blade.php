@@ -287,7 +287,7 @@
                 </a>
 
                 {{-- iPhone PWA --}}
-                <a href="https://mpa-five.vercel.app/" target="_blank"
+                <a href="https://app.menupro.ci" target="_blank"
                    class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
                    style="border-color:#E8E0D5">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
@@ -319,9 +319,9 @@
                 <div class="bg-white rounded-2xl p-8 border flex flex-col items-center gap-5 max-w-xs w-full" style="border-color:#E8E0D5;box-shadow:0 8px 40px rgba(26,22,20,.06)">
                     <p class="font-semibold text-sm" style="color:#1A1614">Application Livreurs</p>
                     <div class="w-40 h-40 rounded-2xl overflow-hidden flex items-center justify-center p-1" style="border:2px solid rgba(255,97,0,.2);background:#FAF8F5">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-driver.vercel.app/') }}&color=FF6100&bgcolor=FAF8F5&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://driver.menupro.ci') }}&color=FF6100&bgcolor=FAF8F5&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     </div>
-                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
+                    <a href="https://driver.menupro.ci" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
                 </div>
             </div>
 

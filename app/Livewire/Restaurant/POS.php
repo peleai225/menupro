@@ -299,8 +299,11 @@ class POS extends Component
             $this->customerEmail = '';
             $this->tableNumber = '';
             $this->customerNotes = '';
+            $this->paymentMethod = 'cash';
+            $this->dispatch('printOrder', url: route('orders.print', $createdOrder->id));
 
         } catch (\Throwable $e) {
+            $this->showConfirmModal = false;
             $this->addError('submit', 'Erreur lors de la création : ' . $e->getMessage());
             \Log::error('POS order creation failed', ['error' => $e->getMessage()]);
         }

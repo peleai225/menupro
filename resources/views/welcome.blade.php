@@ -111,7 +111,7 @@
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="https://mpa-five.vercel.app/" target="_blank" class="inline-flex items-center justify-center px-8 py-4 bg-orange-600 text-white text-lg font-bold rounded-full hover:bg-orange-700 transform hover:scale-105 transition shadow-xl hover:shadow-2xl">
+                        <a href="https://app.menupro.ci" target="_blank" class="inline-flex items-center justify-center px-8 py-4 bg-orange-600 text-white text-lg font-bold rounded-full hover:bg-orange-700 transform hover:scale-105 transition shadow-xl hover:shadow-2xl">
                             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
@@ -343,7 +343,7 @@
                 Rejoignez des milliers de clients satisfaits et découvrez une nouvelle façon de commander vos repas
             </p>
 
-            <a href="https://mpa-five.vercel.app/" target="_blank" class="inline-flex items-center px-10 py-5 bg-white text-orange-600 text-lg font-bold rounded-full hover:bg-gray-100 transform hover:scale-105 transition shadow-2xl">
+            <a href="https://app.menupro.ci" target="_blank" class="inline-flex items-center px-10 py-5 bg-white text-orange-600 text-lg font-bold rounded-full hover:bg-gray-100 transform hover:scale-105 transition shadow-2xl">
                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
@@ -379,7 +379,7 @@
                 <div>
                     <h4 class="font-bold text-white mb-4">Liens rapides</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="https://mpa-five.vercel.app/" class="hover:text-orange-600 transition">Commander</a></li>
+                        <li><a href="https://app.menupro.ci" class="hover:text-orange-600 transition">Commander</a></li>
                         <li><a href="#features" class="hover:text-orange-600 transition">Fonctionnalités</a></li>
                         @auth
                             <li><a href="{{ url('/dashboard') }}" class="hover:text-orange-600 transition">Dashboard</a></li>
