@@ -10,6 +10,7 @@ return [
         [
             'https://menupro.ci',
             'https://www.menupro.ci',
+            'https://app.menupro.ci',
             'https://delivery.menupro.ci',
             'https://driver.menupro.ci',
             'https://mpa-five.vercel.app',
