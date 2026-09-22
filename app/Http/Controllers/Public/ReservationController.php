@@ -97,23 +97,25 @@ class ReservationController extends Controller
     private function isRestaurantOpenAt(Restaurant $restaurant, \Carbon\Carbon $datetime): bool
     {
         if (!$restaurant->opening_hours) {
-            return true; // Default to open if no hours set
+            return true;
         }
 
         $datetime->setTimezone($restaurant->timezone ?? 'Africa/Abidjan');
-        $dayOfWeek = strtolower($datetime->format('l'));
-        
+        $dayOfWeek = strtolower($datetime->englishDayOfWeek);
+
         $dayHours = $restaurant->opening_hours[$dayOfWeek] ?? null;
-        
-        // Check if restaurant is closed for this day
+
         if (!$dayHours || !($dayHours['is_open'] ?? false)) {
             return false;
         }
 
-        $openTime = $dayHours['open'] ?? '00:00';
-        $closeTime = $dayHours['close'] ?? '23:59';
-
+        $openTime = str_pad(explode(':', $dayHours['open'] ?? '00:00')[0], 2, '0', STR_PAD_LEFT) . ':' . (explode(':', $dayHours['open'] ?? '00:00')[1] ?? '00');
+        $closeTime = str_pad(explode(':', $dayHours['close'] ?? '23:59')[0], 2, '0', STR_PAD_LEFT) . ':' . (explode(':', $dayHours['close'] ?? '23:59')[1] ?? '59');
         $reservationTime = $datetime->format('H:i');
+
+        if ($closeTime <= $openTime) {
+            return $reservationTime >= $openTime || $reservationTime <= $closeTime;
+        }
 
         return $reservationTime >= $openTime && $reservationTime <= $closeTime;
     }
