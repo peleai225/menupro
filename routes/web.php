@@ -538,11 +538,11 @@ Route::prefix('admin')
 */
 
 Route::prefix('r/{slug}')->name('r.')->group(function () {
-    // Menu (Livewire)
-    Route::get('/', \App\Livewire\Public\RestaurantMenu::class)->name('menu');
-    
-    // Checkout (Livewire)
-    Route::get('/commander', \App\Livewire\Public\Checkout::class)->name('checkout');
+    // Menu (Livewire) — bloqué si le restaurant n'est pas ACTIVE (PENDING/SUSPENDED/EXPIRED)
+    Route::get('/', \App\Livewire\Public\RestaurantMenu::class)->name('menu')->middleware('restaurant.active');
+
+    // Checkout (Livewire) — même garde : pas de nouvelle commande sur un restaurant non actif
+    Route::get('/commander', \App\Livewire\Public\Checkout::class)->name('checkout')->middleware('restaurant.active');
     
     // Order Status (secured with tracking token)
     Route::get('/commande/{token}', [OrderStatusController::class, 'show'])->name('order.status')->middleware('throttle:30,1');
