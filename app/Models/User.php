@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'welcome_token_expires_at',
         'city',
         'tour_completed_at',
+        'admin_permissions',
     ];
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\User;
+use App\Support\AdminSections;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,20 +62,28 @@ class UserController extends Controller
             'email' => ['required', 'email', 'unique:users'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', 'in:super_admin'],
+            'account_type' => ['required', 'in:full,employee'],
+            'admin_permissions' => ['required_if:account_type,employee', 'array'],
+            'admin_permissions.*' => ['string', 'in:' . implode(',', AdminSections::DELEGABLE)],
         ]);
 
-        User::create([
+        // role est dans $guarded → assigné explicitement après instanciation.
+        $user = new User([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => UserRole::SUPER_ADMIN,
             'is_active' => true,
-            'email_verified_at' => now(),
+            'admin_permissions' => $request->account_type === 'employee'
+                ? array_values($request->admin_permissions)
+                : null,
         ]);
+        // role et email_verified_at hors $fillable → assignés explicitement.
+        $user->role = UserRole::SUPER_ADMIN;
+        $user->email_verified_at = now();
+        $user->save();
 
-        return back()->with('success', 'Administrateur créé avec succès.');
+        return back()->with('success', 'Compte créé avec succès.');
     }
 
     /**
