@@ -29,7 +29,9 @@
             </div>
 
             <!-- Navigation -->
+            @php($u = auth()->user())
             <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin">
+                @if($u->isFullAdmin())
                 <!-- Dashboard -->
                 <a href="{{ route('super-admin.dashboard') }}"
                    class="nav-item {{ request()->routeIs('super-admin.dashboard') ? 'nav-active' : '' }}" title="Dashboard">
@@ -38,6 +40,7 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Dashboard</span>
                 </a>
+                @endif
 
                 <!-- Section: Gestion -->
                 <div class="pt-5 pb-1">
@@ -47,6 +50,7 @@
                     <div x-show="!expanded" class="h-px bg-neutral-800 mx-2"></div>
                 </div>
 
+                @if($u->canAdminSection('restaurants'))
                 <a href="{{ route('super-admin.restaurants.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.restaurants*') ? 'nav-active' : '' }}" title="Restaurants">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +61,9 @@
                         <span class="sidebar-badge-restaurants bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full" x-show="expanded">{{ $pendingRestaurants ?? 0 }}</span>
                     @endif
                 </a>
+                @endif
 
+                @if($u->canAdminSection('orders'))
                 <a href="{{ route('super-admin.orders.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.orders*') ? 'nav-active' : '' }}" title="Commandes">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +71,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Commandes</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('deliveries'))
                 <a href="{{ route('super-admin.deliveries.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.deliveries*') ? 'nav-active' : '' }}" title="Livraisons">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +81,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Livraisons</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('subscriptions'))
                 <a href="{{ route('super-admin.plans.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.plans*') ? 'nav-active' : '' }}" title="Plans">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +99,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Abonnements</span>
                 </a>
+                @endif
 
+                @if($u->isFullAdmin())
                 <a href="{{ route('super-admin.utilisateurs.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.utilisateurs*') ? 'nav-active' : '' }}" title="Utilisateurs">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +109,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Utilisateurs</span>
                 </a>
+                @endif
 
+                @if($u->isFullAdmin())
                 <!-- Section: Paiements -->
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
@@ -124,7 +138,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Config Paiement</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('crm'))
                 <a href="{{ route('super-admin.commando.agents.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.commando*') ? 'nav-active' : '' }}" title="Commando">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,15 +159,19 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm flex-1">CRM</span>
                 </a>
+                @endif
 
                 <!-- Section: Livraison -->
+                @if($u->canAdminSection('deliveries') || $u->canAdminSection('customers') || $u->canAdminSection('announcements'))
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
                         Livraison
                     </span>
                     <div x-show="!expanded" class="h-px bg-neutral-800 mx-2"></div>
                 </div>
+                @endif
 
+                @if($u->canAdminSection('deliveries'))
                 <a href="{{ route('super-admin.drivers.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.drivers*') ? 'nav-active' : '' }}" title="Livreurs">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +182,9 @@
                         <span class="sidebar-badge-drivers bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full" x-show="expanded">{{ $pendingDrivers ?? 0 }}</span>
                     @endif
                 </a>
+                @endif
 
+                @if($u->canAdminSection('customers'))
                 <a href="{{ route('super-admin.customers.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.customers*') ? 'nav-active' : '' }}" title="Clients">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +192,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Clients</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('deliveries'))
                 <a href="{{ route('super-admin.delivery-cities.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.delivery-cities*') ? 'nav-active' : '' }}" title="Villes & Livraison">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +203,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Villes livraison</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('announcements'))
                 <a href="{{ route('super-admin.push.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.push*') ? 'nav-active' : '' }}" title="Notifications Push">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,15 +213,19 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Push Notifs</span>
                 </a>
+                @endif
 
                 <!-- Section: Analytics -->
+                @if($u->isFullAdmin() || $u->canAdminSection('finance'))
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
                         Analytics
                     </span>
                     <div x-show="!expanded" class="h-px bg-neutral-800 mx-2"></div>
                 </div>
+                @endif
 
+                @if($u->isFullAdmin())
                 <a href="{{ route('super-admin.stats') }}"
                    class="nav-item {{ request()->routeIs('super-admin.stats*') ? 'nav-active' : '' }}" title="Statistiques">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +233,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Statistiques</span>
                 </a>
+                @endif
 
+                @if($u->canAdminSection('finance'))
                 <a href="{{ route('super-admin.transactions.index') }}"
                    class="nav-item {{ request()->routeIs('super-admin.transactions*') ? 'nav-active' : '' }}" title="Transactions">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +251,9 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Finances</span>
                 </a>
+                @endif
 
+                @if($u->isFullAdmin())
                 <a href="{{ route('super-admin.activity') }}"
                    class="nav-item {{ request()->routeIs('super-admin.activity*') ? 'nav-active' : '' }}" title="Activité">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,8 +261,10 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Activité</span>
                 </a>
+                @endif
 
                 <!-- Section: Communication -->
+                @if($u->canAdminSection('announcements'))
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
                         Communication
@@ -251,8 +287,10 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Bannières promo</span>
                 </a>
+                @endif
 
                 <!-- Section: Système -->
+                @if($u->isFullAdmin())
                 <div class="pt-5 pb-1">
                     <span x-show="expanded" x-transition.opacity class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">
                         Système
@@ -268,6 +306,7 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Paramètres</span>
                 </a>
+                @endif
             </nav>
 
             <!-- Toggle Button -->
@@ -300,39 +339,44 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
+            @php($u = auth()->user())
             <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" @click="mobileOpen = false">
-                <a href="{{ route('super-admin.dashboard') }}" class="nav-item {{ request()->routeIs('super-admin.dashboard') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg><span class="text-sm">Dashboard</span></a>
+                @if($u->isFullAdmin())<a href="{{ route('super-admin.dashboard') }}" class="nav-item {{ request()->routeIs('super-admin.dashboard') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg><span class="text-sm">Dashboard</span></a>@endif
 
                 <div class="pt-4 pb-1"><span class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">Gestion</span></div>
-                <a href="{{ route('super-admin.restaurants.index') }}" class="nav-item {{ request()->routeIs('super-admin.restaurants*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span class="text-sm flex-1">Restaurants</span>@if(($pendingRestaurants ?? 0) > 0)<span class="sidebar-badge-restaurants bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingRestaurants ?? 0 }}</span>@endif</a>
-                <a href="{{ route('super-admin.orders.index') }}" class="nav-item {{ request()->routeIs('super-admin.orders*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span class="text-sm">Commandes</span></a>
-                <a href="{{ route('super-admin.deliveries.index') }}" class="nav-item {{ request()->routeIs('super-admin.deliveries*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg><span class="text-sm">Livraisons</span></a>
-                <a href="{{ route('super-admin.plans.index') }}" class="nav-item {{ request()->routeIs('super-admin.plans*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span class="text-sm">Plans</span></a>
-                <a href="{{ route('super-admin.subscriptions.index') }}" class="nav-item {{ request()->routeIs('super-admin.subscriptions*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-sm">Abonnements</span></a>
-                <a href="{{ route('super-admin.utilisateurs.index') }}" class="nav-item {{ request()->routeIs('super-admin.utilisateurs*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="text-sm">Utilisateurs</span></a>
+                @if($u->canAdminSection('restaurants'))<a href="{{ route('super-admin.restaurants.index') }}" class="nav-item {{ request()->routeIs('super-admin.restaurants*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span class="text-sm flex-1">Restaurants</span>@if(($pendingRestaurants ?? 0) > 0)<span class="sidebar-badge-restaurants bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingRestaurants ?? 0 }}</span>@endif</a>@endif
+                @if($u->canAdminSection('orders'))<a href="{{ route('super-admin.orders.index') }}" class="nav-item {{ request()->routeIs('super-admin.orders*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span class="text-sm">Commandes</span></a>@endif
+                @if($u->canAdminSection('deliveries'))<a href="{{ route('super-admin.deliveries.index') }}" class="nav-item {{ request()->routeIs('super-admin.deliveries*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg><span class="text-sm">Livraisons</span></a>@endif
+                @if($u->canAdminSection('subscriptions'))<a href="{{ route('super-admin.plans.index') }}" class="nav-item {{ request()->routeIs('super-admin.plans*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span class="text-sm">Plans</span></a>@endif
+                @if($u->canAdminSection('subscriptions'))<a href="{{ route('super-admin.subscriptions.index') }}" class="nav-item {{ request()->routeIs('super-admin.subscriptions*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-sm">Abonnements</span></a>@endif
+                @if($u->isFullAdmin())<a href="{{ route('super-admin.utilisateurs.index') }}" class="nav-item {{ request()->routeIs('super-admin.utilisateurs*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="text-sm">Utilisateurs</span></a>@endif
 
+                @if($u->isFullAdmin())
                 <div class="pt-4 pb-1"><span class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">Paiements</span></div>
                 <a href="{{ route('super-admin.jeko.index') }}" class="nav-item {{ request()->routeIs('super-admin.jeko*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm flex-1">Jeko KYC</span>@if(($pendingJekoRequests ?? 0) > 0)<span class="bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingJekoRequests }}</span>@endif</a>
                 <a href="{{ route('super-admin.payment-settings.index') }}" class="nav-item {{ request()->routeIs('super-admin.payment-settings*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span class="text-sm">Config Paiement</span></a>
+                @endif
 
-                <a href="{{ route('super-admin.commando.agents.index') }}" class="nav-item {{ request()->routeIs('super-admin.commando*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm flex-1">Commando</span>@if(($pendingCommandoAgents ?? 0) > 0)<span class="sidebar-badge-commando bg-orange-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingCommandoAgents ?? 0 }}</span>@endif</a>
-                <a href="{{ route('crm.dashboard') }}" class="nav-item {{ request()->routeIs('crm.*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="text-sm">CRM</span></a>
+                @if($u->canAdminSection('crm'))<a href="{{ route('super-admin.commando.agents.index') }}" class="nav-item {{ request()->routeIs('super-admin.commando*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm flex-1">Commando</span>@if(($pendingCommandoAgents ?? 0) > 0)<span class="sidebar-badge-commando bg-orange-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingCommandoAgents ?? 0 }}</span>@endif</a>@endif
+                @if($u->canAdminSection('crm'))<a href="{{ route('crm.dashboard') }}" class="nav-item {{ request()->routeIs('crm.*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="text-sm">CRM</span></a>@endif
 
                 <div class="pt-4 pb-1"><span class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">Livraison</span></div>
-                <a href="{{ route('super-admin.drivers.index') }}" class="nav-item {{ request()->routeIs('super-admin.drivers*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg><span class="text-sm flex-1">Livreurs</span>@if(($pendingDrivers ?? 0) > 0)<span class="sidebar-badge-drivers bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingDrivers ?? 0 }}</span>@endif</a>
-                <a href="{{ route('super-admin.customers.index') }}" class="nav-item {{ request()->routeIs('super-admin.customers*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Clients</span></a>
-                <a href="{{ route('super-admin.delivery-zones.index') }}" class="nav-item {{ request()->routeIs('super-admin.delivery-zones*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Zones livraison</span></a>
-                <a href="{{ route('super-admin.push.index') }}" class="nav-item {{ request()->routeIs('super-admin.push*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="text-sm">Push Notifs</span></a>
+                @if($u->canAdminSection('deliveries'))<a href="{{ route('super-admin.drivers.index') }}" class="nav-item {{ request()->routeIs('super-admin.drivers*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg><span class="text-sm flex-1">Livreurs</span>@if(($pendingDrivers ?? 0) > 0)<span class="sidebar-badge-drivers bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingDrivers ?? 0 }}</span>@endif</a>@endif
+                @if($u->canAdminSection('customers'))<a href="{{ route('super-admin.customers.index') }}" class="nav-item {{ request()->routeIs('super-admin.customers*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Clients</span></a>@endif
+                @if($u->canAdminSection('deliveries'))<a href="{{ route('super-admin.delivery-zones.index') }}" class="nav-item {{ request()->routeIs('super-admin.delivery-zones*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Zones livraison</span></a>@endif
+                @if($u->canAdminSection('announcements'))<a href="{{ route('super-admin.push.index') }}" class="nav-item {{ request()->routeIs('super-admin.push*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="text-sm">Push Notifs</span></a>@endif
 
+                @if($u->canAdminSection('finance') || $u->isFullAdmin())
                 <div class="pt-4 pb-1"><span class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">Analytics</span></div>
-                <a href="{{ route('super-admin.stats') }}" class="nav-item {{ request()->routeIs('super-admin.stats*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="text-sm">Statistiques</span></a>
-                <a href="{{ route('super-admin.transactions.index') }}" class="nav-item {{ request()->routeIs('super-admin.transactions*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span class="text-sm">Transactions</span></a>
-                <a href="{{ route('super-admin.finances.index') }}" class="nav-item {{ request()->routeIs('super-admin.finances*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm">Finances</span></a>
-                <a href="{{ route('super-admin.activity') }}" class="nav-item {{ request()->routeIs('super-admin.activity*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm">Activité</span></a>
+                @endif
+                @if($u->isFullAdmin())<a href="{{ route('super-admin.stats') }}" class="nav-item {{ request()->routeIs('super-admin.stats*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="text-sm">Statistiques</span></a>@endif
+                @if($u->canAdminSection('finance'))<a href="{{ route('super-admin.transactions.index') }}" class="nav-item {{ request()->routeIs('super-admin.transactions*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span class="text-sm">Transactions</span></a>@endif
+                @if($u->canAdminSection('finance'))<a href="{{ route('super-admin.finances.index') }}" class="nav-item {{ request()->routeIs('super-admin.finances*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm">Finances</span></a>@endif
+                @if($u->isFullAdmin())<a href="{{ route('super-admin.activity') }}" class="nav-item {{ request()->routeIs('super-admin.activity*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-sm">Activité</span></a>@endif
 
                 <div class="pt-4 pb-1"><span class="px-3 text-[10px] font-bold text-neutral-500 uppercase tracking-[0.15em]">Système</span></div>
-                <a href="{{ route('super-admin.announcements.index') }}" class="nav-item {{ request()->routeIs('super-admin.announcements*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg><span class="text-sm">Annonces</span></a>
-                <a href="{{ route('super-admin.settings') }}" class="nav-item {{ request()->routeIs('super-admin.settings*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Paramètres</span></a>
+                @if($u->canAdminSection('announcements'))<a href="{{ route('super-admin.announcements.index') }}" class="nav-item {{ request()->routeIs('super-admin.announcements*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg><span class="text-sm">Annonces</span></a>@endif
+                @if($u->isFullAdmin())<a href="{{ route('super-admin.settings') }}" class="nav-item {{ request()->routeIs('super-admin.settings*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-sm">Paramètres</span></a>@endif
             </nav>
         </aside>
 
@@ -480,6 +524,7 @@
              :style="'background:var(--sa-card);border-color:var(--sa-border);'">
             <div class="flex items-center justify-around h-16 px-1 max-w-lg mx-auto">
                 {{-- Dashboard --}}
+                @if($u->isFullAdmin())
                 <a href="{{ route('super-admin.dashboard') }}"
                    class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.dashboard') ? 'text-primary-600' : 'text-neutral-500' }}">
                     <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.dashboard') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,8 +532,10 @@
                     </svg>
                     <span class="text-[10px] font-medium">Accueil</span>
                 </a>
+                @endif
 
                 {{-- Restaurants --}}
+                @if($u->canAdminSection('restaurants'))
                 <a href="{{ route('super-admin.restaurants.index') }}"
                    class="relative flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.restaurants*') ? 'text-primary-600' : 'text-neutral-500' }}">
                     <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.restaurants*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,8 +546,10 @@
                     <span class="absolute top-0 right-1 w-5 h-5 bg-amber-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ ($pendingRestaurants ?? 0) > 9 ? '9+' : $pendingRestaurants }}</span>
                     @endif
                 </a>
+                @endif
 
                 {{-- Finances (centre, surélevé) --}}
+                @if($u->canAdminSection('finance'))
                 <a href="{{ route('super-admin.finances.index') }}"
                    class="relative flex flex-col items-center justify-center gap-0.5 -mt-4">
                     <span class="flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg {{ request()->routeIs('super-admin.finances*') || request()->routeIs('super-admin.transactions*') ? 'bg-primary-500 text-white' : 'bg-neutral-900 text-white' }}">
@@ -510,8 +559,10 @@
                     </span>
                     <span class="text-[10px] font-medium mt-0.5 {{ request()->routeIs('super-admin.finances*') || request()->routeIs('super-admin.transactions*') ? 'text-primary-600' : 'text-neutral-500' }}">Finances</span>
                 </a>
+                @endif
 
                 {{-- Stats --}}
+                @if($u->isFullAdmin())
                 <a href="{{ route('super-admin.stats') }}"
                    class="flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg min-w-[56px] {{ request()->routeIs('super-admin.stats*') ? 'text-primary-600' : 'text-neutral-500' }}">
                     <svg class="w-6 h-6" fill="{{ request()->routeIs('super-admin.stats*') ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,6 +570,7 @@
                     </svg>
                     <span class="text-[10px] font-medium">Stats</span>
                 </a>
+                @endif
 
                 {{-- Plus --}}
                 <button @click="more = !more"
@@ -545,18 +597,23 @@
                  x-cloak>
                 <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-4"></div>
                 <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
+                    @if($u->canAdminSection('orders'))
                     <a href="{{ route('super-admin.orders.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.orders*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Commandes</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('deliveries'))
                     <a href="{{ route('super-admin.deliveries.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.deliveries*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Livraisons</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('subscriptions'))
                     <a href="{{ route('super-admin.plans.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.plans*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
@@ -569,12 +626,16 @@
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Abonnements</span>
                     </a>
+                    @endif
+                    @if($u->isFullAdmin())
                     <a href="{{ route('super-admin.utilisateurs.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.utilisateurs*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Users</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('crm'))
                     <a href="{{ route('super-admin.commando.agents.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.commando*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -587,18 +648,24 @@
                         </span>
                         <span class="text-[10px] font-medium text-emerald-700">CRM</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('finance'))
                     <a href="{{ route('super-admin.transactions.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.transactions*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Transactions</span>
                     </a>
+                    @endif
+                    @if($u->isFullAdmin())
                     <a href="{{ route('super-admin.activity') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.activity*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Activite</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('announcements'))
                     <a href="{{ route('super-admin.announcements.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.announcements*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
@@ -611,36 +678,47 @@
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Bannières</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('deliveries'))
                     <a href="{{ route('super-admin.drivers.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.drivers*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Livreurs</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('customers'))
                     <a href="{{ route('super-admin.customers.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.customers*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Clients</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('deliveries'))
                     <a href="{{ route('super-admin.delivery-zones.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.delivery-zones*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-lime-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Zones</span>
                     </a>
+                    @endif
+                    @if($u->canAdminSection('announcements'))
                     <a href="{{ route('super-admin.push.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.push*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Push</span>
                     </a>
+                    @endif
+                    @if($u->isFullAdmin())
                     <a href="{{ route('super-admin.settings') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.settings*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Reglages</span>
                     </a>
+                    @endif
                 </div>
             </div>
         </nav>

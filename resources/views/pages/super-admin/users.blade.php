@@ -196,7 +196,7 @@
                 <div class="p-6 border-b" style="border-color:var(--sa-border);">
                     <h2 class="text-xl font-bold" style="color:var(--sa-fg);">Nouvel administrateur</h2>
                 </div>
-                <form method="POST" action="{{ route('super-admin.utilisateurs.store') }}" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('super-admin.utilisateurs.store') }}" class="p-6 space-y-4" x-data="{ accountType: 'employee' }">
                     @csrf
                     <div>
                         <label class="block text-sm font-medium mb-2" style="color:var(--sa-fg);">Nom complet *</label>
@@ -214,7 +214,31 @@
                         <label class="block text-sm font-medium mb-2" style="color:var(--sa-fg);">Mot de passe *</label>
                         <input type="password" name="password" required minlength="8" class="w-full h-10 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
                     </div>
-                    <input type="hidden" name="role" value="super_admin">
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color:var(--sa-fg);">Type de compte *</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 text-sm" style="color:var(--sa-fg);">
+                                <input type="radio" name="account_type" value="employee" x-model="accountType" checked> Employé (accès limité)
+                            </label>
+                            <label class="flex items-center gap-2 text-sm" style="color:var(--sa-fg);">
+                                <input type="radio" name="account_type" value="full" x-model="accountType"> Admin complet
+                            </label>
+                        </div>
+                    </div>
+
+                    <div x-show="accountType === 'employee'" x-transition>
+                        <label class="block text-sm font-medium mb-2" style="color:var(--sa-fg);">Sections accessibles</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            @foreach(\App\Support\AdminSections::LABELS as $key => $label)
+                                <label class="flex items-center gap-2 text-sm" style="color:var(--sa-fg);">
+                                    <input type="checkbox" name="admin_permissions[]" value="{{ $key }}">
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="document.getElementById('addUserModal').classList.add('hidden')" class="flex-1 h-10 px-4 rounded-lg font-medium transition-colors" style="background:var(--sa-muted);color:var(--sa-fg);">
                             Annuler
