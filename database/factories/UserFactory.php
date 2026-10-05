@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
+use App\Models\Restaurant;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -40,5 +43,24 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Super admin back-office (role gardé par $guarded → assigné après make).
+     */
+    public function superAdmin(): static
+    {
+        return $this->afterMaking(fn (User $user) => $user->role = UserRole::SUPER_ADMIN);
+    }
+
+    /**
+     * Administrateur d'un restaurant donné.
+     */
+    public function restaurantAdmin(Restaurant $restaurant): static
+    {
+        return $this->afterMaking(function (User $user) use ($restaurant) {
+            $user->role = UserRole::RESTAURANT_ADMIN;
+            $user->restaurant_id = $restaurant->id;
+        });
     }
 }

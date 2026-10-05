@@ -163,6 +163,10 @@ Route::prefix('dashboard')
         // Dashboard (Livewire) - tous
         Route::get('/', \App\Livewire\Restaurant\Dashboard::class)->name('dashboard');
 
+        // Écran d'attente de validation (accessible même en statut PENDING)
+        Route::get('en-attente', fn () => view('pages.restaurant.pending'))
+            ->withoutMiddleware('restaurant.active')->name('pending');
+
         // POS - Mode Caisse - tous
         Route::get('pos', \App\Livewire\Restaurant\POS::class)->name('pos');
         
