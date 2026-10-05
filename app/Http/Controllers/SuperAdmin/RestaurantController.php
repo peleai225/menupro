@@ -156,7 +156,22 @@ class RestaurantController extends Controller
         // Activate restaurant using the validate method
         $restaurant->validate();
 
-        // Activate pending subscription
+        // Démarrer l'essai gelé à l'inscription (starts_at/ends_at étaient nuls).
+        $trial = $restaurant->subscriptions()
+            ->where('is_trial', true)
+            ->whereNull('starts_at')
+            ->latest()
+            ->first();
+
+        if ($trial) {
+            $trial->update([
+                'starts_at' => now(),
+                'ends_at'   => now()->addDays($trial->trial_days ?? 7),
+            ]);
+            $restaurant->update(['subscription_ends_at' => $trial->ends_at]);
+        }
+
+        // Activate pending subscription (abonnement payant en attente)
         $subscription = $restaurant->subscriptions()
             ->where('status', SubscriptionStatus::PENDING)
             ->latest()

@@ -153,9 +153,9 @@ class RegisterController extends Controller
                 'description' => $request->restaurant_description,
                 'address' => $request->restaurant_address,
                 'city' => $request->restaurant_city,
-                'status' => RestaurantStatus::ACTIVE,
+                'status' => RestaurantStatus::PENDING,
                 'current_plan_id' => $plan->id,
-                'subscription_ends_at' => $trialEndsAt,
+                'subscription_ends_at' => null,
                 'orders_blocked' => false,
             ]);
 
@@ -201,8 +201,9 @@ class RegisterController extends Controller
                 'status' => SubscriptionStatus::TRIAL,
                 'is_trial' => true,
                 'trial_days' => $trialDays,
-                'starts_at' => now(),
-                'ends_at' => $trialEndsAt,
+                // Essai gelé : le compteur démarre à l'approbation admin (RestaurantController::approve)
+                'starts_at' => null,
+                'ends_at' => null,
                 'amount_paid' => 0,
                 'billing_period' => $billingPeriod,
                 'discount_percentage' => 0,
@@ -217,10 +218,11 @@ class RegisterController extends Controller
 
             auth()->login($user);
 
-            $user->notify(new \App\Notifications\TrialStartedNotification($subscription));
+            // L'essai démarre à l'approbation admin : pas de notification « essai démarré » ici.
+            // L'approbation envoie RestaurantValidatedNotification.
 
-            return redirect()->route('restaurant.dashboard')
-                ->with('success', "Bienvenue ! Votre essai gratuit de {$trialDays} jours a commencé. Profitez de toutes les fonctionnalités de MenuPro !");
+            return redirect()->route('restaurant.pending')
+                ->with('success', "Inscription reçue ! Votre restaurant est en attente de validation. Vous serez notifié dès son activation.");
 
         } catch (\Exception $e) {
             DB::rollBack();

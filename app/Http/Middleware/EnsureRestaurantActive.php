@@ -45,9 +45,14 @@ class EnsureRestaurantActive
             return $next($request);
         }
 
-        // Check status for dashboard (restaurant owners can access even if pending)
+        // Check status for dashboard
         if ($this->isDashboardRoute($request)) {
-            // Allow access for pending restaurants (owner can still manage)
+            // Restaurant en attente de validation : accès dashboard bloqué, écran d'attente.
+            if ($restaurant->status === RestaurantStatus::PENDING
+                && !$request->routeIs('restaurant.pending')) {
+                return redirect()->route('restaurant.pending');
+            }
+
             if ($restaurant->status === RestaurantStatus::SUSPENDED) {
                 return redirect()->route('home')
                     ->with('error', 'Votre restaurant est suspendu. Contactez le support.');

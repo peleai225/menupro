@@ -9,12 +9,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Supprimer les doublons éventuels avant d'ajouter la contrainte
-        // Garde le premier earning créé pour chaque delivery_id
+        // Supprimer les doublons éventuels avant d'ajouter la contrainte.
+        // Garde le plus petit id pour chaque delivery_id non nul.
+        // Syntaxe portable (MySQL + SQLite) : les null ne sont pas dédupliqués (null != null).
         DB::statement("
-            DELETE e1 FROM driver_earnings e1
-            INNER JOIN driver_earnings e2
-            WHERE e1.id > e2.id AND e1.delivery_id = e2.delivery_id
+            DELETE FROM driver_earnings
+            WHERE delivery_id IS NOT NULL
+              AND id NOT IN (
+                  SELECT keep_id FROM (
+                      SELECT MIN(id) AS keep_id
+                      FROM driver_earnings
+                      WHERE delivery_id IS NOT NULL
+                      GROUP BY delivery_id
+                  ) t
+              )
         ");
 
         Schema::table('driver_earnings', function (Blueprint $table) {
