@@ -90,8 +90,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Define super admin gate
         Gate::before(function (User $user, string $ability) {
-            // Super admins can do everything
-            if ($user->isSuperAdmin()) {
+            // Seuls les admins COMPLETS bypassent tout. Les employés restreints
+            // passent par les policies (et le middleware admin.section).
+            if ($user->isFullAdmin()) {
                 return true;
             }
             
