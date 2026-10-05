@@ -66,6 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'role' => UserRole::class,
             'agent_status' => AgentStatus::class,
             'is_active' => 'boolean',
+            'admin_permissions' => 'array',
         ];
     }
 
@@ -241,6 +242,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isSuperAdmin(): bool
     {
         return $this->role === UserRole::SUPER_ADMIN;
+    }
+
+    /**
+     * Admin complet : super admin sans restriction de sections (accès total).
+     */
+    public function isFullAdmin(): bool
+    {
+        return $this->isSuperAdmin() && $this->admin_permissions === null;
+    }
+
+    /**
+     * Le super admin peut-il gérer cette section back-office ?
+     * Admin complet (admin_permissions null) : oui partout. Employé : selon sa liste.
+     */
+    public function canAdminSection(string $section): bool
+    {
+        if (!$this->isSuperAdmin()) {
+            return false;
+        }
+
+        if ($this->admin_permissions === null) {
+            return true;
+        }
+
+        return in_array($section, $this->admin_permissions, true);
     }
 
     public function isRestaurantAdmin(): bool
