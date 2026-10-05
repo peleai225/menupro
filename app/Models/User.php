@@ -338,12 +338,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getDashboardRoute(): string
     {
         return match ($this->role) {
-            UserRole::SUPER_ADMIN => 'super-admin.dashboard',
+            UserRole::SUPER_ADMIN => $this->adminLandingRoute(),
             UserRole::RESTAURANT_ADMIN, UserRole::EMPLOYEE => 'restaurant.dashboard',
             UserRole::COMMANDO_AGENT => 'commando.dashboard',
             UserRole::COMMERCIAL, UserRole::TECHNICIAN, UserRole::TEAM_LEADER => 'crm.dashboard',
             default => 'home',
         };
+    }
+
+    /**
+     * Route d'atterrissage back-office : dashboard pour un admin complet,
+     * sinon la première section autorisée de l'employé (repli logout si aucune).
+     */
+    private function adminLandingRoute(): string
+    {
+        if ($this->admin_permissions === null) {
+            return 'super-admin.dashboard';
+        }
+
+        foreach (\App\Support\AdminSections::DELEGABLE as $key) {
+            if (in_array($key, $this->admin_permissions, true)) {
+                return \App\Support\AdminSections::LANDING[$key];
+            }
+        }
+
+        return 'logout';
     }
 
     public function isCrmUser(): bool
