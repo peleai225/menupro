@@ -366,7 +366,7 @@ Route::middleware('guest')->group(function () {
 
 Route::prefix('admin')
     ->name('super-admin.')
-    ->middleware(['auth', 'super.admin'])
+    ->middleware(['auth', 'super.admin', 'admin.section'])
     ->group(function () {
         // Dashboard
         Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');

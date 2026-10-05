@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'restaurant.admin' => \App\Http\Middleware\EnsureRestaurantAdmin::class,
             'has.restaurant' => \App\Http\Middleware\EnsureUserHasRestaurant::class,
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'admin.section' => \App\Http\Middleware\EnsureAdminSection::class,
             'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
             'delivery.driver' => \App\Http\Middleware\EnsureDeliveryDriver::class,
             'crm.role' => \App\Http\Middleware\EnsureCrmRole::class,
