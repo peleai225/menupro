@@ -88,7 +88,7 @@ class SubscriptionController extends Controller
             'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
-            'payment_gateway' => ['nullable', 'in:moneyfusion,jeko'],
+            'payment_gateway' => ['nullable', 'in:jeko'],
             'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
         ]);
 
@@ -147,7 +147,7 @@ class SubscriptionController extends Controller
             }
         }
 
-        $gateway = $request->input('payment_gateway', 'moneyfusion');
+        $gateway = $request->input('payment_gateway', 'jeko');
         $jekoOperator = $request->input('jeko_operator', 'wave');
         $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
@@ -170,7 +170,7 @@ class SubscriptionController extends Controller
             'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
             'addons' => ['nullable', 'array'],
             'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
-            'payment_gateway' => ['nullable', 'in:moneyfusion,jeko'],
+            'payment_gateway' => ['nullable', 'in:jeko'],
             'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
         ]);
 
@@ -230,7 +230,7 @@ class SubscriptionController extends Controller
             $subscription->update(['amount_paid' => $priceCalculation['final_price'] + $addonsTotal]);
         }
 
-        $gateway = $request->input('payment_gateway', 'moneyfusion');
+        $gateway = $request->input('payment_gateway', 'jeko');
         $jekoOperator = $request->input('jeko_operator', 'wave');
         $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
@@ -286,7 +286,7 @@ class SubscriptionController extends Controller
             $subscription->update([
                 'status' => SubscriptionStatus::ACTIVE,
                 'is_trial' => false,
-                'payment_method' => $subscription->payment_metadata['gateway'] ?? 'moneyfusion',
+                'payment_method' => $subscription->payment_metadata['gateway'] ?? 'jeko',
             ]);
 
             $restaurant->update([
@@ -360,7 +360,7 @@ class SubscriptionController extends Controller
                 ->with('error', 'Cet abonnement ne peut pas être payé à nouveau.');
         }
 
-        $gateway      = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
+        $gateway      = $subscription->payment_metadata['gateway'] ?? 'jeko';
         $jekoOperator = $subscription->payment_metadata['jeko_operator'] ?? 'wave';
         $result = $this->createSubscriptionPaymentSession($subscription, $gateway, $jekoOperator);
 
@@ -379,7 +379,7 @@ class SubscriptionController extends Controller
 
     protected ?string $lastPaymentError = null;
 
-    private function createSubscriptionPaymentSession(Subscription $subscription, string $gateway = 'moneyfusion', string $jekoOperator = 'wave'): ?array
+    private function createSubscriptionPaymentSession(Subscription $subscription, string $gateway = 'jeko', string $jekoOperator = 'wave'): ?array
     {
         $successUrl = route('restaurant.subscription.success', $subscription);
 
@@ -446,7 +446,7 @@ class SubscriptionController extends Controller
     private function verifySubscriptionPayment(Subscription $subscription): bool
     {
         $ref     = $subscription->payment_reference;
-        $gateway = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
 
         if (!$ref) {
             return true;

@@ -175,7 +175,9 @@
                 <input type="hidden" name="contact_email" value="{{ $settings['contact_email'] ?? '' }}">
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                    {{-- MoneyFusion --}}
+                    {{-- MoneyFusion désactivé — Jeko est l'unique passerelle d'abonnement.
+                         Réactiver ce bloc + la route /webhooks/moneyfusion pour le remettre en service. --}}
+                    @if(false)
                     <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
                         <div class="flex items-center justify-between gap-2 mb-1">
                             <div class="flex items-center gap-2">
@@ -216,6 +218,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     {{-- Wave CI --}}
                     <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">

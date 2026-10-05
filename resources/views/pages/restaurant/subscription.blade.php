@@ -180,7 +180,7 @@
                     @csrf
                     <input type="hidden" name="plan" value="stand">
                     <input type="hidden" name="billing_period" value="monthly">
-                    <input type="hidden" name="payment_gateway" x-bind:value="gateway ?? 'moneyfusion'">
+                    <input type="hidden" name="payment_gateway" x-bind:value="gateway ?? 'jeko'">
                     <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator ?? 'wave'">
                     <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm hover:shadow transition-all">
                         @if($isTrial)
@@ -205,11 +205,13 @@
     </div>
     @else
     @php
-        $moneyFusionActive = (bool) \App\Models\SystemSetting::get('moneyfusion_active', true);
+        // MoneyFusion désactivé — Jeko est l'unique passerelle d'abonnement.
+        // Remettre à la détection par SystemSetting pour le réactiver.
+        $moneyFusionActive = false;
         $moneyFusionConfigured = !empty(\App\Models\SystemSetting::get('moneyfusion_api_url', ''));
         $jekoConfigured = \App\Models\SystemPaymentSetting::where('gateway', 'jeko_marketplace')->where('is_active', true)->exists();
     @endphp
-    <div x-data="{ period: 'monthly', gateway: '{{ ($moneyFusionActive && $moneyFusionConfigured) ? 'moneyfusion' : 'jeko' }}', jeko_operator: 'wave' }">
+    <div x-data="{ period: 'monthly', gateway: 'jeko', jeko_operator: 'wave' }">
 
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

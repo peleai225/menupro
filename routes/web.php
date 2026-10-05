@@ -635,7 +635,9 @@ Route::prefix('api/geocoding')->name('api.geocoding.')->middleware('throttle:30,
 
 Route::prefix('webhooks')->withoutMiddleware(['web'])->group(function () {
     Route::post('/wave', [\App\Http\Controllers\Webhook\WaveWebhookController::class, 'handle'])->name('webhooks.wave');
-    Route::post('/moneyfusion', [\App\Http\Controllers\Webhook\MoneyFusionWebhookController::class, 'handle'])->name('webhooks.moneyfusion');
+    // MoneyFusion désactivé — Jeko est l'unique passerelle d'abonnement.
+    // Réactiver cette route (+ la carte admin) pour remettre MoneyFusion en service.
+    // Route::post('/moneyfusion', [\App\Http\Controllers\Webhook\MoneyFusionWebhookController::class, 'handle'])->name('webhooks.moneyfusion');
     Route::post('/jeko', [\App\Http\Controllers\Webhook\JekoWebhookController::class, 'handle'])->name('webhooks.jeko');
 });
 

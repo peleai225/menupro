@@ -244,12 +244,15 @@ class RegisterController extends Controller
         }
 
         $ref = $subscription->payment_reference;
-        $gateway = $subscription->payment_metadata['gateway'] ?? 'moneyfusion';
+        $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
 
         if ($ref) {
             $paid = false;
 
-            if ($this->moneyFusion->isConfigured()) {
+            // Jeko — le webhook a déjà activé l'abonnement avant la redirection
+            if ($gateway === 'jeko') {
+                $paid = true;
+            } elseif ($this->moneyFusion->isConfigured()) {
                 $result = $this->moneyFusion->verifyPayment($ref);
                 $paid = $result['success'] && ($result['paid'] ?? false);
             }
