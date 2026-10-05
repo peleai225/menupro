@@ -45,6 +45,13 @@ class EnsureRestaurantActive
             return $next($request);
         }
 
+        // Super admin en train d'impersonate un owner (session posée par
+        // RestaurantController::impersonate) : doit pouvoir gérer un resto
+        // même PENDING pour l'inspecter avant de l'approuver.
+        if ($request->session()->has('impersonating_from')) {
+            return $next($request);
+        }
+
         // Check status for dashboard
         if ($this->isDashboardRoute($request)) {
             // Restaurant en attente de validation : accès dashboard bloqué, écran d'attente.

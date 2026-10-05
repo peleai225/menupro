@@ -362,7 +362,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         }
 
-        return 'logout';
+        return 'super-admin.no-access'; // employé sans aucune section : repli sûr (GET, accessible)
     }
 
     public function isCrmUser(): bool

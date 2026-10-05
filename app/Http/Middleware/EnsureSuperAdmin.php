@@ -25,6 +25,14 @@ class EnsureSuperAdmin
             abort(403, 'Accès réservé aux administrateurs.');
         }
 
+        // Couper l'accès même si une session (remember-me, etc.) reste ouverte
+        // après désactivation du compte.
+        if (!$user->is_active) {
+            auth()->logout();
+            $request->session()->invalidate();
+            abort(403, 'Votre compte a été désactivé.');
+        }
+
         return $next($request);
     }
 }

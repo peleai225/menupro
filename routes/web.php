@@ -368,6 +368,10 @@ Route::prefix('admin')
     ->name('super-admin.')
     ->middleware(['auth', 'super.admin', 'admin.section'])
     ->group(function () {
+        // Aucune section attribuée — accessible même sans section (atterrissage de repli)
+        Route::get('aucun-acces', fn () => view('pages.super-admin.no-access'))
+            ->withoutMiddleware('admin.section')->name('no-access');
+
         // Dashboard
         Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
 

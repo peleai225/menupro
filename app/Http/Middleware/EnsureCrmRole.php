@@ -36,6 +36,15 @@ class EnsureCrmRole
             abort(403, 'Accès non autorisé.');
         }
 
+        // Un compte super_admin peut être un employé back-office restreint par
+        // section (admin_permissions). Le rôle seul ne suffit pas : il doit en
+        // plus avoir la section 'crm', sous peine de contourner EnsureAdminSection.
+        if ($user->role === UserRole::SUPER_ADMIN
+            && !$user->isFullAdmin()
+            && !$user->canAdminSection('crm')) {
+            abort(403, 'Accès réservé.');
+        }
+
         return $next($request);
     }
 }

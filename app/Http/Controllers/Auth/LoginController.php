@@ -77,7 +77,7 @@ class LoginController extends Controller
             ['email' => $request->user()->email, 'via' => 'admin_login']
         );
 
-        return redirect()->intended(route('super-admin.dashboard'));
+        return redirect()->intended(route($request->user()->getDashboardRoute()));
     }
 
     /**

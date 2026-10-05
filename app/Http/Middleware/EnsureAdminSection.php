@@ -22,7 +22,16 @@ class EnsureAdminSection
             return $next($request);
         }
 
-        $section = AdminSections::sectionForRouteName($request->route()?->getName());
+        $routeName = $request->route()?->getName();
+
+        // Données peu sensibles (compteurs sidebar, notifications) dont
+        // dépend l'affichage de la sidebar elle-même : accessible à tout
+        // super admin, quelle que soit sa section.
+        if ($user && AdminSections::isAnyAdminRoute($routeName)) {
+            return $next($request);
+        }
+
+        $section = AdminSections::sectionForRouteName($routeName);
 
         // Section réservée (null) ou non accordée → 403.
         if ($section === null || !$user?->canAdminSection($section)) {

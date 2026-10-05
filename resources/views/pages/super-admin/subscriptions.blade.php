@@ -257,13 +257,17 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm" style="color:var(--sa-muted-fg);">
-                                    <div>Début: {{ $subscription->starts_at->format('d/m/Y') }}</div>
-                                    <div>Fin: {{ $subscription->ends_at->format('d/m/Y') }}</div>
-                                    @if($subscription->status->value === 'active')
-                                        <div class="text-xs {{ $subscription->ends_at->diffInDays(now()) <= 7 ? 'text-orange-600' : '' }}"
-                                             @if($subscription->ends_at->diffInDays(now()) > 7) style="color:var(--sa-muted-fg);" @endif>
-                                            {{ $subscription->ends_at->diffInDays(now()) }} jour(s) restant(s)
-                                        </div>
+                                    @if($subscription->starts_at && $subscription->ends_at)
+                                        <div>Début: {{ $subscription->starts_at->format('d/m/Y') }}</div>
+                                        <div>Fin: {{ $subscription->ends_at->format('d/m/Y') }}</div>
+                                        @if($subscription->status->value === 'active')
+                                            <div class="text-xs {{ $subscription->ends_at->diffInDays(now()) <= 7 ? 'text-orange-600' : '' }}"
+                                                 @if($subscription->ends_at->diffInDays(now()) > 7) style="color:var(--sa-muted-fg);" @endif>
+                                                {{ $subscription->ends_at->diffInDays(now()) }} jour(s) restant(s)
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="text-xs italic">Essai non démarré (en attente de validation)</div>
                                     @endif
                                 </div>
                             </td>

@@ -448,13 +448,17 @@ class SubscriptionController extends Controller
         $ref     = $subscription->payment_reference;
         $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
 
+        // Pas de référence = aucune session de paiement n'a jamais réussi (ex.
+        // createSubscriptionPaymentSession a échoué et laissé la ligne PENDING
+        // sans référence). Ne jamais considérer ça comme payé.
         if (!$ref) {
-            return true;
+            return false;
         }
 
-        // Jeko — le webhook a déjà activé l'abonnement avant la redirection
+        // Jeko — seul le webhook (signé) active l'abonnement. Si on arrive ici
+        // sans que le statut soit déjà ACTIVE, le paiement n'est pas confirmé.
         if ($gateway === 'jeko') {
-            return true;
+            return $subscription->fresh()->status === SubscriptionStatus::ACTIVE;
         }
 
         if ($this->moneyFusion->isConfigured()) {
@@ -464,6 +468,6 @@ class SubscriptionController extends Controller
             }
         }
 
-        return true;
+        return false;
     }
 }

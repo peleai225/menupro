@@ -26,6 +26,7 @@ class EmployeeDashboardRouteTest extends TestCase
     public function test_employee_with_no_section_lands_on_safe_fallback(): void
     {
         $emp = User::factory()->superAdmin()->create(['admin_permissions' => []]);
-        $this->assertSame('logout', $emp->getDashboardRoute());
+        // 'logout' est POST-only (405 en GET) — repli vers une page GET atteignable.
+        $this->assertSame('super-admin.no-access', $emp->getDashboardRoute());
     }
 }

@@ -32,6 +32,10 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Explicite (plutôt que de compter sur le défaut DB) : sans ça,
+            // l'instance en mémoire renvoyée par create() a is_active=null
+            // jusqu'au prochain refresh(), ce que lit désormais EnsureSuperAdmin.
+            'is_active' => true,
         ];
     }
 

@@ -245,24 +245,41 @@ class RegisterController extends Controller
             abort(403, 'Accès non autorisé à cet abonnement.');
         }
 
+        // Idempotence : déjà actif (double clic, rafraîchissement) — rien à refaire.
+        if ($subscription->status === SubscriptionStatus::ACTIVE) {
+            return redirect()->route('restaurant.dashboard')
+                ->with('success', 'Votre abonnement est déjà actif.');
+        }
+
         $ref = $subscription->payment_reference;
         $gateway = $subscription->payment_metadata['gateway'] ?? 'jeko';
 
-        if ($ref) {
-            $paid = false;
+        // Aucune référence de paiement = aucune session de paiement n'a jamais été
+        // créée pour cet abonnement (ex. essai gratuit gelé en attente de validation
+        // admin). Ne jamais activer dans ce cas : ce callback ne doit confirmer qu'un
+        // paiement réellement initié, jamais servir de raccourci d'activation.
+        if (!$ref) {
+            return redirect()->route('restaurant.pending')
+                ->with('error', 'Aucun paiement à confirmer pour cet abonnement.');
+        }
 
-            // Jeko — le webhook a déjà activé l'abonnement avant la redirection
-            if ($gateway === 'jeko') {
-                $paid = true;
-            } elseif ($this->moneyFusion->isConfigured()) {
-                $result = $this->moneyFusion->verifyPayment($ref);
-                $paid = $result['success'] && ($result['paid'] ?? false);
-            }
+        // Jeko : seul le webhook (signé, serveur-à-serveur) a le droit d'activer.
+        // Si on arrive ici, le webhook n'est pas encore passé (ou a échoué) — ne
+        // jamais activer depuis la simple redirection navigateur de l'acheteur.
+        if ($gateway === 'jeko') {
+            return redirect()->route('restaurant.dashboard')
+                ->with('warning', 'Paiement en cours de confirmation. Votre abonnement sera activé automatiquement dès réception.');
+        }
 
-            if (!$paid) {
-                return redirect()->route('restaurant.dashboard')
-                    ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
-            }
+        $paid = false;
+        if ($this->moneyFusion->isConfigured()) {
+            $result = $this->moneyFusion->verifyPayment($ref);
+            $paid = $result['success'] && ($result['paid'] ?? false);
+        }
+
+        if (!$paid) {
+            return redirect()->route('restaurant.dashboard')
+                ->with('error', 'Le paiement n\'a pas été confirmé. Veuillez réessayer depuis votre tableau de bord.');
         }
 
         try {

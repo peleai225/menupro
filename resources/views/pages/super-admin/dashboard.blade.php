@@ -392,7 +392,7 @@
                                     <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan?->name ?? '—' }}</p>
                                 </div>
                                 <span class="text-[10px] font-semibold whitespace-nowrap ml-2" style="color:var(--sa-danger);">
-                                    {{ $subscription->ends_at->diffForHumans() }}
+                                    {{ $subscription->ends_at?->diffForHumans() ?? '—' }}
                                 </span>
                             </div>
                         @endforeach

@@ -105,16 +105,28 @@ class Subscription extends Model
 
     public function getIsActiveAttribute(): bool
     {
-        return $this->status === SubscriptionStatus::ACTIVE && $this->ends_at->isFuture();
+        // Essai gelé (starts_at/ends_at null, en attente de validation admin) :
+        // jamais considéré actif.
+        return $this->status === SubscriptionStatus::ACTIVE
+            && $this->ends_at !== null
+            && $this->ends_at->isFuture();
     }
 
     public function getIsExpiredAttribute(): bool
     {
+        if ($this->ends_at === null) {
+            return false;
+        }
+
         return $this->status === SubscriptionStatus::EXPIRED || $this->ends_at->isPast();
     }
 
     public function getDaysRemainingAttribute(): int
     {
+        if ($this->ends_at === null) {
+            return 0;
+        }
+
         return max(0, now()->diffInDays($this->ends_at, false));
     }
 
@@ -125,6 +137,10 @@ class Subscription extends Model
 
     public function getDurationDaysAttribute(): int
     {
+        if ($this->starts_at === null || $this->ends_at === null) {
+            return 0;
+        }
+
         return $this->starts_at->diffInDays($this->ends_at);
     }
 
