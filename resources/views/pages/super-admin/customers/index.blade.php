@@ -13,15 +13,15 @@
                 <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['total'] }}</p>
                 <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Clients totaux</p>
             </div>
-            {{-- Clients actifs --}}
+            {{-- Nouveaux ce mois (inscriptions) --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="flex items-start justify-between">
                     <span class="flex w-11 h-11 items-center justify-center rounded-xl" style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7zM20 8v6m3-3h-6"/></svg>
                     </span>
                 </div>
-                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['active'] }}</p>
-                <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Clients actifs</p>
+                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['new_this_month'] }}</p>
+                <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Nouveaux inscrits ce mois</p>
             </div>
             {{-- Commandes cumulées --}}
             <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md" style="border-color:var(--sa-border);background:var(--sa-card);">
@@ -30,7 +30,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     </span>
                 </div>
-                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['ordered_today'] }}</p>
+                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['orders_total'], 0, ',', ' ') }}</p>
                 <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Commandes cumulées</p>
             </div>
             {{-- Chiffre d'affaires --}}
@@ -40,7 +40,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </span>
                 </div>
-                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ $stats['new_this_month'] }}</p>
+                <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['revenue_total'], 0, ',', ' ') }} F</p>
                 <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Chiffre d'affaires</p>
             </div>
         </div>
@@ -73,6 +73,13 @@
                         <option value="{{ $city }}" {{ request('city') === $city ? 'selected' : '' }}>{{ $city }}</option>
                     @endforeach
                 </select>
+                <select name="sort" onchange="this.form.submit()" class="h-9 px-3 rounded-xl border text-sm focus:outline-none" style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
+                    <option value="recent" {{ $sort === 'recent' ? 'selected' : '' }}>Inscription : plus récents</option>
+                    <option value="oldest" {{ $sort === 'oldest' ? 'selected' : '' }}>Inscription : plus anciens</option>
+                    <option value="last_order" {{ $sort === 'last_order' ? 'selected' : '' }}>Dernière commande</option>
+                    <option value="top_spenders" {{ $sort === 'top_spenders' ? 'selected' : '' }}>Plus grosses dépenses</option>
+                    <option value="most_orders" {{ $sort === 'most_orders' ? 'selected' : '' }}>Plus de commandes</option>
+                </select>
                 <button type="submit" class="h-9 px-4 rounded-xl text-sm font-medium" style="background:var(--sa-primary);color:var(--sa-primary-fg);">Filtrer</button>
             </form>
         </div>
@@ -85,6 +92,7 @@
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Client</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Téléphone</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Ville</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Inscrit le</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Commandes</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Total dépensé</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--sa-muted-fg);">Dernière commande</th>
@@ -111,12 +119,16 @@
                         </td>
                         <td class="px-5 py-3.5" style="color:var(--sa-muted-fg);">{{ $customer->phone ?? '—' }}</td>
                         <td class="px-5 py-3.5" style="color:var(--sa-muted-fg);">{{ $customer->city ?? '—' }}</td>
-                        <td class="px-5 py-3.5 font-medium" style="color:var(--sa-fg);">{{ $customer->total_orders ?? 0 }}</td>
+                        <td class="px-5 py-3.5">
+                            <p class="font-medium" style="color:var(--sa-fg);">{{ $customer->created_at->format('d/m/Y') }}</p>
+                            <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $customer->created_at->diffForHumans() }}</p>
+                        </td>
+                        <td class="px-5 py-3.5 font-medium" style="color:var(--sa-fg);">{{ $customer->orders_count }}</td>
                         <td class="px-5 py-3.5 font-medium" style="color:var(--sa-fg);">
-                            {{ number_format($customer->total_spent ?? 0) }} FCFA
+                            {{ number_format($customer->orders_revenue ?? 0, 0, ',', ' ') }} FCFA
                         </td>
                         <td class="px-5 py-3.5 text-xs" style="color:var(--sa-muted-fg);">
-                            {{ $customer->last_order_at ? $customer->last_order_at->diffForHumans() : '—' }}
+                            {{ $customer->last_order_date ? \Illuminate\Support\Carbon::parse($customer->last_order_date)->diffForHumans() : '—' }}
                         </td>
                         <td class="px-5 py-3.5">
                             @if($customer->is_active)
@@ -144,7 +156,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-5 py-12 text-center text-sm" style="color:var(--sa-muted-fg);">Aucun client trouvé.</td>
+                        <td colspan="9" class="px-5 py-12 text-center text-sm" style="color:var(--sa-muted-fg);">Aucun client trouvé.</td>
                     </tr>
                     @endforelse
                 </tbody>
