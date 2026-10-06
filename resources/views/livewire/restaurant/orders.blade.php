@@ -199,7 +199,7 @@
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
          class="bg-white rounded-2xl p-1.5 sm:p-2 shadow-sm border border-neutral-100 mb-4 sm:mb-6">
-        <div class="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-1 sm:pb-2">
+        <div class="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-1 sm:pb-2 scroll-fade-right lg:[mask-image:none] lg:[-webkit-mask-image:none]">
             <button wire:click="$set('status', '')"
                     wire:loading.attr="disabled"
                     class="relative px-3 sm:px-5 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl font-medium text-xs sm:text-sm lg:text-base transition-all duration-200 whitespace-nowrap touch-manipulation {{ !$status ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'text-neutral-600 hover:bg-neutral-100' }}">

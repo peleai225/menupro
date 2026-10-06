@@ -144,7 +144,7 @@
 
         {{-- Bandeau infos rapides mobile --}}
         <div class="sm:hidden bg-white border-b border-neutral-100 px-4 py-3">
-            <div class="flex items-center gap-4 overflow-x-auto scrollbar-hide text-xs text-neutral-500">
+            <div class="flex items-center gap-4 overflow-x-auto scrollbar-hide scroll-fade-right text-xs text-neutral-500">
                 @if($this->reviewsCount > 0)
                     <span class="flex items-center gap-1 flex-shrink-0">
                         <svg class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -347,7 +347,7 @@
             </div>
 
             <div class="flex items-center justify-between gap-3 py-2.5 sm:py-3">
-                <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 pb-0.5">
+                <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide scroll-fade-right flex-1 pb-0.5">
                     <button wire:click="setCategory(null)"
                             class="flex-shrink-0 px-4 py-2.5 sm:py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap active:scale-95 {{ !$activeCategory ? 'text-white shadow-md' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}"
                             @if(!$activeCategory) style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 12px {{ $primaryColor }}40;" @endif>

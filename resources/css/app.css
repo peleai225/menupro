@@ -382,6 +382,15 @@ body {
     display: none;
 }
 
+/* Indice visuel "défilement horizontal possible" : dégradé sur le bord droit.
+   Sans ça, un scrollbar-hide + overflow-x-auto ressemble à du contenu coupé
+   (bug) plutôt qu'à une liste qu'on peut faire glisser — ex. onglets de
+   statut sur la page Commandes qui débordent sur petit écran. */
+.scroll-fade-right {
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+}
+
 /* Zones de toucher minimales 44px (téléphone/tablette) */
 @media (max-width: 1023px) {
     .btn:not(.btn-sm):not(.btn-icon) {

@@ -140,7 +140,7 @@
                     <input type="email" wire:model="customerEmail" placeholder="Email (optionnel)" class="input text-sm">
 
                     {{-- Order type --}}
-                    <div class="grid grid-cols-3 gap-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         @foreach([
                             'dine_in' => ['label' => 'Sur place', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                             'takeaway' => ['label' => 'Emporter', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],

@@ -443,7 +443,7 @@
             </div>
 
             {{-- Totaux secondaires --}}
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="card p-3 sm:p-4">
                     <p class="text-xs text-neutral-500 mb-1">Sous-total</p>
                     <p class="text-base font-bold text-neutral-900 tabular-nums">{{ number_format($data['total_subtotal'] ?? 0, 0, ',', ' ') }} F</p>

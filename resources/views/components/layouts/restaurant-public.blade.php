@@ -135,7 +135,7 @@
         <!-- Navigation Categories (Sticky) -->
         <nav class="sticky top-0 z-30 bg-white border-b border-neutral-200 shadow-sm mt-6">
             <div class="max-w-5xl mx-auto px-4">
-                <div class="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
+                <div class="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide scroll-fade-right">
                     @foreach($categories ?? [] as $category)
                         <a href="#category-{{ $category->id }}" 
                            class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
