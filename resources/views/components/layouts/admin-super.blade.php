@@ -1,4 +1,4 @@
-<x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'">
+<x-layouts.app :title="($title ?? 'Administration') . ' - MenuPro Admin'" manifestUrl="manifest-superadmin.json">
     <div x-data="sidebar()"
          x-init="
            document.documentElement.classList.remove('dark');

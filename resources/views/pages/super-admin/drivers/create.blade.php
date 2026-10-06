@@ -129,7 +129,7 @@
                         <label for="vehicle_type" class="block text-sm font-semibold mb-1.5" style="color:var(--sa-fg);">
                             Type de véhicule <span style="color:var(--sa-danger);">*</span>
                         </label>
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             @foreach(['moto' => '🏍️ Moto', 'velo' => '🚲 Vélo', 'voiture' => '🚗 Voiture'] as $val => $label)
                             <label class="cursor-pointer">
                                 <input type="radio" name="vehicle_type" value="{{ $val }}"

@@ -1,4 +1,4 @@
-<x-layouts.app title="Accès Administrateur">
+<x-layouts.app title="Accès Administrateur" manifestUrl="manifest-superadmin.json">
 <div class="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12" x-data="{ loading: false, showPassword: false }">
 
     {{-- Ambient glow --}}

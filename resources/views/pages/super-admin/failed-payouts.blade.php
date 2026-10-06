@@ -33,7 +33,7 @@
     @endif
 
     {{-- Stats --}}
-    <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
             <p class="text-sm" style="color:var(--sa-muted-fg);">En attente / échoués (30j)</p>
             <p class="text-3xl font-bold mt-1" style="color:#dc2626;">{{ $stats['total_orders'] }}</p>

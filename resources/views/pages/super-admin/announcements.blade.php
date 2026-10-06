@@ -31,7 +31,7 @@
     @endif
 
     <!-- Stats -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div class="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
             <p class="text-sm text-neutral-500">Total</p>
             <p class="text-2xl font-bold text-neutral-900 mt-1">{{ $stats['total'] }}</p>

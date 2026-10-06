@@ -81,6 +81,11 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production' && $appUrl = config('app.url')) {
             URL::forceRootUrl($appUrl);
             URL::forceScheme('https');
+
+            // Cookie de session jamais transmis en clair. Forcé ici (plutôt
+            // que via .env) pour ne jamais dépendre d'une variable oubliée
+            // sur le serveur, et ne pas casser le dev local en HTTP.
+            config(['session.secure' => true]);
         }
 
         // Register policies

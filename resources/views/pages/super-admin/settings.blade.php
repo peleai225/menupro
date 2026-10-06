@@ -876,7 +876,7 @@
                                    style="background:var(--sa-muted);border-color:var(--sa-border);color:var(--sa-fg);" placeholder="5000">
                         </div>
                         {{-- Commissions par grade --}}
-                        <div class="grid grid-cols-3 gap-4 mt-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label class="block text-xs font-medium mb-1.5" style="color:var(--sa-muted-fg);">Commission ROOKIE (FCFA)</label>
                                 <input type="number" name="commando_commission_rookie_fcfa"

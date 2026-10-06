@@ -85,7 +85,7 @@
             {{-- Stats + Livraisons --}}
             <div class="lg:col-span-2 space-y-4">
                 {{-- Stats --}}
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="rounded-2xl p-4 border shadow-sm text-center" style="background:var(--sa-card);border-color:var(--sa-border);">
                         <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ $driver->total_deliveries ?? 0 }}</p>
                         <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg);">Livraisons</p>
