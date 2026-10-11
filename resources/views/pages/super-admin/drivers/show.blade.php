@@ -108,32 +108,45 @@
                     @if($recentDeliveries->count())
                         <div>
                             @foreach($recentDeliveries as $delivery)
-                            <div class="px-5 py-3 flex items-center justify-between gap-4 text-sm" style="border-bottom:1px solid var(--sa-border);">
-                                <div>
-                                    <p class="font-medium" style="color:var(--sa-fg);">#{{ $delivery->order_id ?? $delivery->id }}</p>
-                                    <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $delivery->created_at->format('d/m/Y H:i') }}</p>
+                            @php
+                                $statusMap = [
+                                    'pending'               => ['text' => 'En attente',  'class' => 'bg-neutral-100 text-neutral-600'],
+                                    'assigned'              => ['text' => 'Assigné',      'class' => 'bg-blue-100 text-blue-700'],
+                                    'heading_to_restaurant' => ['text' => 'En route',     'class' => 'bg-indigo-100 text-indigo-700'],
+                                    'picked_up'             => ['text' => 'Récupéré',     'class' => 'bg-orange-100 text-orange-700'],
+                                    'delivering'            => ['text' => 'En livraison', 'class' => 'bg-purple-100 text-purple-700'],
+                                    'delivered'             => ['text' => 'Livré',         'class' => 'bg-emerald-100 text-emerald-700'],
+                                    'cancelled'             => ['text' => 'Annulé',        'class' => 'bg-red-100 text-red-700'],
+                                ];
+                                $statusKey = $delivery->status instanceof \App\Enums\DeliveryStatus
+                                    ? $delivery->status->value
+                                    : (string) $delivery->status;
+                                $s = $statusMap[$statusKey] ?? ['text' => $statusKey, 'class' => 'bg-neutral-100 text-neutral-600'];
+                                $isStuck = $delivery->status instanceof \App\Enums\DeliveryStatus && $delivery->status->isActive();
+                            @endphp
+                            <div class="px-5 py-3 {{ $isStuck ? '' : 'flex items-center justify-between gap-4' }} text-sm" style="border-bottom:1px solid var(--sa-border);">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div>
+                                        <p class="font-medium" style="color:var(--sa-fg);">#{{ $delivery->order_id ?? $delivery->id }}</p>
+                                        <p class="text-xs" style="color:var(--sa-muted-fg);">{{ $delivery->created_at->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        @if($delivery->fee_xof)
+                                            <span class="text-sm font-medium" style="color:var(--sa-fg);">{{ number_format($delivery->fee_xof) }} F</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 text-xs rounded-full font-medium {{ $s['class'] }}">{{ $s['text'] }}</span>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    @if($delivery->fee_xof)
-                                        <span class="text-sm font-medium" style="color:var(--sa-fg);">{{ number_format($delivery->fee_xof) }} F</span>
-                                    @endif
-                                    @php
-                                        $statusMap = [
-                                            'pending'               => ['text' => 'En attente',  'class' => 'bg-neutral-100 text-neutral-600'],
-                                            'assigned'              => ['text' => 'Assigné',      'class' => 'bg-blue-100 text-blue-700'],
-                                            'heading_to_restaurant' => ['text' => 'En route',     'class' => 'bg-indigo-100 text-indigo-700'],
-                                            'picked_up'             => ['text' => 'Récupéré',     'class' => 'bg-orange-100 text-orange-700'],
-                                            'delivering'            => ['text' => 'En livraison', 'class' => 'bg-purple-100 text-purple-700'],
-                                            'delivered'             => ['text' => 'Livré',         'class' => 'bg-emerald-100 text-emerald-700'],
-                                            'cancelled'             => ['text' => 'Annulé',        'class' => 'bg-red-100 text-red-700'],
-                                        ];
-                                        $statusKey = $delivery->status instanceof \App\Enums\DeliveryStatus
-                                            ? $delivery->status->value
-                                            : (string) $delivery->status;
-                                        $s = $statusMap[$statusKey] ?? ['text' => $statusKey, 'class' => 'bg-neutral-100 text-neutral-600'];
-                                    @endphp
-                                    <span class="px-2 py-0.5 text-xs rounded-full font-medium {{ $s['class'] }}">{{ $s['text'] }}</span>
-                                </div>
+                                @if($isStuck)
+                                    <form method="POST" action="{{ route('super-admin.drivers.unstick-delivery', $delivery) }}" class="flex items-center gap-2 mt-2">
+                                        @csrf
+                                        <input type="text" name="reason" required maxlength="500" placeholder="Raison du déblocage (ex: app plantée)"
+                                               class="flex-1 h-9 px-3 rounded-xl border text-sm" style="border-color:var(--sa-border);background:var(--sa-card);color:var(--sa-fg);">
+                                        <button type="submit" class="h-9 px-3 bg-red-500 text-white rounded-xl text-xs font-medium whitespace-nowrap hover:bg-red-600">
+                                            Débloquer la course
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                             @endforeach
                         </div>

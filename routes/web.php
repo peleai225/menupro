@@ -483,6 +483,7 @@ Route::prefix('admin')
         Route::post('livreurs/{driver}/reject', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'reject'])->name('drivers.reject');
         Route::post('livreurs/{driver}/suspend', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'suspend'])->name('drivers.suspend');
         Route::post('livreurs/{driver}/reactivate', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'reactivate'])->name('drivers.reactivate');
+        Route::post('livreurs/courses/{delivery}/debloquer', [\App\Http\Controllers\SuperAdmin\DeliveryDriverController::class, 'unstickDelivery'])->name('drivers.unstick-delivery');
 
         // Clients
         Route::get('clients', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');

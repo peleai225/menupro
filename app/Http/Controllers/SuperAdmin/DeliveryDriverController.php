@@ -4,9 +4,11 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\Delivery;
 use App\Models\DeliveryCity;
 use App\Models\DeliveryDriver;
 use App\Models\User;
+use App\Services\DriverAssignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -151,5 +153,20 @@ class DeliveryDriverController extends Controller
     {
         $driver->update(['is_active' => true]);
         return back()->with('success', "Livreur {$driver->name} réactivé.");
+    }
+
+    /**
+     * Débloque une course restée coincée (app livreur plantée, connexion perdue...)
+     * qui empêche le livreur de se remettre en ligne.
+     */
+    public function unstickDelivery(Request $request, Delivery $delivery, DriverAssignmentService $assignment): RedirectResponse
+    {
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $assignment->cancelDelivery($delivery, $data['reason'], 'admin');
+
+        return back()->with('success', 'Course débloquée.');
     }
 }

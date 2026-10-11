@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DeliveryStatus;
+use App\Enums\OrderStatus;
 use App\Events\DeliveryStatusChanged;
 use App\Events\DriverAssigned;
 use App\Events\NewDeliveryAvailable;
@@ -193,6 +194,45 @@ class DriverAssignmentService
 
                 // Créditer les gains
                 $this->creditDriverEarning($delivery);
+            }
+        });
+    }
+
+    /**
+     * Annule une course, qu'elle soit déjà récupérée ou pas, à l'initiative
+     * du livreur ou d'un admin débloquant une course restée coincée.
+     * Si pas encore récupérée : la commande repasse en attente d'un autre
+     * livreur (le travail du resto n'est pas perdu). Si déjà récupérée :
+     * la commande est perdue, elle est annulée.
+     */
+    public function cancelDelivery(Delivery $delivery, string $reason, string $cancelledBy): void
+    {
+        DB::transaction(function () use ($delivery, $reason, $cancelledBy) {
+            $alreadyPickedUp = in_array($delivery->status, [
+                DeliveryStatus::PICKED_UP,
+                DeliveryStatus::DELIVERING,
+            ], true);
+
+            $delivery->update([
+                'status'              => DeliveryStatus::CANCELLED->value,
+                'cancelled_by'        => $cancelledBy,
+                'cancellation_reason' => $reason,
+                'cancelled_at'        => now(),
+            ]);
+
+            if ($alreadyPickedUp) {
+                $delivery->order->update(['status' => OrderStatus::CANCELLED->value]);
+            } else {
+                $delivery->order->update([
+                    'status'             => OrderStatus::CONFIRMED->value,
+                    'driver_assigned_at' => null,
+                ]);
+
+                $this->unassign($delivery, "Annulation ({$cancelledBy}): {$reason}");
+            }
+
+            if ($delivery->driver_id) {
+                DeliveryDriver::where('id', $delivery->driver_id)->update(['is_available' => true]);
             }
         });
     }

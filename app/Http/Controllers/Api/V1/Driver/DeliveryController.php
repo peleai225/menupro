@@ -546,31 +546,7 @@ class DeliveryController extends Controller
             ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up'])
             ->findOrFail($deliveryId);
 
-        DB::transaction(function () use ($delivery, $driver, $data) {
-            $delivery->update([
-                'status'             => 'cancelled',
-                'cancelled_by'       => 'driver',
-                'cancellation_reason' => $data['reason'],
-                'cancelled_at'       => now(),
-            ]);
-
-            // Remettre la commande en attente ou l'annuler selon le statut
-            if ($delivery->status === DeliveryStatus::PICKED_UP) {
-                // Si déjà récupérée, on annule la commande complètement
-                $delivery->order->update(['status' => OrderStatus::CANCELLED->value]);
-            } else {
-                // Sinon on remet en attente d'assignation
-                $delivery->order->update([
-                    'status'             => OrderStatus::CONFIRMED->value,
-                    'driver_assigned_at' => null,
-                ]);
-
-                // Créer une nouvelle livraison en attente pour réassignation
-                $this->assignment->unassign($delivery, 'Annulation livreur: ' . $data['reason']);
-            }
-
-            $driver->update(['is_available' => true]);
-        });
+        $this->assignment->cancelDelivery($delivery, $data['reason'], 'driver');
 
         Log::warning('Delivery cancelled by driver', [
             'delivery_id' => $delivery->id,

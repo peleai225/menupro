@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Enums\DeliveryStatus;
 use App\Models\Traits\BelongsToRestaurant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Delivery extends Model
 {
-    use BelongsToRestaurant;
+    use BelongsToRestaurant, HasFactory;
 
     protected $fillable = [
         'order_id',
@@ -31,6 +32,7 @@ class Delivery extends Model
         'delivered_at',
         'cancelled_at',
         'cancellation_reason',
+        'cancelled_by',
         'estimated_minutes',
         'cash_collected',
         'cash_collected_amount_xof',
