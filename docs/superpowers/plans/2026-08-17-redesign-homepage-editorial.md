@@ -1,0 +1,849 @@
+# Redesign Homepage Éditorial Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Refondre `home.blade.php` en style éditorial premium — fond crème, Instrument Serif × Space Grotesk, cartes blanches bien disposées, 14 sections conservées.
+
+**Architecture:** 5 tâches séquentielles sur le même fichier `home.blade.php` + fondations CSS. Les tâches 2-5 éditent des sections distinctes sans conflit. Les variables dynamiques du contrôleur (`$stats`, `$videos`) et les boucles Alpine.js/Blade existantes sont toutes conservées.
+
+**Tech Stack:** Laravel 11, Blade, Tailwind CSS v4, Alpine.js, Google Fonts (Instrument Serif + Space Grotesk)
+
+**Spec:** `docs/superpowers/specs/2026-08-17-redesign-homepage-editorial.md`
+
+## Global Constraints
+
+- Ne pas modifier les contrôleurs, routes, modèles — zéro changement back-end
+- Ne pas modifier `admin-super.blade.php`, `restaurant.blade.php` — hors scope
+- Ne pas changer `--font-sans` dans `app.css` — affecterait admin et restaurant. Utiliser une classe `.font-grotesk` dédiée.
+- Fond de page : `#FAF8F5` (crème chaud), plus de `#080808`
+- Texte principal : `#1A1614`, texte secondaire : `#7C6F65`
+- Orange accent : `#D45E0C` (inchangé)
+- Alpine.js uniquement — pas de GSAP, Swiper, ou autre lib JS externe
+- Classes `.fu` / `.fu.in` conservées sur chaque section (scroll reveal)
+- Variables Blade conservées : `$stats`, `$videos`, `@php` inline pour testimonials/faqs/restaurants
+
+---
+
+## Structure des fichiers
+
+| Fichier | Modifications |
+|---------|--------------|
+| `resources/css/app.css` | Ajout tokens `cream-*` et `warm-*` dans `@theme` + classes `.font-display` et `.font-grotesk` |
+| `resources/views/pages/public/home.blade.php` | Réécriture section par section (tâches 2-5) |
+| `resources/views/components/layouts/app.blade.php` | Remplacement du preload DM Sans par Instrument Serif + Space Grotesk |
+
+---
+
+## Task 1 — Fondations CSS + Polices
+
+**Files:**
+- Modify: `resources/css/app.css`
+- Modify: `resources/views/components/layouts/app.blade.php:109-113`
+
+**Interfaces:**
+- Produces: tokens `cream-50/100/200/300/400`, `warm-900/700/500/300`, classes `.font-display`, `.font-grotesk` utilisés dans toutes les tâches suivantes
+
+- [ ] **Step 1 : Ouvrir `resources/css/app.css`** et repérer le bloc `@theme {` (ligne ~18). Ajouter les nouvelles variables **à la fin du bloc**, juste avant le `}` fermant :
+
+```css
+    /* Editorial redesign — Cream & Warm palette */
+    --color-cream-50:  #FDFCFA;
+    --color-cream-100: #FAF8F5;
+    --color-cream-200: #F2EDE6;
+    --color-cream-300: #E8E0D5;
+    --color-cream-400: #D4C8B8;
+    --color-warm-900:  #1A1614;
+    --color-warm-700:  #3D3330;
+    --color-warm-500:  #7C6F65;
+    --color-warm-300:  #B8AFA8;
+```
+
+- [ ] **Step 2 : Ajouter les classes utilitaires** dans `app.css`, après le bloc `@theme` (après la ligne `}`) :
+
+```css
+/* Editorial typography utilities */
+.font-display { font-family: 'Instrument Serif', Georgia, serif; }
+.font-grotesk { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+```
+
+- [ ] **Step 3 : Ouvrir `resources/views/components/layouts/app.blade.php`**. Remplacer les lignes du bloc Google Fonts DM Sans (lignes 109-113) :
+
+Avant :
+```html
+    <!-- Google Fonts (non-blocking, DM Sans only) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"></noscript>
+```
+
+Après :
+```html
+    <!-- Google Fonts (non-blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"></noscript>
+```
+
+- [ ] **Step 4 : Vérifier visuellement** — ouvrir `http://menupro.test` dans le navigateur, ouvrir DevTools → Network → filtrer "fonts.google" — confirmer que les 3 familles (DM Sans, Instrument Serif, Space Grotesk) sont chargées ou en cache.
+
+- [ ] **Step 5 : Commit**
+
+```bash
+git add resources/css/app.css resources/views/components/layouts/app.blade.php
+git commit -m "feat(design): ajout tokens cream/warm + polices Instrument Serif et Space Grotesk"
+```
+
+---
+
+## Task 2 — Hero (Section 1) + Page Head
+
+**Files:**
+- Modify: `resources/views/pages/public/home.blade.php:1-268`
+
+**Interfaces:**
+- Consumes: `.font-display`, `.font-grotesk`, `cream-100`, `warm-900`, `warm-500` (Task 1)
+- Consumes: `$stats['restaurants']` (controller)
+- Produces: hero editorial, styles de page mis à jour
+
+- [ ] **Step 1 : Remplacer le bloc `@push('head')` complet** (lignes 2-28 actuelles). Le nouveau bloc conserve les styles `.fu`/`.fu.in`, remplace Bricolage par les nouvelles polices, change les variables CSS :
+
+```blade
+@push('head')
+<script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Plateforme SaaS de commande en ligne pour restaurants en Cote d'Ivoire.","offers":{"@@type":"Offer","price":"5000","priceCurrency":"XOF"}}</script>
+<style>
+:root{--c1:#FAF8F5;--c2:#F2EDE6;--warm:#1A1614;--o:#D45E0C;--o2:#FF8C42}
+.fu{opacity:0;transform:translateY(26px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
+.fu.in{opacity:1;transform:none}
+.fu.d1{transition-delay:.1s}.fu.d2{transition-delay:.2s}.fu.d3{transition-delay:.3s}.fu.d4{transition-delay:.4s}
+@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-w{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tk-t{display:flex;width:max-content;animation:tk 28s linear infinite}.tk-t:hover{animation-play-state:paused}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fl{animation:fl 4s ease-in-out infinite}
+</style>
+@endpush
+```
+
+- [ ] **Step 2 : Remplacer la section 1 Hero** (lignes 30-268 actuelles — tout ce qui est entre `{{-- ══════════ 1. HERO ══════════ --}}` et `{{-- ══════════ 2. PAIEMENTS + TICKER ══════════ --}}`). Écrire ce HTML complet :
+
+```blade
+{{-- ══════════ 1. HERO ══════════ --}}
+<section class="font-grotesk min-h-screen flex flex-col justify-center relative overflow-hidden" style="background:#FAF8F5">
+    {{-- Grain subtil en fond --}}
+    <div class="pointer-events-none absolute inset-0 opacity-[0.025]" style="background-image:url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");background-size:200px"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center lg:text-left">
+
+        {{-- Badge --}}
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-10 fu" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.18);color:#D45E0C">
+            <span class="relative flex h-2 w-2 shrink-0">
+                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
+            </span>
+            {{ $stats['restaurants'] }} restaurants actifs en Côte d'Ivoire
+        </div>
+
+        {{-- Titre massif --}}
+        <h1 class="font-display font-normal leading-[1.04] tracking-tight text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem] fu d1" style="color:#1A1614">
+            La plateforme<br>
+            <em class="not-italic" style="color:#D45E0C">restaurants</em><br>
+            qui fait vendre.
+        </h1>
+
+        {{-- Sous-titre --}}
+        <p class="text-lg lg:text-xl mt-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
+            Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov.<br>
+            En ligne en <strong style="color:#1A1614">15 minutes</strong>. Zéro commission. Zéro technique.
+        </p>
+
+        {{-- CTA --}}
+        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start fu d2">
+            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 24px rgba(212,94,12,.35)">
+                Démarrer gratuitement
+                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="#how-it-works" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:white;border:1.5px solid #E8E0D5;color:#3D3330;box-shadow:0 2px 12px rgba(26,22,20,.06)">
+                Voir comment ça marche
+            </a>
+        </div>
+
+        {{-- Social proof --}}
+        <div class="mt-12 flex items-center gap-4 justify-center lg:justify-start fu d3">
+            <div class="flex -space-x-2.5">
+                @foreach(\App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['logo_path','name']) as $r)
+                <div class="w-9 h-9 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
+                    @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            <p class="text-sm" style="color:#7C6F65">
+                <span class="font-semibold" style="color:#1A1614">{{ $stats['restaurants'] }}+</span> restaurateurs nous font confiance
+            </p>
+        </div>
+    </div>
+
+    {{-- Indicateur scroll bas --}}
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 fl" style="color:#D4C8B8">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+</section>
+```
+
+- [ ] **Step 3 : Vérifier dans le navigateur** — le titre doit apparaître en Instrument Serif massif sur fond crème. Sur mobile, les tailles doivent se réduire correctement. Les avatars restaurants et le badge doivent être visibles.
+
+- [ ] **Step 4 : Commit**
+
+```bash
+git add resources/views/pages/public/home.blade.php
+git commit -m "feat(homepage): hero éditorial — Instrument Serif + fond crème"
+```
+
+---
+
+## Task 3 — Sections 2 à 6 (Logos · Pour qui · Features · Stats · How it works)
+
+**Files:**
+- Modify: `resources/views/pages/public/home.blade.php:269-435` (remplacer ces lignes)
+
+**Interfaces:**
+- Consumes: `.font-display`, `.font-grotesk`, tokens cream/warm (Task 1)
+- Consumes: images paiements dans `public/images/payments/`
+
+- [ ] **Step 1 : Remplacer la section 2 — Logos strip + Paiements** (ligne 269-296). Conserver la boucle `@foreach` des logos de paiement et le marquee des plats :
+
+```blade
+{{-- ══════════ 2. PAIEMENTS + TICKER ══════════ --}}
+<section class="font-grotesk bg-white py-10" style="border-top:1px solid #E8E0D5;border-bottom:1px solid #E8E0D5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <p class="text-center text-[10px] font-semibold uppercase tracking-[0.25em] mb-7 fu" style="color:#B8AFA8">Paiements Mobile Money acceptés</p>
+        <div class="flex items-center justify-center gap-6 sm:gap-10 flex-wrap fu d1">
+            @foreach([['wave.png','Wave','#e0f2fe'],['orange-money.png','Orange Money','#fff7ed'],['mtn-momo.png','MTN MoMo','#fefce8'],['moov-money.png','Moov Money','#eff6ff']] as $i => $p)
+            <div class="flex flex-col items-center gap-2" style="transition-delay:{{ $i*0.08 }}s">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center border hover:shadow-md hover:-translate-y-0.5 transition-all" style="background:{{ $p[2] }};border-color:#E8E0D5">
+                    <img src="{{ asset('images/payments/'.$p[0]) }}" alt="{{ $p[1] }}" class="h-8 w-8 object-contain" loading="lazy">
+                </div>
+                <span class="text-[10px] font-medium" style="color:#B8AFA8">{{ $p[1] }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    <div class="tk-w" style="border-top:1px solid #F2EDE6;padding-top:1.25rem">
+        <div class="tk-t">
+            @foreach(array_fill(0,2,['Poulet Braisé','Attieké Poisson','Jus Naturels','Pizza','Burgers','Maquis','Hôtel','Livraison','Paninis','Tacos','Riz Sauce','Café']) as $items)
+            @foreach($items as $item)
+            <div class="flex items-center gap-3 px-5">
+                <span style="color:#E8E0D5;font-weight:900">·</span>
+                <span class="text-sm font-medium whitespace-nowrap" style="color:#B8AFA8">{{ $item }}</span>
+            </div>
+            @endforeach
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 2 : Remplacer la section 3 — Pour qui** (ligne 299-322). Conserver les 4 items du `@foreach` :
+
+```blade
+{{-- ══════════ 3. POUR QUI ══════════ --}}
+<section class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pour qui ?</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">De la vendeuse de panini<br>au grand hôtel</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            @foreach([
+                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','5 000 F/mois'],
+                ['🍽️','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','15 000 F/mois'],
+                ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','Gold'],
+                ['🏍️','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','Pro'],
+            ] as $i => $w)
+            <div class="fu bg-white rounded-2xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated flex flex-col" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
+                <div class="text-3xl mb-6">{{ $w[0] }}</div>
+                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $w[1] }}</h3>
+                <p class="text-sm leading-relaxed flex-1 mb-6" style="color:#7C6F65">{{ $w[2] }}</p>
+                <span class="inline-block self-start text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#FAF8F5;border:1px solid #E8E0D5;color:#D45E0C">À partir de {{ $w[3] }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 3 : Remplacer la section 4 — Features** (lignes 325-384). Conserver les 2 featured cards et les 4 small cards avec tous leurs SVG et tags :
+
+```blade
+{{-- ══════════ 4. FEATURES ══════════ --}}
+<section class="font-grotesk py-24 sm:py-28" style="background:#F2EDE6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pourquoi MenuPro</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">
+                Tout ce dont votre<br>restaurant a besoin
+            </h2>
+        </div>
+
+        {{-- 2 grandes features --}}
+        <div class="grid lg:grid-cols-5 gap-5 mb-5">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                </div>
+                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Commandes en direct</h3>
+                <p class="text-sm leading-relaxed max-w-sm" style="color:#7C6F65">Vos clients commandent via QR code ou lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié, impression automatique.</p>
+                <div class="mt-6 flex items-center gap-2 flex-wrap">
+                    @foreach(['QR Code','WhatsApp','Cuisine','Alertes sonores'] as $tag)
+                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="{{ $loop->first ? 'background:#D45E0C;color:white' : 'background:#FAF8F5;border:1px solid #E8E0D5;color:#7C6F65' }}">{{ $tag }}</span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="lg:col-span-2 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu d1" style="border-color:#E8E0D5">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
+                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Paiement Mobile Money</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">Wave, Orange Money, MTN, Moov. L'argent arrive directement sur votre compte — sans délai ni intermédiaire.</p>
+                <div class="mt-6 flex -space-x-2">
+                    @foreach([['wave.png','#e0f2fe'],['orange-money.png','#fff7ed'],['mtn-momo.png','#fefce8'],['moov-money.png','#eff6ff']] as $p)
+                    <div class="w-9 h-9 rounded-full border-2 flex items-center justify-center" style="background:{{ $p[1] }};border-color:#FAF8F5"><img src="{{ asset('images/payments/'.$p[0]) }}" class="w-5 h-5 object-contain" alt=""></div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- 4 petites features --}}
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            @foreach([
+                ['analytics','Analytics & Rapports','Bilan journalier, CA par heure, plats les plus vendus, taux d\'annulation.'],
+                ['stock','Gestion de stock','Alertes rupture automatiques, inventaire, ingrédients. Plus jamais à court.'],
+                ['hotel','Mode Hôtel','QR par chambre, room service, voix IA, appel addition, appel ménage.'],
+                ['delivery','Livraison intégrée','Gérez vos livreurs avec suivi GPS. Vos clients voient la progression. Zéro commission.'],
+            ] as $i => $f)
+            <div class="bg-white rounded-2xl p-6 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(212,94,12,.08)">
+                    @if($f[0]==='analytics')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    @elseif($f[0]==='stock')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    @elseif($f[0]==='hotel')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    @else<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>@endif
+                </div>
+                <h3 class="font-display text-lg font-normal mb-2" style="color:#1A1614">{{ $f[1] }}</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $f[2] }}</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 4 : Remplacer la section 5 — Stats Strip** (lignes 387-405). Fond sombre `#1A1614` avec chiffres en Instrument Serif massif blancs. Conserver les 4 stats du `@foreach` :
+
+```blade
+{{-- ══════════ 5. STATS STRIP ══════════ --}}
+<section class="font-grotesk py-20" style="background:#1A1614">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center fu">
+            @foreach([
+                ['0%','Commission','Gardez 100% de vos revenus.'],
+                ['15 min','Pour être en ligne','Menu, QR code, paiements prêts.'],
+                ['4','Moyens de paiement','Wave, Orange, MTN, Moov.'],
+                ['24/7','Disponible','Même quand vous dormez.'],
+            ] as $k)
+            <div>
+                <div class="font-display text-5xl sm:text-6xl font-normal leading-none mb-2 text-white">{{ $k[0] }}</div>
+                <div class="font-semibold text-sm mb-1 text-white">{{ $k[1] }}</div>
+                <div class="text-xs" style="color:rgba(255,255,255,.4)">{{ $k[2] }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 5 : Remplacer la section 6 — How it works** (lignes 408-435). Conserver les 3 étapes du `@foreach` :
+
+```blade
+{{-- ══════════ 6. HOW IT WORKS ══════════ --}}
+<section id="how-it-works" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-xl mx-auto mb-16 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Comment ça marche</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">En ligne en 15 minutes<br>chrono</h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6 fu relative">
+            {{-- Ligne de connexion desktop --}}
+            <div class="hidden md:block absolute h-px top-7 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)]" style="background:linear-gradient(90deg,transparent,#D45E0C 20%,#D45E0C 80%,transparent)"></div>
+            @foreach([
+                ['01','Créez votre compte','Nom, email, téléphone. Votre espace est prêt en 2 minutes.','~2 min'],
+                ['02','Ajoutez votre menu','Photos, prix, catégories. Configurez horaires et paiements Mobile Money.','~10 min'],
+                ['03','Recevez des commandes','Partagez votre lien ou imprimez votre QR code. Commandes et paiements en direct.','Immédiat'],
+            ] as $step)
+            <div class="bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-xl font-normal text-white" style="background:#D45E0C">{{ $step[0] }}</div>
+                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#1A1614;color:white">{{ $step[3] }}</span>
+                </div>
+                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $step[1] }}</h3>
+                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $step[2] }}</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 6 : Vérifier dans le navigateur** — faire défiler depuis le hero jusqu'à "How it works". Les sections doivent alterner crème/blanc/crème. Les cards doivent avoir leur ombre au hover. La stats strip doit être sombre avec texte blanc massif.
+
+- [ ] **Step 7 : Commit**
+
+```bash
+git add resources/views/pages/public/home.blade.php
+git commit -m "feat(homepage): sections 2-6 redesign éditorial crème"
+```
+
+---
+
+## Task 4 — Sections 7 à 11 (App · Driver · Vidéos · Témoignages · Restaurants)
+
+**Files:**
+- Modify: `resources/views/pages/public/home.blade.php:436-664`
+
+**Interfaces:**
+- Consumes: `.font-display`, `.font-grotesk`, tokens cream/warm (Task 1)
+- Consumes: `$videos` (controller), `$testimonials` (SystemSetting inline), `$trs` (restaurants inline)
+- Consumes: `route('download.apk')`, `route('r.menu', $r->slug)`
+
+- [ ] **Step 1 : Remplacer la section 7 — App Download** (lignes 436-518). Conserver les 2 boutons de téléchargement avec leurs routes exactes :
+
+```blade
+{{-- ══════════ 7. APP — Android + iPhone ══════════ --}}
+<section id="app" class="font-grotesk py-24" style="background:#F2EDE6">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="fu grid lg:grid-cols-2 gap-16 items-center">
+
+            {{-- Texte gauche --}}
+            <div class="text-center lg:text-left">
+                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
+                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight mb-5" style="color:#1A1614">
+                    Commandez<br>où vous voulez
+                </h2>
+                <p class="text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0" style="color:#7C6F65">
+                    Disponible sur <strong style="color:#1A1614">Android</strong> et <strong style="color:#1A1614">iPhone</strong>.<br>
+                    Téléchargez l'app ou utilisez la version web — expérience identique.
+                </p>
+            </div>
+
+            {{-- Boutons droite --}}
+            <div class="flex flex-col gap-4 max-w-sm mx-auto lg:mx-0 w-full">
+                {{-- Android APK --}}
+                <a href="{{ route('download.apk') }}"
+                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
+                   style="border-color:#E8E0D5">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.2)">
+                        <svg class="w-6 h-6" style="color:#22c55e" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5" style="color:#22c55e">Android</div>
+                        <div class="font-semibold text-base" style="color:#1A1614">Télécharger l'APK</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Installation directe · ~60 Mo</div>
+                    </div>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+
+                {{-- iPhone PWA --}}
+                <a href="https://mpa-five.vercel.app/" target="_blank"
+                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
+                   style="border-color:#E8E0D5">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
+                        <svg class="w-6 h-6" style="color:#D45E0C" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5 flex items-center gap-1.5" style="color:#D45E0C">
+                            iPhone · iPad <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:rgba(212,94,12,.12)">PWA</span>
+                        </div>
+                        <div class="font-semibold text-base" style="color:#1A1614">Ouvrir dans Safari</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Ajouter à l'écran d'accueil</div>
+                    </div>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+                <p class="text-center text-xs px-2" style="color:#B8AFA8">iPhone : ouvrez dans <strong style="color:#7C6F65">Safari</strong> → Partager ⬆ → "Sur l'écran d'accueil"</p>
+            </div>
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 2 : Remplacer la section 8 — Driver App** (lignes 521-564). Conserver le lien `https://mpa-driver.vercel.app/` et les 4 points du `@foreach` :
+
+```blade
+{{-- ══════════ 8. DRIVER APP ══════════ --}}
+<section class="font-grotesk py-24" style="background:#FAF8F5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            {{-- Card QR code --}}
+            <div class="flex flex-col items-center fu order-2 lg:order-1">
+                <div class="bg-white rounded-2xl p-8 border flex flex-col items-center gap-5 max-w-xs w-full" style="border-color:#E8E0D5;box-shadow:0 8px 40px rgba(26,22,20,.06)">
+                    <p class="font-semibold text-sm" style="color:#1A1614">Application Livreurs</p>
+                    <div class="w-40 h-40 rounded-2xl overflow-hidden flex items-center justify-center p-1" style="border:2px solid rgba(255,97,0,.2);background:#FAF8F5">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://mpa-driver.vercel.app/') }}&color=FF6100&bgcolor=FAF8F5&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                    </div>
+                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
+                </div>
+            </div>
+
+            {{-- Texte --}}
+            <div class="text-center lg:text-left fu order-1 lg:order-2">
+                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
+                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight" style="color:#1A1614">
+                    Livrez avec<br>
+                    <em class="not-italic" style="color:#FF6100">MenuPro</em>
+                </h2>
+                <p class="text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0" style="color:#7C6F65">Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.</p>
+                <div class="mt-7 space-y-4">
+                    @foreach([['Inscription rapide','Créez votre compte en 2 minutes avec votre CNI et permis.'],['Courses en temps réel','Recevez les commandes proches de vous avec alerte sonore.'],['Paiement Wave automatique','Vos gains sont virés sur demande, sans délai.'],['Zéro frais','Aucun abonnement. Vous gagnez à chaque course effectuée.']] as $f)
+                    <div class="flex items-start gap-3 text-left">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background:rgba(255,97,0,.1)">
+                            <svg class="w-3 h-3" style="color:#FF6100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm" style="color:#1A1614">{{ $f[0] }}</p>
+                            <p class="text-xs mt-0.5" style="color:#7C6F65">{{ $f[1] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="mt-8">
+                    <a href="https://mpa-driver.vercel.app/" target="_blank" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-semibold rounded-2xl transition hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 4px 20px rgba(255,97,0,.25)">
+                        🏍️ S'inscrire comme livreur
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 3 : Remplacer la section 9 — Vidéos** (lignes 567-588). Conserver `@if(!empty($videos))`, la boucle `@foreach($videos as $v)` et les données dynamiques :
+
+```blade
+{{-- ══════════ VIDÉOS ══════════ --}}
+@if(!empty($videos))
+<section class="font-grotesk py-24 bg-white" style="border-top:1px solid #E8E0D5">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Vidéo</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Voyez MenuPro en action</h2>
+        </div>
+        <div class="grid md:grid-cols-{{ count($videos)>1?'2':'1' }} gap-6 fu">
+            @foreach($videos as $v)
+            <div class="rounded-2xl overflow-hidden border" style="border-color:#E8E0D5">
+                <div class="relative" style="padding-bottom:56.25%;height:0">
+                    <iframe class="absolute inset-0 w-full h-full" src="{{ $v['url'] }}" title="{{ $v['title'] }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                </div>
+                @if($v['title'])<p class="px-4 py-3 text-sm font-semibold" style="color:#1A1614;background:#FAF8F5">{{ $v['title'] }}</p>@endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+```
+
+- [ ] **Step 4 : Remplacer la section 10 — Témoignages** (lignes 590-620). Conserver le `@php` inline pour `$testimonials` et le `@foreach` :
+
+```blade
+{{-- ══════════ TÉMOIGNAGES ══════════ --}}
+<section class="font-grotesk py-24" style="background:#F2EDE6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-xl mx-auto mb-16 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Témoignages</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Ils en parlent<br>mieux que nous</h2>
+        </div>
+        @php
+            $testimonials = \App\Models\SystemSetting::get('home_testimonials', [
+                ['name'=>'Awa Koné','role'=>'Propriétaire, Maquis Chez Awa','city'=>'Daloa','text'=>'Depuis MenuPro, mes clients commandent directement depuis leur téléphone. Mon chiffre d\'affaires a augmenté de 30% en 2 mois.','stars'=>5],
+                ['name'=>'Kouamé Jean','role'=>'Gérant, Restaurant Le Délice','city'=>'Abidjan','text'=>'Le QR code a tout changé. Les clients scannent, commandent et paient par Wave. Je reçois l\'argent immédiatement.','stars'=>5],
+                ['name'=>'Marie Touré','role'=>'Fondatrice, Saveurs d\'Afrique','city'=>'Bouaké','text'=>'À partir de 5 000 F/mois, c\'est le meilleur investissement. Zéro commission, zéro surprise. Je recommande à 100%.','stars'=>5],
+            ]);
+        @endphp
+        <div class="grid md:grid-cols-3 gap-6 fu">
+            @foreach($testimonials as $t)
+            <div class="bg-white rounded-2xl p-8 border flex flex-col hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
+                {{-- Guillemets décoratifs --}}
+                <p class="font-display text-6xl font-normal leading-none mb-2" style="color:#E8E0D5">"</p>
+                <blockquote class="font-display italic text-lg leading-snug flex-1 -mt-4" style="color:#3D3330">"{{ $t['text'] }}"</blockquote>
+                <div class="flex items-center gap-3 mt-6 pt-5" style="border-top:1px solid #F2EDE6">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0" style="background:#D45E0C">{{ strtoupper(substr($t['name'],0,1)) }}</div>
+                    <div>
+                        <div class="font-semibold text-sm" style="color:#1A1614">{{ $t['name'] }}</div>
+                        <div class="text-xs mt-0.5" style="color:#B8AFA8">{{ $t['role'] }} · {{ $t['city'] }}</div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 5 : Remplacer la section 11 — Restaurants** (lignes 623-664). Conserver le `@php $trs = ...` inline et la boucle `@foreach($trs as $r)` avec toutes les conditions `@if` :
+
+```blade
+{{-- ══════════ RESTAURANTS ══════════ --}}
+<section class="font-grotesk py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Ils nous font confiance</span>
+            <h2 class="font-display text-3xl sm:text-4xl font-normal mt-4" style="color:#1A1614">Découvrez nos restaurants</h2>
+            <p class="text-sm mt-2" style="color:#7C6F65">Commandez directement depuis leur menu en ligne</p>
+        </div>
+        @php
+            $trs = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(8)->get(['name','slug','logo_path','banner_path','city']);
+        @endphp
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 fu">
+            @foreach($trs as $r)
+            <a href="{{ route('r.menu', $r->slug) }}" target="_blank" class="group bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated block" style="border-color:#E8E0D5">
+                <div class="relative h-28 overflow-hidden" style="background:#FAF8F5">
+                    @if($r->banner_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->banner_path))
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->banner_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                    @else
+                        <div class="w-full h-full" style="background:linear-gradient(135deg,#F2EDE6,#E8E0D5)"></div>
+                    @endif
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style="background:rgba(26,22,20,.6)">
+                        <span class="text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/30">Voir le menu →</span>
+                    </div>
+                </div>
+                <div class="px-4 pb-4">
+                    <div class="relative -mt-5 mb-3">
+                        <div class="w-10 h-10 rounded-xl border-2 overflow-hidden bg-white shadow-sm" style="border-color:#FAF8F5">
+                            @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover" loading="lazy">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-white font-semibold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
+                            @endif
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-sm truncate" style="color:#1A1614">{{ $r->name }}</h3>
+                    @if($r->city)<p class="text-xs mt-0.5" style="color:#B8AFA8">📍 {{ $r->city }}</p>@endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 6 : Vérifier** — faire défiler de l'App download jusqu'aux Restaurants. Cards restaurants au hover doivent élever. Témoignages en Instrument Serif italic. Vidéos avec iframe responsive.
+
+- [ ] **Step 7 : Commit**
+
+```bash
+git add resources/views/pages/public/home.blade.php
+git commit -m "feat(homepage): sections 7-11 redesign éditorial crème"
+```
+
+---
+
+## Task 5 — Sections 12 à 14 + JS (Pricing · FAQ · CTA)
+
+**Files:**
+- Modify: `resources/views/pages/public/home.blade.php:667-789`
+
+**Interfaces:**
+- Consumes: `.font-display`, `.font-grotesk`, tokens cream/warm (Task 1)
+- Consumes: `$stats['restaurants']` (controller)
+- Consumes: `route('register')`, `route('pricing')`, `route('contact')`
+
+- [ ] **Step 1 : Remplacer la section 12 — Tarifs** (lignes 667-711). Conserver les 4 cards avec toutes leurs listes de features et `route('register')` :
+
+```blade
+{{-- ══════════ TARIFS ══════════ --}}
+<section id="pricing" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-xl mx-auto mb-16 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Tarifs</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Simple. Transparent.<br>Zéro commission.</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
+            {{-- Stand --}}
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#D45E0C">Stand</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">5 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Vendeurs de rue et stands</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['15 plats','100 cmd/mois','QR code inclus','Wave & Orange Money','Sans PC requis'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="border:1.5px solid #D45E0C;color:#D45E0C;background:rgba(212,94,12,.05)" onmouseover="this.style.background='rgba(212,94,12,.1)'" onmouseout="this.style.background='rgba(212,94,12,.05)'">Essai 7j gratuit</a>
+            </div>
+
+            {{-- Essentiel --}}
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#7C6F65">Essentiel</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">15 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Maquis et petits restaurants</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['25 plats, 8 catégories','200 cmd/mois','Mobile Money + QR','Support WhatsApp'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#E8E0D5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="background:#FAF8F5;border:1.5px solid #E8E0D5;color:#7C6F65" onmouseover="this.style.background='#F2EDE6'" onmouseout="this.style.background='#FAF8F5'">Essai 7j gratuit</a>
+            </div>
+
+            {{-- Pro — highlighted --}}
+            <div class="rounded-2xl p-7 border-2 relative hover:-translate-y-1 transition-all duration-300 flex flex-col" style="background:#D45E0C;border-color:#D45E0C;box-shadow:0 8px 40px rgba(212,94,12,.3)">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1.5 rounded-full bg-white" style="color:#D45E0C">⭐ Populaire</div>
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4 text-orange-200">Pro</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal text-white">25 000</span><span class="text-sm text-orange-200">F/mois</span></div>
+                <p class="text-sm text-orange-200 mb-6">Stock, livraison, analytics</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['80 plats, 3 employés','1 000 cmd/mois','Stock complet','Livraison intégrée','Analytics & rapports'] as $f)<li class="flex items-center gap-2 text-sm text-white"><svg class="w-4 h-4 shrink-0 text-orange-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-white hover:opacity-90 transition-all" style="color:#D45E0C">Essai 7j gratuit</a>
+            </div>
+
+            {{-- Gold --}}
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#f6b285">Gold</div>
+                <div class="flex items-baseline gap-1 mb-1">
+                    <span class="font-display text-4xl font-normal" style="background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">85 000</span>
+                    <span class="text-sm" style="color:#B8AFA8">F/mois</span>
+                </div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Multi-espaces, hôtels, VIP</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces illimités','PIN serveurs','Rapports par espace','QR chambres hôtel','Formation personnalisée'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#f6b285" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-all" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Essai 7j gratuit</a>
+            </div>
+        </div>
+        <p class="text-center text-sm mt-8" style="color:#B8AFA8">Sans engagement · Sans carte bancaire · <a href="{{ route('pricing') }}" class="font-semibold hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
+    </div>
+</section>
+```
+
+- [ ] **Step 2 : Remplacer la section 13 — FAQ** (lignes 714-747). Conserver le `@php $faqs = [...]` inline et le `@foreach` :
+
+```blade
+{{-- ══════════ FAQ ══════════ --}}
+<section class="font-grotesk py-24 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14 fu">
+            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">FAQ</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Questions fréquentes</h2>
+        </div>
+        @php
+            $faqs = [
+                ['Mes clients doivent-ils télécharger une application ?','Non. Vos clients scannent le QR code ou cliquent sur votre lien. Tout fonctionne directement dans le navigateur, sans téléchargement.'],
+                ['Comment fonctionne le paiement Mobile Money ?','Vos clients paient depuis leur app Wave, Orange Money, MTN ou Moov. L\'argent est envoyé directement sur votre compte — sans délai, sans intermédiaire.'],
+                ['Combien de temps pour être en ligne ?','Moins de 15 minutes. Créez votre compte, ajoutez quelques plats avec photos et prix, et partagez votre lien ou imprimez votre QR code.'],
+                ['Est-ce qu\'il y a des commissions sur les commandes ?','Aucune commission. Vous payez un forfait mensuel fixe à partir de 5 000 F/mois et gardez 100% de vos ventes.'],
+                ['Que se passe-t-il si j\'ai un problème ?','Support WhatsApp inclus dans tous les plans. Plans Pro et Gold : assistance prioritaire et formation personnalisée.'],
+                ['Puis-je annuler à tout moment ?','Oui, sans engagement et sans frais. Annulez depuis votre compte quand vous voulez.'],
+            ];
+        @endphp
+        <div class="fu" style="border-top:1px solid #E8E0D5">
+            @foreach($faqs as $i => $faq)
+            <div x-data="{ open: {{ $i===0?'true':'false' }} }" style="border-bottom:1px solid #E8E0D5">
+                <button @click="open=!open" class="w-full flex items-center justify-between py-5 text-left transition-colors" style="background:transparent">
+                    <span class="font-semibold text-sm sm:text-base pr-4" style="color:#1A1614">{{ $faq[0] }}</span>
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300" :class="open&&'rotate-45'" style="background:rgba(212,94,12,.08);color:#D45E0C">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    </span>
+                </button>
+                <div x-show="open" x-collapse>
+                    <p class="pb-5 text-sm leading-relaxed" style="color:#7C6F65">{{ $faq[1] }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 3 : Remplacer la section 14 — CTA Final** (lignes 750-780). Conserver `$stats['restaurants']`, `route('register')`, `route('contact')` :
+
+```blade
+{{-- ══════════ CTA FINAL ══════════ --}}
+<section class="font-grotesk relative py-32 overflow-hidden text-center" style="background:#1A1614">
+    {{-- Radial glow subtil --}}
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,94,12,.12),transparent)"></div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 fu">
+        {{-- Badge live --}}
+        <div class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-semibold mb-10" style="border-color:rgba(212,94,12,.25);background:rgba(212,94,12,.08);color:#FF8C42">
+            <span class="relative flex h-2 w-2 shrink-0">
+                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
+            </span>
+            {{ $stats['restaurants'] }} restaurants actifs ce soir
+        </div>
+
+        {{-- Titre massif --}}
+        <h2 class="font-display font-normal leading-[1.04] text-5xl sm:text-6xl lg:text-[4.5rem]" style="color:#FAF8F5">
+            Votre prochain<br>client commande<br>
+            <em class="not-italic" style="color:#D45E0C">dans 15 minutes.</em>
+        </h2>
+        <p class="text-lg mt-6 max-w-lg mx-auto leading-relaxed" style="color:rgba(250,248,245,.4)">Rejoignez les restaurateurs ivoiriens qui encaissent en direct sur leur Mobile Money.</p>
+
+        {{-- CTA --}}
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-4 text-white font-semibold rounded-2xl transition-all hover:-translate-y-0.5 text-base" style="background:#D45E0C;box-shadow:0 8px 32px rgba(212,94,12,.4)">
+                Créer mon restaurant — C'est gratuit
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="{{ route('contact') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl border transition-all text-base" style="color:rgba(250,248,245,.45);border-color:rgba(250,248,245,.1);background:rgba(250,248,245,.03)" onmouseover="this.style.color='rgba(250,248,245,.85)'" onmouseout="this.style.color='rgba(250,248,245,.45)'">
+                Parler à un expert
+            </a>
+        </div>
+
+        {{-- Reassurance --}}
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm" style="color:rgba(250,248,245,.35)">
+            @foreach(['15 min pour être en ligne','Support WhatsApp inclus','À partir de 5 000 F/mois','Annulation libre'] as $t)
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                {{ $t }}
+            </span>
+            @endforeach
+        </div>
+    </div>
+</section>
+```
+
+- [ ] **Step 4 : Remplacer le bloc `@push('scripts')` final** (lignes 782-788). Conserver le `counter()` JS inchangé, conserver l'IntersectionObserver `.fu` :
+
+```blade
+@push('scripts')
+<script>
+function counter(target){return{count:0,target:target,displayCount:'0',startCount(){const s=40,d=1600,sv=this.target/s,sd=d/s;const iv=setInterval(()=>{this.count+=sv;if(this.count>=this.target){this.count=this.target;clearInterval(iv);}this.displayCount=this.count>=1000?Math.round(this.count/1000)+'K+':Math.round(this.count).toString();},sd);}}}
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{threshold:.08});
+document.querySelectorAll('.fu').forEach(el=>io.observe(el));
+</script>
+@endpush
+```
+
+- [ ] **Step 5 : Vérifier la page complète** — ouvrir `http://menupro.test` et faire défiler toute la page :
+  - [ ] Hero : fond crème, titre Instrument Serif massif, badge live orange
+  - [ ] Cards "Pour qui" : blanches sur crème, hover élévation
+  - [ ] Features : fond `#F2EDE6`, cards blanches bien délimitées
+  - [ ] Stats : fond `#1A1614`, chiffres Instrument Serif blancs massifs
+  - [ ] How it works : numéros orange arrondis, ligne de connexion
+  - [ ] App : cards blanches empilées avec icône verte (Android) et orange (iPhone)
+  - [ ] Témoignages : fond `#F2EDE6`, guillemets décoratifs, italic Instrument Serif
+  - [ ] Tarifs : card Pro orange mise en avant avec badge "Populaire"
+  - [ ] FAQ : accordion fluidement animé (x-collapse)
+  - [ ] CTA final : fond `#1A1614`, titre crème, bouton orange avec glow
+  - [ ] Mobile : toutes les grilles passent en 1 colonne sur écran < 640px
+  - [ ] Scroll reveal : chaque section s'anime au scroll (`.fu` → `.fu.in`)
+
+- [ ] **Step 6 : Commit final**
+
+```bash
+git add resources/views/pages/public/home.blade.php
+git commit -m "feat(homepage): sections 12-14 + CTA final — redesign éditorial complet"
+```
+
+---
+
+## Checklist de validation finale
+
+- [ ] `npm run build` (ou `vite build`) ne produit aucune erreur CSS
+- [ ] Aucun fond `#080808` ni `#111111` ne subsiste dans `home.blade.php` (hors stats strip et CTA final qui sont volontairement sombres)
+- [ ] La nav (dans `public.blade.php`) est toujours visible sur fond crème — elle était déjà blanche, pas de régression
+- [ ] Les liens `route('download.apk')` et `route('r.menu', $r->slug)` fonctionnent
+- [ ] Le super-admin et les pages restaurant ne sont pas affectés (vérifier une page admin)
