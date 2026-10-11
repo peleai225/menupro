@@ -45,6 +45,14 @@ class RestaurantController extends Controller
             });
         }
 
+        // GPS filter — restaurants sur la marketplace de livraison sans coordonnées valides
+        if ($request->get('gps') === 'missing') {
+            $query->where('is_on_platform', true)
+                  ->where(function ($q) {
+                      $q->whereNull('latitude')->orWhereNull('longitude');
+                  });
+        }
+
         // Verification filter
         if ($request->filled('verification')) {
             switch ($request->verification) {
@@ -79,6 +87,11 @@ class RestaurantController extends Controller
             'pending_verification' => Restaurant::whereNotNull('rccm')
                 ->whereNotNull('rccm_document_path')
                 ->whereNull('verified_at')
+                ->count(),
+            'gps_missing' => Restaurant::where('is_on_platform', true)
+                ->where(function ($q) {
+                    $q->whereNull('latitude')->orWhereNull('longitude');
+                })
                 ->count(),
         ];
 

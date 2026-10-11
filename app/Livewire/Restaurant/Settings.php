@@ -249,6 +249,11 @@ class Settings extends Component
     public function saveGeneral(): void
     {
         try {
+            // Un restaurant déjà actif sur la marketplace de livraison doit
+            // garder des coordonnées GPS valides — un livreur en dépend pour
+            // le retrouver. Hors marketplace, le GPS reste optionnel.
+            $gpsRule = $this->restaurant->is_on_platform ? 'required' : 'nullable';
+
             $this->validate([
                 'name'        => 'required|string|max:100',
                 'description' => 'nullable|string|max:500',
@@ -259,8 +264,8 @@ class Settings extends Component
                 'address'     => 'nullable|string|max:255',
                 'city'        => 'nullable|string|max:100',
                 'postal_code' => 'nullable|string|max:20',
-                'latitude'    => 'nullable|numeric|between:-90,90',
-                'longitude'   => 'nullable|numeric|between:-180,180',
+                'latitude'    => "{$gpsRule}|numeric|between:-90,90",
+                'longitude'   => "{$gpsRule}|numeric|between:-180,180",
                 'logo'        => 'nullable|mimes:jpeg,jpg,png,webp|max:2048',
                 'banner'      => 'nullable|mimes:jpeg,jpg,png,webp|max:5120',
             ]);

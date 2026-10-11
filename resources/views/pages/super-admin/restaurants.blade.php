@@ -15,6 +15,14 @@
                     {{ $stats['pending_verification'] }} RCCM à vérifier
                 </a>
             @endif
+            @if(isset($stats['gps_missing']) && $stats['gps_missing'] > 0)
+                <a href="{{ route('super-admin.restaurants.index', array_merge(request()->only(['search', 'plan', 'status']), ['gps' => 'missing'])) }}"
+                   class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap"
+                   style="background:rgba(220,38,38,0.10);color:var(--sa-danger);border-color:rgba(220,38,38,0.20);">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                    {{ $stats['gps_missing'] }} sans GPS (livraison)
+                </a>
+            @endif
             <a href="{{ route('super-admin.restaurants.export', request()->only(['search', 'status', 'plan'])) }}"
                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium shadow-sm transition"
                style="background:var(--sa-success);color:#fff;">
@@ -216,6 +224,15 @@
                                             <span title="RCCM à vérifier" style="color:var(--sa-warning);">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                            </span>
+                                        @endif
+                                        @if($restaurant->is_on_platform && (!$restaurant->latitude || !$restaurant->longitude))
+                                            <span title="GPS manquant" style="color:var(--sa-danger);">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a3 3 0 106 0 3 3 0 00-6 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4l16 16"/>
                                                 </svg>
                                             </span>
                                         @endif
