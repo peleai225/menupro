@@ -64,13 +64,24 @@ class DriverAssignmentService
             }
 
             try {
-                $this->fcm->sendToToken(
+                // Compté seulement si Firebase a réellement accepté l'envoi : sinon le job
+                // relance la recherche avec un rayon plus large.
+                $sent = $this->fcm->sendToToken(
                     $driver->fcm_token,
                     '🛵 Nouvelle course disponible',
                     "Course disponible depuis {$restaurant}. Ouvrez l'application pour accepter.",
                     ['type' => 'new_delivery', 'delivery_id' => (string) $delivery->id],
+                    [
+                        'link'                => rtrim(config('apps.driver_url'), '/') . '/?open=deliveries',
+                        'tag'                 => 'delivery-' . $delivery->id,
+                        'require_interaction' => true,
+                        'icon'                => '/logo.png',
+                        'ttl'                 => 600,
+                    ],
                 );
-                $notified++;
+                if ($sent) {
+                    $notified++;
+                }
             } catch (\Throwable $e) {
                 Log::warning('FCM notification failed', [
                     'driver_id' => $driver->id,
@@ -306,6 +317,12 @@ class DriverAssignmentService
                     '🛵 Nouvelle course assignée',
                     "Vous avez une course depuis {$restaurant}. Ouvrez l'application pour accepter.",
                     ['type' => 'delivery_assigned', 'delivery_id' => (string) $delivery->id],
+                    [
+                        'link'                => rtrim(config('apps.driver_url'), '/') . '/?open=active-delivery',
+                        'tag'                 => 'delivery-' . $delivery->id,
+                        'require_interaction' => true,
+                        'icon'                => '/logo.png',
+                    ],
                 );
             } catch (\Throwable $e) {
                 Log::warning('FCM driver assignment notification failed', ['error' => $e->getMessage()]);

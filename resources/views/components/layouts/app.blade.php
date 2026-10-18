@@ -164,32 +164,8 @@
 
     @stack('head')
 
-    <!-- Firebase FCM Web config -->
-    @php
-        try {
-            $fbProjectId  = \App\Models\SystemSetting::get('firebase_project_id');
-            $fbApiKey     = \App\Models\SystemSetting::get('firebase_api_key');
-            $fbAppId      = \App\Models\SystemSetting::get('firebase_app_id');
-            $fbVapidKey   = \App\Models\SystemSetting::get('firebase_vapid_key');
-            $fbConfig = $fbProjectId ? json_encode([
-                'projectId'         => $fbProjectId,
-                'apiKey'            => $fbApiKey ?? '',
-                'appId'             => $fbAppId ?? '',
-                'messagingSenderId' => \App\Models\SystemSetting::get('firebase_sender_id') ?? '',
-            ]) : null;
-        } catch (\Throwable $e) {
-            $fbProjectId = null;
-            $fbVapidKey = null;
-            $fbConfig = null;
-        }
-    @endphp
-    @if($fbConfig)
-    <meta name="firebase-config" content="{{ $fbConfig }}">
-    <meta name="firebase-vapid-key" content="{{ $fbVapidKey ?? '' }}">
-    @auth
-    <meta name="auth-type" content="customer">
-    @endauth
-    @endif
+    <!-- Service worker + config Firebase (notifications push) -->
+    @include('partials.service-worker')
 
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -356,16 +332,6 @@
         </div>
     </div>
 
-    <script>
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then(reg => console.log('SW enregistré, scope:', reg.scope))
-                    .catch(err => console.warn('SW erreur:', err));
-            });
-        }
-    </script>
 </body>
 </html>
 

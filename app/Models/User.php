@@ -105,6 +105,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Customer::class);
     }
 
+    public function pushTokens(): HasMany
+    {
+        return $this->hasMany(PushToken::class);
+    }
+
     public function deliveryDriver(): HasOne
     {
         return $this->hasOne(DeliveryDriver::class);

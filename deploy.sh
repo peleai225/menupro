@@ -26,7 +26,6 @@ cp public/icon-*.png ~/public_html/ 2>/dev/null
 cp public/manifest.json ~/public_html/ 2>/dev/null
 cp public/manifest-admin.json ~/public_html/ && echo " manifest-admin.json copié" || echo " ERREUR copie manifest-admin.json"
 cp public/sw.js ~/public_html/ 2>/dev/null
-cp public/firebase-messaging-sw.js ~/public_html/ 2>/dev/null
 cp public/offline.html ~/public_html/ 2>/dev/null
 cp public/favicon.svg ~/public_html/ 2>/dev/null
 cp public/robots.txt ~/public_html/ 2>/dev/null
@@ -37,7 +36,6 @@ if [ -d ~/menupro.ci ]; then
     cp public/manifest-admin.json ~/menupro.ci/ 2>/dev/null && echo " manifest-admin.json copié → menupro.ci/"
     cp public/manifest.json ~/menupro.ci/ 2>/dev/null
     cp public/sw.js ~/menupro.ci/ 2>/dev/null
-    cp public/firebase-messaging-sw.js ~/menupro.ci/ 2>/dev/null
     cp public/.htaccess ~/menupro.ci/.htaccess 2>/dev/null
 fi
 
@@ -74,6 +72,9 @@ php artisan cache:clear
 php artisan view:clear
 php artisan route:clear
 php artisan route:cache
+
+# 5. Relancer les workers de file d'attente pour qu'ils chargent le nouveau code
+php artisan queue:restart
 
 echo ""
 echo " DÉPLOIEMENT TERMINÉ !"

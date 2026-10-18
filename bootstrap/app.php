@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         RateLimitServiceProvider::class,
     ])
+    // Les listeners sont déclarés explicitement (AppServiceProvider, CrmEventServiceProvider) :
+    // la découverte automatique les enregistrait une deuxième fois (pushs et commissions en double).
+    ->withEvents(discover: false)
     ->withMiddleware(function (Middleware $middleware): void {
         // Register middleware aliases
         $middleware->alias([

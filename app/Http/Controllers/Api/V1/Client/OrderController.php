@@ -197,9 +197,13 @@ class OrderController extends Controller
             ], 500);
         }
 
-        $order->load('items');
-
         $order->load('restaurant', 'items');
+
+        // Paiement à la livraison : la commande est déjà à traiter, on prévient le restaurant
+        // (les commandes payées en ligne le sont dans Order::markAsPaid()).
+        if ($isCashOnDelivery) {
+            $order->announceToRestaurant();
+        }
 
         // Auto-assignation livreur pour paiement cash
         if ($isCashOnDelivery && $order->delivery) {

@@ -11,7 +11,6 @@ use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
-use App\Notifications\NewOrderNotification;
 use App\Services\WaveGateway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -233,12 +232,7 @@ class CheckoutController extends Controller
             return back()->withErrors(['order' => 'Ce restaurant a atteint sa limite de commandes pour ce mois. Veuillez réessayer plus tard.']);
         }
 
-        try {
-            $whatsapp = app(\App\Services\WhatsAppService::class);
-            $whatsapp->sendNewOrderToRestaurant($order);
-        } catch (\Throwable $e) {
-            \Log::warning('WhatsApp new order notification failed: ' . $e->getMessage());
-        }
+        // Le restaurant est prévenu (cloche, push, WhatsApp) une fois la commande payée : Order::markAsPaid()
 
         // Priority 1: Wave Checkout (restaurant direct ou plateforme)
         $wave = $this->resolveWaveGateway($restaurant);
@@ -306,10 +300,6 @@ class CheckoutController extends Controller
                     ]);
 
                     app(\App\Services\WalletService::class)->creditWallet($order->restaurant_id, \App\Models\PaymentTransaction::where('gateway_transaction_id', $order->payment_metadata['jeko_link_id'])->latest()->first()?->id);
-
-                    $restaurant->users()
-                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                        ->each(fn ($user) => $user->notify(new \App\Notifications\NewOrderNotification($order)));
                 }
             } catch (\Exception $e) {
                 \Log::warning('Jeko verify on success fallback failed: ' . $e->getMessage());
@@ -344,10 +334,6 @@ class CheckoutController extends Controller
                     ]);
 
                     app(\App\Services\WalletService::class)->creditWallet($order->restaurant_id, $payment->id);
-
-                    $restaurant->users()
-                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                        ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
                 }
             } catch (\Exception $e) {
                 \Log::warning('Wave verify on success fallback failed: ' . $e->getMessage());
@@ -414,10 +400,6 @@ class CheckoutController extends Controller
                         $order->restaurant_id,
                         \App\Models\PaymentTransaction::where('gateway_transaction_id', $order->payment_metadata['jeko_link_id'])->latest()->value('id')
                     );
-
-                    $order->restaurant->users()
-                        ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-                        ->each(fn ($u) => $u->notify(new \App\Notifications\NewOrderNotification($order)));
                 }
 
                 return response()->json([

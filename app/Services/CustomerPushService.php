@@ -12,31 +12,43 @@ class CustomerPushService
     {
         if (! $this->fcm->isConfigured()) return;
 
-        $token = $order->customer?->fcm_token;
-        if (! $token) return;
+        $customer = $order->customer;
+        if (! $customer) return;
+
+        // App client (token sur le profil client) + site web (appareils du compte utilisateur)
+        $tokens = array_filter([
+            $customer->fcm_token,
+            ...($customer->user?->pushTokens()->pluck('token')->all() ?? []),
+        ]);
+        if (! $tokens) return;
 
         [$title, $body] = $this->messageFor($order->status->value, $order);
 
         if (! $title) return;
 
-        $this->fcm->sendToToken($token, $title, $body, [
+        $this->fcm->sendToMultiple($tokens, $title, $body, [
             'type'     => 'order_status',
             'order_id' => (string) $order->id,
             'status'   => $order->status->value,
+        ], [
+            'link' => rtrim(config('apps.client_url'), '/') . '/',
+            'tag'  => 'order-' . $order->id,
+            'icon' => '/icon-192.png',
         ]);
     }
 
     private function messageFor(string $status, Order $order): array
     {
         $restaurant = $order->restaurant?->name ?? 'le restaurant';
-        $id = '#' . $order->id;
+        $id = '#' . ($order->reference ?: $order->id);
 
+        // Valeurs de App\Enums\OrderStatus
         return match ($status) {
-            'confirmed'   => ["Commande confirmée ✅", "Votre commande {$id} est en préparation chez {$restaurant}."],
+            'confirmed'   => ["Commande confirmée ✅", "Votre commande {$id} est acceptée par {$restaurant}."],
             'preparing'   => ["En préparation 👨‍🍳", "{$restaurant} prépare votre commande {$id}."],
             'ready'       => ["Commande prête 📦", "Votre commande {$id} est prête, un livreur va la récupérer."],
-            'picked_up'   => ["Livreur en route 🛵", "Votre commande {$id} est en chemin !"],
-            'delivered'   => ["Livraison effectuée 🎉", "Votre commande {$id} a été livrée. Bon appétit !"],
+            'delivering'  => ["Livreur en route 🛵", "Votre commande {$id} est en chemin !"],
+            'completed'   => ["Livraison effectuée 🎉", "Votre commande {$id} a été livrée. Bon appétit !"],
             'cancelled'   => ["Commande annulée ❌", "Votre commande {$id} a été annulée."],
             default       => [null, null],
         };

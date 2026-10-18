@@ -1,7 +1,30 @@
 /**
  * MenuPro Service Worker — Offline-first pour l'Afrique
  * Stratégie : Cache-first pour assets statiques, Network-first pour pages dynamiques
+ * + réception des notifications push Firebase (même tous les onglets fermés).
  */
+
+/* ─── Notifications push (Firebase Cloud Messaging) ────────────────────────────
+ * La config Firebase arrive dans l'URL du script (/sw.js?fb=…, voir partials/service-worker).
+ * Elle doit être chargée ici, au démarrage du script : quand un push réveille le service
+ * worker, aucune page n'est là pour la lui envoyer. Le SDK affiche alors lui-même la
+ * notification et ouvre le lien (fcm_options.link) au clic. */
+(() => {
+  const encoded = new URL(self.location.href).searchParams.get('fb');
+  if (!encoded) return;
+  try {
+    const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const config = JSON.parse(atob(base64 + '='.repeat((4 - (base64.length % 4)) % 4)));
+    importScripts(
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js'
+    );
+    firebase.initializeApp(config);
+    firebase.messaging();
+  } catch (e) {
+    console.warn('[SW] Firebase indisponible', e);
+  }
+})();
 
 const CACHE_VERSION = 'menupro-v1';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
@@ -155,26 +178,24 @@ function isExternalApi(url) {
   return externalDomains.some((domain) => url.hostname.includes(domain));
 }
 
-/* ─── Push Notifications (préparé pour future intégration) ──────────────────── */
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
+/* ─── Clic sur une notification affichée par la page (onglet ouvert) ─────────────
+ * Les pushs reçus app fermée sont affichés et gérés au clic par le SDK Firebase
+ * (voir en tête de fichier) : on ne traite ici que nos propres notifications. */
+self.addEventListener('notificationclick', (event) => {
+  const data = event.notification.data || {};
+  if (data.FCM_MSG) return; // géré par Firebase
 
-  const data = event.data.json();
+  event.notification.close();
+  const link = data.link || data.url;
+  if (!link) return;
+
   event.waitUntil(
-    self.registration.showNotification(data.title || 'MenuPro', {
-      body: data.body || '',
-      icon: '/icon-192.png',
-      badge: '/favicon.svg',
-      tag: data.tag || 'menupro-notification',
-      data: data.url ? { url: data.url } : {},
-      vibrate: [100, 50, 100],
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const target = new URL(link, self.location.origin).href;
+      for (const client of windows) {
+        if (client.url === target && 'focus' in client) return client.focus();
+      }
+      return clients.openWindow(target);
     })
   );
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  if (event.notification.data?.url) {
-    event.waitUntil(clients.openWindow(event.notification.data.url));
-  }
 });

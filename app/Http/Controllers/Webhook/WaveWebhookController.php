@@ -8,7 +8,6 @@ use App\Models\Crm\Lead;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Subscription;
-use App\Notifications\NewOrderNotification;
 use App\Services\Crm\LeadPipelineService;
 use App\Services\WalletService;
 use App\Services\WaveGateway;
@@ -132,10 +131,7 @@ class WaveWebhookController extends Controller
         // Créditer le wallet (déclenche l'auto-payout vers le Wave Business du restaurant)
         $walletService->creditWallet($order->restaurant_id, $payment->id);
 
-        // Notifier le restaurant
-        $order->restaurant->users()
-            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-            ->each(fn ($user) => $user->notify(new NewOrderNotification($order)));
+        // Le restaurant est prévenu par Order::markAsPaid() (job AlertRestaurantNewOrder)
 
         Log::channel('payments')->info('Wave webhook: order payment confirmed', [
             'order_id' => $order->id,

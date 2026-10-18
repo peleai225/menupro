@@ -24,11 +24,9 @@ use App\Policies\ReservationPolicy;
 use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
 use App\Events\DriverLocationUpdated;
-use App\Events\NewDeliveryAvailable;
 use App\Events\OrderStatusChanged;
 use App\Listeners\BroadcastDriverLocation;
 use App\Listeners\NotifyCustomerOnOrderStatusChange;
-use App\Listeners\NotifyDriversOnNewDelivery;
 use App\Services\DeliveryPricingService;
 use App\Services\DriverAssignmentService;
 use App\Services\GeocodingService;
@@ -162,7 +160,7 @@ class AppServiceProvider extends ServiceProvider
         $this->loadDynamicPusherConfig();
 
         // Platform delivery events
-        Event::listen(NewDeliveryAvailable::class, NotifyDriversOnNewDelivery::class);
+        // NewDeliveryAvailable : diffusé en WebSocket ; le push ciblé (par rayon) est envoyé par DriverAssignmentService
         Event::listen(OrderStatusChanged::class, NotifyCustomerOnOrderStatusChange::class);
         // DriverLocationUpdated implémente ShouldBroadcast directement — le listener BroadcastDriverLocation est superflu
         // Event::listen(DriverLocationUpdated::class, BroadcastDriverLocation::class);

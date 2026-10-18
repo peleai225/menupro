@@ -284,7 +284,6 @@ class POS extends Component
                 if ($createdOrder->customer_phone) {
                     $whatsapp->sendOrderConfirmation($createdOrder);
                 }
-                $whatsapp->sendNewOrderToRestaurant($createdOrder);
             } catch (\Throwable $e) {
                 \Log::warning('POS WhatsApp notification failed: ' . $e->getMessage());
             }

@@ -8,7 +8,6 @@ use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\PromoCode;
 use App\Models\Restaurant;
-use App\Notifications\NewOrderNotification;
 use App\Services\DeliveryPricingService;
 use App\Services\WaveGateway;
 use Livewire\Attributes\Computed;
@@ -488,13 +487,6 @@ class Checkout extends Component
         }
 
         // Paiement à la caisse
-        // Notify restaurant before marking paid so notification has correct status context
-        $this->restaurant->users()
-            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
-            ->each(function ($user) use ($order) {
-                $user->notify(new NewOrderNotification($order));
-            });
-
         $order->markAsPaid([
             'method'   => 'cash_on_delivery',
             'metadata' => ['note' => 'Paiement à la caisse'],

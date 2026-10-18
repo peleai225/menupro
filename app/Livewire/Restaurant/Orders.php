@@ -149,10 +149,11 @@ class Orders extends Component
             if ($order->status === OrderStatus::PENDING_PAYMENT && $newStatus === OrderStatus::CONFIRMED) {
                 // Mark as paid first if not already paid
                 if (!$order->is_paid) {
+                    // Le restaurant confirme lui-même : inutile de lui annoncer sa propre commande
                     $order->markAsPaid([
                         'method' => 'on_site',
                         'metadata' => ['note' => 'Paiement confirmé manuellement par le restaurant'],
-                    ]);
+                    ], announce: false);
                     $order->refresh();
                 }
                 // Now transition to confirmed
@@ -260,7 +261,10 @@ class Orders extends Component
     public function checkNewOrders(): void
     {
         $restaurantId = auth()->user()->restaurant_id;
-        $latestId = Order::where('restaurant_id', $restaurantId)->max('id') ?? 0;
+        // Une commande en attente de paiement n'est pas encore à préparer : pas de sonnerie
+        $latestId = Order::where('restaurant_id', $restaurantId)
+            ->whereNotIn('status', [OrderStatus::DRAFT, OrderStatus::PENDING_PAYMENT])
+            ->max('id') ?? 0;
 
         if ($latestId > $this->lastOrderId && $this->lastOrderId > 0) {
             $this->dispatch('new-order-received');

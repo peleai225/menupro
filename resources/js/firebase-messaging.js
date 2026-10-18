@@ -1,87 +1,89 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 
-export async function initFcm() {
-    // La config Firebase est exposée via un meta tag dans le layout
+/**
+ * Notifications push du site (restaurateurs, employés, stands, clients connectés).
+ * Le service worker /sw.js (enregistré par partials/service-worker) affiche les pushs
+ * reçus app fermée ; ici on enregistre le token de l'appareil auprès du serveur.
+ */
+
+function readConfig() {
     const configMeta = document.querySelector('meta[name="firebase-config"]');
     const vapidMeta = document.querySelector('meta[name="firebase-vapid-key"]');
+    const endpointMeta = document.querySelector('meta[name="push-token-url"]');
+    if (!configMeta || !vapidMeta?.content || !endpointMeta) return null;
 
-    if (!configMeta || !vapidMeta) return; // Firebase non configuré
-
-    let firebaseConfig;
     try {
-        firebaseConfig = JSON.parse(configMeta.content);
-    } catch (e) {
-        return;
+        const firebaseConfig = JSON.parse(configMeta.content);
+        if (!firebaseConfig.projectId) return null;
+        return { firebaseConfig, vapidKey: vapidMeta.content, endpoint: endpointMeta.content };
+    } catch {
+        return null;
     }
+}
 
-    if (!firebaseConfig.projectId) return;
+export function pushAvailable() {
+    return !!readConfig() && 'serviceWorker' in navigator && 'Notification' in window;
+}
 
-    const vapidKey = vapidMeta.content;
-    if (!vapidKey) return;
+export function pushPermission() {
+    return 'Notification' in window ? Notification.permission : 'denied';
+}
 
-    const app = initializeApp(firebaseConfig);
+let foregroundBound = false;
+
+/**
+ * @param {boolean} askPermission  true uniquement suite à un clic (exigé par Safari/Chrome)
+ * @returns {Promise<boolean>} true si l'appareil est enregistré
+ */
+export async function initFcm(askPermission = false) {
+    const cfg = readConfig();
+    if (!cfg || !('serviceWorker' in navigator) || !('Notification' in window)) return false;
+    if (!(await isSupported())) return false;
+
+    let permission = Notification.permission;
+    if (permission === 'default' && askPermission) {
+        permission = await Notification.requestPermission();
+    }
+    if (permission !== 'granted') return false;
+
+    const app = initializeApp(cfg.firebaseConfig);
     const messaging = getMessaging(app);
+    const registration = await navigator.serviceWorker.ready;
 
-    // Enregistre le service worker Firebase et lui envoie la config
-    if ('serviceWorker' in navigator) {
-        try {
-            const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            const sw = reg.active ?? reg.waiting ?? reg.installing;
-            if (sw) {
-                sw.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
-            } else {
-                reg.addEventListener('updatefound', () => {
-                    reg.installing?.addEventListener('statechange', (e) => {
-                        if (e.target.state === 'activated') {
-                            e.target.postMessage({ type: 'FIREBASE_CONFIG', config: firebaseConfig });
-                        }
-                    });
-                });
-            }
-        } catch (e) {
-            console.warn('[FCM] Service worker registration failed:', e.message);
-            return;
-        }
-    }
+    const token = await getToken(messaging, {
+        vapidKey: cfg.vapidKey,
+        serviceWorkerRegistration: registration,
+    });
+    if (!token) return false;
 
-    // Demande permission et obtient le token
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return;
+    // Ré-enregistré à chaque visite : le serveur garde la date de dernière activité
+    await fetch(cfg.endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        },
+        body: JSON.stringify({ token }),
+    });
 
-        const token = await getToken(messaging, { vapidKey });
-        if (!token) return;
-
-        // Détermine l'endpoint selon si c'est un customer ou un driver
-        // Utilise un meta tag pour savoir le type d'utilisateur authentifié
-        const authTypeMeta = document.querySelector('meta[name="auth-type"]');
-        const endpoint = authTypeMeta?.content === 'driver'
-            ? '/api/v1/driver/auth/fcm-token'
-            : '/api/v1/client/auth/fcm-token';
-
-        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-        const csrfToken = tokenMeta?.content ?? '';
-
-        await fetch(endpoint, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ fcm_token: token }),
-        });
-
-        // Messages en premier plan
+    // Onglet ouvert : le navigateur n'affiche pas le push lui-même, on le fait via le service worker
+    // (new Notification() ne fonctionne pas sur Android).
+    if (!foregroundBound) {
+        foregroundBound = true;
         onMessage(messaging, (payload) => {
             const { title, body } = payload.notification ?? {};
-            if (title && 'Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, { body: body ?? '' });
-            }
+            if (!title) return;
+            registration.showNotification(title, {
+                body: body ?? '',
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                tag: payload.data?.order_id ? `order-${payload.data.order_id}` : undefined,
+                data: { link: payload.fcmOptions?.link },
+            });
         });
-
-    } catch (err) {
-        console.warn('[FCM] token registration failed:', err);
     }
+
+    return true;
 }

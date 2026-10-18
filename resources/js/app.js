@@ -421,10 +421,28 @@ document.addEventListener('livewire:init', () => {
     });
 });
 
-import { initFcm } from './firebase-messaging.js';
+import { initFcm, pushAvailable, pushPermission } from './firebase-messaging.js';
 
-// Les modules ES s'exécutent après le DOM — pas besoin de DOMContentLoaded
-// Guarde sur auth-type : uniquement pour les utilisateurs connectés
-if (document.querySelector('meta[name="auth-type"]')) {
+// Utilisateur connecté ayant déjà autorisé les notifications : on rafraîchit son token sans rien demander
+if (pushAvailable() && pushPermission() === 'granted') {
     initFcm().catch(() => {});
 }
+
+// Bandeau « Activer les notifications » (tableau de bord restaurant) : la demande de permission
+// doit venir d'un clic, sinon Safari/Chrome la bloquent.
+window.pushOptin = () => ({
+    visible: pushAvailable() && pushPermission() === 'default',
+    denied: pushAvailable() && pushPermission() === 'denied',
+    loading: false,
+    async enable() {
+        this.loading = true;
+        try {
+            await initFcm(true);
+        } catch (e) {
+            console.warn('[FCM] activation impossible', e);
+        }
+        this.loading = false;
+        this.visible = pushPermission() === 'default';
+        this.denied = pushPermission() === 'denied';
+    },
+});

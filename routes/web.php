@@ -150,6 +150,12 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
+// Notifications push web : enregistrement de l'appareil de l'utilisateur connecté
+Route::middleware(['auth', 'throttle:20,1'])->group(function () {
+    Route::post('/push-token', [\App\Http\Controllers\PushTokenController::class, 'store'])->name('push-token.store');
+    Route::delete('/push-token', [\App\Http\Controllers\PushTokenController::class, 'destroy'])->name('push-token.destroy');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Restaurant Admin Routes

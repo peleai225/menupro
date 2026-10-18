@@ -234,16 +234,8 @@
         </div>
     </div>
 
-    {{-- Service Worker — mode hors ligne + cache menu --}}
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then(reg => console.debug('[SW] Enregistré', reg.scope))
-                    .catch(err => console.debug('[SW] Échec', err));
-            });
-        }
-    </script>
+    {{-- Service Worker — mode hors ligne + cache menu + notifications push --}}
+    @include('partials.service-worker')
 
     @stack('scripts')
 </body>

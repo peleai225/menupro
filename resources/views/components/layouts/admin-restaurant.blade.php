@@ -659,6 +659,24 @@
 
             <!-- Page Content -->
             <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-20 lg:pb-0">
+                {{-- Notifications push : indispensable pour être alerté des commandes appli fermée --}}
+                <div x-data="pushOptin()" x-cloak>
+                    <div x-show="visible" class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                        <div class="flex-1 text-sm text-neutral-800">
+                            <p class="font-semibold">🔔 Activez les notifications sur cet appareil</p>
+                            <p class="text-neutral-600">Vous serez alerté de chaque nouvelle commande, même quand MenuPro est fermé.</p>
+                        </div>
+                        <button type="button" @click="enable()" :disabled="loading"
+                                class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold disabled:opacity-60 shrink-0">
+                            <span x-text="loading ? 'Activation…' : 'Activer'"></span>
+                        </button>
+                    </div>
+                    <div x-show="denied" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                        <p class="font-semibold">Notifications bloquées sur cet appareil</p>
+                        <p>Vous ne serez pas alerté des commandes quand MenuPro est fermé. Autorisez les notifications dans les réglages du navigateur (icône 🔒 à gauche de l'adresse), puis rechargez la page.</p>
+                    </div>
+                </div>
+
                 {{ $slot }}
             </main>
         </div>

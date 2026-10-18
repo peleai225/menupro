@@ -376,7 +376,7 @@ class Order extends Model
     /**
      * Mark as paid
      */
-    public function markAsPaid(array $paymentData = []): bool
+    public function markAsPaid(array $paymentData = [], bool $announce = true): bool
     {
         $this->payment_status = PaymentStatus::COMPLETED;
         $this->payment_reference = $paymentData['reference'] ?? null;
@@ -389,16 +389,38 @@ class Order extends Model
 
         if ($saved) {
             $this->deductDishStock();
-            \App\Events\OrderCreated::dispatch($this);
 
             // Auto-assignation livreur pour commandes plateforme avec livraison
             if ($this->source === 'platform_web' && $this->type === OrderType::DELIVERY && $this->delivery) {
                 \App\Jobs\AssignDriverJob::dispatch($this->delivery->id)
                     ->delay(now()->addSeconds(30));
             }
+
+            if ($announce) {
+                $this->announceToRestaurant();
+            }
         }
 
         return $saved;
+    }
+
+    /**
+     * Signale une nouvelle commande au restaurant : rafraîchissement temps réel des écrans ouverts,
+     * puis (en file d'attente) cloche, push sur ses appareils et WhatsApp.
+     */
+    public function announceToRestaurant(): void
+    {
+        // Diffusion immédiate : une panne du serveur temps réel ne doit pas bloquer la commande
+        try {
+            \App\Events\OrderCreated::dispatch($this);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('OrderCreated broadcast failed', [
+                'order_id' => $this->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
+
+        \App\Jobs\AlertRestaurantNewOrder::dispatch($this->id)->afterCommit();
     }
 
     protected function deductDishStock(): void
