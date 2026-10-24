@@ -136,7 +136,8 @@ class WaveWebhookController extends Controller
         Log::channel('payments')->info('Wave webhook: order payment confirmed', [
             'order_id' => $order->id,
             'amount' => $order->total,
-            'mode' => $isDirectMode ? 'restaurant_direct' : 'platform_payout',
+            // $isDirectMode n'existe que dans la transaction ci-dessus : relu depuis le paiement enregistré
+            'mode' => data_get($payment->metadata, 'wave_mode') === 'restaurant_direct' ? 'restaurant_direct' : 'platform_payout',
         ]);
 
         return response()->json(['success' => true]);
