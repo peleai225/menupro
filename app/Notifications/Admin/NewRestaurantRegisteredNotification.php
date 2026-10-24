@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Admin;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Restaurant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +18,21 @@ class NewRestaurantRegisteredNotification extends Notification implements Should
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        return [
+            'title' => '🏪 Nouveau restaurant inscrit',
+            'body'  => "{$this->restaurant->name}" . ($this->restaurant->city ? " ({$this->restaurant->city})" : '') . ' attend votre validation.',
+            'data'  => [
+                'type'          => 'new_restaurant',
+                'restaurant_id' => (string) $this->restaurant->id,
+            ],
+            'link' => route('super-admin.restaurants.show', $this->restaurant),
+            'tag'  => 'new-restaurant-' . $this->restaurant->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

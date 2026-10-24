@@ -11,7 +11,9 @@ use App\Models\Delivery;
 use App\Models\DeliveryDriver;
 use App\Models\DriverEarning;
 use App\Models\Order;
+use App\Notifications\DeliveryCancelledNotification;
 use App\Services\FcmService;
+use App\Support\PushBadge;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -70,7 +72,11 @@ class DriverAssignmentService
                     $driver->fcm_token,
                     '🛵 Nouvelle course disponible',
                     "Course disponible depuis {$restaurant}. Ouvrez l'application pour accepter.",
-                    ['type' => 'new_delivery', 'delivery_id' => (string) $delivery->id],
+                    [
+                        'type'        => 'new_delivery',
+                        'delivery_id' => (string) $delivery->id,
+                        'badge'       => PushBadge::forDriver($driver),
+                    ],
                     [
                         'link'                => rtrim(config('apps.driver_url'), '/') . '/?open=deliveries',
                         'tag'                 => 'delivery-' . $delivery->id,
@@ -218,7 +224,10 @@ class DriverAssignmentService
      */
     public function cancelDelivery(Delivery $delivery, string $reason, string $cancelledBy): void
     {
-        DB::transaction(function () use ($delivery, $reason, $cancelledBy) {
+        // Lu avant : la course non récupérée est désassignée (driver_id remis à null)
+        $driverId = $delivery->driver_id;
+
+        DB::transaction(function () use ($delivery, $reason, $cancelledBy, $driverId) {
             $alreadyPickedUp = in_array($delivery->status, [
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::DELIVERING,
@@ -242,10 +251,15 @@ class DriverAssignmentService
                 $this->unassign($delivery, "Annulation ({$cancelledBy}): {$reason}");
             }
 
-            if ($delivery->driver_id) {
-                DeliveryDriver::where('id', $delivery->driver_id)->update(['is_available' => true]);
+            if ($driverId) {
+                DeliveryDriver::where('id', $driverId)->update(['is_available' => true]);
             }
         });
+
+        // Le livreur qui annule lui-même n'a pas besoin d'être prévenu
+        if ($cancelledBy !== 'driver') {
+            DeliveryCancelledNotification::sendTo($driverId, $delivery, $reason);
+        }
     }
 
     /**
@@ -316,7 +330,8 @@ class DriverAssignmentService
                     $driver->fcm_token,
                     '🛵 Nouvelle course assignée',
                     "Vous avez une course depuis {$restaurant}. Ouvrez l'application pour accepter.",
-                    ['type' => 'delivery_assigned', 'delivery_id' => (string) $delivery->id],
+                    // Une course assignée : badge à 1
+                    ['type' => 'delivery_assigned', 'delivery_id' => (string) $delivery->id, 'badge' => 1],
                     [
                         'link'                => rtrim(config('apps.driver_url'), '/') . '/?open=active-delivery',
                         'tag'                 => 'delivery-' . $delivery->id,

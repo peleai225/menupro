@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Reservation;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -14,7 +15,7 @@ class NewReservationNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database', 'mail', PushChannel::class];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -37,6 +38,22 @@ class NewReservationNotification extends Notification
             })
             ->action('Voir la réservation', route('restaurant.reservations.show', $reservation))
             ->salutation('MenuPro');
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $guests = $this->reservation->number_of_guests;
+
+        return [
+            'title' => "📅 Nouvelle réservation · {$this->reservation->customer_name}",
+            'body'  => $this->reservation->reservation_date->format('d/m à H:i') . " · {$guests} personne" . ($guests > 1 ? 's' : ''),
+            'data'  => [
+                'type'           => 'new_reservation',
+                'reservation_id' => (string) $this->reservation->id,
+            ],
+            'link' => route('restaurant.reservations.index'),
+            'tag'  => 'reservation-' . $this->reservation->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

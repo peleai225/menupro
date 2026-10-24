@@ -1,6 +1,7 @@
 <?php
 namespace App\Notifications\Crm;
 
+use App\Notifications\Channels\PushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -15,7 +16,23 @@ class WithdrawalStatusNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $content = $this->toArray($notifiable);
+
+        return [
+            'title' => '💸 ' . $content['title'],
+            'body'  => $content['message'],
+            'data'  => [
+                'type'          => $content['type'],
+                'withdrawal_id' => (string) $this->withdrawal->id,
+            ],
+            'link' => route('crm.wallet'),
+            'tag'  => 'withdrawal-' . $this->withdrawal->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

@@ -11,6 +11,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryDriver;
 use App\Models\DriverEarning;
 use App\Models\Order;
+use App\Notifications\DriverProgressNotification;
 use App\Services\DriverAssignmentService;
 use App\Services\GeocodingService;
 use Illuminate\Http\JsonResponse;
@@ -154,6 +155,8 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Cette course a déjà été prise par un autre livreur.'], 409);
         }
 
+        DriverProgressNotification::sendFor($accepted->fresh(['order', 'driver', 'restaurant']), DriverProgressNotification::ACCEPTED);
+
         return response()->json([
             'message' => 'Course acceptée.',
             'data'    => $this->formatDeliveryDetail($accepted->fresh()->load(['order.items', 'restaurant'])),
@@ -248,6 +251,10 @@ class DeliveryController extends Controller
             ));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('DeliveryStatusChanged broadcast failed', ['error' => $e->getMessage()]);
+        }
+
+        if ($newStatus === DeliveryStatus::PICKED_UP) {
+            DriverProgressNotification::sendFor($delivery->fresh(['order', 'driver', 'restaurant']), DriverProgressNotification::PICKED_UP);
         }
 
         return response()->json([

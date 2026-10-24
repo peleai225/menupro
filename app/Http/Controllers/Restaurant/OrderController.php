@@ -205,6 +205,9 @@ class OrderController extends Controller
                 'cancellation_reason' => $request->reason ?? 'Remboursement',
             ]);
 
+            // Livreur en route : course annulée et livreur prévenu
+            $order->cancelActiveDelivery($order->cancellation_reason);
+
             // Débiter le wallet (annuler le crédit automatique reçu via webhook)
             $onlinePaymentMethods = ['jeko', 'wave', 'fusionpay', 'lygos'];
             if (in_array($order->payment_method, $onlinePaymentMethods)) {

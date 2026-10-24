@@ -5,9 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\RoutesNotifications;
 
 class Customer extends Model
 {
+    // notify() pour les pushs (PushChannel) : les clients n'ont pas de cloche en base
+    use RoutesNotifications;
+
     protected $fillable = [
         'user_id',
         'phone',

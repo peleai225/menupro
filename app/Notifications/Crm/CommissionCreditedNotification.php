@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Crm;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Crm\Commission;
 use Illuminate\Notifications\Notification;
 
@@ -13,7 +14,21 @@ class CommissionCreditedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        return [
+            'title' => "💰 Commission créditée : {$this->commission->amount_formatted}",
+            'body'  => $this->commission->description ?? 'Nouvelle commission sur votre portefeuille.',
+            'data'  => [
+                'type'          => 'commission_credited',
+                'commission_id' => (string) $this->commission->id,
+            ],
+            'link' => route('crm.wallet'),
+            'tag'  => 'commission-' . $this->commission->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

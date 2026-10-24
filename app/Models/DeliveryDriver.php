@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\RoutesNotifications;
 
 class DeliveryDriver extends Model
 {
-    use HasFactory;
+    // notify() pour les pushs (PushChannel) : les livreurs n'ont pas de cloche en base
+    use HasFactory, RoutesNotifications;
 
     protected $fillable = [
         'user_id',

@@ -8,6 +8,7 @@ use App\Models\PushToken;
 use App\Notifications\NewOrderNotification;
 use App\Services\FcmService;
 use App\Services\WhatsAppService;
+use App\Support\PushBadge;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,9 +36,7 @@ class AlertRestaurantNewOrder implements ShouldQueue
             return;
         }
 
-        $staff = $order->restaurant->users()
-            ->whereIn('role', [UserRole::RESTAURANT_ADMIN, UserRole::EMPLOYEE])
-            ->get();
+        $staff = $order->restaurant->staffToAlert();
 
         // Une seule fois par commande, même si le job est rejoué après un échec partiel
         $alreadyNotified = $staff->isNotEmpty() && $staff->first()->notifications()
@@ -73,6 +72,7 @@ class AlertRestaurantNewOrder implements ShouldQueue
             [
                 'type'     => 'new_order',
                 'order_id' => (string) $order->id,
+                'badge'    => PushBadge::forRestaurant($order->restaurant_id),
             ],
             [
                 'link'                => route('restaurant.orders'),

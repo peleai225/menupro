@@ -164,6 +164,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderStatusChanged::class, NotifyCustomerOnOrderStatusChange::class);
         // DriverLocationUpdated implémente ShouldBroadcast directement — le listener BroadcastDriverLocation est superflu
         // Event::listen(DriverLocationUpdated::class, BroadcastDriverLocation::class);
+
+        // Canal push : via() accepte PushChannel::class ou l'alias 'push'
+        \Illuminate\Support\Facades\Notification::extend('push',
+            fn ($app) => $app->make(\App\Notifications\Channels\PushChannel::class));
     }
 
     /**

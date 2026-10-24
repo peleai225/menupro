@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Support\PushBadge;
 
 class CustomerPushService
 {
@@ -30,8 +31,10 @@ class CustomerPushService
             'type'     => 'order_status',
             'order_id' => (string) $order->id,
             'status'   => $order->status->value,
+            'badge'    => PushBadge::forCustomer($customer),
         ], [
-            'link' => rtrim(config('apps.client_url'), '/') . '/',
+            // L'app client ouvre « Mes commandes » avec ce paramètre (src/lib/nav.tsx)
+            'link' => rtrim(config('apps.client_url'), '/') . '/?open=orders',
             'tag'  => 'order-' . $order->id,
             'icon' => '/icon-192.png',
         ]);

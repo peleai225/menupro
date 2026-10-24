@@ -133,6 +133,13 @@ class DriverController extends Controller
             $driver->update(['is_available' => false]);
         }
 
+        if ($newStatus === DeliveryStatus::PICKED_UP) {
+            \App\Notifications\DriverProgressNotification::sendFor(
+                $delivery->fresh(['order', 'driver', 'restaurant']),
+                \App\Notifications\DriverProgressNotification::PICKED_UP,
+            );
+        }
+
         return response()->json(['success' => true, 'new_status' => $newStatus->value]);
     }
 

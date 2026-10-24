@@ -428,6 +428,21 @@ if (pushAvailable() && pushPermission() === 'granted') {
     initFcm().catch(() => {});
 }
 
+// Compteur sur l'icône de l'application (posé par /sw.js à la réception d'un push) : effacé
+// dès que l'utilisateur revient sur son espace (les éléments en attente y sont visibles).
+const BACK_OFFICE_PATHS = ['/dashboard', '/admin', '/crm', '/commando'];
+function clearAppBadgeOnBackOffice() {
+    if (document.visibilityState !== 'visible' || !('clearAppBadge' in navigator)) return;
+    if (!BACK_OFFICE_PATHS.some((path) => window.location.pathname.startsWith(path))) return;
+    try {
+        navigator.clearAppBadge().catch(() => {});
+    } catch {
+        // API Badging non supportée
+    }
+}
+document.addEventListener('visibilitychange', clearAppBadgeOnBackOffice);
+clearAppBadgeOnBackOffice();
+
 // Bandeau « Activer les notifications » (tableau de bord restaurant) : la demande de permission
 // doit venir d'un clic, sinon Safari/Chrome la bloquent.
 window.pushOptin = () => ({

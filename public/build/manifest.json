@@ -4,7 +4,7 @@
     "name": "auto"
   },
   "resources/css/app.css": {
-    "file": "assets/app-FKysqz3v.css",
+    "file": "assets/app-BMeWG4N1.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -13,7 +13,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CgJ-hmbC.js",
+    "file": "assets/app-CDPbo21m.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

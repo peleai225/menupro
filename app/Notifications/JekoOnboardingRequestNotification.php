@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Restaurant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +16,21 @@ class JekoOnboardingRequestNotification extends Notification implements ShouldQu
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        return [
+            'title' => '🏦 Demande d\'intégration Jeko',
+            'body'  => "{$this->restaurant->name} souhaite encaisser via Jeko : dossier à traiter.",
+            'data'  => [
+                'type'          => 'jeko_onboarding_request',
+                'restaurant_id' => (string) $this->restaurant->id,
+            ],
+            'link' => route('super-admin.jeko.index'),
+            'tag'  => 'jeko-onboarding-' . $this->restaurant->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Crm;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Crm\Lead;
 use Illuminate\Notifications\Notification;
 
@@ -13,7 +14,21 @@ class LeadAssignedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        return [
+            'title' => '🎯 Nouveau lead assigné',
+            'body'  => "« {$this->lead->restaurant_name} »" . ($this->lead->city ? " ({$this->lead->city})" : '') . ' vous a été confié.',
+            'data'  => [
+                'type'    => 'lead_assigned',
+                'lead_id' => (string) $this->lead->id,
+            ],
+            'link' => route('crm.leads.index'),
+            'tag'  => 'lead-' . $this->lead->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

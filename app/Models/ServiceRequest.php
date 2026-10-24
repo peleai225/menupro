@@ -25,6 +25,16 @@ class ServiceRequest extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
+    /**
+     * « Table 4 » pour une table numérotée, sinon le nom saisi (« Chambre 101 », « Suite Royale »…).
+     */
+    public function placeLabel(): string
+    {
+        $place = trim((string) $this->table_number);
+
+        return is_numeric($place) ? "Table {$place}" : $place;
+    }
+
     public function typeLabel(): string
     {
         return match ($this->type) {

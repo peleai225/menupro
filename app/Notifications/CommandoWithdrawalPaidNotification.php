@@ -18,7 +18,20 @@ class CommandoWithdrawalPaidNotification extends Notification implements ShouldQ
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $amount = number_format($this->amountCents / 100, 0, ',', ' ');
+
+        return [
+            'title' => '💸 Retrait effectué',
+            'body'  => "Votre retrait de {$amount} FCFA a été payé.",
+            'data'  => ['type' => 'commando_withdrawal_paid'],
+            'link'  => route('commando.dashboard') . '#wallet',
+            'tag'   => 'commando-withdrawal-' . $this->agent->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

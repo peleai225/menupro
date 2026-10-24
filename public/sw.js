@@ -20,7 +20,24 @@
       'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js'
     );
     firebase.initializeApp(config);
-    firebase.messaging();
+    const messaging = firebase.messaging();
+
+    // Compteur sur l'icône de l'application installée (comme WhatsApp) : data.badge = éléments
+    // en attente côté serveur. Les messages avec bloc notification sont déjà affichés par le SDK :
+    // on ne fait que mettre à jour le compteur, sans réafficher.
+    messaging.onBackgroundMessage((payload) => {
+      const badge = parseInt(payload?.data?.badge, 10);
+      if (Number.isNaN(badge)) return;
+      try {
+        if (badge > 0 && self.navigator.setAppBadge) {
+          self.navigator.setAppBadge(badge).catch(() => {});
+        } else if (badge <= 0 && self.navigator.clearAppBadge) {
+          self.navigator.clearAppBadge().catch(() => {});
+        }
+      } catch (e) {
+        // API Badging non supportée : sans effet
+      }
+    });
   } catch (e) {
     console.warn('[SW] Firebase indisponible', e);
   }

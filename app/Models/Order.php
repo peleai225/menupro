@@ -367,6 +367,11 @@ class Order extends Model
         $saved = $this->save();
 
         if ($saved) {
+            // Annulation depuis le tableau des commandes / la cuisine : la course suit
+            if ($newStatus === OrderStatus::CANCELLED) {
+                $this->cancelActiveDelivery($this->cancellation_reason);
+            }
+
             \App\Events\OrderStatusChanged::dispatch($this, $oldStatus, $newStatus->value);
         }
 
@@ -472,37 +477,7 @@ class Order extends Model
         $saved = $this->save();
 
         if ($saved) {
-            // Annuler la livraison active si le livreur est en route
-            $activeDelivery = $this->delivery()
-                ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up', 'delivering'])
-                ->first();
-
-            if ($activeDelivery) {
-                $oldStatus = $activeDelivery->status instanceof \App\Enums\DeliveryStatus
-                    ? $activeDelivery->status->value
-                    : $activeDelivery->status;
-
-                $activeDelivery->update([
-                    'status'              => \App\Enums\DeliveryStatus::CANCELLED->value,
-                    'cancelled_at'        => now(),
-                    'cancellation_reason' => 'Commande annulée par le restaurant.',
-                ]);
-                // Remettre le livreur disponible
-                if ($activeDelivery->driver_id) {
-                    \App\Models\DeliveryDriver::where('id', $activeDelivery->driver_id)
-                        ->update(['is_available' => true]);
-                }
-
-                try {
-                    broadcast(new \App\Events\DeliveryStatusChanged(
-                        delivery:  $activeDelivery->fresh()->load(['order', 'driver', 'restaurant']),
-                        oldStatus: $oldStatus,
-                        newStatus: \App\Enums\DeliveryStatus::CANCELLED->value,
-                    ));
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning('DeliveryStatusChanged broadcast on cancel failed', ['error' => $e->getMessage()]);
-                }
-            }
+            $this->cancelActiveDelivery($reason);
         }
 
         if ($saved && $wasPaid) {
@@ -523,6 +498,48 @@ class Order extends Model
         }
 
         return $saved;
+    }
+
+    /**
+     * Commande annulée : annule la livraison en cours, libère le livreur et le prévient
+     * (push « course annulée »). Sans effet s'il n'y a pas de course active.
+     */
+    public function cancelActiveDelivery(?string $reason = null): void
+    {
+        $activeDelivery = $this->delivery()
+            ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up', 'delivering'])
+            ->first();
+
+        if (!$activeDelivery) {
+            return;
+        }
+
+        $oldStatus = $activeDelivery->status instanceof \App\Enums\DeliveryStatus
+            ? $activeDelivery->status->value
+            : $activeDelivery->status;
+
+        $activeDelivery->update([
+            'status'              => \App\Enums\DeliveryStatus::CANCELLED->value,
+            'cancelled_at'        => now(),
+            'cancellation_reason' => $reason ? "Commande annulée : {$reason}" : 'Commande annulée par le restaurant.',
+        ]);
+        // Remettre le livreur disponible
+        if ($activeDelivery->driver_id) {
+            \App\Models\DeliveryDriver::where('id', $activeDelivery->driver_id)
+                ->update(['is_available' => true]);
+        }
+
+        try {
+            broadcast(new \App\Events\DeliveryStatusChanged(
+                delivery:  $activeDelivery->fresh()->load(['order', 'driver', 'restaurant']),
+                oldStatus: $oldStatus,
+                newStatus: \App\Enums\DeliveryStatus::CANCELLED->value,
+            ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('DeliveryStatusChanged broadcast on cancel failed', ['error' => $e->getMessage()]);
+        }
+
+        \App\Notifications\DeliveryCancelledNotification::sendTo($activeDelivery->driver_id, $activeDelivery, $reason);
     }
 
     protected function restoreDishStock(): void

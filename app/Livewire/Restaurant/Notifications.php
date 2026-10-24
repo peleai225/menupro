@@ -3,6 +3,7 @@
 namespace App\Livewire\Restaurant;
 
 use App\Models\ServiceRequest;
+use App\Notifications\ServiceRequestNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -18,7 +19,7 @@ class Notifications extends Component
 
     public function mount(): void
     {
-        $this->lastUnreadCount = auth()->user()->unreadNotifications()->count();
+        $this->lastUnreadCount = $this->unreadNotificationsToRing();
         $restaurantId = auth()->user()->restaurant_id;
         $this->lastServiceRequestId = ServiceRequest::where('restaurant_id', $restaurantId)
             ->where('status', 'pending')->max('id') ?? 0;
@@ -31,9 +32,12 @@ class Notifications extends Component
      */
     public function checkForNewNotifications(): void
     {
-        $currentCount = auth()->user()->unreadNotifications()->count();
+        $currentCount = $this->unreadNotificationsToRing();
         if ($currentCount > $this->lastUnreadCount) {
-            $latest = auth()->user()->unreadNotifications()->latest()->first();
+            $latest = auth()->user()->unreadNotifications()
+                ->where('type', '!=', ServiceRequestNotification::class)
+                ->latest()
+                ->first();
             $data   = $latest?->data ?? [];
             $this->dispatch('new-notification-arrived', [
                 'type'         => $data['type'] ?? '',
@@ -60,6 +64,17 @@ class Notifications extends Component
         $this->lastServiceRequestId = $latestId;
         $this->pendingServiceRequests = ServiceRequest::where('restaurant_id', $restaurantId)
             ->where('status', 'pending')->count();
+    }
+
+    /**
+     * Notifications non lues qui doivent faire sonner la cloche. Les appels du personnel sont
+     * exclus : ils sonnent déjà via le suivi des service requests ci-dessus (sinon double son).
+     */
+    private function unreadNotificationsToRing(): int
+    {
+        return auth()->user()->unreadNotifications()
+            ->where('type', '!=', ServiceRequestNotification::class)
+            ->count();
     }
 
     public function markServiceRequestDone(int $id): void

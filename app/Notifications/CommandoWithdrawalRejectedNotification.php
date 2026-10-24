@@ -19,7 +19,20 @@ class CommandoWithdrawalRejectedNotification extends Notification implements Sho
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', PushChannel::class];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $amount = number_format($this->amountCents / 100, 0, ',', ' ');
+
+        return [
+            'title' => '💸 Retrait refusé',
+            'body'  => "Votre demande de retrait de {$amount} FCFA n'a pas été retenue." . ($this->reason ? " Motif : {$this->reason}" : ''),
+            'data'  => ['type' => 'commando_withdrawal_rejected'],
+            'link'  => route('commando.dashboard') . '#wallet',
+            'tag'   => 'commando-withdrawal-' . $this->agent->id,
+        ];
     }
 
     public function toArray(object $notifiable): array

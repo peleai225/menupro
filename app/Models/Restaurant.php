@@ -159,6 +159,17 @@ class Restaurant extends Model
         return $this->hasMany(User::class);
     }
 
+    /**
+     * Personnel à prévenir des événements de service (commandes, appels, livreurs) :
+     * administrateurs et employés du restaurant.
+     */
+    public function staffToAlert(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->users()
+            ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN, \App\Enums\UserRole::EMPLOYEE])
+            ->get();
+    }
+
     public function owner(): HasOne
     {
         return $this->hasOne(User::class)

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\PushChannel;
 use App\Models\Restaurant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,7 +21,7 @@ class LowStockNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail', 'database', PushChannel::class];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -35,6 +36,20 @@ class LowStockNotification extends Notification implements ShouldQueue
                 'ingredients' => $this->ingredients,
                 'notifiable' => $notifiable,
             ]);
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $count = $this->ingredients->count();
+        $names = $this->ingredients->take(3)->pluck('name')->implode(', ');
+
+        return [
+            'title' => "⚠️ {$count} ingrédient" . ($count > 1 ? 's' : '') . ' en stock bas',
+            'body'  => $names . ($count > 3 ? '…' : '') . ' — pensez à réapprovisionner.',
+            'data'  => ['type' => 'low_stock'],
+            'link'  => route('restaurant.stock.alerts'),
+            'tag'   => 'low-stock-' . $this->restaurant->id,
+        ];
     }
 
     public function toArray(object $notifiable): array
