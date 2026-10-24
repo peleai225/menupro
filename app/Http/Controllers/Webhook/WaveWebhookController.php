@@ -172,17 +172,14 @@ class WaveWebhookController extends Controller
             return response()->json(['success' => true]);
         }
 
-        $subscription->update([
+        // Unique abonnement en cours du restaurant, date d'encaissement renseignée
+        $subscription->activateExclusively([
             'status' => \App\Enums\SubscriptionStatus::ACTIVE,
             'payment_method' => 'wave',
+            'paid_at' => now(),
         ]);
 
         $restaurant = $subscription->restaurant;
-        $restaurant->update([
-            'current_plan_id' => $subscription->plan_id,
-            'subscription_ends_at' => $subscription->ends_at,
-            'orders_blocked' => false,
-        ]);
 
         try {
             app(\App\Services\CommandoCommissionService::class)

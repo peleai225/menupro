@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderRefund;
 use App\Models\Subscription;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class TransactionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, PlatformMetrics $metrics): View
     {
         $type = $request->get('type', 'all');
         $status = $request->get('status', '');
@@ -20,33 +21,25 @@ class TransactionController extends Controller
         $dateTo = $request->get('date_to');
         $search = $request->get('search');
 
-        // Stats
+        // Stats — deux totaux SÉPARÉS : le volume des commandes appartient aux restaurants
+        // (GMV), seuls les abonnements encaissés sont des revenus MenuPro. Hors démo.
+        $monthStart = now()->startOfMonth();
         $stats = [
-            'total_revenue' => 0,
-            'subscriptions_revenue' => Subscription::where('status', 'active')->sum('amount_paid'),
-            'orders_revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->sum('total'),
-            'refunds_total' => OrderRefund::where('status', 'completed')->sum('amount'),
-            'pending_payments' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'pending')
-                ->sum('total'),
-            'today_revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereDate('paid_at', today())
-                ->sum('total') + 
-                Subscription::whereDate('created_at', today())
-                ->sum('amount_paid'),
-            'this_month_revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereMonth('paid_at', now()->month)
-                ->whereYear('paid_at', now()->year)
-                ->sum('total') +
-                Subscription::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount_paid'),
+            // Abonnements réellement encaissés (status active|expired, montant > 0, référence)
+            'subscriptions_revenue' => $metrics->subscriptionRevenue(),
+            'subscriptions_this_month' => $metrics->subscriptionRevenue($monthStart, now()),
+            // Commandes payées non annulées/remboursées (sur paid_at)
+            'orders_revenue' => $metrics->gmv(),
+            'orders_this_month' => $metrics->gmv($monthStart),
+            'refunds_total' => OrderRefund::where('status', 'completed')
+                ->whereIn('order_id', $metrics->orders()->select('orders.id'))
+                ->sum('amount'),
+            // Paiements de commandes en cours (hors brouillons abandonnés)
+            'pending_payments' => $metrics->placedOrders()
+                ->where('orders.payment_status', 'pending')
+                ->whereNotIn('orders.status', [\App\Enums\OrderStatus::CANCELLED, \App\Enums\OrderStatus::REFUNDED])
+                ->sum('orders.total'),
         ];
-        $stats['total_revenue'] = $stats['subscriptions_revenue'] + $stats['orders_revenue'];
 
         // Build transactions query - combine subscriptions and orders
         $transactions = collect();
@@ -63,9 +56,11 @@ class TransactionController extends Controller
                 $subscriptionsQuery->whereDate('created_at', '<=', $dateTo);
             }
             if ($search) {
-                $subscriptionsQuery->whereHas('restaurant', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })->orWhere('payment_reference', 'like', "%{$search}%");
+                // Regroupé : un orWhere libre annulait les autres filtres (montant, dates)
+                $subscriptionsQuery->where(function ($q) use ($search) {
+                    $q->whereHas('restaurant', fn ($r) => $r->where('name', 'like', "%{$search}%"))
+                      ->orWhere('payment_reference', 'like', "%{$search}%");
+                });
             }
 
             $subscriptions = $subscriptionsQuery->get()->map(function ($sub) {
@@ -182,21 +177,26 @@ class TransactionController extends Controller
         $total = $transactions->count();
         $transactions = $transactions->forPage($page, $perPage);
 
-        // Revenue chart data (last 30 days)
+        // Courbes des 30 derniers jours — 2 requêtes groupées au lieu de 60.
+        // Commandes : payées non annulées (paid_at) ; abonnements : encaissés (paid_at, repli created_at).
+        $chartStart = now()->subDays(29)->startOfDay();
+        $ordersByDay = $metrics->revenueOrders()
+            ->where('orders.paid_at', '>=', $chartStart)
+            ->selectRaw('DATE(orders.paid_at) as day, SUM(orders.total) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        $subsByDay = $metrics->collectedSubscriptionsBetween($chartStart, now())
+            ->selectRaw('DATE(' . $metrics->subscriptionPaidAtColumn() . ') as day, SUM(subscriptions.amount_paid) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
         $chartData = [];
         for ($i = 29; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $orderRevenue = Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereDate('paid_at', $date)
-                ->sum('total');
-            $subRevenue = Subscription::whereDate('created_at', $date)->sum('amount_paid');
-            
             $chartData[] = [
                 'date' => now()->subDays($i)->format('d/m'),
-                'orders' => $orderRevenue,
-                'subscriptions' => $subRevenue,
-                'total' => $orderRevenue + $subRevenue,
+                'orders' => (int) ($ordersByDay[$date] ?? 0),
+                'subscriptions' => (int) ($subsByDay[$date] ?? 0),
             ];
         }
 

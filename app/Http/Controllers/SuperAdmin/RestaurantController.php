@@ -13,6 +13,7 @@ use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Notifications\RestaurantRejectedNotification;
 use App\Notifications\RestaurantValidatedNotification;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -77,13 +78,17 @@ class RestaurantController extends Controller
 
         $plans = Plan::active()->ordered()->get();
 
-        // Stats
+        // Stats — hors comptes démo (et supprimés, via SoftDeletes)
+        $metrics = app(PlatformMetrics::class);
         $stats = [
-            'total' => Restaurant::count(),
-            'active' => Restaurant::where('status', RestaurantStatus::ACTIVE)->count(),
-            'pending' => Restaurant::where('status', RestaurantStatus::PENDING)->count(),
-            'suspended' => Restaurant::where('status', RestaurantStatus::SUSPENDED)->count(),
-            'expired' => Restaurant::where('status', RestaurantStatus::EXPIRED)->count(),
+            'total' => $metrics->restaurants()->count(),
+            // Actifs = abonnement payant ou essai encore valide (définition unique PlatformMetrics)
+            'active' => $metrics->activeRestaurantsCount(),
+            // Compteur de l'onglet de filtre « status = active » (champ restaurants.status)
+            'status_active' => $metrics->restaurants()->where('status', RestaurantStatus::ACTIVE)->count(),
+            'pending' => $metrics->restaurants()->where('status', RestaurantStatus::PENDING)->count(),
+            'suspended' => $metrics->restaurants()->where('status', RestaurantStatus::SUSPENDED)->count(),
+            'expired' => $metrics->restaurants()->where('status', RestaurantStatus::EXPIRED)->count(),
             'pending_verification' => Restaurant::whereNotNull('rccm')
                 ->whereNotNull('rccm_document_path')
                 ->whereNull('verified_at')
@@ -115,7 +120,8 @@ class RestaurantController extends Controller
             'dishes_count' => $restaurant->dishes()->count(),
             'categories_count' => $restaurant->categories()->count(),
             'orders_count' => $restaurant->orders()->count(),
-            'total_revenue' => $restaurant->orders()->where('payment_status', 'completed')->sum('total'),
+            // CA : commandes payées non annulées/remboursées (même définition que PlatformMetrics)
+            'total_revenue' => $restaurant->orders()->withoutGlobalScope('restaurant')->revenue()->sum('total'),
             'recent_orders' => $restaurant->orders()->latest()->limit(5)->get(),
         ];
 
@@ -177,11 +183,11 @@ class RestaurantController extends Controller
             ->first();
 
         if ($trial) {
-            $trial->update([
+            // Démarre l'essai et clôt tout autre abonnement active/trial resté ouvert
+            $trial->activateExclusively([
                 'starts_at' => now(),
                 'ends_at'   => now()->addDays($trial->trial_days ?? 7),
             ]);
-            $restaurant->update(['subscription_ends_at' => $trial->ends_at]);
         }
 
         // Activate pending subscription (abonnement payant en attente)
@@ -191,13 +197,8 @@ class RestaurantController extends Controller
             ->first();
 
         if ($subscription) {
-            $subscription->update([
-                'status' => SubscriptionStatus::ACTIVE,
-            ]);
-
-            $restaurant->update([
-                'subscription_ends_at' => $subscription->ends_at,
-            ]);
+            // Devient l'unique abonnement en cours (l'essai éventuel ci-dessus est clôturé)
+            $subscription->activateExclusively(['status' => SubscriptionStatus::ACTIVE]);
         }
 
         // Notify owner
@@ -277,22 +278,27 @@ class RestaurantController extends Controller
         $plan = Plan::findOrFail($request->plan_id);
         $days = (int) $request->days;
 
+        $amountPaid = 0; // Prolongation manuelle gratuite
+
         // Create new subscription
-        Subscription::create([
+        $subscription = Subscription::create([
             'restaurant_id' => $restaurant->id,
             'plan_id' => $plan->id,
             'status' => SubscriptionStatus::ACTIVE,
             'starts_at' => now(),
             'ends_at' => now()->addDays($days),
-            'amount_paid' => 0, // Manual extension
+            'amount_paid' => $amountPaid,
             'payment_method' => 'admin_manual',
             'payment_metadata' => ['reason' => $request->reason, 'admin_id' => auth()->id()],
+            // Date d'encaissement seulement si la prolongation est payante
+            'paid_at' => $amountPaid > 0 ? now() : null,
         ]);
 
-        // Update restaurant
+        // Unique abonnement en cours : clôt les anciens, plan/date de fin à jour.
+        $subscription->activateExclusively();
+
+        // Décision explicite du super-admin : lève aussi une suspension/expiration
         $restaurant->update([
-            'current_plan_id' => $plan->id,
-            'subscription_ends_at' => now()->addDays($days),
             'status' => RestaurantStatus::ACTIVE,
             'orders_blocked' => false,
         ]);
@@ -403,8 +409,14 @@ class RestaurantController extends Controller
         if (!$adminId) {
             return redirect()->route('super-admin.dashboard')->with('error', 'Aucune impersonation active.');
         }
-        $admin = User::findOrFail($adminId);
+        $admin = User::find($adminId);
+        // Sécurité : on ne revient que vers un compte super-admin
+        if (!$admin || !$admin->isSuperAdmin()) {
+            return redirect()->route('login')->with('error', 'Impersonation invalide.');
+        }
         ActivityLog::log('impersonation_end', $admin, "Fin d'impersonation par super admin", ['restaurant_id' => auth()->user()->restaurant_id ?? null]);
+        // Le scope restaurant posé pendant l'impersonation ne doit pas suivre l'admin
+        session()->forget('current_restaurant_id');
         auth()->login($admin);
         $request->session()->regenerate();
         return redirect()->route('super-admin.dashboard');

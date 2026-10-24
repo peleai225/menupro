@@ -58,27 +58,18 @@ class MoneyFusionWebhookController extends Controller
                 return false;
             }
 
-            $subscription->update([
+            // Unique abonnement en cours (essai et anciens abonnements clôturés)
+            $subscription->activateExclusively([
                 'status' => SubscriptionStatus::ACTIVE,
                 'payment_method' => 'moneyfusion',
                 'payment_metadata' => array_merge(
                     $subscription->payment_metadata ?? [],
                     ['moneyfusion_event' => $payload]
                 ),
+                'paid_at' => now(),
             ]);
 
             $restaurant = $subscription->restaurant;
-
-            $restaurant->subscriptions()
-                ->where('status', SubscriptionStatus::TRIAL)
-                ->where('is_trial', true)
-                ->update(['status' => SubscriptionStatus::EXPIRED]);
-
-            $restaurant->update([
-                'current_plan_id' => $subscription->plan_id,
-                'subscription_ends_at' => $subscription->ends_at,
-                'orders_blocked' => false,
-            ]);
 
             return true;
         });

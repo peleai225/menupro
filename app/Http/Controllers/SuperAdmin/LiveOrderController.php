@@ -6,23 +6,19 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class LiveOrderController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, PlatformMetrics $metrics): View
     {
-        $query = Order::withoutGlobalScope('restaurant')
-            ->with('restaurant:id,name,is_demo')
-            ->whereIn('status', [
-                OrderStatus::PAID,
-                OrderStatus::CONFIRMED,
-                OrderStatus::PREPARING,
-                OrderStatus::READY,
-                OrderStatus::DELIVERING,
-            ]);
+        // En cours = payée → en livraison, limitées aux 48 dernières heures (au-delà : bloquées,
+        // comptées à part) ; restaurants démo exclus.
+        $query = $metrics->inProgressOrders()
+            ->with('restaurant:id,name,is_demo');
 
         if ($request->filled('restaurant_id')) {
             $query->where('restaurant_id', $request->restaurant_id);
@@ -36,32 +32,21 @@ class LiveOrderController extends Controller
 
         $restaurants = Restaurant::active()->orderBy('name')->get(['id', 'name']);
 
-        $statusCounts = Order::withoutGlobalScope('restaurant')
-            ->whereIn('status', [
-                OrderStatus::PAID,
-                OrderStatus::CONFIRMED,
-                OrderStatus::PREPARING,
-                OrderStatus::READY,
-                OrderStatus::DELIVERING,
-            ])
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status');
+        $statusCounts = $metrics->inProgressOrders()
+            ->selectRaw('orders.status as status_value, COUNT(*) as count')
+            ->groupBy('orders.status')
+            ->pluck('count', 'status_value');
 
-        return view('pages.super-admin.live-orders', compact('orders', 'restaurants', 'statusCounts'));
+        // Commandes restées « en cours » depuis plus de 48 h (oubliées / non clôturées)
+        $stuckCount = $metrics->stuckOrders()->count();
+
+        return view('pages.super-admin.live-orders', compact('orders', 'restaurants', 'statusCounts', 'stuckCount'));
     }
 
-    public function liveOrders(): JsonResponse
+    public function liveOrders(PlatformMetrics $metrics): JsonResponse
     {
-        $orders = Order::withoutGlobalScope('restaurant')
+        $orders = $metrics->inProgressOrders()
             ->with('restaurant:id,name')
-            ->whereIn('status', [
-                OrderStatus::PAID,
-                OrderStatus::CONFIRMED,
-                OrderStatus::PREPARING,
-                OrderStatus::READY,
-                OrderStatus::DELIVERING,
-            ])
             ->latest()
             ->limit(50)
             ->get()

@@ -49,11 +49,13 @@
                         @if(!$plan->is_active)
                             <span class="badge bg-red-50 text-red-700 border border-red-200">Inactif</span>
                         @endif
+                        @if(Route::has('super-admin.plans.edit')) {{-- route absente : le lien faisait planter toute la page --}}
                         <a href="{{ route('super-admin.plans.edit', $plan) }}" class="p-2 rounded-lg" style="color:var(--sa-muted-fg);">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </a>
+                        @endif
                     </div>
                 </div>
                 <h3 class="text-xl font-bold mb-1" style="color:var(--sa-fg);">{{ $plan->name }}</h3>

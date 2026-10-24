@@ -93,7 +93,7 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Flux financiers</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Collectes et retraits — 6 derniers mois</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Collectes et reversements aux restaurants — 6 derniers mois</p>
                 </div>
             </div>
             <div style="position:relative;height:280px;width:100%;">
@@ -104,7 +104,7 @@
         <div class="rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Statut des retraits</h2>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Statut des reversements</h2>
                     <p class="text-sm" style="color:var(--sa-muted-fg);">Répartition</p>
                 </div>
             </div>
@@ -144,9 +144,9 @@
                     <p class="text-xs" style="color:var(--sa-muted-fg);">{{ number_format($stats['pending_payouts_amount'], 0, ',', ' ') }} F</p>
                 </div>
                 <div class="rounded-xl p-3" style="background:var(--sa-muted);">
-                    <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--sa-muted-fg);">Complétés</p>
-                    <p class="mt-1 text-lg font-bold" style="color:var(--sa-success);">{{ $stats['completed_payouts'] }}</p>
-                    <p class="text-xs" style="color:var(--sa-muted-fg);">{{ number_format($stats['total_withdrawn'], 0, ',', ' ') }} F reversés</p>
+                    <p class="text-xs font-medium uppercase tracking-wide" style="color:var(--sa-muted-fg);">Reversements commandes</p>
+                    <p class="mt-1 text-lg font-bold" style="color:var(--sa-success);">{{ $stats['completed_payouts'] }} faits</p>
+                    <p class="text-xs" style="color:var(--sa-muted-fg);">{{ number_format($stats['total_withdrawn'], 0, ',', ' ') }} F reversés · {{ $stats['todo_payouts'] }} à faire ({{ number_format($stats['todo_payouts_amount'], 0, ',', ' ') }} F)</p>
                 </div>
             </div>
 
@@ -292,13 +292,13 @@
                 },
             });
 
-            // ── Statut des retraits (doughnut) ────────────────────────────
+            // ── Statut des reversements (commandes) (doughnut) ────────────────────────────
             new Chart(document.getElementById('payoutSplitChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['En attente', 'Complétés'],
+                    labels: ['À faire', 'Faits'],
                     datasets: [{
-                        data: [{{ $stats['pending_payouts'] }}, {{ $stats['completed_payouts'] }}],
+                        data: [{{ $stats['todo_payouts'] }}, {{ $stats['completed_payouts'] }}],
                         backgroundColor: ['rgba(245,158,11,0.85)', 'rgba(16,185,129,0.85)'],
                         borderWidth: 2, borderColor: 'var(--sa-card)',
                     }],

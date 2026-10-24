@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\RestaurantStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\Traits\BelongsToRestaurant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Subscription extends Model
 {
@@ -24,6 +26,7 @@ class Subscription extends Model
         'payment_reference',
         'payment_method',
         'payment_metadata',
+        'paid_at', // Date d'encaissement confirmé (webhook / callback de paiement)
         'reminder_sent_at',
         'expired_notification_sent_at',
         'billing_period', // 'monthly', 'quarterly', 'semiannual', 'annual'
@@ -38,6 +41,7 @@ class Subscription extends Model
         'ends_at' => 'datetime',
         'amount_paid' => 'integer',
         'payment_metadata' => 'array',
+        'paid_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
         'expired_notification_sent_at' => 'datetime',
         'discount_percentage' => 'integer',
@@ -70,6 +74,63 @@ class Subscription extends Model
             ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL])
             ->where('ends_at', '>', now())
             ->exists();
+    }
+
+    /**
+     * Active cet abonnement comme UNIQUE abonnement en cours du restaurant.
+     *
+     * Point d'entrée commun à toutes les activations (webhooks de paiement, callback de
+     * paiement, prolongation super-admin, validation d'un restaurant) :
+     *  1. applique $attributes (statut ACTIVE par défaut, sauf essai TRIAL qu'on démarre) ;
+     *  2. clôt les autres abonnements active/trial du restaurant (status expired +
+     *     expired_notification_sent_at pour que les jobs n'envoient pas de mail
+     *     « abonnement expiré » sur un doublon) — les doublons faussaient les indicateurs ;
+     *  3. aligne le restaurant (plan courant, date de fin, status ACTIVE, commandes
+     *     débloquées). Un restaurant SUSPENDU (décision admin) ou EN ATTENTE de validation
+     *     garde son statut : un paiement ne lève pas une suspension et ne court-circuite
+     *     pas la validation.
+     */
+    public function activateExclusively(array $attributes = []): self
+    {
+        DB::transaction(function () use ($attributes) {
+            $this->fill($attributes);
+
+            if (!in_array($this->status, [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL], true)) {
+                $this->status = SubscriptionStatus::ACTIVE;
+            }
+
+            $this->save();
+
+            // Mise à jour en masse : pas d'observer → pas de notification admin
+            // « abonnement expiré » pour un simple doublon remplacé.
+            static::withoutGlobalScopes()
+                ->where('restaurant_id', $this->restaurant_id)
+                ->where('id', '!=', $this->id)
+                ->whereIn('status', [SubscriptionStatus::ACTIVE->value, SubscriptionStatus::TRIAL->value])
+                ->update([
+                    'status' => SubscriptionStatus::EXPIRED->value,
+                    'expired_notification_sent_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            $restaurant = Restaurant::withTrashed()->find($this->restaurant_id);
+
+            if ($restaurant) {
+                $restaurantData = [
+                    'current_plan_id' => $this->plan_id,
+                    'subscription_ends_at' => $this->ends_at,
+                ];
+
+                if (!in_array($restaurant->status, [RestaurantStatus::SUSPENDED, RestaurantStatus::PENDING], true)) {
+                    $restaurantData['status'] = RestaurantStatus::ACTIVE;
+                    $restaurantData['orders_blocked'] = false;
+                }
+
+                $restaurant->update($restaurantData);
+            }
+        });
+
+        return $this;
     }
 
     // =========================================================================

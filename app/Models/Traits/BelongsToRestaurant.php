@@ -36,6 +36,13 @@ trait BelongsToRestaurant
      */
     protected static function getCurrentRestaurantId(): ?int
     {
+        // Super-admin : jamais de filtre restaurant (vue plateforme). Sans ce garde-fou, un
+        // current_restaurant_id resté en session (ex. après une impersonation) ou un
+        // restaurant_id sur le compte filtrait silencieusement les indicateurs du back-office.
+        if (auth()->check() && auth()->user()->isSuperAdmin()) {
+            return null;
+        }
+
         // Priority: session > auth user > null
         if (session()->has('current_restaurant_id')) {
             return session('current_restaurant_id');

@@ -25,9 +25,9 @@
     </div>
 
     {{-- ── KPI Cards ────────────────────────────────────────────────────────── --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
-        {{-- Restaurants actifs --}}
+        {{-- Restaurants actifs : abonnement payant ou essai encore valide (hors démo / supprimés) --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
@@ -38,15 +38,48 @@
                     </svg>
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
-                    +{{ $stats['restaurants']['total'] }}
+                      style="background:rgba(61,158,98,0.10);color:var(--sa-success);"
+                      title="Restaurants réels (hors démo et supprimés)">
+                    {{ number_format($stats['restaurants']['total']) }} au total
                 </span>
             </div>
             <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['restaurants']['active']) }}</p>
-            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);" title="Abonnement payant ou essai encore valide (hors démo et supprimés)">Restaurants actifs</p>
+            <p class="mt-0.5 text-xs" style="color:var(--sa-muted-fg);">
+                {{ number_format($stats['restaurants']['paying']) }} payants · {{ number_format($stats['restaurants']['trial']) }} en essai · {{ number_format($stats['restaurants']['expired']) }} expirés
+            </p>
         </div>
 
-        {{-- Revenus mensuels --}}
+        {{-- MRR : revenu récurrent mensuel des abonnements MenuPro --}}
+        <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
+             style="border-color:var(--sa-border);background:var(--sa-card);"
+             title="Dernier abonnement payant valide de chaque restaurant, ramené à 30 jours">
+            <div class="flex items-start justify-between">
+                <span class="flex w-11 h-11 items-center justify-center rounded-xl"
+                      style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </span>
+                <span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+                      style="background:rgba(194,98,31,0.10);color:var(--sa-primary);">
+                    MRR
+                </span>
+            </div>
+            <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">
+                @if($stats['revenue']['mrr'] >= 1000000)
+                    {{ number_format($stats['revenue']['mrr'] / 1000000, 1, ',', ' ') }}M
+                @elseif($stats['revenue']['mrr'] >= 1000)
+                    {{ number_format($stats['revenue']['mrr'] / 1000, 0, ',', ' ') }}K
+                @else
+                    {{ number_format($stats['revenue']['mrr'], 0, ',', ' ') }}
+                @endif
+                <span class="text-sm font-normal" style="color:var(--sa-muted-fg);">FCFA</span>
+            </p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Revenu récurrent mensuel</p>
+        </div>
+
+        {{-- Volume commandes (GMV) : argent encaissé par les restaurants, pas par MenuPro --}}
         <div class="rounded-2xl border p-5 shadow-sm transition hover:shadow-md"
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="flex items-start justify-between">
@@ -58,19 +91,21 @@
                 </span>
                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold flex items-center gap-1"
                       style="background:rgba(61,158,98,0.10);color:var(--sa-success);">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                    MRR
+                    GMV
                 </span>
             </div>
             <p class="mt-4 text-2xl sm:text-3xl font-bold" style="color:var(--sa-fg);">
-                @if($stats['revenue']['this_month'] >= 1000000)
-                    {{ number_format($stats['revenue']['this_month'] / 1000000, 1, ',', ' ') }}M
+                @if($stats['revenue']['gmv_this_month'] >= 1000000)
+                    {{ number_format($stats['revenue']['gmv_this_month'] / 1000000, 1, ',', ' ') }}M
+                @elseif($stats['revenue']['gmv_this_month'] >= 1000)
+                    {{ number_format($stats['revenue']['gmv_this_month'] / 1000, 0, ',', ' ') }}K
                 @else
-                    {{ number_format($stats['revenue']['this_month'] / 1000, 0, ',', ' ') }}K
+                    {{ number_format($stats['revenue']['gmv_this_month'], 0, ',', ' ') }}
                 @endif
                 <span class="text-sm font-normal" style="color:var(--sa-muted-fg);">FCFA</span>
             </p>
-            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Volume commandes (GMV)</p>
+            <p class="mt-0.5 text-xs" style="color:var(--sa-muted-fg);">Commandes payées ce mois, hors annulées</p>
         </div>
 
         {{-- Commandes --}}
@@ -95,7 +130,8 @@
                     {{ number_format($stats['orders']['total']) }}
                 @endif
             </p>
-            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Commandes totales</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Commandes passées</p>
+            <p class="mt-0.5 text-xs" style="color:var(--sa-muted-fg);">dont {{ number_format($stats['orders']['cancelled']) }} annulées/remboursées</p>
         </div>
 
         {{-- En attente --}}
@@ -131,8 +167,8 @@
              style="border-color:var(--sa-border);background:var(--sa-card);">
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes &amp; Revenus</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">7 derniers jours</p>
+                    <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes &amp; Volume payé</h2>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">7 derniers jours — volume = commandes payées non annulées</p>
                 </div>
             </div>
             <div style="position:relative;height:220px;width:100%;">
@@ -146,7 +182,7 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Commandes par statut</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Toutes les commandes</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes passées (hors brouillons)</p>
                 </div>
             </div>
             <div style="position:relative;height:220px;width:100%;">
@@ -302,7 +338,7 @@
                  style="border-color:var(--sa-border);background:var(--sa-card);">
                 <div class="mb-5">
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Revenus par plan</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Ce mois-ci</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Abonnements encaissés ce mois-ci</p>
                 </div>
                 <div class="space-y-4">
                     @php $barColors = ['var(--sa-primary)', 'var(--sa-success)', 'var(--sa-info)']; @endphp
@@ -344,7 +380,7 @@
                     </div>
                     <div class="rounded-xl p-3 text-center" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
                         <p class="text-2xl font-black text-green-600">{{ $driverStats['online_drivers'] }}</p>
-                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)">En ligne maintenant</p>
+                        <p class="text-xs mt-0.5" style="color:var(--sa-muted-fg)" title="Disponibles avec une position reçue il y a moins de 10 min">En ligne maintenant</p>
                     </div>
                     @if($driverStats['cash_pending_orders'] > 0)
                     <div class="rounded-xl p-3 text-center" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
@@ -389,7 +425,7 @@
                                  style="background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.15);">
                                 <div class="min-w-0">
                                     <p class="text-xs font-medium truncate" style="color:var(--sa-fg);">{{ $subscription->restaurant?->name ?? '(restaurant supprimé)' }}</p>
-                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan?->name ?? '—' }}</p>
+                                    <p class="text-[10px]" style="color:var(--sa-muted-fg);">{{ $subscription->plan?->name ?? '—' }}{{ $subscription->isTrial() ? ' · essai' : '' }}</p>
                                 </div>
                                 <span class="text-[10px] font-semibold whitespace-nowrap ml-2" style="color:var(--sa-danger);">
                                     {{ $subscription->ends_at?->diffForHumans() ?? '—' }}
@@ -406,7 +442,7 @@
                      style="border-color:var(--sa-border);background:var(--sa-card);">
                     <div class="mb-5">
                         <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Top restaurants ce mois</h2>
-                        <p class="text-sm" style="color:var(--sa-muted-fg);">Par volume de commandes</p>
+                        <p class="text-sm" style="color:var(--sa-muted-fg);">Par volume payé (hors annulées)</p>
                     </div>
                     <div class="space-y-2.5">
                         @foreach($topRestaurants as $index => $restaurant)
@@ -521,11 +557,11 @@
                             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                                      :class="{
-                                        'bg-amber-500/15 text-amber-400': order.status === 'pending',
+                                        'bg-amber-500/15 text-amber-400': order.status === 'paid',
                                         'bg-blue-500/15 text-blue-400': order.status === 'confirmed',
                                         'bg-violet-500/15 text-violet-400': order.status === 'preparing',
                                         'bg-emerald-500/15 text-emerald-400': order.status === 'ready' || order.status === 'completed',
-                                        'bg-red-500/15 text-red-400': order.status === 'cancelled',
+                                        'bg-red-500/15 text-red-400': order.status === 'cancelled' || order.status === 'refunded',
                                      }">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -541,11 +577,11 @@
                             <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold"
                                       :class="{
-                                        'bg-amber-500/15 text-amber-400': order.status === 'pending',
+                                        'bg-amber-500/15 text-amber-400': order.status === 'paid',
                                         'bg-blue-500/15 text-blue-400': order.status === 'confirmed',
                                         'bg-violet-500/15 text-violet-400': order.status === 'preparing',
                                         'bg-emerald-500/15 text-emerald-400': order.status === 'ready' || order.status === 'completed',
-                                        'bg-red-500/15 text-red-400': order.status === 'cancelled',
+                                        'bg-red-500/15 text-red-400': order.status === 'cancelled' || order.status === 'refunded',
                                       }"
                                       x-text="order.status_label"></span>
                                 <span class="text-xs font-semibold" style="color:var(--sa-sidebar-fg);" x-text="formatCurrency(order.total) + ' F'"></span>
@@ -569,7 +605,8 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                     <div>
                         <p class="text-lg font-bold" style="color:var(--sa-sidebar-fg);" x-text="stats.pending_orders || 0"></p>
-                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">En attente</p>
+                        <p class="text-[10px]" style="color:var(--sa-sidebar-accent);">En cours (48 h)</p>
+                        <p class="text-[10px] font-semibold" style="color:var(--sa-danger);" x-show="stats.stuck_orders > 0" x-text="stats.stuck_orders + ' bloquée(s) +48 h'"></p>
                     </div>
                     <div>
                         <p class="text-lg font-bold" style="color:var(--sa-success);" x-text="stats.active_restaurants || 0"></p>
@@ -617,6 +654,7 @@
                     orders_today: {{ $stats['orders']['today'] ?? 0 }},
                     revenue_today: 0,
                     pending_orders: 0,
+                    stuck_orders: 0,
                     active_restaurants: {{ $stats['restaurants']['active'] ?? 0 }},
                     new_registrations_today: 0,
                 },
@@ -668,7 +706,7 @@
                                 yAxisID: 'yLeft',
                             },
                             {
-                                label: 'Revenus (FCFA)',
+                                label: 'Volume payé (FCFA)',
                                 data: ordersChartData.revenues,
                                 borderColor: '#10b981',
                                 backgroundColor: 'rgba(16, 185, 129, 0.08)',
@@ -742,17 +780,19 @@
             // Graphique 2 — Donut commandes par statut
             const statusCtx = document.getElementById('statusChart');
             if (statusCtx) {
+                // Couleurs par statut réel (OrderStatus), libellés français fournis par le contrôleur
                 const statusColorMap = {
-                    'En attente':       '#f59e0b',
-                    'Confirmée':        '#3b82f6',
-                    'En préparation':   '#8b5cf6',
-                    'Prête':            '#06b6d4',
-                    'Livrée':           '#10b981',
-                    'Terminée':         '#059669',
-                    'Annulée':          '#ef4444',
+                    'paid':       '#f59e0b',
+                    'confirmed':  '#3b82f6',
+                    'preparing':  '#8b5cf6',
+                    'ready':      '#06b6d4',
+                    'delivering': '#10b981',
+                    'completed':  '#059669',
+                    'cancelled':  '#ef4444',
+                    'refunded':   '#f97316',
                 };
-                const bgColors = statusChartData.labels.map(function (l) {
-                    return statusColorMap[l] || '#9ca3af';
+                const bgColors = statusChartData.statuses.map(function (s) {
+                    return statusColorMap[s] || '#9ca3af';
                 });
 
                 new Chart(statusCtx, {

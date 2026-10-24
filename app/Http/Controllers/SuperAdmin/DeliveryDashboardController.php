@@ -6,6 +6,7 @@ use App\Enums\DeliveryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\Restaurant;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +23,9 @@ class DeliveryDashboardController extends Controller
                 DeliveryStatus::HEADING_TO_RESTAURANT,
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::DELIVERING,
-            ]);
+            ])
+            // Livraisons « en cours » limitées aux 48 dernières heures (au-delà : bloquées)
+            ->where('created_at', '>=', now()->subHours(PlatformMetrics::IN_PROGRESS_WINDOW_HOURS));
 
         if ($request->filled('restaurant_id')) {
             $query->where('restaurant_id', $request->restaurant_id);
@@ -47,9 +50,21 @@ class DeliveryDashboardController extends Controller
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::DELIVERING,
             ])
+            ->where('created_at', '>=', now()->subHours(PlatformMetrics::IN_PROGRESS_WINDOW_HOURS))
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
+
+        $stuckCount = Delivery::withoutGlobalScope('restaurant')
+            ->whereIn('status', [
+                DeliveryStatus::PENDING,
+                DeliveryStatus::ASSIGNED,
+                DeliveryStatus::HEADING_TO_RESTAURANT,
+                DeliveryStatus::PICKED_UP,
+                DeliveryStatus::DELIVERING,
+            ])
+            ->where('created_at', '<', now()->subHours(PlatformMetrics::IN_PROGRESS_WINDOW_HOURS))
+            ->count();
 
         $todayDelivered = Delivery::withoutGlobalScope('restaurant')
             ->where('status', DeliveryStatus::DELIVERED)
@@ -57,7 +72,7 @@ class DeliveryDashboardController extends Controller
             ->count();
 
         return view('pages.super-admin.deliveries', compact(
-            'deliveries', 'restaurants', 'statusCounts', 'todayDelivered'
+            'deliveries', 'restaurants', 'statusCounts', 'todayDelivered', 'stuckCount'
         ));
     }
 
@@ -72,6 +87,7 @@ class DeliveryDashboardController extends Controller
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::DELIVERING,
             ])
+            ->where('created_at', '>=', now()->subHours(PlatformMetrics::IN_PROGRESS_WINDOW_HOURS))
             ->latest()
             ->limit(50)
             ->get()

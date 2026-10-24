@@ -105,19 +105,15 @@ class JekoWebhookController extends Controller
                     ->first();
 
                 if ($subscription && $subscription->status !== SubscriptionStatus::ACTIVE) {
-                    $subscription->convertToPaid([
-                        'method'    => 'jeko',
-                        'reference' => $transactionId,
+                    // Paiement confirmé : abonnement payant, unique abonnement en cours du
+                    // restaurant (anciens actifs/essais clôturés), restaurant débloqué.
+                    $subscription->activateExclusively([
+                        'status'            => SubscriptionStatus::ACTIVE,
+                        'is_trial'          => false,
+                        'payment_method'    => 'jeko',
+                        'payment_reference' => $transactionId ?: $subscription->payment_reference,
+                        'paid_at'           => now(),
                     ]);
-
-                    $restaurant = $subscription->restaurant;
-                    if ($restaurant) {
-                        $restaurant->update([
-                            'current_plan_id'      => $subscription->plan_id,
-                            'subscription_ends_at' => $subscription->ends_at,
-                            'orders_blocked'       => false,
-                        ]);
-                    }
                 }
             }
         });
@@ -173,7 +169,8 @@ class JekoWebhookController extends Controller
                 }
             }
 
-            // Subscription — marquer FAILED pour que le restaurant puisse relancer
+            // Subscription — paiement échoué : on l'annule pour que le restaurant puisse relancer
+            // (l'enum n'a pas de statut FAILED : l'utiliser faisait planter le webhook)
             $subscription = $this->findSubscription($reference);
             if ($subscription) {
                 $subscription = Subscription::withoutGlobalScope('restaurant')
@@ -182,7 +179,7 @@ class JekoWebhookController extends Controller
                     ->first();
 
                 if ($subscription && $subscription->status === SubscriptionStatus::PENDING) {
-                    $subscription->update(['status' => SubscriptionStatus::FAILED]);
+                    $subscription->update(['status' => SubscriptionStatus::CANCELLED]);
                 }
             }
         });

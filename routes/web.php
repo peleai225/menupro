@@ -370,6 +370,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/admin/login', [LoginController::class, 'adminStore'])->middleware('throttle:5,1')->name('admin.login.post');
 });
 
+// Fin d'impersonation : hors du groupe super.admin, car pendant l'impersonation l'utilisateur
+// connecté est le propriétaire du restaurant (la route était donc inatteignable). Le
+// contrôleur vérifie impersonating_from en session et que ce compte est bien super-admin.
+Route::post('/admin/restaurants/stop-impersonation', [RestaurantController::class, 'stopImpersonation'])
+    ->middleware('auth')
+    ->name('super-admin.restaurants.stop-impersonation');
+
 Route::prefix('admin')
     ->name('super-admin.')
     ->middleware(['auth', 'super.admin', 'admin.section'])
@@ -409,7 +416,6 @@ Route::prefix('admin')
         Route::post('restaurants/{restaurant}/verify', [RestaurantController::class, 'verify'])->name('restaurants.verify');
         Route::post('restaurants/{restaurant}/unverify', [RestaurantController::class, 'unverify'])->name('restaurants.unverify');
         Route::post('restaurants/{restaurant}/toggle-demo', [RestaurantController::class, 'toggleDemo'])->name('restaurants.toggle-demo');
-        Route::post('restaurants/stop-impersonation', [RestaurantController::class, 'stopImpersonation'])->name('restaurants.stop-impersonation');
 
         // Orders
         Route::get('commandes', [\App\Http\Controllers\SuperAdmin\OrderController::class, 'index'])->name('orders.index');
@@ -448,8 +454,9 @@ Route::prefix('admin')
         
         // Activity Logs
         Route::get('activite', [ActivityController::class, 'index'])->name('activity');
-        Route::get('activite/{log}', [ActivityController::class, 'show'])->name('activity.show');
+        // export avant {log} : sinon « export » était capturé comme identifiant de log (404)
         Route::get('activite/export', [ActivityController::class, 'export'])->name('activity.export');
+        Route::get('activite/{log}', [ActivityController::class, 'show'])->name('activity.show');
         
         // Transactions
         Route::get('transactions', [\App\Http\Controllers\SuperAdmin\TransactionController::class, 'index'])->name('transactions.index');

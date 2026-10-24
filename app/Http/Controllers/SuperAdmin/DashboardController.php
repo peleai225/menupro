@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
 use App\Enums\RestaurantStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
 use App\Models\Restaurant;
-use App\Models\Subscription;
 use App\Models\User;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,160 +16,143 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(PlatformMetrics $metrics): View
     {
-        $demoRestaurantIds = Restaurant::where('is_demo', true)->pluck('id');
+        // Toutes les métriques passent par PlatformMetrics : restaurants démo et supprimés
+        // exclus, montants en FCFA, bornes de dates calculées en PHP (portable MySQL/SQLite).
+        $todayStart = now()->startOfDay();
+        $monthStart = now()->startOfMonth();
 
-        // Key metrics (excluding demo accounts) — consolidated queries to reduce DB round-trips
+        // Restaurants : répartition calculée sur les abonnements valides (et non sur
+        // restaurants.status qui comptait les essais comme actifs et n'expirait jamais un essai).
+        $restaurantCounts = $metrics->restaurantSubscriptionCounts();
 
-        // 1 requête au lieu de 4 pour les restaurants
-        $restaurantStats = DB::table('restaurants')
-            ->where('is_demo', false)
-            ->selectRaw("
-                COUNT(*) as total,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as expired
-            ", [
-                RestaurantStatus::ACTIVE->value,
-                RestaurantStatus::PENDING->value,
-                RestaurantStatus::EXPIRED->value,
-            ])
-            ->first();
-
-        // 1 requête au lieu de 5 pour les commandes + revenus
-        $orderStats = DB::table('orders')
-            ->when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))
-            ->selectRaw("
-                COUNT(*) as total,
-                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
-                SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN 1 ELSE 0 END) as this_month,
-                SUM(CASE WHEN payment_status = ? THEN total ELSE 0 END) as revenue_total,
-                SUM(CASE WHEN payment_status = ? AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN total ELSE 0 END) as revenue_month
-            ", [PaymentStatus::COMPLETED->value, PaymentStatus::COMPLETED->value])
-            ->first();
+        // Volume de commandes : commandes réellement passées (hors brouillon / attente de
+        // paiement) ; les annulées sont affichées à part.
+        $placedOrders = $metrics->placedOrders();
 
         $stats = [
             'restaurants' => [
-                'total'   => (int) ($restaurantStats->total ?? 0),
-                'active'  => (int) ($restaurantStats->active ?? 0),
-                'pending' => (int) ($restaurantStats->pending ?? 0),
-                'expired' => (int) ($restaurantStats->expired ?? 0),
+                'total'   => $restaurantCounts['total'],
+                // Actifs = abonnement payant OU essai encore valide (ends_at > maintenant),
+                // restaurants non démo et non supprimés
+                'active'  => $restaurantCounts['paying'] + $restaurantCounts['trial'],
+                'paying'  => $restaurantCounts['paying'],
+                'trial'   => $restaurantCounts['trial'],
+                'pending' => $restaurantCounts['pending'],
+                'expired' => $restaurantCounts['expired'],
             ],
-            'users' => User::when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))->count(),
+            'users' => $this->realUsers($metrics)->count(),
             'orders' => [
-                'total'      => (int) ($orderStats->total ?? 0),
-                'today'      => (int) ($orderStats->today ?? 0),
-                'this_month' => (int) ($orderStats->this_month ?? 0),
+                'total'      => (clone $placedOrders)->count(),
+                'cancelled'  => (clone $placedOrders)->whereIn('orders.status', [OrderStatus::CANCELLED, OrderStatus::REFUNDED])->count(),
+                'today'      => (clone $placedOrders)->where('orders.created_at', '>=', $todayStart)->count(),
+                'this_month' => (clone $placedOrders)->where('orders.created_at', '>=', $monthStart)->count(),
             ],
             'revenue' => [
-                'total'      => (float) ($orderStats->revenue_total ?? 0),
-                'this_month' => (float) ($orderStats->revenue_month ?? 0),
+                // GMV : volume des commandes payées (argent des restaurants, pas celui de MenuPro)
+                'gmv_total'      => $metrics->gmv(),
+                'gmv_this_month' => $metrics->gmv($monthStart),
+                // MRR : revenu récurrent mensuel des abonnements MenuPro
+                'mrr'            => $metrics->mrr(),
             ],
         ];
 
         // Recent restaurants
-        $recentRestaurants = Restaurant::with('currentPlan')
+        $recentRestaurants = $metrics->restaurants()
+            ->with(['currentPlan', 'owner'])
             ->latest()
             ->limit(5)
             ->get();
 
         // Pending validations
-        $pendingRestaurants = Restaurant::where('status', RestaurantStatus::PENDING)
+        $pendingRestaurants = $metrics->restaurants()
+            ->where('status', RestaurantStatus::PENDING)
             ->with('owner')
             ->latest()
             ->limit(10)
             ->get();
 
-        // Expiring subscriptions (next 7 days)
-        $expiringSubscriptions = Subscription::where('status', 'active')
-            ->where('ends_at', '<=', now()->addDays(7))
-            ->where('ends_at', '>', now())
-            ->with('restaurant', 'plan')
-            ->orderBy('ends_at')
-            ->limit(10)
-            ->get();
+        // Expirent bientôt : dernier abonnement valide de chaque restaurant (essais inclus)
+        $expiringSubscriptions = $metrics->expiringSubscriptions(7, 10);
 
-        // Revenue by plan (this month)
-        $revenueByPlan = Subscription::query()
+        // Revenus par plan (ce mois) : abonnements réellement encaissés depuis le 1er du mois
+        $revenueByPlan = $metrics->collectedSubscriptionsBetween($monthStart, now())
             ->join('plans', 'subscriptions.plan_id', '=', 'plans.id')
-            ->where('subscriptions.status', 'active')
-            ->whereMonth('subscriptions.created_at', now()->month)
             ->select('plans.name', DB::raw('SUM(subscriptions.amount_paid) as total'))
             ->groupBy('plans.name')
+            ->orderByDesc('total')
             ->get();
 
-        // Top restaurants by orders this month (excluding demo)
-        $topRestaurants = Order::withoutGlobalScope('restaurant')
-            ->join('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
-            ->where('restaurants.is_demo', false)
-            ->where('orders.payment_status', 'completed')
-            ->whereMonth('orders.created_at', now()->month)
-            ->select(
-                'restaurants.id',
-                'restaurants.name',
-                'restaurants.slug',
-                DB::raw('COUNT(*) as orders_count'),
-                DB::raw('SUM(orders.total) as revenue')
-            )
-            ->groupBy('restaurants.id', 'restaurants.name', 'restaurants.slug')
+        // Top restaurants du mois par CA (commandes payées non annulées, sur paid_at)
+        $topRevenue = $metrics->revenueOrders()
+            ->where('orders.paid_at', '>=', $monthStart)
+            ->select('orders.restaurant_id', DB::raw('COUNT(*) as orders_count'), DB::raw('SUM(orders.total) as revenue'))
+            ->groupBy('orders.restaurant_id')
             ->orderByDesc('revenue')
             ->limit(5)
             ->get();
+        $topNames = Restaurant::whereIn('id', $topRevenue->pluck('restaurant_id'))->get(['id', 'name', 'slug'])->keyBy('id');
+        $topRestaurants = $topRevenue->map(fn ($row) => (object) [
+            'id'           => $row->restaurant_id,
+            'name'         => $topNames[$row->restaurant_id]->name ?? '—',
+            'slug'         => $topNames[$row->restaurant_id]->slug ?? null,
+            'orders_count' => (int) $row->orders_count,
+            'revenue'      => (int) $row->revenue,
+        ]);
 
-        // Orders by day (last 7 days) for line chart
-        $ordersByDayRaw = DB::table('orders')
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as count, SUM(total) as revenue')
-            ->whereNotIn('restaurant_id', $demoRestaurantIds)
-            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+        // Courbe 7 jours : commandes passées (par date de création) et CA (par date de paiement)
+        $chartStart = now()->subDays(6)->startOfDay();
+        $countsByDay = $metrics->placedOrders()
+            ->where('orders.created_at', '>=', $chartStart)
+            ->selectRaw('DATE(orders.created_at) as day, COUNT(*) as count')
             ->groupBy('day')
-            ->orderBy('day')
-            ->get();
+            ->pluck('count', 'day');
+        $revenueByDay = $metrics->revenueOrders()
+            ->where('orders.paid_at', '>=', $chartStart)
+            ->selectRaw('DATE(orders.paid_at) as day, SUM(orders.total) as revenue')
+            ->groupBy('day')
+            ->pluck('revenue', 'day');
 
         $daysFr = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-        $dataMap = $ordersByDayRaw->keyBy('day');
         $ordersByDay = ['labels' => [], 'counts' => [], 'revenues' => []];
 
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
             $dayOfWeek = (int) now()->subDays($i)->format('w');
             $ordersByDay['labels'][] = $daysFr[$dayOfWeek];
-            $dayData = $dataMap->get($date);
-            $ordersByDay['counts'][] = $dayData ? (int) $dayData->count : 0;
-            $ordersByDay['revenues'][] = $dayData ? (float) $dayData->revenue : 0.0;
+            $ordersByDay['counts'][] = (int) ($countsByDay[$date] ?? 0);
+            $ordersByDay['revenues'][] = (float) ($revenueByDay[$date] ?? 0);
         }
 
         // Delivery driver stats (cash flow)
         $driverStats = [
             'total_drivers'       => \App\Models\DeliveryDriver::count(),
-            'online_drivers'      => \App\Models\DeliveryDriver::where('is_available', true)->count(),
+            // En ligne = disponible ET position reçue il y a moins de 10 min
+            'online_drivers'      => \App\Models\DeliveryDriver::where('is_available', true)
+                ->where('location_updated_at', '>=', now()->subMinutes(PlatformMetrics::DRIVER_ONLINE_MINUTES))
+                ->count(),
             'cash_pending_orders' => DB::table('orders')->where('payout_status', 'cash_pending')->count(),
             'cash_pending_amount' => (int) DB::table('orders')->where('payout_status', 'cash_pending')->sum('total'),
             'cash_debts_total'    => (int) DB::table('driver_cash_debts')->where('status', 'pending')->sum('amount_xof'),
             'remittances_pending' => DB::table('driver_cash_remittances')->where('status', 'pending')->count(),
         ];
 
-        // Orders by status (all time) for donut chart
-        $ordersByStatusRaw = DB::table('orders')
-            ->selectRaw('status, COUNT(*) as count')
-            ->whereNotIn('restaurant_id', $demoRestaurantIds)
-            ->groupBy('status')
-            ->get();
+        // Donut : commandes passées par statut réel, libellés français de l'enum
+        $ordersByStatusRaw = $metrics->placedOrders()
+            ->selectRaw('orders.status as status_value, COUNT(*) as count')
+            ->groupBy('orders.status')
+            ->pluck('count', 'status_value');
 
-        $statusLabelsMap = [
-            'pending'   => 'En attente',
-            'confirmed' => 'Confirmée',
-            'preparing' => 'En préparation',
-            'ready'     => 'Prête',
-            'delivered' => 'Livrée',
-            'completed' => 'Terminée',
-            'cancelled' => 'Annulée',
-        ];
-
-        $ordersByStatus = ['labels' => [], 'counts' => []];
-        foreach ($ordersByStatusRaw as $item) {
-            $ordersByStatus['labels'][] = $statusLabelsMap[$item->status] ?? ucfirst($item->status);
-            $ordersByStatus['counts'][] = (int) $item->count;
+        $ordersByStatus = ['labels' => [], 'counts' => [], 'statuses' => []];
+        foreach (OrderStatus::cases() as $status) {
+            $count = (int) ($ordersByStatusRaw[$status->value] ?? 0);
+            if ($count === 0) {
+                continue;
+            }
+            $ordersByStatus['labels'][] = $status->label();
+            $ordersByStatus['counts'][] = $count;
+            $ordersByStatus['statuses'][] = $status->value;
         }
 
         return view('pages.super-admin.dashboard', compact(
@@ -760,15 +741,14 @@ class DashboardController extends Controller
     /**
      * Get live stats for real-time dashboard.
      */
-    public function liveStats()
+    public function liveStats(PlatformMetrics $metrics)
     {
-        $demoRestaurantIds = Restaurant::where('is_demo', true)->pluck('id');
+        $todayStart = now()->startOfDay();
 
-        // Recent orders (last 5 minutes, excluding demo)
-        $recentOrders = Order::withoutGlobalScope('restaurant')
+        // Commandes récentes (5 dernières minutes, hors démo, hors brouillons)
+        $recentOrders = $metrics->placedOrders()
             ->with('restaurant:id,name')
-            ->whereNotIn('restaurant_id', $demoRestaurantIds)
-            ->where('created_at', '>=', now()->subMinutes(5))
+            ->where('orders.created_at', '>=', now()->subMinutes(5))
             ->latest()
             ->limit(10)
             ->get()
@@ -783,37 +763,29 @@ class DashboardController extends Controller
                 'created_at' => $order->created_at->format('H:i:s'),
             ]);
 
-        // Live stats (excluding demo)
+        // Live stats (hors démo) — mêmes définitions que le dashboard
         $stats = [
-            'orders_today' => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoRestaurantIds)->whereDate('created_at', today())->count(),
-            'revenue_today' => Order::withoutGlobalScope('restaurant')
-                ->whereNotIn('restaurant_id', $demoRestaurantIds)
-                ->where('payment_status', 'completed')
-                ->whereDate('paid_at', today())
-                ->sum('total'),
-            'pending_orders' => Order::withoutGlobalScope('restaurant')
-                ->whereNotIn('restaurant_id', $demoRestaurantIds)
-                ->whereIn('status', ['pending', 'confirmed', 'preparing'])
-                ->count(),
-            'active_restaurants' => Restaurant::notDemo()->where('status', 'active')->count(),
-            'new_registrations_today' => User::when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))->whereDate('created_at', today())->count(),
+            'orders_today' => $metrics->placedOrders()->where('orders.created_at', '>=', $todayStart)->count(),
+            'revenue_today' => $metrics->gmv($todayStart),
+            // En cours = payée → en livraison, limitées aux 48 dernières heures
+            'pending_orders' => $metrics->inProgressOrders()->count(),
+            'stuck_orders' => $metrics->stuckOrders()->count(),
+            'active_restaurants' => $metrics->activeRestaurantsCount(),
+            // Nouveaux utilisateurs du jour, y compris ceux sans restaurant (clients, livreurs…)
+            'new_registrations_today' => $this->realUsers($metrics)->where('created_at', '>=', $todayStart)->count(),
         ];
 
         // Orders by status (for pie chart)
-        $ordersByStatus = Order::withoutGlobalScope('restaurant')
-            ->whereDate('created_at', today())
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->get()
-            ->mapWithKeys(fn($item) => [
-                (is_object($item->status) ? $item->status->value : (string) $item->status) => $item->count
-            ]);
+        $ordersByStatus = $metrics->placedOrders()
+            ->where('orders.created_at', '>=', $todayStart)
+            ->selectRaw('orders.status as status_value, COUNT(*) as count')
+            ->groupBy('orders.status')
+            ->pluck('count', 'status_value');
 
-        // Hourly orders (for line chart) — 1 requête GROUP BY au lieu de 24 requêtes séparées
-        $hourlyRaw = DB::table('orders')
-            ->when($demoRestaurantIds->isNotEmpty(), fn($q) => $q->whereNotIn('restaurant_id', $demoRestaurantIds))
-            ->whereDate('created_at', today())
-            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
+        // Hourly orders (for line chart) — 1 requête GROUP BY, expression d'heure portable
+        $hourlyRaw = $metrics->placedOrders()
+            ->where('orders.created_at', '>=', $todayStart)
+            ->selectRaw($metrics->hourExpression('orders.created_at') . ' as hour, COUNT(*) as count')
             ->groupBy('hour')
             ->pluck('count', 'hour');
 
@@ -853,5 +825,16 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Utilisateurs hors comptes démo : ceux sans restaurant (clients, livreurs, admins)
+     * sont inclus — un whereNotIn('restaurant_id', …) seul les excluait (NULL NOT IN).
+     */
+    private function realUsers(PlatformMetrics $metrics)
+    {
+        return User::where(function ($q) use ($metrics) {
+            $q->whereNull('restaurant_id')
+              ->orWhere(fn ($r) => $metrics->onlyRealRestaurants($r));
+        });
+    }
 }
 

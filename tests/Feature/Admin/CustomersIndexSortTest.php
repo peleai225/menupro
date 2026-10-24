@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Restaurant;
@@ -44,12 +45,16 @@ class CustomersIndexSortTest extends TestCase
             'restaurant_id' => $restaurant->id,
             'customer_id' => $recent->id,
             'status' => OrderStatus::COMPLETED,
+            'payment_status' => PaymentStatus::COMPLETED, // CA = commandes payées (PlatformMetrics)
+            'paid_at' => now(),
             'total' => 5000,
         ]);
         Order::factory()->create([
             'restaurant_id' => $restaurant->id,
             'customer_id' => $recent->id,
             'status' => OrderStatus::COMPLETED,
+            'payment_status' => PaymentStatus::COMPLETED, // CA = commandes payées (PlatformMetrics)
+            'paid_at' => now(),
             'total' => 3000,
         ]);
 
@@ -99,6 +104,8 @@ class CustomersIndexSortTest extends TestCase
             'restaurant_id' => $restaurant->id,
             'customer_id' => $customer->id,
             'status' => OrderStatus::COMPLETED,
+            'payment_status' => PaymentStatus::COMPLETED, // CA = commandes payées (PlatformMetrics)
+            'paid_at' => now(),
             'total' => 10000,
         ]);
 

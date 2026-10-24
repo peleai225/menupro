@@ -126,7 +126,8 @@ class DeliveryDriverController extends Controller
     {
         $recentDeliveries = $driver->deliveries()->latest()->limit(20)->get();
         $totalEarnings = $driver->earnings()->sum('net_amount');
-        $deliveriesThisMonth = $driver->deliveries()->whereMonth('created_at', now()->month)->count();
+        // Bornes calculées en PHP (whereMonth seul mélangeait les mois des années précédentes)
+        $deliveriesThisMonth = $driver->deliveries()->where('created_at', '>=', now()->startOfMonth())->count();
 
         return view('pages.super-admin.drivers.show', compact('driver', 'recentDeliveries', 'totalEarnings', 'deliveriesThisMonth'));
     }

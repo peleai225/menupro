@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
 use App\Models\Restaurant;
-use App\Models\Subscription;
+use App\Services\PlatformMetrics;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -14,114 +15,99 @@ use App\Exports\SuperAdminStatsExport;
 
 class StatsController extends Controller
 {
+    /** Périodes proposées sur la page croissance (inclut 6 mois). */
+    private const GROWTH_PERIODS = [7, 30, 90, 180, 365];
+
+    public function __construct(private PlatformMetrics $metrics)
+    {
+    }
+
     /**
      * Display statistics dashboard.
      */
     public function index(Request $request): View
     {
-        $period = $request->get('period', '30'); // days
+        $period = $this->metrics->period($request->get('period'), 30); // days
+        $from = now()->subDays($period);
 
-        // Revenue over time
-        $revenueData = Order::withoutGlobalScope('restaurant')
-            ->where('payment_status', 'completed')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total) as revenue'),
-                DB::raw('COUNT(*) as orders')
-            )
+        // Volume payé (GMV) dans le temps : commandes payées non annulées, par date de paiement
+        $revenueData = $this->metrics->revenueOrders()
+            ->where('orders.paid_at', '>=', $from)
+            ->selectRaw('DATE(orders.paid_at) as date, SUM(orders.total) as revenue, COUNT(*) as orders')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Orders by status
-        $ordersByStatus = Order::withoutGlobalScope('restaurant')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->select('status', DB::raw('COUNT(*) as count'))
-            ->groupBy('status')
+        // Orders by status (commandes passées)
+        $ordersByStatus = $this->metrics->placedOrders()
+            ->where('orders.created_at', '>=', $from)
+            ->select('orders.status', DB::raw('COUNT(*) as count'))
+            ->groupBy('orders.status')
             ->get();
 
         // Orders by type
-        $ordersByType = Order::withoutGlobalScope('restaurant')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->select('type', DB::raw('COUNT(*) as count'))
-            ->groupBy('type')
+        $ordersByType = $this->metrics->placedOrders()
+            ->where('orders.created_at', '>=', $from)
+            ->select('orders.type', DB::raw('COUNT(*) as count'))
+            ->groupBy('orders.type')
             ->get();
 
-        // New restaurants over time
-        $newRestaurants = Restaurant::where('created_at', '>=', now()->subDays($period))
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
+        // New restaurants over time (hors démo / supprimés)
+        $newRestaurants = $this->metrics->restaurants()
+            ->where('created_at', '>=', $from)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Top 10 days by order count (all statuses) for bar chart
-        $topDays = Order::withoutGlobalScope('restaurant')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as orders')
-            )
+        // Commandes passées par jour (sert au top 10 et à la tendance hebdomadaire)
+        $ordersPerDay = $this->metrics->placedOrders()
+            ->where('orders.created_at', '>=', $from)
+            ->selectRaw('DATE(orders.created_at) as date, COUNT(*) as orders')
             ->groupBy('date')
-            ->orderByDesc('orders')
-            ->limit(10)
-            ->get();
+            ->orderBy('date')
+            ->toBase()->get();
 
-        // Weekly order trend for line chart
-        $weeklyTrend = DB::table('orders')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->selectRaw("YEARWEEK(created_at, 1) as yw")
-            ->selectRaw("MIN(DATE(created_at)) as week_start")
-            ->selectRaw("COUNT(*) as orders")
-            ->groupBy('yw')
-            ->orderBy('yw')
-            ->get();
+        // Top 10 days by order count for bar chart
+        $topDays = $ordersPerDay->sortByDesc('orders')->take(10)->values();
 
-        // Subscription revenue
-        $subscriptionRevenue = Subscription::where('created_at', '>=', now()->subDays($period))
-            ->where('status', 'active')
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(amount_paid) as revenue')
-            )
+        // Weekly order trend (semaines ISO commençant le lundi, regroupées en PHP)
+        $weeklyTrend = collect($this->metrics->groupDailyRowsByWeek($ordersPerDay, ['orders']))
+            ->map(fn ($row, $monday) => (object) ['week_start' => $monday, 'orders' => (int) $row['orders']])
+            ->values();
+
+        // Revenus d'abonnements encaissés (date de paiement, repli date de création)
+        $subscriptionRevenue = $this->metrics->collectedSubscriptionsBetween($from, now())
+            ->selectRaw('DATE(' . $this->metrics->subscriptionPaidAtColumn() . ') as date, SUM(subscriptions.amount_paid) as revenue')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Plan distribution
-        $planDistribution = Restaurant::join('plans', 'restaurants.current_plan_id', '=', 'plans.id')
-            ->where('restaurants.status', 'active')
-            ->select('plans.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('plans.name')
-            ->get();
+        // Répartition par plan : dernier abonnement valide de chaque restaurant
+        $planDistribution = $this->metrics->planDistribution();
 
         // Top cities
-        $topCities = Restaurant::whereNotNull('city')
+        $topCities = $this->metrics->restaurants()
+            ->whereNotNull('city')
             ->select('city', DB::raw('COUNT(*) as count'))
             ->groupBy('city')
             ->orderByDesc('count')
             ->limit(10)
             ->get();
 
-        // Summary stats — single query for orders
-        $orderSummary = DB::table('orders')
-            ->where('created_at', '>=', now()->subDays($period))
-            ->selectRaw("COUNT(*) as total_orders")
-            ->selectRaw("SUM(CASE WHEN payment_status = 'completed' THEN total ELSE 0 END) as total_revenue")
-            ->selectRaw("AVG(CASE WHEN payment_status = 'completed' THEN total ELSE NULL END) as average_order")
-            ->first();
+        $paidOrdersCount = $this->metrics->revenueOrders()->where('orders.paid_at', '>=', $from)->count();
+        $gmv = $this->metrics->gmv($from);
 
         $summary = [
-            'total_revenue' => (int) ($orderSummary->total_revenue ?? 0),
-            'total_orders' => (int) ($orderSummary->total_orders ?? 0),
-            'average_order' => (float) ($orderSummary->average_order ?? 0),
-            'new_restaurants' => Restaurant::where('created_at', '>=', now()->subDays($period))->count(),
-            'subscription_revenue' => Subscription::where('created_at', '>=', now()->subDays($period))
-                ->where('status', 'active')
-                ->sum('amount_paid'),
+            'total_revenue' => $gmv,
+            'total_orders' => $this->metrics->placedOrders()->where('orders.created_at', '>=', $from)->count(),
+            'cancelled_orders' => $this->metrics->placedOrders()
+                ->where('orders.created_at', '>=', $from)
+                ->whereIn('orders.status', [OrderStatus::CANCELLED, OrderStatus::REFUNDED])
+                ->count(),
+            'average_order' => $paidOrdersCount > 0 ? $gmv / $paidOrdersCount : 0,
+            'new_restaurants' => $this->metrics->restaurants()->where('created_at', '>=', $from)->count(),
+            'subscription_revenue' => $this->metrics->subscriptionRevenue($from, now()),
         ];
 
         return view('pages.super-admin.stats', compact(
@@ -144,62 +130,51 @@ class StatsController extends Controller
      */
     public function revenue(Request $request): View
     {
-        $period = $request->get('period', '30'); // days
+        $period = $this->metrics->period($request->get('period'), 30); // days
         $startDate = now()->subDays($period);
         $endDate = now();
 
-        // Daily revenue
-        $dailyRevenue = Order::withoutGlobalScope('restaurant')
-            ->where('payment_status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total) as revenue'),
-                DB::raw('COUNT(*) as orders'),
-                DB::raw('AVG(total) as average')
-            )
+        // Volume payé par jour (commandes payées non annulées, par date de paiement)
+        $dailyRevenue = $this->metrics->revenueOrders()
+            ->whereBetween('orders.paid_at', [$startDate, $endDate])
+            ->selectRaw('DATE(orders.paid_at) as date, SUM(orders.total) as revenue, COUNT(*) as orders, AVG(orders.total) as average')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Revenue by restaurant
-        $revenueByRestaurant = Order::withoutGlobalScope('restaurant')
-            ->join('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
-            ->where('orders.payment_status', 'completed')
-            ->whereBetween('orders.created_at', [$startDate, $endDate])
-            ->select(
-                'restaurants.id',
-                'restaurants.name',
-                DB::raw('SUM(orders.total) as revenue'),
-                DB::raw('COUNT(*) as orders')
-            )
-            ->groupBy('restaurants.id', 'restaurants.name')
+        // Revenue by restaurant (agrégé sur orders puis noms chargés : pas de jointure
+        // qui rendrait ambiguë la colonne status du scope revenue())
+        $byRestaurant = $this->metrics->revenueOrders()
+            ->whereBetween('orders.paid_at', [$startDate, $endDate])
+            ->select('orders.restaurant_id', DB::raw('SUM(orders.total) as revenue'), DB::raw('COUNT(*) as orders'))
+            ->groupBy('orders.restaurant_id')
             ->orderByDesc('revenue')
             ->limit(20)
             ->get();
+        $names = Restaurant::whereIn('id', $byRestaurant->pluck('restaurant_id'))->pluck('name', 'id');
+        $revenueByRestaurant = $byRestaurant->map(fn ($row) => (object) [
+            'id' => $row->restaurant_id,
+            'name' => $names[$row->restaurant_id] ?? '—',
+            'revenue' => (int) $row->revenue,
+            'orders' => (int) $row->orders,
+        ]);
 
         // Revenue by payment method
-        $revenueByPayment = Order::withoutGlobalScope('restaurant')
-            ->where('payment_status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select('payment_method', DB::raw('SUM(total) as revenue'), DB::raw('COUNT(*) as orders'))
-            ->groupBy('payment_method')
+        $revenueByPayment = $this->metrics->revenueOrders()
+            ->whereBetween('orders.paid_at', [$startDate, $endDate])
+            ->select('orders.payment_method', DB::raw('SUM(orders.total) as revenue'), DB::raw('COUNT(*) as orders'))
+            ->groupBy('orders.payment_method')
             ->get();
 
-        // Subscription revenue
-        $subscriptionRevenue = Subscription::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'active')
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(amount_paid) as revenue'),
-                DB::raw('COUNT(*) as count')
-            )
+        // Revenus d'abonnements encaissés
+        $subscriptionRevenue = $this->metrics->collectedSubscriptionsBetween($startDate, $endDate)
+            ->selectRaw('DATE(' . $this->metrics->subscriptionPaidAtColumn() . ') as date, SUM(subscriptions.amount_paid) as revenue, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $totalRevenue = $dailyRevenue->sum('revenue');
-        $totalOrders = $dailyRevenue->sum('orders');
+        $totalRevenue = (int) $dailyRevenue->sum('revenue');
+        $totalOrders = (int) $dailyRevenue->sum('orders');
         $averageOrder = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
         return view('pages.super-admin.stats-revenue', compact(
@@ -221,94 +196,59 @@ class StatsController extends Controller
      */
     public function growth(Request $request): View
     {
-        $period = $request->get('period', '90'); // days
-        $startDate = now()->subDays($period);
+        $period = $this->metrics->period($request->get('period'), 90, self::GROWTH_PERIODS); // days
         $endDate = now();
+        $startDate = $endDate->copy()->subDays($period);
 
-        // Previous period for comparison
+        // Période précédente de même durée, juste avant (bornes : [début, fin[ pour ne
+        // pas compter deux fois la seconde de jonction)
         $previousStartDate = $startDate->copy()->subDays($period);
-        $previousEndDate = $startDate;
+        $previousEndDate = $startDate->copy()->subSecond();
 
-        // Current period stats
-        $currentStats = [
-            'restaurants' => Restaurant::whereBetween('created_at', [$startDate, $endDate])->count(),
-            'orders' => Order::withoutGlobalScope('restaurant')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->count(),
-            'revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('total'),
-            'subscriptions' => Subscription::where('status', 'active')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->count(),
-        ];
+        $currentStats = $this->periodStats($startDate, $endDate);
+        $previousStats = $this->periodStats($previousStartDate, $previousEndDate);
 
-        // Previous period stats
-        $previousStats = [
-            'restaurants' => Restaurant::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count(),
-            'orders' => Order::withoutGlobalScope('restaurant')
-                ->whereBetween('created_at', [$previousStartDate, $previousEndDate])
-                ->count(),
-            'revenue' => Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereBetween('created_at', [$previousStartDate, $previousEndDate])
-                ->sum('total'),
-            'subscriptions' => Subscription::where('status', 'active')
-                ->whereBetween('created_at', [$previousStartDate, $previousEndDate])
-                ->count(),
-        ];
-
-        // Calculate growth percentages
+        // Évolution en % ; null quand la période précédente vaut 0 (affiché « nouveau » / « — »)
         $growth = [];
         foreach ($currentStats as $key => $current) {
-            $previous = $previousStats[$key] ?? 0;
-            $growth[$key] = $previous > 0 
-                ? (($current - $previous) / $previous) * 100 
-                : ($current > 0 ? 100 : 0);
+            $growth[$key] = $this->metrics->growth($current, $previousStats[$key] ?? 0);
         }
 
-        // Growth over time (weekly) — 2 queries instead of 3 per week
-        $weeklyOrders = DB::table('orders')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("YEARWEEK(created_at, 1) as yw")
-            ->selectRaw("MIN(DATE(created_at)) as week")
-            ->selectRaw("COUNT(*) as orders")
-            ->selectRaw("SUM(CASE WHEN payment_status = 'completed' THEN total ELSE 0 END) as revenue")
-            ->groupBy('yw')
-            ->orderBy('yw')
-            ->get()
-            ->keyBy('yw');
+        // Évolution hebdomadaire : semaines ISO (lundi), libellé = date du lundi
+        $ordersPerDay = $this->metrics->placedOrders()
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->selectRaw('DATE(orders.created_at) as date, COUNT(*) as orders')
+            ->groupBy('date')
+            ->toBase()->get();
 
-        $weeklyRestaurants = DB::table('restaurants')
+        $revenuePerDay = $this->metrics->revenueOrders()
+            ->whereBetween('orders.paid_at', [$startDate, $endDate])
+            ->selectRaw('DATE(orders.paid_at) as date, SUM(orders.total) as revenue')
+            ->groupBy('date')
+            ->toBase()->get();
+
+        $restaurantsPerDay = $this->metrics->restaurants()
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("YEARWEEK(created_at, 1) as yw")
-            ->selectRaw("COUNT(*) as restaurants")
-            ->groupBy('yw')
-            ->get()
-            ->keyBy('yw');
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as restaurants')
+            ->groupBy('date')
+            ->toBase()->get();
+
+        $weeklyOrders = $this->metrics->groupDailyRowsByWeek($ordersPerDay, ['orders']);
+        $weeklyRevenue = $this->metrics->groupDailyRowsByWeek($revenuePerDay, ['revenue']);
+        $weeklyRestaurants = $this->metrics->groupDailyRowsByWeek($restaurantsPerDay, ['restaurants']);
 
         $weeklyGrowth = [];
-        foreach ($weeklyOrders as $yw => $row) {
+        $monday = $startDate->copy()->startOfWeek(CarbonInterface::MONDAY);
+        while ($monday->lte($endDate)) {
+            $key = $monday->toDateString();
             $weeklyGrowth[] = [
-                'week' => $row->week,
-                'restaurants' => (int) ($weeklyRestaurants[$yw]->restaurants ?? 0),
-                'orders' => (int) $row->orders,
-                'revenue' => (int) $row->revenue,
+                'week' => $key,
+                'restaurants' => (int) ($weeklyRestaurants[$key]['restaurants'] ?? 0),
+                'orders' => (int) ($weeklyOrders[$key]['orders'] ?? 0),
+                'revenue' => (int) ($weeklyRevenue[$key]['revenue'] ?? 0),
             ];
+            $monday->addWeek();
         }
-        // Add weeks with only restaurants but no orders
-        foreach ($weeklyRestaurants as $yw => $row) {
-            if (!isset($weeklyOrders[$yw])) {
-                $weeklyGrowth[] = [
-                    'week' => $startDate->copy()->addWeeks(array_search($yw, array_keys($weeklyRestaurants->toArray())))->format('Y-m-d'),
-                    'restaurants' => (int) $row->restaurants,
-                    'orders' => 0,
-                    'revenue' => 0,
-                ];
-            }
-        }
-        usort($weeklyGrowth, fn($a, $b) => strcmp($a['week'], $b['week']));
 
         return view('pages.super-admin.stats-growth', compact(
             'period',
@@ -322,12 +262,26 @@ class StatsController extends Controller
     }
 
     /**
+     * Indicateurs d'une période (mêmes définitions pour la période courante et la précédente).
+     */
+    private function periodStats(CarbonInterface $from, CarbonInterface $to): array
+    {
+        return [
+            'restaurants' => $this->metrics->restaurants()->whereBetween('created_at', [$from, $to])->count(),
+            'orders' => $this->metrics->placedOrders()->whereBetween('orders.created_at', [$from, $to])->count(),
+            'revenue' => $this->metrics->gmv($from, $to),
+            // Paiements d'abonnement encaissés sur la période
+            'subscriptions' => $this->metrics->collectedSubscriptionsBetween($from, $to)->count(),
+        ];
+    }
+
+    /**
      * Export statistics.
      */
     public function export(Request $request)
     {
-        $period = $request->get('period', '30');
-        $type = $request->get('type', 'all'); // all, revenue, growth
+        $period = $this->metrics->period($request->get('period'), 30, self::GROWTH_PERIODS);
+        $type = in_array($request->get('type'), ['all', 'revenue', 'growth'], true) ? $request->get('type') : 'all';
 
         return Excel::download(
             new SuperAdminStatsExport($period, $type),
@@ -335,4 +289,3 @@ class StatsController extends Controller
         );
     }
 }
-

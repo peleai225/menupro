@@ -24,9 +24,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                 </svg>
             </div>
-            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['total_revenue'], 0, ',', ' ') }} F</p>
-            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Volume traité</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Abonnements + Commandes</p>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['subscriptions_revenue'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Abonnements encaissés</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Revenus MenuPro · ce mois {{ number_format($stats['subscriptions_this_month'], 0, ',', ' ') }} F</p>
         </div>
 
         <!-- Ce mois (success) -->
@@ -36,9 +36,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['this_month_revenue'], 0, ',', ' ') }} F</p>
-            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Transactions réussies</p>
+            <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['orders_this_month'], 0, ',', ' ') }} F</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Volume commandes ce mois</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Payées, hors annulées (argent des restaurants)</p>
         </div>
 
         <!-- En attente (warning) -->
@@ -50,7 +50,7 @@
             </div>
             <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['pending_payments'], 0, ',', ' ') }} F</p>
             <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">En attente</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Paiements en cours</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Paiements de commandes en cours</p>
         </div>
 
         <!-- Commissions (info) -->
@@ -61,8 +61,8 @@
                 </svg>
             </div>
             <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['orders_revenue'], 0, ',', ' ') }} F</p>
-            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus commandes</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Hors abonnements</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Volume commandes (GMV)</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Toutes périodes · remboursé {{ number_format($stats['refunds_total'], 0, ',', ' ') }} F</p>
         </div>
     </div>
 
@@ -70,8 +70,8 @@
     <div class="mb-6 rounded-2xl border p-5 shadow-sm" style="border-color:var(--sa-border);background:var(--sa-card);">
         <div class="mb-5 flex items-start justify-between gap-4">
             <div>
-                <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Revenus des 30 derniers jours</h2>
-                <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes + abonnements</p>
+                <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Encaissements des 30 derniers jours</h2>
+                <p class="text-sm" style="color:var(--sa-muted-fg);">Volume commandes et abonnements, courbes séparées</p>
             </div>
         </div>
         <div style="position:relative;height:260px;width:100%;">
@@ -255,16 +255,7 @@
                 data: {
                     labels: chartData.map(d => d.date),
                     datasets: [
-                        {
-                            label: 'Total',
-                            data: chartData.map(d => d.total),
-                            borderColor: 'rgb(34, 197, 94)',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2,
-                        },
-                        {
+                                                {
                             label: 'Commandes',
                             data: chartData.map(d => d.orders),
                             borderColor: 'rgb(139, 92, 246)',

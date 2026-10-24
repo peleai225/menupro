@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -25,7 +26,7 @@ class CustomerController extends Controller
         $stats = [
             'total_orders'  => $customer->orders()->withoutGlobalScope('restaurant')->count(),
             'total_spent'   => $customer->orders()->withoutGlobalScope('restaurant')
-                ->where('status', 'completed')->sum('total'),
+                ->revenue()->sum('total'),
             'last_order_at' => $customer->orders()->withoutGlobalScope('restaurant')
                 ->latest()->value('created_at'),
             'favourite_restaurant' => $customer->orders()
@@ -40,7 +41,7 @@ class CustomerController extends Controller
         return view('pages.super-admin.customers.show', compact('customer', 'stats'));
     }
 
-    public function index(Request $request): View
+    public function index(Request $request, PlatformMetrics $metrics): View
     {
         $sort = $request->get('sort', 'recent');
 
@@ -49,8 +50,7 @@ class CustomerController extends Controller
         // agrégeant directement depuis les commandes à chaque affichage.
         $query = Customer::with('user')
             ->withCount(['orders as orders_count' => fn($q) => $q->withoutGlobalScope('restaurant')])
-            ->withSum(['orders as orders_revenue' => fn($q) => $q->withoutGlobalScope('restaurant')
-                ->where('status', 'completed')], 'total')
+            ->withSum(['orders as orders_revenue' => fn($q) => $q->withoutGlobalScope('restaurant')->revenue()], 'total')
             ->withMax(['orders as last_order_date' => fn($q) => $q->withoutGlobalScope('restaurant')], 'created_at')
             ->when($request->search, fn($q) => $q->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -70,13 +70,12 @@ class CustomerController extends Controller
 
         $customers = $query->paginate(25)->withQueryString();
 
+        // Commandes clients hors comptes démo ; CA = commandes payées non annulées (PlatformMetrics)
         $stats = [
             'total'          => Customer::count(),
-            'new_this_month' => Customer::whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)->count(),
-            'orders_total'   => Order::withoutGlobalScope('restaurant')->whereNotNull('customer_id')->count(),
-            'revenue_total'  => Order::withoutGlobalScope('restaurant')->whereNotNull('customer_id')
-                ->where('status', 'completed')->sum('total'),
+            'new_this_month' => Customer::where('created_at', '>=', now()->startOfMonth())->count(),
+            'orders_total'   => $metrics->placedOrders()->whereNotNull('orders.customer_id')->count(),
+            'revenue_total'  => (int) $metrics->revenueOrders()->whereNotNull('orders.customer_id')->sum('orders.total'),
         ];
 
         $cities = Customer::select('city')->distinct()->whereNotNull('city')->pluck('city');

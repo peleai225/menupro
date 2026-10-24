@@ -7,35 +7,24 @@ use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, PlatformMetrics $metrics): View
     {
-        // Stats — all restaurants, excluding demo
+        // Stats — mêmes définitions que le dashboard (PlatformMetrics), hors démo/supprimés
         $demoIds = Restaurant::where('is_demo', true)->pluck('id');
 
         $stats = [
-            'total'         => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoIds)->count(),
-            'today'         => Order::withoutGlobalScope('restaurant')->whereNotIn('restaurant_id', $demoIds)->whereDate('created_at', today())->count(),
-            'revenue_month' => Order::withoutGlobalScope('restaurant')
-                ->whereNotIn('restaurant_id', $demoIds)
-                ->where('payment_status', PaymentStatus::COMPLETED)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('total'),
-            'pending'       => Order::withoutGlobalScope('restaurant')
-                ->whereNotIn('restaurant_id', $demoIds)
-                ->whereIn('status', [
-                    OrderStatus::PAID,
-                    OrderStatus::CONFIRMED,
-                    OrderStatus::PREPARING,
-                    OrderStatus::READY,
-                    OrderStatus::DELIVERING,
-                ])
-                ->count(),
+            'total'         => $metrics->placedOrders()->count(),
+            'today'         => $metrics->placedOrders()->where('orders.created_at', '>=', now()->startOfDay())->count(),
+            // Volume payé du mois : commandes payées non annulées, sur paid_at
+            'revenue_month' => $metrics->gmv(now()->startOfMonth()),
+            // En cours : payée → en livraison, 48 dernières heures
+            'pending'       => $metrics->inProgressOrders()->count(),
         ];
 
         // Orders query with filters

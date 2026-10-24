@@ -57,7 +57,7 @@
                 </svg>
             </span>
             <p class="mt-4 text-3xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['active']) }}</p>
-            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);">Actifs</p>
+            <p class="mt-1 text-sm" style="color:var(--sa-muted-fg);" title="Abonnement payant ou essai encore valide (hors démo et supprimés)">Actifs (abonnement ou essai valide)</p>
         </div>
 
         {{-- Suspendus --}}
@@ -88,7 +88,7 @@
         $baseParams = array_filter(request()->only(['search', 'plan', 'verification']));
         $tabDefs = [
             ['key' => '',          'label' => 'Tous',       'count' => $stats['total']],
-            ['key' => 'active',    'label' => 'Actifs',     'count' => $stats['active']],
+            ['key' => 'active',    'label' => 'Statut actif', 'count' => $stats['status_active']],
             ['key' => 'suspended', 'label' => 'Suspendus',  'count' => $stats['suspended']],
             ['key' => 'pending',   'label' => 'En attente', 'count' => $stats['pending']],
         ];

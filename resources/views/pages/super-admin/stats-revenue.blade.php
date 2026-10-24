@@ -36,16 +36,17 @@
     <!-- Summary Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus totaux</p>
-            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($totalRevenue / 100, 0, ',', ' ') }} FCFA</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Volume payé (GMV)</p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">Commandes payées, hors annulées/remboursées</p>
+            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($totalRevenue, 0, ',', ' ') }} FCFA</p>
         </div>
         <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes totales</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);">Commandes payées</p>
             <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($totalOrders) }}</p>
         </div>
         <div class="border shadow-sm rounded-xl p-6" style="background:var(--sa-card);border-color:var(--sa-border);">
             <p class="text-sm" style="color:var(--sa-muted-fg);">Panier moyen</p>
-            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($averageOrder / 100, 0, ',', ' ') }} FCFA</p>
+            <p class="text-2xl font-bold mt-1" style="color:var(--sa-fg);">{{ number_format($averageOrder, 0, ',', ' ') }} FCFA</p>
         </div>
     </div>
 
@@ -73,7 +74,7 @@
                     @forelse($revenueByRestaurant as $restaurant)
                         <tr style="border-bottom:1px solid var(--sa-border);">
                             <td class="py-3 px-4" style="color:var(--sa-fg);">{{ $restaurant->name }}</td>
-                            <td class="py-3 px-4 text-right font-medium" style="color:var(--sa-fg);">{{ number_format($restaurant->revenue / 100, 0, ',', ' ') }} FCFA</td>
+                            <td class="py-3 px-4 text-right font-medium" style="color:var(--sa-fg);">{{ number_format($restaurant->revenue, 0, ',', ' ') }} FCFA</td>
                             <td class="py-3 px-4 text-right" style="color:var(--sa-muted-fg);">{{ $restaurant->orders }}</td>
                         </tr>
                     @empty
@@ -94,7 +95,7 @@
                 <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--sa-muted);">
                     <span class="font-medium" style="color:var(--sa-fg);">{{ ucfirst($payment->payment_method ?? 'Non spécifié') }}</span>
                     <div class="text-right">
-                        <p class="font-bold" style="color:var(--sa-fg);">{{ number_format($payment->revenue / 100, 0, ',', ' ') }} FCFA</p>
+                        <p class="font-bold" style="color:var(--sa-fg);">{{ number_format($payment->revenue, 0, ',', ' ') }} FCFA</p>
                         <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $payment->orders }} commande(s)</p>
                     </div>
                 </div>
@@ -115,7 +116,7 @@
                 labels: {!! json_encode($dailyRevenue->pluck('date'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                 datasets: [{
                     label: 'Revenus (FCFA)',
-                    data: {!! json_encode($dailyRevenue->pluck('revenue')->map(fn($v) => $v / 100), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
+                    data: {!! json_encode($dailyRevenue->pluck('revenue')->map(fn($v) => (int) $v), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                     borderColor: 'rgb(59, 130, 246)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4

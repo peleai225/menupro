@@ -2,7 +2,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Commandes en cours</h1>
-            <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Vue temps réel de toutes les commandes actives</p>
+            <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Commandes actives des 48 dernières heures (hors comptes démo)</p>
+            @if(($stuckCount ?? 0) > 0)
+                <p class="text-sm mt-1 font-semibold" style="color:var(--sa-danger);">{{ $stuckCount }} commande(s) bloquée(s) « en cours » depuis plus de 48 h</p>
+            @endif
         </div>
         <div class="flex items-center gap-2" x-data="{ refreshing: false }" >
             <button @click="refreshing = true; setTimeout(() => location.reload(), 100)"

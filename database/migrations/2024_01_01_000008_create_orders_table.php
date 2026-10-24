@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('type')->default(OrderType::TAKEAWAY->value);
             $table->string('status')->default(OrderStatus::DRAFT->value);
             
-            // Montants (en centimes)
+            // Montants (en FCFA, entiers — le franc CFA n'a pas de subdivision)
             $table->unsignedInteger('subtotal');
             $table->unsignedInteger('delivery_fee')->default(0);
             $table->unsignedInteger('discount_amount')->default(0);

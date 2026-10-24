@@ -2,7 +2,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Livraisons en cours</h1>
-            <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Suivi global des livraisons tous restaurants confondus</p>
+            <p class="text-sm mt-1" style="color:var(--sa-muted-fg);">Livraisons actives des 48 dernières heures, tous restaurants confondus</p>
+            @if(($stuckCount ?? 0) > 0)
+                <p class="text-sm mt-1 font-semibold" style="color:var(--sa-danger);">{{ $stuckCount }} livraison(s) bloquée(s) depuis plus de 48 h</p>
+            @endif
         </div>
         <div class="flex items-center gap-3">
             <div class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">

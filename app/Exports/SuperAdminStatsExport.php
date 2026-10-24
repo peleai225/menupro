@@ -2,10 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Order;
-use App\Models\Restaurant;
-use App\Models\Subscription;
-use Illuminate\Support\Facades\DB;
+use App\Services\PlatformMetrics;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -37,8 +34,8 @@ class SuperAdminStatsExport implements FromArray, WithHeadings, WithTitle, WithS
     public function headings(): array
     {
         return match ($this->type) {
-            'revenue' => ['Date', 'Revenus (FCFA)', 'Commandes', 'Moyenne (FCFA)'],
-            'growth' => ['Période', 'Restaurants', 'Commandes', 'Revenus (FCFA)', 'Abonnements'],
+            'revenue' => ['Date', 'Volume payé (FCFA)', 'Commandes payées', 'Panier moyen (FCFA)'],
+            'growth' => ['Période', 'Nouveaux restaurants', 'Commandes passées', 'Volume payé (FCFA)', 'Abonnements encaissés'],
             default => ['Métrique', 'Valeur', 'Période'],
         };
     }
@@ -82,26 +79,22 @@ class SuperAdminStatsExport implements FromArray, WithHeadings, WithTitle, WithS
     protected function getRevenueData($startDate, $endDate): array
     {
         $data = [];
-        
-        $revenueData = Order::withoutGlobalScope('restaurant')
-            ->where('payment_status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total) as revenue'),
-                DB::raw('COUNT(*) as orders'),
-                DB::raw('AVG(total) as average')
-            )
+
+        // Montants en FCFA (aucune division) ; CA = commandes payées non annulées, par date de paiement
+        $revenueData = $this->metrics()->revenueOrders()
+            ->whereBetween('orders.paid_at', [$startDate, $endDate])
+            ->selectRaw('DATE(orders.paid_at) as date, SUM(orders.total) as revenue, COUNT(*) as orders, AVG(orders.total) as average')
             ->groupBy('date')
             ->orderBy('date')
+            ->toBase()
             ->get();
 
         foreach ($revenueData as $row) {
             $data[] = [
                 $row->date,
-                number_format($row->revenue / 100, 0, ',', ' '),
+                number_format((float) $row->revenue, 0, ',', ' '),
                 $row->orders,
-                number_format($row->average / 100, 0, ',', ' '),
+                number_format((float) $row->average, 0, ',', ' '),
             ];
         }
 
@@ -115,25 +108,20 @@ class SuperAdminStatsExport implements FromArray, WithHeadings, WithTitle, WithS
 
         for ($i = 0; $i < $weeks; $i++) {
             $weekStart = $startDate->copy()->addWeeks($i);
-            $weekEnd = $weekStart->copy()->addWeek();
+            $weekEnd = $weekStart->copy()->addWeek()->subSecond();
 
-            $restaurants = Restaurant::whereBetween('created_at', [$weekStart, $weekEnd])->count();
-            $orders = Order::withoutGlobalScope('restaurant')
-                ->whereBetween('created_at', [$weekStart, $weekEnd])
+            $restaurants = $this->metrics()->restaurants()->whereBetween('created_at', [$weekStart, $weekEnd])->count();
+            $orders = $this->metrics()->placedOrders()
+                ->whereBetween('orders.created_at', [$weekStart, $weekEnd])
                 ->count();
-            $revenue = Order::withoutGlobalScope('restaurant')
-                ->where('payment_status', 'completed')
-                ->whereBetween('created_at', [$weekStart, $weekEnd])
-                ->sum('total');
-            $subscriptions = Subscription::where('status', 'active')
-                ->whereBetween('created_at', [$weekStart, $weekEnd])
-                ->count();
+            $revenue = $this->metrics()->gmv($weekStart, $weekEnd);
+            $subscriptions = $this->metrics()->collectedSubscriptionsBetween($weekStart, $weekEnd)->count();
 
             $data[] = [
                 $weekStart->format('Y-m-d') . ' / ' . $weekEnd->format('Y-m-d'),
                 $restaurants,
                 $orders,
-                number_format($revenue / 100, 0, ',', ' '),
+                number_format($revenue, 0, ',', ' '),
                 $subscriptions,
             ];
         }
@@ -143,27 +131,27 @@ class SuperAdminStatsExport implements FromArray, WithHeadings, WithTitle, WithS
 
     protected function getAllData($startDate, $endDate): array
     {
-        $totalRevenue = Order::withoutGlobalScope('restaurant')
-            ->where('payment_status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('total');
+        $totalRevenue = $this->metrics()->gmv($startDate, $endDate);
 
-        $totalOrders = Order::withoutGlobalScope('restaurant')
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $totalOrders = $this->metrics()->placedOrders()
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->count();
 
-        $totalRestaurants = Restaurant::whereBetween('created_at', [$startDate, $endDate])->count();
+        $totalRestaurants = $this->metrics()->restaurants()->whereBetween('created_at', [$startDate, $endDate])->count();
 
-        $totalSubscriptions = Subscription::where('status', 'active')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('amount_paid');
+        $totalSubscriptions = $this->metrics()->subscriptionRevenue($startDate, $endDate);
 
         return [
-            ['Revenus totaux', number_format($totalRevenue / 100, 0, ',', ' ') . ' FCFA', $this->period . ' jours'],
-            ['Commandes totales', $totalOrders, $this->period . ' jours'],
+            ['Volume payé (GMV)', number_format($totalRevenue, 0, ',', ' ') . ' FCFA', $this->period . ' jours'],
+            ['Commandes passées', $totalOrders, $this->period . ' jours'],
             ['Nouveaux restaurants', $totalRestaurants, $this->period . ' jours'],
-            ['Revenus abonnements', number_format($totalSubscriptions / 100, 0, ',', ' ') . ' FCFA', $this->period . ' jours'],
+            ['Revenus abonnements encaissés', number_format($totalSubscriptions, 0, ',', ' ') . ' FCFA', $this->period . ' jours'],
+            ['MRR (à date)', number_format($this->metrics()->mrr(), 0, ',', ' ') . ' FCFA', 'aujourd\'hui'],
         ];
     }
-}
 
+    protected function metrics(): PlatformMetrics
+    {
+        return app(PlatformMetrics::class);
+    }
+}

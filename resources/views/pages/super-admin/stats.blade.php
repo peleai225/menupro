@@ -39,7 +39,7 @@
                     {{ number_format($summary['total_revenue'] / 1000, 0, ',', ' ') }}K F
                 @endif
             </p>
-            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus totaux</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Volume payé (GMV)</p>
             <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
         </div>
 
@@ -57,8 +57,8 @@
                     {{ number_format($summary['total_orders']) }}
                 @endif
             </p>
-            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Commandes traitées</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
+            <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Commandes passées</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours · dont {{ number_format($summary['cancelled_orders']) }} annulées</p>
         </div>
 
         <!-- Revenus abonnements -->
@@ -70,7 +70,7 @@
             </div>
             <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($summary['subscription_revenue'], 0, ',', ' ') }} F</p>
             <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Revenus abonnements</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Sur {{ $period }} jours</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Encaissés sur {{ $period }} jours</p>
         </div>
 
         <!-- Panier moyen -->
@@ -82,7 +82,7 @@
             </div>
             <p class="mt-3 text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($summary['average_order'], 0, ',', ' ') }} F</p>
             <p class="mt-0.5 text-sm font-medium" style="color:var(--sa-muted-fg);">Panier moyen</p>
-            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Par commande</p>
+            <p class="mt-1 text-xs" style="color:var(--sa-muted-fg);">Par commande payée</p>
         </div>
     </div>
 
@@ -119,7 +119,7 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Répartition par plan</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs par abonnement</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Dernier abonnement valide (essais inclus)</p>
                 </div>
             </div>
             <div style="position:relative;height:280px;width:100%;">
@@ -164,7 +164,7 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Évolution des revenus</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">{{ $period }} derniers jours</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Volume payé — {{ $period }} derniers jours</p>
                 </div>
             </div>
             <div style="position:relative;height:280px;width:100%;">
@@ -176,7 +176,7 @@
             <div class="mb-5 flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold" style="color:var(--sa-fg);">Répartition par ville</h2>
-                    <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants actifs</p>
+                    <p class="text-sm" style="color:var(--sa-muted-fg);">Restaurants (hors démo)</p>
                 </div>
             </div>
             <div style="position:relative;height:280px;width:100%;">

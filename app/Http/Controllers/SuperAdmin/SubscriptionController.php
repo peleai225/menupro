@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\Restaurant;
 use App\Models\Subscription;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class SubscriptionController extends Controller
     /**
      * Display a listing of subscriptions.
      */
-    public function index(Request $request): View
+    public function index(Request $request, PlatformMetrics $metrics): View
     {
         $query = Subscription::with(['restaurant.owner', 'plan', 'addons']);
 
@@ -73,44 +74,57 @@ class SubscriptionController extends Controller
 
         $subscriptions = $query->latest('created_at')->paginate(25)->withQueryString();
 
-        // Statistics
+        // Statistiques — en RESTAURANTS distincts (plus de doublons de lignes d'abonnement),
+        // hors démo et supprimés, définitions PlatformMetrics.
+        $counts = $metrics->restaurantSubscriptionCounts();
+        $latestPaid = $metrics->latestPaidValidSubscriptions();
+
         $stats = [
-            'total' => Subscription::count(),
-            'active' => Subscription::where('status', SubscriptionStatus::ACTIVE)->count(),
-            'expired' => Subscription::where('status', SubscriptionStatus::EXPIRED)->count(),
-            'pending' => Subscription::where('status', SubscriptionStatus::PENDING)->count(),
-            'expiring_soon' => Subscription::where('status', SubscriptionStatus::ACTIVE)
-                ->where('ends_at', '<=', now()->addDays(7))
-                ->where('ends_at', '>', now())
-                ->count(),
-            'total_revenue' => Subscription::where('status', SubscriptionStatus::ACTIVE)
-                ->sum('amount_paid'),
-            'monthly_revenue' => Subscription::where('status', SubscriptionStatus::ACTIVE)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount_paid'),
+            // Restaurants ayant eu au moins un abonnement
+            'total' => (int) $metrics->subscriptions()->distinct()->count('subscriptions.restaurant_id'),
+            // Abonnement payant/actif valide (ends_at > maintenant) — essais à part
+            'active' => $counts['paying'],
+            'trial' => $counts['trial'],
+            // Ni abonnement ni essai valide (hors restaurants en attente de validation)
+            'expired' => $counts['expired'],
+            // Restaurants ayant un paiement d'abonnement en attente (lancé, non confirmé)
+            'pending' => (int) $metrics->subscriptions()
+                ->where('subscriptions.status', SubscriptionStatus::PENDING->value)
+                ->distinct()
+                ->count('subscriptions.restaurant_id'),
+            // Dernier abonnement valide (essais inclus) finissant sous 7 jours
+            'expiring_soon' => $metrics->expiringSubscriptions(7)->count(),
+            // Encaissé : status active|expired, montant > 0, référence de paiement
+            'total_revenue' => $metrics->subscriptionRevenue(),
+            'monthly_revenue' => $metrics->subscriptionRevenue(now()->startOfMonth(), now()),
+            'mrr' => $metrics->mrr(),
         ];
 
-        // Revenue by billing period
-        $revenueByPeriod = Subscription::where('status', SubscriptionStatus::ACTIVE)
-            ->select('billing_period', DB::raw('SUM(amount_paid) as total'), DB::raw('COUNT(*) as count'))
-            ->groupBy('billing_period')
+        // Revenus encaissés par période de facturation
+        $revenueByPeriod = $metrics->collectedSubscriptions()
+            ->select('subscriptions.billing_period', DB::raw('SUM(subscriptions.amount_paid) as total'), DB::raw('COUNT(*) as count'))
+            ->groupBy('subscriptions.billing_period')
             ->get();
 
-        // Revenue by plan
-        $revenueByPlan = Subscription::where('status', SubscriptionStatus::ACTIVE)
+        // Revenus encaissés par plan
+        $revenueByPlan = $metrics->collectedSubscriptions()
             ->join('plans', 'subscriptions.plan_id', '=', 'plans.id')
             ->select('plans.name', 'plans.id', DB::raw('SUM(subscriptions.amount_paid) as total'), DB::raw('COUNT(*) as count'))
             ->groupBy('plans.id', 'plans.name')
             ->get();
 
-        // Retention stats
+        // Rétention (unités : restaurants, fenêtre 30 jours — voir PlatformMetrics::retentionRates)
+        $retention = $metrics->retentionRates(30);
         $retentionStats = [
-            'average_duration' => Subscription::where('status', SubscriptionStatus::ACTIVE)
-                ->selectRaw('AVG(DATEDIFF(ends_at, starts_at)) as avg_days')
-                ->value('avg_days'),
-            'renewal_rate' => $this->calculateRenewalRate(),
-            'churn_rate' => $this->calculateChurnRate(),
+            // Durée moyenne (jours) des abonnements payants en cours, calculée en PHP (DATEDIFF = MySQL)
+            'average_duration' => $latestPaid->isEmpty()
+                ? null
+                : $latestPaid->avg(fn ($s) => ($s->starts_at ?? $s->created_at)->diffInDays($s->ends_at, true)),
+            'renewal_rate' => $retention['renewal_rate'],
+            'renewal_base' => $retention['renewal_base'],
+            'churn_rate' => $retention['churn_rate'],
+            'churn_base' => $retention['churn_base'],
+            'window_days' => $retention['window_days'],
         ];
 
         $plans = Plan::active()->ordered()->get();
@@ -144,46 +158,6 @@ class SubscriptionController extends Controller
             'subscription',
             'paymentHistory'
         ));
-    }
-
-    /**
-     * Calculate renewal rate
-     */
-    private function calculateRenewalRate(): float
-    {
-        $totalExpired = Subscription::where('status', SubscriptionStatus::EXPIRED)->count();
-        
-        if ($totalExpired === 0) {
-            return 0;
-        }
-
-        // Count restaurants that have renewed (have multiple subscriptions)
-        $renewedCount = DB::table('subscriptions')
-            ->select('restaurant_id')
-            ->where('status', SubscriptionStatus::EXPIRED)
-            ->groupBy('restaurant_id')
-            ->havingRaw('COUNT(*) > 1')
-            ->count();
-
-        return round(($renewedCount / $totalExpired) * 100, 2);
-    }
-
-    /**
-     * Calculate churn rate
-     */
-    private function calculateChurnRate(): float
-    {
-        $totalActive = Subscription::where('status', SubscriptionStatus::ACTIVE)->count();
-        $expiredThisMonth = Subscription::where('status', SubscriptionStatus::EXPIRED)
-            ->whereMonth('ends_at', now()->month)
-            ->whereYear('ends_at', now()->year)
-            ->count();
-
-        if ($totalActive === 0) {
-            return 0;
-        }
-
-        return round(($expiredThisMonth / $totalActive) * 100, 2);
     }
 
     /**

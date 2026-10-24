@@ -10,23 +10,34 @@ use App\Models\CommissionLog;
 use App\Models\Order;
 use App\Jobs\ProcessJekoPayoutJob;
 use App\Services\JekoGateway;
+use App\Services\PlatformMetrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class FinanceController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, PlatformMetrics $metrics)
     {
+        // Commissions et reversements calculés depuis orders (platform_commission,
+        // payout_status/payout_at) : CommissionLog n'est pas alimenté pour toutes les
+        // commandes. Les retraits de wallet (PayoutTransaction) restent affichés tels quels.
+        $payoutsDone = $metrics->payouts(PlatformMetrics::PAYOUT_DONE_STATUSES);
+        $payoutsTodo = $metrics->payouts(PlatformMetrics::PAYOUT_TODO_STATUSES);
+
         $stats = [
             'total_wallets_balance' => RestaurantWallet::sum('balance'),
             'total_collected' => PaymentTransaction::where('status', 'completed')->sum('amount'),
-            'total_withdrawn' => PayoutTransaction::where('status', 'completed')->sum('amount'),
-            'total_commissions' => CommissionLog::sum('amount'),
-            'commissions_this_month' => CommissionLog::where('created_at', '>=', now()->startOfMonth())->sum('amount'),
+            'total_withdrawn' => $payoutsDone['amount'],
+            'total_commissions' => $metrics->commissions(),
+            'commissions_this_month' => $metrics->commissions(now()->startOfMonth()),
+            // Retraits de wallet demandés (onglet « Retraits »)
             'pending_payouts' => PayoutTransaction::where('status', 'pending')->count(),
             'pending_payouts_amount' => PayoutTransaction::where('status', 'pending')->sum('amount'),
-            'completed_payouts' => PayoutTransaction::where('status', 'completed')->count(),
+            // Reversements de commandes aux restaurants
+            'completed_payouts' => $payoutsDone['count'],
+            'todo_payouts' => $payoutsTodo['count'],
+            'todo_payouts_amount' => $payoutsTodo['amount'],
         ];
 
         $wallets = RestaurantWallet::with('restaurant')
@@ -43,27 +54,39 @@ class FinanceController extends Controller
             ->limit(10)
             ->get();
 
-        $recentCommissions = CommissionLog::with(['restaurant', 'order'])
-            ->latest()
+        // Dernières commissions : commandes payées portant une commission plateforme
+        $recentCommissions = $metrics->revenueOrders()
+            ->where('orders.platform_commission', '>', 0)
+            ->with('restaurant:id,name')
+            ->latest('orders.paid_at')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(fn ($order) => (object) [
+                'restaurant' => $order->restaurant,
+                'order' => $order,
+                'amount' => (int) $order->platform_commission,
+            ]);
 
-        // Chart data — 6 derniers mois
+        // Chart data — 6 derniers mois (expression année-mois portable MySQL/SQLite)
         $months = collect(range(5, 0))->map(fn($i) => now()->subMonths($i));
         $monthLabels = $months->map(fn($m) => $m->isoFormat('MMM YY'))->toArray();
+        $chartStart = now()->subMonths(5)->startOfMonth();
 
         $collectByMonth = PaymentTransaction::where('status', 'completed')
-            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+            ->where('created_at', '>=', $chartStart)
+            ->select(DB::raw($metrics->yearMonthExpression('created_at') . ' as ym'), DB::raw('SUM(amount) as total'))
             ->groupBy('ym')->pluck('total', 'ym');
 
-        $withdrawByMonth = PayoutTransaction::where('status', 'completed')
-            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+        // Reversements faits aux restaurants (orders.payout_at)
+        $withdrawByMonth = $metrics->revenueOrders()
+            ->whereIn('orders.payout_status', PlatformMetrics::PAYOUT_DONE_STATUSES)
+            ->where('orders.payout_at', '>=', $chartStart)
+            ->select(DB::raw($metrics->yearMonthExpression('orders.payout_at') . ' as ym'), DB::raw('SUM(' . $metrics->payoutAmountExpression() . ') as total'))
             ->groupBy('ym')->pluck('total', 'ym');
 
-        $commissionByMonth = CommissionLog::where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as ym"), DB::raw('SUM(amount) as total'))
+        $commissionByMonth = $metrics->revenueOrders()
+            ->where('orders.paid_at', '>=', $chartStart)
+            ->select(DB::raw($metrics->yearMonthExpression('orders.paid_at') . ' as ym'), DB::raw('SUM(orders.platform_commission) as total'))
             ->groupBy('ym')->pluck('total', 'ym');
 
         $chartData = [
@@ -230,14 +253,23 @@ class FinanceController extends Controller
         return back()->with('success', "Commande #{$order->reference} marquée comme reversée manuellement.");
     }
 
-    public function commissions(Request $request)
+    public function commissions(Request $request, PlatformMetrics $metrics)
     {
+        // Totaux depuis orders.platform_commission (commandes payées non annulées, paid_at) ;
+        // la liste détaillée ci-dessous reste celle de CommissionLog.
+        $withCommission = $metrics->revenueOrders()->where('orders.platform_commission', '>', 0);
+        $agg = (clone $withCommission)
+            ->selectRaw('COUNT(*) as cnt, SUM(orders.platform_commission) as commission, SUM(orders.total) as volume')
+            ->toBase()
+            ->first();
+
         $stats = [
-            'total' => CommissionLog::sum('amount'),
-            'this_month' => CommissionLog::where('created_at', '>=', now()->startOfMonth())->sum('amount'),
-            'last_month' => CommissionLog::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->sum('amount'),
-            'avg_rate' => CommissionLog::avg('commission_rate') ?? 0,
-            'total_orders' => CommissionLog::count(),
+            'total' => (int) ($agg->commission ?? 0),
+            'this_month' => $metrics->commissions(now()->startOfMonth()),
+            'last_month' => $metrics->commissions(now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()),
+            // Taux effectif = commissions / volume des commandes concernées
+            'avg_rate' => ($agg->volume ?? 0) > 0 ? $agg->commission / $agg->volume * 100 : 0,
+            'total_orders' => (int) ($agg->cnt ?? 0),
         ];
 
         $commissions = CommissionLog::with(['restaurant', 'order'])

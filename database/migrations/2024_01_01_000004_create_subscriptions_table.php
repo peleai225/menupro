@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('ends_at');
             
             // Paiement
-            $table->unsignedInteger('amount_paid'); // en centimes
+            $table->unsignedInteger('amount_paid'); // en FCFA (entier)
             $table->string('payment_reference')->nullable();
             $table->string('payment_method')->nullable();
             $table->json('payment_metadata')->nullable();

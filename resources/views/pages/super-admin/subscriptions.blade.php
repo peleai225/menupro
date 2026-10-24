@@ -21,31 +21,33 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Total</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Restaurants (hors démo) ayant eu au moins un abonnement">Restaurants</p>
             <p class="text-2xl font-bold" style="color:var(--sa-fg);">{{ number_format($stats['total']) }}</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Actifs</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Restaurants avec un abonnement actif valide (hors essais)">Abonnés actifs</p>
             <p class="text-2xl font-bold text-emerald-600">{{ number_format($stats['active']) }}</p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">+ {{ number_format($stats['trial']) }} en essai</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Expirés</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Restaurants sans abonnement ni essai valide">Expirés</p>
             <p class="text-2xl font-bold text-red-600">{{ number_format($stats['expired']) }}</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Restaurants avec un paiement d'abonnement lancé mais non confirmé">Paiement en attente</p>
             <p class="text-2xl font-bold text-amber-600">{{ number_format($stats['pending']) }}</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Expirent bientôt</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Dernier abonnement valide (essais inclus) finissant sous 7 jours">Expirent bientôt</p>
             <p class="text-2xl font-bold text-orange-600">{{ number_format($stats['expiring_soon']) }}</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus totaux</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Abonnements réellement payés (toutes périodes)">Encaissé total</p>
             <p class="text-lg font-bold text-emerald-600">{{ number_format($stats['total_revenue'], 0, ',', ' ') }} F</p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">MRR {{ number_format($stats['mrr'], 0, ',', ' ') }} F</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">Revenus ce mois</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);" title="Paiements confirmés depuis le 1er du mois">Encaissé ce mois</p>
             <p class="text-lg font-bold text-emerald-600">{{ number_format($stats['monthly_revenue'], 0, ',', ' ') }} F</p>
         </div>
     </div>
@@ -57,14 +59,21 @@
             <p class="text-xl font-bold" style="color:var(--sa-fg);">
                 {{ $retentionStats['average_duration'] ? round($retentionStats['average_duration']) . ' jours' : 'N/A' }}
             </p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">Abonnements payants en cours</p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
             <p class="text-sm" style="color:var(--sa-muted-fg);">Taux de renouvellement</p>
-            <p class="text-xl font-bold text-emerald-600">{{ $retentionStats['renewal_rate'] }}%</p>
+            <p class="text-xl font-bold text-emerald-600">{{ $retentionStats['renewal_rate'] !== null ? $retentionStats['renewal_rate'] . '%' : '—' }}</p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">
+                Restaurants dont l'abonnement payant a pris fin sur {{ $retentionStats['window_days'] }} j ({{ $retentionStats['renewal_base'] }}) et qui ont de nouveau un abonnement payant valide
+            </p>
         </div>
         <div class="border shadow-sm rounded-xl p-4" style="background:var(--sa-card);border-color:var(--sa-border);">
             <p class="text-sm" style="color:var(--sa-muted-fg);">Taux de désabonnement</p>
-            <p class="text-xl font-bold text-red-600">{{ $retentionStats['churn_rate'] }}%</p>
+            <p class="text-xl font-bold text-red-600">{{ $retentionStats['churn_rate'] !== null ? $retentionStats['churn_rate'] . '%' : '—' }}</p>
+            <p class="text-xs" style="color:var(--sa-muted-fg);">
+                Restaurants payants il y a {{ $retentionStats['window_days'] }} j ({{ $retentionStats['churn_base'] }}) qui n'ont plus d'abonnement payant valide
+            </p>
         </div>
     </div>
 
@@ -171,7 +180,7 @@
     <!-- Revenue by Period -->
     @if($revenueByPeriod->isNotEmpty())
     <div class="border shadow-sm rounded-xl p-4 mb-6" style="background:var(--sa-card);border-color:var(--sa-border);">
-        <h3 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Revenus par période</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color:var(--sa-fg);">Revenus encaissés par période de facturation</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @foreach($revenueByPeriod as $period)
                 <div class="text-center">

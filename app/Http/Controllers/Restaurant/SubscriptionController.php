@@ -277,23 +277,13 @@ class SubscriptionController extends Controller
                 ->latest()
                 ->first();
 
-            if ($activeTrial) {
-                $activeTrial->update([
-                    'status' => SubscriptionStatus::EXPIRED,
-                ]);
-            }
-
-            $subscription->update([
+            // Paiement vérifié : unique abonnement en cours (l'essai et tout ancien
+            // abonnement actif sont clôturés), restaurant réactivé et débloqué.
+            $subscription->activateExclusively([
                 'status' => SubscriptionStatus::ACTIVE,
                 'is_trial' => false,
                 'payment_method' => $subscription->payment_metadata['gateway'] ?? 'jeko',
-            ]);
-
-            $restaurant->update([
-                'current_plan_id' => $subscription->plan_id,
-                'subscription_ends_at' => $subscription->ends_at,
-                'orders_blocked' => false,
-                'status' => \App\Enums\RestaurantStatus::ACTIVE,
+                'paid_at' => $subscription->paid_at ?? now(),
             ]);
 
             \DB::commit();
