@@ -331,6 +331,12 @@
                                            class="text-xs text-primary-600 hover:text-primary-700 font-medium mt-2 inline-block">
                                             Voir la commande →
                                         </a>
+                                        {{-- Lien signé (30 min) : accepter / refuser en un geste, même depuis un autre appareil --}}
+                                        <a href="{{ \App\Support\OrderActionLink::for((int) $data['order_id']) }}"
+                                           wire:click="markAsRead('{{ $notification->id }}')"
+                                           class="text-xs font-bold mt-2 ml-3 inline-block" style="color:#16a34a">
+                                            Accepter / refuser →
+                                        </a>
                                     @elseif(isset($data['reservation_id']) && $data['type'] === 'new_reservation')
                                         <a href="{{ route('restaurant.reservations.show', $data['reservation_id']) }}" 
                                            wire:click="markAsRead('{{ $notification->id }}')"

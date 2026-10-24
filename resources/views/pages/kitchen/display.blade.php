@@ -438,7 +438,7 @@
         var min = Math.round(Number(o.minutes_ago)||0);
         var tblLabel = o.table_number ? (/^\d+$/.test(String(o.table_number)) ? 'Table '+h(o.table_number) : h(o.table_number)) : '';
         var tbl = tblLabel ? '<span class="ctbl">'+tblLabel+'</span>' : '';
-        var badgeLabel = st==='paid' ? 'NOUVELLE' : st==='confirmed' ? 'CONFIRM&#201;E' : st==='preparing' ? 'EN COURS' : 'PR&#202;T';
+        var badgeLabel = st==='paid' ? '&#192; ACCEPTER' : st==='confirmed' ? 'CONFIRM&#201;E' : st==='preparing' ? 'EN COURS' : 'PR&#202;T';
 
         var orderNote = o.customer_notes
             ? '<div class="cnote"><span class="cnote-icon">&#9888;</span><span>'+h(o.customer_notes)+'</span></div>'
@@ -456,7 +456,7 @@
             +orderNote
             +itemsHtml(o.items);
 
-        if      (st==='paid')      html += '<button class="cbtn bc" onclick="act('+id+',\'confirm\',this)">&#10003; Confirmer</button>';
+        if      (st==='paid')      html += '<button class="cbtn bc" onclick="act('+id+',\'confirm\',this)">&#10003; Accepter</button>';
         else if (st==='confirmed') html += '<button class="cbtn bp" onclick="act('+id+',\'prepare\',this)">&#127859; Commencer</button>';
         else if (st==='preparing') html += '<button class="cbtn br" onclick="act('+id+',\'ready\',this)">&#9989; Pr&#234;t &#8212; Servir !</button>';
         else                       html += '<div class="rdy-lbl">En attente d\'un serveur</div>';

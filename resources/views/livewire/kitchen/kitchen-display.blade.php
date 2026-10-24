@@ -22,7 +22,7 @@
                         <div class="kds-card-top kds-top-{{ $order['status'] }}">
                             <span class="kds-ref">#{{ $order['reference'] }}</span>
                             <span class="kds-badge kds-badge-{{ $order['status'] }}">
-                                {{ $order['status'] === 'paid' ? 'NOUVELLE' : 'CONFIRMÉE' }}
+                                {{ $order['status'] === 'paid' ? 'À ACCEPTER' : 'CONFIRMÉE' }}
                             </span>
                             @if($order['table_number'])
                                 <span class="kds-table">Table {{ $order['table_number'] }}</span>
@@ -54,7 +54,7 @@
                                 <button class="kds-btn kds-btn-confirm"
                                     wire:click="confirm({{ $order['id'] }})"
                                     wire:loading.attr="disabled">
-                                    ✓ Confirmer
+                                    ✓ Accepter
                                 </button>
                             @else
                                 <button class="kds-btn kds-btn-prepare"

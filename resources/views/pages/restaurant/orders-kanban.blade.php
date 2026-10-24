@@ -94,7 +94,7 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <h3 class="font-semibold text-neutral-900">Payées</h3>
+                            <h3 class="font-semibold text-neutral-900">À accepter</h3>
                         </div>
                         <span class="text-xs text-neutral-500 bg-white px-2 py-1 rounded-full" 
                               x-text="getOrderCount('paid')"></span>
