@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryStatus;
+use App\Enums\OrderRejectionReason;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Order extends Model
@@ -55,13 +58,20 @@ class Order extends Model
         'internal_notes',
         'estimated_prep_time',
         'confirmed_at',
+        'accepted_at',
+        'prep_minutes',
         'preparing_at',
         'ready_at',
         'driver_assigned_at',
+        'driver_search_at',
         'picked_up_at',
         'completed_at',
         'cancelled_at',
         'cancellation_reason',
+        'rejected_at',
+        'rejection_reason',
+        'refund_status',
+        'acceptance_reminder_level',
         'payout_status',
         'payout_at',
         'payout_reference',
@@ -81,12 +91,18 @@ class Order extends Model
         'scheduled_at' => 'datetime',
         'paid_at' => 'datetime',
         'confirmed_at' => 'datetime',
+        'accepted_at' => 'datetime',
         'preparing_at' => 'datetime',
         'ready_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'driver_search_at' => 'datetime',
         'payout_at' => 'datetime',
         'estimated_prep_time' => 'integer',
+        'prep_minutes' => 'integer',
+        'acceptance_reminder_level' => 'integer',
+        'rejection_reason' => OrderRejectionReason::class,
     ];
 
     // =========================================================================
@@ -132,6 +148,15 @@ class Order extends Model
     public function waiter(): BelongsTo
     {
         return $this->belongsTo(Waiter::class, 'waiter_id');
+    }
+
+    /**
+     * Client de l'app / du site (commandes plateforme). Sans cette relation, $order->customer
+     * valait toujours null et le client ne recevait aucun push de suivi (CustomerPushService).
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function items(): HasMany
@@ -184,6 +209,21 @@ class Order extends Model
             OrderStatus::READY,
             OrderStatus::DELIVERING,
         ]);
+    }
+
+    /**
+     * Commandes dont la course peut être proposée aux livreurs : acceptées par le restaurant
+     * et arrivées à l'heure d'appel des livreurs (fin de préparation, voir driver_search_at).
+     */
+    public function scopeOpenToDrivers($query)
+    {
+        return $query
+            ->whereIn('status', [
+                OrderStatus::CONFIRMED->value,
+                OrderStatus::PREPARING->value,
+                OrderStatus::READY->value,
+            ])
+            ->where(fn ($q) => $q->whereNull('driver_search_at')->orWhere('driver_search_at', '<=', now()));
     }
 
     public function scopePending($query)
@@ -312,10 +352,14 @@ class Order extends Model
 
     public function getEstimatedReadyAtAttribute(): ?\Carbon\Carbon
     {
-        if (!$this->estimated_prep_time || !$this->confirmed_at) {
+        // Temps annoncé par le restaurant à l'acceptation, sinon l'estimation de la commande
+        $minutes = $this->prep_minutes ?: $this->estimated_prep_time;
+        $from = $this->accepted_at ?? $this->confirmed_at;
+
+        if (!$minutes || !$from) {
             return null;
         }
-        return $this->confirmed_at->addMinutes($this->estimated_prep_time);
+        return $from->copy()->addMinutes($minutes);
     }
 
     // =========================================================================
@@ -352,7 +396,18 @@ class Order extends Model
         }
 
         $oldStatus = $this->status->value;
+        $isAcceptance = $this->status === OrderStatus::PAID && $newStatus === OrderStatus::CONFIRMED;
         $this->status = $newStatus;
+
+        // Commande « à accepter » confirmée (bloc « À accepter », kanban, rush, cuisine, API) :
+        // c'est l'acceptation du restaurant, avec le temps de préparation par défaut s'il n'en a pas choisi.
+        if ($isAcceptance) {
+            $this->accepted_at ??= now();
+            $this->prep_minutes ??= (int) config('orders.acceptance.default_prep_minutes', 15);
+            if ($this->needsPlatformDriver()) {
+                $this->driver_search_at = now()->addMinutes($this->driverSearchDelayMinutes());
+            }
+        }
 
         // Set timestamps
         match ($newStatus) {
@@ -370,6 +425,16 @@ class Order extends Model
             // Annulation depuis le tableau des commandes / la cuisine : la course suit
             if ($newStatus === OrderStatus::CANCELLED) {
                 $this->cancelActiveDelivery($this->cancellation_reason);
+            }
+
+            // Acceptée : les livreurs seront appelés vers la fin de la préparation
+            if ($isAcceptance) {
+                $this->scheduleDriverSearch();
+            }
+
+            // Prête avant l'heure prévue : inutile d'attendre, on appelle les livreurs tout de suite
+            if ($newStatus === OrderStatus::READY) {
+                $this->callDriversNowIfStillWaiting();
             }
 
             \App\Events\OrderStatusChanged::dispatch($this, $oldStatus, $newStatus->value);
@@ -395,11 +460,8 @@ class Order extends Model
         if ($saved) {
             $this->deductDishStock();
 
-            // Auto-assignation livreur pour commandes plateforme avec livraison
-            if ($this->source === 'platform_web' && $this->type === OrderType::DELIVERY && $this->delivery) {
-                \App\Jobs\AssignDriverJob::dispatch($this->delivery->id)
-                    ->delay(now()->addSeconds(30));
-            }
+            // Les livreurs ne sont plus appelés au paiement mais quand le restaurant accepte
+            // la commande (transitionTo() → scheduleDriverSearch()).
 
             if ($announce) {
                 $this->announceToRestaurant();
@@ -426,6 +488,180 @@ class Order extends Model
         }
 
         \App\Jobs\AlertRestaurantNewOrder::dispatch($this->id)->afterCommit();
+
+        // Relances tant que la commande n'est ni acceptée ni refusée (push, SMS, alerte admin)
+        if ($this->isAwaitingAcceptance()) {
+            \App\Jobs\RemindRestaurantPendingOrder::scheduleFirst($this);
+        }
+    }
+
+    // =========================================================================
+    // ACCEPTATION / REFUS PAR LE RESTAURANT
+    // =========================================================================
+
+    /**
+     * Libellé du statut vu par le client (« Payée » n'a pas de sens pour une commande espèces
+     * qui attend le restaurant).
+     */
+    public function customerStatusLabel(): string
+    {
+        return match (true) {
+            $this->status === OrderStatus::PAID => 'En attente de confirmation du restaurant',
+            $this->status === OrderStatus::CANCELLED && $this->rejection_reason !== null => 'Refusée par le restaurant',
+            default => $this->status->label(),
+        };
+    }
+
+    /**
+     * Commande reçue qui attend la décision du restaurant (bloc « À accepter »).
+     */
+    public function isAwaitingAcceptance(): bool
+    {
+        return $this->status === OrderStatus::PAID;
+    }
+
+    /**
+     * Début de l'attente : le paiement, ou la création pour une commande « espèces ».
+     */
+    public function acceptanceRequestedAt(): \Carbon\Carbon
+    {
+        return ($this->paid_at ?? $this->created_at ?? now())->copy();
+    }
+
+    /**
+     * Payée en ligne (passerelle) : un refus impose un remboursement.
+     */
+    public function isPaidOnline(): bool
+    {
+        return $this->is_paid
+            && !in_array($this->payment_method, [null, '', 'cash', 'cash_on_delivery', 'on_site'], true);
+    }
+
+    /**
+     * Le restaurant accepte la commande avec un temps de préparation (minutes).
+     * Retourne false si elle n'est plus à accepter (déjà acceptée ou refusée par quelqu'un d'autre).
+     */
+    public function accept(?int $prepMinutes = null): bool
+    {
+        $prepMinutes = $prepMinutes ?: (int) config('orders.acceptance.default_prep_minutes', 15);
+        $prepMinutes = max(1, min(180, $prepMinutes));
+
+        return DB::transaction(function () use ($prepMinutes) {
+            if (!$this->lockAndRefreshAwaiting()) {
+                return false;
+            }
+
+            $this->prep_minutes = $prepMinutes;
+            $this->accepted_at = now();
+
+            return $this->transitionTo(OrderStatus::CONFIRMED);
+        });
+    }
+
+    /**
+     * Le restaurant refuse la commande (motif obligatoire, précision libre).
+     * Elle est annulée et le client prévenu ; payée en ligne : « remboursement à effectuer »
+     * (manuel, pas de remboursement automatique) et super-admins alertés.
+     */
+    public function reject(OrderRejectionReason $reason, ?string $note = null): bool
+    {
+        $note = trim((string) $note) ?: null;
+
+        $rejected = DB::transaction(function () use ($reason, $note) {
+            if (!$this->lockAndRefreshAwaiting()) {
+                return false;
+            }
+
+            $this->rejected_at = now();
+            $this->rejection_reason = $reason;
+            $this->cancellation_reason = $note ? "{$reason->label()} : {$note}" : $reason->label();
+            if ($this->isPaidOnline()) {
+                $this->refund_status = 'pending';
+            }
+
+            if (!$this->transitionTo(OrderStatus::CANCELLED)) {
+                return false;
+            }
+
+            // Le stock retiré au paiement est remis en vente
+            if ($this->is_paid) {
+                $this->restoreDishStock();
+            }
+
+            return true;
+        });
+
+        if ($rejected && $this->refund_status === 'pending') {
+            \Illuminate\Support\Facades\Notification::send(
+                User::superAdmins()->get(),
+                new \App\Notifications\Admin\RefundRequiredNotification($this),
+            );
+        }
+
+        return $rejected;
+    }
+
+    /**
+     * Verrouille la ligne et recharge la commande : deux personnes (tableau de bord et lien de
+     * notification) peuvent répondre en même temps, une seule décision doit passer.
+     */
+    private function lockAndRefreshAwaiting(): bool
+    {
+        $fresh = $this->newQueryWithoutScopes()->whereKey($this->getKey())->lockForUpdate()->first();
+        if (!$fresh) {
+            return false;
+        }
+
+        $this->setRawAttributes($fresh->getAttributes(), true);
+
+        return $this->isAwaitingAcceptance();
+    }
+
+    /**
+     * Commande de la plateforme livrée par un livreur MenuPro.
+     */
+    public function needsPlatformDriver(): bool
+    {
+        return $this->source === 'platform_web'
+            && $this->type === OrderType::DELIVERY
+            && $this->delivery()->exists();
+    }
+
+    /**
+     * Délai avant l'appel des livreurs : fin de préparation moins leur temps d'approche, au moins 1 min.
+     */
+    public function driverSearchDelayMinutes(): int
+    {
+        $prep = $this->prep_minutes ?: (int) config('orders.acceptance.default_prep_minutes', 15);
+
+        return max(1, $prep - (int) config('orders.driver_lead_minutes', 10));
+    }
+
+    protected function scheduleDriverSearch(): void
+    {
+        $delivery = $this->delivery()->first();
+        if (!$delivery || !$this->needsPlatformDriver()) {
+            return;
+        }
+
+        \App\Jobs\AssignDriverJob::dispatch($delivery->id)
+            ->delay($this->driver_search_at ?? now()->addMinutes($this->driverSearchDelayMinutes()))
+            ->afterCommit();
+    }
+
+    protected function callDriversNowIfStillWaiting(): void
+    {
+        if (!$this->driver_search_at || $this->driver_search_at->lte(now())) {
+            return;
+        }
+
+        $delivery = $this->delivery()->first();
+        if (!$delivery || $delivery->status !== DeliveryStatus::PENDING || !$this->needsPlatformDriver()) {
+            return;
+        }
+
+        $this->forceFill(['driver_search_at' => now()])->saveQuietly();
+        \App\Jobs\AssignDriverJob::dispatch($delivery->id)->afterCommit();
     }
 
     protected function deductDishStock(): void

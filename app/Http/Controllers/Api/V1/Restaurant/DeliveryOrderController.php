@@ -60,6 +60,8 @@ class DeliveryOrderController extends Controller
         DB::transaction(function () use ($order, $data, $restaurantId) {
             if ($data['estimated_prep_time'] ?? null) {
                 $order->estimated_prep_time = $data['estimated_prep_time'];
+                // Temps annoncé à l'acceptation : fixe aussi l'heure d'appel des livreurs
+                $order->prep_minutes = $data['estimated_prep_time'];
             }
 
             $order->transitionTo(OrderStatus::CONFIRMED);

@@ -28,6 +28,8 @@ class NewOrderNotification extends Notification
             'order_type'       => $this->order->type->value,
             'table_number'     => $this->order->table_number ?? null,
             'message'          => "Nouvelle commande #{$this->order->reference} de {$this->order->customer_name}.",
+            // Lien signé « Accepter / Refuser » (30 min) ; la cloche en régénère un à l'affichage
+            'action_url'       => $this->order->isAwaitingAcceptance() ? \App\Support\OrderActionLink::for($this->order) : null,
         ];
     }
 }

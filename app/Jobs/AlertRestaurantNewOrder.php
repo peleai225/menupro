@@ -8,6 +8,7 @@ use App\Models\PushToken;
 use App\Notifications\NewOrderNotification;
 use App\Services\FcmService;
 use App\Services\WhatsAppService;
+use App\Support\OrderActionLink;
 use App\Support\PushBadge;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -64,18 +65,21 @@ class AlertRestaurantNewOrder implements ShouldQueue
         }
 
         $total = number_format($order->total, 0, ',', ' ');
+        $awaiting = $order->isAwaitingAcceptance();
 
         $fcm->sendToMultiple(
             $tokens,
             '🔔 Nouvelle commande #' . $order->reference,
-            "{$order->customer_name} · {$order->items_count} article(s) · {$total} F CFA",
+            "{$order->customer_name} · {$order->items_count} article(s) · {$total} F CFA"
+                . ($awaiting ? ' · Touchez pour accepter ou refuser' : ''),
             [
                 'type'     => 'new_order',
                 'order_id' => (string) $order->id,
                 'badge'    => PushBadge::forRestaurant($order->restaurant_id),
             ],
             [
-                'link'                => route('restaurant.orders'),
+                // À accepter : lien signé vers la page « Accepter / Refuser » (utilisable sans connexion)
+                'link'                => $awaiting ? OrderActionLink::for($order) : route('restaurant.orders'),
                 'tag'                 => 'order-' . $order->id,
                 'require_interaction' => true,
                 'icon'                => '/icon-192.png',

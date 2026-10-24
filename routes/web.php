@@ -623,6 +623,15 @@ Route::prefix('cuisine/{token}')->middleware('throttle:120,1')->group(function (
     Route::post('/service-requests/{serviceRequest}/done', [\App\Http\Controllers\Restaurant\KitchenController::class, 'serviceRequestDone'])->name('kitchen.service-request.done');
 });
 
+// Accepter / refuser une commande depuis une notification (lien signé 30 min, sans connexion :
+// voir App\Http\Controllers\OrderActionController). La signature est vérifiée dans le contrôleur
+// pour afficher une page claire si le lien a expiré ; le POST est aussi protégé par le CSRF.
+Route::prefix('commande-a-traiter/{order}')->name('order-action.')->whereNumber('order')
+    ->middleware('throttle:30,1')->group(function () {
+        Route::get('/', [\App\Http\Controllers\OrderActionController::class, 'show'])->name('show');
+        Route::post('/', [\App\Http\Controllers\OrderActionController::class, 'handle'])->name('handle');
+    });
+
 // Interface serveur (token public, comme cuisine et personnel)
 Route::prefix('serveur/{token}')->name('waiter.')->middleware('throttle:120,1')->group(function () {
     Route::get('/', [\App\Http\Controllers\Restaurant\WaiterController::class, 'display'])->name('display');

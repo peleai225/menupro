@@ -41,6 +41,14 @@ class AssignDriverJob implements ShouldQueue
             return;
         }
 
+        // Les livreurs ne sont appelés qu'une fois la commande acceptée par le restaurant
+        if ($delivery->order->isAwaitingAcceptance()) {
+            Log::info('AssignDriverJob: skipped, order not accepted yet', [
+                'delivery_id' => $this->deliveryId,
+            ]);
+            return;
+        }
+
         if ($delivery->status !== DeliveryStatus::PENDING) {
             Log::info('AssignDriverJob: skipped, already accepted', [
                 'delivery_id' => $this->deliveryId,
