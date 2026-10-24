@@ -57,6 +57,21 @@ class Subscription extends Model
         return $this->hasMany(SubscriptionAddon::class);
     }
 
+    /**
+     * Le restaurant a-t-il un autre abonnement (payant ou essai) encore valide ?
+     * Sert aux jobs d'expiration : un ancien abonnement en doublon ne doit pas bloquer
+     * un restaurant qui a renouvelé.
+     */
+    public static function hasOtherValidFor(int $restaurantId, int $exceptSubscriptionId): bool
+    {
+        return static::withoutGlobalScopes()
+            ->where('restaurant_id', $restaurantId)
+            ->where('id', '!=', $exceptSubscriptionId)
+            ->whereIn('status', [SubscriptionStatus::ACTIVE, SubscriptionStatus::TRIAL])
+            ->where('ends_at', '>', now())
+            ->exists();
+    }
+
     // =========================================================================
     // SCOPES
     // =========================================================================

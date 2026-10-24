@@ -104,6 +104,12 @@ class ProcessTrialExpiration implements ShouldQueue
             'status' => SubscriptionStatus::EXPIRED,
         ]);
 
+        // Le restaurant a déjà souscrit un abonnement valide : on clôt l'essai sans bloquer ni prévenir
+        if (Subscription::hasOtherValidFor($restaurant->id, $subscription->id)) {
+            $subscription->markExpiredNotificationSent();
+            return;
+        }
+
         // Block restaurant orders
         $restaurant->update([
             'orders_blocked' => true,

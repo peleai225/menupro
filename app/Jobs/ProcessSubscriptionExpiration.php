@@ -50,8 +50,16 @@ class ProcessSubscriptionExpiration implements ShouldQueue
                 'status' => SubscriptionStatus::EXPIRED,
             ]);
 
-            // Update restaurant status
             $restaurant = $subscription->restaurant;
+
+            // Ancien abonnement en doublon alors qu'un plus récent est encore valide (renouvellement) :
+            // on le clôt sans bloquer le restaurant ni le prévenir.
+            if (Subscription::hasOtherValidFor($restaurant->id, $subscription->id)) {
+                $subscription->update(['expired_notification_sent_at' => $subscription->expired_notification_sent_at ?? now()]);
+                return;
+            }
+
+            // Update restaurant status
             $restaurant->update([
                 'status' => RestaurantStatus::EXPIRED,
                 'orders_blocked' => true,
