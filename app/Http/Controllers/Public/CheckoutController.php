@@ -271,7 +271,7 @@ class CheckoutController extends Controller
 
         if ($order->is_paid) {
             return redirect()->route('r.order.status', [$slug, $order->tracking_token])
-                ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
+                ->with('success', 'Paiement confirmé ! Le restaurant va confirmer votre commande dans quelques instants.');
         }
 
         // Jeko: verify payment link status
@@ -341,7 +341,7 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('r.order.status', [$slug, $order->tracking_token])
-            ->with('success', 'Paiement confirmé ! Votre commande est en cours de préparation.');
+            ->with('success', 'Paiement confirmé ! Le restaurant va confirmer votre commande dans quelques instants.');
     }
 
     public function cancel(string $slug, Order $order): RedirectResponse

@@ -127,8 +127,9 @@ class OrderController extends Controller
                 'customer_phone'      => $customer->phone,
                 'type'                => OrderType::DELIVERY->value,
                 'source'              => 'platform_web',
+                // Espèces : directement « à accepter » par le restaurant (paiement encaissé à la livraison)
                 'status'              => $isCashOnDelivery
-                    ? OrderStatus::CONFIRMED->value
+                    ? OrderStatus::PAID->value
                     : OrderStatus::PENDING_PAYMENT->value,
                 'subtotal'            => $subtotal,
                 'delivery_fee'        => $deliveryFee,
@@ -199,16 +200,11 @@ class OrderController extends Controller
 
         $order->load('restaurant', 'items');
 
-        // Paiement à la livraison : la commande est déjà à traiter, on prévient le restaurant
-        // (les commandes payées en ligne le sont dans Order::markAsPaid()).
+        // Paiement à la livraison : la commande est déjà à accepter, on prévient le restaurant
+        // (les commandes payées en ligne le sont dans Order::markAsPaid()). Les livreurs seront
+        // appelés quand le restaurant l'acceptera (Order::transitionTo()).
         if ($isCashOnDelivery) {
             $order->announceToRestaurant();
-        }
-
-        // Auto-assignation livreur pour paiement cash
-        if ($isCashOnDelivery && $order->delivery) {
-            \App\Jobs\AssignDriverJob::dispatch($order->delivery->id)
-                ->delay(now()->addSeconds(30));
         }
 
         $response = [
@@ -272,16 +268,21 @@ class OrderController extends Controller
 
         return response()->json([
             'order_status'       => $statusValue,
-            'order_status_label' => $status->label(),
+            'order_status_label' => $order->customerStatusLabel(),
             'estimated_minutes'  => $order->estimated_prep_time,
             'is_final'           => $isFinal,
             'payment_status'     => $paymentStatus,
+            // Refus du restaurant : motif lisible et remboursement en cours (paiement en ligne)
+            'rejection'          => $order->rejection_reason ? [
+                'reason'         => $order->rejection_reason->customerLabel(),
+                'refund_pending' => $order->refund_status === 'pending',
+            ] : null,
             'order' => [
                 'id'             => $order->id,
                 'reference'      => $order->reference,
                 'tracking_token' => $order->tracking_token,
                 'status'         => $statusValue,
-                'status_label'   => $status->label(),
+                'status_label'   => $order->customerStatusLabel(),
                 'payment_status' => $paymentStatus,
                 'payment_method' => $order->payment_method,
                 'subtotal'       => $order->subtotal,
@@ -425,7 +426,7 @@ class OrderController extends Controller
             'reference'      => $order->reference,
             'tracking_token' => $order->tracking_token,
             'status'         => $status->value,
-            'status_label'   => $status->label(),
+            'status_label'   => $order->customerStatusLabel(),
             'payment_status' => $paymentStatus->value,
             'payment_method' => $order->payment_method,
             'subtotal'       => $order->subtotal,

@@ -107,10 +107,7 @@ class PushBadge
         // Même définition que Api\V1\Driver\DeliveryController::pendingOrders()
         return Delivery::withoutGlobalScope('restaurant')
             ->where('status', DeliveryStatus::PENDING->value)
-            ->whereHas('order', fn ($q) => $q->withoutGlobalScope('restaurant')->whereIn('status', [
-                OrderStatus::PAID->value,
-                OrderStatus::CONFIRMED->value,
-            ]))
+            ->whereHas('order', fn ($q) => $q->withoutGlobalScope('restaurant')->openToDrivers())
             ->whereHas('restaurant', fn ($q) => $q->where('city', $driver->city))
             ->count();
     }

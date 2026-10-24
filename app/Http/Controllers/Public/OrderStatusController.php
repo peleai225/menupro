@@ -118,7 +118,7 @@ class OrderStatusController extends Controller
 
         $response = [
             'status' => $order->status->value,
-            'status_label' => $order->status->label(),
+            'status_label' => $order->customerStatusLabel(),
             'status_color' => $order->status->color(),
             'payment_status' => $order->payment_status->value,
             'estimated_ready_at' => $order->estimated_ready_at?->toISOString(),
@@ -218,7 +218,7 @@ class OrderStatusController extends Controller
         if ($order->cancelled_at) {
             $steps[] = [
                 'key' => 'cancelled',
-                'label' => 'Annulée',
+                'label' => $order->rejected_at ? 'Refusée par le restaurant' : 'Annulée',
                 'completed' => true,
                 'current' => false,
                 'time' => $order->cancelled_at,

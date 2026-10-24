@@ -98,13 +98,10 @@ class DeliveryController extends Controller
             return response()->json(['data' => [], 'message' => 'Passez en ligne pour voir les courses.']);
         }
 
-        // Courses en attente dans la même ville
-        // Accepter paid (paiement en ligne) ET confirmed (cash on delivery)
+        // Courses en attente dans la même ville : commandes acceptées par le restaurant dont
+        // l'heure d'appel des livreurs (fin de préparation) est arrivée
         $deliveries = Delivery::where('status', DeliveryStatus::PENDING->value)
-            ->whereHas('order', fn($q) => $q->whereIn('status', [
-                OrderStatus::PAID->value,
-                OrderStatus::CONFIRMED->value,
-            ]))
+            ->whereHas('order', fn($q) => $q->openToDrivers())
             ->whereHas('restaurant', fn($q) => $q->where('city', $driver->city))
             ->with(['order', 'restaurant'])
             ->latest()

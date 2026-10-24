@@ -68,6 +68,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GeocodingService::class);
         $this->app->singleton(DeliveryPricingService::class);
         $this->app->singleton(DriverAssignmentService::class);
+
+        // SMS : aucun fournisseur choisi pour l'instant (journal seulement)
+        $this->app->bind(\App\Contracts\SmsSender::class, \App\Services\Sms\NullSmsSender::class);
     }
 
     /**

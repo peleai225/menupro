@@ -39,6 +39,24 @@
         <p class="mt-1" style="color:var(--sa-muted-fg);">Passée le {{ $order->created_at->format('d M Y à H:i') }}</p>
     </div>
 
+    {{-- Acceptation par le restaurant : attente, refus, remboursement à effectuer --}}
+    @if($order->isAwaitingAcceptance())
+        <div class="mb-6 p-4 rounded-xl border" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;">
+            <strong>En attente d'acceptation</strong> depuis {{ $order->acceptanceRequestedAt()->locale('fr')->diffForHumans(null, true) }}
+            @if($order->acceptance_reminder_level >= \App\Jobs\RemindRestaurantPendingOrder::STEP_ADMIN)
+                — le restaurant ne répond pas aux relances. Appelez-le : {{ $order->restaurant?->phone ?? 'téléphone inconnu' }}
+            @endif
+        </div>
+    @elseif($order->rejected_at)
+        <div class="mb-6 p-4 rounded-xl border" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b;">
+            <strong>Refusée par le restaurant</strong> le {{ $order->rejected_at->format('d/m/Y à H:i') }} : {{ $order->cancellation_reason }}
+            @if($order->refund_status === 'pending')
+                <br><strong>💸 Remboursement à effectuer : {{ number_format($order->total, 0, ',', ' ') }} F</strong>
+                ({{ $order->payment_method }}, client {{ $order->customer_phone }})
+            @endif
+        </div>
+    @endif
+
     <!-- Two-column layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

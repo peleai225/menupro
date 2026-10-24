@@ -1,4 +1,5 @@
 <div wire:poll.10s="checkNewOrders"
+     data-awaiting="{{ $this->awaitingOrders->count() }}"
      x-data="{
         loaded: false,
         soundEnabled: false,
@@ -40,9 +41,16 @@
             if (Notification.permission === 'granted') {
                 new Notification('Nouvelle commande !', { body: 'Une nouvelle commande vient d\'arriver.', icon: '/icon-192.png' });
             }
+        },
+        // Sonnerie répétée tant qu'une commande attend d'être acceptée ou refusée
+        startAwaitingRing() {
+            const root = this.$el;
+            setInterval(() => {
+                if (this.soundEnabled && Number(root.dataset.awaiting || 0) > 0) this.playBeep();
+            }, 8000);
         }
      }"
-     x-init="setTimeout(() => loaded = true, 100)"
+     x-init="setTimeout(() => loaded = true, 100); startAwaitingRing()"
      x-on:new-order-received.window="playAlert()">
     <!-- Header with gradient background - Mobile optimized -->
     <div x-show="loaded" x-transition:enter="transition ease-out duration-300"
@@ -155,6 +163,82 @@
         </div>
     @endif
 
+    {{-- À ACCEPTER : commandes reçues qui attendent la décision du restaurant (sonnerie en boucle) --}}
+    @if($this->awaitingOrders->isNotEmpty())
+    <div class="card p-4 mb-6" style="border: 2px solid #f97316; background: #fff7ed;">
+        <h2 class="text-base sm:text-lg font-black mb-3 flex items-center gap-2" style="color: #9a3412;">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#fb923c"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3" style="background:#ea580c"></span>
+            </span>
+            À accepter ({{ $this->awaitingOrders->count() }})
+            <span class="text-xs font-medium" style="color:#c2410c">— le client attend votre réponse</span>
+        </h2>
+        <div class="space-y-3">
+            @foreach($this->awaitingOrders as $awaiting)
+            <div wire:key="awaiting-{{ $awaiting->id }}"
+                 class="bg-white rounded-xl p-3 sm:p-4"
+                 style="border: 1px solid #fed7aa;"
+                 x-data="{
+                    prep: {{ (int) config('orders.acceptance.default_prep_minutes', 15) }},
+                    since: {{ $awaiting->acceptanceRequestedAt()->timestamp }},
+                    elapsed: 0,
+                    init() { this.tick(); setInterval(() => this.tick(), 1000); },
+                    tick() { this.elapsed = Math.max(0, Math.floor(Date.now() / 1000) - this.since); },
+                    label() { const m = Math.floor(this.elapsed / 60), s = this.elapsed % 60; return m + ' min ' + String(s).padStart(2, '0') + ' s'; }
+                 }">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <div class="min-w-0">
+                        <p class="font-black text-neutral-900">
+                            #{{ $awaiting->reference }}
+                            <span class="text-xs font-semibold text-neutral-500">· {{ $awaiting->type?->label() }}</span>
+                        </p>
+                        <p class="text-sm text-neutral-600 truncate">
+                            {{ $awaiting->customer_name }}
+                            · {{ $awaiting->items->sum('quantity') }} article(s)
+                            · <strong>{{ number_format($awaiting->total, 0, ',', ' ') }} F</strong>
+                            · {{ $awaiting->isPaidOnline() ? 'Payée en ligne' : 'Espèces' }}
+                        </p>
+                        <p class="text-xs text-neutral-500 truncate">
+                            {{ $awaiting->items->map(fn ($i) => $i->quantity . '× ' . $i->dish_name)->implode(', ') }}
+                        </p>
+                    </div>
+                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-black tabular-nums"
+                          :style="elapsed >= 120 ? 'background:#fee2e2;color:#b91c1c' : 'background:#fef3c7;color:#92400e'"
+                          x-text="'⏱ ' + label()"></span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                    <span class="text-xs font-bold text-neutral-500 mr-1">Prêt dans :</span>
+                    @foreach(config('orders.acceptance.prep_choices', [10, 15, 20, 30, 45]) as $minutes)
+                        <button type="button" @click="prep = {{ $minutes }}"
+                                class="px-3 py-2 rounded-lg text-sm font-bold touch-manipulation"
+                                :style="prep === {{ $minutes }} ? 'background:#16a34a;color:#fff' : 'background:#f5f5f4;color:#44403c'">
+                            {{ $minutes }} min
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button"
+                            @click="$wire.acceptOrder({{ $awaiting->id }}, prep)"
+                            wire:loading.attr="disabled"
+                            class="flex-1 px-4 py-3 rounded-xl font-black text-white touch-manipulation min-h-[48px]"
+                            style="background:#16a34a">
+                        ✅ Accepter (<span x-text="prep"></span> min)
+                    </button>
+                    <button type="button"
+                            wire:click="openRejectModal({{ $awaiting->id }})"
+                            class="px-4 py-3 rounded-xl font-bold touch-manipulation min-h-[48px]"
+                            style="background:#fee2e2;color:#dc2626">
+                        Refuser
+                    </button>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
     {{-- Section Reversements en attente (cash_on_delivery livreurs plateforme) --}}
     @if($this->pendingRemittances->isNotEmpty())
     <div class="card p-4 mb-6 border-2 border-amber-200 bg-amber-50">
@@ -770,7 +854,15 @@
                             </div>
                             <!-- Boutons -->
                             <div class="px-4 py-3 flex gap-2">
-                                @if($selectedOrder->status === \App\Enums\OrderStatus::PENDING_PAYMENT || $selectedOrder->status === \App\Enums\OrderStatus::PAID)
+                                @if($selectedOrder->isAwaitingAcceptance())
+                                    <button wire:click="acceptOrder({{ $selectedOrder->id }}, {{ (int) config('orders.acceptance.default_prep_minutes', 15) }})"
+                                            wire:loading.attr="disabled"
+                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
+                                            style="background: linear-gradient(135deg, #22c55e, #16a34a); min-height: 52px;">
+                                        <span wire:loading.remove wire:target="acceptOrder">✅ Accepter ({{ (int) config('orders.acceptance.default_prep_minutes', 15) }} min)</span>
+                                        <span wire:loading wire:target="acceptOrder">...</span>
+                                    </button>
+                                @elseif($selectedOrder->status === \App\Enums\OrderStatus::PENDING_PAYMENT)
                                     <button wire:click="updateStatus({{ $selectedOrder->id }}, 'confirmed')"
                                             wire:loading.attr="disabled"
                                             class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white transition-all text-base touch-manipulation"
@@ -832,13 +924,14 @@
                                     </button>
                                 @endif
 
-                                <button wire:click="openCancelModal({{ $selectedOrder->id }})"
+                                {{-- À accepter : on refuse (motif obligatoire), on n'annule pas --}}
+                                <button wire:click="{{ $selectedOrder->isAwaitingAcceptance() ? 'openRejectModal' : 'openCancelModal' }}({{ $selectedOrder->id }})"
                                         class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold transition-all text-base touch-manipulation"
                                         style="background: #fee2e2; color: #dc2626; min-height: 52px; min-width: 120px;">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
-                                    <span>Annuler</span>
+                                    <span>{{ $selectedOrder->isAwaitingAcceptance() ? 'Refuser' : 'Annuler' }}</span>
                                 </button>
                             </div>
                         </div>
@@ -962,6 +1055,46 @@
                                 <span wire:loading>Annulation...</span>
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Reject Order Modal (motif obligatoire) -->
+    @if($rejectingOrderId)
+        <div class="fixed inset-0 z-[60] overflow-y-auto" @keydown.escape.window="$wire.closeRejectModal()">
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/60" @click="$wire.closeRejectModal()"></div>
+
+                <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
+                    <h3 class="text-xl font-bold text-neutral-900 text-center mb-1">Refuser la commande</h3>
+                    <p class="text-neutral-600 text-center text-sm mb-5">Le client sera prévenu du motif. Une commande payée en ligne sera remboursée par MenuPro.</p>
+
+                    <div class="space-y-2 mb-4">
+                        @foreach(\App\Enums\OrderRejectionReason::cases() as $reason)
+                            <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer touch-manipulation"
+                                   style="border: 2px solid {{ $rejectReason === $reason->value ? '#dc2626' : '#e7e5e4' }};">
+                                <input type="radio" wire:model.live="rejectReason" value="{{ $reason->value }}">
+                                <span class="font-semibold text-neutral-800">{{ $reason->label() }}</span>
+                            </label>
+                        @endforeach
+                        @error('rejectReason') <p class="text-sm" style="color:#dc2626">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="mb-5">
+                        <textarea wire:model="rejectNote" rows="2" maxlength="255" class="input"
+                                  placeholder="Précision {{ $rejectReason === 'other' ? '(obligatoire)' : '(optionnelle)' }}"></textarea>
+                        @error('rejectNote') <p class="text-sm mt-1" style="color:#dc2626">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button wire:click="closeRejectModal" class="btn btn-secondary flex-1 py-3">Retour</button>
+                        <button wire:click="rejectOrder" wire:loading.attr="disabled"
+                                class="btn flex-1 py-3 text-white" style="background:#dc2626">
+                            <span wire:loading.remove wire:target="rejectOrder">Refuser</span>
+                            <span wire:loading wire:target="rejectOrder">...</span>
+                        </button>
                     </div>
                 </div>
             </div>

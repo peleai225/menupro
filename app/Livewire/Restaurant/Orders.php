@@ -108,6 +108,117 @@ class Orders extends Component
         ];
     }
 
+    // =========================================================================
+    // À ACCEPTER : acceptation (temps de préparation) / refus (motif obligatoire)
+    // =========================================================================
+
+    public ?int $rejectingOrderId = null;
+
+    public string $rejectReason = '';
+
+    public string $rejectNote = '';
+
+    /**
+     * Commandes reçues qui attendent la décision du restaurant (les plus anciennes d'abord).
+     */
+    #[Computed]
+    public function awaitingOrders()
+    {
+        $restaurantId = auth()->user()->restaurant_id;
+        if (!$restaurantId) {
+            return collect();
+        }
+
+        return Order::where('restaurant_id', $restaurantId)
+            ->where('status', OrderStatus::PAID)
+            ->with('items')
+            ->oldest('paid_at')
+            ->oldest()
+            ->limit(30)
+            ->get();
+    }
+
+    public function acceptOrder(int $orderId, int $prepMinutes = 0): void
+    {
+        $order = $this->ownOrder($orderId);
+        if (!$order) {
+            return;
+        }
+
+        $choices = config('orders.acceptance.prep_choices', [10, 15, 20, 30, 45]);
+        if (!in_array($prepMinutes, $choices, true)) {
+            $prepMinutes = (int) config('orders.acceptance.default_prep_minutes', 15);
+        }
+
+        if (!$order->accept($prepMinutes)) {
+            session()->flash('error', 'Cette commande a déjà été traitée.');
+        } else {
+            session()->flash('success', "Commande #{$order->reference} acceptée ({$prepMinutes} min). Le client est prévenu.");
+        }
+
+        $this->refreshAfterDecision($orderId);
+    }
+
+    public function openRejectModal(int $orderId): void
+    {
+        $this->rejectingOrderId = $orderId;
+        $this->rejectReason = '';
+        $this->rejectNote = '';
+        $this->resetErrorBag();
+    }
+
+    public function closeRejectModal(): void
+    {
+        $this->rejectingOrderId = null;
+    }
+
+    public function rejectOrder(): void
+    {
+        $this->validate([
+            'rejectReason' => ['required', \Illuminate\Validation\Rule::in(\App\Enums\OrderRejectionReason::values())],
+            'rejectNote'   => ['required_if:rejectReason,other', 'nullable', 'string', 'max:255'],
+        ], [
+            'rejectReason.required'  => 'Choisissez le motif du refus.',
+            'rejectNote.required_if' => 'Précisez le motif du refus.',
+        ]);
+
+        $order = $this->rejectingOrderId ? $this->ownOrder($this->rejectingOrderId) : null;
+        if (!$order) {
+            $this->rejectingOrderId = null;
+            return;
+        }
+
+        if (!$order->reject(\App\Enums\OrderRejectionReason::from($this->rejectReason), $this->rejectNote)) {
+            session()->flash('error', 'Cette commande a déjà été traitée.');
+        } else {
+            session()->flash('success', "Commande #{$order->reference} refusée. Le client est prévenu."
+                . ($order->refund_status === 'pending' ? ' MenuPro s\'occupe du remboursement.' : ''));
+        }
+
+        $this->rejectingOrderId = null;
+        $this->refreshAfterDecision($order->id);
+    }
+
+    private function ownOrder(int $orderId): ?Order
+    {
+        $order = Order::where('restaurant_id', auth()->user()->restaurant_id)->find($orderId);
+        if (!$order) {
+            session()->flash('error', 'Vous n\'avez pas accès à cette commande.');
+        }
+
+        return $order;
+    }
+
+    private function refreshAfterDecision(int $orderId): void
+    {
+        unset($this->awaitingOrders, $this->orders, $this->statusCounts);
+        \Illuminate\Support\Facades\Cache::forget('status_counts.' . auth()->user()->restaurant_id);
+
+        if ($this->selectedOrder?->id === $orderId) {
+            $this->selectedOrder = $this->selectedOrder->fresh(['items.dish']);
+        }
+    }
+
     public function viewOrder(int $orderId): void
     {
         try {
@@ -274,6 +385,7 @@ class Orders extends Component
 
         unset($this->orders);
         unset($this->statusCounts);
+        unset($this->awaitingOrders);
     }
 
     /**

@@ -80,8 +80,22 @@ window.Echo = new Echo({
                         $textClass = $textColorMap[$statusColor] ?? 'text-primary-600';
                     @endphp
                     <span class="status-dot w-3 h-3 {{ $bgClass }} rounded-full {{ $order->status->value !== 'completed' && $order->status->value !== 'cancelled' ? 'animate-pulse' : '' }}"></span>
-                    <span class="status-text text-lg font-semibold {{ $textClass }}">{{ $order->status->label() }}</span>
+                    <span class="status-text text-lg font-semibold {{ $textClass }}">{{ $order->customerStatusLabel() }}</span>
                 </div>
+
+                {{-- Refus du restaurant : motif clair et remboursement le cas échéant --}}
+                @if($order->rejection_reason)
+                    <div class="mb-6 p-4 rounded-xl" style="background:#fef2f2; color:#991b1b;">
+                        <p class="font-semibold">Le restaurant ne peut pas honorer votre commande : {{ $order->rejection_reason->customerLabel() }}.</p>
+                        <p class="text-sm mt-1">
+                            {{ $order->refund_status === 'pending'
+                                ? 'Vous serez remboursé(e) intégralement. L\'équipe MenuPro s\'en occupe.'
+                                : 'Aucun montant ne vous sera demandé.' }}
+                        </p>
+                    </div>
+                @elseif($order->isAwaitingAcceptance())
+                    <p class="mb-6 text-sm text-neutral-600">⏳ Le restaurant va confirmer votre commande dans quelques instants.</p>
+                @endif
 
                 <!-- Progress Steps -->
                 <div class="relative">

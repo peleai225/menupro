@@ -61,8 +61,13 @@ class WhatsAppService
 
         $items = $order->items->map(fn ($i) => "  • {$i->dish_name} x{$i->quantity}")->implode("\n");
 
-        $message = "✅ *Commande confirmée !*\n\n"
-            . "Merci *{$order->customer_name}* 🙏\n\n"
+        // Commande à accepter : le client sait que le restaurant doit encore la valider
+        $header = $order->isAwaitingAcceptance()
+            ? "🧾 *Commande reçue !*\n\nMerci *{$order->customer_name}* 🙏\n"
+                . "*{$order->restaurant->name}* va la confirmer dans quelques instants.\n\n"
+            : "✅ *Commande confirmée !*\n\nMerci *{$order->customer_name}* 🙏\n\n";
+
+        $message = $header
             . "📋 *Réf :* #{$order->reference}\n"
             . "📦 *Type :* {$typeLabel}\n"
             . "⏱️ *Préparation :* ~{$order->estimated_prep_time} min\n\n"
@@ -86,7 +91,9 @@ class WhatsAppService
         $message = match ($order->status->value) {
             'confirmed' => "✅ *Commande #{$order->reference} acceptée !*\n\n"
                 . "Votre commande a été validée par *{$order->restaurant->name}*.\n"
-                . "Préparation en cours... ⏳",
+                . ($order->prep_minutes
+                    ? "Préparation : ~{$order->prep_minutes} min ⏳"
+                    : "Préparation en cours... ⏳"),
 
             'preparing' => "👨‍🍳 *En préparation !*\n\n"
                 . "Commande #{$order->reference} — *~{$order->estimated_prep_time} minutes* de cuisson.",
@@ -101,8 +108,15 @@ class WhatsAppService
                 . "Nous espérons que vous avez apprécié votre repas 😊\n"
                 . "Laissez-nous un avis sur *{$order->restaurant->name}* !",
 
-            'cancelled' => "❌ *Commande #{$order->reference} annulée*\n\n"
-                . "Contactez le restaurant directement si vous avez des questions.",
+            'cancelled' => $order->rejection_reason
+                ? "❌ *Commande #{$order->reference} refusée*\n\n"
+                    . "*{$order->restaurant->name}* ne peut pas honorer votre commande : "
+                    . $order->rejection_reason->customerLabel() . ".\n"
+                    . ($order->refund_status === 'pending'
+                        ? "💸 Vous serez remboursé(e) intégralement. L'équipe MenuPro s'en occupe."
+                        : "Aucun montant ne vous sera demandé.")
+                : "❌ *Commande #{$order->reference} annulée*\n\n"
+                    . "Contactez le restaurant directement si vous avez des questions.",
 
             default => null,
         };
@@ -159,9 +173,40 @@ class WhatsAppService
             . "📦 *Type :* {$typeLabel}\n"
             . "🔢 *Articles :* {$order->items_count}\n"
             . "💰 *Total :* " . number_format($order->total, 0, ',', ' ') . " F CFA\n\n"
-            . "⚡ Ouvrez votre dashboard MenuPro pour traiter cette commande.";
+            . ($order->isAwaitingAcceptance()
+                ? "⚡ Acceptez ou refusez la commande :\n" . \App\Support\OrderActionLink::for($order)
+                : "⚡ Ouvrez votre dashboard MenuPro pour traiter cette commande.");
 
         return $this->send($restaurantPhone, $message);
+    }
+
+    /**
+     * Relance du restaurateur : une commande attend toujours d'être acceptée ou refusée.
+     */
+    public function sendOrderAwaitingReminder(Order $order, string $restaurantPhone, int $minutes): bool
+    {
+        $message = "⏰ *Commande #{$order->reference} en attente depuis {$minutes} min !*\n\n"
+            . "👤 {$order->customer_name} · " . number_format($order->total, 0, ',', ' ') . " F CFA\n\n"
+            . "Le client attend votre réponse. Acceptez ou refusez la commande :\n"
+            . \App\Support\OrderActionLink::for($order);
+
+        return $this->send($restaurantPhone, $message);
+    }
+
+    /**
+     * Client rassuré quand le restaurant tarde à répondre (MenuPro relance le restaurant).
+     */
+    public function sendOrderDelayedToCustomer(Order $order): bool
+    {
+        if (empty($order->customer_phone)) {
+            return false;
+        }
+
+        $message = "⏳ *Commande #{$order->reference}*\n\n"
+            . "*{$order->restaurant->name}* met un peu plus de temps que prévu à confirmer votre commande.\n"
+            . "L'équipe MenuPro le contacte en ce moment, nous revenons vers vous très vite 🙏";
+
+        return $this->send($order->customer_phone, $message);
     }
 
     /**
