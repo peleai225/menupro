@@ -22,21 +22,15 @@ cp -r public/images/* ~/public_html/images/ 2>/dev/null
 cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
 mkdir -p ~/public_html/sounds 2>/dev/null
 cp -r public/sounds/* ~/public_html/sounds/ 2>/dev/null
-cp public/icon-*.png ~/public_html/ 2>/dev/null
-cp public/manifest.json ~/public_html/ 2>/dev/null
-cp public/manifest-admin.json ~/public_html/ && echo " manifest-admin.json copié" || echo " ERREUR copie manifest-admin.json"
-cp public/sw.js ~/public_html/ 2>/dev/null
-cp public/offline.html ~/public_html/ 2>/dev/null
-cp public/favicon.svg ~/public_html/ 2>/dev/null
-cp public/robots.txt ~/public_html/ 2>/dev/null
+# Tous les fichiers à la racine de public/ (icônes, manifests, sw.js, offline.html…), sauf index.php
+# qui est propre au serveur : un nouveau fichier public n'est ainsi jamais oublié.
+find public -maxdepth 1 -type f ! -name index.php -exec cp {} ~/public_html/ \;
 cp public/.htaccess ~/public_html/.htaccess && echo " .htaccess copié" || echo " ERREUR copie .htaccess"
 
 # Copier aussi vers menupro.ci/ si le dossier existe (domaine sans www)
 if [ -d ~/menupro.ci ]; then
-    cp public/manifest-admin.json ~/menupro.ci/ 2>/dev/null && echo " manifest-admin.json copié → menupro.ci/"
-    cp public/manifest.json ~/menupro.ci/ 2>/dev/null
-    cp public/sw.js ~/menupro.ci/ 2>/dev/null
-    cp public/.htaccess ~/menupro.ci/.htaccess 2>/dev/null
+    find public -maxdepth 1 -type f ! -name index.php -exec cp {} ~/menupro.ci/ \;
+    echo " fichiers publics copiés → menupro.ci/"
 fi
 
 # 2b. Symlink storage (images téléchargées via Storage::url)
