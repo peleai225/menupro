@@ -4,7 +4,7 @@
 @endphp
 
 <x-layouts.admin-restaurant title="Mode Rush - Commandes" :restaurant="$restaurant" :subscription="$subscription">
-    <div class="space-y-4" x-data="rushMode()" x-init="init()">
+    <div class="space-y-4" x-data="rushMode()" x-init="init()" x-on:menupro-resync.window="refreshData()">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

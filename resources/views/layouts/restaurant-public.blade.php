@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ ($restaurant->name ?? 'Restaurant') . ' - Menu' }}</title>
     <meta name="description" content="{{ $restaurant->description ?? 'Découvrez notre menu et commandez en ligne' }}">
@@ -14,7 +14,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ $restaurant->name ?? 'MenuPro' }}">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="/manifest.json">
+    {{-- Manifest propre au restaurant : l'appli installée ouvre ce menu (et non l'accueil MenuPro) --}}
+    <link rel="manifest" href="{{ (isset($restaurant) && !empty($restaurant->slug)) ? route('r.manifest', $restaurant->slug) : '/manifest.json' }}">
 
     {{-- Open Graph pour partage WhatsApp / réseaux sociaux --}}
     <meta property="og:url" content="{{ url()->current() }}">
@@ -93,16 +94,21 @@
     @if($faviconUrl)
         <link rel="icon" type="{{ $faviconType }}" href="{{ $faviconUrl }}">
         <link rel="shortcut icon" type="{{ $faviconType }}" href="{{ $faviconUrl }}">
-        <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     @else
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
         <link rel="shortcut icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     @endif
+    {{-- Icône d'écran d'accueil iOS : PNG 180×180 opaque (le favicon, SVG ou trop petit, est ignoré/flou) --}}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     
     <!-- Fonts : preconnect + display=swap pour affichage immédiat du texte (évite FOIT sur réseau lent) -->
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|playfair-display:400,500,600,700&display=swap" rel="stylesheet" />
     
+    {{-- Service Worker — mode hors ligne + cache menu + notifications push (dans le <head> : l'invite
+         d'installation Android doit être capturée avant le démarrage d'Alpine) --}}
+    @include('partials.service-worker')
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     @livewireStyles
@@ -154,49 +160,53 @@
         function registerPwa(Alpine) {
             Alpine.data('pwaSmartInstall', () => ({
             showBanner: false,
-            deferredPrompt: null,
+            iosSteps: false,
+            showIosSteps: false,
             restaurantName: '',
+            isIos() {
+                return /iphone|ipad|ipod/i.test(navigator.userAgent)
+                    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            },
             init() {
                 if (window.matchMedia('(display-mode: standalone)').matches) return;
                 if (window.navigator.standalone === true) return;
-                const dismissed = localStorage.getItem('pwa_smart_dismissed');
+                let dismissed = null;
+                try { dismissed = localStorage.getItem('pwa_smart_dismissed'); } catch (e) {}
                 if (dismissed && Date.now() - parseInt(dismissed) < 14 * 24 * 3600 * 1000) return;
                 this.restaurantName = this.$el.dataset.restaurant || '';
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    this.deferredPrompt = e;
-                    this._checkTrigger();
-                });
-                if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) this._checkTrigger();
+                this.iosSteps = this.isIos();
+                // Invite Android capturée dès le <head> (partials/service-worker) : rien n'est manqué
+                if (!window.__mpInstallPrompt) {
+                    window.addEventListener('mp:installable', () => this._onEngagement(), { once: true });
+                }
+                window.addEventListener('mp:installed', () => { this.showBanner = false; });
                 document.addEventListener('cart-updated', () => this._onEngagement());
-                this._trackVisit();
-            },
-            _trackVisit() {
                 this._onEngagement();
             },
             _onEngagement() {
                 if (this.showBanner) return;
-                if (this.deferredPrompt || /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
+                if (window.__mpInstallPrompt || this.iosSteps) {
                     setTimeout(() => { this.showBanner = true; }, 3000);
                 }
             },
-            _checkTrigger() {
-                this._onEngagement();
-            },
             async install() {
-                if (this.deferredPrompt) {
-                    this.deferredPrompt.prompt();
-                    const { outcome } = await this.deferredPrompt.userChoice;
-                    if (outcome === 'accepted') this.showBanner = false;
-                    this.deferredPrompt = null;
+                const prompt = window.__mpInstallPrompt;
+                if (prompt) {
+                    try {
+                        prompt.prompt();
+                        const { outcome } = await prompt.userChoice;
+                        if (outcome === 'accepted') this.showBanner = false; else this.dismiss();
+                    } catch (e) { this.dismiss(); }
+                    window.__mpInstallPrompt = null;
+                } else if (this.iosSteps) {
+                    this.showIosSteps = !this.showIosSteps;
                 } else {
-                    alert('Pour installer :\n1. Appuyez sur le bouton Partager\n2. « Sur l\'écran d\'accueil »');
                     this.dismiss();
                 }
             },
             dismiss() {
                 this.showBanner = false;
-                localStorage.setItem('pwa_smart_dismissed', Date.now().toString());
+                try { localStorage.setItem('pwa_smart_dismissed', Date.now().toString()); } catch (e) {}
             }
         }));
         }
@@ -225,17 +235,21 @@
                 <p class="text-sm font-semibold text-neutral-900 truncate">Installer {{ $restaurant->name ?? 'ce restaurant' }}</p>
                 <p class="text-xs text-neutral-500">Commander plus vite depuis l'accueil</p>
             </div>
-            <button @click="install()" class="px-3.5 py-2 rounded-xl text-white text-sm font-semibold transition flex-shrink-0" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }};">
+            <button @click="install()" class="min-h-[44px] px-3.5 rounded-xl text-white text-sm font-semibold transition flex-shrink-0" style="background-color: {{ $restaurant->primary_color ?? '#f97316' }};">
                 Installer
             </button>
-            <button @click="dismiss()" class="p-1 text-neutral-400 hover:text-neutral-600 transition flex-shrink-0">
+            <button @click="dismiss()" aria-label="Plus tard" class="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition flex-shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
+        <div x-show="showIosSteps" x-cloak class="max-w-md mx-auto mt-2 bg-white rounded-2xl shadow-2xl border border-neutral-200/80 p-4 text-sm text-neutral-700">
+            <p>1. Appuyez sur
+                <svg class="inline w-5 h-5 -mt-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Partager"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0-12L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                <strong>Partager</strong> en bas de Safari</p>
+            <p class="mt-1">2. Choisissez <strong>« Sur l'écran d'accueil »</strong> puis <strong>Ajouter</strong></p>
+        </div>
     </div>
 
-    {{-- Service Worker — mode hors ligne + cache menu + notifications push --}}
-    @include('partials.service-worker')
 
     @stack('scripts')
 </body>

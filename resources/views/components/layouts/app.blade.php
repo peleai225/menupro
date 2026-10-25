@@ -48,12 +48,12 @@
     @if($faviconUrl)
         <link rel="icon" type="{{ $faviconType }}" href="{{ $faviconUrl }}">
         <link rel="shortcut icon" type="{{ $faviconType }}" href="{{ $faviconUrl }}">
-        <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     @else
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
         <link rel="shortcut icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-        <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
     @endif
+    {{-- Icône d'écran d'accueil iOS : PNG 180×180 opaque (iOS ignore les SVG) --}}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
     <!-- Open Graph / Social -->
     @php
@@ -273,62 +273,55 @@
         });
     </script>
 
-    <!-- PWA : Service Worker + Install Banner -->
+    {{-- PWA : bandeau d'installation (Android : invite native ; iPhone : étapes Partager → Sur l'écran d'accueil,
+         indispensables au push sur iOS). Refus mémorisé 7 jours. Logique : window.mpInstallBanner (resources/js/pwa.js). --}}
     <div id="pwa-install-banner"
-         class="fixed bottom-0 inset-x-0 z-[200] p-3 sm:p-4 bg-neutral-900 border-t border-orange-500/30 shadow-2xl safe-bottom"
-         x-data="{
-             showBanner: false,
-             deferredPrompt: null,
-             init() {
-                 if (window.matchMedia('(display-mode: standalone)').matches) return;
-                 if (localStorage.getItem('pwa_dismissed') && Date.now() - parseInt(localStorage.getItem('pwa_dismissed')) < 7*24*3600*1000) return;
-                 window.addEventListener('beforeinstallprompt', (e) => {
-                     e.preventDefault();
-                     this.deferredPrompt = e;
-                     setTimeout(() => { this.showBanner = true; }, 5000);
-                 });
-                 const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-                 if (isIos && !window.navigator.standalone) {
-                     setTimeout(() => { this.showBanner = true; }, 5000);
-                 }
-             },
-             async install() {
-                 if (this.deferredPrompt) {
-                     this.deferredPrompt.prompt();
-                     const { outcome } = await this.deferredPrompt.userChoice;
-                     if (outcome === 'accepted') this.showBanner = false;
-                     this.deferredPrompt = null;
-                 } else {
-                     alert('Pour installer MenuPro :\n1. Appuyez sur le bouton Partager\n2. Sélectionnez Sur l\'écran d\'accueil');
-                     this.dismiss();
-                 }
-             },
-             dismiss() {
-                 localStorage.setItem('pwa_dismissed', Date.now().toString());
-                 this.showBanner = false;
-             }
-         }"
+         class="fixed inset-x-0 z-[200] px-3 sm:px-4"
+         :style="'bottom: calc(' + offset + 'px + env(safe-area-inset-bottom, 0px))'"
+         x-data="mpInstallBanner()"
          x-show="showBanner" x-cloak
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="translate-y-full"
-         x-transition:enter-end="translate-y-0"
+         x-transition:enter-start="translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="translate-y-0"
-         x-transition:leave-end="translate-y-full">
-        <div class="max-w-lg mx-auto flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shrink-0 shadow-lg">
-                <img src="{{ asset('favicon.svg') }}" alt="MenuPro" class="w-7 h-7">
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="translate-y-full opacity-0">
+        <div class="max-w-lg mx-auto rounded-2xl bg-neutral-900 border border-orange-500/30 shadow-2xl p-3 sm:p-4">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('apple-touch-icon.png') }}" alt="" class="w-11 h-11 rounded-xl shrink-0 bg-white">
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-sm font-semibold">Installer MenuPro</p>
+                    <p class="text-neutral-400 text-xs" x-text="subtitle"></p>
+                </div>
+                <button type="button" x-show="!iosSteps" @click="install()"
+                        class="min-h-[44px] px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition shrink-0 touch-manipulation">
+                    Installer
+                </button>
+                <button type="button" @click="dismiss()"
+                        class="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-400 hover:text-white transition shrink-0 touch-manipulation" aria-label="Plus tard">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-white text-sm font-semibold">Installer MenuPro</p>
-                <p class="text-neutral-400 text-xs truncate">Acc&eacute;dez rapidement depuis votre &eacute;cran d'accueil</p>
-            </div>
-            <button @click="install()" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition shrink-0">
-                Installer
-            </button>
-            <button @click="dismiss()" class="p-1.5 text-neutral-500 hover:text-white transition shrink-0" aria-label="Fermer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+            {{-- Étapes iPhone / iPad --}}
+            <template x-if="iosSteps">
+                <div class="mt-3 border-t border-neutral-700 pt-3 text-sm text-neutral-200">
+                    <template x-if="!iosSafari">
+                        <p class="mb-2 text-amber-300">Ouvrez d'abord cette page dans <strong>Safari</strong> (l'installation ne marche pas depuis WhatsApp, Facebook…).</p>
+                    </template>
+                    <ol class="space-y-2">
+                        <li class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                            <span>Appuyez sur
+                                <svg class="inline w-5 h-5 -mt-1 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Partager"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0-12L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                                <strong>Partager</strong> (en bas de Safari)</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                            <span>Choisissez <strong>« Sur l'écran d'accueil »</strong> puis <strong>Ajouter</strong></span>
+                        </li>
+                    </ol>
+                </div>
+            </template>
         </div>
     </div>
 

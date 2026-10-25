@@ -422,6 +422,7 @@ document.addEventListener('livewire:init', () => {
 });
 
 import { initFcm, pushAvailable, pushPermission } from './firebase-messaging.js';
+import { isIos, isStandalone } from './pwa.js';
 
 // Utilisateur connecté ayant déjà autorisé les notifications : on rafraîchit son token sans rien demander
 if (pushAvailable() && pushPermission() === 'granted') {
@@ -448,6 +449,8 @@ clearAppBadgeOnBackOffice();
 window.pushOptin = () => ({
     visible: pushAvailable() && pushPermission() === 'default',
     denied: pushAvailable() && pushPermission() === 'denied',
+    // iPhone/iPad : les notifications web n'existent que dans l'appli installée sur l'écran d'accueil
+    iosInstall: isIos() && !isStandalone(),
     loading: false,
     async enable() {
         this.loading = true;

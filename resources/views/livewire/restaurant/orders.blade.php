@@ -212,7 +212,7 @@
                     <span class="text-xs font-bold text-neutral-500 mr-1">Prêt dans :</span>
                     @foreach(config('orders.acceptance.prep_choices', [10, 15, 20, 30, 45]) as $minutes)
                         <button type="button" @click="prep = {{ $minutes }}"
-                                class="px-3 py-2 rounded-lg text-sm font-bold touch-manipulation"
+                                class="px-3 py-2 min-h-[44px] min-w-[52px] rounded-lg text-sm font-bold touch-manipulation"
                                 :style="prep === {{ $minutes }} ? 'background:#16a34a;color:#fff' : 'background:#f5f5f4;color:#44403c'">
                             {{ $minutes }} min
                         </button>
@@ -603,7 +603,7 @@
                             <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                 <a href="{{ route('r.order.status', [$selectedOrder->restaurant->slug, $selectedOrder->tracking_token]) }}" 
                                    target="_blank"
-                                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg text-sm font-medium transition-colors touch-manipulation"
                                    style="background: #e5e7eb; color: #374151;"
                                    title="Voir suivi">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -615,7 +615,7 @@
                                 <a href="{{ route('restaurant.orders.print', $selectedOrder) }}"
                                    target="_blank"
                                    onclick="window.open(this.href, '_blank', 'width=400,height=600'); return false;"
-                                   class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg text-sm font-medium transition-colors touch-manipulation"
                                    style="background: #e5e7eb; color: #374151;"
                                    title="Imprimer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -624,9 +624,9 @@
                                     <span class="hidden sm:inline">Imprimer</span>
                                 </a>
                                 <button @click="show = false; document.body.classList.remove('overflow-hidden'); setTimeout(() => $wire.closeOrderModal(), 200)"
-                                        class="p-2 rounded-lg transition-colors"
+                                        class="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg transition-colors touch-manipulation"
                                         style="background: #fee2e2; color: #dc2626;"
-                                        title="Fermer">
+                                        title="Fermer" aria-label="Fermer">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
@@ -802,8 +802,8 @@
                     </div>
 
                     <!-- Footer - Totals & Actions -->
-                    {{-- Quand commande finale : pb-16 lg:pb-0 pour passer au-dessus de la navbar mobile --}}
-                    <div class="flex-shrink-0 border-t {{ $selectedOrder->is_final ? 'pb-16 lg:pb-0' : '' }}" style="border-color: #e5e7eb;">
+                    {{-- Quand commande finale : pb-bottom-nav-tight pour passer au-dessus de la navbar mobile (+ zone de geste iPhone) --}}
+                    <div class="flex-shrink-0 border-t {{ $selectedOrder->is_final ? 'pb-bottom-nav-tight' : '' }}" style="border-color: #e5e7eb;">
                         <!-- Totals -->
                         <div class="px-4 sm:px-6 py-4" style="background: #1f2937;">
                             <div class="space-y-2 text-sm">
@@ -844,9 +844,9 @@
                     </div>
 
                     <!-- Footer : Total + Actions (Sticky) -->
-                    {{-- pb-16 lg:pb-0 = compense la navbar mobile fixe (h-16, lg:hidden) --}}
+                    {{-- pb-bottom-nav-tight = compense la navbar mobile fixe (h-16 + zone de geste iPhone, lg:hidden) --}}
                     @unless($selectedOrder->is_final)
-                        <div class="flex-shrink-0 border-t-2 border-gray-200 pb-16 lg:pb-0" style="background: #ffffff; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <div class="flex-shrink-0 border-t-2 border-gray-200 pb-bottom-nav-tight" style="background: #ffffff; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);">
                             <!-- Total compact -->
                             <div class="px-4 py-2 flex items-center justify-between" style="background: #1f2937;">
                                 <span class="text-sm font-semibold" style="color: #9ca3af;">Total</span>
@@ -943,7 +943,7 @@
                     )
                         {{-- Marquer comme livré (quand commande en DELIVERING) --}}
                         @if($selectedOrder->status->value === 'delivering')
-                        <div class="flex-shrink-0 border-t border-neutral-200 px-4 py-3 pb-16 lg:pb-3 flex gap-2" style="background:#f0fdf4">
+                        <div class="flex-shrink-0 border-t border-neutral-200 px-4 py-3 pb-bottom-nav-tight lg:pb-3 flex gap-2" style="background:#f0fdf4">
                             <button wire:click="markDelivered({{ $selectedOrder->id }})"
                                     wire:loading.attr="disabled"
                                     class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-white text-sm touch-manipulation min-h-[52px]"
@@ -968,7 +968,7 @@
                         $selectedOrder->payment_method === 'cash_on_delivery' &&
                         !$selectedOrder->is_paid
                     )
-                    <div class="flex-shrink-0 border-t border-neutral-200 px-4 py-3 pb-16 lg:pb-3 flex gap-2" style="background:#fffbeb">
+                    <div class="flex-shrink-0 border-t border-neutral-200 px-4 py-3 pb-bottom-nav-tight lg:pb-3 flex gap-2" style="background:#fffbeb">
                         <div class="flex-1">
                             <p class="text-xs text-amber-700 font-semibold mb-2">
                                 💵 Paiement cash à la livraison — confirmez la réception

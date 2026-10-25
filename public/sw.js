@@ -1,6 +1,7 @@
 /**
  * MenuPro Service Worker — Offline-first pour l'Afrique
- * Stratégie : Cache-first pour assets statiques, Network-first pour pages dynamiques
+ * Stratégie : cache d'abord pour les assets statiques, réseau d'abord pour les pages,
+ * jamais de cache pour le tableau de bord, l'API, les paiements et les données en direct
  * + réception des notifications push Firebase (même tous les onglets fermés).
  */
 
@@ -43,38 +44,63 @@
   }
 })();
 
-const CACHE_VERSION = 'menupro-v1';
+/* Version du cache : l'incrémenter purge les anciens caches à l'activation. */
+const CACHE_VERSION = 'menupro-v2';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
+const MEDIA_CACHE   = `${CACHE_VERSION}-media`;
 const OFFLINE_URL   = '/offline.html';
+// Plafonds pour les téléphones d'entrée de gamme (peu de stockage)
+const MAX_DYNAMIC_ENTRIES = 30;  // pages de menu gardées pour le hors-ligne
+const MAX_MEDIA_ENTRIES   = 150; // photos de plats / logos (/storage, …)
 
-// Assets à mettre en cache immédiatement (shell app)
+// Coquille hors ligne mise en cache dès l'installation
 const STATIC_ASSETS = [
-  '/',
   OFFLINE_URL,
   '/favicon.svg',
-  '/manifest.json',
+  '/icon-192.png',
 ];
 
-// Patterns d'URL à ne JAMAIS mettre en cache
-const NEVER_CACHE = [
-  '/webhooks/',
+/* Chemins JAMAIS servis depuis le cache (préfixes de pathname).
+ * Tableau de bord, API, paiements, liens signés « commande à traiter », jetons push et CSRF,
+ * écrans cuisine / personnel / serveur / livreur : toujours le réseau, sans exception. */
+const NEVER_CACHE_PREFIXES = [
+  '/dashboard',
+  '/admin',
   '/api/',
-  '/livewire/update',
-  'livewire.min.js',
-  '__clockwork',
-  '/dashboard/',
-  '/admin/',
+  '/webhooks/',
+  '/livewire',
+  '/commande-a-traiter',
+  '/push-token',
+  '/csrf-token',
+  '/connexion',
+  '/deconnexion',
+  '/logout',
+  '/inscription',
+  '/mot-de-passe-oublie',
+  '/reinitialiser-mot-de-passe',
+  '/email/',
+  '/verify',
   '/cuisine/',
+  '/personnel/',
+  '/serveur/',
   '/livreur/',
-  '/commando/',
+  '/commando',
+  '/crm',
+  '/telecharger',
+  '/__clockwork',
 ];
 
-/* ─── Installation ─────────────────────────────────────────────────────────── */
+/* ─── Installation ─────────────────────────────────────────────────────────────
+ * La nouvelle version prend la main tout de suite (corrections du cache appliquées sans
+ * attendre), mais la page n'est JAMAIS rechargée automatiquement : la page affiche une
+ * bannière « Nouvelle version — Mettre à jour » (partials/service-worker) et ne recharge
+ * que si l'utilisateur appuie dessus (aucune commande en attente n'est perdue). */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS).catch(() => {}))
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .catch(() => {})
       .then(() => self.skipWaiting())
   );
 });
@@ -83,116 +109,120 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key.startsWith('menupro-') && key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => {
-        // Claim seulement après activation complète
-        return self.clients.claim().catch(() => {
-          // Ignore l'erreur si le SW n'est pas encore actif
-          console.log('SW will claim clients on next activation');
-        });
-      })
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith('menupro-') && ![STATIC_CACHE, DYNAMIC_CACHE, MEDIA_CACHE].includes(key))
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+      .catch(() => {})
   );
 });
 
-/* ─── Fetch — Stratégie hybride ─────────────────────────────────────────────── */
+/* ─── Fetch ─────────────────────────────────────────────────────────────────────
+ * Seules deux familles de requêtes sont interceptées :
+ *  - assets statiques versionnés (/build, polices, images) → cache d'abord ;
+ *  - navigations HTML → réseau d'abord, repli sur le cache (menus /r/{slug} seulement)
+ *    puis sur /offline.html.
+ * Tout le reste (JSON de suivi de commande, statut de paiement, données des écrans…)
+ * va directement au réseau : jamais de réponse périmée. */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
-
-  // Ignorer les requêtes non-GET et les URLs à ne jamais cacher
   if (request.method !== 'GET') return;
-  if (NEVER_CACHE.some((pattern) => url.pathname.includes(pattern))) return;
+  if (request.headers.has('range')) return; // sons / médias : laissés au navigateur (requêtes partielles)
+
+  const url = new URL(request.url);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
+  if (url.origin !== self.location.origin) return;
 
-  // Assets statiques (JS, CSS, fonts, images) → Cache-first
+  // Navigations : toujours le réseau. Hors ligne, page /offline.html (avec « Réessayer »),
+  // y compris pour le tableau de bord — dont aucune page n'est jamais mise en cache.
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstWithOfflineFallback(request, url));
+    return;
+  }
+
+  if (isNeverCached(url.pathname)) return;
+
   if (isStaticAsset(url)) {
-    event.respondWith(cacheFirst(request));
-    return;
+    event.respondWith(cacheFirst(request, url));
   }
-
-  // Pages HTML → Network-first avec fallback offline
-  if (request.headers.get('Accept')?.includes('text/html')) {
-    event.respondWith(networkFirstWithOfflineFallback(request));
-    return;
-  }
-
-  // API externe (ex: paiements) → Network-only
-  if (isExternalApi(url)) return;
-
-  // Autres requêtes → Stale-while-revalidate
-  event.respondWith(staleWhileRevalidate(request));
 });
 
-/* ─── Stratégies de cache ───────────────────────────────────────────────────── */
+/* ─── Stratégies ───────────────────────────────────────────────────────────── */
 
-async function cacheFirst(request) {
+async function cacheFirst(request, url) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, response.clone());
+    if (response.ok && response.status === 200 && response.type === 'basic') {
+      // /build (noms hachés) et icônes de l'appli : cache statique ; photos & logos : cache plafonné
+      const isMedia = !url.pathname.startsWith('/build/') && /\.(png|jpe?g|gif|webp|avif)$/i.test(url.pathname)
+        && !/^\/(icon-|apple-touch-icon)/.test(url.pathname);
+      const cache = await caches.open(isMedia ? MEDIA_CACHE : STATIC_CACHE);
+      // Sans await : la réponse part tout de suite vers la page (réseau lent), le cache suit
+      cache.put(request, response.clone())
+        .then(() => { if (isMedia) trimCache(MEDIA_CACHE, MAX_MEDIA_ENTRIES); })
+        .catch(() => {});
     }
     return response;
-  } catch {
-    return new Response('Ressource non disponible hors ligne.', { status: 503 });
+  } catch (e) {
+    return new Response('', { status: 503, statusText: 'Hors ligne' });
   }
 }
 
-async function networkFirstWithOfflineFallback(request) {
+async function networkFirstWithOfflineFallback(request, url) {
+  const cacheable = isMenuPage(url.pathname);
   try {
     const response = await fetch(request);
-    if (response.ok) {
-      // Mettre en cache les pages de menu restaurant pour offline
-      if (request.url.includes('/r/')) {
-        const cache = await caches.open(DYNAMIC_CACHE);
-        cache.put(request, response.clone());
-      }
+    if (cacheable && response.ok && response.type === 'basic' && !response.redirected) {
+      // Une seule entrée par menu (sans ?table=…), sans retarder l'affichage
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(url.origin + url.pathname, response.clone())
+        .then(() => trimCache(DYNAMIC_CACHE, MAX_DYNAMIC_ENTRIES))
+        .catch(() => {});
     }
     return response;
-  } catch {
-    // Essayer le cache dynamique
-    const cached = await caches.match(request);
-    if (cached) return cached;
-
-    // Fallback sur la page offline
+  } catch (e) {
+    if (cacheable) {
+      const cached = await caches.match(url.origin + url.pathname, { cacheName: DYNAMIC_CACHE });
+      if (cached) return cached;
+    }
     const offlinePage = await caches.match(OFFLINE_URL);
     return offlinePage || new Response(
-      '<html><body><h1>Pas de connexion</h1><p>Reconnectez-vous pour commander.</p></body></html>',
+      '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne</title>'
+      + '<body style="font-family:sans-serif;text-align:center;padding:3rem 1rem"><h1>Pas de connexion</h1>'
+      + '<p>Vérifiez votre connexion internet.</p><button onclick="location.reload()" style="padding:.8rem 1.5rem;font-size:1rem">Réessayer</button></body>',
       { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
     );
   }
 }
 
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(DYNAMIC_CACHE);
-  const cached = await cache.match(request);
-
-  const networkFetch = fetch(request).then((response) => {
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  }).catch(() => cached || new Response('Hors ligne', { status: 503 }));
-
-  return cached || networkFetch;
+async function trimCache(name, max) {
+  try {
+    const cache = await caches.open(name);
+    const keys = await cache.keys();
+    for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
+  } catch (e) { /* sans effet */ }
 }
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 
-function isStaticAsset(url) {
-  return /\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|webp)(\?.*)?$/.test(url.pathname);
+function isNeverCached(pathname) {
+  return NEVER_CACHE_PREFIXES.some((prefix) => pathname === prefix.replace(/\/$/, '') || pathname.startsWith(prefix));
 }
 
-function isExternalApi(url) {
-  const externalDomains = ['api.wave.com', 'cinetpay.com', 'fusionpay.io', 'lygosapp.com'];
-  return externalDomains.some((domain) => url.hostname.includes(domain));
+// Menu public d'un restaurant (/r/{slug}) : seule page HTML gardée pour le hors-ligne.
+// Les pages de suivi / paiement (/r/{slug}/commande/…) ne sont jamais mises en cache.
+function isMenuPage(pathname) {
+  return /^\/r\/[^/]+\/?$/.test(pathname);
+}
+
+function isStaticAsset(url) {
+  if (url.pathname.startsWith('/build/')) return true;
+  return /\.(css|js|woff2?|ttf|otf|svg|png|jpe?g|gif|ico|webp|avif)$/i.test(url.pathname);
 }
 
 /* ─── Clic sur une notification affichée par la page (onglet ouvert) ─────────────

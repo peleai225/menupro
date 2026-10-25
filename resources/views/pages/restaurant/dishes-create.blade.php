@@ -127,7 +127,7 @@
     </form>
 
     <!-- Sticky Save Bar (mobile) -->
-    <div class="fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
+    <div class="fixed bottom-above-nav left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
         <a href="{{ route('restaurant.plats.index') }}" class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl border-2 border-neutral-200 text-sm font-semibold text-neutral-700">Annuler</a>
         <button type="submit" form="dish-form" class="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:#D45E0C">Enregistrer</button>
     </div>

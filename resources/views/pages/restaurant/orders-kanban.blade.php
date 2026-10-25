@@ -4,7 +4,7 @@
 @endphp
 
 <x-layouts.admin-restaurant title="Vue Kanban - Commandes" :restaurant="$restaurant" :subscription="$subscription">
-    <div class="space-y-6" x-data="kanbanBoard()" x-init="init()">
+    <div class="space-y-6" x-data="kanbanBoard()" x-init="init()" x-on:menupro-resync.window="refreshData()">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

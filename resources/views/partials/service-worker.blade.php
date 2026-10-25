@@ -29,6 +29,17 @@
     @endauth
 @endif
 <script>
+    // Proposition d'installation (Android / Chrome) : capturée dès le <head>, car l'événement
+    // peut arriver avant le démarrage d'Alpine. Les bandeaux d'installation la lisent ensuite.
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        window.__mpInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent('mp:installable'));
+    });
+    window.addEventListener('appinstalled', function () {
+        window.__mpInstallPrompt = null;
+        window.dispatchEvent(new CustomEvent('mp:installed'));
+    });
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register(@json($swUrl), { scope: '/' })

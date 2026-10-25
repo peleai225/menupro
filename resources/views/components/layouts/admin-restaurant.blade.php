@@ -488,7 +488,7 @@
                x-transition:leave="transition ease-in duration-200"
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="-translate-x-full"
-               class="fixed left-0 top-0 h-full w-64 bg-neutral-900 border-r border-neutral-800 z-40 lg:hidden flex flex-col"
+               class="fixed left-0 top-0 h-full w-64 bg-neutral-900 border-r border-neutral-800 z-40 lg:hidden flex flex-col pt-safe pb-safe pl-safe"
                x-cloak>
             <div class="h-16 flex items-center justify-center border-b border-neutral-800 flex-shrink-0 px-4">
                 <a href="{{ route('restaurant.dashboard') }}" class="flex items-center" @click="mobileOpen = false">
@@ -555,7 +555,7 @@
         <!-- Main Content -->
         <div :class="expanded ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 ml-0">
             <!-- Top Bar -->
-            <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
+            <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm header-safe">
                 <div class="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 lg:px-8 gap-2">
                     <!-- Mobile Menu Button -->
                     <button @click="toggleMobile()" class="lg:hidden p-2.5 -ml-1 rounded-lg hover:bg-neutral-100 min-h-[44px] min-w-[44px] flex items-center justify-center">
@@ -582,7 +582,7 @@
                         <!-- Tutoriel guidé -->
                         <button type="button" 
                                 onclick="window.runRestaurantTour && window.runRestaurantTour()"
-                                class="flex items-center justify-center w-9 h-9 rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-100 hover:text-primary-600 hover:border-primary-200 transition-colors"
+                                class="flex items-center justify-center w-11 h-11 sm:w-9 sm:h-9 rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-100 hover:text-primary-600 hover:border-primary-200 transition-colors"
                                 title="Découvrir le tutoriel">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -658,7 +658,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-20 lg:pb-0">
+            <main class="p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden pb-bottom-nav">
                 {{-- Notifications push : indispensable pour être alerté des commandes appli fermée --}}
                 <div x-data="pushOptin()" x-cloak>
                     <div x-show="visible" class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4">
@@ -673,7 +673,28 @@
                     </div>
                     <div x-show="denied" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                         <p class="font-semibold">Notifications bloquées sur cet appareil</p>
-                        <p>Vous ne serez pas alerté des commandes quand MenuPro est fermé. Autorisez les notifications dans les réglages du navigateur (icône 🔒 à gauche de l'adresse), puis rechargez la page.</p>
+                        <p>Vous ne serez pas alerté des commandes quand MenuPro est fermé. Autorisez les notifications dans les réglages du navigateur (icône 🔒 à gauche de l'adresse) ou du téléphone (Réglages › Notifications › MenuPro), puis rechargez la page.</p>
+                    </div>
+                    {{-- iPhone / iPad : le push web n'existe que dans l'appli installée sur l'écran d'accueil --}}
+                    <div x-show="iosInstall" class="mb-4 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-neutral-800">
+                        <p class="font-semibold">📲 Sur iPhone, installez MenuPro pour être alerté des commandes</p>
+                        <p class="text-neutral-600 mt-1">Les notifications ne fonctionnent que depuis l'icône MenuPro de l'écran d'accueil :</p>
+                        <ol class="mt-2 space-y-1.5 text-neutral-700">
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                                <span>Dans Safari, appuyez sur
+                                    <svg class="inline w-5 h-5 -mt-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Partager"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0-12L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                                    <strong>Partager</strong></span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                                <span>Choisissez <strong>« Sur l'écran d'accueil »</strong>, puis <strong>Ajouter</strong></span>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                                <span>Ouvrez MenuPro depuis l'icône et appuyez sur <strong>Activer</strong></span>
+                            </li>
+                        </ol>
                     </div>
                 </div>
 
@@ -682,7 +703,8 @@
         </div>
 
         {{-- Bottom Navigation Bar (Mobile) --}}
-        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] bottom-nav-safe"
+             data-bottom-nav
              x-data="{ more: false }">
             @php
                 $menuActive = request()->routeIs('restaurant.plats*') || request()->routeIs('restaurant.categories*');

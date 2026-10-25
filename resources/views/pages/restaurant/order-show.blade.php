@@ -316,7 +316,7 @@
 
     {{-- Sticky action bar mobile — statut commande --}}
     @if(count($allowedTransitions) > 0)
-        <div class="fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
+        <div class="fixed bottom-above-nav left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-neutral-200 px-4 py-3 flex gap-3 lg:hidden">
             <form action="{{ route('restaurant.orders.status', $order) }}" method="POST" class="flex-1">
                 @csrf
                 @method('PATCH')

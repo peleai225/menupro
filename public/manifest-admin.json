@@ -1,57 +1,45 @@
 {
-  "name": "MenuPro Admin",
+  "id": "/connexion",
+  "name": "MenuPro Restaurant",
   "short_name": "MenuPro",
-  "description": "Gérez votre restaurant MenuPro — commandes, menu, réservations.",
-  "start_url": "/connexion",
+  "description": "Gérez votre restaurant ou votre stand MenuPro : commandes, caisse, menu, réservations.",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#0f172a",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#ffffff",
   "theme_color": "#f97316",
   "lang": "fr",
-  "categories": ["business", "food"],
+  "dir": "ltr",
+  "categories": ["business", "food", "productivity"],
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icon-512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
     {
-      "name": "Mes commandes",
-      "url": "/restaurant/orders",
-      "description": "Voir les commandes en cours"
+      "name": "Commandes",
+      "short_name": "Commandes",
+      "description": "Commandes à accepter et en cours",
+      "url": "/dashboard/commandes",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
-      "name": "Dashboard",
-      "url": "/restaurant/dashboard",
-      "description": "Tableau de bord"
+      "name": "Caisse",
+      "short_name": "Caisse",
+      "description": "Encaisser une commande sur place",
+      "url": "/dashboard/pos",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Cuisine",
+      "short_name": "Cuisine",
+      "description": "Tableau de préparation des commandes",
+      "url": "/dashboard/commandes/kanban",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "prefer_related_applications": false
