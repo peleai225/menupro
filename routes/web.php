@@ -466,6 +466,11 @@ Route::prefix('admin')
         Route::get('finances', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'index'])->name('finances.index');
         Route::get('finances/retraits', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'payouts'])->name('finances.payouts');
         Route::get('finances/commissions', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'commissions'])->name('finances.commissions');
+        // Journal des transactions (registre unique ledger_entries)
+        Route::get('finances/transactions', [\App\Http\Controllers\SuperAdmin\LedgerController::class, 'index'])->name('finances.ledger.index');
+        Route::get('finances/transactions/export', [\App\Http\Controllers\SuperAdmin\LedgerController::class, 'export'])->name('finances.ledger.export');
+        Route::post('finances/transactions/frais', [\App\Http\Controllers\SuperAdmin\LedgerController::class, 'updateFees'])->name('finances.ledger.fees');
+        Route::get('finances/transactions/{entry}', [\App\Http\Controllers\SuperAdmin\LedgerController::class, 'show'])->whereNumber('entry')->name('finances.ledger.show');
         // Gestion des reversements échoués
         Route::get('finances/reversements-echoues', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'failedPayouts'])->name('finances.failed-payouts');
         Route::post('finances/reversements/{order}/relancer', [\App\Http\Controllers\SuperAdmin\FinanceController::class, 'retryPayout'])->name('finances.retry-payout');
