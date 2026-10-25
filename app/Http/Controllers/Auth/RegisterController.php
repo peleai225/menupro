@@ -12,7 +12,6 @@ use App\Models\Crm\Lead;
 use App\Models\Plan;
 use App\Models\Restaurant;
 use App\Models\Subscription;
-use App\Models\SubscriptionAddon;
 use App\Models\User;
 use App\Services\Crm\LeadPipelineService;
 use App\Services\MoneyFusionGateway;
@@ -97,36 +96,19 @@ class RegisterController extends Controller
                 ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
         }
 
+        // Période choisie pour APRÈS l'essai (rien n'est payé à l'inscription).
+        // L'hebdomadaire n'existe que pour les plans qui l'autorisent (Stand).
         $billingPeriod = $request->billing_period ?? 'monthly';
-
-        $priceCalculation = Subscription::calculatePriceWithDiscount($plan->price, $billingPeriod);
-
-        $durationDays = match($billingPeriod) {
-            'monthly' => 30,
-            'quarterly' => 90,
-            'semiannual' => 180,
-            'annual' => 365,
-            default => 30,
-        };
-
-        $addonsTotal = 0;
-        if ($request->has('addons') && is_array($request->addons)) {
-            $availableAddons = SubscriptionAddon::getAvailableAddons();
-            $months = $durationDays / 30;
-            foreach ($request->addons as $addonType) {
-                if (isset($availableAddons[$addonType])) {
-                    $addonData = $availableAddons[$addonType];
-                    $addonsTotal += $addonData['price'] * $months;
-                }
-            }
+        if ($billingPeriod === 'weekly' && !$plan->supportsWeeklyBilling()) {
+            return back()->withInput()->withErrors([
+                'billing_period' => "Le paiement à la semaine n'est disponible que pour le plan Stand.",
+            ]);
         }
-
-        $totalPrice = $priceCalculation['final_price'] + $addonsTotal;
 
         try {
             DB::beginTransaction();
 
-            $trialDays = 7;
+            $trialDays = (int) config('plans.trial_days', 30); // fonctions Pro pendant l'essai
             $trialEndsAt = now()->addDays($trialDays);
 
             $referredByAgentId = null;

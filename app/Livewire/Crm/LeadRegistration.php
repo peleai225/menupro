@@ -90,7 +90,8 @@ class LeadRegistration extends Component
             ?? Plan::where('is_active', true)->orderBy('sort_order')->first();
 
         DB::transaction(function () use ($lead, $plan) {
-            $trialEndsAt = now()->addDays(7);
+            $trialDays = (int) config('plans.trial_days', 30);
+            $trialEndsAt = now()->addDays($trialDays);
 
             $restaurant = Restaurant::create([
                 'name'               => $this->restaurant_name,
@@ -123,7 +124,7 @@ class LeadRegistration extends Component
                 'plan_id'            => $plan->id,
                 'status'             => SubscriptionStatus::TRIAL,
                 'is_trial'           => true,
-                'trial_days'         => 7,
+                'trial_days'         => $trialDays,
                 'starts_at'          => now(),
                 'ends_at'            => $trialEndsAt,
                 'amount_paid'        => 0,

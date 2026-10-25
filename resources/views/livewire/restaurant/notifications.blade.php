@@ -355,6 +355,12 @@
                                            class="text-xs text-primary-600 hover:text-primary-700 font-medium mt-2 inline-block">
                                             Voir l'abonnement →
                                         </a>
+                                    @elseif(($data['type'] ?? null) === 'order_quota_reached')
+                                        <a href="{{ route('restaurant.subscription.plans') }}"
+                                           wire:click="markAsRead('{{ $notification->id }}')"
+                                           class="text-xs text-primary-600 hover:text-primary-700 font-medium mt-2 inline-block">
+                                            Voir les plans →
+                                        </a>
                                     @endif
                                 </div>
 

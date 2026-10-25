@@ -299,31 +299,36 @@ Route::prefix('dashboard')
             Route::get('rapports', \App\Livewire\Restaurant\Reports::class)->name('reports');
             Route::get('rapports/export-pdf', [\App\Http\Controllers\Restaurant\ReportExportController::class, 'pdf'])->name('reports.export-pdf');
             Route::get('depenses', \App\Livewire\Restaurant\Expenses::class)->name('expenses');
-            Route::get('rentabilite', \App\Livewire\Restaurant\DishProfitability::class)->name('profitability');
+            // Rentabilité par plat : plan Pro (stock par ingrédient)
+            Route::get('rentabilite', \App\Livewire\Restaurant\DishProfitability::class)->name('profitability')
+                ->middleware('feature:ingredient_stock');
         });
-        
-        // Stock Management - plan Pro+ requis
+
+        // Stock simple (stock journalier) - plan Restaurant et +
         Route::prefix('stock')->name('stock.')->middleware('feature:stock')->group(function () {
             Route::get('journalier', \App\Livewire\Restaurant\DailyStock::class)->name('daily');
 
-            Route::middleware('restaurant.admin')->group(function () {
-                Route::resource('categories-ingredients', IngredientCategoryController::class)
-                    ->parameters(['categories-ingredients' => 'ingredientCategory']);
-                Route::resource('fournisseurs', SupplierController::class)->parameters(['fournisseurs' => 'supplier']);
-                Route::post('fournisseurs/{supplier}/link-ingredient', [SupplierController::class, 'linkIngredient'])->name('suppliers.link-ingredient');
-                Route::delete('fournisseurs/{supplier}/ingredients/{ingredient}', [SupplierController::class, 'unlinkIngredient'])->name('suppliers.unlink-ingredient');
-                Route::get('rapport', [IngredientController::class, 'report'])->name('report');
-            });
+            // Stock par ingrédient (recettes, fournisseurs, alertes) - plan Pro et +
+            Route::middleware('feature:ingredient_stock')->group(function () {
+                Route::middleware('restaurant.admin')->group(function () {
+                    Route::resource('categories-ingredients', IngredientCategoryController::class)
+                        ->parameters(['categories-ingredients' => 'ingredientCategory']);
+                    Route::resource('fournisseurs', SupplierController::class)->parameters(['fournisseurs' => 'supplier']);
+                    Route::post('fournisseurs/{supplier}/link-ingredient', [SupplierController::class, 'linkIngredient'])->name('suppliers.link-ingredient');
+                    Route::delete('fournisseurs/{supplier}/ingredients/{ingredient}', [SupplierController::class, 'unlinkIngredient'])->name('suppliers.unlink-ingredient');
+                    Route::get('rapport', [IngredientController::class, 'report'])->name('report');
+                });
 
-            Route::resource('ingredients', IngredientController::class);
-            Route::post('ingredients/{ingredient}/entry', [IngredientController::class, 'addStock'])->name('ingredients.entry');
-            Route::post('ingredients/{ingredient}/exit', [IngredientController::class, 'removeStock'])->name('ingredients.exit');
-            Route::post('ingredients/{ingredient}/adjustment', [IngredientController::class, 'adjust'])->name('ingredients.adjustment');
-            Route::post('ingredients/{ingredient}/waste', [IngredientController::class, 'recordWaste'])->name('ingredients.waste');
-            Route::get('ingredients/{ingredient}/movements', [IngredientController::class, 'movements'])->name('ingredients.movements');
-            Route::get('alertes', [IngredientController::class, 'alerts'])->name('alerts');
-            Route::get('export', [IngredientController::class, 'export'])->name('export');
-            Route::get('mise-a-jour', \App\Livewire\Restaurant\BulkStockUpdate::class)->name('bulk-update');
+                Route::resource('ingredients', IngredientController::class);
+                Route::post('ingredients/{ingredient}/entry', [IngredientController::class, 'addStock'])->name('ingredients.entry');
+                Route::post('ingredients/{ingredient}/exit', [IngredientController::class, 'removeStock'])->name('ingredients.exit');
+                Route::post('ingredients/{ingredient}/adjustment', [IngredientController::class, 'adjust'])->name('ingredients.adjustment');
+                Route::post('ingredients/{ingredient}/waste', [IngredientController::class, 'recordWaste'])->name('ingredients.waste');
+                Route::get('ingredients/{ingredient}/movements', [IngredientController::class, 'movements'])->name('ingredients.movements');
+                Route::get('alertes', [IngredientController::class, 'alerts'])->name('alerts');
+                Route::get('export', [IngredientController::class, 'export'])->name('export');
+                Route::get('mise-a-jour', \App\Livewire\Restaurant\BulkStockUpdate::class)->name('bulk-update');
+            });
         });
         
         // Team Management - admin uniquement

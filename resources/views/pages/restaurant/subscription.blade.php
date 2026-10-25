@@ -17,9 +17,19 @@
         $isActive       = $subscription && $subscription->isActive() && !$isTrial;
         $isExpired      = $restaurant->is_subscription_expired;
         $daysLeft       = $restaurant->days_until_expiration ?? 0;
-        $trialDays      = $subscription?->trial_days ?? 7;
+        $trialDays      = $subscription?->trial_days ?? config('plans.trial_days', 30);
         $availableAddons = \App\Models\SubscriptionAddon::getAvailableAddons();
         $isStand        = ($restaurant->currentPlan?->slug ?? '') === 'stand';
+
+        // Prix calculés côté serveur (remises, prix hebdo Stand, tarif conservé des anciens abonnés)
+        $quotes = $plans->mapWithKeys(fn ($plan) => [
+            $plan->slug => collect($plan->availableBillingPeriods())->mapWithKeys(fn ($p) => [
+                $p => \App\Models\Subscription::quote($plan, $p, $restaurant),
+            ]),
+        ]);
+        $hasWeekly = $plans->contains(fn ($plan) => $plan->supportsWeeklyBilling());
+        $periodSuffix = ['weekly' => '/semaine', 'monthly' => '/mois', 'quarterly' => '/trimestre', 'semiannual' => '/semestre', 'annual' => '/an'];
+        $fmt = fn ($n) => number_format((int) $n, 0, ',', ' ');
 
         $pendingSubscription = $restaurant->subscriptions()
             ->where('status', \App\Enums\SubscriptionStatus::PENDING)
@@ -67,8 +77,8 @@
                             </span>
                         </div>
                         <p class="text-sm text-neutral-600">
-                            Expire le <strong>{{ $subscription->ends_at->locale('fr')->isoFormat('D MMMM YYYY') }}</strong> —
-                            accès complet à toutes les fonctionnalités.
+                            Expire le <strong>{{ $subscription->ends_at?->locale('fr')->isoFormat('D MMMM YYYY') }}</strong> —
+                            accès complet à toutes les fonctions du plan Pro. Choisissez ensuite votre plan, payé en Mobile Money.
                         </p>
                         @if($daysLeft <= 2)
                             <p class="text-xs text-red-600 font-semibold mt-1">⚠️ Votre essai expire très bientôt, abonnez-vous pour ne pas perdre l'accès.</p>
@@ -134,68 +144,58 @@
 
     {{-- ═══ PLANS ═══ --}}
     @if($isStand)
-    {{-- Récapitulatif simplifié pour le plan Stand --}}
-    <div class="mb-8">
+    {{-- Récapitulatif simplifié pour le plan Stand : paiement à la semaine ou au mois --}}
+    @php
+        $standPlan = $plans->firstWhere('slug', 'stand') ?? $currentPlan;
+        $standQuotes = $quotes[$standPlan->slug] ?? collect();
+        $canPayStand = !$isActive || $daysLeft <= 7;
+    @endphp
+    <div class="mb-8" x-data="{ gateway: 'jeko', jeko_operator: 'wave' }">
         <h2 class="text-xl font-bold text-neutral-900 mb-4">Votre plan</h2>
         <div class="p-6 rounded-2xl border-2 border-primary-200 bg-gradient-to-br from-primary-50 to-white">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                 <div>
-                    <h3 class="text-lg font-bold text-neutral-900">Plan Stand</h3>
-                    <p class="text-sm text-neutral-500">Pour les stands, kiosques et micro-commerces</p>
+                    <h3 class="text-lg font-bold text-neutral-900">Plan {{ $standPlan->name }}</h3>
+                    <p class="text-sm text-neutral-500">Pour les stands, kiosques et street food</p>
                 </div>
-                <div class="text-right">
-                    <span class="text-2xl font-bold text-primary-600">5 000 F</span>
+                <div class="sm:text-right">
+                    <span class="text-2xl font-bold text-primary-600">{{ $fmt($standQuotes['monthly']['final_price'] ?? $standPlan->price) }} F</span>
                     <span class="text-sm text-neutral-500">/mois</span>
+                    @if(isset($standQuotes['weekly']))
+                        <p class="text-sm text-neutral-500">ou {{ $fmt($standQuotes['weekly']['final_price']) }} F/semaine</p>
+                    @endif
                 </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    15 plats max
-                </div>
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    5 catégories
-                </div>
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    100 commandes/mois
-                </div>
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    QR Code inclus
-                </div>
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    Commandes WhatsApp
-                </div>
-                <div class="flex items-center gap-2 text-sm text-neutral-700">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    1 compte
-                </div>
-            </div>
-            @if(!$isActive || $daysLeft <= 7)
-            <div class="mt-5 pt-4 border-t border-neutral-200">
-                <form method="POST" action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
-                    @csrf
-                    <input type="hidden" name="plan" value="stand">
-                    <input type="hidden" name="billing_period" value="monthly">
-                    <input type="hidden" name="payment_gateway" x-bind:value="gateway ?? 'jeko'">
-                    <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator ?? 'wave'">
-                    <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm hover:shadow transition-all">
-                        @if($isTrial)
-                            Activer mon plan — 5 000 F/mois
-                        @elseif($isActive && $daysLeft <= 7)
-                            Renouveler — 5 000 F/mois
-                        @else
-                            Réactiver mon plan — 5 000 F/mois
-                        @endif
-                    </button>
-                </form>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                @foreach($standPlan->features as $feature)
+                    <li class="flex items-start gap-2 text-sm text-neutral-700">
+                        <svg class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        {{ $feature }}
+                    </li>
+                @endforeach
+            </ul>
+            <p class="text-xs text-neutral-500 mt-3">Livraison incluse — commission de 12 % uniquement sur les commandes livrées. Aucune commande n'est jamais bloquée.</p>
+
+            @if($canPayStand)
+            <div class="mt-5 pt-4 border-t border-neutral-200 flex flex-col sm:flex-row gap-3">
+                @foreach(['weekly' => 'semaine', 'monthly' => 'mois'] as $period => $unit)
+                    @continue(!isset($standQuotes[$period]))
+                    <form method="POST" action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}" class="flex-1">
+                        @csrf
+                        <input type="hidden" name="plan" value="{{ $standPlan->slug }}">
+                        <input type="hidden" name="billing_period" value="{{ $period }}">
+                        <input type="hidden" name="payment_gateway" x-bind:value="gateway">
+                        <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator">
+                        <button type="submit" class="w-full px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow transition-all {{ $period === 'monthly' ? 'text-white bg-primary-600 hover:bg-primary-700' : 'text-primary-700 bg-white border-2 border-primary-300 hover:border-primary-500' }}">
+                            @if($isTrial) Activer @elseif($isActive) Renouveler @else Réactiver @endif
+                            — {{ $fmt($standQuotes[$period]['final_price']) }} F / {{ $unit }}
+                        </button>
+                    </form>
+                @endforeach
             </div>
             @endif
-            <div class="mt-4 pt-4 {{ !$isActive ? '' : 'border-t border-neutral-200' }}">
-                <p class="text-sm text-neutral-600">Besoin de plus ? Passez au plan <strong>Essentiel</strong> pour débloquer la livraison, les statistiques et plus encore.</p>
+            <div class="mt-4 pt-4 border-t border-neutral-200">
+                <p class="text-sm text-neutral-600">Besoin de plus ? Le plan <strong>Restaurant</strong> ajoute la caisse, l'écran cuisine, le stock, les statistiques et les réservations.</p>
                 <a href="{{ route('restaurant.subscription.plans') }}" class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 mt-2">
                     Voir les plans supérieurs
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -211,7 +211,7 @@
         $moneyFusionConfigured = !empty(\App\Models\SystemSetting::get('moneyfusion_api_url', ''));
         $jekoConfigured = \App\Models\SystemPaymentSetting::where('gateway', 'jeko_marketplace')->where('is_active', true)->exists();
     @endphp
-    <div x-data="{ period: 'monthly', gateway: 'jeko', jeko_operator: 'wave' }">
+    <div x-data="{ period: 'monthly', gateway: 'jeko', jeko_operator: 'wave', quotes: @js($quotes) }">
 
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -226,7 +226,7 @@
             </div>
             {{-- Toggle période --}}
             <div class="flex bg-neutral-100 rounded-xl p-1 gap-1 text-xs font-semibold shrink-0">
-                @foreach(['monthly' => ['1 mois', null], 'quarterly' => ['3 mois', '-10%'], 'semiannual' => ['6 mois', '-15%'], 'annual' => ['1 an', '-20%']] as $p => [$label, $badge])
+                @foreach(array_filter(['weekly' => ['1 semaine', null], 'monthly' => ['1 mois', null], 'quarterly' => ['3 mois', '-10%'], 'semiannual' => ['6 mois', '-15%'], 'annual' => ['1 an', '-20%']], fn ($k) => $k !== 'weekly' || $hasWeekly, ARRAY_FILTER_USE_KEY) as $p => [$label, $badge])
                     <button type="button" @click="period = '{{ $p }}'"
                             :class="period === '{{ $p }}' ? 'bg-white shadow text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'"
                             class="relative px-3 py-1.5 rounded-lg transition-all">
@@ -290,17 +290,22 @@
         @endif
 
         {{-- Grille des plans --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+            <strong>Livraison incluse</strong> — commission de 12 % uniquement sur les commandes livrées (10 % avec Pro).
+            <strong>Aucune commande n'est jamais bloquée.</strong>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             @foreach($plans as $plan)
                 @php
                     $isCurrentPlan = $currentPlan && $currentPlan->id === $plan->id && $isActive;
                     $canRenew = $isExpired || ($daysLeft !== null && $daysLeft <= 7);
                     $isDisabled = $isCurrentPlan && !$canRenew;
+                    $lockedApplied = $quotes[$plan->slug]['monthly']['locked_price_applied'] ?? false;
 
                     $accent = match($plan->slug) {
-                        'essentiel' => ['ring' => '', 'btn' => 'bg-neutral-900 hover:bg-neutral-800 text-white', 'price' => 'text-neutral-900'],
-                        'pro'       => ['ring' => 'ring-2 ring-primary-400', 'btn' => 'bg-primary-500 hover:bg-primary-600 text-white', 'price' => 'text-primary-600'],
-                        'business'  => ['ring' => 'ring-2 ring-amber-400', 'btn' => 'bg-amber-500 hover:bg-amber-600 text-white', 'price' => 'text-amber-600'],
+                        'stand'     => ['ring' => '', 'btn' => 'bg-neutral-900 hover:bg-neutral-800 text-white', 'price' => 'text-neutral-900'],
+                        'essentiel' => ['ring' => 'ring-2 ring-primary-400', 'btn' => 'bg-primary-500 hover:bg-primary-600 text-white', 'price' => 'text-primary-600'],
+                        'pro'       => ['ring' => 'ring-2 ring-amber-400', 'btn' => 'bg-amber-500 hover:bg-amber-600 text-white', 'price' => 'text-amber-600'],
                         default     => ['ring' => '', 'btn' => 'bg-neutral-900 hover:bg-neutral-800 text-white', 'price' => 'text-neutral-900'],
                     };
                 @endphp
@@ -326,67 +331,56 @@
                         <p class="text-xs text-neutral-500 mt-0.5 leading-relaxed">{{ $plan->description }}</p>
                     </div>
 
-                    {{-- Prix dynamique --}}
+                    {{-- Prix (calculé côté serveur) --}}
                     <div class="mb-5">
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-3xl font-bold {{ $accent['price'] }}"
-                                  x-text="calcPrice({{ (int)$plan->price }}, period)"></span>
-                            <span class="text-sm text-neutral-400" x-text="periodSuffix(period)"></span>
-                        </div>
-                        <p class="text-xs text-neutral-400 mt-0.5"
-                           x-show="period !== 'monthly'"
-                           x-text="'soit ' + calcMonthly({{ (int)$plan->price }}, period) + ' FCFA/mois'"></p>
-                        <p class="text-xs text-emerald-600 font-semibold mt-0.5"
-                           x-show="period !== 'monthly'"
-                           x-text="'économie : ' + calcSaving({{ (int)$plan->price }}, period) + ' FCFA'"></p>
+                        @if($plan->is_on_quote)
+                            <p class="text-xs text-neutral-500">Sur devis, à partir de</p>
+                        @endif
+                        <template x-if="quotes['{{ $plan->slug }}'][period]">
+                            <div>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl font-bold {{ $accent['price'] }}"
+                                          x-text="new Intl.NumberFormat('fr-FR').format(quotes['{{ $plan->slug }}'][period].final_price) + ' F'"></span>
+                                    <span class="text-sm text-neutral-400" x-text="@js($periodSuffix)[period]"></span>
+                                </div>
+                                <p class="text-xs text-neutral-400 mt-0.5"
+                                   x-show="period !== 'monthly' && period !== 'weekly'"
+                                   x-text="'soit ' + new Intl.NumberFormat('fr-FR').format(quotes['{{ $plan->slug }}'][period].monthly_equivalent) + ' FCFA/mois'"></p>
+                                <p class="text-xs text-emerald-600 font-semibold mt-0.5"
+                                   x-show="quotes['{{ $plan->slug }}'][period].discount_amount > 0"
+                                   x-text="'économie : ' + new Intl.NumberFormat('fr-FR').format(quotes['{{ $plan->slug }}'][period].discount_amount) + ' FCFA'"></p>
+                            </div>
+                        </template>
+                        <template x-if="!quotes['{{ $plan->slug }}'][period]">
+                            <p class="text-sm text-neutral-400">Non disponible à la semaine</p>
+                        </template>
+                        @if($lockedApplied)
+                            <p class="text-xs text-emerald-700 font-medium mt-1">Votre tarif d'abonné est conservé</p>
+                        @endif
                     </div>
 
                     {{-- Fonctionnalités --}}
                     <ul class="space-y-2 mb-6 flex-1 text-sm text-neutral-600">
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>{{ $plan->max_dishes >= 9999 ? 'Plats illimités' : $plan->max_dishes . ' plats' }}</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>{{ $plan->max_employees }} compte{{ $plan->max_employees > 1 ? 's' : '' }} employé</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>{{ $plan->max_orders_per_month >= 9999 ? 'Commandes illimitées' : number_format($plan->max_orders_per_month, 0, ',', ' ') . ' cmd/mois' }}</span>
-                        </li>
-                        @if($plan->has_delivery)
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Gestion de la livraison</span>
-                        </li>
-                        @endif
-                        @if($plan->has_stock_management)
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Gestion du stock</span>
-                        </li>
-                        @endif
-                        @if($plan->has_analytics)
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Statistiques avancées</span>
-                        </li>
-                        @endif
-                        @foreach($plan->features ?? [] as $feature)
-                        <li class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        @foreach($plan->features as $feature)
+                        <li class="flex items-start gap-2">
+                            <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>{{ $feature }}</span>
                         </li>
                         @endforeach
                     </ul>
 
                     {{-- Bouton --}}
+                    @if($plan->is_on_quote)
+                        <a href="{{ route('contact') }}?type=gold"
+                           class="block w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all {{ $accent['btn'] }} shadow-sm hover:shadow">
+                            Demander un devis
+                        </a>
+                    @else
                     <form method="POST"
                           action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
                         @csrf
                         <input type="hidden" name="plan" value="{{ $plan->slug }}">
-                        <input type="hidden" name="billing_period" x-bind:value="period">
+                        <input type="hidden" name="billing_period" x-bind:value="quotes['{{ $plan->slug }}'][period] ? period : 'monthly'">
                         <input type="hidden" name="payment_gateway" x-bind:value="gateway">
                         <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator">
                         @if($isDisabled)
@@ -396,7 +390,8 @@
                             </button>
                         @else
                             <button type="submit"
-                                    class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all {{ $accent['btn'] }} shadow-sm hover:shadow">
+                                    x-bind:disabled="!quotes['{{ $plan->slug }}'][period]"
+                                    class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ $accent['btn'] }} shadow-sm hover:shadow">
                                 @if($isTrial || $isExpired)
                                     Activer ce plan
                                 @elseif($isCurrentPlan && $canRenew)
@@ -407,6 +402,7 @@
                             </button>
                         @endif
                     </form>
+                    @endif
                 </div>
             @endforeach
         </div>
@@ -438,21 +434,24 @@
     @endif
 
     {{-- ═══ UTILISATION ═══ --}}
-    @if($currentPlan)
+    @php $usagePlan = $restaurant->effectivePlan(); /* pendant l'essai : limites Pro */ @endphp
+    @if($usagePlan)
     <div class="mb-8">
         <h3 class="text-base font-bold text-neutral-900 mb-4">Utilisation actuelle</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @php
+                $orderQuota = (clone app(\App\Services\PlanLimiter::class))->forRestaurant($restaurant)->getQuotasSummary()['orders_this_month'];
                 $usages = [
-                    ['label' => 'Plats', 'count' => $restaurant->dishes()->count(), 'max' => $currentPlan->max_dishes, 'color' => 'primary'],
-                    ['label' => 'Catégories', 'count' => $restaurant->categories()->count(), 'max' => $currentPlan->max_categories ?? 999, 'color' => 'secondary'],
-                    ['label' => 'Équipe', 'count' => $restaurant->users()->where('role', 'employee')->count(), 'max' => $currentPlan->max_employees, 'color' => 'amber'],
+                    ['label' => 'Plats', 'count' => $restaurant->dishes()->count(), 'max' => $usagePlan->max_dishes ?? 9999, 'color' => 'primary', 'soft' => false],
+                    ['label' => 'Catégories', 'count' => $restaurant->categories()->count(), 'max' => $usagePlan->max_categories ?? 9999, 'color' => 'secondary', 'soft' => false],
+                    ['label' => 'Équipe', 'count' => $restaurant->users()->where('role', 'employee')->count(), 'max' => $usagePlan->max_employees ?? 9999, 'color' => 'amber', 'soft' => false],
+                    ['label' => 'Commandes ce mois', 'count' => $orderQuota['current'], 'max' => $orderQuota['limit'] ?? 9999, 'color' => 'emerald', 'soft' => true],
                 ];
             @endphp
             @foreach($usages as $u)
                 @php
                     $pct = $u['max'] < 9999 ? min(100, ($u['count'] / max(1, $u['max'])) * 100) : 0;
-                    $warn = $pct >= 90;
+                    $warn = $pct >= 90 && !$u['soft'];
                 @endphp
                 <div class="p-4 rounded-2xl border border-neutral-200 bg-white">
                     <div class="flex items-center justify-between mb-3">
@@ -469,6 +468,9 @@
                     @if($warn)
                         <p class="text-[10px] text-red-500 font-medium mt-1">Limite presque atteinte</p>
                     @endif
+                    @endif
+                    @if($u['soft'])
+                        <p class="text-[10px] text-neutral-500 mt-1">Indicatif : aucune commande n'est jamais bloquée</p>
                     @endif
                 </div>
             @endforeach
@@ -501,7 +503,7 @@
                                     'cancelled'=> ['Annulé',     'bg-red-100 text-red-600'],
                                 ];
                                 [$statusLabel, $statusClass] = $statusMap[$sub->status->value] ?? [$sub->status->value, 'bg-neutral-100 text-neutral-500'];
-                                $periodLabels = ['monthly' => 'Mensuel', 'quarterly' => 'Trimestriel', 'semiannual' => 'Semestriel', 'annual' => 'Annuel'];
+                                $periodLabels = ['weekly' => 'Hebdomadaire', 'monthly' => 'Mensuel', 'quarterly' => 'Trimestriel', 'semiannual' => 'Semestriel', 'annual' => 'Annuel'];
                             @endphp
                             <tr class="hover:bg-neutral-50 transition-colors">
                                 <td class="px-4 py-3 text-sm text-neutral-600">{{ $sub->created_at->format('d M Y') }}</td>
@@ -533,30 +535,5 @@
     </div>
     @endif
 
-    @push('scripts')
-    <script>
-        function calcPrice(price, period) {
-            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
-            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
-            const final = Math.round(price * m * (1 - d/100) / 100) * 100;
-            return new Intl.NumberFormat('fr-FR').format(final) + ' F';
-        }
-        function calcMonthly(price, period) {
-            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
-            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
-            const final = Math.round(price * m * (1 - d/100) / 100) * 100;
-            return new Intl.NumberFormat('fr-FR').format(Math.round(final / m));
-        }
-        function calcSaving(price, period) {
-            const m = {monthly:1, quarterly:3, semiannual:6, annual:12}[period] || 1;
-            const d = {monthly:0, quarterly:10, semiannual:15, annual:20}[period] || 0;
-            const saving = Math.round(price * m * (d/100) / 100) * 100;
-            return new Intl.NumberFormat('fr-FR').format(saving);
-        }
-        function periodSuffix(period) {
-            return {monthly:'/mois', quarterly:'/trimestre', semiannual:'/semestre', annual:'/an'}[period] || '/mois';
-        }
-    </script>
-    @endpush
 
 </x-layouts.admin-restaurant>

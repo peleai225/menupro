@@ -61,7 +61,7 @@ class Dashboard extends Component
             ->count();
 
         $dishesCount = Dish::where('restaurant_id', $restaurant->id)->count();
-        $maxDishes = $restaurant->currentPlan?->max_dishes ?? 50;
+        $maxDishes = $restaurant->effectivePlan()?->max_dishes ?? 50;
 
         return [
             'orders_today' => $ordersToday,
@@ -163,7 +163,7 @@ class Dashboard extends Component
     {
         $restaurant = auth()->user()->restaurant;
         
-        if (!$restaurant || !$restaurant->currentPlan?->has_stock_management) {
+        if (!$restaurant || !$restaurant->hasFeature('ingredient_stock')) {
             return collect();
         }
 
@@ -268,6 +268,28 @@ class Dashboard extends Component
         $values = $data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray();
 
         return ['labels' => $labels, 'data' => $values];
+    }
+
+    /**
+     * Quota souple de commandes : bandeau quand le palier 80 % / 100 % est atteint ce mois-ci.
+     * Lecture de order_quota_alerts (indexée) ; le comptage n'est fait que si un palier est atteint.
+     */
+    #[Computed]
+    public function orderQuota(): ?array
+    {
+        $restaurant = auth()->user()->restaurant;
+
+        if (!$restaurant || !auth()->user()->canManageRestaurant()) {
+            return null;
+        }
+
+        if (app(\App\Services\OrderQuotaMonitor::class)->reachedThisMonth($restaurant) === null) {
+            return null;
+        }
+
+        $status = (clone app(\App\Services\PlanLimiter::class))->forRestaurant($restaurant)->getOrderQuotaStatus();
+
+        return $status['threshold'] !== null ? $status : null;
     }
 
     /**

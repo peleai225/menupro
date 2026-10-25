@@ -24,7 +24,7 @@ class TrialStartedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $restaurant = $this->subscription->restaurant;
-        $trialDays = $this->subscription->trial_days ?? 14;
+        $trialDays = $this->subscription->trial_days ?? config('plans.trial_days', 30);
         $trialEndsAt = $this->subscription->ends_at->locale('fr')->isoFormat('dddd D MMMM YYYY [à] HH:mm');
 
         return (new MailMessage)
@@ -56,7 +56,7 @@ class TrialStartedNotification extends Notification implements ShouldQueue
             'restaurant_id' => $restaurant->id,
             'restaurant_name' => $restaurant->name,
             'subscription_id' => $this->subscription->id,
-            'trial_days' => $this->subscription->trial_days ?? 14,
+            'trial_days' => $this->subscription->trial_days ?? config('plans.trial_days', 30),
             'trial_ends_at' => $this->subscription->ends_at->toIso8601String(),
             'message' => "Votre essai gratuit de {$this->subscription->trial_days} jours a commencé !",
         ];

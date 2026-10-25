@@ -186,7 +186,7 @@ class RestaurantController extends Controller
             // Démarre l'essai et clôt tout autre abonnement active/trial resté ouvert
             $trial->activateExclusively([
                 'starts_at' => now(),
-                'ends_at'   => now()->addDays($trial->trial_days ?? 7),
+                'ends_at'   => now()->addDays($trial->trial_days ?? (int) config('plans.trial_days', 30)),
             ]);
         }
 

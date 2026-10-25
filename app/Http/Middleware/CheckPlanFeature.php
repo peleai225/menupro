@@ -39,6 +39,7 @@ class CheckPlanFeature
         return match ($feature) {
             'analytics' => 'Statistiques, Rapports et Codes Promo',
             'stock' => 'Gestion de Stock',
+            'ingredient_stock' => 'Stock par ingrédient et rentabilité par plat (Plan Pro)',
             'delivery' => 'Gestion des Livraisons',
             'hotel_rooms' => 'Chambres Hôtel (QR par chambre)',
             'multi_spaces' => 'Gestion multi-espaces (Plan GOLD)',

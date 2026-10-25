@@ -15,7 +15,9 @@
     $hasStock = isset($restaurant) && $restaurant?->hasFeature('stock');
     $hasAnalytics = isset($restaurant) && $restaurant?->hasFeature('analytics');
     $hasDelivery = isset($restaurant) && $restaurant?->hasFeature('delivery');
-    $planName = $restaurant?->currentPlan?->slug ?? 'essentiel';
+    $hasIngredientStock = isset($restaurant) && $restaurant?->hasFeature('ingredient_stock');
+    // Plan effectif : pendant l'essai, interface complète du plan Pro (même inscrit en Stand)
+    $planName = $restaurant?->effectivePlan()?->slug ?? 'essentiel';
     $isStand = $planName === 'stand';
 
     // Étapes du tutoriel guidé (selon le rôle et les fonctionnalités)
@@ -308,6 +310,7 @@
                             <span x-show="expanded" x-transition class="whitespace-nowrap">Stock Journalier</span>
                         </a>
 
+                        @if($hasIngredientStock)
                         <a href="{{ route('restaurant.stock.ingredients.index') }}"
                            class="sidebar-item {{ request()->routeIs('restaurant.stock.ingredients*') ? 'sidebar-item-active' : '' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,6 +342,16 @@
                                 <span class="ml-auto bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $lowStockCount }}</span>
                             @endif
                         </a>
+                        @else
+                        {{-- Stock par ingrédient : plan Pro --}}
+                        <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <span x-show="expanded" x-transition class="whitespace-nowrap">Ingrédients</span>
+                            <span x-show="expanded" class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">PRO</span>
+                        </a>
+                        @endif
                     @else
                         <a href="{{ route('restaurant.subscription') }}" class="sidebar-item opacity-60 hover:opacity-100">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -835,8 +848,8 @@
                         <span class="text-[10px] font-medium text-neutral-700">Caisse</span>
                     </a>
                     @endif
-                    @if(isset($restaurant) && $restaurant?->hasFeature('stock'))
-                    <a href="{{ route('restaurant.stock.ingredients.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.stock*') ? 'bg-primary-50' : '' }}">
+                    @if($hasStock)
+                    <a href="{{ $hasIngredientStock ? route('restaurant.stock.ingredients.index') : route('restaurant.stock.daily') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('restaurant.stock*') ? 'bg-primary-50' : '' }}">
                         <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
                             <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                         </span>

@@ -122,6 +122,7 @@
                         class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
                     <option value="">Toutes les périodes</option>
+                    <option value="weekly" {{ request('billing_period') === 'weekly' ? 'selected' : '' }}>Hebdomadaire</option>
                     <option value="monthly" {{ request('billing_period') === 'monthly' ? 'selected' : '' }}>Mensuel</option>
                     <option value="quarterly" {{ request('billing_period') === 'quarterly' ? 'selected' : '' }}>Trimestriel</option>
                     <option value="semiannual" {{ request('billing_period') === 'semiannual' ? 'selected' : '' }}>Semestriel</option>

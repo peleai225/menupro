@@ -125,7 +125,7 @@ class DeliveryOrderController extends Controller
         return response()->json([
             'is_on_platform'           => $restaurant->is_on_platform,
             'avg_prep_time_minutes'    => $restaurant->avg_prep_time_minutes ?? 20,
-            'platform_commission_rate' => $restaurant->platform_commission_rate ?? 12.00,
+            'platform_commission_rate' => $restaurant->platformCommissionRate(), // dépend du plan (12 % / 10 % Pro-Gold)
             'platform_category'        => $restaurant->platform_category,
             'city_pricing' => $city ? [
                 'city_name'               => $city->name,

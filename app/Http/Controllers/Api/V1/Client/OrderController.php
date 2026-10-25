@@ -106,7 +106,8 @@ class OrderController extends Controller
             ], 422);
         }
 
-        $commissionRate = $restaurant->platform_commission_rate ?? 12.00;
+        // Taux selon le plan du restaurant au moment de la commande (12 %, 10 % Pro/Gold)
+        $commissionRate = $restaurant->platformCommissionRate();
         $commission = (int) round($subtotal * $commissionRate / 100);
         $total = $subtotal + $deliveryFee;
 
@@ -182,10 +183,6 @@ class OrderController extends Controller
 
             return $order;
         });
-        } catch (\App\Exceptions\QuotaExceededException $e) {
-            return response()->json([
-                'message' => 'Ce restaurant a atteint sa limite de commandes pour ce mois.',
-            ], 422);
         } catch (\Throwable $e) {
             \Log::error('API order creation failed', [
                 'restaurant_id' => $restaurant->id,

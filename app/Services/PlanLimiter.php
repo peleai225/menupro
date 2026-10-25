@@ -16,9 +16,43 @@ class PlanLimiter
     public function forRestaurant(Restaurant $restaurant): static
     {
         $this->restaurant = $restaurant;
-        $this->plan = $restaurant->currentPlan;
+        // Pendant l'essai : limites du plan Pro (Restaurant::effectivePlan())
+        $this->plan = $restaurant->effectivePlan();
 
         return $this;
+    }
+
+    /**
+     * État du quota SOUPLE de commandes du mois (n'empêche jamais une commande) :
+     * ['current', 'limit' (null = illimité), 'percentage', 'threshold' (palier atteint : 100, 80 ou null)].
+     */
+    public function getOrderQuotaStatus(): array
+    {
+        $limit = $this->getLimit('orders_this_month');
+
+        if ($limit === null || $limit <= 0) {
+            return ['current' => 0, 'limit' => null, 'percentage' => 0, 'threshold' => null];
+        }
+
+        $current = $this->getCurrentCount('orders_this_month');
+        $percentage = (int) floor($current * 100 / $limit);
+
+        $threshold = null;
+        $thresholds = config('plans.order_quota_alert_thresholds', [80, 100]);
+        rsort($thresholds);
+        foreach ($thresholds as $t) {
+            if ($percentage >= $t) {
+                $threshold = (int) $t;
+                break;
+            }
+        }
+
+        return [
+            'current' => $current,
+            'limit' => $limit,
+            'percentage' => $percentage,
+            'threshold' => $threshold,
+        ];
     }
 
     /**
@@ -116,9 +150,11 @@ class PlanLimiter
             'dishes' => $this->restaurant->dishes()->count(),
             'categories' => $this->restaurant->categories()->count(),
             'employees' => $this->restaurant->users()->where('role', 'employee')->count(),
-            'orders_this_month' => $this->restaurant->orders()
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
+            // Seules les commandes réellement payées/acceptées comptent (hors brouillons,
+            // attentes de paiement, annulées et caisse POS) — voir Order::scopeCountingTowardQuota
+            'orders_this_month' => \App\Models\Order::withoutGlobalScopes()
+                ->where('restaurant_id', $this->restaurant->id)
+                ->countingTowardQuota()
                 ->count(),
             default => 0,
         };

@@ -1,4 +1,4 @@
-<x-layouts.public title="MenuPro — Solution #1 pour restaurants en Côte d'Ivoire" description="MenuPro : digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov. Zéro commission.">
+<x-layouts.public title="MenuPro — Solution #1 pour restaurants en Côte d'Ivoire" description="MenuPro : digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov. Livraison incluse, zéro commission hors livraison.">
 @push('head')
 <script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Plateforme SaaS de commande en ligne pour restaurants en Cote d'Ivoire.","offers":{"@@type":"Offer","price":"5000","priceCurrency":"XOF"}}</script>
 <style>
@@ -45,7 +45,7 @@
         {{-- Sous-titre --}}
         <p class="text-lg lg:text-xl mt-8 max-w-xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
             Menu · QR code · Wave · Orange · MTN · Moov.<br>
-            En ligne en <strong style="color:#1A1614;font-weight:600">15 minutes</strong>. Zéro commission.
+            En ligne en <strong style="color:#1A1614;font-weight:600">15 minutes</strong>. Zéro commission hors livraison.
         </p>
 
         {{-- CTA --}}
@@ -123,10 +123,10 @@
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach([
-                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','5 000 F/mois'],
+                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','dès 1 500 F/semaine'],
                 ['🍽️','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','15 000 F/mois'],
                 ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','Gold'],
-                ['🏍️','Livraison intégrée','Vos livreurs, suivi temps réel. 0% de commission.','Pro'],
+                ['🏍️','Livraison incluse','Livreurs MenuPro, suivi temps réel. 12 % uniquement sur les commandes livrées.','Tous les plans'],
             ] as $i => $w)
             <div class="fu bg-white rounded-2xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated flex flex-col" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
                 <div class="text-3xl mb-6">{{ $w[0] }}</div>
@@ -184,7 +184,7 @@
                 ['analytics','Analytics & Rapports','Bilan journalier, CA par heure, plats les plus vendus, taux d\'annulation.'],
                 ['stock','Gestion de stock','Alertes rupture automatiques, inventaire, ingrédients. Plus jamais à court.'],
                 ['hotel','Mode Hôtel','QR par chambre, room service, voix IA, appel addition, appel ménage.'],
-                ['delivery','Livraison intégrée','Gérez vos livreurs avec suivi GPS. Vos clients voient la progression. Zéro commission.'],
+                ['delivery','Livraison intégrée','Gérez vos livreurs avec suivi GPS. Vos clients voient la progression. Commission de 12 % uniquement sur les commandes livrées.'],
             ] as $i => $f)
             <div class="bg-white rounded-2xl p-6 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(212,94,12,.08)">
@@ -392,7 +392,7 @@
             $testimonials = \App\Models\SystemSetting::get('home_testimonials', [
                 ['name'=>'Awa Koné','role'=>'Propriétaire, Maquis Chez Awa','city'=>'Daloa','text'=>'Depuis MenuPro, mes clients commandent directement depuis leur téléphone. Mon chiffre d\'affaires a augmenté de 30% en 2 mois.','stars'=>5],
                 ['name'=>'Kouamé Jean','role'=>'Gérant, Restaurant Le Délice','city'=>'Abidjan','text'=>'Le QR code a tout changé. Les clients scannent, commandent et paient par Wave. Je reçois l\'argent immédiatement.','stars'=>5],
-                ['name'=>'Marie Touré','role'=>'Fondatrice, Saveurs d\'Afrique','city'=>'Bouaké','text'=>'À partir de 5 000 F/mois, c\'est le meilleur investissement. Zéro commission, zéro surprise. Je recommande à 100%.','stars'=>5],
+                ['name'=>'Marie Touré','role'=>'Fondatrice, Saveurs d\'Afrique','city'=>'Bouaké','text'=>'À partir de 5 000 F/mois, c\'est le meilleur investissement. Zéro surprise. Je recommande à 100%.','stars'=>5],
             ]);
         @endphp
         <div class="grid md:grid-cols-3 gap-6 fu">
@@ -460,54 +460,65 @@
 
 
 {{-- ══════════ TARIFS ══════════ --}}
+@php
+    // Grille d'abonnements : prix lus en base, repli sur PlanSeeder (source de vérité)
+    $homePlans = \App\Models\Plan::whereIn('slug', \Database\Seeders\PlanSeeder::ACTIVE_SLUGS)->get()->keyBy('slug');
+    $homeDefs = \Database\Seeders\PlanSeeder::definitions();
+    $hp = fn ($slug, $field) => $homePlans[$slug]->{$field} ?? $homeDefs[$slug][$field];
+    $hfmt = fn ($n) => number_format((int) $n, 0, ',', ' ');
+    $homeTrial = (int) config('plans.trial_days', 30);
+    $check = '<svg class="w-4 h-4 shrink-0" style="color:currentColor" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>';
+@endphp
 <section id="pricing" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-xl mx-auto mb-16 fu">
             <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Tarifs</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Simple. Transparent.<br>Zéro commission.</h2>
+            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Simple. Transparent.<br>Livraison incluse.</h2>
+            <p class="text-sm mt-4" style="color:#7C6F65">Commission de 12 % uniquement sur les commandes livrées. Aucune commande n'est jamais bloquée.</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
             {{-- Stand --}}
             <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
                 <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#D45E0C">Stand</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">5 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
-                <p class="text-sm mb-6" style="color:#7C6F65">Vendeurs de rue et stands</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['15 plats','100 cmd/mois','QR code inclus','Wave & Orange Money','Sans PC requis'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=stand" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="border:1.5px solid #D45E0C;color:#D45E0C;background:rgba(212,94,12,.05)" onmouseover="this.style.background='rgba(212,94,12,.1)'" onmouseout="this.style.background='rgba(212,94,12,.05)'">Essai 7j gratuit</a>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">{{ $hfmt($hp('stand', 'price')) }}</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">ou {{ $hfmt($hp('stand', 'weekly_price')) }} F/semaine · stands et street food</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Menu QR + commandes','Mobile Money','Livraison MenuPro incluse','30 plats, 8 catégories','1 utilisateur'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#D45E0C">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?type=stand" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="border:1.5px solid #D45E0C;color:#D45E0C;background:rgba(212,94,12,.05)" onmouseover="this.style.background='rgba(212,94,12,.1)'" onmouseout="this.style.background='rgba(212,94,12,.05)'">Essai {{ $homeTrial }}j gratuit</a>
             </div>
 
-            {{-- Essentiel --}}
-            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#7C6F65">Essentiel</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">15 000</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
-                <p class="text-sm mb-6" style="color:#7C6F65">Maquis et petits restaurants</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['25 plats, 8 catégories','200 cmd/mois','Mobile Money + QR','Support WhatsApp'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#E8E0D5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="background:#FAF8F5;border:1.5px solid #E8E0D5;color:#7C6F65" onmouseover="this.style.background='#F2EDE6'" onmouseout="this.style.background='#FAF8F5'">Essai 7j gratuit</a>
-            </div>
-
-            {{-- Pro — highlighted --}}
+            {{-- Restaurant (slug essentiel) — highlighted --}}
             <div class="rounded-2xl p-7 border-2 relative hover:-translate-y-1 transition-all duration-300 flex flex-col" style="background:#D45E0C;border-color:#D45E0C;box-shadow:0 8px 40px rgba(212,94,12,.3)">
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1.5 rounded-full bg-white" style="color:#D45E0C">⭐ Populaire</div>
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4 text-orange-200">Pro</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal text-white">25 000</span><span class="text-sm text-orange-200">F/mois</span></div>
-                <p class="text-sm text-orange-200 mb-6">Stock, livraison, analytics</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['80 plats, 3 employés','1 000 cmd/mois','Stock complet','Livraison intégrée','Analytics & rapports'] as $f)<li class="flex items-center gap-2 text-sm text-white"><svg class="w-4 h-4 shrink-0 text-orange-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-white hover:opacity-90 transition-all" style="color:#D45E0C">Essai 7j gratuit</a>
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4 text-orange-200">{{ $hp('essentiel', 'name') }}</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal text-white">{{ $hfmt($hp('essentiel', 'price')) }}</span><span class="text-sm text-orange-200">F/mois</span></div>
+                <p class="text-sm text-orange-200 mb-6">Maquis et restaurants</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Caisse + écran cuisine','Stock simple','Statistiques','Réservations','3 employés, 100 plats'] as $f)<li class="flex items-center gap-2 text-sm text-white"><span class="text-orange-200">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-white hover:opacity-90 transition-all" style="color:#D45E0C">Essai {{ $homeTrial }}j gratuit</a>
+            </div>
+
+            {{-- Pro --}}
+            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
+                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#7C6F65">Pro</div>
+                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">{{ $hfmt($hp('pro', 'price')) }}</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
+                <p class="text-sm mb-6" style="color:#7C6F65">Restaurants établis et hôtels</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Stock par ingrédient','Rentabilité par plat','Chambres d\'hôtel','10 employés, plats illimités','Commission réduite à 10 %'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#E8E0D5">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="background:#FAF8F5;border:1.5px solid #E8E0D5;color:#7C6F65" onmouseover="this.style.background='#F2EDE6'" onmouseout="this.style.background='#FAF8F5'">Essai {{ $homeTrial }}j gratuit</a>
             </div>
 
             {{-- Gold --}}
             <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
                 <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#f6b285">Gold</div>
+                <div class="text-sm" style="color:#7C6F65">Sur devis, à partir de</div>
                 <div class="flex items-baseline gap-1 mb-1">
-                    <span class="font-display text-4xl font-normal" style="background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">85 000</span>
+                    <span class="font-display text-4xl font-normal" style="background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ $hfmt($hp('gold', 'price')) }}</span>
                     <span class="text-sm" style="color:#B8AFA8">F/mois</span>
                 </div>
-                <p class="text-sm mb-6" style="color:#7C6F65">Multi-espaces, hôtels, VIP</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces illimités','PIN serveurs','Rapports par espace','QR chambres hôtel','Formation personnalisée'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><svg class="w-4 h-4 shrink-0" style="color:#f6b285" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=gold" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-all" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Essai 7j gratuit</a>
+                <p class="text-sm mb-6" style="color:#7C6F65">Complexes, hôtels, multi-sites</p>
+                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces','Multi-sites','PIN serveurs','Tout illimité','Accompagnement dédié'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#f6b285">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
+                <a href="{{ route('contact') }}?type=gold" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-all" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Demander un devis</a>
             </div>
         </div>
-        <p class="text-center text-sm mt-8" style="color:#B8AFA8">Sans engagement · Sans carte bancaire · <a href="{{ route('pricing') }}" class="font-semibold hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
+        <p class="text-center text-sm mt-8" style="color:#B8AFA8">Sans engagement · Sans carte bancaire · {{ $homeTrial }} jours avec toutes les fonctions Pro · <a href="{{ route('pricing') }}" class="font-semibold hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
     </div>
 </section>
 
@@ -524,7 +535,7 @@
                 ['Mes clients doivent-ils télécharger une application ?','Non. Vos clients scannent le QR code ou cliquent sur votre lien. Tout fonctionne directement dans le navigateur, sans téléchargement.'],
                 ['Comment fonctionne le paiement Mobile Money ?','Vos clients paient depuis leur app Wave, Orange Money, MTN ou Moov. L\'argent est envoyé directement sur votre compte — sans délai, sans intermédiaire.'],
                 ['Combien de temps pour être en ligne ?','Moins de 15 minutes. Créez votre compte, ajoutez quelques plats avec photos et prix, et partagez votre lien ou imprimez votre QR code.'],
-                ['Est-ce qu\'il y a des commissions sur les commandes ?','Aucune commission. Vous payez un forfait mensuel fixe à partir de 5 000 F/mois et gardez 100% de vos ventes.'],
+                ['Est-ce qu\'il y a des commissions sur les commandes ?','Uniquement sur les commandes livrées par MenuPro : 12 % (10 % avec le plan Pro). Vos commandes sur place et à emporter sont sans commission, et aucune commande n\'est jamais bloquée.'],
                 ['Que se passe-t-il si j\'ai un problème ?','Support WhatsApp inclus dans tous les plans. Plans Pro et Gold : assistance prioritaire et formation personnalisée.'],
                 ['Puis-je annuler à tout moment ?','Oui, sans engagement et sans frais. Annulez depuis votre compte quand vous voulez.'],
             ];

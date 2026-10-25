@@ -1,4 +1,30 @@
 <div>
+    <!-- Quota souple de commandes (jamais bloquant) -->
+    @if($quota = $this->orderQuota)
+        @php $over = $quota['threshold'] >= 100; @endphp
+        <div class="mb-6 p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center gap-3 {{ $over ? 'bg-gradient-to-r from-primary-50 to-amber-50 border-primary-200' : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' }}">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 {{ $over ? 'bg-primary-500' : 'bg-amber-500' }}">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-semibold text-neutral-900">
+                    {{ number_format($quota['current'], 0, ',', ' ') }} commandes ce mois-ci
+                    sur {{ number_format($quota['limit'], 0, ',', ' ') }} prévues par votre plan
+                    @if($over) — quota dépassé @endif
+                </p>
+                <p class="text-sm text-neutral-600 mt-0.5">
+                    Aucune commande n'est jamais bloquée : vos clients continuent de commander normalement.
+                    {{ $over ? 'Votre activité grandit, passez au plan supérieur.' : 'Pensez au plan supérieur pour suivre votre croissance.' }}
+                </p>
+            </div>
+            <a href="{{ route('restaurant.subscription.plans') }}" class="btn btn-primary text-sm px-4 py-2 whitespace-nowrap self-start sm:self-center">
+                Voir les plans
+            </a>
+        </div>
+    @endif
+
     <!-- Platform Announcements -->
     @if($this->announcements->isNotEmpty())
         <div class="space-y-3 mb-6">

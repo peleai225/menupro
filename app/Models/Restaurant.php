@@ -41,6 +41,7 @@ class Restaurant extends Model
         'suspension_reason',
         'current_plan_id',
         'subscription_ends_at',
+        'locked_price', // Prix mensuel garanti (anciens abonnés), prioritaire au renouvellement
         'orders_blocked',
         'logo_path',
         'banner_path',
@@ -108,7 +109,14 @@ class Restaurant extends Model
         'delivery_enabled' => 'boolean',
         'cash_on_delivery' => 'boolean',
         'is_demo' => 'boolean',
+        'locked_price' => 'integer',
     ];
+
+    /**
+     * Plan offert pendant l'essai (mémorisé pour la durée de vie de l'instance).
+     */
+    protected ?Plan $trialPlanCache = null;
+    protected bool $trialPlanResolved = false;
 
     protected $hidden = [
         'lygos_api_key',
@@ -360,7 +368,70 @@ class Restaurant extends Model
 
     public function isOnTrial(): bool
     {
-        return $this->activeSubscription?->status === \App\Enums\SubscriptionStatus::TRIAL;
+        $subscription = $this->activeSubscription;
+
+        return $subscription?->status === \App\Enums\SubscriptionStatus::TRIAL
+            && ($subscription->ends_at === null || $subscription->ends_at->isFuture());
+    }
+
+    /**
+     * Plan dont les fonctions et limites s'appliquent MAINTENANT :
+     * pendant l'essai, le plan d'essai (Pro, config('plans.trial_plan_slug')) ;
+     * sinon le plan souscrit (current_plan_id).
+     *
+     * Le plan choisi à l'inscription reste current_plan_id : c'est celui qui sera payé à la fin de l'essai.
+     */
+    public function effectivePlan(): ?Plan
+    {
+        if (!$this->trialPlanResolved) {
+            $this->trialPlanResolved = true;
+
+            if ($this->isOnTrial()) {
+                $this->trialPlanCache = Plan::where('slug', config('plans.trial_plan_slug', 'pro'))->first();
+            }
+        }
+
+        return $this->trialPlanCache ?? $this->currentPlan;
+    }
+
+    /**
+     * Taux de commission plateforme (%) des commandes livrées via MenuPro — SEUL point de calcul.
+     *
+     * Dépend du plan au moment de la commande (12 % par défaut, 10 % Pro/Gold et pendant l'essai Pro).
+     * Un taux négocié saisi par l'admin (restaurants.platform_commission_rate différent du taux par
+     * défaut de 12 %) reste prioritaire.
+     */
+    public function platformCommissionRate(): float
+    {
+        $default = (float) config('plans.commission.default_rate', 12.0);
+        $negotiated = $this->platform_commission_rate !== null ? (float) $this->platform_commission_rate : null;
+
+        if ($negotiated !== null && abs($negotiated - $default) > 0.001) {
+            return $negotiated;
+        }
+
+        return $this->effectivePlan()?->commissionRate() ?? $default;
+    }
+
+    /**
+     * Prix mensuel verrouillé applicable à ce plan (anciens abonnés conservant leur tarif),
+     * uniquement pour un renouvellement sur le plan actuel du restaurant.
+     */
+    public function lockedPriceFor(Plan $plan): ?int
+    {
+        if ($this->locked_price === null || (int) $this->current_plan_id !== (int) $plan->id) {
+            return null;
+        }
+
+        // « Tant qu'ils restent abonnés » : perdu si l'abonnement a expiré depuis plus de N jours
+        // (tolérance pour un renouvellement Mobile Money un peu tardif).
+        $graceDays = (int) config('plans.locked_price_grace_days', 7);
+        if ($this->subscription_ends_at && $this->subscription_ends_at->lt(now()->subDays($graceDays))) {
+            return null;
+        }
+
+        // Jamais plus cher que le tarif public du moment
+        return min((int) $this->locked_price, (int) $plan->price);
     }
 
     public function getIsSubscriptionExpiredAttribute(): bool
@@ -444,7 +515,9 @@ class Restaurant extends Model
      */
     public function canCreate(string $type): bool
     {
-        if (!$this->currentPlan) {
+        $plan = $this->effectivePlan();
+
+        if (!$plan) {
             return false;
         }
 
@@ -455,8 +528,8 @@ class Restaurant extends Model
         ];
 
         $current = $counts[$type] ?? 0;
-        
-        return !$this->currentPlan->isLimitReached($type, $current);
+
+        return !$plan->isLimitReached($type, $current);
     }
 
     /**
@@ -464,14 +537,16 @@ class Restaurant extends Model
      */
     public function getRemainingQuota(string $type): int
     {
-        if (!$this->currentPlan) {
+        $plan = $this->effectivePlan();
+
+        if (!$plan) {
             return 0;
         }
 
         $limits = [
-            'dishes' => $this->currentPlan->max_dishes,
-            'categories' => $this->currentPlan->max_categories,
-            'employees' => $this->currentPlan->max_employees,
+            'dishes' => $plan->max_dishes,
+            'categories' => $plan->max_categories,
+            'employees' => $plan->max_employees,
         ];
 
         $counts = [
@@ -491,7 +566,8 @@ class Restaurant extends Model
      */
     public function hasFeature(string $feature): bool
     {
-        return $this->currentPlan?->hasFeature($feature) ?? false;
+        // Pendant l'essai : fonctions du plan Pro (voir effectivePlan())
+        return $this->effectivePlan()?->hasFeature($feature) ?? false;
     }
 
     /**

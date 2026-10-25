@@ -25,7 +25,7 @@ class SubscriptionController extends Controller
         $restaurant = $request->user()->restaurant;
         $currentPlan = $restaurant->currentPlan;
         $subscription = $restaurant->activeSubscription;
-        $plans = Plan::active()->ordered()->where('slug', '!=', 'stand')->get();
+        $plans = Plan::active()->ordered()->get(); // Stand inclus (renouvellement, paiement à la semaine)
 
         $history = Subscription::where('restaurant_id', $restaurant->id)
             ->with('plan')
@@ -47,7 +47,7 @@ class SubscriptionController extends Controller
         $restaurant = $request->user()->restaurant;
         $currentPlan = $restaurant->currentPlan;
         $subscription = $restaurant->activeSubscription;
-        $plans = Plan::active()->ordered()->where('slug', '!=', 'stand')->get();
+        $plans = Plan::active()->ordered()->get(); // Stand inclus (renouvellement, paiement à la semaine)
 
         return view('pages.restaurant.subscription-plans', compact(
             'restaurant',
@@ -83,68 +83,13 @@ class SubscriptionController extends Controller
                 ->with('error', 'Vous n\'avez pas d\'essai actif à convertir.');
         }
 
-        $request->validate([
-            'plan' => ['required', 'exists:plans,slug'],
-            'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
-            'addons' => ['nullable', 'array'],
-            'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
-            'payment_gateway' => ['nullable', 'in:jeko'],
-            'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
-        ]);
+        $request->validate($this->subscriptionRules());
 
         $plan = Plan::where('slug', $request->plan)->firstOrFail();
 
-        $billingPeriod = $request->billing_period ?? 'monthly';
-        $priceCalculation = Subscription::calculatePriceWithDiscount($plan->price, $billingPeriod);
-
-        $durationDays = match($billingPeriod) {
-            'monthly' => 30,
-            'quarterly' => 90,
-            'semiannual' => 180,
-            'annual' => 365,
-            default => 30,
-        };
-
-        $addonsTotal = 0;
-        if ($request->has('addons') && is_array($request->addons)) {
-            $availableAddons = SubscriptionAddon::getAvailableAddons();
-            $months = $durationDays / 30;
-            foreach ($request->addons as $addonType) {
-                if (isset($availableAddons[$addonType])) {
-                    $addonData = $availableAddons[$addonType];
-                    $addonsTotal += $addonData['price'] * $months;
-                }
-            }
-        }
-
-        $totalPrice = $priceCalculation['final_price'] + $addonsTotal;
-
-        $subscription = Subscription::create([
-            'restaurant_id' => $restaurant->id,
-            'plan_id' => $plan->id,
-            'status' => SubscriptionStatus::PENDING,
-            'is_trial' => false,
-            'starts_at' => now(),
-            'ends_at' => now()->addDays($durationDays),
-            'amount_paid' => $totalPrice,
-            'billing_period' => $billingPeriod,
-            'discount_percentage' => $priceCalculation['discount_percentage'],
-        ]);
-
-        if ($request->has('addons') && is_array($request->addons)) {
-            $availableAddons = SubscriptionAddon::getAvailableAddons();
-            foreach ($request->addons as $addonType) {
-                if (isset($availableAddons[$addonType])) {
-                    $addonData = $availableAddons[$addonType];
-                    SubscriptionAddon::create([
-                        'subscription_id' => $subscription->id,
-                        'addon_type' => $addonType,
-                        'name' => $addonData['name'],
-                        'price' => $addonData['price'] * ($durationDays / 30),
-                        'metadata' => ['description' => $addonData['description']],
-                    ]);
-                }
-            }
+        $subscription = $this->createPendingSubscription($request, $restaurant, $plan);
+        if (!$subscription) {
+            return back()->with('error', "Le paiement à la semaine n'est disponible que pour le plan Stand.");
         }
 
         $gateway = $request->input('payment_gateway', 'jeko');
@@ -165,69 +110,14 @@ class SubscriptionController extends Controller
 
     public function change(Request $request): RedirectResponse
     {
-        $request->validate([
-            'plan' => ['required', 'exists:plans,slug'],
-            'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
-            'addons' => ['nullable', 'array'],
-            'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
-            'payment_gateway' => ['nullable', 'in:jeko'],
-            'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
-        ]);
+        $request->validate($this->subscriptionRules());
 
         $restaurant = $request->user()->restaurant;
         $plan = Plan::where('slug', $request->plan)->firstOrFail();
 
-        $billingPeriod = $request->billing_period ?? 'monthly';
-        $priceCalculation = Subscription::calculatePriceWithDiscount($plan->price, $billingPeriod);
-
-        $durationDays = match($billingPeriod) {
-            'monthly' => 30,
-            'quarterly' => 90,
-            'semiannual' => 180,
-            'annual' => 365,
-            default => 30,
-        };
-
-        $subscription = Subscription::create([
-            'restaurant_id' => $restaurant->id,
-            'plan_id' => $plan->id,
-            'status' => SubscriptionStatus::PENDING,
-            'starts_at' => now(),
-            'ends_at' => now()->addDays($durationDays),
-            'amount_paid' => $priceCalculation['final_price'],
-            'billing_period' => $billingPeriod,
-            'discount_percentage' => $priceCalculation['discount_percentage'],
-        ]);
-
-        if ($request->has('addons') && is_array($request->addons)) {
-            $availableAddons = SubscriptionAddon::getAvailableAddons();
-            foreach ($request->addons as $addonType) {
-                if (isset($availableAddons[$addonType])) {
-                    $addonData = $availableAddons[$addonType];
-                    SubscriptionAddon::create([
-                        'subscription_id' => $subscription->id,
-                        'addon_type' => $addonType,
-                        'name' => $addonData['name'],
-                        'price' => $addonData['price'] * ($durationDays / 30),
-                        'metadata' => ['description' => $addonData['description']],
-                    ]);
-                }
-            }
-        }
-
-        // Recalculer le total avec les addons (cohérent avec convertTrial)
-        $addonsTotal = 0;
-        if ($request->has('addons') && is_array($request->addons)) {
-            $availableAddons = SubscriptionAddon::getAvailableAddons();
-            $months = $durationDays / 30;
-            foreach ($request->addons as $addonType) {
-                if (isset($availableAddons[$addonType])) {
-                    $addonsTotal += $availableAddons[$addonType]['price'] * $months;
-                }
-            }
-        }
-        if ($addonsTotal > 0) {
-            $subscription->update(['amount_paid' => $priceCalculation['final_price'] + $addonsTotal]);
+        $subscription = $this->createPendingSubscription($request, $restaurant, $plan);
+        if (!$subscription) {
+            return back()->with('error', "Le paiement à la semaine n'est disponible que pour le plan Stand.");
         }
 
         $gateway = $request->input('payment_gateway', 'jeko');
@@ -368,6 +258,69 @@ class SubscriptionController extends Controller
     }
 
     protected ?string $lastPaymentError = null;
+
+    /**
+     * Règles communes au changement de plan et à la conversion d'essai.
+     */
+    private function subscriptionRules(): array
+    {
+        return [
+            'plan' => ['required', 'exists:plans,slug'],
+            // 'weekly' : plan Stand uniquement (contrôlé par Subscription::quote())
+            'billing_period' => ['nullable', Subscription::billingPeriodRule()],
+            'addons' => ['nullable', 'array'],
+            'addons.*' => ['string', 'in:priority_support,custom_domain,extra_employees,extra_dishes'],
+            'payment_gateway' => ['nullable', 'in:jeko'],
+            'jeko_operator'   => ['nullable', 'in:wave,orange,mtn,moov'],
+        ];
+    }
+
+    /**
+     * Crée l'abonnement EN ATTENTE de paiement (montant = prix de la période, prix verrouillé
+     * éventuel des anciens abonnés, options au prorata). Null si la période n'est pas autorisée
+     * pour ce plan (hebdomadaire hors Stand).
+     */
+    private function createPendingSubscription(Request $request, \App\Models\Restaurant $restaurant, Plan $plan): ?Subscription
+    {
+        $billingPeriod = $request->billing_period ?? 'monthly';
+
+        try {
+            $quote = Subscription::quote($plan, $billingPeriod, $restaurant);
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
+
+        $months = Subscription::monthsFor($billingPeriod);
+        $availableAddons = SubscriptionAddon::getAvailableAddons();
+        $addons = collect(is_array($request->addons) ? $request->addons : [])
+            ->filter(fn ($type) => isset($availableAddons[$type]));
+        $addonsTotal = (int) round($addons->sum(fn ($type) => $availableAddons[$type]['price'] * $months));
+
+        $subscription = Subscription::create([
+            'restaurant_id' => $restaurant->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::PENDING,
+            'is_trial' => false,
+            'starts_at' => now(),
+            'ends_at' => now()->addDays($quote['duration_days']),
+            'amount_paid' => $quote['final_price'] + $addonsTotal,
+            'billing_period' => $quote['billing_period'],
+            'discount_percentage' => $quote['discount_percentage'],
+        ]);
+
+        foreach ($addons as $addonType) {
+            $addonData = $availableAddons[$addonType];
+            SubscriptionAddon::create([
+                'subscription_id' => $subscription->id,
+                'addon_type' => $addonType,
+                'name' => $addonData['name'],
+                'price' => (int) round($addonData['price'] * $months),
+                'metadata' => ['description' => $addonData['description']],
+            ]);
+        }
+
+        return $subscription;
+    }
 
     private function createSubscriptionPaymentSession(Subscription $subscription, string $gateway = 'jeko', string $jekoOperator = 'wave'): ?array
     {

@@ -26,7 +26,7 @@ class CheckLowStock implements ShouldQueue
 
         // Get restaurants with stock management feature
         $restaurants = Restaurant::query()
-            ->whereHas('currentPlan', fn($q) => $q->where('has_stock_management', true))
+            ->whereHas('currentPlan', fn($q) => $q->where('has_ingredient_stock', true)) // alertes = stock par ingrédient
             ->with(['owner', 'notificationSettings'])
             ->get();
 

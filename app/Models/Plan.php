@@ -16,13 +16,15 @@ class Plan extends Model
         'slug',
         'description',
         'price',
+        'weekly_price', // Prix à la semaine (Stand uniquement, voir config('plans.weekly_plans'))
         'duration_days',
         'max_dishes',
         'max_categories',
         'max_employees',
-        'max_orders_per_month',
+        'max_orders_per_month', // Quota SOUPLE : alerte au restaurant, ne bloque jamais une commande
         'has_delivery',
-        'has_stock_management',
+        'has_stock_management', // Stock simple (stock journalier des plats)
+        'has_ingredient_stock', // Stock par ingrédient + rentabilité par plat
         'has_analytics',
         'has_custom_domain',
         'has_priority_support',
@@ -35,6 +37,7 @@ class Plan extends Model
 
     protected $casts = [
         'price' => 'integer',
+        'weekly_price' => 'integer',
         'duration_days' => 'integer',
         'max_dishes' => 'integer',
         'max_categories' => 'integer',
@@ -42,6 +45,7 @@ class Plan extends Model
         'max_orders_per_month' => 'integer',
         'has_delivery' => 'boolean',
         'has_stock_management' => 'boolean',
+        'has_ingredient_stock' => 'boolean',
         'has_analytics' => 'boolean',
         'has_custom_domain' => 'boolean',
         'has_priority_support' => 'boolean',
@@ -109,25 +113,50 @@ class Plan extends Model
     }
 
     /**
+     * Plan « sur devis » (Gold) : le prix stocké est un prix plancher, affiché « à partir de ».
+     */
+    public function getIsOnQuoteAttribute(): bool
+    {
+        return $this->slug === 'gold';
+    }
+
+    /**
+     * Prix affiché : « 15 000 F/mois », ou « Sur devis, à partir de 75 000 F » pour Gold.
+     */
+    public function getPriceLabelAttribute(): string
+    {
+        $price = number_format($this->price, 0, ',', ' ');
+
+        return $this->is_on_quote
+            ? "Sur devis, à partir de {$price} F"
+            : "{$price} F/mois";
+    }
+
+    /**
      * Get features list
      */
     public function getFeaturesAttribute(): array
     {
         $features = [];
 
-        $features[] = $this->max_dishes . ' plats maximum';
-        $features[] = $this->max_categories . ' catégories maximum';
-        $features[] = $this->max_employees . ' employé(s)';
-        
-        if ($this->max_orders_per_month) {
-            $features[] = $this->max_orders_per_month . ' commandes/mois';
-        } else {
-            $features[] = 'Commandes illimitées';
-        }
+        $features[] = self::isUnlimitedValue($this->max_dishes) ? 'Plats illimités' : $this->max_dishes . ' plats maximum';
+        $features[] = self::isUnlimitedValue($this->max_categories) ? 'Catégories illimitées' : $this->max_categories . ' catégories maximum';
+        $features[] = match (true) {
+            self::isUnlimitedValue($this->max_employees) => 'Employés illimités',
+            (int) $this->max_employees === 0 => '1 utilisateur (le gérant)',
+            default => $this->max_employees . ' employé(s)',
+        };
 
-        if ($this->has_delivery) $features[] = 'Gestion livraison';
-        if ($this->has_stock_management) $features[] = 'Gestion des stocks';
-        if ($this->has_analytics) $features[] = 'Statistiques avancées';
+        $features[] = self::isUnlimitedValue($this->max_orders_per_month)
+            ? 'Commandes illimitées'
+            : number_format($this->max_orders_per_month, 0, ',', ' ') . ' commandes/mois conseillées (jamais bloquées)';
+
+        if ($this->has_delivery) $features[] = 'Livraison MenuPro incluse';
+        if ($this->has_stock_management) $features[] = 'Gestion de stock simple';
+        if ($this->has_ingredient_stock) $features[] = 'Stock par ingrédient & rentabilité par plat';
+        if ($this->has_analytics) $features[] = 'Statistiques';
+        if ($this->has_hotel_rooms) $features[] = 'Chambres d\'hôtel';
+        if ($this->has_multi_spaces) $features[] = 'Multi-espaces';
         if ($this->has_custom_domain) $features[] = 'Domaine personnalisé';
         if ($this->has_priority_support) $features[] = 'Support prioritaire';
 
@@ -139,6 +168,50 @@ class Plan extends Model
     // =========================================================================
 
     /**
+     * Une limite est illimitée si elle est nulle ou >= 9999 (convention historique).
+     * Attention : 0 signifie bien ZÉRO.
+     */
+    public static function isUnlimitedValue(?int $value): bool
+    {
+        return $value === null || $value >= (int) config('plans.unlimited_threshold', 9999);
+    }
+
+    /**
+     * Le plan peut-il être payé à la semaine ?
+     */
+    public function supportsWeeklyBilling(): bool
+    {
+        return in_array($this->slug, config('plans.weekly_plans', []), true)
+            && (int) $this->weekly_price > 0;
+    }
+
+    /**
+     * Périodes de facturation proposées pour ce plan (clés de config('plans.billing_periods')).
+     */
+    public function availableBillingPeriods(): array
+    {
+        $periods = array_keys(config('plans.billing_periods', []));
+
+        if (!$this->supportsWeeklyBilling()) {
+            $periods = array_values(array_diff($periods, ['weekly']));
+        }
+
+        return $periods;
+    }
+
+    /**
+     * Taux de commission plateforme (%) des commandes livrées via MenuPro pour ce plan.
+     */
+    public function commissionRate(): float
+    {
+        $config = config('plans.commission');
+
+        return in_array($this->slug, $config['reduced_plans'] ?? [], true)
+            ? (float) $config['reduced_rate']
+            : (float) $config['default_rate'];
+    }
+
+    /**
      * Check if plan has a specific feature
      */
     public function hasFeature(string $feature): bool
@@ -146,6 +219,7 @@ class Plan extends Model
         $featureMap = [
             'delivery' => $this->has_delivery,
             'stock' => $this->has_stock_management,
+            'ingredient_stock' => $this->has_ingredient_stock,
             'analytics' => $this->has_analytics,
             'custom_domain' => $this->has_custom_domain,
             'priority_support' => $this->has_priority_support,
@@ -153,7 +227,7 @@ class Plan extends Model
             'multi_spaces' => $this->has_multi_spaces,
         ];
 
-        return $featureMap[$feature] ?? false;
+        return (bool) ($featureMap[$feature] ?? false);
     }
 
     /**
@@ -168,8 +242,11 @@ class Plan extends Model
         ];
 
         $limit = $limits[$type] ?? null;
-        
-        return $limit !== null && $current >= $limit;
+
+        if (self::isUnlimitedValue($limit)) {
+            return false;
+        }
+
+        return $current >= $limit;
     }
 }
-

@@ -31,11 +31,9 @@ class SendSubscriptionReminders implements ShouldQueue
         Log::info("Sending subscription reminders for {$this->daysBeforeExpiry} days before expiry...");
 
         // Get active subscriptions expiring within the specified days (withoutGlobalScopes car ce job tourne hors contexte HTTP)
+        // Abonnements hebdomadaires (Stand) : rappel J-1 au lieu de J-7 (voir scopeNeedsReminder)
         $expiringSubscriptions = Subscription::withoutGlobalScopes()
-            ->where('status', SubscriptionStatus::ACTIVE)
-            ->where('ends_at', '<=', now()->addDays($this->daysBeforeExpiry))
-            ->where('ends_at', '>', now())
-            ->whereNull('reminder_sent_at')
+            ->needsReminder($this->daysBeforeExpiry)
             ->with('restaurant.owner')
             ->get();
 

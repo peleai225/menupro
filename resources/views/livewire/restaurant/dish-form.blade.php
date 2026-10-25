@@ -220,7 +220,7 @@
                 </div>
 
                 <!-- Ingredients (if stock management) -->
-                @if(auth()->user()->restaurant?->currentPlan?->has_stock_management)
+                @if(auth()->user()->restaurant?->hasFeature('ingredient_stock'))
                     <div class="card p-4 sm:p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>

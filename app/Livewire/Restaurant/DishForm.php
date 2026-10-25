@@ -117,7 +117,7 @@ class DishForm extends Component
     {
         $restaurant = auth()->user()->restaurant;
 
-        if (!$restaurant->currentPlan?->has_stock_management) {
+        if (!$restaurant->hasFeature('ingredient_stock')) {
             return collect();
         }
 

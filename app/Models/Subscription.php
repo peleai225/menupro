@@ -29,7 +29,7 @@ class Subscription extends Model
         'paid_at', // Date d'encaissement confirmé (webhook / callback de paiement)
         'reminder_sent_at',
         'expired_notification_sent_at',
-        'billing_period', // 'monthly', 'quarterly', 'semiannual', 'annual'
+        'billing_period', // 'weekly' (Stand uniquement), 'monthly', 'quarterly', 'semiannual', 'annual'
         'discount_percentage', // Pourcentage de réduction (ex: 15 pour 15%)
     ];
 
@@ -121,6 +121,14 @@ class Subscription extends Model
                     'subscription_ends_at' => $this->ends_at,
                 ];
 
+                // Changement de plan payant : l'ancien prix verrouillé ne suit pas (un essai ne
+                // compte pas comme changement, il n'altère pas le tarif d'un ancien abonné).
+                if ($this->status !== SubscriptionStatus::TRIAL
+                    && $restaurant->locked_price !== null
+                    && (int) $restaurant->current_plan_id !== (int) $this->plan_id) {
+                    $restaurantData['locked_price'] = null;
+                }
+
                 if (!in_array($restaurant->status, [RestaurantStatus::SUSPENDED, RestaurantStatus::PENDING], true)) {
                     $restaurantData['status'] = RestaurantStatus::ACTIVE;
                     $restaurantData['orders_blocked'] = false;
@@ -161,12 +169,22 @@ class Subscription extends Model
             ->where('ends_at', '<=', now()->addDays(7));
     }
 
-    public function scopeNeedsReminder($query)
+    public function scopeNeedsReminder($query, int $daysBeforeExpiry = 7)
     {
         return $query->where('status', SubscriptionStatus::ACTIVE)
-            ->where('ends_at', '<=', now()->addDays(7))
             ->where('ends_at', '>', now())
-            ->whereNull('reminder_sent_at');
+            ->whereNull('reminder_sent_at')
+            ->where(function ($q) use ($daysBeforeExpiry) {
+                // Abonnement de 7 jours : un rappel J-7 partirait dès le paiement → rappel J-1
+                $weeklyDays = static::reminderDaysFor('weekly');
+                $q->where(function ($w) use ($weeklyDays) {
+                    $w->where('billing_period', 'weekly')
+                      ->where('ends_at', '<=', now()->addDays($weeklyDays));
+                })->orWhere(function ($m) use ($daysBeforeExpiry) {
+                    $m->where(fn ($p) => $p->whereNull('billing_period')->orWhere('billing_period', '!=', 'weekly'))
+                      ->where('ends_at', '<=', now()->addDays($daysBeforeExpiry));
+                });
+            });
     }
 
     public function scopeNeedsExpiration($query)
@@ -289,18 +307,22 @@ class Subscription extends Model
      */
     public function renew(Plan $plan, array $paymentData = []): Subscription
     {
+        $billingPeriod = $paymentData['billing_period'] ?? 'monthly';
+        // Prix verrouillé éventuel (anciens abonnés) pris en compte par quote()
+        $quote = static::quote($plan, $billingPeriod, Restaurant::find($this->restaurant_id));
+
         return static::create([
             'restaurant_id' => $this->restaurant_id,
             'plan_id' => $plan->id,
             'status' => SubscriptionStatus::ACTIVE,
             'starts_at' => now(),
-            'ends_at' => now()->addDays($plan->duration_days),
-            'amount_paid' => $plan->price,
+            'ends_at' => now()->addDays($quote['duration_days']),
+            'amount_paid' => $quote['final_price'],
             'payment_reference' => $paymentData['reference'] ?? null,
             'payment_method' => $paymentData['method'] ?? null,
             'payment_metadata' => $paymentData['metadata'] ?? null,
-            'billing_period' => $paymentData['billing_period'] ?? 'monthly',
-            'discount_percentage' => $paymentData['discount_percentage'] ?? 0,
+            'billing_period' => $billingPeriod,
+            'discount_percentage' => $quote['discount_percentage'],
         ]);
     }
 
@@ -329,20 +351,64 @@ class Subscription extends Model
         return number_format($this->total_price, 0, ',', ' ') . ' FCFA';
     }
 
+    // =========================================================================
+    // PÉRIODES DE FACTURATION & PRIX (source unique : config/plans.php)
+    // =========================================================================
+
     /**
-     * Calculate price with discount for a given billing period
+     * Périodes de facturation connues : ['weekly' => ['label', 'days', 'months', 'discount'], …]
+     */
+    public static function billingPeriods(): array
+    {
+        return config('plans.billing_periods', []);
+    }
+
+    /**
+     * Règle de validation Laravel « in: » des périodes de facturation.
+     */
+    public static function billingPeriodRule(): string
+    {
+        return 'in:' . implode(',', array_keys(static::billingPeriods()));
+    }
+
+    /**
+     * Durée (jours) d'une période de facturation. Inconnue → mensuel (30 j).
+     */
+    public static function durationDaysFor(?string $billingPeriod): int
+    {
+        $periods = static::billingPeriods();
+
+        return (int) ($periods[$billingPeriod]['days'] ?? $periods['monthly']['days'] ?? 30);
+    }
+
+    /**
+     * Nombre de mois facturés (fraction pour l'hebdomadaire) — sert au prorata des options.
+     */
+    public static function monthsFor(?string $billingPeriod): float
+    {
+        return $billingPeriod === 'weekly'
+            ? static::durationDaysFor('weekly') / 30
+            : (float) (static::billingPeriods()[$billingPeriod]['months'] ?? 1);
+    }
+
+    /**
+     * Calculate price with discount for a given billing period.
+     *
+     * $basePrice est le prix MENSUEL, sauf pour 'weekly' où c'est le prix de la SEMAINE
+     * (sans remise). Préférer quote() qui choisit la bonne base (hebdo, prix verrouillé…).
      */
     public static function calculatePriceWithDiscount(int $basePrice, string $billingPeriod): array
     {
-        $periods = [
-            'monthly' => ['months' => 1, 'discount' => 0],
-            'quarterly' => ['months' => 3, 'discount' => 10],
-            'semiannual' => ['months' => 6, 'discount' => 15],
-            'annual' => ['months' => 12, 'discount' => 20],
-        ];
+        $periods = static::billingPeriods();
 
-        $period = $periods[$billingPeriod] ?? $periods['monthly'];
-        $totalPrice = $basePrice * $period['months'];
+        if (!isset($periods[$billingPeriod])) {
+            $billingPeriod = 'monthly';
+        }
+
+        $period = $periods[$billingPeriod];
+        $isWeekly = $billingPeriod === 'weekly';
+
+        $totalPrice = $isWeekly ? $basePrice : $basePrice * $period['months'];
         $discountAmount = ($totalPrice * $period['discount']) / 100;
         $finalPrice = $totalPrice - $discountAmount;
 
@@ -350,12 +416,49 @@ class Subscription extends Model
             'base_price' => $basePrice,
             'billing_period' => $billingPeriod,
             'months' => $period['months'],
+            'duration_days' => (int) $period['days'],
             'total_before_discount' => $totalPrice,
             'discount_percentage' => $period['discount'],
             'discount_amount' => (int) $discountAmount,
             'final_price' => (int) $finalPrice,
-            'monthly_equivalent' => (int) ($finalPrice / $period['months']),
+            'monthly_equivalent' => $isWeekly
+                ? (int) round($finalPrice * 30 / $period['days'])
+                : (int) ($finalPrice / $period['months']),
         ];
+    }
+
+    /**
+     * Prix à payer pour un plan et une période, pour un restaurant donné.
+     *
+     *  - 'weekly' : uniquement pour les plans qui l'autorisent (Stand), prix plans.weekly_price ;
+     *  - sinon : prix verrouillé du restaurant (restaurants.locked_price, anciens abonnés) s'il
+     *    s'applique à ce plan, à défaut le prix du plan ; remises de période appliquées.
+     *
+     * @throws \InvalidArgumentException période hebdomadaire demandée pour un plan qui ne l'autorise pas
+     */
+    public static function quote(Plan $plan, string $billingPeriod, ?Restaurant $restaurant = null): array
+    {
+        if ($billingPeriod === 'weekly') {
+            if (!$plan->supportsWeeklyBilling()) {
+                throw new \InvalidArgumentException("Le plan {$plan->name} ne peut pas être payé à la semaine.");
+            }
+
+            return static::calculatePriceWithDiscount((int) $plan->weekly_price, 'weekly')
+                + ['locked_price_applied' => false];
+        }
+
+        $lockedPrice = $restaurant?->lockedPriceFor($plan);
+
+        return static::calculatePriceWithDiscount($lockedPrice ?? (int) $plan->price, $billingPeriod)
+            + ['locked_price_applied' => $lockedPrice !== null];
+    }
+
+    /**
+     * Rappel de fin d'abonnement : J-1 pour un abonnement hebdomadaire, J-7 sinon.
+     */
+    public static function reminderDaysFor(?string $billingPeriod): int
+    {
+        return $billingPeriod === 'weekly' ? 1 : 7;
     }
 }
 

@@ -121,19 +121,70 @@ class Order extends Model
                 $order->tracking_token = static::generateTrackingToken();
             }
 
-            if ($order->restaurant_id) {
-                $plan = Restaurant::find($order->restaurant_id)?->currentPlan;
-                if ($plan && $plan->max_orders_per_month !== null) {
-                    $count = static::where('restaurant_id', $order->restaurant_id)
-                        ->whereMonth('created_at', now()->month)
-                        ->whereYear('created_at', now()->year)
-                        ->count();
-                    if ($count >= $plan->max_orders_per_month) {
-                        throw new \App\Exceptions\QuotaExceededException('Limite de commandes mensuelles atteinte (' . $plan->max_orders_per_month . '/mois).');
-                    }
-                }
-            }
+            // Plus aucun blocage de quota ici : une commande client n'est JAMAIS refusée pour
+            // dépassement du quota mensuel. Le quota est « souple » (voir saved() ci-dessous).
         });
+
+        // Quota souple : quand une commande devient payée/acceptée, on vérifie (en file d'attente)
+        // si le restaurant franchit un palier (80 % / 100 %) pour le prévenir une fois par mois.
+        static::saved(function (Order $order) {
+            if (!$order->restaurant_id || $order->isPosOrder() || !$order->countsTowardQuota()) {
+                return;
+            }
+
+            $previous = $order->wasRecentlyCreated ? null : $order->getRawOriginal('status');
+            if ($previous !== null && in_array($previous, static::quotaStatusValues(), true)) {
+                return; // déjà comptée (ex. payée → acceptée)
+            }
+
+            \App\Jobs\CheckOrderQuota::dispatch($order->restaurant_id)->afterCommit();
+        });
+    }
+
+    // =========================================================================
+    // QUOTA SOUPLE DE COMMANDES
+    // =========================================================================
+
+    /**
+     * Statuts comptés dans le quota mensuel : commandes réellement payées/acceptées.
+     */
+    public static function quotaStatusValues(): array
+    {
+        return [
+            OrderStatus::PAID->value,
+            OrderStatus::CONFIRMED->value,
+            OrderStatus::PREPARING->value,
+            OrderStatus::READY->value,
+            OrderStatus::DELIVERING->value,
+            OrderStatus::COMPLETED->value,
+        ];
+    }
+
+    /**
+     * Commande saisie à la caisse (POS) : non comptée dans le quota.
+     */
+    public function isPosOrder(): bool
+    {
+        return str_starts_with((string) $this->reference, 'POS-');
+    }
+
+    public function countsTowardQuota(): bool
+    {
+        $status = $this->status instanceof OrderStatus ? $this->status->value : (string) $this->status;
+
+        return in_array($status, static::quotaStatusValues(), true);
+    }
+
+    /**
+     * Commandes du mois en cours comptées dans le quota souple
+     * (hors brouillons, attentes de paiement, annulées/remboursées et commandes caisse POS).
+     */
+    public function scopeCountingTowardQuota($query)
+    {
+        return $query
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->whereIn('status', static::quotaStatusValues())
+            ->where('reference', 'not like', 'POS-%');
     }
 
     // =========================================================================

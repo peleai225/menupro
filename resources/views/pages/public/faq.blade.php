@@ -98,11 +98,11 @@
                     <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions sur les tarifs</h2>
 
                     @foreach([
-                        ['q' => "Combien coûte MenuPro ?", 'a' => "MenuPro propose un seul plan tout inclus à partir de 25 000 FCFA/mois. Toutes les fonctionnalités sont incluses, sans surprise. Consultez notre page Tarifs pour découvrir les réductions selon la durée d'engagement."],
-                        ['q' => "Y a-t-il des frais cachés ?", 'a' => "Non, absolument aucun frais caché. Le prix affiché est le prix que vous payez. Pas de frais de mise en service, pas de frais de résiliation. Des add-ons optionnels sont disponibles si vous souhaitez aller plus loin."],
-                        ['q' => "Puis-je choisir ma durée d'abonnement ?", 'a' => "Oui ! Vous pouvez souscrire au mois, au trimestre, au semestre ou à l'année. Plus la durée est longue, plus vous économisez — jusqu'à 15% de réduction sur l'abonnement annuel."],
+                        ['q' => "Combien coûte MenuPro ?", 'a' => "Quatre plans : Stand à 5 000 F/mois (ou 1 500 F/semaine), Restaurant à 15 000 F/mois, Pro à 30 000 F/mois et Gold sur devis (à partir de 75 000 F/mois). Essai gratuit de " . config('plans.trial_days') . " jours avec toutes les fonctions du plan Pro. Détails sur la page Tarifs."],
+                        ['q' => "Y a-t-il des frais cachés ?", 'a' => "Non. Livraison incluse — commission de 12 % uniquement sur les commandes livrées (10 % avec le plan Pro). Pas de frais de mise en service, pas de frais de résiliation, et aucune commande n'est jamais bloquée."],
+                        ['q' => "Puis-je choisir ma durée d'abonnement ?", 'a' => "Oui ! Vous pouvez souscrire au mois, au trimestre, au semestre ou à l'année (et à la semaine pour le plan Stand). Plus la durée est longue, plus vous économisez — jusqu'à 20% de réduction sur l'abonnement annuel."],
                         ['q' => "Quels moyens de paiement acceptez-vous ?", 'a' => "Nous acceptons les paiements par Mobile Money : Wave, Orange Money, MTN Money et Moov Money. Tous les paiements sont sécurisés via nos partenaires certifiés."],
-                        ['q' => "Proposez-vous des réductions pour un engagement annuel ?", 'a' => "Oui ! Vous bénéficiez de 7% de réduction en trimestriel, 13% en semestriel et 15% en annuel. Plus la durée est longue, plus la réduction est importante."],
+                        ['q' => "Proposez-vous des réductions pour un engagement annuel ?", 'a' => "Oui ! Vous bénéficiez de 10% de réduction en trimestriel, 15% en semestriel et 20% en annuel. Plus la durée est longue, plus la réduction est importante."],
                     ] as $faq)
                         <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                             <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">

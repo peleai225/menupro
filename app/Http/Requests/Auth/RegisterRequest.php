@@ -47,7 +47,7 @@ class RegisterRequest extends FormRequest
             'plan' => ['required', 'exists:plans,slug'],
             
             // Billing period
-            'billing_period' => ['nullable', 'in:monthly,quarterly,semiannual,annual'],
+            'billing_period' => ['nullable', \App\Models\Subscription::billingPeriodRule()], // 'weekly' : Stand uniquement (contrôlé par le contrôleur)
             
             // Add-ons
             'addons' => ['nullable', 'array'],

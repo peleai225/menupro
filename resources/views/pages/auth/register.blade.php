@@ -325,7 +325,7 @@
                  x-init="init(); formData.plan = '{{ $plan->slug ?? 'essentiel' }}';">
                 <div class="mb-6">
                     <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Choisissez votre plan</h1>
-                    <p class="text-neutral-500 mt-1.5 text-[14px]">7 jours d'essai gratuit inclus, sans engagement.</p>
+                    <p class="text-neutral-500 mt-1.5 text-[14px]">{{ config('plans.trial_days') }} jours d'essai gratuit avec toutes les fonctions du plan Pro, sans engagement. Vous choisissez ensuite votre plan, payé en Mobile Money.</p>
                 </div>
 
                 {{-- Hidden inputs --}}
@@ -342,11 +342,14 @@
                             <p class="text-[13px] text-neutral-500">Idéal pour votre micro-commerce</p>
                         </div>
                         <div class="ml-auto text-right">
-                            <p class="font-bold text-xl text-neutral-900">5 000 <span class="text-[13px] font-normal">F/mois</span></p>
+                            <p class="font-bold text-xl text-neutral-900">{{ number_format($plan->price, 0, ',', ' ') }} <span class="text-[13px] font-normal">F/mois</span></p>
+                            @if($plan->supportsWeeklyBilling())
+                                <p class="text-[12px] text-neutral-500">ou {{ number_format($plan->weekly_price, 0, ',', ' ') }} F/semaine</p>
+                            @endif
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-1.5 text-[12px]">
-                        @foreach(['15 plats maximum', '5 catégories', 'QR Code inclus', 'Commandes WhatsApp', '7 jours gratuits', '1 compte utilisateur'] as $f)
+                        @foreach(array_merge($plan->features, ['QR Code + Mobile Money', config('plans.trial_days') . ' jours gratuits (fonctions Pro)']) as $f)
                         <div class="flex items-center gap-1.5 text-neutral-700">
                             <svg class="w-3.5 h-3.5 text-secondary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                             {{ $f }}
@@ -383,13 +386,16 @@
                                     <span class="text-[12px] text-neutral-500">{{ $p->max_dishes >= 9999 ? 'Illimité' : $p->max_dishes . ' plats' }}</span>
                                 </div>
                                 <div class="text-[12px] text-neutral-500 mt-0.5">
-                                    {{ $p->max_orders_per_month >= 9999 ? 'Commandes illimitées' : number_format($p->max_orders_per_month) . ' cmd/mois' }}
-                                    · {{ $p->max_employees }} compte{{ $p->max_employees > 1 ? 's' : '' }}
-                                    @if($p->has_delivery) · Livraison @endif
+                                    {{ \App\Models\Plan::isUnlimitedValue($p->max_employees) ? 'Employés illimités' : $p->max_employees . ' employé' . ($p->max_employees > 1 ? 's' : '') }}
+                                    @if($p->has_delivery) · Livraison incluse @endif
+                                    · Commandes jamais bloquées
                                 </div>
                             </div>
                             {{-- Price --}}
                             <div class="text-right flex-shrink-0">
+                                @if($p->is_on_quote)
+                                    <div class="text-[11px] text-neutral-400">Sur devis, dès</div>
+                                @endif
                                 <div class="font-bold text-neutral-900 text-[15px]">{{ number_format($p->price, 0, ',', '.') }}<span class="text-[12px] font-medium text-neutral-500 ml-0.5">F</span></div>
                                 <div class="text-[11px] text-neutral-400">/mois</div>
                             </div>
@@ -446,15 +452,28 @@
 
                 {{-- Price card (restaurants) / Price stand --}}
                 @if($isStand)
+                {{-- Stand : paiement à la semaine ou au mois (après l'essai) --}}
+                @if($plan->supportsWeeklyBilling())
+                <div class="mb-4">
+                    <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Après l'essai, je paierai</label>
+                    <div class="grid grid-cols-2 gap-1 p-1 bg-neutral-100 rounded-xl">
+                        @foreach(['weekly' => 'À la semaine', 'monthly' => 'Au mois'] as $cycleId => $cycleLabel)
+                        <button type="button" @click="billingCycle = '{{ $cycleId }}'"
+                                :class="billingCycle === '{{ $cycleId }}' ? 'bg-white shadow-sm text-neutral-900 font-bold' : 'text-neutral-500 hover:text-neutral-700'"
+                                class="py-2.5 rounded-lg text-[12px] font-medium transition-all duration-200">{{ $cycleLabel }}</button>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 <div class="p-4 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 text-white mb-5">
                     <div class="flex items-baseline justify-between">
-                        <span class="text-[13px] font-medium text-primary-200">Plan Stand — 1 mois</span>
+                        <span class="text-[13px] font-medium text-primary-200" x-text="'Plan Stand — ' + (billingCycle === 'weekly' ? '1 semaine' : '1 mois')"></span>
                     </div>
                     <div class="flex items-baseline gap-1.5 mt-1">
-                        <span class="text-3xl font-bold">5 000</span>
+                        <span class="text-3xl font-bold" x-text="billingCycle === 'weekly' ? '{{ number_format((int) $plan->weekly_price, 0, ',', ' ') }}' : '{{ number_format($plan->price, 0, ',', ' ') }}'"></span>
                         <span class="text-[13px] text-primary-200">FCFA</span>
                     </div>
-                    <p class="text-[12px] text-primary-200 mt-1">7 jours gratuits · Renouvelable chaque mois</p>
+                    <p class="text-[12px] text-primary-200 mt-1">{{ config('plans.trial_days') }} jours gratuits · Livraison incluse (12 % uniquement sur les commandes livrées)</p>
                 </div>
                 @else
                 <div class="p-4 rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-950 text-white mb-5 relative overflow-hidden">
@@ -514,7 +533,7 @@
 
                 <p class="text-center text-[11px] text-neutral-400 mt-4 flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    7 jours gratuits · Sans carte bancaire · Annulation libre
+                    {{ config('plans.trial_days') }} jours gratuits · Sans carte bancaire · Aucune commande n'est jamais bloquée
                 </p>
             </div>
         </form>
@@ -585,6 +604,7 @@
                 basePriceMonthly: {{ (int) ($plan->price ?? 15000) }},
                 currentPlanName: '{{ $plan->name ?? "Essentiel" }}',
                 cycleMeta: [
+                    { id: 'weekly', months: 1, discount: 0 }, // Stand uniquement (prix affiché côté serveur)
                     { id: 'monthly', months: 1, discount: 0 },
                     { id: 'quarterly', months: 3, discount: 10 },
                     { id: 'semiannual', months: 6, discount: 15 },
