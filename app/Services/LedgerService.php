@@ -738,9 +738,11 @@ class LedgerService
         ];
 
         if ($this->normalizeMethod($order->payment_method) !== 'cash') {
+            // Pas de liste de colonnes : la table de production n'a pas toutes les colonnes
+            // des migrations (wave_payment_id absente) ; une colonne manquante vaut null.
             $tx = PaymentTransaction::where('order_id', $order->id)
                 ->latest('id')
-                ->first(['gateway_transaction_id', 'jeko_payment_id', 'wave_payment_id', 'wave_checkout_id']);
+                ->first();
             if ($tx) {
                 array_push($refs, $tx->gateway_transaction_id, $tx->jeko_payment_id, $tx->wave_payment_id, $tx->wave_checkout_id);
             }
