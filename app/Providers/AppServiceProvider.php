@@ -199,6 +199,17 @@ class AppServiceProvider extends ServiceProvider
 
         Dish::observe(\App\Observers\MenuCacheObserver::class);
         Category::observe(\App\Observers\MenuCacheObserver::class);
+
+        // Journal des transactions : une ligne par mouvement d'argent (voir LedgerService)
+        foreach ([
+            Order::class,
+            Subscription::class,
+            \App\Models\OrderRefund::class,
+            \App\Models\PayoutTransaction::class,
+            \App\Models\DriverEarning::class,
+        ] as $model) {
+            $model::observe(\App\Observers\LedgerObserver::class);
+        }
     }
 
     /**
