@@ -11,6 +11,7 @@ enum CommissionType: string
     case BONUS_GRADE = 'bonus_grade';
     case REFERRAL_BONUS = 'referral_bonus';
     case LEADER_OVERRIDE = 'leader_override';
+    case REPRESENTATIVE_SHARE = 'representative_share';
 
     public function label(): string
     {
@@ -22,6 +23,7 @@ enum CommissionType: string
             self::BONUS_GRADE => 'Bonus grade',
             self::REFERRAL_BONUS => 'Bonus parrainage',
             self::LEADER_OVERRIDE => 'Override team leader',
+            self::REPRESENTATIVE_SHARE => 'Part représentant de ville',
         };
     }
 
@@ -35,6 +37,7 @@ enum CommissionType: string
             self::BONUS_GRADE => 'star',
             self::REFERRAL_BONUS => 'gift',
             self::LEADER_OVERRIDE => 'user-group',
+            self::REPRESENTATIVE_SHARE => 'map-pin',
         };
     }
 }

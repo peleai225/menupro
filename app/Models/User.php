@@ -346,7 +346,7 @@ class User extends Authenticatable implements MustVerifyEmail
             UserRole::SUPER_ADMIN => $this->adminLandingRoute(),
             UserRole::RESTAURANT_ADMIN, UserRole::EMPLOYEE => 'restaurant.dashboard',
             UserRole::COMMANDO_AGENT => 'commando.dashboard',
-            UserRole::COMMERCIAL, UserRole::TECHNICIAN, UserRole::TEAM_LEADER => 'crm.dashboard',
+            UserRole::COMMERCIAL, UserRole::TECHNICIAN, UserRole::TEAM_LEADER, UserRole::REPRESENTATIVE => 'crm.dashboard',
             default => 'home',
         };
     }
@@ -392,5 +392,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isTeamLeader(): bool
     {
         return $this->role === UserRole::TEAM_LEADER;
+    }
+
+    public function isRepresentative(): bool
+    {
+        return $this->role === UserRole::REPRESENTATIVE;
+    }
+
+    /** Profil « représentant de ville » (programme partenaires). */
+    public function representativeProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Crm\RepresentativeProfile::class);
     }
 }

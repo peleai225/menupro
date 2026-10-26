@@ -62,6 +62,18 @@ Route::get('/telecharger/android', function () {
     abort(404, 'Le fichier APK n\'est pas encore disponible. Revenez bientôt !');
 })->name('download.apk')->middleware('throttle:60,1');
 
+// Programme « Représentant de ville » (hors cache public : formulaire avec jeton CSRF)
+Route::get('/devenir-representant', [\App\Http\Controllers\Public\PartnerProgramController::class, 'show'])->name('representative.program');
+Route::post('/devenir-representant', [\App\Http\Controllers\Public\PartnerProgramController::class, 'store'])
+    ->middleware('throttle:5,10')
+    ->name('representative.apply');
+
+// Campagnes QR : lien court suivi (bâches, affiches) — compte le scan puis redirige
+Route::get('/q/{code}', \App\Http\Controllers\Public\QrRedirectController::class)
+    ->where('code', '[A-Za-z0-9]{3,16}')
+    ->middleware('throttle:120,1')
+    ->name('qr.redirect');
+
 Route::post('/contact', [\App\Http\Controllers\Public\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
 Route::post('/qr-supports/order', [\App\Http\Controllers\Public\QrSupportOrderController::class, 'store'])->name('qr-supports.order')->middleware('throttle:5,1');
 Route::get('/test-geocoding', [\App\Http\Controllers\Public\GeocodingTestController::class, 'index'])->name('geocoding.test');
@@ -423,6 +435,28 @@ Route::prefix('admin')
             Route::delete('/agents/{agent}', [\App\Http\Controllers\SuperAdmin\CommandoAgentController::class, 'destroy'])->name('agents.destroy');
         });
         
+        // Programme « Représentant de ville » : candidatures
+        Route::get('candidatures-representants', [\App\Http\Controllers\SuperAdmin\PartnerApplicationController::class, 'index'])->name('partner-applications.index');
+        Route::get('candidatures-representants/{application}', [\App\Http\Controllers\SuperAdmin\PartnerApplicationController::class, 'show'])->name('partner-applications.show');
+        Route::put('candidatures-representants/{application}', [\App\Http\Controllers\SuperAdmin\PartnerApplicationController::class, 'update'])->name('partner-applications.update');
+        Route::get('candidatures-representants/{application}/piece-jointe', [\App\Http\Controllers\SuperAdmin\PartnerApplicationController::class, 'attachment'])->name('partner-applications.attachment');
+        Route::post('candidatures-representants/{application}/creer-representant', [\App\Http\Controllers\SuperAdmin\PartnerApplicationController::class, 'createRepresentative'])->name('partner-applications.create-representative');
+
+        // Représentants de ville
+        Route::get('representants', [\App\Http\Controllers\SuperAdmin\RepresentativeController::class, 'index'])->name('representatives.index');
+        Route::get('representants/export', [\App\Http\Controllers\SuperAdmin\RepresentativeController::class, 'export'])->name('representatives.export');
+        Route::get('representants/{representative}', [\App\Http\Controllers\SuperAdmin\RepresentativeController::class, 'show'])->whereNumber('representative')->name('representatives.show');
+        Route::put('representants/{representative}', [\App\Http\Controllers\SuperAdmin\RepresentativeController::class, 'update'])->whereNumber('representative')->name('representatives.update');
+        Route::post('representants/{representative}/calculer', [\App\Http\Controllers\SuperAdmin\RepresentativeController::class, 'compute'])->whereNumber('representative')->name('representatives.compute');
+
+        // Campagnes QR (bâches, affiches)
+        Route::get('campagnes-qr', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'index'])->name('qr-campaigns.index');
+        Route::post('campagnes-qr', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'store'])->name('qr-campaigns.store');
+        Route::get('campagnes-qr/{campaign}', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'show'])->name('qr-campaigns.show');
+        Route::put('campagnes-qr/{campaign}', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'update'])->name('qr-campaigns.update');
+        Route::get('campagnes-qr/{campaign}/qr.png', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'png'])->name('qr-campaigns.png');
+        Route::get('campagnes-qr/{campaign}/qr.svg', [\App\Http\Controllers\SuperAdmin\QrCampaignController::class, 'svg'])->name('qr-campaigns.svg');
+
         // Restaurants Management
         Route::get('restaurants/export', [RestaurantController::class, 'export'])->name('restaurants.export');
         Route::resource('restaurants', RestaurantController::class)->only(['index', 'show', 'update', 'destroy']);

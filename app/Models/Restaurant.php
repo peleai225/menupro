@@ -80,6 +80,7 @@ class Restaurant extends Model
         'waiter_token',
         'is_demo',
         'referred_by_user_id',
+        'qr_campaign_id',
         'platform_category',
         'is_on_platform',
         'platform_commission_rate',

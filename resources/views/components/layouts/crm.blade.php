@@ -55,11 +55,13 @@
                 </x-crm-nav-link>
                 </div>
 
+                @if($role !== 'representative')
                 <div id="tour-nav-performance">
                 <x-crm-nav-link href="{{ route('crm.performance') }}" icon="chart-bar" :active="request()->routeIs('crm.performance')">
                     Performance
                 </x-crm-nav-link>
                 </div>
+                @endif
 
                 @if(in_array($role, ['commercial', 'technician']))
                 <x-crm-nav-link href="{{ route('crm.report') }}" icon="document-text" :active="request()->routeIs('crm.report')">
@@ -163,9 +165,11 @@
                     Wallet
                 </x-crm-nav-link>
 
+                @if($role !== 'representative')
                 <x-crm-nav-link href="{{ route('crm.performance') }}" icon="chart-bar" :active="request()->routeIs('crm.performance')">
                     Performance
                 </x-crm-nav-link>
+                @endif
 
                 @if(in_array($role, ['commercial', 'technician']))
                 <x-crm-nav-link href="{{ route('crm.report') }}" icon="document-text" :active="request()->routeIs('crm.report')">

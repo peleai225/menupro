@@ -12,6 +12,10 @@ class DashboardController extends Controller
     {
         $role = $request->user()->role;
 
+        if ($role === UserRole::REPRESENTATIVE) {
+            return $this->representativeDashboard($request);
+        }
+
         $view = match ($role) {
             UserRole::SUPER_ADMIN => 'pages.crm.admin-dashboard',
             UserRole::TEAM_LEADER => 'pages.crm.team-dashboard',
@@ -21,6 +25,41 @@ class DashboardController extends Controller
         };
 
         return view($view);
+    }
+
+    /**
+     * Espace du représentant de ville : restaurants attribués, encaissements du mois,
+     * sa part, objectif trimestriel et historique des relevés.
+     */
+    private function representativeDashboard(Request $request)
+    {
+        $profile = $request->user()->representativeProfile;
+        abort_unless($profile, 403, 'Profil représentant introuvable. Contactez MenuPro.');
+
+        $service = app(\App\Services\Crm\RepresentativeService::class);
+        $month = now()->format('Y-m');
+
+        return view('pages.crm.representative-dashboard', [
+            'profile' => $profile,
+            'current' => $service->calculate($profile, $month),
+            'quarter' => $service->quarterProgress($profile),
+            'statements' => $profile->statements()->orderByDesc('month')->limit(12)->get(),
+            'wallet' => \App\Models\Crm\Wallet::firstOrCreate(
+                ['user_id' => $request->user()->id],
+                ['balance_cents' => 0, 'total_earned_cents' => 0, 'total_withdrawn_cents' => 0]
+            ),
+        ]);
+    }
+
+    public function representativeExport(Request $request)
+    {
+        $profile = $request->user()->representativeProfile;
+        abort_unless($profile, 403);
+
+        return \App\Http\Controllers\SuperAdmin\RepresentativeController::statementsCsv(
+            $profile->statements()->with('profile.user')->orderByDesc('month'),
+            'mes-releves-menupro_' . now()->format('Y-m-d') . '.csv'
+        );
     }
 
     public function leads()
