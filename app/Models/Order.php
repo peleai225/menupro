@@ -481,6 +481,11 @@ class Order extends Model
             // Acceptée : les livreurs seront appelés vers la fin de la préparation
             if ($isAcceptance) {
                 $this->scheduleDriverSearch();
+
+                // Payée via Jeko : le reversement au restaurant ne part qu'une fois la commande acceptée
+                if ($this->payment_method === 'jeko' && $this->payout_status !== 'completed') {
+                    \App\Jobs\ProcessJekoPayoutJob::dispatch($this)->afterCommit()->delay(now()->addMinutes(2));
+                }
             }
 
             // Prête avant l'heure prévue : inutile d'attendre, on appelle les livreurs tout de suite

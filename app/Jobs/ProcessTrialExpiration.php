@@ -82,7 +82,13 @@ class ProcessTrialExpiration implements ShouldQueue
     protected function sendExpiringNotification(Subscription $subscription, int $daysLeft = 3): void
     {
         $restaurant = $subscription->restaurant;
-        
+
+        // Restaurant supprimé : pas de rappel (et plus de plantage du job entier)
+        if (!$restaurant) {
+            $subscription->markReminderSent();
+            return;
+        }
+
         $restaurant->users()
             ->whereIn('role', [\App\Enums\UserRole::RESTAURANT_ADMIN])
             ->each(function ($user) use ($subscription, $daysLeft) {
@@ -103,6 +109,13 @@ class ProcessTrialExpiration implements ShouldQueue
         $subscription->update([
             'status' => SubscriptionStatus::EXPIRED,
         ]);
+
+        // Restaurant supprimé (soft delete) : essai clos sans blocage ni notification
+        // (avant : « Attempt to read property "id" on null », le job plantait chaque nuit)
+        if (!$restaurant) {
+            $subscription->markExpiredNotificationSent();
+            return;
+        }
 
         // Le restaurant a déjà souscrit un abonnement valide : on clôt l'essai sans bloquer ni prévenir
         if (Subscription::hasOtherValidFor($restaurant->id, $subscription->id)) {

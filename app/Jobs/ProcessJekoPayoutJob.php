@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\JekoGateway;
 use Illuminate\Bus\Queueable;
@@ -27,6 +28,27 @@ class ProcessJekoPayoutJob implements ShouldQueue
 
     public function handle(JekoGateway $gateway): void
     {
+        // État à jour : la commande a pu être acceptée, refusée ou annulée depuis la mise en file
+        $this->order->refresh();
+
+        // Jamais de reversement pour une commande annulée, remboursée ou à rembourser
+        if (in_array($this->order->status, [OrderStatus::CANCELLED, OrderStatus::REFUNDED], true)
+            || $this->order->refund_status === 'pending') {
+            Log::channel('payments')->info('ProcessJekoPayoutJob: commande annulée/remboursée, pas de reversement', [
+                'order_id' => $this->order->id,
+                'status'   => $this->order->status->value,
+            ]);
+            return;
+        }
+
+        // Pas encore acceptée par le restaurant : le reversement sera relancé à l'acceptation (Order::accept)
+        if ($this->order->isAwaitingAcceptance()) {
+            Log::channel('payments')->info('ProcessJekoPayoutJob: en attente d\'acceptation, reversement différé', [
+                'order_id' => $this->order->id,
+            ]);
+            return;
+        }
+
         // Idempotence : ne pas relancer si le payout a déjà réussi
         if ($this->order->payout_status === 'completed') {
             Log::channel('payments')->info('ProcessJekoPayoutJob: already completed, skipping', [
