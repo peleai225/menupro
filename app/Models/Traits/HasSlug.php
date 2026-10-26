@@ -20,7 +20,8 @@ trait HasSlug
         static::updating(function ($model) {
             // Regenerate slug if name changed and slug wasn't manually set
             $slugSource = $model->getSlugSource();
-            if ($model->isDirty($slugSource) && !$model->isDirty('slug')) {
+            $keepSlug = property_exists($model, 'keepSlugOnRename') && $model->keepSlugOnRename;
+            if (!$keepSlug && $model->isDirty($slugSource) && !$model->isDirty('slug')) {
                 $model->slug = $model->generateUniqueSlug();
             }
         });

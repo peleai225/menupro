@@ -11,6 +11,12 @@ class Plan extends Model
 {
     use HasFactory, HasSlug;
 
+    /**
+     * Le slug d'un plan est un identifiant stable (code, seeder, inscription ?type=stand) :
+     * renommer un plan ne doit jamais le changer.
+     */
+    protected bool $keepSlugOnRename = true;
+
     protected $fillable = [
         'name',
         'slug',
