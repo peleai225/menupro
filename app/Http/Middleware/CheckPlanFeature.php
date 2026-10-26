@@ -2,10 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\PlanLimiter;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Fonction réservée à un plan supérieur (config('plans.features')) : jamais de 403 brute
+ * pour une page, mais un renvoi vers les offres avec « Passer au plan X ».
+ */
 class CheckPlanFeature
 {
     public function handle(Request $request, Closure $next, string $feature): Response
@@ -22,28 +27,29 @@ class CheckPlanFeature
             return $next($request);
         }
 
+        $label = PlanLimiter::featureLabel($feature);
+        $plan = PlanLimiter::requiredPlanFor($feature);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Cette fonctionnalité nécessite un plan supérieur.',
                 'feature' => $feature,
-                'upgrade_required' => $this->featureLabel($feature),
+                'upgrade_required' => $label,
+                'required_plan' => $plan?->slug,
             ], 403);
         }
 
-        return redirect()->route('restaurant.subscription')
-            ->with('upgrade_required', $this->featureLabel($feature));
-    }
+        $message = $plan
+            ? "« {$label} » est inclus à partir du plan {$plan->name}. Passez au plan {$plan->name} pour y accéder."
+            : "« {$label} » n'est pas inclus dans votre plan.";
 
-    protected function featureLabel(string $feature): string
-    {
-        return match ($feature) {
-            'analytics' => 'Statistiques, Rapports et Codes Promo',
-            'stock' => 'Gestion de Stock',
-            'ingredient_stock' => 'Stock par ingrédient et rentabilité par plat (Plan Pro)',
-            'delivery' => 'Gestion des Livraisons',
-            'hotel_rooms' => 'Chambres Hôtel (QR par chambre)',
-            'multi_spaces' => 'Gestion multi-espaces (Plan GOLD)',
-            default => ucfirst($feature),
-        };
+        // Employé : il ne peut pas changer d'abonnement, retour au tableau de bord
+        if (!$user->canManageRestaurant()) {
+            return redirect()->route('restaurant.dashboard')->with('warning', $message . ' Parlez-en au gérant.');
+        }
+
+        return redirect()->route('restaurant.subscription.plans', array_filter(['plan' => $plan?->slug]))
+            ->with('upgrade_required', $label)
+            ->with('warning', $message);
     }
 }

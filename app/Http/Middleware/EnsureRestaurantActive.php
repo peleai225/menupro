@@ -65,14 +65,28 @@ class EnsureRestaurantActive
                     ->with('error', 'Votre restaurant est suspendu. Contactez le support.');
             }
             
-            if ($restaurant->status === RestaurantStatus::EXPIRED) {
-                // Allow access to subscription page only
-                if (!$request->routeIs('restaurant.subscription*')) {
-                    return redirect()->route('restaurant.subscription')
-                        ->with('warning', 'Votre abonnement a expiré. Veuillez le renouveler.');
+            // Abonnement expiré / essai terminé / paiement en attente : accès limité à
+            // l'abonnement (paiement toujours possible), aux paramètres et au profil.
+            $limiter = (clone app(\App\Services\PlanLimiter::class))->forRestaurant($restaurant);
+            if ($limiter->isAccessLimited() && !\App\Services\PlanLimiter::isRouteAllowedWhenLimited($request)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Abonnement expiré : renouvelez pour réactiver votre espace.',
+                        'subscription_expired' => true,
+                    ], 402);
                 }
+
+                // Un employé ne peut pas payer (page Abonnement réservée au gérant) : sans ce
+                // cas, abonnement → tableau de bord → abonnement… bouclait à l'infini.
+                if (!$request->user()?->canManageRestaurant()) {
+                    return redirect()->route('restaurant.profile')
+                        ->with('warning', 'L\'abonnement du restaurant a expiré. Prévenez le gérant pour qu\'il le renouvelle.');
+                }
+
+                return redirect()->route('restaurant.subscription')
+                    ->with('warning', 'Votre abonnement a expiré. Renouvelez-le pour réactiver toutes les fonctions.');
             }
-            
+
             return $next($request);
         }
 

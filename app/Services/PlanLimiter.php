@@ -197,6 +197,99 @@ class PlanLimiter
         return $this->plan->hasFeature($feature);
     }
 
+    // =========================================================================
+    // ÉTAT D'ACCÈS (essai / actif / limité) — utilisé par la navigation et le middleware
+    // =========================================================================
+
+    public const ACCESS_TRIAL = 'trial';
+    public const ACCESS_ACTIVE = 'active';
+    public const ACCESS_LIMITED = 'limited';
+
+    /**
+     * Le restaurant a-t-il un abonnement (payé ou essai) encore valide ?
+     */
+    public function hasValidSubscription(): bool
+    {
+        $subscription = $this->restaurant->activeSubscription;
+
+        return $subscription !== null
+            && ($subscription->ends_at === null || $subscription->ends_at->isFuture());
+    }
+
+    /**
+     * Abonnement expiré (ou essai terminé, éventuellement avec un paiement en attente) :
+     * le tableau de bord est limité à l'abonnement et aux paramètres.
+     */
+    public function isAccessLimited(): bool
+    {
+        if ($this->restaurant->status === \App\Enums\RestaurantStatus::EXPIRED) {
+            return true;
+        }
+
+        return $this->restaurant->is_subscription_expired && !$this->hasValidSubscription();
+    }
+
+    public function accessState(): string
+    {
+        if ($this->isAccessLimited()) {
+            return self::ACCESS_LIMITED;
+        }
+
+        return $this->restaurant->isOnTrial() ? self::ACCESS_TRIAL : self::ACCESS_ACTIVE;
+    }
+
+    /** Paiement d'abonnement en attente (lien Jeko créé, webhook pas encore reçu). */
+    public function pendingSubscription(): ?\App\Models\Subscription
+    {
+        return $this->restaurant->subscriptions()
+            ->where('status', \App\Enums\SubscriptionStatus::PENDING)
+            ->latest()
+            ->first();
+    }
+
+    /** Jours d'essai restants (null hors essai). */
+    public function trialDaysLeft(): ?int
+    {
+        if (!$this->restaurant->isOnTrial()) {
+            return null;
+        }
+
+        $endsAt = $this->restaurant->activeSubscription?->ends_at;
+
+        return $endsAt ? max(0, (int) ceil(now()->diffInHours($endsAt, false) / 24)) : null;
+    }
+
+    /**
+     * Plan le moins cher de la grille qui inclut cette fonction (pour « Passer au plan X »).
+     */
+    public static function requiredPlanFor(string $feature): ?Plan
+    {
+        // Cache « array » : durée de la requête (la navigation l'appelle pour chaque onglet verrouillé)
+        $plans = cache()->store('array')->rememberForever('plan-limiter.active-plans', fn () => Plan::active()->ordered()->get());
+
+        return $plans->first(fn (Plan $plan) => !$plan->is_on_quote && $plan->hasFeature($feature))
+            ?? $plans->first(fn (Plan $plan) => $plan->hasFeature($feature));
+    }
+
+    public static function featureLabel(string $feature): string
+    {
+        return config("plans.features.{$feature}.label") ?? ucfirst($feature);
+    }
+
+    /**
+     * Route accessible quand l'accès est limité (abonnement expiré / en attente de paiement) ?
+     */
+    public static function isRouteAllowedWhenLimited(\Illuminate\Http\Request $request): bool
+    {
+        foreach (config('plans.limited_access_routes', []) as $pattern) {
+            if ($request->routeIs($pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Get all quotas summary
      */
@@ -228,7 +321,7 @@ class PlanLimiter
      */
     public function getFeaturesSummary(): array
     {
-        $features = ['delivery', 'stock', 'analytics', 'custom_domain', 'priority_support'];
+        $features = array_keys(config('plans.features', []));
         $summary = [];
 
         foreach ($features as $feature) {

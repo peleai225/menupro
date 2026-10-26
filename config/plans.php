@@ -48,4 +48,80 @@ return [
         'semiannual' => ['label' => 'Semestriel',   'days' => 180, 'months' => 6,  'discount' => 15],
         'annual'     => ['label' => 'Annuel',       'days' => 365, 'months' => 12, 'discount' => 20],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | « Ce plan donne accès à quoi » — SOURCE UNIQUE
+    |--------------------------------------------------------------------------
+    |
+    | Chaque fonction est portée soit par une colonne booléenne du plan (`column`, valeurs
+    | fixées par PlanSeeder), soit par un plan minimum (`min_plan`, rang dans `plan_order`).
+    | Lue par Plan::hasFeature(), PlanLimiter, le middleware `feature:` et la navigation du
+    | tableau de bord (App\Support\RestaurantNavigation). Pendant l'essai : plan Pro.
+    |
+    */
+
+    // Rang des plans (du moins cher au plus complet). Un ancien plan absent de la liste
+    // garde l'interface complète d'un plan Restaurant (comportement historique).
+    'plan_order' => ['stand', 'essentiel', 'pro', 'gold'],
+    'legacy_plan_rank_as' => 'essentiel',
+
+    'features' => [
+        // Fonctions portées par une colonne du plan
+        'delivery'         => ['label' => 'Livraisons',                          'column' => 'has_delivery'],
+        'stock'            => ['label' => 'Stock simple (stock journalier)',     'column' => 'has_stock_management'],
+        'ingredient_stock' => ['label' => 'Stock par ingrédient et rentabilité', 'column' => 'has_ingredient_stock'],
+        'analytics'        => ['label' => 'Statistiques, rapports et codes promo', 'column' => 'has_analytics'],
+        'hotel_rooms'      => ['label' => 'Chambres d\'hôtel (QR par chambre)',  'column' => 'has_hotel_rooms'],
+        'multi_spaces'     => ['label' => 'Multi-espaces et serveurs',           'column' => 'has_multi_spaces'],
+        'custom_domain'    => ['label' => 'Domaine personnalisé',                'column' => 'has_custom_domain'],
+        'priority_support' => ['label' => 'Support prioritaire',                 'column' => 'has_priority_support'],
+
+        // Fonctions d'interface : à partir d'un plan minimum
+        'pos'              => ['label' => 'Caisse (POS)',            'min_plan' => 'essentiel'],
+        'customers'        => ['label' => 'Fichier clients',         'min_plan' => 'essentiel'],
+        'reservations'     => ['label' => 'Réservations',            'min_plan' => 'essentiel'],
+        'reviews'          => ['label' => 'Avis clients',            'min_plan' => 'essentiel'],
+        'team'             => ['label' => 'Équipe (employés)',       'min_plan' => 'essentiel'],
+        'taxes'            => ['label' => 'Taxes et frais',          'min_plan' => 'essentiel'],
+    ],
+
+    // Abonnement expiré ou en attente de paiement : seules ces pages restent ouvertes
+    // (le restaurant bloqué doit toujours pouvoir payer).
+    'limited_access_routes' => [
+        'restaurant.subscription*',
+        'restaurant.settings*',
+        'restaurant.profile',
+        'restaurant.pending',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Packs de supports imprimés (pages d'offres, inscription, abonnement)
+    |--------------------------------------------------------------------------
+    */
+    'welcome_pack' => 'Affiche vitrine « Commandez sur MenuPro » offerte à tous dès l\'inscription',
+
+    'packs' => [
+        'stand' => [
+            'name'  => 'Pack Stand',
+            'items' => ['4 autocollants QR de table', '1 affiche vitrine A4'],
+            'note'  => 'offerts dès le 1er paiement',
+        ],
+        'essentiel' => [
+            'name'  => 'Pack Maquis',
+            'items' => ['15 autocollants de table', '1 affiche vitrine A4', '1 autocollant de porte A3'],
+            'note'  => 'offerts dès le 1er paiement',
+        ],
+        'pro' => [
+            'name'  => 'Pack Pro',
+            'items' => ['30 autocollants', '2 chevalets de comptoir', 'Affiche vitrine', 'Autocollant de porte'],
+            'note'  => 'inclus',
+        ],
+        'gold' => [
+            'name'  => 'Pack Gold',
+            'items' => ['Supports personnalisés'],
+            'note'  => 'sur devis',
+        ],
+    ],
 ];

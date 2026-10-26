@@ -222,18 +222,51 @@ class Plan extends Model
      */
     public function hasFeature(string $feature): bool
     {
-        $featureMap = [
-            'delivery' => $this->has_delivery,
-            'stock' => $this->has_stock_management,
-            'ingredient_stock' => $this->has_ingredient_stock,
-            'analytics' => $this->has_analytics,
-            'custom_domain' => $this->has_custom_domain,
-            'priority_support' => $this->has_priority_support,
-            'hotel_rooms' => $this->has_hotel_rooms,
-            'multi_spaces' => $this->has_multi_spaces,
-        ];
+        // Source unique : config('plans.features') — colonne du plan ou plan minimum
+        $definition = config("plans.features.{$feature}");
 
-        return (bool) ($featureMap[$feature] ?? false);
+        if (!$definition) {
+            return false;
+        }
+
+        if (isset($definition['column'])) {
+            return (bool) $this->{$definition['column']};
+        }
+
+        if (isset($definition['min_plan'])) {
+            return $this->rank() >= self::rankOf($definition['min_plan']);
+        }
+
+        return false;
+    }
+
+    /**
+     * Rang du plan dans la grille (config('plans.plan_order')) ; un ancien plan hors grille
+     * prend le rang de config('plans.legacy_plan_rank_as').
+     */
+    public function rank(): int
+    {
+        return self::rankOf($this->slug);
+    }
+
+    public static function rankOf(?string $slug): int
+    {
+        $order = config('plans.plan_order', []);
+        $rank = array_search($slug, $order, true);
+
+        if ($rank === false) {
+            $rank = array_search(config('plans.legacy_plan_rank_as', 'essentiel'), $order, true);
+        }
+
+        return $rank === false ? 0 : (int) $rank;
+    }
+
+    /**
+     * Pack de supports imprimés du plan (config('plans.packs')), ou null.
+     */
+    public function getPackAttribute(): ?array
+    {
+        return config("plans.packs.{$this->slug}");
     }
 
     /**
