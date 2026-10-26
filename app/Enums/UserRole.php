@@ -11,6 +11,7 @@ enum UserRole: string
     case COMMERCIAL = 'commercial';
     case TECHNICIAN = 'technician';
     case TEAM_LEADER = 'team_leader';
+    case REPRESENTATIVE = 'representative';
     case CUSTOMER = 'customer';
     case DELIVERY_DRIVER = 'delivery_driver';
 
@@ -24,6 +25,7 @@ enum UserRole: string
             self::COMMERCIAL => 'Ambassadeur',
             self::TECHNICIAN => 'Technicien',
             self::TEAM_LEADER => 'Team Leader',
+            self::REPRESENTATIVE => 'Représentant de ville',
             self::CUSTOMER => 'Client',
             self::DELIVERY_DRIVER => 'Livreur',
         };
@@ -39,6 +41,7 @@ enum UserRole: string
             self::COMMERCIAL => 'orange',
             self::TECHNICIAN => 'cyan',
             self::TEAM_LEADER => 'emerald',
+            self::REPRESENTATIVE => 'indigo',
             self::CUSTOMER => 'green',
             self::DELIVERY_DRIVER => 'yellow',
         };

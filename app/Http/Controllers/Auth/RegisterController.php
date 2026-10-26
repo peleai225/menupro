@@ -43,9 +43,22 @@ class RegisterController extends Controller
                 ->where('status_verification', 'valide')
                 ->whereNull('banned_at')
                 ->first();
-            if ($agent) {
+            // Même mécanisme ref_agent pour les représentants de ville (lien de parrainage)
+            $representative = $agent ? null : $this->activeRepresentativeByUuid($ref);
+            if ($agent || $representative) {
                 session(['register_ref_agent' => $ref]);
                 cookie()->queue(cookie('ref_agent', $ref, 60 * 24 * 7)); // 7 jours
+            }
+        }
+
+        // Campagne QR « inscription restaurant » : utm_campaign = code de la campagne
+        // (complète la session posée par /q/{code}, ex. lien ouvert dans un autre navigateur).
+        if (request()->query('utm_source') === 'qr' && ($code = request()->query('utm_campaign'))) {
+            $campaign = \App\Models\QrCampaign::where('code', strtolower((string) $code))
+                ->where('target_type', \App\Models\QrCampaign::TARGET_RESTAURANT_SIGNUP)
+                ->first();
+            if ($campaign) {
+                session([\App\Models\QrCampaign::SESSION_KEY => $campaign->id]);
             }
         }
 
@@ -112,13 +125,23 @@ class RegisterController extends Controller
             $trialEndsAt = now()->addDays($trialDays);
 
             $referredByAgentId = null;
+            $referredByUserId = null;
             $refAgentUuid = session('register_ref_agent') ?? $request->cookie('ref_agent');
             if ($refAgentUuid) {
                 $refAgent = \App\Models\CommandoAgent::where('uuid', $refAgentUuid)->valide()->first();
                 if ($refAgent && !$refAgent->isBanni()) {
                     $referredByAgentId = $refAgent->id;
+                } elseif ($representative = $this->activeRepresentativeByUuid($refAgentUuid)) {
+                    // Lien de parrainage d'un représentant de ville → attribution par l'utilisateur
+                    $referredByUserId = $representative->user_id;
                 }
                 session()->forget('register_ref_agent');
+            }
+
+            // Campagne QR d'origine (inscriptions issues d'une bâche / affiche)
+            $qrCampaignId = session(\App\Models\QrCampaign::SESSION_KEY);
+            if ($qrCampaignId && !\App\Models\QrCampaign::whereKey($qrCampaignId)->exists()) {
+                $qrCampaignId = null;
             }
 
             // Email auto-généré si non fourni (connexion par téléphone)
@@ -130,6 +153,8 @@ class RegisterController extends Controller
                 'company_name' => $request->company_name,
                 'rccm' => $request->rccm,
                 'referred_by_agent_id' => $referredByAgentId,
+                'referred_by_user_id' => $referredByUserId,
+                'qr_campaign_id' => $qrCampaignId,
                 'email' => $email,
                 'phone' => $request->phone,
                 'description' => $request->restaurant_description,
@@ -195,6 +220,7 @@ class RegisterController extends Controller
 
             // Lier au lead CRM si un token est en session
             $this->linkLeadToRestaurant($restaurant);
+            session()->forget(\App\Models\QrCampaign::SESSION_KEY);
 
             event(new Registered($user));
 
@@ -306,6 +332,28 @@ class RegisterController extends Controller
             return redirect()->route('restaurant.dashboard')
                 ->with('error', 'Une erreur est survenue lors de l\'activation. Veuillez contacter le support.');
         }
+    }
+
+    /**
+     * Représentant de ville dont le lien de parrainage porte cet uuid, si son compte est actif.
+     */
+    protected function activeRepresentativeByUuid(?string $uuid): ?\App\Models\Crm\RepresentativeProfile
+    {
+        if (!$uuid) {
+            return null;
+        }
+
+        $profile = \App\Models\Crm\RepresentativeProfile::with('user')->where('uuid', $uuid)->first();
+        $user = $profile?->user;
+
+        if (!$user || $user->role !== UserRole::REPRESENTATIVE || !$user->is_active) {
+            return null;
+        }
+        if ($user->agent_status && !$user->agent_status->canWork()) {
+            return null;
+        }
+
+        return $profile;
     }
 
     protected function linkLeadToRestaurant(Restaurant $restaurant): void

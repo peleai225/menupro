@@ -117,6 +117,12 @@ Schedule::command('crm:credit-recurring')
     ->name('crm-recurring-commissions')
     ->withoutOverlapping();
 
+// Représentants de ville — part du mois précédent (journal des transactions), le 2 à 7h
+Schedule::command('representants:calculer-mois')
+    ->monthlyOn(2, '07:00')
+    ->name('representants-calcul-mensuel')
+    ->withoutOverlapping();
+
 // CRM — Snapshots de performance + commissions récurrentes le 1er du mois à 2h
 Schedule::command('crm:monthly-processing')
     ->monthlyOn(1, '02:00')

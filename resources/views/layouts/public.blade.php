@@ -144,6 +144,7 @@
                         <li><a href="{{ route('pricing') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Tarifs</a></li>
                         <li><a href="#" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
                         <li><a href="{{ route('devenir-livreur') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Devenir livreur</a></li>
+                        <li><a href="{{ route('representative.program') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Devenir représentant</a></li>
                     </ul>
                 </div>
 

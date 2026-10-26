@@ -29,6 +29,20 @@ return [
         'bonus_monthly_top_cents' => (int) env('CRM_BONUS_MONTHLY_TOP', 5_000_000),
     ],
 
+    /*
+    | Programme « Représentant de ville »
+    | Rémunération en pourcentage, calculée chaque mois depuis le journal des
+    | transactions (ledger_entries) : part des abonnements encaissés + part de la
+    | commission MenuPro des commandes livrées des restaurants attribués.
+    | Les taux sont personnalisables par représentant (valeurs ci-dessous = défauts).
+    */
+    'representatives' => [
+        'subscription_rate_percent' => (float) env('CRM_REP_SUBSCRIPTION_RATE', 20),
+        'delivery_rate_percent'     => (float) env('CRM_REP_DELIVERY_RATE', 20),
+        'trial_months'              => (int) env('CRM_REP_TRIAL_MONTHS', 3),
+        'default_quarterly_target'  => (int) env('CRM_REP_QUARTERLY_TARGET', 10),
+    ],
+
     'grades' => [
         'rookie'   => ['min' => 0,  'max' => 5],
         'commando' => ['min' => 6,  'max' => 20],

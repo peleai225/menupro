@@ -9,20 +9,28 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_leader,commando_agent'])
+Route::middleware(['auth', 'crm.role:super_admin,commercial,technician,team_leader,commando_agent,representative'])
     ->prefix('crm')
     ->name('crm.')
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/leads', [DashboardController::class, 'leads'])->name('leads.index');
-        Route::get('/installations', [DashboardController::class, 'installations'])->name('installations.index');
-        Route::get('/teams', [DashboardController::class, 'teams'])->name('teams.index');
+        // Outils terrain (pipeline, installations…) : pas pour les représentants de ville
+        Route::middleware('crm.role:super_admin,commercial,technician,team_leader,commando_agent')->group(function () {
+            Route::get('/leads', [DashboardController::class, 'leads'])->name('leads.index');
+            Route::get('/installations', [DashboardController::class, 'installations'])->name('installations.index');
+            Route::get('/teams', [DashboardController::class, 'teams'])->name('teams.index');
+            Route::get('/performance', [DashboardController::class, 'performance'])->name('performance');
+            Route::get('/report', [DashboardController::class, 'dailyReport'])->name('report');
+        });
         Route::get('/wallet', [DashboardController::class, 'wallet'])->name('wallet');
-        Route::get('/performance', [DashboardController::class, 'performance'])->name('performance');
-        Route::get('/report', [DashboardController::class, 'dailyReport'])->name('report');
         Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
+
+        // Représentant de ville : export de ses relevés mensuels
+        Route::get('/representant/export', [DashboardController::class, 'representativeExport'])
+            ->middleware('crm.role:representative')
+            ->name('representative.export');
 
         Route::post('/tour/complete', function () {
             auth()->user()->update(['tour_completed_at' => now()]);

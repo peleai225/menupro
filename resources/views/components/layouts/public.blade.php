@@ -281,6 +281,7 @@
                         <li><a href="{{ route('home') }}#how-it-works" class="text-neutral-400 hover:text-primary-400 transition-colors">Fonctionnalités</a></li>
                         <li><a href="{{ route('pricing') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Tarifs</a></li>
                         <li><a href="{{ route('commando.register.step1') }}" class="text-neutral-400 hover:text-orange-400 transition-colors">Devenir agent Commando</a></li>
+                        <li><a href="{{ route('representative.program') }}" class="text-neutral-400 hover:text-primary-400 transition-colors">Devenir représentant</a></li>
                         <li><a href="{{ route('contact') }}?type=demo" class="text-neutral-400 hover:text-primary-400 transition-colors">Démo</a></li>
                         <li><a href="{{ route('home') }}#testimonials" class="text-neutral-400 hover:text-primary-400 transition-colors">Témoignages</a></li>
                     </ul>

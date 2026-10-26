@@ -193,6 +193,25 @@ class CommissionEngine
     }
 
     /**
+     * Part mensuelle d'un représentant de ville (programme partenaires).
+     * Le montant est le complément restant dû pour le relevé : l'idempotence est
+     * garantie par RepresentativeService (credited_cents du relevé, sous verrou).
+     */
+    public function creditRepresentativeShare(User $user, \App\Models\Crm\RepresentativeStatement $statement, int $amountCents): ?Commission
+    {
+        if ($amountCents <= 0 || !$this->agentCanReceive($user)) return null;
+
+        return $this->credit(
+            user: $user,
+            type: CommissionType::REPRESENTATIVE_SHARE,
+            amountCents: $amountCents,
+            source: $statement,
+            description: "Part représentant {$statement->month} — {$statement->profile?->city}",
+            metadata: ['month' => $statement->month],
+        );
+    }
+
+    /**
      * Palier commission technicien selon nombre d'installations ce mois.
      */
     private function technicianInstallCommission(int $technicianId): int
