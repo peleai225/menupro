@@ -132,7 +132,7 @@ class FinanceController extends Controller
             ->whereIn('payment_method', ['jeko', 'wave'])
             ->whereNotNull('paid_at')
             ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
-            ->where('paid_at', '>=', now()->subDays(30))
+            ->where('paid_at', '>=', now()->subDays(180))->where('total', '>', 0)
             ->where(fn($q) => $q
                 ->whereNull('payout_status')
                 ->orWhereIn('payout_status', ['pending', 'failed'])
@@ -147,7 +147,7 @@ class FinanceController extends Controller
         $baseQ = Order::whereIn('payment_method', ['jeko', 'wave'])
             ->whereNotNull('paid_at')
             ->whereNotIn('status', ['cancelled', 'refunded', 'draft'])
-            ->where('paid_at', '>=', now()->subDays(30));
+            ->where('paid_at', '>=', now()->subDays(180))->where('total', '>', 0);
 
         $stats = [
             'total_orders'     => (clone $baseQ)->where(fn($q) => $q->whereNull('payout_status')->orWhereIn('payout_status', ['pending', 'failed']))->count(),

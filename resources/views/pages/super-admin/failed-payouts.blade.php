@@ -10,7 +10,7 @@
                 </a>
                 <h1 class="text-2xl font-bold" style="color:var(--sa-fg);">Reversements à traiter</h1>
             </div>
-            <p class="mt-1 ml-8" style="color:var(--sa-muted-fg);">Commandes Jeko/Wave payées (30 derniers jours) — reversements à vérifier et relancer.</p>
+            <p class="mt-1 ml-8" style="color:var(--sa-muted-fg);">Commandes Jeko/Wave payées (6 derniers mois) — reversements à vérifier et relancer.</p>
         </div>
         <a href="{{ route('super-admin.finances.failed-payouts') }}" class="h-10 px-4 flex items-center gap-2 rounded-xl border text-sm font-medium transition-colors" style="background:var(--sa-card);border-color:var(--sa-border);color:var(--sa-fg);">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
     {{-- Stats --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
-            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente / échoués (30j)</p>
+            <p class="text-sm" style="color:var(--sa-muted-fg);">En attente / échoués (6 mois)</p>
             <p class="text-3xl font-bold mt-1" style="color:#dc2626;">{{ $stats['total_orders'] }}</p>
         </div>
         <div class="rounded-xl p-5 border shadow-sm" style="background:var(--sa-card);border-color:var(--sa-border);">
@@ -165,7 +165,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-4 py-12 text-center" style="color:var(--sa-muted-fg);">
-                                ✅ Aucune commande Jeko/Wave en attente de reversement sur les 30 derniers jours.
+                                ✅ Aucune commande Jeko/Wave en attente de reversement sur les 6 derniers mois.
                             </td>
                         </tr>
                     @endforelse
