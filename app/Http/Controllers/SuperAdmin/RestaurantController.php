@@ -269,30 +269,57 @@ class RestaurantController extends Controller
      */
     public function extendSubscription(Request $request, Restaurant $restaurant): RedirectResponse
     {
+        $methods = \App\Services\LedgerService::MANUAL_PAYMENT_METHODS;
+
         $request->validate([
             'plan_id' => ['required', 'exists:plans,id'],
             'days' => ['required', 'integer', 'min:1', 'max:365'],
             'reason' => ['required', 'string', 'max:255'],
+            // Paiement reçu hors plateforme (dépôt Jeko, espèces, Wave…) — 0 = offert (geste commercial)
+            'amount_received' => ['nullable', 'integer', 'min:0', 'max:10000000'], // vide = 0 = offert
+            'received_via' => ['nullable', \Illuminate\Validation\Rule::requiredIf(fn () => (int) $request->amount_received > 0), 'in:' . implode(',', array_keys($methods))],
+            'payment_reference' => ['nullable', 'string', 'max:120'],
+            'paid_on' => ['nullable', 'date', 'before_or_equal:today'],
+        ], [
+            'received_via.required' => 'Indiquez le moyen de paiement reçu (espèces, dépôt Jeko, Wave…).',
+            'paid_on.before_or_equal' => 'La date de paiement ne peut pas être dans le futur.',
         ]);
 
         $plan = Plan::findOrFail($request->plan_id);
         $days = (int) $request->days;
+        $amount = (int) ($request->amount_received ?? 0);
+        $offered = $amount === 0;
+        $via = $offered ? null : $request->received_via;
+        $reference = trim((string) $request->payment_reference) ?: null;
+        $paidAt = $offered ? null : ($request->paid_on
+            ? \Carbon\Carbon::parse($request->paid_on)->setTimeFrom(now())->min(now())
+            : now());
 
-        $amountPaid = 0; // Prolongation manuelle gratuite
-
-        // Create new subscription
-        $subscription = Subscription::create([
+        $subscription = new Subscription([
             'restaurant_id' => $restaurant->id,
             'plan_id' => $plan->id,
             'status' => SubscriptionStatus::ACTIVE,
-            'starts_at' => now(),
-            'ends_at' => now()->addDays($days),
-            'amount_paid' => $amountPaid,
+            'is_trial' => false,
+            'billing_period' => 'monthly',
+            'amount_paid' => $amount,
             'payment_method' => 'admin_manual',
-            'payment_metadata' => ['reason' => $request->reason, 'admin_id' => auth()->id()],
-            // Date d'encaissement seulement si la prolongation est payante
-            'paid_at' => $amountPaid > 0 ? now() : null,
+            // Référence obligatoire pour que le journal compte l'encaissement (LedgerService::isCollectedSubscription)
+            'payment_reference' => $offered ? null : ($reference ?? 'MANUEL-' . $restaurant->id . '-' . now()->format('YmdHis')),
+            'payment_metadata' => [
+                'reason' => $request->reason,
+                'admin_id' => auth()->id(),
+                'admin_name' => auth()->user()?->name,
+                'offered' => $offered,
+                'received_via' => $via,
+                'received_via_label' => $via ? $methods[$via]['label'] : null,
+                'reference' => $reference,
+                'paid_on' => $paidAt?->toDateString(),
+            ],
+            'paid_at' => $paidAt,
         ]);
+        // Prolongation : démarre à la fin de l'abonnement payé en cours (jours restants conservés)
+        $subscription->fill($subscription->paidPeriodAttributes($days));
+        $subscription->save();
 
         // Unique abonnement en cours : clôt les anciens, plan/date de fin à jour.
         $subscription->activateExclusively();
@@ -303,7 +330,16 @@ class RestaurantController extends Controller
             'orders_blocked' => false,
         ]);
 
-        return back()->with('success', "Abonnement prolongé de {$days} jours.");
+        ActivityLog::log('subscription_extended', auth()->user(),
+            "Prolongation manuelle de {$days} jours ({$plan->name}) — " . ($offered ? 'OFFERTE' : number_format($amount, 0, ',', ' ') . ' F reçus par ' . $methods[$via]['label']),
+            ['restaurant_id' => $restaurant->id, 'subscription_id' => $subscription->id, 'amount' => $amount, 'received_via' => $via, 'reference' => $reference]
+        );
+
+        $until = $subscription->ends_at->locale('fr')->isoFormat('D MMMM YYYY');
+
+        return back()->with('success', $offered
+            ? "Abonnement prolongé de {$days} jours (jusqu'au {$until}) — OFFERT : aucun encaissement enregistré, ligne « offert » ajoutée au journal."
+            : "Abonnement prolongé de {$days} jours (jusqu'au {$until}) — " . number_format($amount, 0, ',', ' ') . " F reçus par {$methods[$via]['label']} enregistrés dans le journal des transactions.");
     }
 
     /**

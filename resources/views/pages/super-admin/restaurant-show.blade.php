@@ -450,7 +450,7 @@
 
                     <!-- Prolonger / Renouveler l'abonnement (sans Lygos) -->
                     <div class="mt-4 pt-4 border-t" style="border-color:var(--sa-border);">
-                        <p class="text-sm mb-3" style="color:var(--sa-muted-fg);">Lygos indisponible ? Prolongez l'abonnement manuellement (paiement hors ligne).</p>
+                        <p class="text-sm mb-3" style="color:var(--sa-muted-fg);">Paiement reçu hors plateforme (dépôt Jeko, espèces, Wave…) ou geste commercial : prolongez manuellement. Le montant reçu alimente le journal des transactions et le MRR.</p>
                         <form method="POST" action="{{ route('super-admin.restaurants.extend-subscription', $restaurant) }}" class="space-y-3">
                             @csrf
                             <div>
@@ -472,6 +472,48 @@
                                        style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
                                        placeholder="30">
                             </div>
+                            {{-- Paiement reçu hors plateforme : apparaît dans le journal des transactions et le MRR --}}
+                            <div x-data="{ amount: '{{ old('amount_received', '') }}' }" class="space-y-3 p-3 rounded-lg" style="border:1px dashed var(--sa-border);">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Montant reçu (F) — 0 = offert</label>
+                                        <input type="number" name="amount_received" min="0" step="1" required x-model="amount"
+                                               class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
+                                               placeholder="Ex : 5000">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Moyen</label>
+                                        <select name="received_via" :required="amount !== '' && Number(amount) > 0" :disabled="amount !== '' && Number(amount) === 0"
+                                                class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
+                                            <option value="">— Choisir —</option>
+                                            @foreach(\App\Services\LedgerService::MANUAL_PAYMENT_METHODS as $key => $method)
+                                                <option value="{{ $key }}" @selected(old('received_via') === $key)>{{ $method['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Référence (transaction, reçu…)</label>
+                                        <input type="text" name="payment_reference" maxlength="120" value="{{ old('payment_reference') }}"
+                                               class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);"
+                                               placeholder="Ex : ID du dépôt Jeko">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Date du paiement</label>
+                                        <input type="date" name="paid_on" max="{{ now()->toDateString() }}" value="{{ old('paid_on', now()->toDateString()) }}"
+                                               class="w-full h-10 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                               style="background:var(--sa-muted);border:1px solid var(--sa-border);color:var(--sa-fg);">
+                                    </div>
+                                </div>
+                                <p x-show="amount !== '' && Number(amount) === 0" x-cloak class="text-xs font-semibold text-amber-600">
+                                    🎁 Prolongation OFFERTE (geste commercial) : aucun encaissement, marquée « offert » dans le journal.
+                                </p>
+                            </div>
+                            @if($errors->any())
+                                <div class="text-xs text-red-600">{{ $errors->first() }}</div>
+                            @endif
                             <div>
                                 <label class="block text-xs font-medium mb-1" style="color:var(--sa-muted-fg);">Raison (obligatoire)</label>
                                 <input type="text" name="reason" required maxlength="255"

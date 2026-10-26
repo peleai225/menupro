@@ -50,6 +50,21 @@ class LedgerService
     /** Valeurs brutes de payment_method considérées comme des espèces. */
     public const CASH_METHODS = ['cash', 'cash_on_delivery', 'on_site'];
 
+    /**
+     * Moyens d'un paiement d'abonnement reçu HORS plateforme et saisi par le super-admin
+     * (prolongation manuelle) : libellé et moyen normalisé du journal.
+     */
+    public const MANUAL_PAYMENT_METHODS = [
+        'cash'          => ['label' => 'Espèces',           'method' => 'cash'],
+        'jeko_deposit'  => ['label' => 'Dépôt Jeko',        'method' => 'jeko'],
+        'wave'          => ['label' => 'Wave',              'method' => 'wave'],
+        'orange_money'  => ['label' => 'Orange Money',      'method' => 'other'],
+        'mtn_momo'      => ['label' => 'MTN MoMo',          'method' => 'other'],
+        'moov_money'    => ['label' => 'Moov Money',        'method' => 'other'],
+        'bank_transfer' => ['label' => 'Virement bancaire', 'method' => 'other'],
+        'other'         => ['label' => 'Autre',             'method' => 'other'],
+    ];
+
     /** Statuts de reversement de commande considérés comme effectués. */
     public const PAYOUT_DONE = ['completed', 'manual'];
 
@@ -435,25 +450,37 @@ class LedgerService
             && !empty($subscription->payment_reference);
     }
 
+    /** Prolongation manuelle à 0 F (geste commercial) : tracée dans le journal, marquée « offert ». */
+    public function isOfferedManualSubscription(Subscription $subscription): bool
+    {
+        return $subscription->payment_method === 'admin_manual'
+            && (int) $subscription->amount_paid === 0
+            && in_array($subscription->status, [SubscriptionStatus::ACTIVE, SubscriptionStatus::EXPIRED], true)
+            && (bool) ($subscription->payment_metadata['offered'] ?? false);
+    }
+
     public function subscriptionEntry(Subscription $subscription, ?string $via = null, bool $failed = false): ?array
     {
         $amount = (int) $subscription->amount_paid;
-        if ($amount <= 0) {
+        $offered = !$failed && $this->isOfferedManualSubscription($subscription);
+        if ($amount <= 0 && !$offered) {
             return null;
         }
 
         $restaurant = $this->restaurant($subscription->restaurant_id);
         $plan = $subscription->plan;
         $isStand = $this->isStandPlan($plan?->slug);
-        $method = $this->normalizeMethod($subscription->payment_method);
-        $rate = (!$failed && $method === 'jeko') ? $this->collectionFeePercent() : 0.0;
-        $fee = $this->fee($amount, $rate);
         $manual = $subscription->payment_method === 'admin_manual';
+        $meta = $subscription->payment_metadata ?? [];
+        // Paiement reçu hors plateforme (dépôt, espèces…) : moyen saisi par le super-admin, sans frais
+        $manualVia = $manual ? (self::MANUAL_PAYMENT_METHODS[$meta['received_via'] ?? ''] ?? null) : null;
+        $method = $manualVia['method'] ?? $this->normalizeMethod($subscription->payment_method);
+        $rate = (!$failed && !$manual && $method === 'jeko') ? $this->collectionFeePercent() : 0.0;
+        $fee = $this->fee($amount, $rate);
 
-        $periodLabels = ['monthly' => 'mensuel', 'quarterly' => 'trimestriel', 'semiannual' => 'semestriel', 'annual' => 'annuel'];
+        $periodLabels = ['weekly' => 'hebdomadaire', 'monthly' => 'mensuel', 'quarterly' => 'trimestriel', 'semiannual' => 'semestriel', 'annual' => 'annuel'];
         $period = $periodLabels[$subscription->billing_period] ?? $subscription->billing_period;
 
-        $meta = $subscription->payment_metadata ?? [];
         $alt = $meta['jeko_link_id'] ?? $meta['payment_id'] ?? $meta['transaction_id'] ?? null;
 
         return [
@@ -467,7 +494,9 @@ class LedgerService
             'channel' => $manual ? 'back_office' : 'restaurant_space',
             'recorded_via' => $via ?? $this->currentVia(),
             'method' => $method,
-            'method_detail' => $subscription->payment_method,
+            'method_detail' => $manual
+                ? ($offered ? 'Offert — geste commercial' : ($manualVia['label'] ?? 'Hors plateforme') . ' — reçu hors plateforme')
+                : $subscription->payment_method,
             'restaurant_id' => $subscription->restaurant_id,
             'restaurant_name' => $restaurant?->name,
             'restaurant_plan' => $plan?->slug,
@@ -492,11 +521,17 @@ class LedgerService
             'restaurant_share' => 0,
             'driver_share' => 0,
             'net_menupro' => $failed ? 0 : $amount - $fee,
-            'description' => trim('Abonnement ' . ($plan?->name ?? '') . ($period ? ' — ' . $period : '')),
+            'description' => trim('Abonnement ' . ($plan?->name ?? '') . ($period ? ' — ' . $period : ''))
+                . ($offered ? ' — OFFERT (geste commercial)' : '')
+                . ($manual && !$offered ? ' — paiement reçu hors plateforme' . (!empty($meta['reference']) ? ' (réf. ' . $meta['reference'] . ')' : '') : '')
+                . ($manual && !empty($meta['reason']) ? ' — ' . mb_substr((string) $meta['reason'], 0, 120) : ''),
             'metadata' => [
                 'billing_period' => $subscription->billing_period,
                 'starts_at' => $subscription->starts_at?->toIso8601String(),
                 'ends_at' => $subscription->ends_at?->toIso8601String(),
+                'offered' => $offered,
+                'received_via' => $meta['received_via'] ?? null,
+                'admin_id' => $manual ? ($meta['admin_id'] ?? null) : null,
             ],
         ];
     }

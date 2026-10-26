@@ -119,7 +119,7 @@ class LedgerObserver
             return;
         }
 
-        if ($this->ledger->isCollectedSubscription($subscription)) {
+        if ($this->ledger->isCollectedSubscription($subscription) || $this->ledger->isOfferedManualSubscription($subscription)) {
             $this->ledger->writeAfterCommit(fn () => $this->ledger->subscriptionEntry($subscription));
 
             return;
