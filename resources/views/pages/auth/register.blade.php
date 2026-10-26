@@ -356,6 +356,7 @@
                         </div>
                         @endforeach
                     </div>
+                    @include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])
                 </div>
                 @endif
 
@@ -447,8 +448,14 @@
                         </template>
                         @endforeach
                     </div>
+                    @foreach($availablePlans as $p)
+                        <div x-show="formData.plan === '{{ $p->slug }}'" x-cloak>@include('partials.plan-pack', ['slug' => $p->slug, 'compact' => true])</div>
+                    @endforeach
                 </div>
                 @endif
+
+                {{-- Supports offerts à tous dès l'inscription --}}
+                <p class="mb-5 flex items-center gap-2 text-[12px] font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2" data-welcome-pack><span aria-hidden="true">🎁</span>{{ config('plans.welcome_pack') }}</p>
 
                 {{-- Price card (restaurants) / Price stand --}}
                 @if($isStand)

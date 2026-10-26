@@ -233,9 +233,19 @@
                                     </li>
                                 @endforeach
                             </ul>
+                            @include('partials.plan-pack', ['slug' => $slug, 'compact' => true])
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            <!-- Supports imprimés offerts (config/plans.php : welcome_pack + packs) -->
+            <div class="max-w-6xl mx-auto mt-10 flex flex-col sm:flex-row items-center gap-4 rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 to-primary-500/10 p-5" data-welcome-pack>
+                <span class="text-3xl" aria-hidden="true">🎁</span>
+                <div class="text-center sm:text-left">
+                    <p class="text-white font-bold">{{ config('plans.welcome_pack') }}.</p>
+                    <p class="text-neutral-300 text-sm mt-1">Et selon votre plan : autocollants QR de table, affiche vitrine, autocollant de porte, chevalets de comptoir… (voir le pack de chaque offre).</p>
+                </div>
             </div>
 
             <!-- Règles communes -->
