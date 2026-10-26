@@ -52,6 +52,18 @@ class ProcessSubscriptionExpiration implements ShouldQueue
 
             $restaurant = $subscription->restaurant;
 
+            // Restaurant supprimé (soft delete) : abonnement clos sans blocage ni notification
+            // (avant : « Attempt to read property "id" on null » à chaque passage du job).
+            if (!$restaurant) {
+                $subscription->update(['expired_notification_sent_at' => $subscription->expired_notification_sent_at ?? now()]);
+                Log::info('Subscription expired for a deleted restaurant (no notification)', [
+                    'subscription_id' => $subscription->id,
+                    'restaurant_id' => $subscription->restaurant_id,
+                ]);
+
+                return;
+            }
+
             // Ancien abonnement en doublon alors qu'un plus récent est encore valide (renouvellement) :
             // on le clôt sans bloquer le restaurant ni le prévenir.
             if (Subscription::hasOtherValidFor($restaurant->id, $subscription->id)) {

@@ -45,6 +45,29 @@ class SubscriptionExpirationDuplicatesTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_subscription_of_a_deleted_restaurant_is_expired_quietly(): void
+    {
+        Notification::fake();
+        $plan = Plan::factory()->create();
+        $deleted = Restaurant::factory()->create();
+        User::factory()->restaurantAdmin($deleted)->create();
+        $orphan = $this->subscription($deleted, $plan, now()->subDays(2));
+        $deleted->delete(); // soft delete
+
+        $alive = Restaurant::factory()->create(['orders_blocked' => false]);
+        $this->subscription($alive, $plan, now()->subDay());
+
+        // Avant : « Attempt to read property "id" on null » sur l'abonnement orphelin
+        (new ProcessSubscriptionExpiration())->handle();
+
+        $orphan->refresh();
+        $this->assertSame(SubscriptionStatus::EXPIRED, $orphan->status);
+        $this->assertNotNull($orphan->expired_notification_sent_at);
+        Notification::assertNothingSent();
+        // Les autres abonnements sont toujours traités
+        $this->assertTrue((bool) $alive->fresh()->orders_blocked);
+    }
+
     public function test_restaurant_without_valid_subscription_is_still_blocked(): void
     {
         $plan = Plan::factory()->create();
