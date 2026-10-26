@@ -156,6 +156,19 @@ Route::middleware(['auth', 'throttle:20,1'])->group(function () {
     Route::delete('/push-token', [\App\Http\Controllers\PushTokenController::class, 'destroy'])->name('push-token.destroy');
 });
 
+// Retour de la page de paiement Jeko d'un abonnement : PUBLIC (le retour depuis Wave /
+// Orange Money ou la PWA s'ouvre souvent sans la session). Protégé par un jeton aléatoire.
+Route::get('/abonnement/paiement/{subscription}/{token}/statut', [\App\Http\Controllers\SubscriptionPaymentReturnController::class, 'status'])
+    ->whereNumber('subscription')->middleware('throttle:60,1')->name('subscription.payment.status');
+Route::get('/abonnement/paiement/{subscription}/{token}/{issue}', [\App\Http\Controllers\SubscriptionPaymentReturnController::class, 'show'])
+    ->whereNumber('subscription')->whereIn('issue', ['succes', 'echec'])->middleware('throttle:30,1')->name('subscription.payment.return');
+
+// Journal des erreurs navigateur des pages de paiement (sans CSRF : page restée ouverte des heures)
+Route::post('/journal-client', [\App\Http\Controllers\ClientErrorLogController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+    ->name('client-errors.store');
+
 /*
 |--------------------------------------------------------------------------
 | Restaurant Admin Routes
@@ -305,8 +318,9 @@ Route::prefix('dashboard')
         });
 
         // Stock simple (stock journalier) - plan Restaurant et +
-        Route::prefix('stock')->name('stock.')->middleware('feature:stock')->group(function () {
-            Route::get('journalier', \App\Livewire\Restaurant\DailyStock::class)->name('daily');
+        // (feature posée par route : un Stand qui ouvre « Ingrédients » se voit proposer le plan Pro, pas Restaurant)
+        Route::prefix('stock')->name('stock.')->group(function () {
+            Route::get('journalier', \App\Livewire\Restaurant\DailyStock::class)->name('daily')->middleware('feature:stock');
 
             // Stock par ingrédient (recettes, fournisseurs, alertes) - plan Pro et +
             Route::middleware('feature:ingredient_stock')->group(function () {

@@ -20,19 +20,31 @@ class SubscriptionPaymentTest extends TestCase
     private function mockGatewayValid(): void
     {
         $mock = $this->mock(JekoGateway::class);
-        $mock->shouldReceive('forPlatform')->andReturnSelf();
+        $mock->shouldReceive('forMarketplacePlatform')->andReturnSelf();
         $mock->shouldReceive('verifyWebhookSignature')->andReturn(true);
     }
 
     private function mockGatewayInvalid(): void
     {
         $mock = $this->mock(JekoGateway::class);
-        $mock->shouldReceive('forPlatform')->andReturnSelf();
+        $mock->shouldReceive('forMarketplacePlatform')->andReturnSelf();
         $mock->shouldReceive('verifyWebhookSignature')->andReturn(false);
     }
 
     private function postWebhook(array $payload, string $signature = 'valid-sig'): \Illuminate\Testing\TestResponse
     {
+        // Format réel Jeko : {event: transaction.completed, data: {status, transactionType, transactionDetails.reference}}
+        if (isset($payload['payment_id'])) {
+            $payload = [
+                'event' => 'transaction.completed',
+                'data' => [
+                    'id' => 'tx-' . $payload['payment_id'],
+                    'status' => $payload['event'] === 'payment.success' ? 'success' : 'failed',
+                    'transactionType' => 'payment',
+                    'transactionDetails' => ['reference' => $payload['payment_id']],
+                ],
+            ];
+        }
         $rawPayload = json_encode($payload);
 
         return $this->call(
@@ -41,7 +53,7 @@ class SubscriptionPaymentTest extends TestCase
             [],
             [],
             [],
-            ['HTTP_X_JEKO_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
+            ['HTTP_JEKO_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
             $rawPayload
         );
     }

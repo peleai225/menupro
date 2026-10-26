@@ -61,6 +61,9 @@ class JekoGateway implements PaymentGatewayInterface
     {
         $gateway = $this->isMarketplaceMode ? 'jeko_marketplace' : 'jeko_normal';
 
+        // Réinitialiser : une passerelle désactivée ne doit pas garder les clés d'un appel précédent
+        $this->apiKey = $this->apiKeyId = $this->webhookSecret = $this->storeId = '';
+
         $setting = SystemPaymentSetting::where('gateway', $gateway)
             ->where('is_active', true)
             ->first();
@@ -107,7 +110,9 @@ class JekoGateway implements PaymentGatewayInterface
 
         $reference = $entity instanceof Order
             ? 'ORDER-' . $entity->id . '-' . time()
-            : 'SUB-' . $entity->id . '-' . time();
+            // Suffixe aléatoire : deux tentatives dans la même seconde (double appui, relance)
+            // gardent des références distinctes (un échec ancien n'annule pas la relance)
+            : 'SUB-' . $entity->id . '-' . time() . random_int(100, 999);
 
         try {
             $payload = [
@@ -145,6 +150,7 @@ class JekoGateway implements PaymentGatewayInterface
                     'success'     => true,
                     'payment_id'  => $data['id'] ?? $reference,
                     'payment_url' => $data['redirectUrl'] ?? '',
+                    'reference'   => $reference,
                     'status'      => 'pending',
                 ];
             }

@@ -107,7 +107,8 @@ class JekoWebhookController extends Controller
                 if ($subscription && $subscription->status !== SubscriptionStatus::ACTIVE) {
                     // Paiement confirmé : abonnement payant, unique abonnement en cours du
                     // restaurant (anciens actifs/essais clôturés), restaurant débloqué.
-                    $subscription->activateExclusively([
+                    // Période calculée maintenant : renouvellement anticipé = jours restants conservés.
+                    $subscription->activateExclusively($subscription->paidPeriodAttributes() + [
                         'status'            => SubscriptionStatus::ACTIVE,
                         'is_trial'          => false,
                         'payment_method'    => 'jeko',
@@ -155,7 +156,7 @@ class JekoWebhookController extends Controller
             return;
         }
 
-        DB::transaction(function () use ($reference, $paymentLinkId) {
+        DB::transaction(function () use ($reference, $paymentLinkId, $data) {
             // Order
             $order = $this->findOrder($reference, $paymentLinkId);
             if ($order) {
@@ -178,8 +179,24 @@ class JekoWebhookController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if ($subscription && $subscription->status === SubscriptionStatus::PENDING) {
-                    $subscription->update(['status' => SubscriptionStatus::CANCELLED]);
+                $currentReference = $subscription?->payment_metadata['jeko_reference'] ?? null;
+
+                if ($subscription && $currentReference && $currentReference !== $reference) {
+                    // Échec d'une ANCIENNE demande de paiement : le restaurant a relancé un
+                    // paiement plus récent sur cet abonnement, qui reste en attente.
+                    Log::channel('payments')->info('Jeko webhook: échec d\'une ancienne demande ignoré', [
+                        'subscription_id' => $subscription->id,
+                        'reference' => $reference,
+                        'current_reference' => $currentReference,
+                    ]);
+                } elseif ($subscription && $subscription->status === SubscriptionStatus::PENDING) {
+                    $subscription->update([
+                        'status' => SubscriptionStatus::CANCELLED,
+                        'payment_metadata' => array_merge($subscription->payment_metadata ?? [], [
+                            'failed_at' => now()->toIso8601String(),
+                            'failure_reason' => $data['failureReason'] ?? $data['errorMessage'] ?? $data['status'] ?? null,
+                        ]),
+                    ]);
                 }
             }
         });

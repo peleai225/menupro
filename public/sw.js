@@ -77,6 +77,8 @@ const NEVER_CACHE_PREFIXES = [
   '/deconnexion',
   '/logout',
   '/inscription',
+  '/abonnement/',
+  '/journal-client',
   '/mot-de-passe-oublie',
   '/reinitialiser-mot-de-passe',
   '/email/',

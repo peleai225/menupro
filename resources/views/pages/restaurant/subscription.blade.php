@@ -31,10 +31,19 @@
         $periodSuffix = ['weekly' => '/semaine', 'monthly' => '/mois', 'quarterly' => '/trimestre', 'semiannual' => '/semestre', 'annual' => '/an'];
         $fmt = fn ($n) => number_format((int) $n, 0, ',', ' ');
 
+        // Jeko : unique passerelle d'abonnement (MoneyFusion désactivé)
+        $jekoConfigured = \App\Models\SystemPaymentSetting::where('gateway', 'jeko_marketplace')->where('is_active', true)->exists();
+
         $pendingSubscription = $restaurant->subscriptions()
             ->where('status', \App\Enums\SubscriptionStatus::PENDING)
             ->latest()->first();
     @endphp
+
+    @unless($jekoConfigured)
+        <div class="mb-6 p-4 rounded-2xl border border-amber-300 bg-amber-50 text-sm text-amber-900" role="alert">
+            <strong>Paiement Mobile Money momentanément indisponible.</strong> Réessayez dans quelques minutes ; si cela continue, contactez le support MenuPro.
+        </div>
+    @endunless
 
     {{-- ═══ BANNIÈRE PAIEMENT EN ATTENTE ═══ --}}
     @if($pendingSubscription && $pendingSubscription->status === \App\Enums\SubscriptionStatus::PENDING)
@@ -47,11 +56,20 @@
             <div class="flex-1">
                 <h3 class="font-bold text-amber-900 mb-1">Paiement en attente</h3>
                 <p class="text-sm text-amber-800 mb-3">Votre abonnement <strong>{{ $pendingSubscription->plan->name }}</strong> est en attente de paiement — <strong>{{ number_format($pendingSubscription->amount_paid, 0, ',', ' ') }} FCFA</strong>.</p>
-                <form method="POST" action="{{ route('restaurant.subscription.retry', $pendingSubscription) }}">
+                <p class="text-xs text-amber-800 mb-3">Si vous avez déjà validé le paiement sur votre téléphone, attendez quelques minutes : l'activation est automatique. Sinon, reprenez le paiement :</p>
+                <form method="POST" action="{{ route('restaurant.subscription.retry', $pendingSubscription) }}" data-payment-form
+                      class="flex flex-col sm:flex-row gap-2" x-data="{ loading: false }" @submit="loading = true">
                     @csrf
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition">
+                    <label class="sr-only" for="retry-operator">Opérateur Mobile Money</label>
+                    <select id="retry-operator" name="jeko_operator" class="min-h-[44px] rounded-xl border-amber-300 text-sm font-medium text-neutral-800 bg-white">
+                        @foreach(\App\Http\Controllers\Restaurant\SubscriptionController::OPERATORS as $op => $opLabel)
+                            <option value="{{ $op }}" @selected(($pendingSubscription->payment_metadata['jeko_operator'] ?? 'wave') === $op)>{{ $opLabel }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" :disabled="loading" :aria-busy="loading"
+                            class="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        Reprendre le paiement
+                        <span x-text="loading ? 'Redirection vers Jeko…' : 'Reprendre le paiement'">Reprendre le paiement</span>
                     </button>
                 </form>
             </div>
@@ -176,23 +194,52 @@
             </ul>
             <p class="text-xs text-neutral-500 mt-3">Livraison incluse — commission de 12 % uniquement sur les commandes livrées. Aucune commande n'est jamais bloquée.</p>
 
+            <div class="mt-4">@include('partials.plan-pack', ['slug' => $standPlan->slug, 'compact' => true])</div>
+
             @if($canPayStand)
-            <div class="mt-5 pt-4 border-t border-neutral-200 flex flex-col sm:flex-row gap-3">
-                @foreach(['weekly' => 'semaine', 'monthly' => 'mois'] as $period => $unit)
-                    @continue(!isset($standQuotes[$period]))
-                    <form method="POST" action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}" class="flex-1">
-                        @csrf
-                        <input type="hidden" name="plan" value="{{ $standPlan->slug }}">
-                        <input type="hidden" name="billing_period" value="{{ $period }}">
-                        <input type="hidden" name="payment_gateway" x-bind:value="gateway">
-                        <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator">
-                        <button type="submit" class="w-full px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow transition-all {{ $period === 'monthly' ? 'text-white bg-primary-600 hover:bg-primary-700' : 'text-primary-700 bg-white border-2 border-primary-300 hover:border-primary-500' }}">
-                            @if($isTrial) Activer @elseif($isActive) Renouveler @else Réactiver @endif
-                            — {{ $fmt($standQuotes[$period]['final_price']) }} F / {{ $unit }}
-                        </button>
-                    </form>
-                @endforeach
-            </div>
+            {{-- UN seul formulaire, vrais boutons radio : fonctionne même sans JavaScript (avant : opérateur
+                 imposé à Wave, aucun choix possible pour Orange / MTN / Moov). --}}
+            @php
+                $standDefaultPeriod = old('billing_period', isset($standQuotes['weekly']) && ($subscription?->billing_period ?? $restaurant->subscriptions()->latest()->value('billing_period')) === 'weekly' ? 'weekly' : 'monthly');
+                $standPrices = collect(['weekly', 'monthly'])->filter(fn ($p) => isset($standQuotes[$p]))->mapWithKeys(fn ($p) => [$p => (int) $standQuotes[$p]['final_price']]);
+            @endphp
+            <form method="POST" action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}"
+                  data-payment-form class="mt-5 pt-4 border-t border-neutral-200 space-y-4"
+                  x-data="{ period: @js($standDefaultPeriod), jeko_operator: @js(old('jeko_operator', 'wave')), prices: @js($standPrices), loading: false,
+                            labels: @js(\App\Http\Controllers\Restaurant\SubscriptionController::OPERATORS) }"
+                  @submit="loading = true">
+                @csrf
+                <input type="hidden" name="plan" value="{{ $standPlan->slug }}">
+                <input type="hidden" name="payment_gateway" value="jeko">
+
+                <fieldset>
+                    <legend class="text-sm font-semibold text-neutral-800 mb-2">Je paie :</legend>
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach(['weekly' => ['semaine', '7 jours d’accès'], 'monthly' => ['mois', '30 jours d’accès']] as $period => [$unitLabel, $durationLabel])
+                            @continue(!isset($standQuotes[$period]))
+                            <label class="flex flex-col justify-center min-h-[64px] px-3 py-2 rounded-xl border-2 cursor-pointer bg-white border-neutral-200 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
+                                <span class="flex items-center gap-2">
+                                    <input type="radio" name="billing_period" value="{{ $period }}" x-model="period" class="w-4 h-4 text-primary-600" @checked($standDefaultPeriod === $period)>
+                                    <span class="text-sm sm:text-base font-bold text-neutral-900 leading-tight">{{ $fmt($standQuotes[$period]['final_price']) }} F / {{ $unitLabel }}</span>
+                                </span>
+                                <span class="text-xs text-neutral-600 pl-6">{{ $durationLabel }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
+
+                @include('partials.subscription.operator-picker')
+
+                <button type="submit" :disabled="loading" :aria-busy="loading"
+                        class="w-full min-h-[52px] px-6 rounded-xl text-base font-bold text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 shadow-sm">
+                    <span x-text="loading ? 'Redirection vers Jeko…' : ('{{ $isTrial ? 'Activer' : ($isActive ? 'Renouveler' : 'Réactiver') }} — payer ' + new Intl.NumberFormat('fr-FR').format(prices[period] || 0) + ' F avec ' + (labels[jeko_operator] || 'Mobile Money'))">
+                        @if($isTrial) Activer @elseif($isActive) Renouveler @else Réactiver @endif — payer par Mobile Money
+                    </span>
+                </button>
+                <p id="payment-stalled-hint" hidden class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">
+                    La page de paiement ne s'est pas ouverte. Vérifiez votre connexion internet puis appuyez à nouveau sur le bouton.
+                </p>
+            </form>
             @endif
             <div class="mt-4 pt-4 border-t border-neutral-200">
                 <p class="text-sm text-neutral-600">Besoin de plus ? Le plan <strong>Restaurant</strong> ajoute la caisse, l'écran cuisine, le stock, les statistiques et les réservations.</p>
@@ -204,14 +251,7 @@
         </div>
     </div>
     @else
-    @php
-        // MoneyFusion désactivé — Jeko est l'unique passerelle d'abonnement.
-        // Remettre à la détection par SystemSetting pour le réactiver.
-        $moneyFusionActive = false;
-        $moneyFusionConfigured = !empty(\App\Models\SystemSetting::get('moneyfusion_api_url', ''));
-        $jekoConfigured = \App\Models\SystemPaymentSetting::where('gateway', 'jeko_marketplace')->where('is_active', true)->exists();
-    @endphp
-    <div x-data="{ period: 'monthly', gateway: 'jeko', jeko_operator: 'wave', quotes: @js($quotes) }">
+    <div x-data="{ period: 'monthly', gateway: 'jeko', jeko_operator: @js(old('jeko_operator', 'wave')), quotes: @js($quotes), loading: null }">
 
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -225,11 +265,11 @@
                 <p class="text-sm text-neutral-500 mt-0.5">Sans engagement · Changez de plan à tout moment</p>
             </div>
             {{-- Toggle période --}}
-            <div class="flex bg-neutral-100 rounded-xl p-1 gap-1 text-xs font-semibold shrink-0">
+            <div class="flex flex-wrap bg-neutral-100 rounded-xl p-1 gap-1 text-xs font-semibold w-full sm:w-auto" role="group" aria-label="Période de paiement">
                 @foreach(array_filter(['weekly' => ['1 semaine', null], 'monthly' => ['1 mois', null], 'quarterly' => ['3 mois', '-10%'], 'semiannual' => ['6 mois', '-15%'], 'annual' => ['1 an', '-20%']], fn ($k) => $k !== 'weekly' || $hasWeekly, ARRAY_FILTER_USE_KEY) as $p => [$label, $badge])
                     <button type="button" @click="period = '{{ $p }}'"
                             :class="period === '{{ $p }}' ? 'bg-white shadow text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'"
-                            class="relative px-3 py-1.5 rounded-lg transition-all">
+                            class="relative flex-1 sm:flex-none min-h-[40px] px-3 py-2 rounded-lg transition-all whitespace-nowrap">
                         {{ $label }}
                         @if($badge)
                             <span class="absolute -top-1.5 -right-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded leading-tight"
@@ -240,54 +280,10 @@
             </div>
         </div>
 
-        {{-- Sélecteur moyen de paiement --}}
-        @if(($moneyFusionActive && $moneyFusionConfigured) || $jekoConfigured)
+        {{-- Opérateur Mobile Money (Jeko, unique passerelle d'abonnement) --}}
         <div class="mb-6 p-4 bg-white rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 class="text-sm font-semibold text-neutral-700 mb-3">Moyen de paiement</h3>
-            <div class="flex flex-col sm:flex-row gap-3">
-                @if($moneyFusionActive && $moneyFusionConfigured)
-                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all flex-1"
-                       :class="gateway === 'moneyfusion' ? 'border-blue-500 bg-blue-50' : 'border-neutral-200 hover:border-neutral-300'">
-                    <input type="radio" x-model="gateway" value="moneyfusion" class="sr-only">
-                    <span class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#2563eb;">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                    </span>
-                    <div>
-                        <p class="font-medium text-neutral-900 text-sm">MoneyFusion</p>
-                        <p class="text-xs text-neutral-500">Orange, MTN, Wave, Moov</p>
-                    </div>
-                </label>
-                @endif
-                @if($jekoConfigured)
-                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all flex-1"
-                       :class="gateway === 'jeko' ? 'border-purple-500 bg-purple-50' : 'border-neutral-200 hover:border-neutral-300'">
-                    <input type="radio" x-model="gateway" value="jeko" class="sr-only">
-                    <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">
-                        <svg viewBox="0 0 40 40" class="w-6 h-6" fill="none"><rect x="20" y="8" width="7" height="18" rx="3.5" fill="white"/><path d="M20 22 Q20 30 13 30 Q10 30 9 27" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="13" cy="14" r="5" fill="#38BDF8"/></svg>
-                    </span>
-                    <div>
-                        <p class="font-medium text-neutral-900 text-sm">Jeko</p>
-                        <p class="text-xs text-neutral-500">Wave, Orange, MTN, Moov</p>
-                    </div>
-                </label>
-                @endif
-            </div>
-            {{-- Sélecteur opérateur Jeko --}}
-            <div x-show="gateway === 'jeko'" x-transition class="mt-3">
-                <p class="text-xs text-neutral-500 mb-2">Choisissez votre opérateur :</p>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    @foreach(['wave' => ['label' => 'Wave', 'logo' => 'wave.png'], 'orange' => ['label' => 'Orange Money', 'logo' => 'orange-money.png'], 'mtn' => ['label' => 'MTN MoMo', 'logo' => 'mtn-momo.png'], 'moov' => ['label' => 'Moov Money', 'logo' => 'moov-money.png']] as $op => $info)
-                    <label class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all"
-                           :class="jeko_operator === '{{ $op }}' ? 'border-purple-500 bg-purple-50' : 'border-neutral-200 hover:border-neutral-300'">
-                        <input type="radio" x-model="jeko_operator" value="{{ $op }}" class="sr-only">
-                        <img src="{{ asset('images/payments/' . $info['logo']) }}" alt="{{ $info['label'] }}" class="h-8 w-auto object-contain">
-                        <span class="text-xs font-medium" :class="jeko_operator === '{{ $op }}' ? 'text-purple-700' : 'text-neutral-600'">{{ $info['label'] }}</span>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
+            @include('partials.subscription.operator-picker')
         </div>
-        @endif
 
         {{-- Grille des plans --}}
         <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
@@ -368,21 +364,22 @@
                         </li>
                         @endforeach
                     </ul>
+                    <div class="mb-4 -mt-2">@include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])</div>
 
                     {{-- Bouton --}}
                     @if($plan->is_on_quote)
                         <a href="{{ route('contact') }}?type=gold"
-                           class="block w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all {{ $accent['btn'] }} shadow-sm hover:shadow">
+                           class="flex items-center justify-center w-full min-h-[48px] py-2.5 rounded-xl text-sm font-semibold text-center transition-all {{ $accent['btn'] }} shadow-sm hover:shadow">
                             Demander un devis
                         </a>
                     @else
-                    <form method="POST"
+                    <form method="POST" data-payment-form @submit="loading = '{{ $plan->slug }}'"
                           action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
                         @csrf
                         <input type="hidden" name="plan" value="{{ $plan->slug }}">
-                        <input type="hidden" name="billing_period" x-bind:value="quotes['{{ $plan->slug }}'][period] ? period : 'monthly'">
-                        <input type="hidden" name="payment_gateway" x-bind:value="gateway">
-                        <input type="hidden" name="jeko_operator" x-bind:value="jeko_operator">
+                        <input type="hidden" name="billing_period" value="monthly" x-bind:value="quotes['{{ $plan->slug }}'][period] ? period : 'monthly'">
+                        <input type="hidden" name="payment_gateway" value="jeko">
+                        <input type="hidden" name="jeko_operator" value="wave" x-bind:value="jeko_operator">
                         @if($isDisabled)
                             <button type="button" disabled
                                     class="w-full py-2.5 rounded-xl text-sm font-semibold bg-neutral-100 text-neutral-400 cursor-not-allowed">
@@ -390,8 +387,10 @@
                             </button>
                         @else
                             <button type="submit"
-                                    x-bind:disabled="!quotes['{{ $plan->slug }}'][period]"
-                                    class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ $accent['btn'] }} shadow-sm hover:shadow">
+                                    x-bind:disabled="!quotes['{{ $plan->slug }}'][period] || loading !== null"
+                                    class="w-full min-h-[48px] py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ $accent['btn'] }} shadow-sm hover:shadow">
+                                <span x-show="loading === '{{ $plan->slug }}'" x-cloak>Redirection vers Jeko…</span>
+                                <span x-show="loading !== '{{ $plan->slug }}'">
                                 @if($isTrial || $isExpired)
                                     Activer ce plan
                                 @elseif($isCurrentPlan && $canRenew)
@@ -399,6 +398,7 @@
                                 @else
                                     Choisir ce plan
                                 @endif
+                                </span>
                             </button>
                         @endif
                     </form>
@@ -406,6 +406,8 @@
                 </div>
             @endforeach
         </div>
+
+        <p id="payment-stalled-hint" hidden class="mb-6 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">La page de paiement ne s'est pas ouverte. Vérifiez votre connexion internet puis appuyez à nouveau sur le bouton du plan.</p>
 
         {{-- Add-ons --}}
         @if($availableAddons)
@@ -536,4 +538,7 @@
     @endif
 
 
+    <p class="mt-6 text-xs text-neutral-500 text-center">🎁 {{ config('plans.welcome_pack') }}.</p>
+
+    @include('partials.payment-error-logger')
 </x-layouts.admin-restaurant>

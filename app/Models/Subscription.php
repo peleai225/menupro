@@ -77,6 +77,32 @@ class Subscription extends Model
     }
 
     /**
+     * Période réelle d'un abonnement au moment où il est payé : un renouvellement anticipé
+     * démarre à la fin de l'abonnement PAYANT encore en cours (les jours restants ne sont
+     * pas perdus) ; sinon maintenant. Un essai en cours n'est pas prolongé (paiement = fin
+     * de l'essai). Durée = celle de la période de facturation ($days pour une prolongation).
+     *
+     * @return array{starts_at: \Carbon\Carbon, ends_at: \Carbon\Carbon}
+     */
+    public function paidPeriodAttributes(?int $days = null): array
+    {
+        $currentEnd = static::withoutGlobalScopes()
+            ->where('restaurant_id', $this->restaurant_id)
+            ->when($this->exists, fn ($q) => $q->where('id', '!=', $this->id))
+            ->where('status', SubscriptionStatus::ACTIVE)
+            ->where('is_trial', false)
+            ->where('ends_at', '>', now())
+            ->max('ends_at');
+
+        $start = $currentEnd ? \Carbon\Carbon::parse($currentEnd) : now();
+
+        return [
+            'starts_at' => $start,
+            'ends_at' => $start->copy()->addDays($days ?? static::durationDaysFor($this->billing_period)),
+        ];
+    }
+
+    /**
      * Active cet abonnement comme UNIQUE abonnement en cours du restaurant.
      *
      * Point d'entrée commun à toutes les activations (webhooks de paiement, callback de

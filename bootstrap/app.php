@@ -117,6 +117,45 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 500);
         });
 
+        // 419 (jeton CSRF périmé) sur un formulaire classique : très fréquent sur mobile (PWA
+        // laissée ouverte des heures, session expirée) et jusqu'ici muet côté serveur. On le
+        // journalise et on renvoie sur la page avec un message clair au lieu de l'écran 419.
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) {
+            if ($e->getStatusCode() !== 419
+                || !$e->getPrevious() instanceof \Illuminate\Session\TokenMismatchException
+                || $request->expectsJson()
+                || $request->header('X-Livewire')
+                || $request->is('api/*')) {
+                return null;
+            }
+
+            $route = $request->route()?->getName();
+            $context = [
+                'route' => $route,
+                'path' => $request->path(),
+                'user_id' => $request->user()?->id,
+                'user_agent' => \Illuminate\Support\Str::limit((string) $request->userAgent(), 180),
+            ];
+            \Log::warning('Formulaire refusé : session expirée (419)', $context);
+            if (str_starts_with((string) $route, 'restaurant.subscription')) {
+                \Log::channel('payments')->warning('Paiement d\'abonnement : session expirée (419) avant l\'envoi vers Jeko', $context);
+            }
+
+            $message = 'Votre session avait expiré : la page a été actualisée. Appuyez à nouveau sur le bouton pour continuer.';
+
+            if (!$request->user()) {
+                return redirect()->guest(route('login'))
+                    ->with('error', 'Votre session a expiré. Reconnectez-vous puis recommencez.');
+            }
+
+            $target = str_starts_with((string) $route, 'restaurant.subscription')
+                ? route('restaurant.subscription')
+                : (url()->previous() ?: url('/'));
+
+            return redirect()->to($target)->withInput($request->except(['_token', 'password', 'password_confirmation']))
+                ->with('error', $message);
+        });
+
         // UTF-8 — erreurs Livewire existantes
         $exceptions->render(function (\InvalidArgumentException $e, $request) {
             if (str_contains($e->getMessage(), 'UTF-8') || str_contains($e->getMessage(), 'Malformed')) {

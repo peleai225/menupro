@@ -11,8 +11,15 @@
     @endif
 
     @if(session('error'))
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700" role="alert">
             {{ session('error') }}
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="mb-6 p-4 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 flex items-start gap-3" role="alert" data-upgrade-required>
+            <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <p class="text-sm font-medium">{{ session('warning') }}</p>
         </div>
     @endif
 
@@ -54,13 +61,13 @@
     </div>
 
     <!-- Billing period selector -->
-    <div x-data="{ period: 'monthly', quotes: @js($quotes) }" class="space-y-6">
+    <div x-data="{ period: 'monthly', jeko_operator: @js(old('jeko_operator', 'wave')), quotes: @js($quotes), loading: null }" class="space-y-6">
         <div class="card p-4">
             <p class="text-sm font-medium text-neutral-700 mb-3">Période de facturation :</p>
             <div class="grid grid-cols-2 {{ $hasWeekly ? 'sm:grid-cols-5' : 'sm:grid-cols-4' }} gap-2">
                 @foreach($periods as $key => $p)
                     @continue($key === 'weekly' && !$hasWeekly)
-                    <button type="button" @click="period = '{{ $key }}'" :class="period === '{{ $key }}' ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'" class="px-3 py-2 rounded-lg border text-sm font-medium transition-all text-center">
+                    <button type="button" @click="period = '{{ $key }}'" :class="period === '{{ $key }}' ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'" class="min-h-[44px] px-3 py-2 rounded-lg border text-sm font-medium transition-all text-center">
                         {{ $p['label'] }}
                         @if($key === 'weekly')
                             <span class="text-neutral-400 font-normal">(Stand)</span>
@@ -70,6 +77,10 @@
                     </button>
                 @endforeach
             </div>
+        </div>
+
+        <div class="card p-4">
+            @include('partials.subscription.operator-picker')
         </div>
 
         <!-- Plans list -->
@@ -86,7 +97,7 @@
                     };
                     $lockedApplied = $quotes[$plan->slug]['monthly']['locked_price_applied'] ?? false;
                 @endphp
-                <div class="card p-5 {{ $planColors['border'] }} transition-all relative flex flex-col {{ $isCurrentPlan ? 'opacity-90' : '' }}">
+                <div class="card p-5 {{ $planColors['border'] }} transition-all relative flex flex-col {{ $isCurrentPlan ? 'opacity-90' : '' }} {{ ($highlightPlan ?? null) === $plan->slug ? 'ring-4 ring-amber-300' : '' }}" data-plan-card="{{ $plan->slug }}">
                     @if($plan->is_featured)
                         <div class="absolute -top-2.5 left-4">
                             <span class="bg-primary-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">POPULAIRE</span>
@@ -141,21 +152,24 @@
                             </li>
                         @endif
                     </ul>
+                    <div class="mb-4 -mt-2">@include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])</div>
 
                     <!-- Action -->
                     @if($plan->is_on_quote)
-                        <a href="{{ route('contact') }}?type=gold" class="w-full py-2.5 rounded-lg text-sm font-bold text-center bg-neutral-900 hover:bg-neutral-800 text-white transition-all">
+                        <a href="{{ route('contact') }}?type=gold" class="flex items-center justify-center w-full min-h-[48px] py-2.5 rounded-lg text-sm font-bold text-center bg-neutral-900 hover:bg-neutral-800 text-white transition-all">
                             Demander un devis
                         </a>
                     @else
-                        <form method="POST"
+                        <form method="POST" data-payment-form @submit="loading = '{{ $plan->slug }}'"
                               action="{{ $isTrial ? route('restaurant.subscription.convertTrial') : route('restaurant.subscription.change') }}">
                             @csrf
                             <input type="hidden" name="plan" value="{{ $plan->slug }}">
-                            <input type="hidden" name="billing_period" x-bind:value="period">
+                            <input type="hidden" name="billing_period" value="monthly" x-bind:value="quotes['{{ $plan->slug }}'][period] ? period : 'monthly'">
+                            <input type="hidden" name="payment_gateway" value="jeko">
+                            <input type="hidden" name="jeko_operator" value="wave" x-bind:value="jeko_operator">
                             <button type="submit"
-                                    x-bind:disabled="{{ $isCurrentPlan ? 'true' : 'false' }} || !quotes['{{ $plan->slug }}'][period]"
-                                    class="w-full py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ $plan->is_featured ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-neutral-900 hover:bg-neutral-800 text-white' }}">
+                                    x-bind:disabled="{{ $isCurrentPlan ? 'true' : 'false' }} || !quotes['{{ $plan->slug }}'][period] || loading !== null"
+                                    class="w-full min-h-[48px] py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ $plan->is_featured ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-neutral-900 hover:bg-neutral-800 text-white' }}">
                                 @if($isCurrentPlan)
                                     Plan actuel
                                 @elseif($isTrial)
@@ -170,4 +184,6 @@
             @endforeach
         </div>
     </div>
+    <p class="mt-6 text-xs text-neutral-500 text-center">🎁 {{ config('plans.welcome_pack') }}.</p>
+    @include('partials.payment-error-logger')
 </x-layouts.admin-restaurant>

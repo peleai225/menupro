@@ -29,6 +29,18 @@ class WebhookTest extends TestCase
 
     private function postWebhook(array $payload, ?string $signature = null): \Illuminate\Testing\TestResponse
     {
+        // Format réel Jeko : {event: transaction.completed, data: {status, transactionType, transactionDetails.reference}}
+        if (isset($payload['payment_id'])) {
+            $payload = [
+                'event' => 'transaction.completed',
+                'data' => [
+                    'id' => 'tx-' . $payload['payment_id'],
+                    'status' => $payload['event'] === 'payment.success' ? 'success' : 'failed',
+                    'transactionType' => 'payment',
+                    'transactionDetails' => ['reference' => $payload['payment_id']],
+                ],
+            ];
+        }
         $rawPayload = json_encode($payload);
 
         if ($signature === null) {
@@ -41,7 +53,7 @@ class WebhookTest extends TestCase
             [],
             [],
             [],
-            ['HTTP_X_JEKO_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
+            ['HTTP_JEKO_SIGNATURE' => $signature, 'CONTENT_TYPE' => 'application/json'],
             $rawPayload
         );
     }
@@ -50,7 +62,7 @@ class WebhookTest extends TestCase
     {
         $mock = $this->mock(JekoGateway::class);
 
-        $mock->shouldReceive('forPlatform')
+        $mock->shouldReceive('forMarketplacePlatform')
             ->andReturnSelf();
 
         $mock->shouldReceive('verifyWebhookSignature')
@@ -61,7 +73,7 @@ class WebhookTest extends TestCase
     {
         $mock = $this->mock(JekoGateway::class);
 
-        $mock->shouldReceive('forPlatform')
+        $mock->shouldReceive('forMarketplacePlatform')
             ->andReturnSelf();
 
         $mock->shouldReceive('verifyWebhookSignature')
