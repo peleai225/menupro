@@ -1,4 +1,8 @@
 <div>
+    @php
+        // Boutique : article non alimentaire → référence (SKU), pas de temps de préparation / allergènes / nutrition
+        $isShop = auth()->user()->restaurant?->isShop() ?? false;
+    @endphp
     <!-- Header -->
     <div class="flex items-center justify-between mb-6 sm:mb-8">
         <div class="flex items-center gap-3 sm:gap-4">
@@ -9,10 +13,10 @@
             </a>
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold text-neutral-900">
-                    {{ $dish ? 'Modifier le plat' : 'Nouveau plat' }}
+                    {{ $dish ? 'Modifier ' . business_label('the_dish') : business_label('new_dish') }}
                 </h1>
                 <p class="text-neutral-500 mt-1 hidden sm:block">
-                    {{ $dish ? 'Modifiez les informations de votre plat' : 'Ajoutez un nouveau plat à votre menu' }}
+                    {{ $dish ? 'Modifiez les informations de ' . business_label('this_dish') : 'Ajoutez ' . business_label('a_new_dish') . ' à votre ' . business_label('menu_lc') }}
                 </p>
             </div>
         </div>
@@ -27,7 +31,7 @@
 
     @if(!$this->canAddDish && !$dish)
         <div class="mb-6 p-4 bg-accent-50 border border-accent-200 rounded-xl text-accent-700">
-            <strong>Limite atteinte !</strong> Passez à un forfait supérieur pour ajouter plus de plats.
+            <strong>Limite atteinte !</strong> Passez à un forfait supérieur pour ajouter plus de {{ business_label('dishes_lc') }}.
             <a href="{{ route('restaurant.subscription.plans') }}" class="underline ml-2">Voir les forfaits</a>
         </div>
     @endif
@@ -43,7 +47,7 @@
                     <div class="space-y-6">
                         <!-- Name -->
                         <div>
-                            <label class="block text-sm font-medium text-neutral-700 mb-2">Nom du plat *</label>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">{{ business_label('dish_name') }} *</label>
                             <input type="text" 
                                    wire:model="name"
                                    class="input @error('name') border-red-500 @enderror"
@@ -53,13 +57,28 @@
                             @enderror
                         </div>
 
+                        @if($isShop)
+                        <!-- Référence (SKU / code-barres) -->
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">Référence <span class="text-neutral-400 font-normal">(facultatif)</span></label>
+                            <input type="text"
+                                   wire:model="sku"
+                                   maxlength="64"
+                                   class="input @error('sku') border-red-500 @enderror"
+                                   placeholder="Ex: CHG-USBC-01 ou code-barres">
+                            @error('sku')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        @endif
+
                         <!-- Description -->
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">Description</label>
                             <textarea wire:model="description"
                                       rows="4"
                                       class="input @error('description') border-red-500 @enderror"
-                                      placeholder="Décrivez votre plat..."></textarea>
+                                      placeholder="Décrivez {{ business_label('this_dish') }}..."></textarea>
                             @error('description')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -98,6 +117,7 @@
                             </div>
                         </div>
 
+                        @unless($isShop)
                         <!-- Prep Time -->
                         <div>
                             <label class="block text-sm font-medium text-neutral-700 mb-2">Temps de préparation (minutes)</label>
@@ -117,6 +137,7 @@
                                    placeholder="Ex: Gluten, Arachides, Lait...">
                             <p class="mt-1 text-xs text-neutral-500">Séparez les allergènes par des virgules</p>
                         </div>
+                        @endunless
                     </div>
                 </div>
 
@@ -138,7 +159,7 @@
                     @if(empty($optionGroups))
                         <div class="text-center py-8 text-neutral-500">
                             <p>Aucun groupe d'options</p>
-                            <p class="text-sm mt-1">Ex: Taille (Petit, Moyen, Grand), Suppléments (Fromage, Bacon...)</p>
+                            <p class="text-sm mt-1">{{ $isShop ? 'Ex: Taille (S, M, L), Couleur (Noir, Blanc...), Contenance (33 cl, 1 L)' : 'Ex: Taille (Petit, Moyen, Grand), Suppléments (Fromage, Bacon...)' }}</p>
                         </div>
                     @else
                         <div class="space-y-6">
@@ -220,7 +241,7 @@
                 </div>
 
                 <!-- Ingredients (if stock management) -->
-                @if(auth()->user()->restaurant?->hasFeature('ingredient_stock'))
+                @if(!$isShop && auth()->user()->restaurant?->hasFeature('ingredient_stock'))
                     <div class="card p-4 sm:p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>
@@ -387,6 +408,7 @@
                 @endif
 
                 <!-- Nutrition -->
+                @unless($isShop)
                 <div class="card p-4 sm:p-6">
                     <h2 class="text-lg font-bold text-neutral-900 mb-6">Informations nutritionnelles</h2>
                     <p class="text-sm text-neutral-500 mb-4">Optionnel - Aidez vos clients à faire des choix éclairés</p>
@@ -410,6 +432,7 @@
                         </div>
                     </div>
                 </div>
+                @endunless
             </div>
 
             <!-- Sidebar -->
@@ -422,9 +445,9 @@
                         <!-- Preview -->
                         <div class="aspect-square bg-neutral-100 rounded-xl overflow-hidden">
                             @if($image)
-                                <img src="{{ $image->temporaryUrl() }}" alt="Aperçu du plat" class="w-full h-full object-cover">
+                                <img src="{{ $image->temporaryUrl() }}" alt="Aperçu" class="w-full h-full object-cover">
                             @elseif($existingImage)
-                                <img src="{{ Storage::url($existingImage) }}" alt="Image du plat" class="w-full h-full object-cover">
+                                <img src="{{ Storage::url($existingImage) }}" alt="Image" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <svg class="w-16 h-16 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,7 +481,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="font-medium text-neutral-900">Disponible</p>
-                                <p class="text-sm text-neutral-500">Afficher sur le menu</p>
+                                <p class="text-sm text-neutral-500">Afficher sur le {{ business_label('menu_lc') }}</p>
                             </div>
                             <button type="button"
                                     wire:click="$toggle('is_available')"
@@ -492,7 +515,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             <span wire:loading.remove wire:target="save">
-                                {{ $dish ? 'Enregistrer les modifications' : 'Créer le plat' }}
+                                {{ $dish ? 'Enregistrer les modifications' : 'Créer ' . business_label('the_dish') }}
                             </span>
                             <span wire:loading wire:target="save" class="flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">

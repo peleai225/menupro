@@ -13,7 +13,7 @@
                 </span>
                 <span class="truncate">Catégories</span>
             </h1>
-            <p class="text-xs sm:text-sm text-neutral-500 mt-0.5 hidden sm:block">Organisez vos plats par catégorie</p>
+            <p class="text-xs sm:text-sm text-neutral-500 mt-0.5 hidden sm:block">Organisez vos {{ business_label('dishes_lc') }} par catégorie</p>
         </div>
         <button wire:click="openModal"
                 class="btn btn-primary px-4 sm:px-6 py-3 flex items-center gap-2 group min-h-[52px] touch-manipulation shrink-0">
@@ -89,7 +89,7 @@
                 </div>
                 <h3 class="empty-state-title text-xl">Aucune catégorie</h3>
                 <p class="empty-state-description text-base">
-                    Créez votre première catégorie pour organiser vos plats et offrir une meilleure expérience à vos clients.
+                    Créez votre première catégorie pour organiser vos {{ business_label('dishes_lc') }} et offrir une meilleure expérience à vos clients.
                 </p>
                 <button wire:click="openModal" class="btn btn-primary btn-glow px-8 py-3 text-base">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span><strong>Astuce :</strong> Glissez-déposez les cartes pour réorganiser l'ordre d'affichage des catégories sur votre menu.</span>
+            <span><strong>Astuce :</strong> Glissez-déposez les cartes pour réorganiser l'ordre d'affichage des catégories sur votre {{ business_label('menu_lc') }}.</span>
         </div>
 
         <div x-show="loaded" x-transition:enter="transition ease-out duration-300 delay-200"
@@ -180,7 +180,7 @@
                                     </svg>
                                 </div>
                                 <span class="font-semibold text-neutral-900">{{ $category->dishes_count }}</span>
-                                <span class="text-neutral-500">{{ Str::plural('plat', $category->dishes_count) }}</span>
+                                <span class="text-neutral-500">{{ Str::plural(business_label('dish_lc'), $category->dishes_count) }}</span>
                             </div>
                         </div>
 
@@ -287,7 +287,7 @@
                                        id="name"
                                        wire:model.blur="name"
                                        class="input h-12 @error('name') border-red-500 focus:ring-red-500 @enderror"
-                                       placeholder="Ex: Entrées, Plats principaux...">
+                                       placeholder="{{ business_label('categories_hint') }}">
                                 @error('name')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
@@ -325,7 +325,7 @@
                             <!-- Active Toggle -->
                             <div class="flex items-center justify-between p-3 bg-neutral-50 rounded-xl">
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-neutral-900">Visible sur le menu</p>
+                                    <p class="text-sm font-medium text-neutral-900">Visible sur le {{ business_label('menu_lc') }}</p>
                                     <p class="text-xs text-neutral-500">Les clients peuvent la voir</p>
                                 </div>
                                 <button type="button"

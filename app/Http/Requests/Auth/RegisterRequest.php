@@ -31,7 +31,7 @@ class RegisterRequest extends FormRequest
             
             // Restaurant info
             'restaurant_name' => ['required', 'string', 'max:255'],
-            'restaurant_type' => ['required', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe,food_truck,brunch,evenementiel,stand,kiosque,cantine,patisserie,epicerie,jus,snack'],
+            'restaurant_type' => ['required', 'string', \Illuminate\Validation\Rule::in(\App\Support\BusinessType::values())], // config/business_types.php (dont 'boutique')
             'company_name' => ['nullable', 'string', 'max:255'],
             'rccm' => ['nullable', 'string', 'max:50', 'unique:restaurants,rccm'],
             'restaurant_description' => ['nullable', 'string', 'max:1000'],

@@ -33,9 +33,9 @@
     // Tutoriel guidé : uniquement les onglets réellement affichés (et ouverts)
     $tourLabels = [
         'tour-dashboard' => ['Dashboard', 'Vue d\'ensemble : commandes du jour, chiffre d\'affaires et activité.'],
-        'tour-categories' => ['Catégories', 'Organisez votre menu (Entrées, Plats, Boissons…).'],
-        'tour-plats' => ['Plats', 'Ajoutez des plats, modifiez les prix, photos et disponibilité.'],
-        'tour-qrcode' => ['QR Code', 'Téléchargez votre QR Code pour que les clients accèdent à votre menu.'],
+        'tour-categories' => [business_label('categories', $restaurant), 'Organisez votre ' . business_label('menu_lc', $restaurant) . ' (' . str_replace(['Ex: ', '...'], '', business_label('categories_hint', $restaurant)) . '…).'],
+        'tour-plats' => [business_label('dishes', $restaurant), 'Ajoutez des ' . business_label('dishes_lc', $restaurant) . ', modifiez les prix, photos et disponibilité.'],
+        'tour-qrcode' => ['QR Code', 'Téléchargez votre QR Code pour que les clients accèdent à votre ' . business_label('menu_lc', $restaurant) . '.'],
         'tour-commandes' => ['Commandes', 'Gérez les commandes : statuts, impression des tickets.'],
         'tour-clients' => ['Clients', 'Liste des clients ayant commandé chez vous.'],
         'tour-codes-promo' => ['Codes Promo', 'Créez des réductions et promotions.'],
@@ -53,7 +53,7 @@
     }
 @endphp
 
-<x-layouts.app :title="($title ?? 'Dashboard') . ' - ' . ($restaurant?->name ?? 'Restaurant')" manifestUrl="manifest-admin.json">
+<x-layouts.app :title="($title ?? 'Dashboard') . ' - ' . ($restaurant?->name ?? business_label('business', $restaurant))" manifestUrl="manifest-admin.json">
     <div x-data="sidebar()" class="min-h-screen bg-neutral-50">
         <!-- Sidebar -->
         <aside :class="expanded ? 'w-64' : 'w-20'" 
@@ -443,7 +443,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     </span>
-                    <span class="text-[10px] font-semibold mt-1 leading-tight {{ $menuActive ? 'text-primary-600' : 'text-neutral-500' }}">Menu</span>
+                    <span class="text-[10px] font-semibold mt-1 leading-tight {{ $menuActive ? 'text-primary-600' : 'text-neutral-500' }}">{{ business_label('menu', $restaurant) }}</span>
                 </a>
 
                 {{-- QR Code --}}

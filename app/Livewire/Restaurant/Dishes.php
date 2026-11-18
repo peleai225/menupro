@@ -63,7 +63,7 @@ class Dishes extends Component
     {
         return Dish::where('restaurant_id', auth()->user()->restaurant_id)
             ->with('category')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->when($this->search, fn($q) => $q->where(fn($s) => $s->where('name', 'like', "%{$this->search}%")->orWhere('sku', $this->search)))
             ->when($this->category, fn($q) => $q->where('category_id', $this->category))
             ->when($this->status === 'available', fn($q) => $q->where('is_active', true))
             ->when($this->status === 'unavailable', fn($q) => $q->where('is_active', false))
@@ -111,7 +111,7 @@ class Dishes extends Component
         
         return view('livewire.restaurant.dishes')
             ->layout('components.layouts.admin-restaurant', [
-                'title' => 'Plats',
+                'title' => business_label('dishes', $restaurant),
                 'restaurant' => $restaurant,
                 'subscription' => $subscription,
             ]);

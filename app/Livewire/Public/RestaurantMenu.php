@@ -92,7 +92,8 @@ class RestaurantMenu extends Component
             ->active()
             ->ordered()
             ->withCount(['dishes' => fn($q) => $q->active()])
-            ->having('dishes_count', '>', 0)
+            // whereHas plutôt que HAVING sans GROUP BY (refusé par SQLite, utilisé par les tests)
+            ->whereHas('dishes', fn($q) => $q->active())
             ->get();
     }
 

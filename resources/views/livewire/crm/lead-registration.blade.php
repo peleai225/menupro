@@ -110,6 +110,7 @@
                                     <option value="traiteur">Traiteur</option>
                                     <option value="cafe">Café</option>
                                     <option value="food_truck">Food Truck</option>
+                                    <option value="boutique">Boutique</option>
                                 </select>
                             </div>
                             <div>

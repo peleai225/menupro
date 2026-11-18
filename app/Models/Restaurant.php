@@ -7,6 +7,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\CommandoAgent;
 use App\Models\JekoSubMerchant;
 use App\Models\Traits\HasSlug;
+use App\Support\BusinessType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -335,6 +336,58 @@ class Restaurant extends Model
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    /**
+     * Filtre par famille de commerce : 'boutique'/'shop' → boutiques, 'restaurant'/'food' →
+     * tous les types alimentaires ; toute autre valeur connue → type exact.
+     */
+    public function scopeOfBusinessType($query, string $type)
+    {
+        $kind = match ($type) {
+            'boutique', BusinessType::KIND_SHOP => BusinessType::KIND_SHOP,
+            'restaurant', BusinessType::KIND_FOOD => BusinessType::KIND_FOOD,
+            default => null,
+        };
+
+        if ($kind === null) {
+            return $query->where('type', $type);
+        }
+
+        $values = BusinessType::valuesOfKind($kind);
+
+        // Anciennes lignes sans type (NULL) = restaurant
+        return $kind === BusinessType::KIND_FOOD
+            ? $query->where(fn ($q) => $q->whereIn('type', $values)->orWhereNull('type'))
+            : $query->whereIn('type', $values);
+    }
+
+    // =========================================================================
+    // TYPE DE COMMERCE
+    // =========================================================================
+
+    /** Boutique (articles non alimentaires, épicerie de détail…) plutôt que restauration. */
+    public function isShop(): bool
+    {
+        return BusinessType::isShop($this->type);
+    }
+
+    /** Famille du commerce : 'food' | 'shop'. */
+    public function businessKind(): string
+    {
+        return BusinessType::kindOf($this->type);
+    }
+
+    /** Libellé du type (« Maquis », « Boutique »…). */
+    public function getBusinessLabelAttribute(): string
+    {
+        return BusinessType::labelOf($this->type);
+    }
+
+    /** Vocabulaire adapté au commerce : $restaurant->term('dishes') → « Plats » / « Articles ». */
+    public function term(string $key): string
+    {
+        return BusinessType::label($key, $this);
     }
 
     // =========================================================================

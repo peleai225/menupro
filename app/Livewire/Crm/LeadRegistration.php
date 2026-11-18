@@ -68,7 +68,7 @@ class LeadRegistration extends Component
     {
         $this->validate([
             'restaurant_name' => 'required|string|max:255',
-            'restaurant_type' => 'required|in:restaurant,bar,brasserie,maquis,traiteur,cafe,food_truck,brunch,evenementiel',
+            'restaurant_type' => ['required', \Illuminate\Validation\Rule::in(\App\Support\BusinessType::values())],
             'phone'           => 'required|string|max:20',
             'email'           => 'required|email|unique:users,email|unique:restaurants,email',
             'owner_name'      => 'required|string|max:255',

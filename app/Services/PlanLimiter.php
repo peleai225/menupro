@@ -339,7 +339,7 @@ class PlanLimiter
         if (!$this->canCreate($resource)) {
             $limit = $this->getLimit($resource);
             $resourceName = match ($resource) {
-                'dishes' => 'plats',
+                'dishes' => business_label('dishes_lc', $this->restaurant),
                 'categories' => 'catégories',
                 'employees' => 'employés',
                 'orders_this_month' => 'commandes ce mois-ci',

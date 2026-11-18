@@ -52,17 +52,20 @@ class RestaurantNavigation
      * feature : clé de config('plans.features') (null = tous les plans) ;
      * admin   : réservé au gérant ; limited : reste ouvert quand l'abonnement a expiré.
      */
-    protected static function definitions(): array
+    protected static function definitions(?Restaurant $restaurant = null): array
     {
+        // Vocabulaire selon le type de commerce (Plats/Articles, Menu/Catalogue…) — config/business_types.php
+        $t = fn (string $key) => BusinessType::label($key, $restaurant ?? 'restaurant');
+
         return [
             ['section' => null, 'key' => 'dashboard', 'label' => 'Dashboard', 'route' => 'restaurant.dashboard', 'active' => 'restaurant.dashboard', 'icon' => 'dashboard', 'id' => 'tour-dashboard'],
 
-            ['section' => 'Menu', 'key' => 'categories', 'label' => 'Catégories', 'route' => 'restaurant.categories.index', 'active' => 'restaurant.categories*', 'icon' => 'categories', 'admin' => true, 'id' => 'tour-categories'],
-            ['section' => 'Menu', 'key' => 'dishes', 'label' => 'Plats', 'route' => 'restaurant.plats.index', 'active' => 'restaurant.plats*', 'icon' => 'dishes', 'admin' => true, 'id' => 'tour-plats'],
-            ['section' => 'Menu', 'key' => 'qrcode', 'label' => 'QR Code', 'route' => 'restaurant.qrcode', 'active' => 'restaurant.qrcode*', 'icon' => 'qrcode', 'id' => 'tour-qrcode'],
-            ['section' => 'Menu', 'key' => 'rooms', 'label' => 'Chambres hôtel', 'route' => 'restaurant.rooms.index', 'active' => 'restaurant.rooms*', 'icon' => 'building', 'feature' => 'hotel_rooms'],
-            ['section' => 'Menu', 'key' => 'spaces', 'label' => 'Espaces', 'route' => 'restaurant.spaces', 'active' => 'restaurant.spaces', 'icon' => 'categories', 'feature' => 'multi_spaces', 'admin' => true],
-            ['section' => 'Menu', 'key' => 'waiters', 'label' => 'Serveurs', 'route' => 'restaurant.waiters', 'active' => 'restaurant.waiters', 'icon' => 'users', 'feature' => 'multi_spaces', 'admin' => true, 'hide_locked' => true],
+            ['section' => $t('menu'), 'key' => 'categories', 'label' => 'Catégories', 'route' => 'restaurant.categories.index', 'active' => 'restaurant.categories*', 'icon' => 'categories', 'admin' => true, 'id' => 'tour-categories'],
+            ['section' => $t('menu'), 'key' => 'dishes', 'label' => $t('dishes'), 'route' => 'restaurant.plats.index', 'active' => 'restaurant.plats*', 'icon' => 'dishes', 'admin' => true, 'id' => 'tour-plats'],
+            ['section' => $t('menu'), 'key' => 'qrcode', 'label' => 'QR Code', 'route' => 'restaurant.qrcode', 'active' => 'restaurant.qrcode*', 'icon' => 'qrcode', 'id' => 'tour-qrcode'],
+            ['section' => $t('menu'), 'key' => 'rooms', 'label' => 'Chambres hôtel', 'route' => 'restaurant.rooms.index', 'active' => 'restaurant.rooms*', 'icon' => 'building', 'feature' => 'hotel_rooms'],
+            ['section' => $t('menu'), 'key' => 'spaces', 'label' => 'Espaces', 'route' => 'restaurant.spaces', 'active' => 'restaurant.spaces', 'icon' => 'categories', 'feature' => 'multi_spaces', 'admin' => true],
+            ['section' => $t('menu'), 'key' => 'waiters', 'label' => 'Serveurs', 'route' => 'restaurant.waiters', 'active' => 'restaurant.waiters', 'icon' => 'users', 'feature' => 'multi_spaces', 'admin' => true, 'hide_locked' => true],
 
             ['section' => 'Commerce', 'key' => 'orders', 'label' => 'Commandes', 'route' => 'restaurant.orders', 'active' => 'restaurant.orders*', 'icon' => 'orders', 'id' => 'tour-commandes'],
             ['section' => 'Commerce', 'key' => 'pos', 'label' => 'Caisse (POS)', 'route' => 'restaurant.pos', 'active' => 'restaurant.pos*', 'icon' => 'pos', 'feature' => 'pos', 'id' => 'tour-pos'],
@@ -74,7 +77,7 @@ class RestaurantNavigation
             ['section' => 'Pilotage', 'key' => 'reports', 'label' => 'Rapports', 'route' => 'restaurant.reports', 'active' => 'restaurant.reports*', 'icon' => 'report', 'feature' => 'analytics', 'admin' => true],
             ['section' => 'Pilotage', 'key' => 'promo-codes', 'label' => 'Codes Promo', 'route' => 'restaurant.promo-codes', 'active' => 'restaurant.promo-codes*', 'icon' => 'promo', 'feature' => 'analytics', 'admin' => true, 'id' => 'tour-codes-promo'],
 
-            ['section' => 'Stock', 'key' => 'stock-daily', 'label' => 'Stock journalier', 'route' => 'restaurant.stock.daily', 'active' => 'restaurant.stock.daily', 'icon' => 'clipboard', 'feature' => 'stock', 'id' => 'tour-stock'],
+            ['section' => 'Stock', 'key' => 'stock-daily', 'label' => $t('stock_daily'), 'route' => 'restaurant.stock.daily', 'active' => 'restaurant.stock.daily', 'icon' => 'clipboard', 'feature' => 'stock', 'id' => 'tour-stock'],
             ['section' => 'Stock', 'key' => 'ingredients', 'label' => 'Ingrédients', 'route' => 'restaurant.stock.ingredients.index', 'active' => 'restaurant.stock.ingredients*', 'icon' => 'box', 'feature' => 'ingredient_stock'],
             ['section' => 'Stock', 'key' => 'suppliers', 'label' => 'Fournisseurs', 'route' => 'restaurant.stock.fournisseurs.index', 'active' => 'restaurant.stock.fournisseurs*', 'icon' => 'building', 'feature' => 'ingredient_stock', 'admin' => true, 'hide_locked' => true],
             ['section' => 'Stock', 'key' => 'stock-alerts', 'label' => 'Alertes stock', 'route' => 'restaurant.stock.alerts', 'active' => 'restaurant.stock.alerts*', 'icon' => 'alert', 'feature' => 'ingredient_stock', 'badge' => 'low_stock', 'hide_locked' => true],
@@ -104,7 +107,14 @@ class RestaurantNavigation
         $limited = $limiter->isAccessLimited();
         $items = [];
 
-        foreach (static::definitions() as $def) {
+        // Onglets sans objet pour ce type de commerce (ex. chambres, réservations pour une boutique)
+        $hidden = BusinessType::hiddenNavKeys($restaurant);
+
+        foreach (static::definitions($restaurant) as $def) {
+            if (in_array($def['key'], $hidden, true)) {
+                continue;
+            }
+
             $def += ['admin' => false, 'feature' => null, 'limited' => false, 'hide_locked' => false, 'id' => null, 'badge' => null];
 
             if ($def['admin'] && !$isAdmin) {

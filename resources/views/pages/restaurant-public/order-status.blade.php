@@ -487,7 +487,7 @@ window.Echo = new Echo({
                     </a>
                 @endif
                 <a href="{{ route('r.menu', $restaurant->slug) }}" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
-                    ← Retour au menu
+                    ← {{ business_label('back_to_menu', $restaurant) }}
                 </a>
             </div>
         </div>

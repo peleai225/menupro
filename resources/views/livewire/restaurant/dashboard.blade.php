@@ -82,7 +82,7 @@
         <div class="relative z-10">
             <p class="text-primary-200 text-xs font-medium mb-1 hidden sm:block">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
             <h1 class="text-lg sm:text-xl font-bold truncate">Bonjour, {{ auth()->user()->name }} 👋</h1>
-            <p class="text-primary-100 mt-1 text-sm hidden sm:block">Voici un résumé de l'activité de votre restaurant aujourd'hui.</p>
+            <p class="text-primary-100 mt-1 text-sm hidden sm:block">Voici un résumé de l'activité de {{ business_label('your_business') }} aujourd'hui.</p>
         </div>
     </div>
 
@@ -166,7 +166,7 @@
                     @php $dishUsage = $this->stats['max_dishes'] > 0 ? round(($this->stats['dishes_count'] / $this->stats['max_dishes']) * 100) : 0; @endphp
                     <span class="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded {{ $dishUsage > 80 ? 'bg-red-50 text-red-700' : ($dishUsage > 50 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-neutral-700') }}">{{ $dishUsage }}%</span>
                 </div>
-                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">Plats</p>
+                <p class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">{{ business_label('dishes') }}</p>
                 <p class="text-2xl sm:text-3xl font-bold text-neutral-900 leading-none">{{ $this->stats['dishes_count'] }}<span class="text-sm text-neutral-400 font-medium ml-0.5">/{{ $this->stats['max_dishes'] }}</span></p>
                 <div class="h-1 bg-neutral-100 rounded-full mt-2 overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all" style="width: {{ min($dishUsage, 100) }}%"></div>
@@ -225,7 +225,7 @@
 
     <!-- Top Dishes Chart -->
     <div class="bg-white rounded-2xl p-6 border border-neutral-200/60 shadow-sm mb-8">
-        <h3 class="text-lg font-bold text-neutral-900 mb-4">Top 5 des plats vendus (30 derniers jours)</h3>
+        <h3 class="text-lg font-bold text-neutral-900 mb-4">Top 5 des {{ business_label('dishes_lc') }} vendus (30 derniers jours)</h3>
         <div class="h-80">
             <canvas id="topDishesChart"></canvas>
         </div>
@@ -300,7 +300,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                             </svg>
                         </div>
-                        <span class="font-medium text-neutral-900">Ajouter un plat</span>
+                        <span class="font-medium text-neutral-900">{{ business_label('add_dish') }}</span>
                     </a>
                     <a href="{{ route('restaurant.categories.index') }}" class="flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 rounded-xl transition-colors">
                         <div class="w-10 h-10 bg-neutral-200 rounded-xl flex items-center justify-center">
@@ -324,7 +324,7 @@
 
             <!-- Best Sellers -->
             <div class="card p-6">
-                <h2 class="text-lg font-bold text-neutral-900 mb-4">Plats populaires</h2>
+                <h2 class="text-lg font-bold text-neutral-900 mb-4">{{ business_label('popular_dishes') }}</h2>
                 <div class="space-y-4">
                     @forelse($this->popularDishes as $dish)
                         <div class="flex items-center justify-between">

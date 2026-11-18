@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ ($restaurant->name ?? 'Restaurant') . ' - Menu' }}</title>
-    <meta name="description" content="{{ $restaurant->description ?? 'Découvrez notre menu et commandez en ligne' }}">
+    <title>{{ ($restaurant->name ?? 'Restaurant') . ' - ' . business_label('menu', $restaurant ?? 'restaurant') }}</title>
+    <meta name="description" content="{{ $restaurant->description ?? 'Découvrez notre ' . business_label('menu_lc', $restaurant ?? 'restaurant') . ' et commandez en ligne' }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- PWA & Mobile Web App --}}
@@ -19,7 +19,7 @@
 
     {{-- Open Graph pour partage WhatsApp / réseaux sociaux --}}
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="{{ $restaurant->name ?? 'MenuPro' }} - Menu & Commande en ligne">
+    <meta property="og:title" content="{{ $restaurant->name ?? 'MenuPro' }} - {{ business_label('menu', $restaurant ?? 'restaurant') }} & Commande en ligne">
     <meta property="og:description" content="{{ $restaurant->description ?? 'Commandez en ligne — paiement Mobile Money' }}">
     <meta property="og:type" content="restaurant.restaurant">
     <meta property="og:locale" content="fr_CI">
@@ -31,7 +31,7 @@
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $restaurant->name ?? 'MenuPro' }} - Menu en ligne">
+    <meta name="twitter:title" content="{{ $restaurant->name ?? 'MenuPro' }} - {{ business_label('menu', $restaurant ?? 'restaurant') }} en ligne">
     <meta name="twitter:description" content="{{ $restaurant->description ?? 'Commandez en ligne — paiement Mobile Money' }}">
 
     {{-- JSON-LD Structured Data --}}

@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\Crm\LeadPipelineService;
 use App\Services\MoneyFusionGateway;
 use App\Services\MediaUploader;
+use App\Support\BusinessType;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,17 @@ class RegisterController extends Controller
             ? collect([$plan])
             : Plan::where('is_active', true)->where('slug', '!=', 'stand')->orderBy('sort_order')->get();
 
-        return view('pages.auth.register', compact('plan', 'availablePlans', 'isStand'));
+        // Types de commerce (config/business_types.php) groupés pour le formulaire :
+        // ['restaurant' => [valeur => libellé], 'stand' => [...], 'shop' => ['boutique' => 'Boutique']].
+        // ?type=boutique (ou tout type connu) → présélection ; une boutique choisit librement son plan.
+        $businessTypes = [
+            'restaurant' => BusinessType::optionsForGroup('restaurant'),
+            'stand' => BusinessType::optionsForGroup('stand'),
+            'shop' => BusinessType::optionsForGroup('shop'),
+        ];
+        $preselectedType = in_array($accountType, BusinessType::values(), true) ? $accountType : null;
+
+        return view('pages.auth.register', compact('plan', 'availablePlans', 'isStand', 'businessTypes', 'preselectedType'));
     }
 
     public function store(RegisterRequest $request): RedirectResponse

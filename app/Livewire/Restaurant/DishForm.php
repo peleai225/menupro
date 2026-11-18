@@ -25,6 +25,10 @@ class DishForm extends Component
     #[Rule('nullable|string|max:1000')]
     public ?string $description = null;
 
+    /** Référence article (SKU / code-barres) — affichée pour les boutiques. */
+    #[Rule('nullable|string|max:64')]
+    public ?string $sku = null;
+
     #[Rule('required|numeric|min:0')]
     public float $price = 0;
 
@@ -69,6 +73,7 @@ class DishForm extends Component
             $this->dish = $dish;
             $this->name = $dish->name;
             $this->description = $dish->description;
+            $this->sku = $dish->sku;
             $this->price = $dish->price;
             $this->category_id = $dish->category_id;
             $this->existingImage = $dish->image_path;
@@ -228,13 +233,14 @@ class DishForm extends Component
         $this->validate();
 
         if (!$this->canAddDish && !$this->dish) {
-            session()->flash('error', 'Vous avez atteint la limite de plats pour votre forfait.');
+            session()->flash('error', 'Vous avez atteint la limite de ' . business_label('dishes_lc') . ' pour votre forfait.');
             return;
         }
 
         $data = [
             'name' => $this->name,
             'description' => $this->description,
+            'sku' => filled($this->sku) ? trim($this->sku) : null,
             'price' => $this->price,
             'category_id' => $this->category_id,
             'is_available' => $this->is_available,
@@ -372,7 +378,7 @@ class DishForm extends Component
             }
         }
 
-        session()->flash('success', $this->dish ? 'Plat mis à jour avec succès.' : 'Plat créé avec succès.');
+        session()->flash('success', business_label('dish') . ($this->dish ? ' mis à jour avec succès.' : ' créé avec succès.'));
         
         $this->redirect(route('restaurant.plats.index'));
     }
@@ -384,7 +390,7 @@ class DishForm extends Component
         
         return view('livewire.restaurant.dish-form')
             ->layout('components.layouts.admin-restaurant', [
-                'title' => $this->dish ? 'Modifier le plat' : 'Nouveau plat',
+                'title' => $this->dish ? 'Modifier ' . business_label('the_dish', $restaurant) : business_label('new_dish', $restaurant),
                 'restaurant' => $restaurant,
                 'subscription' => $subscription,
             ]);

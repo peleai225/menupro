@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Services\DeliveryPricingService;
 use App\Services\GeocodingService;
+use App\Support\BusinessType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,13 +19,16 @@ class RestaurantController extends Controller
 
     /**
      * Liste des restaurants sur la plateforme.
-     * Filtres : city, category, open_now, lat+lng (tri par distance)
+     * Filtres : city, category, type, open_now, lat+lng (tri par distance)
+     * type : 'boutique' → boutiques ; 'restaurant' → tous les commerces alimentaires
+     *        (restaurant, maquis, stand…) ; toute autre valeur de config/business_types.php → type exact.
      */
     public function index(Request $request): JsonResponse
     {
         $request->validate([
             'city'     => 'nullable|string|max:100',
             'category' => 'nullable|string|max:50',
+            'type'     => 'nullable|string|max:30',
             'lat'      => 'nullable|numeric|between:-90,90',
             'lng'      => 'nullable|numeric|between:-180,180',
             'open_now' => 'nullable|boolean',
@@ -40,6 +44,10 @@ class RestaurantController extends Controller
 
         if ($request->filled('category')) {
             $query->where('platform_category', $request->category);
+        }
+
+        if ($request->filled('type')) {
+            $query->ofBusinessType($request->type);
         }
 
         $restaurants = $query->get()->map(function (Restaurant $r) use ($request) {
@@ -121,6 +129,7 @@ class RestaurantController extends Controller
     {
         $request->validate([
             'city'  => 'nullable|string|max:100',
+            'type'  => 'nullable|string|max:30',
             'limit' => 'nullable|integer|min:1|max:30',
         ]);
 
@@ -132,6 +141,9 @@ class RestaurantController extends Controller
                 $q->where('is_on_platform', true)->where('status', 'active');
                 if ($request->filled('city')) {
                     $q->where('city', $request->city);
+                }
+                if ($request->filled('type')) {
+                    $q->ofBusinessType($request->type);
                 }
             })
             ->inStock()
@@ -157,6 +169,9 @@ class RestaurantController extends Controller
                         ? asset('storage/' . $dish->restaurant->logo_path)
                         : null,
                     'is_open'  => $dish->restaurant->isOpenNow(),
+                    'business_type'  => BusinessType::normalize($dish->restaurant->type),
+                    'business_kind'  => $dish->restaurant->businessKind(),
+                    'business_label' => $dish->restaurant->business_label,
                 ],
             ]);
 
@@ -205,6 +220,8 @@ class RestaurantController extends Controller
 
         return response()->json([
             'restaurant_id' => $restaurant->id,
+            'business_type' => BusinessType::normalize($restaurant->type),
+            'business_kind' => $restaurant->businessKind(),
             'currency'      => $restaurant->currency ?? 'XOF',
             'categories'    => $categories,
         ]);
@@ -219,6 +236,7 @@ class RestaurantController extends Controller
             'lat'       => 'required|numeric|between:-90,90',
             'lng'       => 'required|numeric|between:-180,180',
             'radius_km' => 'nullable|integer|min:1|max:20',
+            'type'      => 'nullable|string|max:30',
         ]);
 
         $lat    = (float) $request->lat;
@@ -229,6 +247,7 @@ class RestaurantController extends Controller
             ->where('status', 'active')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
+            ->when($request->filled('type'), fn ($q) => $q->ofBusinessType($request->type))
             ->get()
             ->map(function (Restaurant $r) use ($lat, $lng) {
                 $distKm = $this->geo->distanceKm($lat, $lng, (float) $r->latitude, (float) $r->longitude);
@@ -286,6 +305,11 @@ class RestaurantController extends Controller
             'id'               => $r->id,
             'name'             => $r->name,
             'slug'             => $r->slug,
+            // Type de commerce : valeur de config/business_types.php ('restaurant', 'maquis', 'stand', 'boutique'…)
+            'business_type'    => BusinessType::normalize($r->type),
+            // Famille : 'food' (restauration) | 'shop' (boutique) — onglet « Boutiques » de l'app
+            'business_kind'    => $r->businessKind(),
+            'business_label'   => $r->business_label,
             'category'         => $r->platform_category,
             'city'             => $r->city,
             'address'          => $r->address,
@@ -329,6 +353,7 @@ class RestaurantController extends Controller
             'id'            => $dish->id,
             'name'          => $dish->name,
             'description'   => $dish->description,
+            'sku'           => $dish->sku,
             'price'         => $dish->price,
             'compare_price' => $dish->compare_price,
             'image_url'     => $dish->image_path ? asset('storage/' . $dish->image_path) : null,

@@ -138,7 +138,7 @@ class DailyStock extends Component
                 ]);
         }
 
-        session()->flash('stock_success', 'Stock journalier mis à jour avec succès.');
+        session()->flash('stock_success', business_label('stock_daily') . ' mis à jour avec succès.');
     }
 
     public function render()
@@ -148,7 +148,7 @@ class DailyStock extends Component
 
         return view('livewire.restaurant.daily-stock')
             ->layout('components.layouts.admin-restaurant', [
-                'title' => 'Stock Journalier',
+                'title' => business_label('stock_daily'),
                 'restaurant' => $restaurant,
                 'subscription' => $subscription,
             ]);

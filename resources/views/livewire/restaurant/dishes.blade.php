@@ -11,10 +11,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </span>
-                <span class="truncate">Plats</span>
+                <span class="truncate">{{ business_label('dishes') }}</span>
             </h1>
             <p class="text-xs sm:text-sm text-neutral-500 mt-0.5">
-                <span class="font-semibold text-neutral-900">{{ $this->dishes->total() }}</span> au menu
+                <span class="font-semibold text-neutral-900">{{ $this->dishes->total() }}</span> au {{ business_label('menu_lc') }}
             </p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
@@ -41,7 +41,7 @@
                 <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                <span class="hidden sm:inline">Nouveau plat</span>
+                <span class="hidden sm:inline">{{ business_label('new_dish') }}</span>
                 <span class="sm:hidden">Nouveau</span>
             </a>
             @endif
@@ -113,7 +113,7 @@
                     <input type="text" 
                            wire:model.live.debounce.300ms="search"
                            class="input pl-12 h-12"
-                           placeholder="Rechercher un plat...">
+                           placeholder="{{ business_label('search_dish') }}">
                     <div wire:loading wire:target="search" class="absolute right-4 top-1/2 -translate-y-1/2">
                         <svg class="animate-spin h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -137,8 +137,8 @@
             <div class="w-full lg:w-44">
                 <select wire:model.live="status" class="input h-12">
                     <option value="">Tous les statuts</option>
-                    <option value="available">Visible sur le menu</option>
-                    <option value="unavailable">Masqués du menu</option>
+                    <option value="available">Visible sur le {{ business_label('menu_lc') }}</option>
+                    <option value="unavailable">Masqués du {{ business_label('menu_lc') }}</option>
                     <option value="featured">En vedette</option>
                 </select>
             </div>
@@ -159,16 +159,16 @@
                 </div>
                 <h3 class="empty-state-title text-xl">
                     @if($search || $category || $status)
-                        Aucun plat trouvé
+                        {{ business_label('no_dish') }} trouvé
                     @else
-                        Aucun plat dans votre menu
+                        {{ business_label('no_dish') }} dans votre {{ business_label('menu_lc') }}
                     @endif
                 </h3>
                 <p class="empty-state-description text-base">
                     @if($search || $category || $status)
-                        Aucun plat ne correspond à vos critères de recherche.
+                        {{ business_label('no_dish') }} ne correspond à vos critères de recherche.
                     @else
-                        Créez votre premier plat pour le proposer à vos clients.
+                        Créez votre {{ business_label('first_dish') }} pour le proposer à vos clients.
                     @endif
                 </p>
                 @if($search || $category || $status)
@@ -184,7 +184,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        Créer mon premier plat
+                        Créer mon {{ business_label('first_dish') }}
                     </a>
                 @endif
             </div>
@@ -259,7 +259,7 @@
                                 <button wire:click="toggleAvailability({{ $dish->id }})"
                                         wire:loading.attr="disabled"
                                         class="p-3.5 sm:p-4 bg-white rounded-xl hover:scale-105 transition-all shadow-lg touch-manipulation min-h-[52px] min-w-[52px] flex items-center justify-center {{ $dish->is_active ? 'hover:bg-orange-50' : 'hover:bg-secondary-50' }}"
-                                        title="{{ $dish->is_active ? 'Masquer du menu' : 'Afficher sur le menu' }}">
+                                        title="{{ $dish->is_active ? 'Masquer du ' . business_label('menu_lc') : 'Afficher sur le ' . business_label('menu_lc') }}">
                                     @if($dish->is_active)
                                         <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -386,7 +386,7 @@
                             </a>
                             <button wire:click="toggleAvailability({{ $dish->id }})"
                                     class="p-2 rounded-lg hover:bg-neutral-200 transition-colors"
-                                    title="{{ $dish->is_active ? 'Masquer du menu' : 'Afficher sur le menu' }}">
+                                    title="{{ $dish->is_active ? 'Masquer du ' . business_label('menu_lc') : 'Afficher sur le ' . business_label('menu_lc') }}">
                                 @if($dish->is_active)
                                     <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

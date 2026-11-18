@@ -21,6 +21,7 @@ class Dish extends Model
         'space_id',
         'category_id',
         'name',
+        'sku',
         'slug',
         'description',
         'price',

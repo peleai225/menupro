@@ -1,6 +1,8 @@
 @php
     $primaryColor = $restaurant->primary_color ?? '#f97316';
     $secondaryColor = $restaurant->secondary_color ?? '#1c1917';
+    // Vocabulaire du commerce (Menu/Catalogue, plats/articles…) — config/business_types.php
+    $isShop = $restaurant->isShop();
 @endphp
 
 <div class="min-h-screen bg-neutral-50" wire:poll.60s="refreshRestaurant">
@@ -50,10 +52,10 @@
                 <!-- Content -->
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-neutral-900 mb-2">
-                        Restaurant fermé
+                        {{ business_label('business_closed', $restaurant) }}
                     </h3>
                     <p class="text-neutral-600 mb-4">
-                        Le restaurant est actuellement fermé. Le site sera accessible dès la réouverture.
+                        {{ ucfirst(business_label('the_business', $restaurant)) }} est actuellement {{ $isShop ? 'fermée' : 'fermé' }}. Le site sera accessible dès la réouverture.
                     </p>
                     @if($this->restaurant->getNextOpeningTime())
                         <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
@@ -312,7 +314,7 @@
                                         </svg>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-xs font-semibold mb-1" style="color: {{ $primaryColor }};">Réponse du restaurant</p>
+                                        <p class="text-xs font-semibold mb-1" style="color: {{ $primaryColor }};">Réponse {{ $isShop ? 'de la boutique' : 'du restaurant' }}</p>
                                         <p class="text-sm text-neutral-600">{{ $review->response }}</p>
                                     </div>
                                 </div>
@@ -337,7 +339,7 @@
                            wire:model.live.debounce.300ms="searchQuery"
                            class="w-full pl-9 pr-4 py-2.5 bg-neutral-100 border-0 rounded-xl text-sm text-neutral-700 placeholder-neutral-400 focus:ring-2 focus:bg-white transition-all outline-none"
                            style="--tw-ring-color: {{ $primaryColor }};"
-                           placeholder="Rechercher un plat...">
+                           placeholder="{{ business_label('search_dish', $restaurant) }}">
                     @if($searchQuery)
                         <button wire:click="$set('searchQuery', '')" aria-label="Effacer la recherche" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-neutral-300 text-white">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -393,7 +395,7 @@
                        wire:model.live.debounce.300ms="searchQuery"
                        class="w-full pl-12 pr-5 py-3.5 bg-white border border-neutral-200 rounded-2xl text-neutral-700 placeholder-neutral-400 shadow-sm focus:ring-2 focus:border-transparent focus:shadow-md transition-all duration-200 outline-none"
                        style="--tw-ring-color: {{ $primaryColor }};"
-                       placeholder="Rechercher un plat...">
+                       placeholder="{{ business_label('search_dish', $restaurant) }}">
                 @if($searchQuery)
                     <button wire:click="$set('searchQuery', '')"
                             aria-label="Effacer la recherche"
@@ -414,11 +416,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-semibold text-neutral-900 mb-2">Aucun plat trouvé</h3>
-                <p class="text-neutral-500">@if($searchQuery) Essayez une autre recherche @else Le menu sera bientôt disponible @endif</p>
+                <h3 class="text-xl font-semibold text-neutral-900 mb-2">{{ business_label('no_dish', $restaurant) }} trouvé</h3>
+                <p class="text-neutral-500">@if($searchQuery) Essayez une autre recherche @else Le {{ business_label('menu_lc', $restaurant) }} sera bientôt disponible @endif</p>
                 @if($searchQuery)
                     <button wire:click="$set('searchQuery', '')" class="mt-4 font-medium hover:opacity-80 transition-opacity" style="color: {{ $primaryColor }};">
-                        Voir tous les plats
+                        Voir tous les {{ business_label('dishes_lc', $restaurant) }}
                     </button>
                 @endif
             </div>
@@ -471,7 +473,7 @@
                             </div>
                             {{-- Bouton "+" en overlay (mobile) — ajout rapide --}}
                             @if($dish->is_available)
-                                <button wire:click.stop="quickAddToCart({{ $dish->id }})"
+                                <button wire:click.stop="quickAddToCart({{ $dish->id }})" aria-label="{{ business_label('add_to_cart', $restaurant) }}" title="{{ business_label('add_to_cart', $restaurant) }}"
                                         class="absolute bottom-1.5 right-1.5 w-7 h-7 sm:hidden text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform z-20"
                                         style="background-color: {{ $primaryColor }};">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -491,7 +493,7 @@
                             <div class="hidden sm:flex items-center justify-between mt-3">
                                 <span class="text-base font-bold" style="color: {{ $primaryColor }};">{{ number_format($dish->price, 0, ',', ' ') }} F</span>
                                 @if($dish->is_available)
-                                    <button wire:click.stop="quickAddToCart({{ $dish->id }})"
+                                    <button wire:click.stop="quickAddToCart({{ $dish->id }})" aria-label="{{ business_label('add_to_cart', $restaurant) }}" title="{{ business_label('add_to_cart', $restaurant) }}"
                                             class="w-9 h-9 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                                             style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 12px {{ $primaryColor }}50;">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -546,7 +548,7 @@
                             </svg>
                         </div>
                         <p class="text-neutral-500 font-medium">Panier vide</p>
-                        <p class="text-sm text-neutral-400 mt-1">Ajoutez des plats pour commander</p>
+                        <p class="text-sm text-neutral-400 mt-1">Ajoutez des {{ business_label('dishes_lc', $restaurant) }} pour commander</p>
                     </div>
                 @else
                     <div class="space-y-3">
@@ -608,7 +610,7 @@
                         @if($this->isRestaurantOpen)
                             Commander
                         @else
-                            Restaurant fermé
+                            {{ business_label('business_closed', $restaurant) }}
                         @endif
                     </button>
                     <button wire:click="clearCart" class="w-full mt-2 text-sm text-neutral-400 hover:text-red-500 transition">
@@ -676,7 +678,7 @@
                                 </svg>
                             </div>
                             <p class="text-neutral-500 font-medium">Panier vide</p>
-                            <p class="text-sm text-neutral-400 mt-1">Ajoutez des plats pour commander</p>
+                            <p class="text-sm text-neutral-400 mt-1">Ajoutez des {{ business_label('dishes_lc', $restaurant) }} pour commander</p>
                         </div>
                     @else
                         <div class="space-y-3">
@@ -738,7 +740,7 @@
                             @if($this->isRestaurantOpen)
                                 Commander
                             @else
-                                Restaurant fermé
+                                {{ business_label('business_closed', $restaurant) }}
                             @endif
                         </button>
                         <button wire:click="clearCart" class="w-full mt-2 text-sm text-neutral-400 hover:text-red-500 transition font-medium">
@@ -869,13 +871,13 @@
 
                         @if(!$this->isRestaurantOpen)
                             <button disabled class="flex-1 py-3.5 bg-neutral-200 text-neutral-500 font-bold rounded-xl cursor-not-allowed text-sm">
-                                Restaurant fermé
+                                {{ business_label('business_closed', $restaurant) }}
                             </button>
                         @elseif($this->selectedDish->is_available)
                             <button @click="$wire.addToCart({{ $this->selectedDish->id }}, quantity, selectedOptions, instructions)"
                                     class="flex-1 py-3.5 text-white font-bold rounded-xl transition-all active:scale-[0.97] text-sm shadow-lg"
                                     style="background-color: {{ $primaryColor }}; box-shadow: 0 4px 16px {{ $primaryColor }}50;">
-                                Ajouter au panier
+                                {{ business_label('add_to_cart', $restaurant) }}
                             </button>
                         @else
                             <button disabled class="flex-1 py-3.5 bg-neutral-200 text-neutral-500 font-bold rounded-xl cursor-not-allowed text-sm">
@@ -910,7 +912,7 @@
                 }).catch(() => { this.loading = false; });
             }
         }"
-         class="fixed bottom-6 right-6 z-40 {{ $restaurant->reservations_enabled ? 'bottom-28' : 'bottom-6' }}"
+         class="fixed bottom-6 right-6 z-40 {{ $restaurant->reservations_enabled && !$isShop ? 'bottom-28' : 'bottom-6' }}"
          :class="{{ $this->cartItemsCount > 0 ? 'true' : 'false' }} ? 'bottom-24 lg:bottom-6' : 'bottom-6'">
 
         <!-- Bouton flottant -->
@@ -1014,7 +1016,7 @@
     @endif
 
     <!-- Floating Reservation Button (gauche sur mobile pour éviter chevauchement avec panier, droite sur desktop) -->
-    @if($restaurant->reservations_enabled)
+    @if($restaurant->reservations_enabled && !$isShop)
         <div x-data="{ showReservationModal: false }" class="fixed bottom-6 left-6 z-40 lg:left-auto lg:right-6">
             <!-- Floating Button -->
             <button @click="showReservationModal = true" 

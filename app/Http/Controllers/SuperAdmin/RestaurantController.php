@@ -137,7 +137,7 @@ class RestaurantController extends Controller
     {
         $request->validate([
             'current_plan_id'   => ['nullable', 'exists:plans,id'],
-            'type'              => ['nullable', 'string', 'in:restaurant,bar,brasserie,maquis,traiteur,cafe'],
+            'type'              => ['nullable', 'string', \Illuminate\Validation\Rule::in(\App\Support\BusinessType::values())],
             'platform_category' => ['nullable', 'string', 'max:50'],
         ]);
 
