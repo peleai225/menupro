@@ -1,555 +1,392 @@
-<x-layouts.auth title="Inscription">
-    <div x-data="registerForm()" class="animate-fade-in">
-        {{-- ═══ Stepper ═══ --}}
-        <div class="mb-8 sm:mb-10">
-            {{-- Mobile --}}
-            <div class="sm:hidden flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-primary-600 uppercase tracking-widest">Étape <span x-text="step"></span>/3</span>
-                    <div class="text-sm font-bold text-neutral-900 mt-0.5" x-text="step === 1 ? 'Votre compte' : (step === 2 ? 'Votre restaurant' : 'Votre abonnement')"></div>
-                </div>
-                <div class="flex gap-1">
-                    <template x-for="i in 3" :key="i">
-                        <div class="h-1.5 rounded-full transition-all duration-500"
-                             :class="i <= step ? 'w-7 bg-gradient-to-r from-primary-400 to-primary-600' : 'w-4 bg-neutral-200'"></div>
-                    </template>
-                </div>
-            </div>
+@use('App\Support\VitrineGrid', 'G')
+@php
+    // Types de commerce : fournis par RegisterController ($businessTypes, groupes restaurant|stand|shop,
+    // lus dans config/business_types.php) ; repli équivalent si la variable est absente.
+    $businessTypes = $businessTypes ?? null;
+    $businessTypes = is_array($businessTypes) && $businessTypes ? $businessTypes : [
+        'restaurant' => ['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'],
+        'stand'      => ['stand' => 'Stand de rue', 'kiosque' => 'Kiosque', 'cantine' => 'Cantine / Cafétéria', 'patisserie' => 'Pâtisserie / Boulangerie', 'epicerie' => 'Épicerie', 'jus' => 'Jus & Boissons', 'snack' => 'Snack rapide'],
+        'shop'       => ['boutique' => 'Boutique / Superette'],
+    ];
+    // Groupe de types affiché pour chaque carte d'offre
+    $offerGroups = ['restaurant' => 'restaurant', 'stand' => 'stand', 'boutique' => 'shop'];
 
-            {{-- Desktop --}}
-            <div class="hidden sm:flex items-center gap-3">
-                @foreach([['n' => 1, 'label' => 'Compte'], ['n' => 2, 'label' => 'Restaurant'], ['n' => 3, 'label' => 'Abonnement']] as $s)
-                    @if($s['n'] > 1)
-                        <div class="flex-1 h-[3px] rounded-full bg-neutral-200 overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-700 ease-out"
-                                 :style="step > {{ $s['n'] - 1 }} ? 'width: 100%' : 'width: 0%'"></div>
-                        </div>
-                    @endif
-                    <button type="button" @click="step > {{ $s['n'] }} && goToStep({{ $s['n'] }})"
-                            :disabled="step < {{ $s['n'] }}"
-                            class="flex items-center gap-2.5 focus:outline-none transition-all"
-                            :class="step < {{ $s['n'] }} ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300"
-                             :class="step > {{ $s['n'] }}
-                                ? 'bg-primary-500 text-white shadow-md shadow-primary-500/30'
-                                : (step === {{ $s['n'] }}
-                                    ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/40 scale-110'
-                                    : 'bg-neutral-100 text-neutral-400 border border-neutral-200')">
-                            <template x-if="step > {{ $s['n'] }}">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </template>
-                            <template x-if="step <= {{ $s['n'] }}"><span>{{ $s['n'] }}</span></template>
-                        </div>
-                        <span class="text-[13px] font-semibold transition-colors" :class="step >= {{ $s['n'] }} ? 'text-neutral-800' : 'text-neutral-400'">{{ $s['label'] }}</span>
-                    </button>
+    // Type présélectionné : $preselectedType (contrôleur, via ?type=…) ; repli sur ?type=boutique / ?type=stand.
+    $requestedType = request()->query('type');
+    $preselectedType = $preselectedType ?? (in_array($requestedType, ['boutique', 'stand'], true) ? $requestedType : null);
+    $preselectedGroup = collect($businessTypes)->search(fn ($types) => array_key_exists((string) $preselectedType, $types));
+    $offer = $isStand ? 'stand' : (array_search($preselectedGroup, $offerGroups, true) ?: 'restaurant');
+    $offerCards = collect(config('vitrine.offers', []))->map(function ($o, $key) {
+        $query = request()->except(['type']);
+        if (!empty($o['register_type'])) {
+            $query['type'] = $o['register_type'];
+        }
+        return [
+            'key'   => $key,
+            'label' => $o['label'],
+            'hint'  => ['restaurant' => 'Bar, brasserie, traiteur, café…', 'stand' => 'Garba, jus, kiosque, cantine…', 'boutique' => 'Superette, boutique de quartier…'][$key] ?? '',
+            'url'   => route('register', $query),
+            'from'  => G::offerFrom($key),
+            'stand' => $key === 'stand',
+        ];
+    })->values();
+    $defaultForOffer = ['restaurant' => '', 'stand' => 'stand', 'boutique' => 'boutique'][$offer];
+    $initialRestaurantType = old('restaurant_type', array_key_exists((string) $preselectedType, $businessTypes[$offerGroups[$offer]] ?? []) ? $preselectedType : $defaultForOffer);
+    $check = '<svg class="w-5 h-5 shrink-0 text-mp-ink" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+@endphp
+<x-layouts.auth title="Inscription">
+    <div x-data="registerForm()">
+        {{-- ═══ Type de commerce (avant tout le reste) ═══ --}}
+        <fieldset x-show="step === 1" class="mb-8">
+            <legend class="vt-h2 mb-2">Quel est votre commerce ?</legend>
+            <p class="vt-muted mb-5">Choisissez votre offre. Vous pourrez changer de plan plus tard.</p>
+            <div class="grid gap-3">
+                @foreach($offerCards as $card)
+                    <a href="{{ $card['url'] }}"
+                       :aria-current="offer === '{{ $card['key'] }}' ? 'true' : 'false'"
+                       aria-current="{{ $offer === $card['key'] ? 'true' : 'false' }}"
+                       :class="offer === '{{ $card['key'] }}' ? 'border-mp-black bg-mp-orange' : 'border-mp-line bg-white hover:border-mp-black'"
+                       class="flex items-center gap-4 rounded-2xl border-2 p-4 min-h-[4.5rem]">
+                        <span class="flex-none w-6 h-6 rounded-full border-2 border-mp-black flex items-center justify-center bg-white" aria-hidden="true">
+                            <span class="w-3 h-3 rounded-full bg-mp-black" x-show="offer === '{{ $card['key'] }}'" @if($offer !== $card['key']) style="display:none" @endif></span>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-lg">{{ $card['label'] }}</span>
+                                @if($card['key'] === 'boutique')<span class="vt-pill bg-mp-black text-white !text-sm !py-0.5">Nouveau</span>@endif
+                            </span>
+                            <span class="block text-[0.9375rem]" :class="offer === '{{ $card['key'] }}' ? 'text-mp-black' : 'text-mp-text'">{{ $card['hint'] }}</span>
+                        </span>
+                        <span class="text-right whitespace-nowrap">
+                            <span class="block text-sm">dès</span>
+                            <span class="font-bold vt-num">{{ $card['from']['amount'] }} F</span>
+                            <span class="block text-sm">{{ $card['from']['unit'] === 'F/semaine' ? '/semaine' : '/mois' }}</span>
+                        </span>
+                    </a>
                 @endforeach
             </div>
-        </div>
+        </fieldset>
 
-        {{-- Agent badge --}}
+        {{-- ═══ Étapes ═══ --}}
+        <nav aria-label="Étapes de l'inscription" class="mb-8">
+            <p class="font-semibold">Étape <span x-text="step">1</span> sur 3 : <span x-text="['Votre compte', offerTitle, 'Votre abonnement'][step - 1]">Votre compte</span></p>
+            <ol class="mt-3 grid grid-cols-3 gap-2">
+                @foreach([1 => 'Compte', 2 => 'Commerce', 3 => 'Abonnement'] as $n => $label)
+                    <li>
+                        <button type="button" @click="goToStep({{ $n }})" :disabled="step < {{ $n }}"
+                                class="w-full text-left disabled:cursor-default" :aria-current="step === {{ $n }} ? 'step' : 'false'">
+                            <span class="block h-2 rounded-full" :class="step >= {{ $n }} ? 'bg-mp-orange' : 'bg-mp-line'"></span>
+                            <span class="block mt-1.5 text-[0.9375rem]" :class="step >= {{ $n }} ? 'font-bold text-mp-black' : 'text-mp-text'">{{ $label }}</span>
+                        </button>
+                    </li>
+                @endforeach
+            </ol>
+        </nav>
+
+        {{-- Parrainage (agent Commando ou représentant) --}}
         @if(session('register_ref_agent'))
             @php $refAgent = \App\Models\CommandoAgent::where('uuid', session('register_ref_agent'))->first(); @endphp
             @if($refAgent)
-            <div class="mb-5 p-3 bg-gradient-to-r from-primary-50/80 to-orange-50/80 border border-primary-200/60 rounded-2xl flex items-center gap-3 animate-slide-up">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shrink-0 shadow-md shadow-primary-500/20">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <div class="mb-6 p-4 rounded-2xl border-2 border-mp-line bg-mp-paper">
+                    <p class="font-semibold">Parrainé par {{ $refAgent->full_name }}</p>
+                    <p class="vt-muted">Agent MenuPro, {{ $refAgent->city }}</p>
                 </div>
-                <div>
-                    <p class="text-[13px] font-semibold text-neutral-800">Parrainé par {{ $refAgent->full_name }}</p>
-                    <p class="text-[11px] text-neutral-500">Agent MenuPro — {{ $refAgent->city }}</p>
-                </div>
-            </div>
             @endif
         @endif
 
-        {{-- Errors --}}
         @if ($errors->any())
-            <div class="mb-6 p-4 bg-error-500/5 border border-error-500/20 rounded-2xl animate-slide-up">
-                <div class="flex items-start gap-3">
-                    <div class="w-6 h-6 rounded-full bg-error-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-3.5 h-3.5 text-error-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-[13px] font-bold text-error-600 mb-1">Corrigez les erreurs</h3>
-                        <ul class="space-y-0.5 text-[13px] text-error-600/90">
-                            @foreach ($errors->all() as $error)<li>• {{ $error }}</li>@endforeach
-                        </ul>
-                    </div>
-                </div>
+            <div class="mb-6 p-4 rounded-2xl border-2 border-[#B91C1C] bg-[#FEF2F2] text-[#7F1D1D]" role="alert" data-register-errors>
+                <h2 class="font-bold">Corrigez les points suivants</h2>
+                <ul class="mt-1 list-disc pl-5 space-y-0.5">
+                    @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                </ul>
             </div>
         @endif
 
         <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data" @submit.prevent="submitForm()" id="register-form">
             @csrf
 
-            {{-- ═══════════════════════════════════════
-                 STEP 1 — Account
-            ═══════════════════════════════════════ --}}
-            <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="mb-8">
-                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Créez votre compte</h1>
-                    <p class="text-neutral-500 mt-2 text-[15px]">Remplissez vos informations personnelles pour commencer.</p>
-                </div>
+            {{-- ═══════════ ÉTAPE 1 — Compte ═══════════ --}}
+            <section x-show="step === 1" aria-labelledby="step1-title">
+                <h1 id="step1-title" class="vt-h3 text-2xl mb-6">Créez votre compte</h1>
 
-                <div class="space-y-5">
-                    {{-- Name --}}
+                <div class="space-y-6">
                     <div>
-                        <label for="name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Nom complet <span class="text-error-500">*</span></label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            </div>
-                            <input type="text" id="name" name="name" x-model="formData.name" placeholder="Jean Kouassi" required autocomplete="name"
-                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
-                        </div>
+                        <label for="name" class="vt-label">Nom complet <span class="text-[#B91C1C]" aria-hidden="true">*</span></label>
+                        <input type="text" id="name" name="name" x-model="formData.name" placeholder="Jean Kouassi" required autocomplete="name" class="vt-input">
                     </div>
 
-                    {{-- Phone (identifiant principal) --}}
                     <div>
-                        <label for="phone" class="block text-[13px] font-semibold text-neutral-700 mb-2">
-                            Numéro WhatsApp <span class="text-error-500">*</span>
-                            <span class="text-neutral-400 font-normal ml-1">— utilisé pour vous connecter</span>
-                        </label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                            </div>
-                            <input type="tel" id="phone" name="phone" x-model="formData.phone" placeholder="07 00 00 00 00" required autocomplete="tel" inputmode="tel"
-                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
-                        </div>
+                        <label for="phone" class="vt-label">Numéro WhatsApp <span class="text-[#B91C1C]" aria-hidden="true">*</span></label>
+                        <input type="tel" id="phone" name="phone" x-model="formData.phone" placeholder="07 00 00 00 00" required autocomplete="tel" inputmode="tel" aria-describedby="phone-hint" class="vt-input">
+                        <p id="phone-hint" class="mt-2 vt-hint">Il vous servira à vous connecter.</p>
                     </div>
 
-                    {{-- Email (optionnel) --}}
                     <div>
-                        <label for="email" class="block text-[13px] font-semibold text-neutral-700 mb-2">
-                            Adresse email
-                            <span class="text-neutral-400 font-normal ml-1">— optionnel</span>
-                        </label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <input type="email" id="email" name="email" x-model="formData.email" placeholder="vous@exemple.com (facultatif)" autocomplete="email"
-                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
-                        </div>
+                        <label for="email" class="vt-label">Adresse e-mail <span class="vt-hint">(facultatif)</span></label>
+                        <input type="email" id="email" name="email" x-model="formData.email" placeholder="vous@exemple.com" autocomplete="email" autocapitalize="none" class="vt-input">
                     </div>
 
-                    {{-- Password --}}
                     <div>
-                        <label for="reg-password" class="block text-[13px] font-semibold text-neutral-700 mb-2">Mot de passe <span class="text-error-500">*</span></label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                            </div>
-                            <input :type="showPassword ? 'text' : 'password'" id="reg-password" name="password" x-model="formData.password"
-                                   placeholder="Minimum 8 caractères" required minlength="8" autocomplete="new-password"
-                                   class="w-full h-[52px] pl-12 pr-12 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                        <label for="reg-password" class="vt-label">Mot de passe <span class="text-[#B91C1C]" aria-hidden="true">*</span></label>
+                        <div class="relative">
+                            <input :type="showPassword ? 'text' : 'password'" type="password" id="reg-password" name="password" x-model="formData.password"
+                                   required minlength="8" autocomplete="new-password" aria-describedby="password-hint" class="vt-input !pr-14">
                             <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-600 rounded-xl hover:bg-neutral-100 transition-all">
-                                <svg x-show="!showPassword" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                <svg x-show="showPassword" x-cloak class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                                    class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-xl text-mp-text hover:text-mp-black"
+                                    :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'" aria-label="Afficher le mot de passe">
+                                <svg x-show="!showPassword" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPassword" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                             </button>
                         </div>
-                        <div class="mt-2.5 flex gap-1.5">
-                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
-                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-secondary-400' : 'bg-warning-500') : 'bg-neutral-200'"></div>
-                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 8 ? 'bg-secondary-500' : 'bg-neutral-200'"></div>
-                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="formData.password.length >= 12 ? 'bg-secondary-600' : 'bg-neutral-200'"></div>
+                        <div class="mt-3 flex gap-1.5" aria-hidden="true">
+                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-mp-line'"></div>
+                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-mp-line'"></div>
+                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-line'"></div>
+                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 12 ? 'bg-[#15803D]' : 'bg-mp-line'"></div>
                         </div>
+                        <p id="password-hint" class="mt-2 vt-hint">8 caractères minimum.</p>
                     </div>
                 </div>
 
-                <button type="button" @click="if(validateStep1()) { step = 2; window.scrollTo({top:0, behavior:'smooth'}) }"
-                        class="w-full h-[52px] mt-8 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200">
-                    <span class="flex items-center justify-center gap-2">
-                        Continuer
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </span>
-                </button>
+                <p x-show="stepError" x-cloak x-text="stepError" class="mt-6 font-semibold text-[#B91C1C]" role="alert"></p>
 
-                <p class="text-center text-[13px] text-neutral-400 mt-5">
-                    Déjà inscrit ? <a href="{{ route('login') }}" class="text-primary-600 font-semibold hover:underline underline-offset-2">Se connecter</a>
-                </p>
-            </div>
+                <button type="button" @click="next(1)" class="vt-btn vt-btn-primary vt-btn-block mt-8">Continuer</button>
 
-            {{-- ═══════════════════════════════════════
-                 STEP 2 — Restaurant
-            ═══════════════════════════════════════ --}}
-            <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="mb-8">
-                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight" x-text="isStand ? 'Votre stand' : 'Votre restaurant'">Votre établissement</h1>
-                    <p class="text-neutral-500 mt-2 text-[15px]">Décrivez votre établissement — vous pourrez tout modifier après.</p>
-                </div>
+                <p class="mt-6 text-center">Déjà inscrit ? <a href="{{ route('login') }}" class="vt-link">Se connecter</a></p>
+            </section>
 
-                {{-- Choix type de compte --}}
-                <div class="mb-5">
-                    <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Vous êtes ? <span class="text-error-500">*</span></label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" @click="isStand = false; formData.plan = 'essentiel'; formData.restaurant_type = formData.restaurant_type === 'stand' || formData.restaurant_type === 'kiosque' ? '' : formData.restaurant_type"
-                                :class="!isStand ? 'border-primary-400 bg-primary-50 shadow-sm' : 'border-neutral-200 hover:border-neutral-300'"
-                                class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all">
-                            <span class="text-2xl">🍽️</span>
-                            <span class="text-[13px] font-semibold text-neutral-800">Restaurant / Maquis</span>
-                            <span class="text-[11px] text-neutral-500 text-center">Bar, brasserie, traiteur…</span>
-                        </button>
-                        <button type="button" @click="isStand = true; formData.plan = 'stand'"
-                                :class="isStand ? 'border-primary-400 bg-primary-50 shadow-sm' : 'border-neutral-200 hover:border-neutral-300'"
-                                class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all">
-                            <span class="text-2xl">🛒</span>
-                            <span class="text-[13px] font-semibold text-neutral-800">Stand / Kiosque</span>
-                            <span class="text-[11px] text-neutral-500 text-center">Micro-commerce, vendeuse…</span>
-                        </button>
-                    </div>
-                </div>
+            {{-- ═══════════ ÉTAPE 2 — Commerce ═══════════ --}}
+            <section x-show="step === 2" x-cloak aria-labelledby="step2-title">
+                <h1 id="step2-title" class="vt-h3 text-2xl" x-text="offerTitle">Votre commerce</h1>
+                <p class="mt-1 mb-6 vt-muted">Vous pourrez tout modifier après.</p>
 
-                <div class="space-y-5">
-                    {{-- Restaurant Name --}}
+                <div class="space-y-6">
                     <div>
-                        <label for="restaurant_name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Nom de l'établissement <span class="text-error-500">*</span></label>
-                        <div class="relative group">
-                            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
-                                <svg class="w-[18px] h-[18px] text-neutral-400 group-focus-within:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            </div>
-                            <input type="text" id="restaurant_name" name="restaurant_name" x-model="formData.restaurant_name" placeholder="Le Délice" required
-                                   class="w-full h-[52px] pl-12 pr-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
-                        </div>
+                        <label for="restaurant_name" class="vt-label">Nom du commerce <span class="text-[#B91C1C]" aria-hidden="true">*</span></label>
+                        <input type="text" id="restaurant_name" name="restaurant_name" x-model="formData.restaurant_name" placeholder="Ex. Maquis du Carrefour" required class="vt-input">
                     </div>
 
-                    {{-- Type --}}
                     <div>
-                        <label for="restaurant_type" class="block text-[13px] font-semibold text-neutral-700 mb-2">Type <span class="text-error-500">*</span></label>
-                        <div class="relative group">
-                            <select id="restaurant_type" name="restaurant_type" x-model="formData.restaurant_type" required
-                                    class="w-full h-[52px] pl-4 pr-10 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10 appearance-none cursor-pointer">
-                                <option value="">Sélectionnez un type</option>
-                                {{-- Types restaurant --}}
-                                <template x-if="!isStand">
-                                    <optgroup label="Restaurant">
-                                        @foreach(['restaurant' => 'Restaurant', 'bar' => 'Bar', 'brasserie' => 'Brasserie', 'maquis' => 'Maquis', 'traiteur' => 'Traiteur', 'cafe' => 'Café', 'food_truck' => 'Food Truck', 'brunch' => 'Brunch', 'evenementiel' => 'Événementiel'] as $val => $label)
-                                            <option value="{{ $val }}">{{ $label }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                </template>
-                                {{-- Types stand --}}
-                                <template x-if="isStand">
-                                    <optgroup label="Stand / Kiosque">
-                                        @foreach(['stand' => 'Stand de rue', 'kiosque' => 'Kiosque', 'cantine' => 'Cantine / Cafétéria', 'patisserie' => 'Pâtisserie / Boulangerie', 'epicerie' => 'Épicerie', 'jus' => 'Jus & Boissons', 'snack' => 'Snack rapide'] as $val => $label)
-                                            <option value="{{ $val }}">{{ $label }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                </template>
+                        <label for="restaurant_type" class="vt-label">Type <span class="text-[#B91C1C]" aria-hidden="true">*</span></label>
+                        <div class="relative">
+                            <select id="restaurant_type" name="restaurant_type" x-model="formData.restaurant_type" required class="vt-input appearance-none !pr-12 cursor-pointer">
+                                <option value="">Choisissez</option>
+                                @foreach($offerGroups as $offerKey => $group)
+                                    <template x-if="offer === '{{ $offerKey }}'">
+                                        <optgroup label="{{ config("vitrine.offers.{$offerKey}.label") }}">
+                                            @foreach($businessTypes[$group] ?? [] as $val => $label)
+                                                <option value="{{ $val }}">{{ $label }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    </template>
+                                @endforeach
                             </select>
-                            <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </div>
 
-                    {{-- Company (optional) --}}
                     <div>
-                        <label for="company_name" class="block text-[13px] font-semibold text-neutral-700 mb-2">Entreprise <span class="text-neutral-400 font-normal">(optionnel)</span></label>
-                        <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL Le Délice"
-                               class="w-full h-[52px] px-4 bg-neutral-50/80 border border-neutral-200 rounded-2xl text-neutral-900 text-[15px] placeholder:text-neutral-400 transition-all duration-200 focus:outline-none focus:bg-white focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                        <label for="company_name" class="vt-label">Entreprise <span class="vt-hint">(facultatif)</span></label>
+                        <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL …" class="vt-input">
                     </div>
 
-                    {{-- RCCM (collapsible) --}}
-                    <div x-data="{ open: false }">
-                        <button type="button" @click="open = !open" class="flex items-center gap-2 text-[13px] font-medium text-primary-600 hover:text-primary-700 transition-colors py-1">
-                            <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            Ajouter un RCCM (badge vérifié)
-                        </button>
-                        <div x-show="open" x-cloak x-transition class="mt-2.5 p-4 bg-neutral-50 rounded-2xl border border-neutral-200 space-y-3">
-                            <input type="text" id="rccm" name="rccm" x-model="formData.rccm" placeholder="CI-ABJ-XX-2024-XXXXX"
-                                   class="w-full h-[44px] px-4 bg-white border border-neutral-200 rounded-xl text-neutral-900 text-[14px] placeholder:text-neutral-400 transition-all focus:outline-none focus:border-primary-400 focus:ring-[3px] focus:ring-primary-500/10">
+                    <details class="rounded-2xl border-2 border-mp-line">
+                        <summary class="flex items-center min-h-12 px-4 cursor-pointer font-semibold">Ajouter un RCCM (badge « vérifié »)</summary>
+                        <div class="px-4 pb-4 space-y-4">
                             <div>
-                                <input type="file" id="rccm_document" name="rccm_document" accept=".pdf,.jpg,.jpeg,.png"
-                                       class="w-full text-[13px] text-neutral-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-primary-500 file:text-white hover:file:bg-primary-600 file:cursor-pointer">
-                                <p class="text-[11px] text-neutral-400 mt-1">PDF, JPEG ou PNG — Max 5 Mo</p>
+                                <label for="rccm" class="vt-label">Numéro RCCM</label>
+                                <input type="text" id="rccm" name="rccm" x-model="formData.rccm" placeholder="CI-DAL-XX-2024-XXXXX" class="vt-input">
+                            </div>
+                            <div>
+                                <label for="rccm_document" class="vt-label">Extrait RCCM</label>
+                                <input type="file" id="rccm_document" name="rccm_document" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="rccm-hint"
+                                       class="block w-full text-base file:mr-3 file:min-h-11 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-mp-black file:text-white file:cursor-pointer">
+                                <p id="rccm-hint" class="mt-1 vt-hint">PDF, JPEG ou PNG, 5 Mo maximum.</p>
                             </div>
                         </div>
-                    </div>
+                    </details>
 
-                    {{-- Logo & Banner --}}
-                    <div>
-                        <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Images <span class="text-neutral-400 font-normal">(optionnel)</span></label>
+                    <fieldset>
+                        <legend class="vt-label">Images <span class="vt-hint">(facultatif)</span></legend>
                         <div class="grid grid-cols-2 gap-3">
-                            <label for="logo-upload" class="group relative aspect-square rounded-2xl bg-neutral-50 border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all">
-                                <template x-if="logoPreview"><img :src="logoPreview" class="absolute inset-0 w-full h-full object-cover"></template>
-                                <template x-if="!logoPreview">
-                                    <div class="text-center">
-                                        <div class="w-10 h-10 rounded-full bg-neutral-100 group-hover:bg-primary-100 flex items-center justify-center mx-auto transition-colors">
-                                            <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        </div>
-                                        <p class="text-[11px] text-neutral-500 font-medium mt-2">Logo</p>
-                                    </div>
-                                </template>
-                            </label>
-                            <input type="file" name="logo" id="logo-upload" accept="image/png,image/jpeg,image/webp" class="hidden"
-                                   @change="logoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
-
-                            <label class="group relative aspect-square rounded-2xl bg-neutral-50 border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all">
-                                <template x-if="bannerPreview"><img :src="bannerPreview" class="absolute inset-0 w-full h-full object-cover"></template>
-                                <template x-if="!bannerPreview">
-                                    <div class="text-center">
-                                        <div class="w-10 h-10 rounded-full bg-neutral-100 group-hover:bg-primary-100 flex items-center justify-center mx-auto transition-colors">
-                                            <svg class="w-5 h-5 text-neutral-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        </div>
-                                        <p class="text-[11px] text-neutral-500 font-medium mt-2">Bannière</p>
-                                    </div>
-                                </template>
-                                <input type="file" name="banner" accept="image/png,image/jpeg,image/webp" class="absolute inset-0 opacity-0 cursor-pointer"
+                            <div>
+                                <label for="logo-upload" class="relative aspect-square rounded-2xl border-2 border-dashed border-[#A89F96] bg-mp-paper flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
+                                    <template x-if="logoPreview"><img :src="logoPreview" alt="Aperçu du logo" class="absolute inset-0 w-full h-full object-cover"></template>
+                                    <span x-show="!logoPreview" class="font-semibold">Logo</span>
+                                    <span x-show="!logoPreview" class="vt-hint">Carré</span>
+                                </label>
+                                <input type="file" name="logo" id="logo-upload" accept="image/png,image/jpeg,image/webp" class="sr-only"
+                                       @change="logoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+                            </div>
+                            <div>
+                                <label for="banner-upload" class="relative aspect-square rounded-2xl border-2 border-dashed border-[#A89F96] bg-mp-paper flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
+                                    <template x-if="bannerPreview"><img :src="bannerPreview" alt="Aperçu de la bannière" class="absolute inset-0 w-full h-full object-cover"></template>
+                                    <span x-show="!bannerPreview" class="font-semibold">Bannière</span>
+                                    <span x-show="!bannerPreview" class="vt-hint">Paysage</span>
+                                </label>
+                                <input type="file" name="banner" id="banner-upload" accept="image/png,image/jpeg,image/webp" class="sr-only"
                                        @change="bannerPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
-                            </label>
+                            </div>
                         </div>
-                    </div>
+                    </fieldset>
                 </div>
+
+                <p x-show="stepError" x-cloak x-text="stepError" class="mt-6 font-semibold text-[#B91C1C]" role="alert"></p>
 
                 <div class="flex gap-3 mt-8">
-                    <button type="button" @click="step = 1; window.scrollTo({top:0, behavior:'smooth'})"
-                            class="w-12 h-[52px] flex items-center justify-center border-2 border-neutral-200 rounded-2xl text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition-all flex-shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <button type="button" @click="if(validateStep2()) { step = 3; window.scrollTo({top:0, behavior:'smooth'}) }"
-                            class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200">
-                        <span class="flex items-center justify-center gap-2">
-                            Continuer
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                        </span>
-                    </button>
+                    <button type="button" @click="goToStep(1)" class="vt-btn vt-btn-ghost !px-4" aria-label="Revenir à l'étape précédente">Retour</button>
+                    <button type="button" @click="next(2)" class="vt-btn vt-btn-primary flex-1">Continuer</button>
                 </div>
-            </div>
+            </section>
 
-            {{-- ═══════════════════════════════════════
-                 STEP 3 — Plan
-            ═══════════════════════════════════════ --}}
-            <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
-                 x-data="pricingCalculator()"
-                 x-init="init(); formData.plan = '{{ $plan->slug ?? 'essentiel' }}';">
-                <div class="mb-6">
-                    <h1 class="text-[22px] sm:text-2xl font-bold text-neutral-950 tracking-tight">Choisissez votre plan</h1>
-                    <p class="text-neutral-500 mt-1.5 text-[14px]">{{ config('plans.trial_days') }} jours d'essai gratuit avec toutes les fonctions du plan Pro, sans engagement. Vous choisissez ensuite votre plan, payé en Mobile Money.</p>
-                </div>
+            {{-- ═══════════ ÉTAPE 3 — Abonnement ═══════════ --}}
+            <section x-show="step === 3" x-cloak aria-labelledby="step3-title"
+                     x-data="pricingCalculator()"
+                     x-init="init(); formData.plan = '{{ $plan->slug ?? 'essentiel' }}';">
+                <h1 id="step3-title" class="vt-h3 text-2xl">Choisissez votre plan</h1>
+                <p class="mt-1 mb-6 vt-muted">{{ config('plans.trial_days') }} jours d'essai gratuit avec toutes les fonctions du plan Pro, sans engagement. Ensuite, vous payez votre plan en Mobile Money.</p>
 
-                {{-- Hidden inputs --}}
                 <input type="hidden" name="plan" x-model="formData.plan">
                 <input type="hidden" name="billing_period" :value="billingCycle">
 
-                {{-- Résumé Stand (simplifié) --}}
+                {{-- Stand : plan unique --}}
                 @if($isStand)
-                <div class="mb-6 p-5 rounded-2xl border-2 border-primary-300 bg-primary-50/60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-3xl">🛒</span>
-                        <div>
-                            <p class="font-bold text-neutral-900">Plan Stand</p>
-                            <p class="text-[13px] text-neutral-500">Idéal pour votre micro-commerce</p>
-                        </div>
-                        <div class="ml-auto text-right">
-                            <p class="font-bold text-xl text-neutral-900">{{ number_format($plan->price, 0, ',', ' ') }} <span class="text-[13px] font-normal">F/mois</span></p>
-                            @if($plan->supportsWeeklyBilling())
-                                <p class="text-[12px] text-neutral-500">ou {{ number_format($plan->weekly_price, 0, ',', ' ') }} F/semaine</p>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5 text-[12px]">
-                        @foreach(array_merge($plan->features, ['QR Code + Mobile Money', config('plans.trial_days') . ' jours gratuits (fonctions Pro)']) as $f)
-                        <div class="flex items-center gap-1.5 text-neutral-700">
-                            <svg class="w-3.5 h-3.5 text-secondary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                            {{ $f }}
-                        </div>
-                        @endforeach
-                    </div>
-                    @include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])
-                </div>
-                @endif
-
-                {{-- Plan cards (restaurants uniquement) --}}
-                @if(!$isStand && isset($availablePlans) && $availablePlans->count() > 1)
-                <div class="space-y-2.5 mb-6">
-                    @foreach($availablePlans as $p)
-                    <button type="button"
-                            @click="formData.plan = '{{ $p->slug }}'; basePriceMonthly = {{ (int) $p->price }}; currentPlanName = '{{ $p->name }}';"
-                            :class="formData.plan === '{{ $p->slug }}'
-                                ? 'border-primary-400 bg-primary-50/60 shadow-md shadow-primary-500/10'
-                                : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/50'"
-                            class="relative w-full p-4 rounded-2xl border-2 text-left transition-all duration-200 group">
-                        @if($p->is_featured)
-                            <span class="absolute -top-2.5 right-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md shadow-primary-500/20">Populaire</span>
-                        @endif
-                        <div class="flex items-center gap-3.5">
-                            {{-- Radio indicator --}}
-                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0"
-                                 :class="formData.plan === '{{ $p->slug }}' ? 'border-primary-500' : 'border-neutral-300'">
-                                <div class="w-2.5 h-2.5 rounded-full bg-primary-500 transition-all"
-                                     :class="formData.plan === '{{ $p->slug }}' ? 'scale-100' : 'scale-0'"></div>
-                            </div>
-                            {{-- Plan info --}}
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-baseline gap-2">
-                                    <span class="font-bold text-neutral-900 text-[15px]">{{ $p->name }}</span>
-                                    <span class="text-[12px] text-neutral-500">{{ $p->max_dishes >= 9999 ? 'Illimité' : $p->max_dishes . ' plats' }}</span>
-                                </div>
-                                <div class="text-[12px] text-neutral-500 mt-0.5">
-                                    {{ \App\Models\Plan::isUnlimitedValue($p->max_employees) ? 'Employés illimités' : $p->max_employees . ' employé' . ($p->max_employees > 1 ? 's' : '') }}
-                                    @if($p->has_delivery) · Livraison incluse @endif
-                                    · Commandes jamais bloquées
-                                </div>
-                            </div>
-                            {{-- Price --}}
-                            <div class="text-right flex-shrink-0">
-                                @if($p->is_on_quote)
-                                    <div class="text-[11px] text-neutral-400">Sur devis, dès</div>
+                    <div class="mb-6 p-5 rounded-2xl border-2 border-mp-black bg-mp-paper">
+                        <div class="flex flex-wrap items-baseline justify-between gap-2">
+                            <p class="font-bold text-xl">Plan Stand</p>
+                            <p class="text-right">
+                                <span class="font-bold text-xl vt-num whitespace-nowrap">{{ number_format($plan->price, 0, ',', ' ') }} F/mois</span>
+                                @if($plan->supportsWeeklyBilling())
+                                    <span class="block vt-muted whitespace-nowrap">ou {{ number_format($plan->weekly_price, 0, ',', ' ') }} F/semaine</span>
                                 @endif
-                                <div class="font-bold text-neutral-900 text-[15px]">{{ number_format($p->price, 0, ',', '.') }}<span class="text-[12px] font-medium text-neutral-500 ml-0.5">F</span></div>
-                                <div class="text-[11px] text-neutral-400">/mois</div>
-                            </div>
+                            </p>
                         </div>
-                    </button>
-                    @endforeach
-                </div>
-                @endif
-
-                {{-- Billing toggle (restaurants uniquement) --}}
-                @if(!$isStand)
-                <div class="mb-5">
-                    <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Facturation</label>
-                    <div class="grid grid-cols-4 gap-1 p-1 bg-neutral-100 rounded-xl">
-                        @foreach([['id' => 'monthly', 'label' => '1 mois', 'badge' => null], ['id' => 'quarterly', 'label' => '3 mois', 'badge' => '-10%'], ['id' => 'semiannual', 'label' => '6 mois', 'badge' => '-15%'], ['id' => 'annual', 'label' => '1 an', 'badge' => '-20%']] as $cycle)
-                        <button type="button" @click="billingCycle = '{{ $cycle['id'] }}'"
-                                :class="billingCycle === '{{ $cycle['id'] }}' ? 'bg-white shadow-sm text-neutral-900 font-bold' : 'text-neutral-500 hover:text-neutral-700'"
-                                class="relative py-2.5 rounded-lg text-[11px] font-medium transition-all duration-200">
-                            {{ $cycle['label'] }}
-                            @if($cycle['badge'])
-                            <span class="absolute -top-1 -right-0.5 bg-secondary-500 text-white text-[7px] font-bold px-1 py-px rounded leading-tight"
-                                  x-show="billingCycle !== '{{ $cycle['id'] }}'">{{ $cycle['badge'] }}</span>
-                            @endif
-                        </button>
-                        @endforeach
+                        <ul class="mt-4 grid gap-2">
+                            @foreach(array_merge($plan->features, ['QR Code + Mobile Money', config('plans.trial_days') . ' jours gratuits (fonctions Pro)']) as $f)
+                                <li class="flex items-start gap-2">{!! $check !!}<span>{{ $f }}</span></li>
+                            @endforeach
+                        </ul>
+                        @include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])
                     </div>
-                </div>
                 @endif
 
-                {{-- Features (restaurants uniquement) --}}
+                {{-- Restaurant / Boutique : choix du plan --}}
+                @if(!$isStand && isset($availablePlans) && $availablePlans->count() > 1)
+                    <fieldset class="mb-6">
+                        <legend class="sr-only">Plan</legend>
+                        <div class="space-y-3">
+                            @foreach($availablePlans as $p)
+                                <button type="button"
+                                        @click="formData.plan = '{{ $p->slug }}'; basePriceMonthly = {{ (int) $p->price }}; currentPlanName = '{{ $p->name }}';"
+                                        :aria-pressed="(formData.plan === '{{ $p->slug }}').toString()"
+                                        :class="formData.plan === '{{ $p->slug }}' ? 'border-mp-black bg-mp-paper' : 'border-mp-line hover:border-mp-black'"
+                                        class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4">
+                                    <span class="flex-none w-6 h-6 rounded-full border-2 border-mp-black flex items-center justify-center bg-white" aria-hidden="true">
+                                        <span class="w-3 h-3 rounded-full bg-mp-black" x-show="formData.plan === '{{ $p->slug }}'"></span>
+                                    </span>
+                                    <span class="flex-1 min-w-0">
+                                        <span class="flex flex-wrap items-center gap-2">
+                                            <span class="font-bold text-lg">{{ $p->name }}</span>
+                                            @if($p->is_featured)<span class="vt-pill bg-mp-orange !text-sm !py-0.5">Le plus choisi</span>@endif
+                                        </span>
+                                        <span class="block text-[0.9375rem] vt-muted">
+                                            {{ $p->max_dishes >= 9999 ? 'Produits illimités' : $p->max_dishes . ' produits' }},
+                                            {{ \App\Models\Plan::isUnlimitedValue($p->max_employees) ? 'employés illimités' : $p->max_employees . ' employé' . ($p->max_employees > 1 ? 's' : '') }}@if($p->has_delivery), livraison incluse @endif
+                                        </span>
+                                    </span>
+                                    <span class="text-right whitespace-nowrap">
+                                        @if($p->is_on_quote)<span class="block text-sm">Sur devis, dès</span>@endif
+                                        <span class="font-bold vt-num">{{ number_format($p->price, 0, ',', ' ') }} F</span>
+                                        <span class="block text-sm">/mois</span>
+                                    </span>
+                                </button>
+                            @endforeach
+                        </div>
+                        <p class="mt-3 vt-hint">Commandes jamais bloquées, quel que soit le plan.</p>
+                    </fieldset>
+                @endif
+
                 @if(!$isStand)
-                <div class="mb-5 p-4 rounded-2xl border border-neutral-200 bg-neutral-50/50">
-                    <div class="text-[12px] font-bold text-neutral-600 uppercase tracking-wider mb-2.5">Inclus</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    <fieldset class="mb-6">
+                        <legend class="vt-label">Durée de paiement</legend>
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach([['id' => 'monthly', 'label' => '1 mois', 'badge' => null], ['id' => 'quarterly', 'label' => '3 mois', 'badge' => '-10 %'], ['id' => 'semiannual', 'label' => '6 mois', 'badge' => '-15 %'], ['id' => 'annual', 'label' => '1 an', 'badge' => '-20 %']] as $cycle)
+                                <button type="button" @click="billingCycle = '{{ $cycle['id'] }}'" :aria-pressed="(billingCycle === '{{ $cycle['id'] }}').toString()"
+                                        :class="billingCycle === '{{ $cycle['id'] }}' ? 'bg-mp-black text-white border-mp-black' : 'bg-white border-mp-line hover:border-mp-black'"
+                                        class="min-h-12 px-3 rounded-xl border-2 font-bold text-base">
+                                    {{ $cycle['label'] }}@if($cycle['badge']) <span :class="billingCycle === '{{ $cycle['id'] }}' ? 'text-mp-orange' : 'text-mp-ink'">{{ $cycle['badge'] }}</span>@endif
+                                </button>
+                            @endforeach
+                        </div>
+                    </fieldset>
+
+                    <div class="mb-6 p-4 rounded-2xl border-2 border-mp-line">
+                        <p class="font-bold">Inclus</p>
                         @foreach($availablePlans as $p)
-                        <template x-if="formData.plan === '{{ $p->slug }}'">
-                            <div class="contents">
+                            <ul x-show="formData.plan === '{{ $p->slug }}'" x-cloak class="mt-2 grid gap-2 sm:grid-cols-2">
                                 @foreach($p->features as $f)
-                                <div class="flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-secondary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                    <span class="text-[12px] text-neutral-700">{{ $f }}</span>
-                                </div>
+                                    <li class="flex items-start gap-2">{!! $check !!}<span>{{ $f }}</span></li>
                                 @endforeach
-                                <div class="flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-secondary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                    <span class="text-[12px] text-neutral-700">QR codes + Mobile Money</span>
-                                </div>
-                            </div>
-                        </template>
+                                <li class="flex items-start gap-2">{!! $check !!}<span>QR codes + Mobile Money</span></li>
+                            </ul>
+                            <div x-show="formData.plan === '{{ $p->slug }}'" x-cloak>@include('partials.plan-pack', ['slug' => $p->slug, 'compact' => true])</div>
                         @endforeach
                     </div>
-                    @foreach($availablePlans as $p)
-                        <div x-show="formData.plan === '{{ $p->slug }}'" x-cloak>@include('partials.plan-pack', ['slug' => $p->slug, 'compact' => true])</div>
-                    @endforeach
-                </div>
                 @endif
 
                 {{-- Supports offerts à tous dès l'inscription --}}
-                <p class="mb-5 flex items-center gap-2 text-[12px] font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2" data-welcome-pack><span aria-hidden="true">🎁</span>{{ config('plans.welcome_pack') }}</p>
+                <p class="mb-6 p-4 rounded-2xl bg-mp-paper font-medium" data-welcome-pack>{{ config('plans.welcome_pack') }}</p>
 
-                {{-- Price card (restaurants) / Price stand --}}
                 @if($isStand)
-                {{-- Stand : paiement à la semaine ou au mois (après l'essai) --}}
-                @if($plan->supportsWeeklyBilling())
-                <div class="mb-4">
-                    <label class="block text-[13px] font-semibold text-neutral-700 mb-2">Après l'essai, je paierai</label>
-                    <div class="grid grid-cols-2 gap-1 p-1 bg-neutral-100 rounded-xl">
-                        @foreach(['weekly' => 'À la semaine', 'monthly' => 'Au mois'] as $cycleId => $cycleLabel)
-                        <button type="button" @click="billingCycle = '{{ $cycleId }}'"
-                                :class="billingCycle === '{{ $cycleId }}' ? 'bg-white shadow-sm text-neutral-900 font-bold' : 'text-neutral-500 hover:text-neutral-700'"
-                                class="py-2.5 rounded-lg text-[12px] font-medium transition-all duration-200">{{ $cycleLabel }}</button>
-                        @endforeach
+                    @if($plan->supportsWeeklyBilling())
+                        <fieldset class="mb-4">
+                            <legend class="vt-label">Après l'essai, je paierai</legend>
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach(['weekly' => 'À la semaine', 'monthly' => 'Au mois'] as $cycleId => $cycleLabel)
+                                    <button type="button" @click="billingCycle = '{{ $cycleId }}'" :aria-pressed="(billingCycle === '{{ $cycleId }}').toString()"
+                                            :class="billingCycle === '{{ $cycleId }}' ? 'bg-mp-black text-white border-mp-black' : 'bg-white border-mp-line hover:border-mp-black'"
+                                            class="min-h-12 px-3 rounded-xl border-2 font-bold text-base">{{ $cycleLabel }}</button>
+                                @endforeach
+                            </div>
+                        </fieldset>
+                    @endif
+                    <div class="p-5 rounded-2xl bg-mp-black text-white mb-6">
+                        <p class="text-neutral-200" x-text="'Plan Stand, ' + (billingCycle === 'weekly' ? '1 semaine' : '1 mois')">Plan Stand</p>
+                        <p class="mt-1"><span class="text-3xl font-bold vt-num" x-text="billingCycle === 'weekly' ? '{{ number_format((int) $plan->weekly_price, 0, ',', ' ') }}' : '{{ number_format($plan->price, 0, ',', ' ') }}'"></span> <span class="text-neutral-200">FCFA</span></p>
+                        <p class="mt-1 text-neutral-200">{{ config('plans.trial_days') }} jours gratuits. Livraison incluse ({{ G::commission('stand') }} uniquement sur les commandes livrées).</p>
                     </div>
-                </div>
-                @endif
-                <div class="p-4 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 text-white mb-5">
-                    <div class="flex items-baseline justify-between">
-                        <span class="text-[13px] font-medium text-primary-200" x-text="'Plan Stand — ' + (billingCycle === 'weekly' ? '1 semaine' : '1 mois')"></span>
-                    </div>
-                    <div class="flex items-baseline gap-1.5 mt-1">
-                        <span class="text-3xl font-bold" x-text="billingCycle === 'weekly' ? '{{ number_format((int) $plan->weekly_price, 0, ',', ' ') }}' : '{{ number_format($plan->price, 0, ',', ' ') }}'"></span>
-                        <span class="text-[13px] text-primary-200">FCFA</span>
-                    </div>
-                    <p class="text-[12px] text-primary-200 mt-1">{{ config('plans.trial_days') }} jours gratuits · Livraison incluse (12 % uniquement sur les commandes livrées)</p>
-                </div>
                 @else
-                <div class="p-4 rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-950 text-white mb-5 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-[40px]"></div>
-                    <div class="relative">
-                        <div class="flex items-baseline justify-between mb-1">
-                            <span class="text-[13px] font-medium text-neutral-400" x-text="currentPlanName + ' — ' + (billingCycle === 'monthly' ? '1 mois' : billingCycle === 'quarterly' ? '3 mois' : billingCycle === 'semiannual' ? '6 mois' : '12 mois')"></span>
-                        </div>
-                        <div class="flex items-baseline gap-1.5">
-                            <span class="text-3xl font-bold" x-text="formatPrice(totalPrice)"></span>
-                            <span class="text-[13px] text-neutral-400">FCFA</span>
-                        </div>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-[12px] text-neutral-500" x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></span>
-                            <span x-show="billingCycle !== 'monthly'" class="text-[12px] font-semibold text-secondary-400" x-text="'-' + formatPrice(discountAmount) + ' F économisés'"></span>
-                        </div>
+                    <div class="p-5 rounded-2xl bg-mp-black text-white mb-6">
+                        <p class="text-neutral-200" x-text="currentPlanName + ', ' + (billingCycle === 'monthly' ? '1 mois' : billingCycle === 'quarterly' ? '3 mois' : billingCycle === 'semiannual' ? '6 mois' : '12 mois')"></p>
+                        <p class="mt-1"><span class="text-3xl font-bold vt-num" x-text="formatPrice(totalPrice)"></span> <span class="text-neutral-200">FCFA</span></p>
+                        <p class="mt-1 text-neutral-200" x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></p>
+                        <p x-show="billingCycle !== 'monthly'" class="mt-1 font-semibold text-mp-orange" x-text="formatPrice(discountAmount) + ' F économisés'"></p>
                     </div>
-                </div>
                 @endif
 
-                {{-- Terms --}}
-                <label class="flex items-start gap-3 cursor-pointer mb-5">
-                    <input type="checkbox" name="terms" required
-                           class="w-[18px] h-[18px] mt-0.5 rounded-md border-neutral-300 text-primary-500 focus:ring-primary-500/20 focus:ring-offset-0 cursor-pointer">
-                    <span class="text-[12px] text-neutral-500 leading-relaxed">
-                        J'accepte les <a href="{{ route('terms') }}" target="_blank" class="text-primary-600 font-medium hover:underline">conditions</a>
-                        et la <a href="{{ route('privacy') }}" target="_blank" class="text-primary-600 font-medium hover:underline">politique de confidentialité</a>.
-                    </span>
+                <label class="flex items-start gap-3 mb-6 cursor-pointer">
+                    <input type="checkbox" name="terms" required class="mt-0.5 w-6 h-6 rounded-md border-2 border-[#857C74] text-mp-black focus:ring-mp-orange cursor-pointer">
+                    <span>J'accepte les <a href="{{ route('terms') }}" target="_blank" class="vt-link">conditions</a> et la <a href="{{ route('privacy') }}" target="_blank" class="vt-link">politique de confidentialité</a>.</span>
                 </label>
 
-                {{-- Error --}}
-                <div x-show="submitError" x-cloak class="mb-4 p-3 bg-error-500/5 border border-error-500/20 rounded-xl">
-                    <p class="text-[13px] text-error-600 font-medium flex items-center gap-2">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span x-text="submitError"></span>
-                    </p>
-                </div>
+                <p x-show="submitError" x-cloak x-text="submitError" class="mb-4 font-semibold text-[#B91C1C]" role="alert"></p>
 
-                {{-- Buttons --}}
                 <div class="flex gap-3">
-                    <button type="button" @click="step = 2; window.scrollTo({top:0, behavior:'smooth'})"
-                            class="w-12 h-[52px] flex items-center justify-center border-2 border-neutral-200 rounded-2xl text-neutral-500 hover:bg-neutral-50 hover:border-neutral-300 transition-all flex-shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <button type="submit"
-                            class="flex-1 h-[52px] bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-[15px] rounded-2xl relative overflow-hidden shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 active:scale-[0.98] transition-all duration-200"
-                            :disabled="loading || submitted">
-                        <span :class="{ 'opacity-0': loading }" class="flex items-center justify-center gap-2">
-                            Démarrer l'essai gratuit
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center">
-                            <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <button type="button" @click="goToStep(2)" class="vt-btn vt-btn-ghost !px-4" aria-label="Revenir à l'étape précédente">Retour</button>
+                    <button type="submit" class="vt-btn vt-btn-primary flex-1 relative" :disabled="loading || submitted" :aria-busy="loading.toString()">
+                        <span :class="{ 'opacity-0': loading }">Démarrer l'essai gratuit</span>
+                        <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                            <svg class="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                         </span>
                     </button>
                 </div>
 
-                <p class="text-center text-[11px] text-neutral-400 mt-4 flex items-center justify-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    {{ config('plans.trial_days') }} jours gratuits · Sans carte bancaire · Aucune commande n'est jamais bloquée
-                </p>
-            </div>
+                <p class="mt-4 text-center vt-hint">{{ config('plans.trial_days') }} jours gratuits, sans carte bancaire. Aucune commande n'est jamais bloquée.</p>
+            </section>
         </form>
 
-        {{-- Login (step 3) --}}
-        <div x-show="step === 3" x-cloak class="mt-6 text-center">
-            <span class="text-[13px] text-neutral-400">Déjà inscrit ?</span>
-            <a href="{{ route('login') }}" class="text-[13px] text-primary-600 font-semibold hover:underline underline-offset-2 ml-1">Se connecter</a>
-        </div>
+        <p x-show="step === 3" x-cloak class="mt-6 text-center">Déjà inscrit ? <a href="{{ route('login') }}" class="vt-link">Se connecter</a></p>
     </div>
 
     @push('scripts')
@@ -561,18 +398,33 @@
                 loading: false,
                 submitted: false,
                 submitError: null,
+                stepError: null,
                 isStand: {{ $isStand ? 'true' : 'false' }},
+                offer: @js($offer),
                 formData: {
-                    name: '', email: '', phone: '', password: '',
-                    restaurant_name: '', restaurant_type: '', company_name: '', rccm: '',
+                    name: @js(old('name', '')), email: @js(old('email', '')), phone: @js(old('phone', '')), password: '',
+                    restaurant_name: @js(old('restaurant_name', '')), restaurant_type: @js($initialRestaurantType), company_name: @js(old('company_name', '')), rccm: @js(old('rccm', '')),
                     plan: '{{ $plan->slug ?? "essentiel" }}'
                 },
                 showPassword: false,
                 logoPreview: null,
                 bannerPreview: null,
+                get offerTitle() { return { restaurant: 'Votre restaurant', stand: 'Votre stand', boutique: 'Votre boutique' }[this.offer] || 'Votre commerce'; },
                 validateStep1() { return this.formData.name && this.formData.phone && this.formData.password.length >= 8; },
                 validateStep2() { return this.formData.restaurant_name && this.formData.restaurant_type; },
-                goToStep(t) { if (t >= 1 && t <= this.step) { this.step = t; this.submitError = null; } },
+                next(from) {
+                    const ok = from === 1 ? this.validateStep1() : this.validateStep2();
+                    if (!ok) {
+                        this.stepError = from === 1
+                            ? 'Renseignez votre nom, votre numéro WhatsApp et un mot de passe de 8 caractères minimum.'
+                            : 'Renseignez le nom et le type de votre commerce.';
+                        return;
+                    }
+                    this.stepError = null;
+                    this.step = from + 1;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                goToStep(t) { if (t >= 1 && t <= this.step) { this.step = t; this.submitError = null; this.stepError = null; window.scrollTo({ top: 0, behavior: 'smooth' }); } },
                 submitForm() {
                     this.submitError = null;
                     if (!this.validateStep1() || !this.validateStep2()) {
@@ -600,7 +452,7 @@
         })();
 
         document.addEventListener('DOMContentLoaded', () => {
-            const e = document.querySelector('[class*="bg-error"]');
+            const e = document.querySelector('[data-register-errors]');
             if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 

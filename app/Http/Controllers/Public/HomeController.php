@@ -88,14 +88,10 @@ class HomeController extends Controller
             $ordersCount = number_format($totalOrders, 0, ',', ' ');
         }
         
-        // Uptime (can be calculated from system logs or set as default)
-        // For now, we'll use 99.9% as default, but you can calculate it from actual uptime data
-        $uptime = '99.9%';
         
         return [
             'restaurants' => $restaurantsCount,
             'orders' => $ordersCount,
-            'uptime' => $uptime,
             'raw' => [
                 'restaurants' => $totalRestaurants,
                 'orders' => $totalOrders,
