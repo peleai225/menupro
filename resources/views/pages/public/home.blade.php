@@ -1,612 +1,341 @@
-<x-layouts.public title="MenuPro — Solution #1 pour restaurants en Côte d'Ivoire" description="MenuPro : digitalisez votre restaurant en 15 minutes. Menu en ligne, QR codes, paiements Wave · Orange · MTN · Moov. Livraison incluse, zéro commission hors livraison.">
+@use('App\Support\VitrineGrid', 'G')
+@php
+    $trial = G::trialDays();
+    $rate = G::commission();
+    $reducedRate = G::reducedCommission();
+    $offers = [
+        'restaurant' => [
+            'title' => 'Restaurant & maquis',
+            'text'  => 'Menu en ligne, QR code sur les tables, commandes envoyées en cuisine avec alerte sonore, caisse et stock.',
+            'icon'  => 'M3 11h18M5 11V8a7 7 0 0114 0v3M4 15h16l-1.5 5h-13L4 15z',
+        ],
+        'stand' => [
+            'title' => 'Stand de rue',
+            'text'  => 'Garba, alloco, jus, paninis : vos clients commandent depuis leur téléphone et paient en Mobile Money. Tout se gère depuis le vôtre.',
+            'icon'  => 'M4 10l2-6h12l2 6M4 10h16M4 10v10h16V10M9 20v-5h6v5',
+        ],
+        'boutique' => [
+            'title' => 'Boutique',
+            'text'  => 'Vendez vos articles en ligne : catalogue, paiement Mobile Money, livraison. Pour les superettes et boutiques de quartier.',
+            'icon'  => 'M6 7h12l1 13H5L6 7zm3 0a3 3 0 016 0',
+            'new'   => true,
+        ],
+    ];
+    $registerUrl = fn (string $offer) => route('register', array_filter(['type' => config("vitrine.offers.{$offer}.register_type")]));
+    $testimonials = collect(config('vitrine.testimonials', []))->filter(fn ($t) => ! empty($t['name']) && ! empty($t['text']));
+    $faqs = [
+        ['Mes clients doivent-ils installer une application ?', 'Non. Ils commandent depuis le navigateur de leur téléphone sur app.menupro.ci, en scannant votre QR code ou en ouvrant votre lien. Une application Android existe aussi pour ceux qui la préfèrent.'],
+        ['Comment mes clients paient-ils ?', 'Par Wave, Orange Money, MTN MoMo ou Moov Money, ou en espèces à la livraison ou au comptoir si vous l\'acceptez.'],
+        ['Y a-t-il une commission ?', 'Uniquement sur les commandes livrées par MenuPro : ' . $rate . ' (' . $reducedRate . ' avec le plan Pro). Les commandes sur place et à emporter sont sans commission, et aucune commande n\'est jamais bloquée.'],
+        ['Je tiens une boutique, pas un restaurant. MenuPro me convient ?', 'Oui. L\'offre Boutique vous donne un catalogue d\'articles en ligne, le paiement Mobile Money et la livraison, comme pour un restaurant.'],
+        ['Comment se passe l\'essai gratuit ?', $trial . ' jours avec toutes les fonctions du plan Pro, sans carte bancaire. Ensuite vous choisissez votre plan et payez en Mobile Money. Aucun prélèvement automatique.'],
+    ];
+@endphp
+<x-layouts.public title="Commandes en ligne et Mobile Money pour restaurants, stands et boutiques" description="MenuPro : vos clients commandent sur app.menupro.ci et paient par Wave, Orange, MTN ou Moov. Restaurants, maquis, stands et boutiques. Livraison incluse, essai gratuit {{ $trial }} jours.">
 @push('head')
-<script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Plateforme SaaS de commande en ligne pour restaurants en Cote d'Ivoire.","offers":{"@@type":"Offer","price":"5000","priceCurrency":"XOF"}}</script>
-<style>
-:root{--c1:#FAF8F5;--c2:#F2EDE6;--warm:#1A1614;--o:#D45E0C;--o2:#FF8C42}
-.fu{opacity:0;transform:translateY(26px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
-.fu.in{opacity:1;transform:none}
-.fu.d1{transition-delay:.1s}.fu.d2{transition-delay:.2s}.fu.d3{transition-delay:.3s}.fu.d4{transition-delay:.4s}
-@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.tk-w{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.tk-t{display:flex;width:max-content;animation:tk 28s linear infinite}.tk-t:hover{animation-play-state:paused}
-@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.fl{animation:fl 4s ease-in-out infinite}
-</style>
+<script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Commandes en ligne, paiement Mobile Money et livraison pour restaurants, maquis, stands et boutiques en Côte d'Ivoire.","offers":{"@@type":"Offer","price":"{{ G::price('stand') }}","priceCurrency":"XOF"}}</script>
 @endpush
 
-{{-- ══════════ 1. HERO ══════════ --}}
-<section class="font-grotesk min-h-screen flex flex-col justify-center relative overflow-hidden" style="background:#FAF8F5">
-    {{-- Grain subtil en fond --}}
-    <div class="pointer-events-none absolute inset-0 opacity-[0.025]" style="background-image:url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\");background-size:200px"></div>
+{{-- ══════════ 1. ACCUEIL ══════════ --}}
+<section class="pt-8 pb-14 md:pt-16 md:pb-20">
+    <div class="vt-wrap grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:items-center">
+        <div>
+            <h1 class="vt-h1">Vos clients commandent. Vous encaissez en Mobile Money.</h1>
+            <p class="vt-lead mt-5">Restaurant, maquis, stand de rue ou boutique&nbsp;: MenuPro met votre commerce en ligne, encaisse les paiements Wave, Orange, MTN et Moov, et livre vos clients.</p>
+            <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+                <a href="{{ route('register') }}" class="vt-btn vt-btn-primary">Créer mon commerce</a>
+                <a href="{{ route('pricing') }}" class="vt-btn vt-btn-ghost">Voir les tarifs</a>
+            </div>
+            <p class="mt-4 vt-muted">Essai gratuit de {{ $trial }} jours, sans carte bancaire ni engagement.</p>
 
-    {{-- Grand chiffre décoratif en fond — ancre visuelle --}}
-    <div class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 select-none hidden lg:block" aria-hidden="true">
-        <span class="font-display font-normal leading-none" style="font-size:28vw;color:#1A1614;opacity:0.035;letter-spacing:-0.04em">{{ $stats['raw']['restaurants'] ?? $stats['restaurants'] }}</span>
-    </div>
-
-    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center">
-
-        {{-- Badge --}}
-        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-10 fu" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.18);color:#D45E0C">
-            <span class="relative flex h-2 w-2 shrink-0">
-                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
-            </span>
-            {{ $stats['restaurants'] }} restaurants actifs · Côte d'Ivoire
-        </div>
-
-        {{-- Titre massif --}}
-        <h1 class="font-display font-normal fu d1" style="color:#1A1614;font-size:clamp(2.6rem,5.5vw,5rem);line-height:1.08;letter-spacing:-0.02em">
-            La plateforme<br>
-            <i style="color:#D45E0C;font-style:italic">restaurants</i><br>
-            qui fait vendre.
-        </h1>
-
-        {{-- Sous-titre --}}
-        <p class="text-lg lg:text-xl mt-8 max-w-xl mx-auto lg:mx-0 leading-relaxed fu d2" style="color:#7C6F65">
-            Menu · QR code · Wave · Orange · MTN · Moov.<br>
-            En ligne en <strong style="color:#1A1614;font-weight:600">15 minutes</strong>. Zéro commission hors livraison.
-        </p>
-
-        {{-- CTA --}}
-        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center fu d2">
-            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:#D45E0C;box-shadow:0 4px 32px rgba(212,94,12,.4)">
-                Démarrer gratuitement
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-            <a href="#how-it-works" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl text-base transition-all hover:-translate-y-0.5" style="background:white;border:1.5px solid #E8E0D5;color:#3D3330;box-shadow:0 2px 12px rgba(26,22,20,.06)">
-                Voir comment ça marche
-            </a>
-        </div>
-
-        {{-- Social proof --}}
-        <div class="mt-12 flex items-center gap-4 justify-center fu d3">
-            <div class="flex -space-x-2.5">
-                @foreach(\App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(5)->get(['logo_path','name']) as $r)
-                <div class="w-10 h-10 rounded-full border-2 overflow-hidden bg-neutral-100 shrink-0" style="border-color:#FAF8F5">
-                    @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center text-white font-bold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
-                    @endif
-                </div>
+            <ul class="mt-8 flex flex-wrap items-center gap-3" aria-label="Paiements acceptés">
+                @foreach([['wave.png','Wave'],['orange-money.png','Orange Money'],['mtn-momo.png','MTN MoMo'],['moov-money.png','Moov Money']] as [$img, $name])
+                    <li class="flex items-center gap-2 rounded-full border border-mp-line pl-1 pr-3 py-1 bg-white">
+                        <img src="{{ asset('images/payments/'.$img) }}" alt="" width="28" height="28" class="w-7 h-7 rounded-full object-contain" loading="lazy" decoding="async">
+                        <span class="text-[0.9375rem] font-semibold">{{ $name }}</span>
+                    </li>
                 @endforeach
-            </div>
-            <p class="text-sm" style="color:#7C6F65">
-                <span class="font-semibold" style="color:#1A1614">{{ $stats['restaurants'] }}+</span> restaurateurs nous font confiance
-            </p>
-        </div>
-    </div>
-
-    {{-- Indicateur scroll bas --}}
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 fl" style="color:#D4C8B8">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-    </div>
-</section>
-
-{{-- ══════════ 2. PAIEMENTS + TICKER ══════════ --}}
-<section class="font-grotesk bg-white py-10" style="border-top:1px solid #E8E0D5;border-bottom:1px solid #E8E0D5">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <p class="text-center text-[10px] font-semibold uppercase tracking-[0.25em] mb-7 fu" style="color:#B8AFA8">Paiements Mobile Money acceptés</p>
-        <div class="flex items-center justify-center gap-6 sm:gap-10 flex-wrap fu d1">
-            @foreach([['wave.png','Wave','#e0f2fe'],['orange-money.png','Orange Money','#fff7ed'],['mtn-momo.png','MTN MoMo','#fefce8'],['moov-money.png','Moov Money','#eff6ff']] as $i => $p)
-            <div class="flex flex-col items-center gap-2" style="transition-delay:{{ $i*0.08 }}s">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center border hover:shadow-md hover:-translate-y-0.5 transition-all" style="background:{{ $p[2] }};border-color:#E8E0D5">
-                    <img src="{{ asset('images/payments/'.$p[0]) }}" alt="{{ $p[1] }}" class="h-8 w-8 object-contain" loading="lazy">
-                </div>
-                <span class="text-[10px] font-medium" style="color:#B8AFA8">{{ $p[1] }}</span>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    <div class="tk-w" style="border-top:1px solid #F2EDE6;padding-top:1.25rem">
-        <div class="tk-t">
-            @foreach(array_fill(0,2,['Poulet Braisé','Attieké Poisson','Jus Naturels','Pizza','Burgers','Maquis','Hôtel','Livraison','Paninis','Tacos','Riz Sauce','Café']) as $items)
-            @foreach($items as $item)
-            <div class="flex items-center gap-3 px-5">
-                <span style="color:#E8E0D5;font-weight:900">·</span>
-                <span class="text-sm font-medium whitespace-nowrap" style="color:#B8AFA8">{{ $item }}</span>
-            </div>
-            @endforeach
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 3. POUR QUI ══════════ --}}
-<section class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pour qui ?</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">De la vendeuse de panini<br>au grand hôtel</h2>
-        </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            @foreach([
-                ['🥡','Stand & Street food','Vendeurs de rue, paninis, tacos, jus. MenuPro sur votre téléphone.','dès 1 500 F/semaine'],
-                ['🍽️','Maquis & Restaurant','Tables, QR codes, commandes cuisine, alertes sonores.','15 000 F/mois'],
-                ['🏨','Hôtel & Résidence','QR par chambre, room service, voix IA pour le personnel.','Gold'],
-                ['🏍️','Livraison incluse','Livreurs MenuPro, suivi temps réel. 12 % uniquement sur les commandes livrées.','Tous les plans'],
-            ] as $i => $w)
-            <div class="fu bg-white rounded-2xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated flex flex-col" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
-                <div class="text-3xl mb-6">{{ $w[0] }}</div>
-                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $w[1] }}</h3>
-                <p class="text-sm leading-relaxed flex-1 mb-6" style="color:#7C6F65">{{ $w[2] }}</p>
-                <span class="inline-block self-start text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#FAF8F5;border:1px solid #E8E0D5;color:#D45E0C">À partir de {{ $w[3] }}</span>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 4. FEATURES ══════════ --}}
-<section class="font-grotesk py-24 sm:py-28" style="background:#F2EDE6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Pourquoi MenuPro</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">
-                Tout ce dont votre<br>restaurant a besoin
-            </h2>
+            </ul>
         </div>
 
-        {{-- 2 grandes features --}}
-        <div class="grid lg:grid-cols-5 gap-5 mb-5">
-            <div class="lg:col-span-3 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
-                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                </div>
-                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Commandes en direct</h3>
-                <p class="text-sm leading-relaxed max-w-sm" style="color:#7C6F65">Vos clients commandent via QR code ou lien WhatsApp. Alerte sonore instantanée, écran cuisine dédié, impression automatique.</p>
-                <div class="mt-6 flex items-center gap-2 flex-wrap">
-                    @foreach(['QR Code','WhatsApp','Cuisine','Alertes sonores'] as $tag)
-                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="{{ $loop->first ? 'background:#D45E0C;color:white' : 'background:#FAF8F5;border:1px solid #E8E0D5;color:#7C6F65' }}">{{ $tag }}</span>
-                    @endforeach
-                </div>
-            </div>
-            <div class="lg:col-span-2 bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu d1" style="border-color:#E8E0D5">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
-                    <svg class="w-7 h-7" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <h3 class="font-display text-2xl font-normal mb-3" style="color:#1A1614">Paiement Mobile Money</h3>
-                <p class="text-sm leading-relaxed" style="color:#7C6F65">Wave, Orange Money, MTN, Moov. L'argent arrive directement sur votre compte — sans délai ni intermédiaire.</p>
-                <div class="mt-6 flex -space-x-2">
-                    @foreach([['wave.png','#e0f2fe'],['orange-money.png','#fff7ed'],['mtn-momo.png','#fefce8'],['moov-money.png','#eff6ff']] as $p)
-                    <div class="w-9 h-9 rounded-full border-2 flex items-center justify-center" style="background:{{ $p[1] }};border-color:#FAF8F5"><img src="{{ asset('images/payments/'.$p[0]) }}" class="w-5 h-5 object-contain" alt=""></div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- 4 petites features --}}
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            @foreach([
-                ['analytics','Analytics & Rapports','Bilan journalier, CA par heure, plats les plus vendus, taux d\'annulation.'],
-                ['stock','Gestion de stock','Alertes rupture automatiques, inventaire, ingrédients. Plus jamais à court.'],
-                ['hotel','Mode Hôtel','QR par chambre, room service, voix IA, appel addition, appel ménage.'],
-                ['delivery','Livraison intégrée','Gérez vos livreurs avec suivi GPS. Vos clients voient la progression. Commission de 12 % uniquement sur les commandes livrées.'],
-            ] as $i => $f)
-            <div class="bg-white rounded-2xl p-6 border hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300 fu" style="border-color:#E8E0D5;transition-delay:{{ $i*0.07 }}s">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background:rgba(212,94,12,.08)">
-                    @if($f[0]==='analytics')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    @elseif($f[0]==='stock')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    @elseif($f[0]==='hotel')<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    @else<svg class="w-6 h-6" style="color:#D45E0C" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>@endif
-                </div>
-                <h3 class="font-display text-lg font-normal mb-2" style="color:#1A1614">{{ $f[1] }}</h3>
-                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $f[2] }}</p>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 5. STATS STRIP ══════════ --}}
-<section class="font-grotesk py-20" style="background:#1A1614">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center fu">
-            @foreach([
-                ['0%','Commission','Gardez 100% de vos revenus.'],
-                ['15 min','Pour être en ligne','Menu, QR code, paiements prêts.'],
-                ['4','Moyens de paiement','Wave, Orange, MTN, Moov.'],
-                ['24/7','Disponible','Même quand vous dormez.'],
-            ] as $k)
-            <div>
-                <div class="font-display text-5xl sm:text-6xl font-normal leading-none mb-2 text-white">{{ $k[0] }}</div>
-                <div class="font-semibold text-sm mb-1 text-white">{{ $k[1] }}</div>
-                <div class="text-xs" style="color:rgba(255,255,255,.4)">{{ $k[2] }}</div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 6. HOW IT WORKS ══════════ --}}
-<section id="how-it-works" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Comment ça marche</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">En ligne en 15 minutes<br>chrono</h2>
-        </div>
-        <div class="grid md:grid-cols-3 gap-6 fu relative">
-            {{-- Ligne de connexion desktop --}}
-            <div class="hidden md:block absolute h-px top-7 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)]" style="background:linear-gradient(90deg,transparent,#D45E0C 20%,#D45E0C 80%,transparent)"></div>
-            @foreach([
-                ['01','Créez votre compte','Nom, email, téléphone. Votre espace est prêt en 2 minutes.','~2 min'],
-                ['02','Ajoutez votre menu','Photos, prix, catégories. Configurez horaires et paiements Mobile Money.','~10 min'],
-                ['03','Recevez des commandes','Partagez votre lien ou imprimez votre QR code. Commandes et paiements en direct.','Immédiat'],
-            ] as $step)
-            <div class="bg-white rounded-2xl p-8 border hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
-                <div class="flex items-start justify-between mb-6">
-                    <div class="w-14 h-14 rounded-full flex items-center justify-center font-display text-xl font-normal text-white" style="background:#D45E0C">{{ $step[0] }}</div>
-                    <span class="text-xs font-semibold px-3 py-1.5 rounded-full" style="background:#1A1614;color:white">{{ $step[3] }}</span>
-                </div>
-                <h3 class="font-display text-xl font-normal mb-3" style="color:#1A1614">{{ $step[1] }}</h3>
-                <p class="text-sm leading-relaxed" style="color:#7C6F65">{{ $step[2] }}</p>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 7. APP — Android + iPhone ══════════ --}}
-<section id="app" class="font-grotesk py-24" style="background:#F2EDE6">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="fu grid lg:grid-cols-2 gap-16 items-center">
-
-            {{-- Texte gauche --}}
-            <div class="text-center lg:text-left">
-                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#D45E0C">Application mobile</span>
-                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight mb-5" style="color:#1A1614">
-                    Commandez<br>où vous voulez
-                </h2>
-                <p class="text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0" style="color:#7C6F65">
-                    Disponible sur <strong style="color:#1A1614">Android</strong> et <strong style="color:#1A1614">iPhone</strong>.<br>
-                    Téléchargez l'app ou utilisez la version web — expérience identique.
-                </p>
-            </div>
-
-            {{-- Boutons droite --}}
-            <div class="flex flex-col gap-4 max-w-sm mx-auto lg:mx-0 w-full">
-                {{-- Android APK --}}
-                <a href="{{ route('download.apk') }}"
-                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
-                   style="border-color:#E8E0D5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.2)">
-                        <svg class="w-6 h-6" style="color:#22c55e" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        {{-- Aperçu de l'écran client (HTML pur : aucune image à télécharger) --}}
+        <figure class="relative mx-auto w-full max-w-[19rem]">
+            <div class="vt-phone" role="img" aria-label="Exemple d'écran de commande sur app.menupro.ci : un panier de deux plats payé par Wave, avec suivi de livraison.">
+                <div class="vt-phone-screen" aria-hidden="true">
+                    <div class="bg-mp-orange px-4 pt-5 pb-4">
+                        <p class="text-sm font-semibold">app.menupro.ci</p>
+                        <p class="text-xl font-bold leading-tight mt-1">Maquis du Carrefour</p>
+                        <p class="text-sm">Daloa · ouvert jusqu'à 23 h</p>
                     </div>
-                    <div class="flex-1">
-                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5" style="color:#22c55e">Android</div>
-                        <div class="font-semibold text-base" style="color:#1A1614">Télécharger l'APK</div>
-                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Installation directe · ~60 Mo</div>
-                    </div>
-                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-
-                {{-- iPhone PWA --}}
-                <a href="https://app.menupro.ci" target="_blank"
-                   class="group flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
-                   style="border-color:#E8E0D5">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(212,94,12,.08);border:1px solid rgba(212,94,12,.15)">
-                        <svg class="w-6 h-6" style="color:#D45E0C" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-xs font-semibold uppercase tracking-widest mb-0.5 flex items-center gap-1.5" style="color:#D45E0C">
-                            iPhone · iPad <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:rgba(212,94,12,.12)">PWA</span>
-                        </div>
-                        <div class="font-semibold text-base" style="color:#1A1614">Ouvrir dans Safari</div>
-                        <div class="text-xs mt-0.5" style="color:#B8AFA8">Ajouter à l'écran d'accueil</div>
-                    </div>
-                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" style="color:#D4C8B8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-                <p class="text-center text-xs px-2" style="color:#B8AFA8">iPhone : ouvrez dans <strong style="color:#7C6F65">Safari</strong> → Partager ⬆ → "Sur l'écran d'accueil"</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ 8. DRIVER APP ══════════ --}}
-<section class="font-grotesk py-24" style="background:#FAF8F5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-
-            {{-- Card QR code --}}
-            <div class="flex flex-col items-center fu order-2 lg:order-1">
-                <div class="bg-white rounded-2xl p-8 border flex flex-col items-center gap-5 max-w-xs w-full" style="border-color:#E8E0D5;box-shadow:0 8px 40px rgba(26,22,20,.06)">
-                    <p class="font-semibold text-sm" style="color:#1A1614">Application Livreurs</p>
-                    <div class="w-40 h-40 rounded-2xl overflow-hidden flex items-center justify-center p-1" style="border:2px solid rgba(255,97,0,.2);background:#FAF8F5">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode('https://driver.menupro.ci') }}&color=FF6100&bgcolor=FAF8F5&margin=8" alt="QR Code app livreurs" class="w-full h-full object-cover rounded-xl" loading="lazy">
-                    </div>
-                    <a href="https://driver.menupro.ci" target="_blank" class="w-full text-center py-3.5 rounded-2xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#FF6100">Ouvrir l'app livreur →</a>
-                </div>
-            </div>
-
-            {{-- Texte --}}
-            <div class="text-center lg:text-left fu order-1 lg:order-2">
-                <span class="text-xs font-semibold uppercase tracking-widest mb-4 block" style="color:#FF6100">Devenir livreur</span>
-                <h2 class="font-display text-4xl sm:text-5xl font-normal leading-tight" style="color:#1A1614">
-                    Livrez avec<br>
-                    <span class="not-italic" style="color:#FF6100">MenuPro</span>
-                </h2>
-                <p class="text-lg mt-5 leading-relaxed max-w-lg mx-auto lg:mx-0" style="color:#7C6F65">Inscrivez-vous comme livreur indépendant. Recevez des courses, gérez vos gains et soyez payé directement sur Wave.</p>
-                <div class="mt-7 space-y-4">
-                    @foreach([['Inscription rapide','Créez votre compte en 2 minutes avec votre CNI et permis.'],['Courses en temps réel','Recevez les commandes proches de vous avec alerte sonore.'],['Paiement Wave automatique','Vos gains sont virés sur demande, sans délai.'],['Zéro frais','Aucun abonnement. Vous gagnez à chaque course effectuée.']] as $f)
-                    <div class="flex items-start gap-3 text-left">
-                        <div class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background:rgba(255,97,0,.1)">
-                            <svg class="w-3 h-3" style="color:#FF6100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-sm" style="color:#1A1614">{{ $f[0] }}</p>
-                            <p class="text-xs mt-0.5" style="color:#7C6F65">{{ $f[1] }}</p>
+                    <ul class="px-4 py-3 space-y-3 text-[0.9375rem]">
+                        <li class="flex justify-between gap-3"><span>2 × Garba poisson thon</span><span class="font-bold vt-num whitespace-nowrap">2 000 F</span></li>
+                        <li class="flex justify-between gap-3"><span>1 × Poulet braisé + attiéké</span><span class="font-bold vt-num whitespace-nowrap">3 500 F</span></li>
+                        <li class="flex justify-between gap-3 border-t border-mp-line pt-3 font-bold"><span>Total</span><span class="vt-num whitespace-nowrap">5 500 F</span></li>
+                    </ul>
+                    <div class="px-4 pb-4">
+                        <div class="rounded-xl bg-mp-black text-white text-center py-3 font-bold">Payer avec Wave</div>
+                        <div class="mt-3 rounded-xl border-2 border-mp-black p-3">
+                            <p class="text-sm font-bold">Commande en route</p>
+                            <div class="mt-2 h-2 rounded-full bg-mp-line overflow-hidden"><div class="h-full w-2/3 bg-mp-orange"></div></div>
+                            <p class="text-sm mt-2 vt-muted">Le livreur arrive dans 12 min</p>
                         </div>
                     </div>
-                    @endforeach
                 </div>
-                <div class="mt-8">
-                    <a href="{{ route('devenir-livreur') }}" class="group inline-flex items-center gap-2 px-7 py-4 text-white font-semibold rounded-2xl transition hover:-translate-y-0.5" style="background:#FF6100;box-shadow:0 4px 20px rgba(255,97,0,.25)">
-                        🏍️ S'inscrire comme livreur
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </div>
+            {{-- Notification côté commerçant --}}
+            <div class="relative mt-4 ml-auto mr-2 sm:-mr-8 max-w-[14rem] rounded-2xl bg-white border-2 border-mp-black p-3 shadow-[6px_6px_0_0_#F97316]" aria-hidden="true">
+                <p class="text-sm font-bold">Nouvelle commande</p>
+                <p class="text-sm vt-muted">5 500 F payés par Wave</p>
+            </div>
+            <figcaption class="mt-4 text-center text-[0.9375rem] vt-muted">Exemple d'écran client</figcaption>
+        </figure>
+    </div>
+</section>
+
+{{-- ══════════ 2. LES TROIS OFFRES ══════════ --}}
+<section id="offres" class="vt-section bg-mp-paper scroll-mt-16">
+    <div class="vt-wrap">
+        <h2 class="vt-h2 max-w-2xl">Un outil pour chaque commerce</h2>
+        <p class="vt-lead mt-4">Choisissez votre type de commerce&nbsp;: les fonctions et le prix s'adaptent.</p>
+
+        <div class="mt-10 grid gap-6 md:grid-cols-3">
+            @foreach($offers as $key => $offer)
+                @php $from = G::offerFrom($key); @endphp
+                <article class="vt-tag flex flex-col {{ !empty($offer['new']) ? 'vt-tag-new' : '' }}">
+                    <div class="flex items-start justify-between gap-3 pl-8">
+                        <svg class="w-9 h-9 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $offer['icon'] }}"/></svg>
+                        @if(!empty($offer['new']))
+                            <span class="vt-pill bg-mp-black text-white">Nouveau</span>
+                        @endif
+                    </div>
+                    <h3 class="vt-h3 mt-5 text-2xl">{{ $offer['title'] }}</h3>
+                    <p class="mt-2 flex-1 {{ !empty($offer['new']) ? 'text-mp-black' : 'vt-muted' }}">{{ $offer['text'] }}</p>
+                    <p class="mt-5">
+                        <span class="block text-[0.9375rem] font-semibold">À partir de</span>
+                        <span class="text-4xl font-bold vt-num whitespace-nowrap">{{ $from['amount'] }}</span>
+                        <span class="font-semibold">{{ $from['unit'] }}</span>
+                    </p>
+                    <a href="{{ $registerUrl($key) }}" class="vt-btn {{ !empty($offer['new']) ? 'vt-btn-dark' : 'vt-btn-primary' }} vt-btn-block mt-5">
+                        {{ ['restaurant' => 'Inscrire mon restaurant', 'stand' => 'Inscrire mon stand', 'boutique' => 'Inscrire ma boutique'][$key] }}
                     </a>
-                </div>
-            </div>
+                </article>
+            @endforeach
         </div>
     </div>
 </section>
 
-
-{{-- ══════════ VIDÉOS ══════════ --}}
-@if(!empty($videos))
-<section class="font-grotesk py-24 bg-white" style="border-top:1px solid #E8E0D5">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Vidéo</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Voyez MenuPro en action</h2>
-        </div>
-        <div class="grid md:grid-cols-{{ count($videos)>1?'2':'1' }} gap-6 fu">
-            @foreach($videos as $v)
-            <div class="rounded-2xl overflow-hidden border" style="border-color:#E8E0D5">
-                <div class="relative" style="padding-bottom:56.25%;height:0">
-                    <iframe class="absolute inset-0 w-full h-full" src="{{ $v['url'] }}" title="{{ $v['title'] }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-                </div>
-                @if($v['title'])<p class="px-4 py-3 text-sm font-semibold" style="color:#1A1614;background:#FAF8F5">{{ $v['title'] }}</p>@endif
+{{-- ══════════ 3. CÔTÉ CLIENTS (vraie séquence) ══════════ --}}
+<section id="how-it-works" class="vt-section scroll-mt-16">
+    <div class="vt-wrap grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+        <div>
+            <h2 class="vt-h2">Pour vos clients, c'est simple</h2>
+            <p class="vt-lead mt-4">Pas de compte compliqué, pas d'application obligatoire. Ils ouvrent app.menupro.ci, ou scannent votre QR code.</p>
+            <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+                <a href="https://app.menupro.ci" target="_blank" rel="noopener" class="vt-btn vt-btn-dark">Ouvrir app.menupro.ci</a>
+                <a href="{{ route('download.apk') }}" class="vt-btn vt-btn-ghost">Application Android</a>
             </div>
+        </div>
+        <ol class="grid gap-4">
+            @foreach([
+                ['Ils commandent', 'Depuis leur téléphone, sur votre page MenuPro : plats ou articles, quantités, sur place, à emporter ou en livraison.'],
+                ['Ils paient', 'Par Wave, Orange Money, MTN MoMo ou Moov Money. Ou en espèces si vous l\'acceptez.'],
+                ['Ils suivent leur commande', 'En direct : acceptée, en préparation, en route avec le livreur, livrée.'],
+            ] as $i => [$title, $text])
+                <li class="flex gap-4 rounded-2xl border-2 border-mp-line p-5">
+                    <span class="flex-none w-11 h-11 rounded-full bg-mp-orange text-mp-black font-bold text-xl flex items-center justify-center" aria-hidden="true">{{ $i + 1 }}</span>
+                    <div>
+                        <h3 class="vt-h3">{{ $title }}</h3>
+                        <p class="mt-1 vt-muted">{{ $text }}</p>
+                    </div>
+                </li>
+            @endforeach
+        </ol>
+    </div>
+</section>
+
+{{-- ══════════ 4. CE QUE VOUS GÉREZ ══════════ --}}
+<section class="vt-section bg-mp-black text-white">
+    <div class="vt-wrap">
+        <h2 class="vt-h2 max-w-2xl">Tout se pilote depuis votre téléphone</h2>
+        <ul class="mt-10 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach([
+                ['Commandes en direct', 'Alerte sonore à chaque commande, écran cuisine, impression du ticket.'],
+                ['Livraison incluse', 'Les livreurs MenuPro récupèrent et livrent. ' . $rate . ' uniquement sur les commandes livrées.'],
+                ['Mobile Money', 'Les paiements arrivent dans votre portefeuille MenuPro, retirables sur votre Mobile Money.'],
+                ['Caisse et stock', 'Encaissez au comptoir, suivez votre stock du jour et les ruptures.'],
+                ['Statistiques', 'Ventes du jour, produits qui marchent le mieux, heures de pointe.'],
+                ['Supports imprimés', 'Autocollants QR et affiche vitrine fournis selon votre plan.'],
+            ] as [$title, $text])
+                <li class="border-t border-white/20 py-5">
+                    <h3 class="vt-h3 text-mp-orange">{{ $title }}</h3>
+                    <p class="mt-1 text-neutral-200">{{ $text }}</p>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+</section>
+
+{{-- ══════════ 5. TARIFS (grille lue en base / config, jamais en dur) ══════════ --}}
+@php
+    $homePlans = [
+        'stand'     => ['for' => 'Stands, kiosques, petites boutiques',          'items' => ['Menu QR et commandes', 'Mobile Money', 'Livraison incluse', '1 utilisateur']],
+        'essentiel' => ['for' => 'Maquis, restaurants, boutiques', 'items' => ['Caisse et écran cuisine', 'Stock simple', 'Statistiques', '3 employés']],
+        'pro'       => ['for' => 'Commerces établis et hôtels',    'items' => ['Stock par ingrédient', 'Rentabilité par produit', 'Chambres d\'hôtel', 'Commission réduite à ' . $reducedRate]],
+        'gold'      => ['for' => 'Complexes et multi-sites',       'items' => ['Multi-espaces', 'Multi-sites', 'Tout illimité', 'Accompagnement dédié']],
+    ];
+@endphp
+<section id="pricing" class="vt-section scroll-mt-16">
+    <div class="vt-wrap">
+        <h2 class="vt-h2">Un prix fixe. Livraison incluse.</h2>
+        <p class="vt-lead mt-4">{{ $rate }} uniquement sur les commandes livrées ({{ $reducedRate }} en Pro). Aucune commande n'est jamais bloquée.</p>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach($homePlans as $slug => $card)
+                @php $p = G::plan($slug); $featured = $slug === 'essentiel'; $isGold = $slug === 'gold'; @endphp
+                <article class="flex flex-col rounded-2xl p-6 {{ $featured ? 'bg-mp-orange border-2 border-mp-black' : 'border-2 border-mp-line' }}">
+                    <h3 class="vt-h3 text-2xl">{{ $p->name }}</h3>
+                    <p class="{{ $featured ? 'text-mp-black' : 'vt-muted' }}">{{ $card['for'] }}</p>
+                    <p class="mt-5">
+                        @if($isGold)<span class="block text-[0.9375rem] font-semibold">Sur devis, à partir de</span>@endif
+                        <span class="text-4xl font-bold vt-num whitespace-nowrap">{{ G::money($p->price) }}</span>
+                        <span class="font-semibold">F/mois</span>
+                    </p>
+                    @if($slug === 'stand' && G::weeklyPrice() > 0)
+                        <p class="font-semibold">ou {{ G::money(G::weeklyPrice()) }} F/semaine</p>
+                    @endif
+                    <ul class="vt-checks mt-5 space-y-2 flex-1">
+                        @foreach($card['items'] as $item)<li>{{ $item }}</li>@endforeach
+                    </ul>
+                    @if($isGold)
+                        <a href="{{ route('contact') }}?type=gold" class="vt-btn vt-btn-ghost vt-btn-block mt-6">Demander un devis</a>
+                    @else
+                        <a href="{{ route('register', $slug === 'stand' ? ['type' => 'stand'] : ['plan' => $slug]) }}" class="vt-btn {{ $featured ? 'vt-btn-dark' : 'vt-btn-ghost' }} vt-btn-block mt-6">Essayer {{ $trial }} jours</a>
+                    @endif
+                </article>
+            @endforeach
+        </div>
+        <p class="mt-6 vt-muted">Pendant l'essai, toutes les fonctions du plan Pro sont ouvertes. {{ config('plans.welcome_pack') }}.</p>
+        <p class="mt-2"><a href="{{ route('pricing') }}" class="vt-link">Comparer les plans en détail</a></p>
+    </div>
+</section>
+
+{{-- ══════════ 6. TÉMOIGNAGES (masqué tant qu'aucun vrai témoignage n'est configuré : config/vitrine.php) ══════════ --}}
+@if($testimonials->isNotEmpty())
+<section class="vt-section bg-mp-paper">
+    <div class="vt-wrap">
+        <h2 class="vt-h2">Ils utilisent MenuPro</h2>
+        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @foreach($testimonials as $t)
+                <figure class="rounded-2xl bg-white border-2 border-mp-line p-6 flex flex-col">
+                    <blockquote class="text-lg flex-1">« {{ $t['text'] }} »</blockquote>
+                    <figcaption class="mt-5 flex items-center gap-3">
+                        @if(!empty($t['photo']))
+                            <img src="{{ asset($t['photo']) }}" alt="" width="48" height="48" class="w-12 h-12 rounded-full object-cover" loading="lazy" decoding="async">
+                        @endif
+                        <span><span class="block font-bold">{{ $t['name'] }}</span><span class="vt-muted">{{ $t['role'] }}@if(!empty($t['city'])), {{ $t['city'] }}@endif</span></span>
+                    </figcaption>
+                </figure>
             @endforeach
         </div>
     </div>
 </section>
 @endif
 
-
-{{-- ══════════ TÉMOIGNAGES ══════════ --}}
-<section class="font-grotesk py-24" style="background:#F2EDE6">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Témoignages</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Ils en parlent<br>mieux que nous</h2>
-        </div>
-        @php
-            $testimonials = \App\Models\SystemSetting::get('home_testimonials', [
-                ['name'=>'Awa Koné','role'=>'Propriétaire, Maquis Chez Awa','city'=>'Daloa','text'=>'Depuis MenuPro, mes clients commandent directement depuis leur téléphone. Mon chiffre d\'affaires a augmenté de 30% en 2 mois.','stars'=>5],
-                ['name'=>'Kouamé Jean','role'=>'Gérant, Restaurant Le Délice','city'=>'Abidjan','text'=>'Le QR code a tout changé. Les clients scannent, commandent et paient par Wave. Je reçois l\'argent immédiatement.','stars'=>5],
-                ['name'=>'Marie Touré','role'=>'Fondatrice, Saveurs d\'Afrique','city'=>'Bouaké','text'=>'À partir de 5 000 F/mois, c\'est le meilleur investissement. Zéro surprise. Je recommande à 100%.','stars'=>5],
-            ]);
-        @endphp
-        <div class="grid md:grid-cols-3 gap-6 fu">
-            @foreach($testimonials as $t)
-            <div class="bg-white rounded-2xl p-8 border flex flex-col hover:shadow-elevated hover:-translate-y-1 transition-all duration-300" style="border-color:#E8E0D5">
-                {{-- Guillemets décoratifs --}}
-                <p class="font-display text-6xl font-normal leading-none mb-2" style="color:#E8E0D5">"</p>
-                <blockquote class="font-display italic text-lg leading-snug flex-1 -mt-4" style="color:#3D3330">"{{ $t['text'] }}"</blockquote>
-                <div class="flex items-center gap-3 mt-6 pt-5" style="border-top:1px solid #F2EDE6">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0" style="background:#D45E0C">{{ strtoupper(substr($t['name'],0,1)) }}</div>
-                    <div>
-                        <div class="font-semibold text-sm" style="color:#1A1614">{{ $t['name'] }}</div>
-                        <div class="text-xs mt-0.5" style="color:#B8AFA8">{{ $t['role'] }} · {{ $t['city'] }}</div>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ RESTAURANTS ══════════ --}}
-<section class="font-grotesk py-24 bg-white">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Ils nous font confiance</span>
-            <h2 class="font-display text-3xl sm:text-4xl font-normal mt-4" style="color:#1A1614">Découvrez nos restaurants</h2>
-            <p class="text-sm mt-2" style="color:#7C6F65">Commandez directement depuis leur menu en ligne</p>
-        </div>
-        @php
-            $trs = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(8)->get(['name','slug','logo_path','banner_path','city']);
-        @endphp
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 fu">
-            @foreach($trs as $r)
-            <a href="{{ route('r.menu', $r->slug) }}" target="_blank" class="group bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated block" style="border-color:#E8E0D5">
-                <div class="relative h-28 overflow-hidden" style="background:#FAF8F5">
-                    @if($r->banner_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->banner_path))
-                        <img src="{{ \Illuminate\Support\Facades\Storage::url($r->banner_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
-                    @else
-                        <div class="w-full h-full" style="background:linear-gradient(135deg,#F2EDE6,#E8E0D5)"></div>
-                    @endif
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style="background:rgba(26,22,20,.6)">
-                        <span class="text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/30">Voir le menu →</span>
-                    </div>
-                </div>
-                <div class="px-4 pb-4">
-                    <div class="relative -mt-5 mb-3">
-                        <div class="w-10 h-10 rounded-xl border-2 overflow-hidden bg-white shadow-sm" style="border-color:#FAF8F5">
-                            @if($r->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($r->logo_path))
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($r->logo_path) }}" alt="{{ $r->name }}" class="w-full h-full object-cover" loading="lazy">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-white font-semibold text-xs" style="background:#D45E0C">{{ strtoupper(substr($r->name,0,1)) }}</div>
-                            @endif
-                        </div>
-                    </div>
-                    <h3 class="font-semibold text-sm truncate" style="color:#1A1614">{{ $r->name }}</h3>
-                    @if($r->city)<p class="text-xs mt-0.5" style="color:#B8AFA8">📍 {{ $r->city }}</p>@endif
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-
-{{-- ══════════ TARIFS ══════════ --}}
+{{-- ══════════ 7. COMMERCES EN LIGNE (données réelles) ══════════ --}}
 @php
-    // Grille d'abonnements : prix lus en base, repli sur PlanSeeder (source de vérité)
-    $homePlans = \App\Models\Plan::whereIn('slug', \Database\Seeders\PlanSeeder::ACTIVE_SLUGS)->get()->keyBy('slug');
-    $homeDefs = \Database\Seeders\PlanSeeder::definitions();
-    $hp = fn ($slug, $field) => $homePlans[$slug]->{$field} ?? $homeDefs[$slug][$field];
-    $hfmt = fn ($n) => number_format((int) $n, 0, ',', ' ');
-    $homeTrial = (int) config('plans.trial_days', 30);
-    $check = '<svg class="w-4 h-4 shrink-0" style="color:currentColor" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>';
+    $liveShops = \App\Models\Restaurant::where('status', \App\Enums\RestaurantStatus::ACTIVE)->latest()->take(6)->get(['name', 'slug', 'logo_path', 'city']);
 @endphp
-<section id="pricing" class="font-grotesk py-24 sm:py-28" style="background:#FAF8F5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-xl mx-auto mb-16 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">Tarifs</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4 leading-tight" style="color:#1A1614">Simple. Transparent.<br>Livraison incluse.</h2>
-            <p class="text-sm mt-4" style="color:#7C6F65">Commission de 12 % uniquement sur les commandes livrées. Aucune commande n'est jamais bloquée.</p>
-        </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 fu">
-            {{-- Stand --}}
-            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#D45E0C">Stand</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">{{ $hfmt($hp('stand', 'price')) }}</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
-                <p class="text-sm mb-6" style="color:#7C6F65">ou {{ $hfmt($hp('stand', 'weekly_price')) }} F/semaine · stands et street food</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Menu QR + commandes','Mobile Money','Livraison MenuPro incluse','30 plats, 8 catégories','1 utilisateur'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#D45E0C">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?type=stand" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="border:1.5px solid #D45E0C;color:#D45E0C;background:rgba(212,94,12,.05)" onmouseover="this.style.background='rgba(212,94,12,.1)'" onmouseout="this.style.background='rgba(212,94,12,.05)'">Essai {{ $homeTrial }}j gratuit</a>
-            </div>
-
-            {{-- Restaurant (slug essentiel) — highlighted --}}
-            <div class="rounded-2xl p-7 border-2 relative hover:-translate-y-1 transition-all duration-300 flex flex-col" style="background:#D45E0C;border-color:#D45E0C;box-shadow:0 8px 40px rgba(212,94,12,.3)">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1.5 rounded-full bg-white" style="color:#D45E0C">⭐ Populaire</div>
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4 text-orange-200">{{ $hp('essentiel', 'name') }}</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal text-white">{{ $hfmt($hp('essentiel', 'price')) }}</span><span class="text-sm text-orange-200">F/mois</span></div>
-                <p class="text-sm text-orange-200 mb-6">Maquis et restaurants</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Caisse + écran cuisine','Stock simple','Statistiques','Réservations','3 employés, 100 plats'] as $f)<li class="flex items-center gap-2 text-sm text-white"><span class="text-orange-200">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=essentiel" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm bg-white hover:opacity-90 transition-all" style="color:#D45E0C">Essai {{ $homeTrial }}j gratuit</a>
-            </div>
-
-            {{-- Pro --}}
-            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 hover:shadow-elevated transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#7C6F65">Pro</div>
-                <div class="flex items-baseline gap-1 mb-1"><span class="font-display text-4xl font-normal" style="color:#1A1614">{{ $hfmt($hp('pro', 'price')) }}</span><span class="text-sm" style="color:#B8AFA8">F/mois</span></div>
-                <p class="text-sm mb-6" style="color:#7C6F65">Restaurants établis et hôtels</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Stock par ingrédient','Rentabilité par plat','Chambres d\'hôtel','10 employés, plats illimités','Commission réduite à 10 %'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#E8E0D5">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('register') }}?plan=pro" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm transition-all" style="background:#FAF8F5;border:1.5px solid #E8E0D5;color:#7C6F65" onmouseover="this.style.background='#F2EDE6'" onmouseout="this.style.background='#FAF8F5'">Essai {{ $homeTrial }}j gratuit</a>
-            </div>
-
-            {{-- Gold --}}
-            <div class="bg-white rounded-2xl p-7 border hover:-translate-y-0.5 transition-all duration-300 flex flex-col" style="border-color:#E8E0D5">
-                <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#f6b285">Gold</div>
-                <div class="text-sm" style="color:#7C6F65">Sur devis, à partir de</div>
-                <div class="flex items-baseline gap-1 mb-1">
-                    <span class="font-display text-4xl font-normal" style="background:linear-gradient(135deg,#f6b285,#D45E0C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ $hfmt($hp('gold', 'price')) }}</span>
-                    <span class="text-sm" style="color:#B8AFA8">F/mois</span>
-                </div>
-                <p class="text-sm mb-6" style="color:#7C6F65">Complexes, hôtels, multi-sites</p>
-                <ul class="space-y-2.5 flex-1 mb-8">@foreach(['Multi-espaces','Multi-sites','PIN serveurs','Tout illimité','Accompagnement dédié'] as $f)<li class="flex items-center gap-2 text-sm" style="color:#7C6F65"><span style="color:#f6b285">{!! $check !!}</span>{{ $f }}</li>@endforeach</ul>
-                <a href="{{ route('contact') }}?type=gold" class="block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white hover:opacity-90 transition-all" style="background:linear-gradient(135deg,#f6b285,#D45E0C)">Demander un devis</a>
-            </div>
-        </div>
-        <p class="text-center text-sm mt-8" style="color:#B8AFA8">Sans engagement · Sans carte bancaire · {{ $homeTrial }} jours avec toutes les fonctions Pro · <a href="{{ route('pricing') }}" class="font-semibold hover:underline" style="color:#D45E0C">Comparer tous les plans →</a></p>
+@if($liveShops->isNotEmpty())
+<section class="vt-section {{ $testimonials->isNotEmpty() ? '' : 'bg-mp-paper' }}">
+    <div class="vt-wrap">
+        <h2 class="vt-h2">Déjà en ligne sur MenuPro</h2>
+        <p class="vt-lead mt-4">Ouvrez leur page pour voir ce que vos clients verront.</p>
+        <ul class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($liveShops as $shop)
+                <li>
+                    <a href="{{ route('r.menu', $shop->slug) }}" class="flex items-center gap-4 rounded-2xl bg-white border-2 border-mp-line p-3 hover:border-mp-black min-h-[4.5rem]">
+                        @if($shop->logo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($shop->logo_path))
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($shop->logo_path) }}" alt="" width="48" height="48" class="w-12 h-12 rounded-xl object-cover shrink-0" loading="lazy" decoding="async">
+                        @else
+                            <span class="w-12 h-12 rounded-xl bg-mp-orange text-mp-black font-bold text-lg flex items-center justify-center shrink-0" aria-hidden="true">{{ mb_strtoupper(mb_substr($shop->name, 0, 1)) }}</span>
+                        @endif
+                        <span class="min-w-0">
+                            <span class="block font-bold truncate">{{ $shop->name }}</span>
+                            @if($shop->city)<span class="block vt-muted truncate">{{ $shop->city }}</span>@endif
+                        </span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
     </div>
 </section>
+@endif
 
-
-{{-- ══════════ FAQ ══════════ --}}
-<section class="font-grotesk py-24 bg-white">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14 fu">
-            <span class="text-xs font-semibold uppercase tracking-widest" style="color:#D45E0C">FAQ</span>
-            <h2 class="font-display text-4xl sm:text-5xl font-normal mt-4" style="color:#1A1614">Questions fréquentes</h2>
-        </div>
-        @php
-            $faqs = [
-                ['Mes clients doivent-ils télécharger une application ?','Non. Vos clients scannent le QR code ou cliquent sur votre lien. Tout fonctionne directement dans le navigateur, sans téléchargement.'],
-                ['Comment fonctionne le paiement Mobile Money ?','Vos clients paient depuis leur app Wave, Orange Money, MTN ou Moov. L\'argent est envoyé directement sur votre compte — sans délai, sans intermédiaire.'],
-                ['Combien de temps pour être en ligne ?','Moins de 15 minutes. Créez votre compte, ajoutez quelques plats avec photos et prix, et partagez votre lien ou imprimez votre QR code.'],
-                ['Est-ce qu\'il y a des commissions sur les commandes ?','Uniquement sur les commandes livrées par MenuPro : 12 % (10 % avec le plan Pro). Vos commandes sur place et à emporter sont sans commission, et aucune commande n\'est jamais bloquée.'],
-                ['Que se passe-t-il si j\'ai un problème ?','Support WhatsApp inclus dans tous les plans. Plans Pro et Gold : assistance prioritaire et formation personnalisée.'],
-                ['Puis-je annuler à tout moment ?','Oui, sans engagement et sans frais. Annulez depuis votre compte quand vous voulez.'],
-            ];
-        @endphp
-        <div class="fu" style="border-top:1px solid #E8E0D5">
-            @foreach($faqs as $i => $faq)
-            <div x-data="{ open: {{ $i===0?'true':'false' }} }" style="border-bottom:1px solid #E8E0D5">
-                <button @click="open=!open" :aria-expanded="open.toString()" class="w-full flex items-center justify-between py-5 text-left transition-colors" style="background:transparent">
-                    <span class="font-semibold text-sm sm:text-base pr-4" style="color:#1A1614">{{ $faq[0] }}</span>
-                    <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300" :class="open&&'rotate-45'" style="background:rgba(212,94,12,.08);color:#D45E0C">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    </span>
-                </button>
-                <div x-show="open" x-collapse>
-                    <p class="pb-5 text-sm leading-relaxed" style="color:#7C6F65">{{ $faq[1] }}</p>
+{{-- ══════════ VIDÉOS (réglées par le super admin) ══════════ --}}
+@if(!empty($videos))
+<section class="vt-section">
+    <div class="vt-wrap">
+        <h2 class="vt-h2">MenuPro en vidéo</h2>
+        <div class="mt-8 grid gap-6 {{ count($videos) > 1 ? 'md:grid-cols-2' : 'max-w-3xl' }}">
+            @foreach($videos as $v)
+                <div class="rounded-2xl overflow-hidden border-2 border-mp-line">
+                    <div class="relative aspect-video">
+                        <iframe class="absolute inset-0 w-full h-full" src="{{ $v['url'] }}" title="{{ $v['title'] }}" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    @if($v['title'])<p class="px-4 py-3 font-semibold">{{ $v['title'] }}</p>@endif
                 </div>
-            </div>
             @endforeach
         </div>
     </div>
 </section>
+@endif
 
-
-{{-- ══════════ CTA FINAL ══════════ --}}
-<section class="font-grotesk relative py-32 overflow-hidden text-center" style="background:#1A1614">
-    {{-- Radial glow subtil --}}
-    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,94,12,.12),transparent)"></div>
-    <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 fu">
-        {{-- Badge live --}}
-        <div class="inline-flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-semibold mb-10" style="border-color:rgba(212,94,12,.25);background:rgba(212,94,12,.08);color:#FF8C42">
-            <span class="relative flex h-2 w-2 shrink-0">
-                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background:#D45E0C"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full" style="background:#D45E0C"></span>
-            </span>
-            {{ $stats['restaurants'] }} restaurants actifs ce soir
-        </div>
-
-        {{-- Titre massif --}}
-        <h2 class="font-display font-normal leading-[1.04] text-5xl sm:text-6xl lg:text-[4.5rem]" style="color:#FAF8F5">
-            Votre prochain<br>client commande<br>
-            <span class="not-italic" style="color:#D45E0C">dans 15 minutes.</span>
-        </h2>
-        <p class="text-lg mt-6 max-w-lg mx-auto leading-relaxed" style="color:rgba(250,248,245,.4)">Rejoignez les restaurateurs ivoiriens qui encaissent en direct sur leur Mobile Money.</p>
-
-        {{-- CTA --}}
-        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="{{ route('register') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-4 text-white font-semibold rounded-2xl transition-all hover:-translate-y-0.5 text-base" style="background:#D45E0C;box-shadow:0 8px 32px rgba(212,94,12,.4)">
-                Créer mon restaurant — C'est gratuit
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-            <a href="{{ route('contact') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold rounded-2xl border transition-all text-base" style="color:rgba(250,248,245,.45);border-color:rgba(250,248,245,.1);background:rgba(250,248,245,.03)" onmouseover="this.style.color='rgba(250,248,245,.85)'" onmouseout="this.style.color='rgba(250,248,245,.45)'">
-                Parler à un expert
-            </a>
-        </div>
-
-        {{-- Reassurance --}}
-        <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm" style="color:rgba(250,248,245,.35)">
-            @foreach(['15 min pour être en ligne','Support WhatsApp inclus','À partir de 5 000 F/mois','Annulation libre'] as $t)
-            <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" style="color:#D45E0C" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                {{ $t }}
-            </span>
+{{-- ══════════ 8. QUESTIONS ══════════ --}}
+<section id="faq" class="vt-section scroll-mt-16">
+    <div class="vt-wrap max-w-3xl">
+        <h2 class="vt-h2">Questions fréquentes</h2>
+        <div class="mt-8 border-t-2 border-mp-black">
+            @foreach($faqs as [$q, $a])
+                <details class="group border-b-2 border-mp-line" @if($loop->first) open @endif>
+                    <summary class="flex items-center justify-between gap-4 py-5 cursor-pointer list-none text-lg font-bold [&::-webkit-details-marker]:hidden">
+                        {{ $q }}
+                        <span class="flex-none w-9 h-9 rounded-full bg-mp-paper flex items-center justify-center group-open:rotate-45 transition-transform" aria-hidden="true">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                        </span>
+                    </summary>
+                    <p class="pb-5 vt-muted">{{ $a }}</p>
+                </details>
             @endforeach
         </div>
+        <p class="mt-6"><a href="{{ route('faq') }}" class="vt-link">Toutes les questions</a></p>
     </div>
 </section>
 
-@push('scripts')
-<script>
-const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{threshold:.08});
-document.querySelectorAll('.fu').forEach(el=>io.observe(el));
-</script>
-@endpush
+{{-- ══════════ 9. REJOINDRE ══════════ --}}
+<section class="pb-14 md:pb-20">
+    <div class="vt-wrap grid gap-4 md:grid-cols-2">
+        <a href="{{ route('representative.program') }}" class="rounded-2xl border-2 border-mp-line p-6 hover:border-mp-black block">
+            <h2 class="vt-h3">Devenir représentant dans votre ville</h2>
+            <p class="mt-1 vt-muted">Présentez MenuPro aux commerces de votre ville et touchez une part des abonnements.</p>
+        </a>
+        <a href="{{ route('devenir-livreur') }}" class="rounded-2xl border-2 border-mp-line p-6 hover:border-mp-black block">
+            <h2 class="vt-h3">Devenir livreur</h2>
+            <p class="mt-1 vt-muted">Recevez des courses près de vous et soyez payé sur votre Mobile Money.</p>
+        </a>
+    </div>
+</section>
+
+{{-- ══════════ 10. APPEL FINAL ══════════ --}}
+<section class="bg-mp-orange">
+    <div class="vt-wrap py-14 md:py-20 grid gap-8 md:grid-cols-[1.5fr_1fr] md:items-center">
+        <div>
+            <h2 class="vt-h2">Mettez votre commerce en ligne aujourd'hui.</h2>
+            <p class="mt-4 text-lg">{{ $trial }} jours gratuits. Vous ne payez que si vous continuez.</p>
+        </div>
+        <div class="grid gap-3">
+            <a href="{{ route('register') }}" class="vt-btn vt-btn-dark vt-btn-block">Créer mon commerce</a>
+            <a href="{{ route('contact') }}?type=demo" class="vt-btn vt-btn-light vt-btn-block">Être rappelé par l'équipe</a>
+        </div>
+    </div>
+</section>
 </x-layouts.public>

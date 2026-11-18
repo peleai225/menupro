@@ -1,207 +1,99 @@
-<x-layouts.public title="FAQ - Questions Fréquentes" description="Réponses aux questions fréquentes sur MenuPro : tarifs, commandes en ligne, paiement, menu digital pour restaurants.">
-    <!-- Hero Section -->
-    <section class="relative bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 py-20 overflow-hidden">
-        <div class="absolute inset-0 pattern-dots opacity-30"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-3xl mx-auto">
-                <span class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full text-primary-400 text-sm font-medium mb-6">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Centre d'aide
-                </span>
-                <h1 class="text-4xl sm:text-5xl font-bold text-white mb-6">
-                    Questions Fréquentes
-                </h1>
-                <p class="text-xl text-neutral-300">
-                    Trouvez rapidement les réponses à vos questions sur MenuPro.
-                </p>
+@use('App\Support\VitrineGrid', 'G')
+@php
+    $fmt = fn ($n) => G::money($n);
+    $trial = G::trialDays();
+    $rate = G::commission();
+    $reducedRate = G::reducedCommission();
+    $plans = G::plans();
+    $discounts = collect(config('plans.billing_periods'))->only(['quarterly', 'semiannual', 'annual'])->pluck('discount')->map(fn ($d) => $d . ' %');
+
+    $groups = [
+        'general' => ['Général', [
+            ["Qu'est-ce que MenuPro ?", "MenuPro met votre commerce en ligne : vos clients commandent depuis leur téléphone sur app.menupro.ci, paient en Mobile Money ou en espèces, et suivent leur commande en direct. Vous gérez tout depuis votre tableau de bord : commandes, livraisons, caisse, stock et statistiques."],
+            ["Pour quels commerces ?", "Restaurants et maquis, stands de rue (garba, jus, paninis…), boutiques et superettes de quartier, hôtels et complexes. Chaque type de commerce a son offre."],
+            ["Je tiens une boutique. Comment ça marche ?", "Avec l'offre Boutique, vous publiez votre catalogue d'articles avec photos et prix. Vos clients commandent en ligne, paient par Mobile Money et se font livrer par les livreurs MenuPro, ou passent récupérer leur commande."],
+            ["Comment créer mon commerce sur MenuPro ?", "Cliquez sur « Créer mon commerce », choisissez votre type de commerce, puis renseignez votre compte et votre établissement. Vous ajoutez ensuite vos produits depuis votre téléphone."],
+            ["Dois-je avoir des compétences techniques ?", "Non. Si vous savez utiliser WhatsApp, vous saurez utiliser MenuPro. Votre représentant local ou notre équipe peut aussi vous aider à démarrer."],
+            ["Mes clients doivent-ils installer une application ?", "Non. Ils commandent depuis le navigateur de leur téléphone, en scannant votre QR code ou en ouvrant votre lien. Une application Android existe aussi pour ceux qui la préfèrent."],
+        ]],
+        'pricing' => ['Tarifs', [
+            ["Combien coûte MenuPro ?", "Stand : " . $fmt($plans['stand']->price) . " F/mois ou " . $fmt(G::weeklyPrice()) . " F/semaine. " . $plans['essentiel']->name . " (restaurants, maquis, boutiques) : " . $fmt($plans['essentiel']->price) . " F/mois. Pro : " . $fmt($plans['pro']->price) . " F/mois. Gold : sur devis, à partir de " . $fmt($plans['gold']->price) . " F/mois. Essai gratuit de " . $trial . " jours avec toutes les fonctions du plan Pro."],
+            ["Y a-t-il des frais cachés ?", "Non. La livraison est incluse : MenuPro prend " . $rate . " uniquement sur les commandes livrées (" . $reducedRate . " avec le plan Pro). Pas de frais de mise en service ni de résiliation, et aucune commande n'est jamais bloquée."],
+            ["Puis-je payer pour plusieurs mois ?", "Oui : au mois, au trimestre, au semestre ou à l'année (et à la semaine pour le plan Stand). Vous économisez " . $discounts->join(', ', ' ou ') . " selon la durée."],
+            ["Comment payer mon abonnement ?", "En Mobile Money : Wave, Orange Money, MTN MoMo ou Moov Money. Aucun prélèvement automatique : vous payez quand vous renouvelez."],
+            ["Que se passe-t-il si je dépasse les commandes prévues par mon plan ?", "Rien de bloquant : vos clients continuent de commander. Vous recevez simplement une proposition de passer au plan supérieur."],
+        ]],
+        'features' => ['Fonctions', [
+            ["Comment mes clients passent-ils commande ?", "Ils scannent le QR code sur la table ou la vitrine, ou ouvrent le lien que vous partagez sur WhatsApp. Ils choisissent leurs produits, paient et suivent la commande. Vous recevez une alerte sonore à chaque commande."],
+            ["Comment mes clients paient-ils ?", "Par Wave, Orange Money, MTN MoMo ou Moov Money, ou en espèces si vous l'acceptez. L'argent arrive sur votre portefeuille MenuPro, retirable sur votre Mobile Money."],
+            ["Sur place, à emporter, en livraison ?", "Les trois. Vous activez ou désactivez chaque option. La livraison est assurée par les livreurs MenuPro."],
+            ["Puis-je gérer mon stock ?", "Oui : stock simple à partir du plan " . $plans['essentiel']->name . ", et stock par ingrédient avec la rentabilité de chaque produit dans le plan Pro."],
+            ["Puis-je avoir plusieurs employés ?", "Oui, selon le plan : " . $plans['essentiel']->max_employees . " employés avec " . $plans['essentiel']->name . ", " . $plans['pro']->max_employees . " avec Pro, illimité avec Gold. Chacun a son propre accès."],
+            ["Comment créer des codes promo ?", "Dans votre tableau de bord, section « Codes promo » : réduction en pourcentage ou en montant fixe, avec limite d'utilisation et dates de validité."],
+            ["Comment imprimer mon QR code ?", "Dans votre tableau de bord, section « QR Code » : téléchargez vos QR codes prêts à imprimer. Selon votre plan, des autocollants et une affiche vitrine vous sont fournis."],
+        ]],
+        'technical' => ['Sécurité et aide', [
+            ["Mes données sont-elles protégées ?", "Oui. Les échanges sont chiffrés (HTTPS) et vos données sont traitées conformément à la loi ivoirienne n° 2013-450 relative à la protection des données à caractère personnel."],
+            ["Les paiements sont-ils sécurisés ?", "Les paiements passent par des opérateurs Mobile Money et des partenaires de paiement agréés. MenuPro ne voit jamais le code secret de vos clients."],
+            ["Que faire si j'ai un problème ?", "Écrivez-nous sur WhatsApp ou via la page Contact. Les plans Pro et Gold bénéficient d'un support prioritaire."],
+            ["MenuPro fonctionne-t-il avec une connexion faible ?", "Une connexion internet est nécessaire, mais les pages de commande sont pensées pour se charger vite, même sur une connexion faible."],
+        ]],
+    ];
+@endphp
+<x-layouts.public title="Questions fréquentes" description="Réponses aux questions sur MenuPro : tarifs, commandes en ligne, paiement Mobile Money, livraison, restaurants, stands et boutiques.">
+    <section class="pt-10 pb-6 md:pt-16">
+        <div class="vt-wrap max-w-3xl">
+            <h1 class="vt-h1">Questions fréquentes</h1>
+            <p class="vt-lead mt-4">Vous ne trouvez pas votre réponse ? <a href="{{ route('contact') }}" class="vt-link">Écrivez-nous</a>.</p>
+
+            <div class="mt-8" x-data="{ search: '' }">
+                <label for="faq-search" class="vt-label">Rechercher une question</label>
+                <input type="search" id="faq-search" x-model="search" placeholder="Ex. livraison, boutique, paiement"
+                       @input="
+                           const s = search.toLowerCase();
+                           document.querySelectorAll('[data-faq-item]').forEach(el => { el.hidden = !!s && !el.textContent.toLowerCase().includes(s); });
+                           document.querySelectorAll('[data-faq-group]').forEach(g => { g.hidden = !!s && !g.querySelector('[data-faq-item]:not([hidden])'); });
+                       "
+                       class="vt-input">
             </div>
+
+            <nav class="mt-6 flex flex-wrap gap-2" aria-label="Thèmes">
+                @foreach($groups as $key => [$label])
+                    <a href="#{{ $key }}" class="inline-flex items-center min-h-11 px-4 rounded-full border-2 border-mp-line font-semibold hover:border-mp-black">{{ $label }}</a>
+                @endforeach
+            </nav>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="py-16 lg:py-24 bg-neutral-50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Search Box -->
-            <div class="mb-12" x-data="{ search: '' }">
-                <div class="relative">
-                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text"
-                           x-model="search"
-                           @input="
-                               const s = search.toLowerCase();
-                               document.querySelectorAll('[data-faq-item]').forEach(el => {
-                                   el.style.display = !s || el.textContent.toLowerCase().includes(s) ? '' : 'none';
-                               });
-                           "
-                           placeholder="Rechercher une question..."
-                           class="block w-full pl-12 pr-4 py-4 text-lg bg-white border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm">
+    <section class="pb-16 md:pb-24">
+        <div class="vt-wrap max-w-3xl space-y-12">
+            @foreach($groups as $key => [$label, $items])
+                <div id="{{ $key }}" class="scroll-mt-20" data-faq-group>
+                    <h2 class="vt-h2 text-[1.75rem]">{{ $label }}</h2>
+                    <div class="mt-4 border-t-2 border-mp-black">
+                        @foreach($items as [$q, $a])
+                            <details class="group border-b-2 border-mp-line" data-faq-item>
+                                <summary class="flex items-center justify-between gap-4 py-5 cursor-pointer list-none text-lg font-bold [&::-webkit-details-marker]:hidden">
+                                    {{ $q }}
+                                    <span class="flex-none w-9 h-9 rounded-full bg-mp-paper flex items-center justify-center group-open:rotate-45 transition-transform" aria-hidden="true">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                                    </span>
+                                </summary>
+                                <p class="pb-5 vt-muted">{{ $a }}</p>
+                            </details>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-
-            <!-- FAQ Categories -->
-            <div x-data="{ activeTab: 'general' }" class="space-y-8">
-                
-                <!-- Category Tabs -->
-                <div class="flex flex-wrap gap-2 justify-center">
-                    @foreach([
-                        'general' => ['label' => 'Général', 'icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        'pricing' => ['label' => 'Tarifs', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        'features' => ['label' => 'Fonctionnalités', 'icon' => 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'],
-                        'technical' => ['label' => 'Technique', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'],
-                    ] as $key => $tab)
-                        <button @click="activeTab = '{{ $key }}'"
-                                :class="activeTab === '{{ $key }}' ? 'bg-primary-500 text-white' : 'bg-white text-neutral-700 hover:bg-neutral-100'"
-                                class="flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors border border-neutral-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tab['icon'] }}"/>
-                            </svg>
-                            {{ $tab['label'] }}
-                        </button>
-                    @endforeach
-                </div>
-
-                <!-- General Questions -->
-                <div x-show="activeTab === 'general'" x-transition class="space-y-4">
-                    <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions générales</h2>
-
-                    @foreach([
-                        ['q' => "Qu'est-ce que MenuPro ?", 'a' => "MenuPro est une plateforme SaaS qui permet aux restaurants en Côte d'Ivoire de digitaliser leur activité. Créez votre menu en ligne, recevez des commandes, gérez votre stock et analysez vos performances depuis un seul tableau de bord."],
-                        ['q' => "Comment créer mon restaurant sur MenuPro ?", 'a' => "C'est simple ! Cliquez sur \"Créer mon restaurant\", remplissez le formulaire d'inscription avec les informations de votre établissement, et votre menu sera en ligne en quelques minutes."],
-                        ['q' => "Dois-je avoir des compétences techniques ?", 'a' => "Absolument pas ! MenuPro est conçu pour être utilisé par tous. L'interface est intuitive et ne nécessite aucune connaissance en programmation. Si vous savez utiliser un smartphone, vous saurez utiliser MenuPro."],
-                        ['q' => "Puis-je personnaliser l'apparence de mon menu ?", 'a' => "Oui ! Vous pouvez ajouter votre logo, personnaliser les couleurs, ajouter des photos de vos plats, et bien plus. Votre menu reflétera parfaitement l'identité de votre restaurant."],
-                        ['q' => "MenuPro fonctionne-t-il sur mobile ?", 'a' => "Oui, MenuPro est entièrement responsive. Vos clients peuvent commander depuis leur smartphone, tablette ou ordinateur. Le tableau de bord de gestion est également accessible sur tous les appareils."],
-                    ] as $index => $faq)
-                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                            <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
-                                <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
-                                <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="open" x-collapse>
-                                <div class="px-5 pb-5 text-neutral-600">
-                                    {{ $faq['a'] }}
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <!-- Pricing Questions -->
-                <div x-show="activeTab === 'pricing'" x-transition class="space-y-4">
-                    <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions sur les tarifs</h2>
-
-                    @foreach([
-                        ['q' => "Combien coûte MenuPro ?", 'a' => "Quatre plans : Stand à 5 000 F/mois (ou 1 500 F/semaine), Restaurant à 15 000 F/mois, Pro à 30 000 F/mois et Gold sur devis (à partir de 75 000 F/mois). Essai gratuit de " . config('plans.trial_days') . " jours avec toutes les fonctions du plan Pro. Détails sur la page Tarifs."],
-                        ['q' => "Y a-t-il des frais cachés ?", 'a' => "Non. Livraison incluse — commission de 12 % uniquement sur les commandes livrées (10 % avec le plan Pro). Pas de frais de mise en service, pas de frais de résiliation, et aucune commande n'est jamais bloquée."],
-                        ['q' => "Puis-je choisir ma durée d'abonnement ?", 'a' => "Oui ! Vous pouvez souscrire au mois, au trimestre, au semestre ou à l'année (et à la semaine pour le plan Stand). Plus la durée est longue, plus vous économisez — jusqu'à 20% de réduction sur l'abonnement annuel."],
-                        ['q' => "Quels moyens de paiement acceptez-vous ?", 'a' => "Nous acceptons les paiements par Mobile Money : Wave, Orange Money, MTN Money et Moov Money. Tous les paiements sont sécurisés via nos partenaires certifiés."],
-                        ['q' => "Proposez-vous des réductions pour un engagement annuel ?", 'a' => "Oui ! Vous bénéficiez de 10% de réduction en trimestriel, 15% en semestriel et 20% en annuel. Plus la durée est longue, plus la réduction est importante."],
-                    ] as $faq)
-                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                            <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
-                                <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
-                                <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="open" x-collapse>
-                                <div class="px-5 pb-5 text-neutral-600">
-                                    {{ $faq['a'] }}
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <!-- Features Questions -->
-                <div x-show="activeTab === 'features'" x-transition class="space-y-4">
-                    <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions sur les fonctionnalités</h2>
-
-                    @foreach([
-                        ['q' => "Comment mes clients passent-ils commande ?", 'a' => "Vos clients scannent le QR code sur leur table ou accèdent à votre menu via le lien que vous partagez. Ils peuvent ensuite parcourir le menu, ajouter des articles au panier et passer commande. Vous recevez une notification instantanée."],
-                        ['q' => "Puis-je gérer les commandes en livraison et sur place ?", 'a' => "Oui ! MenuPro supporte tous les types de commandes : sur place, à emporter et en livraison. Vous pouvez activer ou désactiver chaque option selon vos besoins."],
-                        ['q' => "Puis-je gérer mon stock avec MenuPro ?", 'a' => "Oui ! Le module de gestion des stocks vous permet de suivre vos ingrédients, définir des alertes de stock bas, et même désactiver automatiquement un plat quand un ingrédient est épuisé."],
-                        ['q' => "Comment créer des codes promo ?", 'a' => "Dans votre tableau de bord, accédez à la section \"Codes Promo\". Vous pouvez créer des réductions en pourcentage ou en montant fixe, définir des limites d'utilisation et des dates de validité."],
-                        ['q' => "Puis-je avoir plusieurs utilisateurs pour mon restaurant ?", 'a' => "Oui ! Votre abonnement inclut jusqu'à 5 employés. Vous pouvez inviter des membres de votre équipe avec différents niveaux d'accès (admin, employé). Chacun peut gérer les commandes depuis son propre compte. Des employés supplémentaires sont disponibles en add-on."],
-                        ['q' => "Comment fonctionne le QR code par table ?", 'a' => "MenuPro génère un QR code unique pour chaque table de votre restaurant. Vos clients scannent le QR code et accèdent directement au menu avec le numéro de table pré-rempli. Vous pouvez télécharger et imprimer tous vos QR codes en PDF."],
-                    ] as $faq)
-                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                            <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
-                                <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
-                                <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="open" x-collapse>
-                                <div class="px-5 pb-5 text-neutral-600">
-                                    {{ $faq['a'] }}
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <!-- Technical Questions -->
-                <div x-show="activeTab === 'technical'" x-transition class="space-y-4">
-                    <h2 class="text-2xl font-bold text-neutral-900 mb-6">Questions techniques</h2>
-
-                    @foreach([
-                        ['q' => "Comment imprimer mon QR code ?", 'a' => "Dans votre tableau de bord, accédez à la section \"QR Code\". Vous pouvez télécharger vos QR codes par table en format PDF prêt à imprimer, ou générer une carte format réseaux sociaux pour partager sur Facebook et Instagram."],
-                        ['q' => "Les paiements en ligne sont-ils sécurisés ?", 'a' => "Absolument ! Nous utilisons des partenaires de paiement certifiés (Wave, CinetPay, FusionPay) conformes aux normes de sécurité. Vos données et celles de vos clients sont protégées par un chiffrement SSL."],
-                        ['q' => "Que se passe-t-il si j'ai un problème technique ?", 'a' => "Notre équipe de support est disponible par email et via le formulaire de contact. Nous nous engageons à répondre sous 24h. Un add-on Support Prioritaire est également disponible pour une assistance sous 2h."],
-                        ['q' => "Puis-je exporter mes données ?", 'a' => "Oui ! Vous pouvez exporter vos commandes et statistiques au format Excel. Vos données vous appartiennent et vous pouvez les récupérer à tout moment."],
-                        ['q' => "MenuPro est-il disponible hors connexion ?", 'a' => "MenuPro nécessite une connexion internet pour fonctionner. Cependant, le menu public de vos clients est optimisé pour charger rapidement même avec une connexion lente."],
-                    ] as $faq)
-                        <div data-faq-item x-data="{ open: false }" class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                            <button @click="open = !open" class="w-full flex items-center justify-between p-5 text-left hover:bg-neutral-50 transition-colors">
-                                <span class="font-semibold text-neutral-900">{{ $faq['q'] }}</span>
-                                <svg class="w-5 h-5 text-neutral-500 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="open" x-collapse>
-                                <div class="px-5 pb-5 text-neutral-600">
-                                    {{ $faq['a'] }}
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @endforeach
         </div>
     </section>
 
-    <!-- Still have questions -->
-    <section class="py-16 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-br from-primary-50 to-orange-50 rounded-2xl p-8 md:p-12 text-center border border-primary-100">
-                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                    </svg>
-                </div>
-                <h2 class="text-2xl font-bold text-neutral-900 mb-4">Vous n'avez pas trouvé votre réponse ?</h2>
-                <p class="text-neutral-600 mb-8 max-w-xl mx-auto">
-                    Notre équipe est là pour vous aider. Contactez-nous et nous vous répondrons dans les plus brefs délais.
-                </p>
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ route('contact') }}" class="btn btn-primary">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                        Nous contacter
-                    </a>
-                    <a href="{{ route('register') }}" class="btn btn-outline">
-                        Créer mon restaurant
-                    </a>
-                </div>
+    <section class="bg-mp-orange">
+        <div class="vt-wrap py-12 md:py-16 grid gap-6 md:grid-cols-[1.5fr_1fr] md:items-center">
+            <h2 class="vt-h2">Prêt à essayer ? {{ $trial }} jours gratuits.</h2>
+            <div class="grid gap-3">
+                <a href="{{ route('register') }}" class="vt-btn vt-btn-dark vt-btn-block">Créer mon commerce</a>
+                <a href="{{ route('contact') }}" class="vt-btn vt-btn-light vt-btn-block">Poser une question</a>
             </div>
         </div>
     </section>

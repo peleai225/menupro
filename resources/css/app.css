@@ -116,6 +116,14 @@
     --color-warm-700:  #3D3330;
     --color-warm-500:  #7C6F65;
     --color-warm-300:  #B8AFA8;
+
+    /* Vitrine publique (site, inscription, connexion) — identité MenuPro */
+    --color-mp-orange: #F97316;  /* surfaces et boutons (texte noir dessus : 7,6:1) */
+    --color-mp-ink:    #C2410C;  /* orange lisible sur blanc (5,2:1) */
+    --color-mp-black:  #000000;
+    --color-mp-text:   #45403B;  /* texte secondaire (9,6:1 sur blanc) */
+    --color-mp-paper:  #FFF4EA;  /* fond de section alterné, teinte orange */
+    --color-mp-line:   #E8DFD6;
 }
 
 /* Editorial typography utilities */
@@ -1512,4 +1520,96 @@ section {
         color: black;
         background: white;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VITRINE PUBLIQUE (accueil, tarifs, FAQ, inscription, connexion)
+   Mobile d'abord : corps 17 px, boutons 52 px, focus visibles, aucun débordement.
+   Toutes les classes sont préfixées « vt- » pour ne rien changer au tableau de bord.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.vt {
+    font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--color-mp-black);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-x: clip;
+}
+.vt :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 3px solid var(--color-mp-black);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--color-mp-orange);
+    border-radius: 0.5rem;
+}
+.vt-wrap { width: 100%; max-width: 72rem; margin-inline: auto; padding-inline: 1rem; }
+@media (min-width: 640px) { .vt-wrap { padding-inline: 1.5rem; } }
+.vt-section { padding-block: 3.5rem; }
+@media (min-width: 768px) { .vt-section { padding-block: 5.5rem; } }
+
+.vt-h1 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.04; font-size: clamp(2.35rem, 9.5vw, 4.5rem); text-wrap: balance; }
+.vt-h2 { font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; font-size: clamp(1.75rem, 6.5vw, 2.75rem); text-wrap: balance; }
+.vt-h3 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; font-size: 1.25rem; }
+.vt-lead { font-size: 1.125rem; line-height: 1.6; color: var(--color-mp-text); max-width: 38rem; }
+@media (min-width: 768px) { .vt-lead { font-size: 1.25rem; } }
+.vt-muted { color: var(--color-mp-text); }
+.vt-num { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+.vt-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    min-height: 3.25rem; padding: 0.75rem 1.5rem; border-radius: 0.875rem;
+    font-weight: 700; font-size: 1.0625rem; line-height: 1.2; text-align: center;
+    text-decoration: none; transition: background-color .15s, border-color .15s, transform .15s;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.vt-btn:active { transform: scale(.98); }
+.vt-btn-primary { background: var(--color-mp-orange); color: var(--color-mp-black); }
+.vt-btn-primary:hover { background: #FB8A3C; }
+.vt-btn-dark { background: var(--color-mp-black); color: #fff; }
+.vt-btn-dark:hover { background: #262626; }
+.vt-btn-ghost { background: #fff; color: var(--color-mp-black); border: 2px solid var(--color-mp-black); }
+.vt-btn-ghost:hover { background: var(--color-mp-paper); }
+.vt-btn-light { background: #fff; color: var(--color-mp-black); }
+.vt-btn-light:hover { background: var(--color-mp-paper); }
+.vt-btn-block { width: 100%; }
+
+.vt-link { color: var(--color-mp-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+.vt-link:hover { color: var(--color-mp-black); }
+
+/* Étiquette de prix (signature visuelle) : trou de suspension découpé dans le coin */
+.vt-tag {
+    position: relative; border-radius: 1.25rem; padding: 1.5rem 1.25rem 1.25rem;
+    background:
+        radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, var(--vt-tag-ring, var(--color-mp-black)) 0.5rem, transparent 0.55rem),
+        var(--vt-tag-bg, #fff);
+    border: 2px solid var(--vt-tag-border, var(--color-mp-black));
+    -webkit-mask: radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, #000 0.5rem);
+            mask: radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, #000 0.5rem);
+}
+.vt-tag-new { --vt-tag-bg: var(--color-mp-orange); --vt-tag-border: var(--color-mp-black); }
+.vt-pill { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .75rem; border-radius: 999px; font-size: .9375rem; font-weight: 700; }
+
+/* Listes à puces cochées */
+.vt-checks > li { display: flex; gap: .625rem; align-items: flex-start; }
+.vt-checks > li::before {
+    content: ""; flex: none; width: 1.25rem; height: 1.25rem; margin-top: .2rem; border-radius: 999px;
+    background: var(--color-mp-orange) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round' d='M5.5 10.5l3 3 6-7'/%3E%3C/svg%3E") center/0.9rem no-repeat;
+}
+
+/* Champs de formulaire (inscription, connexion) */
+.vt-label { display: block; font-size: 1rem; font-weight: 700; color: var(--color-mp-black); margin-bottom: .5rem; }
+.vt-hint { font-size: .9375rem; color: var(--color-mp-text); font-weight: 400; }
+.vt-input {
+    width: 100%; min-height: 3.25rem; padding: .75rem 1rem; border-radius: .875rem;
+    border: 2px solid #CFC6BD; background: #fff; color: var(--color-mp-black); font-size: 1rem;
+    transition: border-color .15s;
+}
+.vt-input::placeholder { color: #857C74; }
+.vt-input:focus { outline: none; border-color: var(--color-mp-black); box-shadow: 0 0 0 3px var(--color-mp-orange); }
+.vt-input.has-icon { padding-left: 3rem; }
+
+/* Maquette de téléphone (aperçu du vrai écran client, en HTML : aucune image à charger) */
+.vt-phone { width: 100%; max-width: 19rem; border-radius: 2.25rem; background: var(--color-mp-black); padding: .6rem; box-shadow: 0 30px 60px -30px rgba(0,0,0,.45); }
+.vt-phone-screen { border-radius: 1.75rem; background: #fff; overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+    .vt *, .vt *::before, .vt *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
