@@ -62,6 +62,7 @@
         <figure class="relative mx-auto w-full max-w-[19rem]">
             <div class="vt-phone" role="img" aria-label="Exemple d'écran de commande sur app.menupro.ci : un panier de deux plats payé par Wave, avec suivi de livraison.">
                 <div class="vt-phone-screen" aria-hidden="true">
+                    <img src="{{ asset('images/home/offre-restaurant.jpg') }}" alt="" width="800" height="533" class="w-full h-28 object-cover" fetchpriority="high" decoding="async">
                     <div class="bg-mp-orange px-4 pt-5 pb-4">
                         <p class="text-sm font-semibold">app.menupro.ci</p>
                         <p class="text-xl font-bold leading-tight mt-1">Maquis du Carrefour</p>
@@ -102,6 +103,7 @@
             @foreach($offers as $key => $offer)
                 @php $from = G::offerFrom($key); @endphp
                 <article class="vt-tag flex flex-col {{ !empty($offer['new']) ? 'vt-tag-new' : '' }}">
+                    <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[3/2] object-cover rounded-xl mb-5" loading="lazy" decoding="async">
                     <div class="flex items-start justify-between gap-3 pl-8">
                         <svg class="w-9 h-9 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $offer['icon'] }}"/></svg>
                         @if(!empty($offer['new']))
