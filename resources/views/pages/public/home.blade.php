@@ -158,8 +158,58 @@
 {{-- ══════════ 4. CE QUE VOUS GÉREZ ══════════ --}}
 <section class="vt-section bg-mp-black text-white">
     <div class="vt-wrap">
+        <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+        <div>
         <h2 class="vt-h2 max-w-2xl">Tout se pilote depuis votre téléphone</h2>
-        <ul class="mt-10 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+        <p class="vt-lead mt-4 text-neutral-200">Votre tableau de bord MenuPro&nbsp;: chaque commande arrive avec une alerte, vous l'acceptez en un geste, et vous voyez vos ventes du jour en direct.</p>
+        </div>
+
+        {{-- Aperçu du tableau de bord commerçant (HTML pur, aucune image) --}}
+        <figure class="mx-auto w-full max-w-md text-mp-black">
+            <div class="rounded-3xl bg-white p-4 sm:p-5 shadow-[10px_10px_0_0_#F97316]" role="img" aria-label="Exemple de tableau de bord MenuPro : ventes du jour, nouvelle commande à accepter et graphique des ventes.">
+                <div aria-hidden="true">
+                    <div class="flex items-center justify-between">
+                        <p class="font-bold text-lg">Aujourd'hui</p>
+                        <span class="vt-pill bg-green-100 text-green-800 text-sm">● Ouvert</span>
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-2">
+                        @foreach([['Ventes', '87 500 F'], ['Commandes', '24'], ['Livrées', '19']] as [$l, $v])
+                            <div class="rounded-xl bg-mp-paper p-3">
+                                <p class="text-xs font-semibold text-neutral-600">{{ $l }}</p>
+                                <p class="font-bold vt-num text-base sm:text-lg whitespace-nowrap">{{ $v }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-3 rounded-2xl border-2 border-mp-black p-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <p class="text-sm font-bold text-orange-700">Nouvelle commande · il y a 30 s</p>
+                                <p class="font-bold mt-0.5">#1184 · Awa K. · Livraison</p>
+                                <p class="text-sm text-neutral-600">2 × Garba thon, 1 × Jus de bissap</p>
+                            </div>
+                            <p class="font-bold vt-num whitespace-nowrap">2 700 F</p>
+                        </div>
+                        <p class="mt-1 text-sm font-semibold text-green-700">Payée par Wave</p>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <span class="rounded-xl bg-mp-orange text-mp-black text-center py-2.5 font-bold">Accepter</span>
+                            <span class="rounded-xl border-2 border-mp-line text-center py-2.5 font-bold">Refuser</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-sm font-semibold text-neutral-600">Ventes par heure</p>
+                        <div class="mt-2 flex items-end gap-1.5 h-20">
+                            @foreach([20, 35, 70, 95, 55, 30, 45, 80, 100, 60] as $h)
+                                <span class="flex-1 rounded-t {{ $h >= 90 ? 'bg-mp-orange' : 'bg-neutral-300' }}" style="height: {{ $h }}%"></span>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <figcaption class="mt-5 text-center text-[0.9375rem] text-neutral-300">Exemple de tableau de bord commerçant</figcaption>
+        </figure>
+        </div>
+
+        <ul class="mt-12 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
             @foreach([
                 ['Commandes en direct', 'Alerte sonore à chaque commande, écran cuisine, impression du ticket.'],
                 ['Livraison incluse', 'Les livreurs MenuPro récupèrent et livrent. ' . $rate . ' uniquement sur les commandes livrées.'],
