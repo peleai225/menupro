@@ -16,6 +16,11 @@
     $preselectedType = $preselectedType ?? (in_array($requestedType, ['boutique', 'stand'], true) ? $requestedType : null);
     $preselectedGroup = collect($businessTypes)->search(fn ($types) => array_key_exists((string) $preselectedType, $types));
     $offer = $isStand ? 'stand' : (array_search($preselectedGroup, $offerGroups, true) ?: 'restaurant');
+    // Retour après erreur de validation : l'offre suit le type déjà choisi
+    if ($oldType = old('restaurant_type')) {
+        $oldGroup = collect($businessTypes)->search(fn ($types) => array_key_exists((string) $oldType, $types));
+        $offer = array_search($oldGroup, $offerGroups, true) ?: $offer;
+    }
     $offerCards = collect(config('vitrine.offers', []))->map(function ($o, $key) {
         $query = request()->except(['type']);
         if (!empty($o['register_type'])) {
@@ -32,30 +37,44 @@
     })->values();
     $defaultForOffer = ['restaurant' => '', 'stand' => 'stand', 'boutique' => 'boutique'][$offer];
     $initialRestaurantType = old('restaurant_type', array_key_exists((string) $preselectedType, $businessTypes[$offerGroups[$offer]] ?? []) ? $preselectedType : $defaultForOffer);
-    $check = '<svg class="w-5 h-5 shrink-0 text-mp-ink" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+    // Étape 3 : plans par offre (RegisterController::offerPlans). Données réduites pour Alpine.
+    $offerPlans = $offerPlans ?? [];
+    $jsOfferPlans = collect($offerPlans)->map(fn ($g) => [
+        'default' => $g['default'],
+        'plans' => collect($g['plans'])->map(fn ($p) => \Illuminate\Support\Arr::only($p, ['slug', 'name', 'price', 'weekly_price', 'commission']))->values(),
+    ]);
+    $offerDefaultPlan = $offerPlans[$offer]['default'] ?? ($plan->slug ?? 'essentiel');
+    $offerPlanSlugs = array_column($offerPlans[$offer]['plans'] ?? [], 'slug');
+    $initialPlan = in_array(old('plan'), $offerPlanSlugs, true) ? old('plan') : $offerDefaultPlan;
+    if (isset($offerPlans[$offer])) {
+        $offerPlans[$offer]['default'] = $initialPlan; // présélection affichée côté serveur
+    }
+    $defaultTypesByOffer = collect(config('vitrine.offers', []))->map(fn ($o) => $o['restaurant_type'] ?? '');
+    $typeKeysByOffer = collect($offerGroups)->map(fn ($group) => array_keys($businessTypes[$group] ?? []));
+    $check = '<svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#FFEDD5"/><path d="M6 10.2l2.6 2.6L14 7.4" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 @endphp
 <x-layouts.auth title="Inscription">
     <div x-data="registerForm()">
         {{-- ═══ Type de commerce (avant tout le reste) ═══ --}}
         <fieldset x-show="step === 1" class="mb-8">
-            <legend class="vt-h2 mb-2">Quel est votre commerce ?</legend>
+            <legend class="vt-h2 !text-[1.875rem] sm:!text-[2.25rem] mb-2">Quel est votre commerce ?</legend>
             <p class="vt-muted mb-5">Choisissez votre offre. Vous pourrez changer de plan plus tard.</p>
             <div class="grid gap-3">
                 @foreach($offerCards as $card)
-                    <a href="{{ $card['url'] }}"
+                    <a href="{{ $card['url'] }}" @click.prevent="setOffer('{{ $card['key'] }}')"
                        :aria-current="offer === '{{ $card['key'] }}' ? 'true' : 'false'"
                        aria-current="{{ $offer === $card['key'] ? 'true' : 'false' }}"
-                       :class="offer === '{{ $card['key'] }}' ? 'border-mp-black bg-mp-orange' : 'border-mp-line bg-white hover:border-mp-black'"
-                       class="flex items-center gap-4 rounded-2xl border-2 p-4 min-h-[4.5rem]">
-                        <span class="flex-none w-6 h-6 rounded-full border-2 border-mp-black flex items-center justify-center bg-white" aria-hidden="true">
-                            <span class="w-3 h-3 rounded-full bg-mp-black" x-show="offer === '{{ $card['key'] }}'" @if($offer !== $card['key']) style="display:none" @endif></span>
+                       :class="{ 'is-on': offer === '{{ $card['key'] }}' }"
+                       class="vt-option min-h-[4.5rem] {{ $offer === $card['key'] ? 'is-on' : '' }}">
+                        <span class="vt-radio" aria-hidden="true">
+                            <span x-show="offer === '{{ $card['key'] }}'" @if($offer !== $card['key']) style="display:none" @endif></span>
                         </span>
                         <span class="flex-1 min-w-0">
                             <span class="flex flex-wrap items-center gap-2">
                                 <span class="font-bold text-lg">{{ $card['label'] }}</span>
-                                @if($card['key'] === 'boutique')<span class="vt-pill bg-mp-black text-white !text-sm !py-0.5">Nouveau</span>@endif
+                                @if($card['key'] === 'boutique')<span class="vt-badge bg-mp-black text-white">Nouveau</span>@endif
                             </span>
-                            <span class="block text-[0.9375rem]" :class="offer === '{{ $card['key'] }}' ? 'text-mp-black' : 'text-mp-text'">{{ $card['hint'] }}</span>
+                            <span class="block text-[0.9375rem] text-mp-text">{{ $card['hint'] }}</span>
                         </span>
                         <span class="text-right whitespace-nowrap">
                             <span class="block text-sm">dès</span>
@@ -75,7 +94,7 @@
                     <li>
                         <button type="button" @click="goToStep({{ $n }})" :disabled="step < {{ $n }}"
                                 class="w-full text-left disabled:cursor-default" :aria-current="step === {{ $n }} ? 'step' : 'false'">
-                            <span class="block h-2 rounded-full" :class="step >= {{ $n }} ? 'bg-mp-orange' : 'bg-mp-line'"></span>
+                            <span class="block h-1.5 rounded-full" :class="step >= {{ $n }} ? 'bg-mp-orange' : 'bg-neutral-200'"></span>
                             <span class="block mt-1.5 text-[0.9375rem]" :class="step >= {{ $n }} ? 'font-bold text-mp-black' : 'text-mp-text'">{{ $label }}</span>
                         </button>
                     </li>
@@ -87,7 +106,7 @@
         @if(session('register_ref_agent'))
             @php $refAgent = \App\Models\CommandoAgent::where('uuid', session('register_ref_agent'))->first(); @endphp
             @if($refAgent)
-                <div class="mb-6 p-4 rounded-2xl border-2 border-mp-line bg-mp-paper">
+                <div class="mb-6 p-4 vt-soft !rounded-2xl">
                     <p class="font-semibold">Parrainé par {{ $refAgent->full_name }}</p>
                     <p class="vt-muted">Agent MenuPro, {{ $refAgent->city }}</p>
                 </div>
@@ -95,7 +114,7 @@
         @endif
 
         @if ($errors->any())
-            <div class="mb-6 p-4 rounded-2xl border-2 border-[#B91C1C] bg-[#FEF2F2] text-[#7F1D1D]" role="alert" data-register-errors>
+            <div class="mb-6 vt-alert vt-alert-error" role="alert" data-register-errors>
                 <h2 class="font-bold">Corrigez les points suivants</h2>
                 <ul class="mt-1 list-disc pl-5 space-y-0.5">
                     @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
@@ -140,18 +159,18 @@
                             </button>
                         </div>
                         <div class="mt-3 flex gap-1.5" aria-hidden="true">
-                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-mp-line'"></div>
-                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-mp-line'"></div>
-                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-line'"></div>
-                            <div class="h-2 flex-1 rounded-full" :class="formData.password.length >= 12 ? 'bg-[#15803D]' : 'bg-mp-line'"></div>
+                            <div class="h-1.5 flex-1 rounded-full" :class="formData.password.length >= 1 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full" :class="formData.password.length >= 4 ? (formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-mp-orange') : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full" :class="formData.password.length >= 8 ? 'bg-[#15803D]' : 'bg-neutral-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full" :class="formData.password.length >= 12 ? 'bg-[#15803D]' : 'bg-neutral-200'"></div>
                         </div>
                         <p id="password-hint" class="mt-2 vt-hint">8 caractères minimum.</p>
                     </div>
                 </div>
 
-                <p x-show="stepError" x-cloak x-text="stepError" class="mt-6 font-semibold text-[#B91C1C]" role="alert"></p>
+                <p x-show="stepError" x-cloak x-text="stepError" class="vt-error !mt-6" role="alert"></p>
 
-                <button type="button" @click="next(1)" class="vt-btn vt-btn-primary vt-btn-block mt-8">Continuer</button>
+                <button type="button" @click="next(1)" class="vt-btn vt-btn-dark vt-btn-block mt-8">Continuer</button>
 
                 <p class="mt-6 text-center">Déjà inscrit ? <a href="{{ route('login') }}" class="vt-link">Se connecter</a></p>
             </section>
@@ -191,7 +210,7 @@
                         <input type="text" id="company_name" name="company_name" x-model="formData.company_name" placeholder="SARL …" class="vt-input">
                     </div>
 
-                    <details class="rounded-2xl border-2 border-mp-line">
+                    <details class="rounded-2xl ring-1 ring-neutral-200">
                         <summary class="flex items-center min-h-12 px-4 cursor-pointer font-semibold">Ajouter un RCCM (badge « vérifié »)</summary>
                         <div class="px-4 pb-4 space-y-4">
                             <div>
@@ -201,7 +220,7 @@
                             <div>
                                 <label for="rccm_document" class="vt-label">Extrait RCCM</label>
                                 <input type="file" id="rccm_document" name="rccm_document" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="rccm-hint"
-                                       class="block w-full text-base file:mr-3 file:min-h-11 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-mp-black file:text-white file:cursor-pointer">
+                                       class="block w-full text-base file:mr-3 file:min-h-11 file:px-4 file:rounded-xl file:border-0 file:font-semibold file:bg-neutral-100 file:text-mp-black file:cursor-pointer">
                                 <p id="rccm-hint" class="mt-1 vt-hint">PDF, JPEG ou PNG, 5 Mo maximum.</p>
                             </div>
                         </div>
@@ -211,7 +230,7 @@
                         <legend class="vt-label">Images <span class="vt-hint">(facultatif)</span></legend>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label for="logo-upload" class="relative aspect-square rounded-2xl border-2 border-dashed border-[#A89F96] bg-mp-paper flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
+                                <label for="logo-upload" class="relative aspect-square rounded-2xl border border-dashed border-[#A8A29E] bg-neutral-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
                                     <template x-if="logoPreview"><img :src="logoPreview" alt="Aperçu du logo" class="absolute inset-0 w-full h-full object-cover"></template>
                                     <span x-show="!logoPreview" class="font-semibold">Logo</span>
                                     <span x-show="!logoPreview" class="vt-hint">Carré</span>
@@ -220,7 +239,7 @@
                                        @change="logoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
                             </div>
                             <div>
-                                <label for="banner-upload" class="relative aspect-square rounded-2xl border-2 border-dashed border-[#A89F96] bg-mp-paper flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
+                                <label for="banner-upload" class="relative aspect-square rounded-2xl border border-dashed border-[#A8A29E] bg-neutral-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-mp-black">
                                     <template x-if="bannerPreview"><img :src="bannerPreview" alt="Aperçu de la bannière" class="absolute inset-0 w-full h-full object-cover"></template>
                                     <span x-show="!bannerPreview" class="font-semibold">Bannière</span>
                                     <span x-show="!bannerPreview" class="vt-hint">Paysage</span>
@@ -232,149 +251,125 @@
                     </fieldset>
                 </div>
 
-                <p x-show="stepError" x-cloak x-text="stepError" class="mt-6 font-semibold text-[#B91C1C]" role="alert"></p>
+                <p x-show="stepError" x-cloak x-text="stepError" class="vt-error !mt-6" role="alert"></p>
 
                 <div class="flex gap-3 mt-8">
                     <button type="button" @click="goToStep(1)" class="vt-btn vt-btn-ghost !px-4" aria-label="Revenir à l'étape précédente">Retour</button>
-                    <button type="button" @click="next(2)" class="vt-btn vt-btn-primary flex-1">Continuer</button>
+                    <button type="button" @click="next(2)" class="vt-btn vt-btn-dark flex-1">Continuer</button>
                 </div>
             </section>
 
-            {{-- ═══════════ ÉTAPE 3 — Abonnement ═══════════ --}}
-            <section x-show="step === 3" x-cloak aria-labelledby="step3-title"
-                     x-data="pricingCalculator()"
-                     x-init="init(); formData.plan = '{{ $plan->slug ?? 'essentiel' }}';">
+            {{-- ═══════════ ÉTAPE 3 — Abonnement (suit l'offre choisie à l'étape 1) ═══════════ --}}
+            <section x-show="step === 3" x-cloak aria-labelledby="step3-title">
                 <h1 id="step3-title" class="vt-h3 text-2xl">Choisissez votre plan</h1>
                 <p class="mt-1 mb-6 vt-muted">{{ config('plans.trial_days') }} jours d'essai gratuit avec toutes les fonctions du plan Pro, sans engagement. Ensuite, vous payez votre plan en Mobile Money.</p>
 
-                <input type="hidden" name="plan" x-model="formData.plan">
-                <input type="hidden" name="billing_period" :value="billingCycle">
+                <input type="hidden" name="plan" :value="formData.plan" value="{{ $offerPlans[$offer]['default'] ?? ($plan->slug ?? 'essentiel') }}">
+                <input type="hidden" name="billing_period" :value="billingCycle" value="monthly">
 
-                {{-- Stand : plan unique --}}
-                @if($isStand)
-                    <div class="mb-6 p-5 rounded-2xl border-2 border-mp-black bg-mp-paper">
-                        <div class="flex flex-wrap items-baseline justify-between gap-2">
-                            <p class="font-bold text-xl">Plan Stand</p>
-                            <p class="text-right">
-                                <span class="font-bold text-xl vt-num whitespace-nowrap">{{ number_format($plan->price, 0, ',', ' ') }} F/mois</span>
-                                @if($plan->supportsWeeklyBilling())
-                                    <span class="block vt-muted whitespace-nowrap">ou {{ number_format($plan->weekly_price, 0, ',', ' ') }} F/semaine</span>
-                                @endif
-                            </p>
-                        </div>
-                        <ul class="mt-4 grid gap-2">
-                            @foreach(array_merge($plan->features, ['QR Code + Mobile Money', config('plans.trial_days') . ' jours gratuits (fonctions Pro)']) as $f)
-                                <li class="flex items-start gap-2">{!! $check !!}<span>{{ $f }}</span></li>
-                            @endforeach
-                        </ul>
-                        @include('partials.plan-pack', ['slug' => $plan->slug, 'compact' => true])
-                    </div>
-                @endif
+                @foreach($offerPlans as $offerKey => $group)
+                    <div x-show="offer === '{{ $offerKey }}'" @if($offerKey !== $offer) style="display:none" @endif data-offer-plans="{{ $offerKey }}">
+                        @if(count($group['plans']) > 1)
+                            <fieldset class="mb-6">
+                                <legend class="sr-only">Plan</legend>
+                                <div class="space-y-3">
+                                    @foreach($group['plans'] as $p)
+                                        <button type="button" @click="selectPlan('{{ $p['slug'] }}')"
+                                                :aria-pressed="(formData.plan === '{{ $p['slug'] }}').toString()"
+                                                :class="{ 'is-on': formData.plan === '{{ $p['slug'] }}' }"
+                                                class="vt-option {{ $offerKey === $offer && $group['default'] === $p['slug'] ? 'is-on' : '' }}" data-plan="{{ $p['slug'] }}">
+                                            <span class="vt-radio" aria-hidden="true"><span x-show="formData.plan === '{{ $p['slug'] }}'" @if(!($offerKey === $offer && $group['default'] === $p['slug'])) style="display:none" @endif></span></span>
+                                            <span class="flex-1 min-w-0">
+                                                <span class="flex flex-wrap items-center gap-2">
+                                                    <span class="font-bold text-lg">{{ $p['name'] }}</span>
+                                                    @if(config("plans.offer_plans.{$offerKey}.default") === $p['slug'] && count($group['plans']) > 1)<span class="vt-badge bg-[#FFEDD5] text-[#9A3412]">Recommandé</span>@endif
+                                                </span>
+                                                <span class="block text-[0.9375rem] vt-muted">{{ $p['features'][0] ?? '' }}, {{ $p['features'][2] ?? '' }}</span>
+                                            </span>
+                                            <span class="text-right whitespace-nowrap">
+                                                @if($p['on_quote'])<span class="block text-sm">Sur devis, dès</span>@endif
+                                                <span class="font-bold vt-num">{{ number_format($p['price'], 0, ',', ' ') }} F</span>
+                                                <span class="block text-sm">/mois</span>
+                                            </span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <p class="mt-3 vt-hint">Commandes jamais bloquées, quel que soit le plan.</p>
+                            </fieldset>
+                        @else
+                            @php $p = $group['plans'][0]; @endphp
+                            <div class="mb-6 p-5 vt-soft">
+                                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                    <p class="font-bold text-xl">Plan {{ $p['name'] }}</p>
+                                    <p class="text-right">
+                                        <span class="font-bold text-xl vt-num whitespace-nowrap">{{ number_format($p['price'], 0, ',', ' ') }} F/mois</span>
+                                        @if($p['weekly_price'] > 0)
+                                            <span class="block vt-muted whitespace-nowrap">ou {{ number_format($p['weekly_price'], 0, ',', ' ') }} F/semaine</span>
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
 
-                {{-- Restaurant / Boutique : choix du plan --}}
-                @if(!$isStand && isset($availablePlans) && $availablePlans->count() > 1)
-                    <fieldset class="mb-6">
-                        <legend class="sr-only">Plan</legend>
-                        <div class="space-y-3">
-                            @foreach($availablePlans as $p)
-                                <button type="button"
-                                        @click="formData.plan = '{{ $p->slug }}'; basePriceMonthly = {{ (int) $p->price }}; currentPlanName = '{{ $p->name }}';"
-                                        :aria-pressed="(formData.plan === '{{ $p->slug }}').toString()"
-                                        :class="formData.plan === '{{ $p->slug }}' ? 'border-mp-black bg-mp-paper' : 'border-mp-line hover:border-mp-black'"
-                                        class="w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4">
-                                    <span class="flex-none w-6 h-6 rounded-full border-2 border-mp-black flex items-center justify-center bg-white" aria-hidden="true">
-                                        <span class="w-3 h-3 rounded-full bg-mp-black" x-show="formData.plan === '{{ $p->slug }}'"></span>
-                                    </span>
-                                    <span class="flex-1 min-w-0">
-                                        <span class="flex flex-wrap items-center gap-2">
-                                            <span class="font-bold text-lg">{{ $p->name }}</span>
-                                            @if($p->is_featured)<span class="vt-pill bg-mp-orange !text-sm !py-0.5">Le plus choisi</span>@endif
-                                        </span>
-                                        <span class="block text-[0.9375rem] vt-muted">
-                                            {{ $p->max_dishes >= 9999 ? 'Produits illimités' : $p->max_dishes . ' produits' }},
-                                            {{ \App\Models\Plan::isUnlimitedValue($p->max_employees) ? 'employés illimités' : $p->max_employees . ' employé' . ($p->max_employees > 1 ? 's' : '') }}@if($p->has_delivery), livraison incluse @endif
-                                        </span>
-                                    </span>
-                                    <span class="text-right whitespace-nowrap">
-                                        @if($p->is_on_quote)<span class="block text-sm">Sur devis, dès</span>@endif
-                                        <span class="font-bold vt-num">{{ number_format($p->price, 0, ',', ' ') }} F</span>
-                                        <span class="block text-sm">/mois</span>
-                                    </span>
-                                </button>
-                            @endforeach
-                        </div>
-                        <p class="mt-3 vt-hint">Commandes jamais bloquées, quel que soit le plan.</p>
-                    </fieldset>
-                @endif
-
-                @if(!$isStand)
-                    <fieldset class="mb-6">
-                        <legend class="vt-label">Durée de paiement</legend>
-                        <div class="grid grid-cols-2 gap-2">
-                            @foreach([['id' => 'monthly', 'label' => '1 mois', 'badge' => null], ['id' => 'quarterly', 'label' => '3 mois', 'badge' => '-10 %'], ['id' => 'semiannual', 'label' => '6 mois', 'badge' => '-15 %'], ['id' => 'annual', 'label' => '1 an', 'badge' => '-20 %']] as $cycle)
-                                <button type="button" @click="billingCycle = '{{ $cycle['id'] }}'" :aria-pressed="(billingCycle === '{{ $cycle['id'] }}').toString()"
-                                        :class="billingCycle === '{{ $cycle['id'] }}' ? 'bg-mp-black text-white border-mp-black' : 'bg-white border-mp-line hover:border-mp-black'"
-                                        class="min-h-12 px-3 rounded-xl border-2 font-bold text-base">
-                                    {{ $cycle['label'] }}@if($cycle['badge']) <span :class="billingCycle === '{{ $cycle['id'] }}' ? 'text-mp-orange' : 'text-mp-ink'">{{ $cycle['badge'] }}</span>@endif
-                                </button>
-                            @endforeach
-                        </div>
-                    </fieldset>
-
-                    <div class="mb-6 p-4 rounded-2xl border-2 border-mp-line">
-                        <p class="font-bold">Inclus</p>
-                        @foreach($availablePlans as $p)
-                            <ul x-show="formData.plan === '{{ $p->slug }}'" x-cloak class="mt-2 grid gap-2 sm:grid-cols-2">
-                                @foreach($p->features as $f)
-                                    <li class="flex items-start gap-2">{!! $check !!}<span>{{ $f }}</span></li>
-                                @endforeach
-                                <li class="flex items-start gap-2">{!! $check !!}<span>QR codes + Mobile Money</span></li>
-                            </ul>
-                            <div x-show="formData.plan === '{{ $p->slug }}'" x-cloak>@include('partials.plan-pack', ['slug' => $p->slug, 'compact' => true])</div>
+                        {{-- Fonctions et pack du plan sélectionné, formulés pour ce type de commerce --}}
+                        @foreach($group['plans'] as $p)
+                            <div class="mb-6 p-4 vt-soft" x-show="formData.plan === '{{ $p['slug'] }}'" @if(!($offerKey === $offer && $group['default'] === $p['slug'])) style="display:none" @endif>
+                                <p class="font-bold">Inclus dans le plan {{ $p['name'] }}</p>
+                                <ul class="mt-2 grid gap-2">
+                                    @foreach($p['features'] as $feature)
+                                        <li class="flex items-start gap-2">{!! $check !!}<span>{{ $feature }}</span></li>
+                                    @endforeach
+                                    <li class="flex items-start gap-2">{!! $check !!}<span>QR codes + Mobile Money</span></li>
+                                </ul>
+                                @include('partials.plan-pack', ['slug' => $p['slug'], 'packKey' => $p['pack'], 'compact' => true])
+                            </div>
                         @endforeach
                     </div>
-                @endif
+                @endforeach
+
+                {{-- Durée : semaine ou mois pour un stand, 1 à 12 mois sinon --}}
+                @php
+                    $periods = config('plans.billing_periods');
+                    $cycleGroups = [
+                        'weekly' => ['legend' => "Après l'essai, je paierai", 'cycles' => ['weekly' => 'À la semaine', 'monthly' => 'Au mois']],
+                        'months' => ['legend' => 'Durée de paiement', 'cycles' => ['monthly' => '1 mois', 'quarterly' => '3 mois', 'semiannual' => '6 mois', 'annual' => '1 an']],
+                    ];
+                @endphp
+                @foreach($cycleGroups as $groupKey => $cg)
+                    <fieldset class="mb-6" x-show="cycleGroup === '{{ $groupKey }}'" @if(($groupKey === 'weekly') !== ($offer === 'stand')) style="display:none" @endif>
+                        <legend class="vt-label">{{ $cg['legend'] }}</legend>
+                        <div class="vt-seg grid grid-cols-2 w-full">
+                            @foreach($cg['cycles'] as $cycleId => $cycleLabel)
+                                <button type="button" @click="billingCycle = '{{ $cycleId }}'" :aria-pressed="(billingCycle === '{{ $cycleId }}').toString()" class="text-base">
+                                    {{ $cycleLabel }}@if(($periods[$cycleId]['discount'] ?? 0) > 0) <span class="text-mp-ink">-{{ $periods[$cycleId]['discount'] }} %</span>@endif
+                                </button>
+                            @endforeach
+                        </div>
+                    </fieldset>
+                @endforeach
 
                 {{-- Supports offerts à tous dès l'inscription --}}
-                <p class="mb-6 p-4 rounded-2xl bg-mp-paper font-medium" data-welcome-pack>{{ config('plans.welcome_pack') }}</p>
+                <p class="mb-6 p-4 rounded-2xl bg-[#FFF7ED] text-[#7C2D12] font-medium" data-welcome-pack>{{ config('plans.welcome_pack') }}</p>
 
-                @if($isStand)
-                    @if($plan->supportsWeeklyBilling())
-                        <fieldset class="mb-4">
-                            <legend class="vt-label">Après l'essai, je paierai</legend>
-                            <div class="grid grid-cols-2 gap-2">
-                                @foreach(['weekly' => 'À la semaine', 'monthly' => 'Au mois'] as $cycleId => $cycleLabel)
-                                    <button type="button" @click="billingCycle = '{{ $cycleId }}'" :aria-pressed="(billingCycle === '{{ $cycleId }}').toString()"
-                                            :class="billingCycle === '{{ $cycleId }}' ? 'bg-mp-black text-white border-mp-black' : 'bg-white border-mp-line hover:border-mp-black'"
-                                            class="min-h-12 px-3 rounded-xl border-2 font-bold text-base">{{ $cycleLabel }}</button>
-                                @endforeach
-                            </div>
-                        </fieldset>
-                    @endif
-                    <div class="p-5 rounded-2xl bg-mp-black text-white mb-6">
-                        <p class="text-neutral-200" x-text="'Plan Stand, ' + (billingCycle === 'weekly' ? '1 semaine' : '1 mois')">Plan Stand</p>
-                        <p class="mt-1"><span class="text-3xl font-bold vt-num" x-text="billingCycle === 'weekly' ? '{{ number_format((int) $plan->weekly_price, 0, ',', ' ') }}' : '{{ number_format($plan->price, 0, ',', ' ') }}'"></span> <span class="text-neutral-200">FCFA</span></p>
-                        <p class="mt-1 text-neutral-200">{{ config('plans.trial_days') }} jours gratuits. Livraison incluse ({{ G::commission('stand') }} uniquement sur les commandes livrées).</p>
-                    </div>
-                @else
-                    <div class="p-5 rounded-2xl bg-mp-black text-white mb-6">
-                        <p class="text-neutral-200" x-text="currentPlanName + ', ' + (billingCycle === 'monthly' ? '1 mois' : billingCycle === 'quarterly' ? '3 mois' : billingCycle === 'semiannual' ? '6 mois' : '12 mois')"></p>
-                        <p class="mt-1"><span class="text-3xl font-bold vt-num" x-text="formatPrice(totalPrice)"></span> <span class="text-neutral-200">FCFA</span></p>
-                        <p class="mt-1 text-neutral-200" x-text="'Soit ' + formatPrice(totalPrice / getMonths()) + ' FCFA/mois'"></p>
-                        <p x-show="billingCycle !== 'monthly'" class="mt-1 font-semibold text-mp-orange" x-text="formatPrice(discountAmount) + ' F économisés'"></p>
-                    </div>
-                @endif
+                {{-- Récapitulatif (prix lus en base, remises de config/plans.php) --}}
+                <div class="p-5 rounded-2xl bg-mp-black text-white mb-6" aria-live="polite">
+                    <p class="text-neutral-200" x-text="'Plan ' + currentPlan.name + ', ' + currentCycle.duration"></p>
+                    <p class="mt-1"><span class="text-3xl font-bold vt-num" x-text="formatPrice(totalPrice)"></span> <span class="text-neutral-200">FCFA</span></p>
+                    <p x-show="currentCycle.months > 1" class="mt-1 text-neutral-200" x-text="'Soit ' + formatPrice(totalPrice / currentCycle.months) + ' FCFA/mois'"></p>
+                    <p x-show="discountAmount > 0" class="mt-1 font-semibold text-mp-orange" x-text="formatPrice(discountAmount) + ' F économisés'"></p>
+                    <p class="mt-1 text-neutral-200">{{ config('plans.trial_days') }} jours gratuits d'abord. Livraison incluse (<span x-text="currentPlan.commission"></span> uniquement sur les commandes livrées).</p>
+                </div>
 
                 <label class="flex items-start gap-3 mb-6 cursor-pointer">
-                    <input type="checkbox" name="terms" required class="mt-0.5 w-6 h-6 rounded-md border-2 border-[#857C74] text-mp-black focus:ring-mp-orange cursor-pointer">
+                    <input type="checkbox" name="terms" required class="vt-checkbox mt-0.5 cursor-pointer">
                     <span>J'accepte les <a href="{{ route('terms') }}" target="_blank" class="vt-link">conditions</a> et la <a href="{{ route('privacy') }}" target="_blank" class="vt-link">politique de confidentialité</a>.</span>
                 </label>
 
-                <p x-show="submitError" x-cloak x-text="submitError" class="mb-4 font-semibold text-[#B91C1C]" role="alert"></p>
+                <p x-show="submitError" x-cloak x-text="submitError" class="vt-error !mt-0 mb-4" role="alert"></p>
 
                 <div class="flex gap-3">
                     <button type="button" @click="goToStep(2)" class="vt-btn vt-btn-ghost !px-4" aria-label="Revenir à l'étape précédente">Retour</button>
-                    <button type="submit" class="vt-btn vt-btn-primary flex-1 relative" :disabled="loading || submitted" :aria-busy="loading.toString()">
+                    <button type="submit" class="vt-btn vt-btn-dark flex-1 relative" :disabled="loading || submitted" :aria-busy="loading.toString()">
                         <span :class="{ 'opacity-0': loading }">Démarrer l'essai gratuit</span>
                         <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
                             <svg class="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -389,6 +384,7 @@
         <p x-show="step === 3" x-cloak class="mt-6 text-center">Déjà inscrit ? <a href="{{ route('login') }}" class="vt-link">Se connecter</a></p>
     </div>
 
+
     @push('scripts')
     <script>
         function registerForm() {
@@ -399,17 +395,55 @@
                 submitted: false,
                 submitError: null,
                 stepError: null,
-                isStand: {{ $isStand ? 'true' : 'false' }},
                 offer: @js($offer),
+                // Plans de l'étape 3 par offre (RegisterController::offerPlans, prix lus en base)
+                offerPlans: @js($jsOfferPlans),
+                offerUrls: @js($offerCards->pluck('url', 'key')),
+                defaultTypes: @js($defaultTypesByOffer),
+                typesByOffer: @js($typeKeysByOffer),
+                periods: @js(collect(config('plans.billing_periods'))->map(fn ($p) => ['months' => $p['months'], 'discount' => $p['discount']])),
+                billingCycle: @js(old('billing_period', $offer === 'stand' && request()->query('cycle') === 'weekly' ? 'weekly' : (in_array(request()->query('cycle'), ['monthly', 'quarterly', 'semiannual', 'annual'], true) && $offer !== 'stand' ? request()->query('cycle') : 'monthly'))),
                 formData: {
                     name: @js(old('name', '')), email: @js(old('email', '')), phone: @js(old('phone', '')), password: '',
                     restaurant_name: @js(old('restaurant_name', '')), restaurant_type: @js($initialRestaurantType), company_name: @js(old('company_name', '')), rccm: @js(old('rccm', '')),
-                    plan: '{{ $plan->slug ?? "essentiel" }}'
+                    plan: @js($initialPlan)
                 },
                 showPassword: false,
                 logoPreview: null,
                 bannerPreview: null,
                 get offerTitle() { return { restaurant: 'Votre restaurant', stand: 'Votre stand', boutique: 'Votre boutique' }[this.offer] || 'Votre commerce'; },
+                get plansForOffer() { return (this.offerPlans[this.offer] || { plans: [] }).plans; },
+                get currentPlan() { return this.plansForOffer.find(p => p.slug === this.formData.plan) || this.plansForOffer[0] || { name: '', price: 0, weekly_price: 0, commission: '' }; },
+                // Semaine/mois pour un stand (si le plan le permet), 1 à 12 mois sinon
+                get cycleGroup() { return this.offer === 'stand' && this.currentPlan.weekly_price > 0 ? 'weekly' : 'months'; },
+                get currentCycle() {
+                    if (this.billingCycle === 'weekly') return { months: 0, discount: 0, duration: '1 semaine' };
+                    const p = this.periods[this.billingCycle] || this.periods.monthly;
+                    return { months: p.months, discount: p.discount, duration: p.months === 12 ? '12 mois' : p.months + ' mois' };
+                },
+                get originalPrice() { return this.billingCycle === 'weekly' ? this.currentPlan.weekly_price : this.currentPlan.price * this.currentCycle.months; },
+                // Même calcul que Subscription::calculatePriceWithDiscount()
+                get totalPrice() { return Math.floor(this.originalPrice * (1 - this.currentCycle.discount / 100)); },
+                get discountAmount() { return this.originalPrice - this.totalPrice; },
+                formatPrice(p) { return new Intl.NumberFormat('fr-FR').format(Math.round(p)); },
+                selectPlan(slug) { this.formData.plan = slug; this.normalizeCycle(); },
+                normalizeCycle() {
+                    const allowed = this.cycleGroup === 'weekly' ? ['weekly', 'monthly'] : ['monthly', 'quarterly', 'semiannual', 'annual'];
+                    if (!allowed.includes(this.billingCycle)) this.billingCycle = 'monthly';
+                },
+                // Changement d'offre à l'étape 1 : type, plan et récapitulatif suivent, sans rechargement
+                setOffer(key) {
+                    if (!this.offerPlans[key]) return;
+                    this.offer = key;
+                    if (!(this.typesByOffer[key] || []).includes(this.formData.restaurant_type)) {
+                        this.formData.restaurant_type = this.defaultTypes[key] || '';
+                    }
+                    if (!this.plansForOffer.some(p => p.slug === this.formData.plan)) {
+                        this.formData.plan = this.offerPlans[key].default;
+                    }
+                    this.normalizeCycle();
+                    try { history.replaceState(null, '', this.offerUrls[key]); } catch (e) {}
+                },
                 validateStep1() { return this.formData.name && this.formData.phone && this.formData.password.length >= 8; },
                 validateStep2() { return this.formData.restaurant_name && this.formData.restaurant_type; },
                 next(from) {
@@ -436,7 +470,7 @@
                     if (!terms || !terms.checked) { this.submitError = 'Acceptez les conditions d\'utilisation.'; return; }
                     this.loading = true;
                     this.submitted = true;
-                    document.getElementById('register-form').submit();
+                    this.$nextTick(() => document.getElementById('register-form').submit());
                 }
             };
         }
@@ -455,33 +489,6 @@
             const e = document.querySelector('[data-register-errors]');
             if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-
-        function pricingCalculator() {
-            return {
-                billingCycle: 'monthly',
-                selectedAddons: [],
-                basePriceMonthly: {{ (int) ($plan->price ?? 15000) }},
-                currentPlanName: '{{ $plan->name ?? "Essentiel" }}',
-                cycleMeta: [
-                    { id: 'weekly', months: 1, discount: 0 }, // Stand uniquement (prix affiché côté serveur)
-                    { id: 'monthly', months: 1, discount: 0 },
-                    { id: 'quarterly', months: 3, discount: 10 },
-                    { id: 'semiannual', months: 6, discount: 15 },
-                    { id: 'annual', months: 12, discount: 20 },
-                ],
-                init() { this.billingCycle = 'monthly'; },
-                getCurrentCycle() {
-                    const m = this.cycleMeta.find(c => c.id === this.billingCycle);
-                    const orig = this.basePriceMonthly * m.months;
-                    return { ...m, original: orig, price: Math.round(orig * (1 - m.discount / 100)) };
-                },
-                getMonths() { return this.getCurrentCycle().months; },
-                get basePrice() { return this.getCurrentCycle().price; },
-                get discountAmount() { const c = this.getCurrentCycle(); return c.original - c.price; },
-                get totalPrice() { return this.basePrice; },
-                formatPrice(p) { return new Intl.NumberFormat('fr-FR').format(Math.round(p)); }
-            }
-        }
     </script>
     @endpush
 </x-layouts.auth>

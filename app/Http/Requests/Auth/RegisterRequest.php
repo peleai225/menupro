@@ -58,6 +58,27 @@ class RegisterRequest extends FormRequest
         ];
     }
 
+    /**
+     * Plan cohérent avec le type de commerce : le plan Stand (le moins cher) est réservé
+     * aux stands et aux boutiques (config('plans.stand_plan_groups')). Un restaurant ou un
+     * maquis choisit Restaurant, Pro ou Gold.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($validator->errors()->hasAny(['plan', 'restaurant_type'])) {
+                return;
+            }
+            if ($this->input('plan') !== 'stand') {
+                return;
+            }
+            $group = \App\Support\BusinessType::all()[$this->input('restaurant_type')]['group'] ?? null;
+            if (!in_array($group, config('plans.stand_plan_groups', ['stand', 'shop']), true)) {
+                $validator->errors()->add('plan', 'Le plan Stand est réservé aux stands et aux boutiques. Pour un restaurant ou un maquis, choisissez le plan Restaurant ou Pro.');
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

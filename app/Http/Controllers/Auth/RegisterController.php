@@ -104,7 +104,62 @@ class RegisterController extends Controller
         ];
         $preselectedType = in_array($accountType, BusinessType::values(), true) ? $accountType : null;
 
-        return view('pages.auth.register', compact('plan', 'availablePlans', 'isStand', 'businessTypes', 'preselectedType'));
+        // Plans de l'étape 3 pour chaque offre (restaurant | stand | boutique) : l'étape 3 suit
+        // l'offre choisie à l'étape 1 (Alpine), sans rechargement. Prix lus en base.
+        $offerPlans = $this->offerPlans(request()->query('plan'));
+
+        return view('pages.auth.register', compact('plan', 'availablePlans', 'isStand', 'businessTypes', 'preselectedType', 'offerPlans'));
+    }
+
+    /**
+     * Plans proposés par offre (config('plans.offer_plans')), avec nom, fonctions et pack
+     * adaptés au type de commerce.
+     *
+     * @return array<string, array{default: string, plans: array<int, array<string, mixed>>}>
+     */
+    protected function offerPlans(?string $requestedPlan = null): array
+    {
+        $active = Plan::where('is_active', true)->orderBy('sort_order')->get()->keyBy('slug');
+        $result = [];
+
+        foreach (config('plans.offer_plans', []) as $offer => $rules) {
+            $slugs = $rules['plans'] ?? $active->keys()->diff($rules['exclude'] ?? [])->values()->all();
+            $businessType = config("vitrine.offers.{$offer}.restaurant_type") ?: 'restaurant';
+
+            $plans = collect($slugs)
+                ->filter(fn ($slug) => $active->has($slug))
+                ->map(function ($slug) use ($active, $rules, $businessType, $offer) {
+                    $p = $active[$slug];
+
+                    return [
+                        'slug' => $slug,
+                        'name' => $rules['names'][$slug] ?? $p->name,
+                        'price' => (int) $p->price,
+                        'weekly_price' => $p->supportsWeeklyBilling() && $offer === 'stand' ? (int) $p->weekly_price : 0,
+                        'on_quote' => (bool) $p->is_on_quote,
+                        'commission' => \App\Support\VitrineGrid::commission($slug),
+                        'features' => $p->featuresFor($businessType),
+                        'pack' => $rules['packs'][$slug] ?? $slug,
+                        'max_dishes' => $p->max_dishes,
+                        'max_employees' => $p->max_employees,
+                    ];
+                })
+                ->values()
+                ->all();
+
+            if (!$plans) {
+                continue;
+            }
+
+            $slugsAvailable = array_column($plans, 'slug');
+            $default = in_array($requestedPlan, $slugsAvailable, true)
+                ? $requestedPlan
+                : (in_array($rules['default'] ?? null, $slugsAvailable, true) ? $rules['default'] : $slugsAvailable[0]);
+
+            $result[$offer] = ['default' => $default, 'plans' => $plans];
+        }
+
+        return $result;
     }
 
     public function store(RegisterRequest $request): RedirectResponse

@@ -109,7 +109,7 @@ class RepresentativeRemunerationTest extends TestCase
         $this->post(route('register.post'), [
             'name' => 'Koné',
             'restaurant_name' => 'Maquis du Rail',
-            'restaurant_type' => 'restaurant',
+            'restaurant_type' => 'stand',
             'phone' => '0700000001',
             'email' => 'rail@example.com',
             'password' => 'password123',

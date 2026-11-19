@@ -1,16 +1,17 @@
 {{--
     Pack de supports imprimés d'un plan (config('plans.packs'), source unique).
-    Paramètres : $slug (plan), $compact (bool, version courte pour les cartes d'offres).
+    Paramètres : $slug (plan), $compact (bool, version courte pour les cartes d'offres),
+    $packKey (facultatif : clé de config('plans.packs') à afficher à la place, ex. variante boutique).
 --}}
-@php $pack = config('plans.packs.' . ($slug ?? '')); @endphp
+@php $pack = config('plans.packs.' . ($packKey ?? $slug ?? '')); @endphp
 @if($pack)
     @if($compact ?? false)
-        <div class="mt-3 rounded-xl border border-dashed border-amber-300 bg-amber-50/70 px-3 py-2 text-left" data-plan-pack="{{ $slug }}">
-            <p class="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
-                {{ $pack['name'] }} <span class="font-semibold text-amber-700">— {{ $pack['note'] }}</span>
+        <div class="mt-4 rounded-xl bg-[#FFF7ED] px-3 py-2.5 text-left" data-plan-pack="{{ $slug }}">
+            <p class="text-[0.8125rem] font-semibold text-[#7C2D12] flex items-start gap-1.5 leading-snug">
+                <svg class="w-4 h-4 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                <span>{{ $pack['name'] }} <span class="font-medium">— {{ $pack['note'] }}</span></span>
             </p>
-            <p class="text-[11px] text-amber-900 mt-0.5 leading-snug">{{ implode(' + ', $pack['items']) }}</p>
+            <p class="text-[0.8125rem] text-[#7C2D12] mt-1 leading-snug">{{ implode(' + ', $pack['items']) }}</p>
         </div>
     @else
         <div class="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4 text-left" data-plan-pack="{{ $slug }}">

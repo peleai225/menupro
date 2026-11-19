@@ -123,5 +123,49 @@ return [
             'items' => ['Supports personnalisés'],
             'note'  => 'sur devis',
         ],
+        // Variantes boutique (mêmes quantités, vocabulaire du commerce de détail)
+        'boutique' => [
+            'name'  => 'Pack Boutique',
+            'items' => ['4 autocollants QR (comptoir, vitrine)', '1 affiche vitrine A4'],
+            'note'  => 'offerts dès le 1er paiement',
+        ],
+        'boutique_essentiel' => [
+            'name'  => 'Pack Boutique+',
+            'items' => ['15 autocollants QR', '1 affiche vitrine A4', '1 autocollant de porte A3'],
+            'note'  => 'offerts dès le 1er paiement',
+        ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Plans proposés à l'inscription selon l'offre choisie (config/vitrine.php → offers)
+    |--------------------------------------------------------------------------
+    |
+    | plans   : slugs proposés, dans l'ordre (null = tous les plans actifs sauf `exclude`) ;
+    | default : plan sélectionné par défaut (doit correspondre au « dès » de l'accueil) ;
+    | names   : nom affiché pour ce type de commerce (le slug et le prix en base ne changent pas) ;
+    | packs   : clé de `packs` à afficher à la place de celle du plan.
+    | Le plan Stand n'est accepté que pour les stands et les boutiques (RegisterRequest).
+    |
+    */
+    'offer_plans' => [
+        'restaurant' => [
+            'plans'   => null,
+            'exclude' => ['stand'],
+            'default' => 'essentiel',
+        ],
+        'stand' => [
+            'plans'   => ['stand'],
+            'default' => 'stand',
+        ],
+        'boutique' => [
+            'plans'   => ['stand', 'essentiel', 'pro', 'gold'],
+            'default' => 'stand',
+            'names'   => ['stand' => 'Boutique', 'essentiel' => 'Essentiel'],
+            'packs'   => ['stand' => 'boutique', 'essentiel' => 'boutique_essentiel'],
+        ],
+    ],
+
+    // Groupes d'inscription (config/business_types.php → group) autorisés sur le plan Stand
+    'stand_plan_groups' => ['stand', 'shop'],
 ];

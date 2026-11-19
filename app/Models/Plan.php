@@ -169,6 +169,38 @@ class Plan extends Model
         return $features;
     }
 
+    /**
+     * Fonctions du plan formulées pour un type de commerce : pour une boutique,
+     * « articles » au lieu de « plats », sans ce qui n'a pas d'objet (chambres d'hôtel,
+     * multi-espaces, stock par ingrédient). Restauration : liste inchangée.
+     */
+    public function featuresFor(?string $businessType): array
+    {
+        if (!\App\Support\BusinessType::isShop($businessType)) {
+            return $this->features;
+        }
+
+        $features = [];
+        $features[] = self::isUnlimitedValue($this->max_dishes) ? 'Articles illimités' : $this->max_dishes . ' articles maximum';
+        $features[] = self::isUnlimitedValue($this->max_categories) ? 'Catégories illimitées' : $this->max_categories . ' catégories maximum';
+        $features[] = match (true) {
+            self::isUnlimitedValue($this->max_employees) => 'Employés illimités',
+            (int) $this->max_employees === 0 => '1 utilisateur (le gérant)',
+            default => $this->max_employees . ' employé(s)',
+        };
+        $features[] = self::isUnlimitedValue($this->max_orders_per_month)
+            ? 'Commandes illimitées'
+            : number_format($this->max_orders_per_month, 0, ',', ' ') . ' commandes/mois conseillées (jamais bloquées)';
+
+        if ($this->has_delivery) $features[] = 'Livraison MenuPro incluse';
+        if ($this->has_stock_management) $features[] = 'Stock des articles';
+        if ($this->has_analytics) $features[] = 'Statistiques de ventes';
+        if ($this->has_custom_domain) $features[] = 'Domaine personnalisé';
+        if ($this->has_priority_support) $features[] = 'Support prioritaire';
+
+        return $features;
+    }
+
     // =========================================================================
     // METHODS
     // =========================================================================
