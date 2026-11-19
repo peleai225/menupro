@@ -24,7 +24,7 @@ class PaymentSuccessBypassTest extends TestCase
         $this->post(route('register.post'), [
             'name' => 'Koné',
             'restaurant_name' => 'Chez Koné',
-            'restaurant_type' => 'restaurant',
+            'restaurant_type' => 'stand',
             'phone' => '0700000099',
             'email' => 'kone-bypass@example.com',
             'password' => 'password123',

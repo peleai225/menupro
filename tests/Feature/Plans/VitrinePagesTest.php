@@ -56,7 +56,7 @@ class VitrinePagesTest extends PricingGridTestCase
             ->assertOk()
             ->assertSee("offer: 'boutique'", false)
             ->assertSee("restaurant_type: 'boutique'", false)
-            ->assertSee('Pack Maquis'); // grille Restaurant/Pro proposée, pas le plan Stand forcé
+            ->assertSee('Pack Boutique'); // plan Boutique (slug stand) proposé par défaut, packs au vocabulaire boutique
     }
 
     public function test_login_accepts_whatsapp_number_or_email(): void

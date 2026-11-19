@@ -138,7 +138,7 @@ class QrCampaignTest extends TestCase
         $this->post(route('register.post'), [
             'name' => 'Koné',
             'restaurant_name' => 'Maquis de la gare',
-            'restaurant_type' => 'restaurant',
+            'restaurant_type' => 'stand',
             'phone' => '0700000002',
             'email' => 'gare@example.com',
             'password' => 'password123',

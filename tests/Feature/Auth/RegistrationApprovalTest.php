@@ -20,7 +20,7 @@ class RegistrationApprovalTest extends TestCase
         return [
             'name' => 'Koné',
             'restaurant_name' => 'Chez Koné',
-            'restaurant_type' => 'restaurant',
+            'restaurant_type' => 'stand',
             'phone' => '0700000000',
             'email' => 'kone@example.com',
             'password' => 'password123',
