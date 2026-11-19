@@ -10,7 +10,11 @@ use App\Http\Controllers\Api\V1\Client\AuthController;
 use App\Http\Controllers\Api\V1\Client\FcmController as ClientFcmController;
 use App\Http\Controllers\Api\V1\Client\GeocodingController;
 use App\Http\Controllers\Api\V1\Client\OrderController as ClientOrderController;
+use App\Http\Controllers\Api\V1\Client\ParcelController as ClientParcelController;
 use App\Http\Controllers\Api\V1\Client\PaymentController;
+use App\Http\Controllers\Api\V1\Driver\ParcelController as DriverParcelController;
+use App\Http\Controllers\Api\V1\Partner\ParcelController as PartnerParcelController;
+use App\Http\Controllers\Api\V1\ParcelTrackingController;
 use App\Http\Controllers\Api\V1\Client\RestaurantController;
 use App\Http\Controllers\Api\V1\Driver\AuthController as DriverAuthController;
 use App\Http\Controllers\Api\V1\Driver\DeliveryController;
@@ -111,6 +115,18 @@ Route::prefix('v1')
             });
 
             Route::get('/payment/{orderId}/status', [PaymentController::class, 'status'])->name('payment.status');
+
+            // Colis (docs/api-colis.md)
+            Route::post('/parcels/quote', [ClientParcelController::class, 'quote'])->name('parcels.quote');
+            Route::middleware('throttle:api.parcels')->group(function () {
+                Route::post('/parcels', [ClientParcelController::class, 'store'])->name('parcels.store');
+            });
+            Route::get('/parcels', [ClientParcelController::class, 'index'])->name('parcels.index');
+            Route::get('/parcels/{reference}', [ClientParcelController::class, 'show'])->name('parcels.show');
+            Route::post('/parcels/{reference}/cancel', [ClientParcelController::class, 'cancel'])->name('parcels.cancel');
+            Route::middleware('throttle:api.payment')->group(function () {
+                Route::post('/parcels/{reference}/pay', [ClientParcelController::class, 'pay'])->name('parcels.pay');
+            });
         });
 
         // Suivi public (sans auth)
@@ -170,6 +186,17 @@ Route::prefix('v1')
             Route::get('/earnings',         [EarningsController::class, 'summary'])->name('earnings.summary');
             Route::get('/earnings/history', [EarningsController::class, 'history'])->name('earnings.history');
 
+            // Colis (kind: "parcel") — docs/api-colis.md
+            Route::get('/parcels/available',          [DriverParcelController::class, 'available'])->name('parcels.available');
+            Route::get('/parcels/active',             [DriverParcelController::class, 'active'])->name('parcels.active');
+            Route::get('/parcels/history',            [DriverParcelController::class, 'history'])->name('parcels.history');
+            Route::get('/parcels/{reference}',        [DriverParcelController::class, 'show'])->name('parcels.show');
+            Route::post('/parcels/{reference}/accept',  [DriverParcelController::class, 'accept'])->name('parcels.accept');
+            Route::post('/parcels/{reference}/pickup',  [DriverParcelController::class, 'pickup'])->name('parcels.pickup');
+            Route::post('/parcels/{reference}/start',   [DriverParcelController::class, 'start'])->name('parcels.start');
+            Route::post('/parcels/{reference}/deliver', [DriverParcelController::class, 'deliver'])->name('parcels.deliver');
+            Route::post('/parcels/{reference}/fail',    [DriverParcelController::class, 'fail'])->name('parcels.fail');
+
             // Cash on delivery — gestion des dettes et reversements
             Route::get('/cash-balance',      [\App\Http\Controllers\Api\V1\Driver\CashController::class, 'balance'])->name('cash.balance');
             Route::get('/cash-remittances',  [\App\Http\Controllers\Api\V1\Driver\CashController::class, 'remittances'])->name('cash.remittances');
@@ -181,6 +208,26 @@ Route::prefix('v1')
             });
         });
     });
+
+    // -----------------------------------------------------------------------
+    // COLIS — suivi public (destinataire sans compte) et retour de paiement Jeko
+    // -----------------------------------------------------------------------
+    Route::middleware('throttle:api.public')->group(function () {
+        Route::get('/parcels/track/{token}', [ParcelTrackingController::class, 'track'])->name('parcels.track');
+    });
+    Route::get('/parcels/payment/return', [ParcelTrackingController::class, 'paymentReturn'])->name('parcels.payment.return');
+
+    // -----------------------------------------------------------------------
+    // PARTENAIRES — API colis (Authorization: Bearer <clé>)
+    // -----------------------------------------------------------------------
+    Route::prefix('partner')->name('partner.')
+        ->middleware(['delivery.partner', 'throttle:api.partner'])
+        ->group(function () {
+            Route::post('/parcels/quote',               [PartnerParcelController::class, 'quote'])->name('parcels.quote');
+            Route::post('/parcels',                     [PartnerParcelController::class, 'store'])->name('parcels.store');
+            Route::get('/parcels/{reference}',          [PartnerParcelController::class, 'show'])->name('parcels.show');
+            Route::post('/parcels/{reference}/cancel',  [PartnerParcelController::class, 'cancel'])->name('parcels.cancel');
+        });
 
     // -----------------------------------------------------------------------
     // RESTAURANT — Gestion commandes livraison

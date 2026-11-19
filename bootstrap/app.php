@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.section' => \App\Http\Middleware\EnsureAdminSection::class,
             'commando.agent' => \App\Http\Middleware\EnsureCommandoAgent::class,
             'delivery.driver' => \App\Http\Middleware\EnsureDeliveryDriver::class,
+            'delivery.partner' => \App\Http\Middleware\AuthenticateDeliveryPartner::class,
             'crm.role' => \App\Http\Middleware\EnsureCrmRole::class,
             'api.json' => \App\Http\Middleware\ForceJsonResponse::class,
             'api.sanitize' => \App\Http\Middleware\SanitizeApiInput::class,

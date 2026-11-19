@@ -11,6 +11,7 @@ class DriverEarning extends Model
         'driver_id',
         'order_id',
         'delivery_id',
+        'parcel_id',
         'gross_amount',
         'platform_cut',
         'net_amount',
@@ -40,6 +41,11 @@ class DriverEarning extends Model
     public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
+    }
+
+    public function parcel(): BelongsTo
+    {
+        return $this->belongsTo(Parcel::class);
     }
 
     public function scopePending($query)

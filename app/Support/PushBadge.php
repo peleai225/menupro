@@ -96,7 +96,7 @@ class PushBadge
             ])
             ->exists();
 
-        if ($hasActiveDelivery) {
+        if ($hasActiveDelivery || \App\Models\Parcel::where('driver_id', $driver->id)->activeForDriver()->exists()) {
             return 1;
         }
 
@@ -104,8 +104,13 @@ class PushBadge
             return 0;
         }
 
+        // Colis en attente dans la ville (Api\V1\Driver\ParcelController::available())
+        $parcels = \App\Models\Parcel::where('status', \App\Enums\ParcelStatus::SEARCHING_DRIVER->value)
+            ->where('city', $driver->city)
+            ->count();
+
         // Même définition que Api\V1\Driver\DeliveryController::pendingOrders()
-        return Delivery::withoutGlobalScope('restaurant')
+        return $parcels + Delivery::withoutGlobalScope('restaurant')
             ->where('status', DeliveryStatus::PENDING->value)
             ->whereHas('order', fn ($q) => $q->withoutGlobalScope('restaurant')->openToDrivers())
             ->whereHas('restaurant', fn ($q) => $q->where('city', $driver->city))

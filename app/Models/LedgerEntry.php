@@ -25,6 +25,7 @@ class LedgerEntry extends Model
     public const TYPE_PAYOUT_RESTAURANT = 'payout_restaurant';
     public const TYPE_REFUND_CUSTOMER = 'refund_customer';
     public const TYPE_DRIVER_COMMISSION = 'driver_commission';
+    public const TYPE_PARCEL_DELIVERY = 'parcel_delivery';
 
     /** Pseudo-type de filtre : lignes portant des frais Jeko. */
     public const FILTER_JEKO_FEES = 'jeko_fees';
@@ -40,6 +41,7 @@ class LedgerEntry extends Model
         self::TYPE_PAYOUT_RESTAURANT => 'Reversement au restaurant',
         self::TYPE_REFUND_CUSTOMER => 'Remboursement client',
         self::TYPE_DRIVER_COMMISSION => 'Commission livreur',
+        self::TYPE_PARCEL_DELIVERY => 'Livraison de colis',
     ];
 
     public const ORDER_TYPES = [
@@ -92,6 +94,7 @@ class LedgerEntry extends Model
         'back_office' => 'Back-office',
         'restaurant_space' => 'Espace restaurant',
         'system' => 'Automatique',
+        'partner_api' => 'API partenaire',
     ];
 
     public const VIA_LABELS = [

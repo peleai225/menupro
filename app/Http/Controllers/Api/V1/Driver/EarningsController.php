@@ -56,14 +56,16 @@ class EarningsController extends Controller
         $driver = $request->user()->deliveryDriver;
 
         $earnings = DriverEarning::where('driver_id', $driver->id)
-            ->with('order:id,reference,created_at')
+            ->with(['order:id,reference,created_at', 'parcel:id,reference'])
             ->latest()
             ->paginate(20);
 
         return response()->json([
             'data' => $earnings->map(fn($e) => [
                 'id'           => $e->id,
-                'order_ref'    => $e->order->reference,
+                // Gain de colis : pas de commande, la référence est celle du colis (COL-…)
+                'order_ref'    => $e->order?->reference ?? $e->parcel?->reference,
+                'kind'         => $e->parcel_id ? 'parcel' : 'meal',
                 'gross_amount' => $e->gross_amount,
                 'platform_cut' => $e->platform_cut,
                 'net_amount'   => $e->net_amount,

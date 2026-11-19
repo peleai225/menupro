@@ -22,8 +22,10 @@ class CashController extends Controller
             'total_owed_xof' => DriverCashDebt::totalPendingForDriver($driver->id),
             'debts' => $debts->map(fn($d) => [
                 'id'              => $d->id,
-                'restaurant_name' => $d->restaurant->name ?? '—',
-                'order_ref'       => $d->order->reference ?? '—',
+                // Dette d'un colis payé en espèces : commission due à MenuPro (pas à un restaurant)
+                'restaurant_name' => $d->parcel_id ? 'MenuPro' : ($d->restaurant->name ?? '—'),
+                'order_ref'       => $d->order->reference ?? $d->parcel->reference ?? '—',
+                'kind'            => $d->parcel_id ? 'parcel' : 'meal',
                 'amount_xof'      => $d->amount_xof,
                 'created_at'      => $d->created_at?->toDateTimeString(),
             ])->values(),

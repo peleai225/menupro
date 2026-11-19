@@ -21,6 +21,7 @@ class DeliveryCity extends Model
         'max_delivery_distance_km',
         'min_order_amount',
         'currency',
+        'parcel_pricing',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class DeliveryCity extends Model
         'peak_hour_surcharge_percent' => 'integer',
         'max_delivery_distance_km' => 'integer',
         'min_order_amount' => 'integer',
+        'parcel_pricing' => 'array',
     ];
 
     public function zones(): HasMany
