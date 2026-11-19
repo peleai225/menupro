@@ -1545,8 +1545,10 @@ section {
 .vt-section { padding-block: 3.5rem; }
 @media (min-width: 768px) { .vt-section { padding-block: 5.5rem; } }
 
-.vt-h1 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.04; font-size: clamp(2.35rem, 9.5vw, 4.5rem); text-wrap: balance; }
-.vt-h2 { font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; font-size: clamp(1.75rem, 6.5vw, 2.75rem); text-wrap: balance; }
+.vt-h1, .vt-h2, .vt-display { font-family: "Bricolage Grotesque", "DM Sans", ui-sans-serif, system-ui, sans-serif; font-optical-sizing: auto; }
+.vt-display { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.vt-h1 { font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-size: clamp(2.5rem, 10.5vw, 4.5rem); text-wrap: balance; }
+.vt-h2 { font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; font-size: clamp(2rem, 7vw, 3.25rem); text-wrap: balance; }
 .vt-h3 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; font-size: 1.25rem; }
 .vt-lead { font-size: 1.125rem; line-height: 1.6; color: var(--color-mp-text); max-width: 38rem; }
 @media (min-width: 768px) { .vt-lead { font-size: 1.25rem; } }
@@ -1565,7 +1567,8 @@ section {
 .vt-btn-primary:hover { background: #FB8A3C; }
 .vt-btn-dark { background: var(--color-mp-black); color: #fff; }
 .vt-btn-dark:hover { background: #262626; }
-.vt-btn-ghost { background: #fff; color: var(--color-mp-black); border: 2px solid var(--color-mp-black); }
+.vt-btn-ghost { background: #fff; color: var(--color-mp-black); border: 1.5px solid #D6D3D1; }
+.vt-btn-ghost:hover { border-color: var(--color-mp-black); }
 .vt-btn-ghost:hover { background: var(--color-mp-paper); }
 .vt-btn-light { background: #fff; color: var(--color-mp-black); }
 .vt-btn-light:hover { background: var(--color-mp-paper); }
@@ -1578,13 +1581,10 @@ section {
 .vt-tag {
     position: relative; border-radius: 1.25rem; padding: 1.5rem 1.25rem 1.25rem;
     background:
-        radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, var(--vt-tag-ring, var(--color-mp-black)) 0.5rem, transparent 0.55rem),
         var(--vt-tag-bg, #fff);
-    border: 2px solid var(--vt-tag-border, var(--color-mp-black));
-    -webkit-mask: radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, #000 0.5rem);
-            mask: radial-gradient(circle at 1.5rem 1.5rem, transparent 0.45rem, #000 0.5rem);
+    border: 1.5px solid var(--vt-tag-border, var(--color-mp-line));
 }
-.vt-tag-new { --vt-tag-bg: var(--color-mp-orange); --vt-tag-border: var(--color-mp-black); }
+.vt-tag-new { --vt-tag-bg: var(--color-mp-orange); --vt-tag-border: var(--color-mp-orange); }
 .vt-pill { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .75rem; border-radius: 999px; font-size: .9375rem; font-weight: 700; }
 
 /* Listes à puces cochées */
@@ -1613,3 +1613,33 @@ section {
 @media (prefers-reduced-motion: reduce) {
     .vt *, .vt *::before, .vt *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* ── Vitrine v2 : file de tickets (signature), offres, étapes ── */
+.vt-surface { background: #F5F5F4; }
+.vt-on-dark { color: #D6D3D1; }
+.vt-hero { padding-block: 2.5rem 4rem; }
+@media (min-width: 768px) { .vt-hero { padding-block: 5rem 6.5rem; } }
+.vt-rail { margin: 0; width: 100%; max-width: 30rem; justify-self: center; background: #000; border-radius: 1.75rem; padding: 1.25rem; box-shadow: 0 50px 100px -40px rgba(249,115,22,.55); }
+.vt-ticket {
+    position: relative; background: #fff; color: #000; border-radius: .875rem .875rem 0 0; padding: 1rem 1rem 1.25rem;
+    /* bord inférieur perforé, comme un ticket de caisse */
+    -webkit-mask: radial-gradient(circle at 50% 100%, transparent .3rem, #000 .32rem) 0 0 / .9rem 100% repeat-x;
+            mask: radial-gradient(circle at 50% 100%, transparent .3rem, #000 .32rem) 0 0 / .9rem 100% repeat-x;
+}
+.vt-ticket:not(.is-new) { opacity: .92; }
+.vt-ticket.is-new { box-shadow: inset 4px 0 0 var(--color-mp-orange); }
+.vt-live { width: .625rem; height: .625rem; border-radius: 999px; background: #22C55E; box-shadow: 0 0 0 4px rgba(34,197,94,.25); }
+@media (prefers-reduced-motion: no-preference) {
+    .vt-ticket { animation: vt-drop .55s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(.35s + (2 - var(--i)) * .22s); }
+    .vt-live { animation: vt-pulse 1.8s ease-in-out infinite; }
+}
+@keyframes vt-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes vt-pulse { 50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); } }
+
+.vt-offer { display: flex; flex-direction: column; overflow: hidden; background: #fff; border-radius: 1.25rem; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 20px 40px -28px rgba(0,0,0,.25); }
+
+.vt-steps { display: grid; gap: 0; counter-reset: none; }
+.vt-step { position: relative; display: flex; gap: 1.25rem; padding-bottom: 2rem; }
+.vt-step:last-child { padding-bottom: 0; }
+.vt-step:not(:last-child)::before { content: ""; position: absolute; left: 1.375rem; top: 3rem; bottom: .5rem; width: 2px; background: var(--color-mp-line); }
+.vt-step-n { flex: none; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: var(--color-mp-orange); color: #000; display: grid; place-items: center; font: 800 1.375rem/1 "Bricolage Grotesque", "DM Sans", sans-serif; }

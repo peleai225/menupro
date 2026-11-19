@@ -36,90 +36,101 @@
 <script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Commandes en ligne, paiement Mobile Money et livraison pour restaurants, maquis, stands et boutiques en Côte d'Ivoire.","offers":{"@@type":"Offer","price":"{{ G::price('stand') }}","priceCurrency":"XOF"}}</script>
 @endpush
 
-{{-- ══════════ 1. ACCUEIL ══════════ --}}
-<section class="pt-8 pb-14 md:pt-16 md:pb-20">
-    <div class="vt-wrap grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:items-center">
+{{-- ══════════ 1. ACCUEIL : la file de commandes (signature) ══════════ --}}
+@php
+    $tickets = [
+        ['n' => '1186', 'who' => 'Awa K.',     'mode' => 'Livraison',  'items' => '2 × Garba thon, 1 × Bissap', 'total' => '2 700', 'pay' => 'wave.png',         'payName' => 'Wave',         'state' => 'new'],
+        ['n' => '1185', 'who' => 'Table 4',    'mode' => 'Sur place',  'items' => '1 × Poulet braisé attiéké',  'total' => '3 500', 'pay' => 'orange-money.png', 'payName' => 'Orange Money', 'state' => 'cooking'],
+        ['n' => '1184', 'who' => 'Moussa D.',  'mode' => 'À emporter', 'items' => '3 × Alloco poisson',         'total' => '4 500', 'pay' => 'mtn-momo.png',     'payName' => 'MTN MoMo',     'state' => 'done'],
+    ];
+@endphp
+<section class="vt-hero">
+    <div class="vt-wrap grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
         <div>
-            <h1 class="vt-h1">Vos clients commandent. Vous encaissez en Mobile Money.</h1>
-            <p class="vt-lead mt-5">Restaurant, maquis, stand de rue ou boutique&nbsp;: MenuPro met votre commerce en ligne, encaisse les paiements Wave, Orange, MTN et Moov, et livre vos clients.</p>
+            <h1 class="vt-h1">Les commandes arrivent. Vous n'avez plus à décrocher.</h1>
+            <p class="vt-lead mt-6">MenuPro met votre restaurant, votre stand ou votre boutique en ligne. Vos clients commandent et paient en Mobile Money, vous acceptez d'un geste, un livreur s'occupe du reste.</p>
             <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap">
                 <a href="{{ route('register') }}" class="vt-btn vt-btn-primary">Créer mon commerce</a>
                 <a href="{{ route('pricing') }}" class="vt-btn vt-btn-ghost">Voir les tarifs</a>
             </div>
-            <p class="mt-4 vt-muted">Essai gratuit de {{ $trial }} jours, sans carte bancaire ni engagement.</p>
+            <p class="mt-4 vt-muted">{{ $trial }} jours gratuits, sans carte bancaire ni engagement.</p>
 
-            <ul class="mt-8 flex flex-wrap items-center gap-3" aria-label="Paiements acceptés">
-                @foreach([['wave.png','Wave'],['orange-money.png','Orange Money'],['mtn-momo.png','MTN MoMo'],['moov-money.png','Moov Money']] as [$img, $name])
-                    <li class="flex items-center gap-2 rounded-full border border-mp-line pl-1 pr-3 py-1 bg-white">
-                        <img src="{{ asset('images/payments/'.$img) }}" alt="" width="28" height="28" class="w-7 h-7 rounded-full object-contain" loading="lazy" decoding="async">
-                        <span class="text-[0.9375rem] font-semibold">{{ $name }}</span>
-                    </li>
-                @endforeach
-            </ul>
+            <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
+                <p class="text-[0.9375rem] font-semibold vt-muted w-full sm:w-auto">Paiements acceptés</p>
+                <ul class="flex items-center gap-2.5" aria-label="Paiements acceptés">
+                    @foreach([['wave.png','Wave'],['orange-money.png','Orange Money'],['mtn-momo.png','MTN MoMo'],['moov-money.png','Moov Money']] as [$img, $name])
+                        <li><img src="{{ asset('images/payments/'.$img) }}" alt="{{ $name }}" title="{{ $name }}" width="40" height="40" class="w-10 h-10 rounded-xl object-contain bg-white ring-1 ring-black/5" loading="lazy" decoding="async"></li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
 
-        {{-- Aperçu de l'écran client (HTML pur : aucune image à télécharger) --}}
-        <figure class="relative mx-auto w-full max-w-[19rem]">
-            <div class="vt-phone" role="img" aria-label="Exemple d'écran de commande sur app.menupro.ci : un panier de deux plats payé par Wave, avec suivi de livraison.">
-                <div class="vt-phone-screen" aria-hidden="true">
-                    <img src="{{ asset('images/home/offre-restaurant.jpg') }}" alt="" width="800" height="533" class="w-full h-28 object-cover" fetchpriority="high" decoding="async">
-                    <div class="bg-mp-orange px-4 pt-5 pb-4">
-                        <p class="text-sm font-semibold">app.menupro.ci</p>
-                        <p class="text-xl font-bold leading-tight mt-1">Maquis du Carrefour</p>
-                        <p class="text-sm">Daloa · ouvert jusqu'à 23 h</p>
-                    </div>
-                    <ul class="px-4 py-3 space-y-3 text-[0.9375rem]">
-                        <li class="flex justify-between gap-3"><span>2 × Garba poisson thon</span><span class="font-bold vt-num whitespace-nowrap">2 000 F</span></li>
-                        <li class="flex justify-between gap-3"><span>1 × Poulet braisé + attiéké</span><span class="font-bold vt-num whitespace-nowrap">3 500 F</span></li>
-                        <li class="flex justify-between gap-3 border-t border-mp-line pt-3 font-bold"><span>Total</span><span class="vt-num whitespace-nowrap">5 500 F</span></li>
-                    </ul>
-                    <div class="px-4 pb-4">
-                        <div class="rounded-xl bg-mp-black text-white text-center py-3 font-bold">Payer avec Wave</div>
-                        <div class="mt-3 rounded-xl border-2 border-mp-black p-3">
-                            <p class="text-sm font-bold">Commande en route</p>
-                            <div class="mt-2 h-2 rounded-full bg-mp-line overflow-hidden"><div class="h-full w-2/3 bg-mp-orange"></div></div>
-                            <p class="text-sm mt-2 vt-muted">Le livreur arrive dans 12 min</p>
-                        </div>
-                    </div>
+        {{-- File de commandes du commerçant (HTML pur) --}}
+        <figure class="vt-rail" role="img" aria-label="Exemple : trois commandes arrivent sur le tableau de bord MenuPro, payées par Wave, Orange Money et MTN MoMo. La plus récente attend d'être acceptée.">
+            <div aria-hidden="true">
+                <div class="flex items-center justify-between px-1 pb-4 text-white">
+                    <p class="vt-display text-xl">Commandes</p>
+                    <p class="flex items-center gap-2 text-[0.9375rem] font-semibold"><span class="vt-live"></span>En direct</p>
                 </div>
+                <ol class="grid gap-3">
+                    @foreach($tickets as $i => $t)
+                        <li class="vt-ticket {{ $t['state'] === 'new' ? 'is-new' : '' }}" style="--i: {{ $i }}">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="font-bold">#{{ $t['n'] }} · {{ $t['who'] }}</p>
+                                    <p class="text-[0.9375rem] vt-muted truncate">{{ $t['items'] }}</p>
+                                </div>
+                                <p class="vt-display text-xl vt-num whitespace-nowrap">{{ $t['total'] }} F</p>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between gap-3">
+                                <p class="flex items-center gap-2 text-[0.9375rem] font-semibold">
+                                    <img src="{{ asset('images/payments/'.$t['pay']) }}" alt="" width="22" height="22" class="w-[22px] h-[22px] rounded-md object-contain" loading="lazy" decoding="async">
+                                    Payé · {{ $t['mode'] }}
+                                </p>
+                                @if($t['state'] === 'new')
+                                    <span class="rounded-lg bg-mp-orange px-4 py-2 font-bold text-[0.9375rem]">Accepter</span>
+                                @elseif($t['state'] === 'cooking')
+                                    <span class="rounded-lg bg-amber-100 text-amber-900 px-3 py-1.5 font-semibold text-sm">En cuisine</span>
+                                @else
+                                    <span class="rounded-lg bg-green-100 text-green-800 px-3 py-1.5 font-semibold text-sm">Prête</span>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
             </div>
-            {{-- Notification côté commerçant --}}
-            <div class="relative mt-4 ml-auto mr-2 sm:-mr-8 max-w-[14rem] rounded-2xl bg-white border-2 border-mp-black p-3 shadow-[6px_6px_0_0_#F97316]" aria-hidden="true">
-                <p class="text-sm font-bold">Nouvelle commande</p>
-                <p class="text-sm vt-muted">5 500 F payés par Wave</p>
-            </div>
-            <figcaption class="mt-4 text-center text-[0.9375rem] vt-muted">Exemple d'écran client</figcaption>
         </figure>
     </div>
 </section>
 
 {{-- ══════════ 2. LES TROIS OFFRES ══════════ --}}
-<section id="offres" class="vt-section bg-mp-paper scroll-mt-16">
+<section id="offres" class="vt-section vt-surface scroll-mt-16">
     <div class="vt-wrap">
         <h2 class="vt-h2 max-w-2xl">Un outil pour chaque commerce</h2>
-        <p class="vt-lead mt-4">Choisissez votre type de commerce&nbsp;: les fonctions et le prix s'adaptent.</p>
+        <p class="vt-lead mt-4">Choisissez votre type de commerce : les fonctions et le prix s'adaptent.</p>
 
-        <div class="mt-10 grid gap-6 md:grid-cols-3">
+        <div class="mt-10 grid gap-5 md:grid-cols-3">
             @foreach($offers as $key => $offer)
                 @php $from = G::offerFrom($key); @endphp
-                <article class="vt-tag flex flex-col {{ !empty($offer['new']) ? 'vt-tag-new' : '' }}">
-                    <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[3/2] object-cover rounded-xl mb-5" loading="lazy" decoding="async">
-                    <div class="flex items-start justify-between gap-3 pl-8">
-                        <svg class="w-9 h-9 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $offer['icon'] }}"/></svg>
+                <article class="vt-offer">
+                    <div class="relative">
+                        <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[4/3] object-cover" loading="lazy" decoding="async">
                         @if(!empty($offer['new']))
-                            <span class="vt-pill bg-mp-black text-white">Nouveau</span>
+                            <span class="vt-pill absolute top-3 left-3 bg-mp-orange text-mp-black">Nouveau</span>
                         @endif
                     </div>
-                    <h3 class="vt-h3 mt-5 text-2xl">{{ $offer['title'] }}</h3>
-                    <p class="mt-2 flex-1 {{ !empty($offer['new']) ? 'text-mp-black' : 'vt-muted' }}">{{ $offer['text'] }}</p>
-                    <p class="mt-5">
-                        <span class="block text-[0.9375rem] font-semibold">À partir de</span>
-                        <span class="text-4xl font-bold vt-num whitespace-nowrap">{{ $from['amount'] }}</span>
-                        <span class="font-semibold">{{ $from['unit'] }}</span>
-                    </p>
-                    <a href="{{ $registerUrl($key) }}" class="vt-btn {{ !empty($offer['new']) ? 'vt-btn-dark' : 'vt-btn-primary' }} vt-btn-block mt-5">
-                        {{ ['restaurant' => 'Inscrire mon restaurant', 'stand' => 'Inscrire mon stand', 'boutique' => 'Inscrire ma boutique'][$key] }}
-                    </a>
+                    <div class="flex flex-1 flex-col p-5 sm:p-6">
+                        <h3 class="vt-display text-2xl">{{ $offer['title'] }}</h3>
+                        <p class="mt-2 flex-1 vt-muted">{{ $offer['text'] }}</p>
+                        <p class="mt-5 flex items-baseline gap-1.5">
+                            <span class="text-[0.9375rem] vt-muted">dès</span>
+                            <span class="vt-display text-3xl vt-num whitespace-nowrap">{{ $from['amount'] }}</span>
+                            <span class="font-semibold">{{ $from['unit'] }}</span>
+                        </p>
+                        <a href="{{ $registerUrl($key) }}" class="vt-btn {{ !empty($offer['new']) ? 'vt-btn-primary' : 'vt-btn-dark' }} vt-btn-block mt-5">
+                            {{ ['restaurant' => 'Inscrire mon restaurant', 'stand' => 'Inscrire mon stand', 'boutique' => 'Inscrire ma boutique'][$key] }}
+                        </a>
+                    </div>
                 </article>
             @endforeach
         </div>
@@ -137,14 +148,14 @@
                 <a href="{{ route('download.apk') }}" class="vt-btn vt-btn-ghost">Application Android</a>
             </div>
         </div>
-        <ol class="grid gap-4">
+        <ol class="vt-steps">
             @foreach([
                 ['Ils commandent', 'Depuis leur téléphone, sur votre page MenuPro : plats ou articles, quantités, sur place, à emporter ou en livraison.'],
                 ['Ils paient', 'Par Wave, Orange Money, MTN MoMo ou Moov Money. Ou en espèces si vous l\'acceptez.'],
                 ['Ils suivent leur commande', 'En direct : acceptée, en préparation, en route avec le livreur, livrée.'],
             ] as $i => [$title, $text])
-                <li class="flex gap-4 rounded-2xl border-2 border-mp-line p-5">
-                    <span class="flex-none w-11 h-11 rounded-full bg-mp-orange text-mp-black font-bold text-xl flex items-center justify-center" aria-hidden="true">{{ $i + 1 }}</span>
+                <li class="vt-step">
+                    <span class="vt-step-n" aria-hidden="true">{{ $i + 1 }}</span>
                     <div>
                         <h3 class="vt-h3">{{ $title }}</h3>
                         <p class="mt-1 vt-muted">{{ $text }}</p>
@@ -161,12 +172,12 @@
         <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <div>
         <h2 class="vt-h2 max-w-2xl">Tout se pilote depuis votre téléphone</h2>
-        <p class="vt-lead mt-4 text-neutral-200">Votre tableau de bord MenuPro&nbsp;: chaque commande arrive avec une alerte, vous l'acceptez en un geste, et vous voyez vos ventes du jour en direct.</p>
+        <p class="vt-lead vt-on-dark mt-4">Votre tableau de bord MenuPro&nbsp;: chaque commande arrive avec une alerte, vous l'acceptez en un geste, et vous voyez vos ventes du jour en direct.</p>
         </div>
 
         {{-- Aperçu du tableau de bord commerçant (HTML pur, aucune image) --}}
         <figure class="mx-auto w-full max-w-md text-mp-black">
-            <div class="rounded-3xl bg-white p-4 sm:p-5 shadow-[10px_10px_0_0_#F97316]" role="img" aria-label="Exemple de tableau de bord MenuPro : ventes du jour, nouvelle commande à accepter et graphique des ventes.">
+            <div class="rounded-3xl bg-white p-4 sm:p-5 shadow-[0_40px_80px_-30px_rgba(249,115,22,.45)]" role="img" aria-label="Exemple de tableau de bord MenuPro : ventes du jour, nouvelle commande à accepter et graphique des ventes.">
                 <div aria-hidden="true">
                     <div class="flex items-center justify-between">
                         <p class="font-bold text-lg">Aujourd'hui</p>
@@ -180,7 +191,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <div class="mt-3 rounded-2xl border-2 border-mp-black p-3">
+                    <div class="mt-3 rounded-2xl ring-2 ring-mp-orange p-3">
                         <div class="flex items-start justify-between gap-2">
                             <div>
                                 <p class="text-sm font-bold text-orange-700">Nouvelle commande · il y a 30 s</p>
