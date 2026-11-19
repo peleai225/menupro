@@ -1599,11 +1599,16 @@ section {
 .vt-hint { font-size: .9375rem; color: var(--color-mp-text); font-weight: 400; }
 .vt-input {
     width: 100%; min-height: 3.25rem; padding: .75rem 1rem; border-radius: .875rem;
-    border: 2px solid #CFC6BD; background: #fff; color: var(--color-mp-black); font-size: 1rem;
-    transition: border-color .15s;
+    border: 1px solid #A8A29E; background: #fff; color: var(--color-mp-black); font-size: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    transition: border-color .15s, box-shadow .15s;
 }
+.vt-input:hover { border-color: #78716C; }
 .vt-input::placeholder { color: #857C74; }
-.vt-input:focus { outline: none; border-color: var(--color-mp-black); box-shadow: 0 0 0 3px var(--color-mp-orange); }
+.vt-input:focus, .vt .vt-input:focus-visible { outline: none; border-color: #EA580C; box-shadow: 0 0 0 4px rgba(249,115,22,.22); border-radius: .875rem; }
+.vt-input[aria-invalid="true"], .vt-input.is-invalid { border-color: #B91C1C; }
+.vt-input[aria-invalid="true"]:focus, .vt-input.is-invalid:focus { border-color: #B91C1C; box-shadow: 0 0 0 4px rgba(185,28,28,.15); }
+.vt-error { margin-top: .5rem; font-size: .9375rem; font-weight: 600; color: #B91C1C; }
 .vt-input.has-icon { padding-left: 3rem; }
 
 /* Maquette de téléphone (aperçu du vrai écran client, en HTML : aucune image à charger) */
@@ -1659,3 +1664,48 @@ section {
 .vt-mini { margin-top: auto; background: #fff; border-radius: 1rem 1rem 0 0; padding: 1rem 1rem 1.25rem; box-shadow: 0 -1px 0 rgba(0,0,0,.03), 0 18px 40px -18px rgba(0,0,0,.18); }
 .vt-benefit { position: relative; padding: 1.25rem 0 1.25rem 1.5rem; }
 .vt-benefit::before { content: ""; position: absolute; left: 0; top: 1.4rem; bottom: 1.4rem; width: 3px; border-radius: 3px; background: linear-gradient(var(--color-mp-orange), rgba(249,115,22,.15)); }
+
+/* ── Vitrine v3 : pages intérieures (tarifs, FAQ, contact, inscription, connexion) ── */
+.vt-pagehead { position: relative; overflow: hidden; padding-block: 3rem 2.5rem; text-align: center;
+    background: radial-gradient(55% 60% at 50% -10%, rgba(249,115,22,.24), rgba(249,115,22,.06) 50%, transparent 78%), #fff; }
+@media (min-width: 768px) { .vt-pagehead { padding-block: 5rem 3.5rem; } }
+.vt-pagehead .vt-lead { margin-inline: auto; }
+.vt-card { background: #fff; border-radius: 1.5rem; box-shadow: 0 0 0 1px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04), 0 24px 48px -28px rgba(0,0,0,.22); }
+.vt-soft { background: #F6F6F6; border-radius: 1.5rem; }
+.vt-badge { display: inline-flex; align-items: center; gap: .375rem; border-radius: 999px; padding: .2rem .7rem; font-size: .875rem; font-weight: 600; line-height: 1.4; }
+/* Coche orange dans un rond #FFEDD5 (même dessin que l'accueil) */
+.vt-checks-soft > li { display: flex; gap: .625rem; align-items: flex-start; }
+.vt-checks-soft > li::before {
+    content: ""; flex: none; width: 1.25rem; height: 1.25rem; margin-top: .2rem; border-radius: 999px;
+    background: #FFEDD5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23EA580C' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M6 10.2l2.6 2.6L14 7.4'/%3E%3C/svg%3E") center/1.25rem no-repeat;
+}
+/* Sélecteur segmenté (durée de paiement) */
+.vt-seg { display: inline-grid; gap: .25rem; padding: .3rem; border-radius: 1rem; background: #F1F1F0; }
+.vt-seg > button { min-height: 2.75rem; padding: .5rem 1rem; border-radius: .75rem; font-weight: 600; color: var(--color-mp-text); transition: background-color .15s, color .15s, box-shadow .15s; }
+.vt-seg > button:hover { color: #000; }
+.vt-seg > [aria-pressed="true"] { background: #fff; color: #000; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px -4px rgba(0,0,0,.15); }
+/* Option sélectionnable (carte radio) */
+.vt-option { display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; padding: 1rem; border-radius: 1rem; background: #fff;
+    box-shadow: 0 0 0 1px #E7E5E4; transition: box-shadow .15s, background-color .15s; }
+.vt-option:hover { box-shadow: 0 0 0 1px #A8A29E; }
+.vt-option.is-on { background: #FFF7ED; box-shadow: 0 0 0 2px #EA580C; }
+.vt-radio { flex: none; width: 1.375rem; height: 1.375rem; border-radius: 999px; border: 1.5px solid #A8A29E; background: #fff; display: grid; place-items: center; }
+.vt-option.is-on .vt-radio { border-color: #EA580C; }
+.vt-radio > span { width: .625rem; height: .625rem; border-radius: 999px; background: #EA580C; }
+/* Questions (accordéon) */
+.vt-faq { border-radius: 1.25rem; background: #fff; box-shadow: 0 0 0 1px #E7E5E4; }
+.vt-faq > details + details { border-top: 1px solid #EDEBE9; }
+.vt-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.125rem 1.25rem; cursor: pointer; list-style: none; font-weight: 600; font-size: 1.0625rem; line-height: 1.4; }
+.vt-faq summary::-webkit-details-marker { display: none; }
+.vt-faq-icon { flex: none; width: 2rem; height: 2rem; border-radius: 999px; background: #F5F5F4; display: grid; place-items: center; transition: transform .2s, background-color .2s; }
+.vt-faq details[open] .vt-faq-icon { transform: rotate(45deg); background: #FFEDD5; color: #C2410C; }
+.vt-faq details > p { padding: 0 1.25rem 1.25rem; color: var(--color-mp-text); max-width: 65ch; }
+/* Messages */
+.vt-alert { border-radius: 1rem; padding: 1rem 1.125rem; }
+.vt-alert-error { background: #FEF2F2; color: #7F1D1D; box-shadow: inset 0 0 0 1px #FECACA; }
+.vt-alert-ok { background: #F0FDF4; color: #14532D; box-shadow: inset 0 0 0 1px #BBF7D0; }
+/* Cases à cocher */
+.vt-checkbox { flex: none; width: 1.375rem; height: 1.375rem; border-radius: .375rem; border: 1.5px solid #78716C; color: #EA580C; }
+.vt-checkbox:focus { box-shadow: 0 0 0 4px rgba(249,115,22,.22); }
+/* Zone d'authentification : halo + carte */
+.vt-auth { background: radial-gradient(70% 40% at 50% 0%, rgba(249,115,22,.20), rgba(249,115,22,.05) 55%, transparent 80%), #FAFAF9; }

@@ -20,36 +20,29 @@
     decline() { this.setCookie('essential_only'); this.showBanner = false; }
 }"
      x-show="showBanner"
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0 translate-y-full"
+     x-transition:enter="transition ease-out duration-300 motion-reduce:transition-none"
+     x-transition:enter-start="opacity-0 translate-y-4"
      x-transition:enter-end="opacity-100 translate-y-0"
-     x-transition:leave="transition ease-in duration-200"
-     x-transition:leave-start="opacity-100 translate-y-0"
-     x-transition:leave-end="opacity-0 translate-y-full"
-     class="fixed bottom-0 left-0 right-0 z-[200] p-4 sm:p-6"
+     x-transition:leave="transition ease-in duration-150 motion-reduce:transition-none"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-x-0 bottom-0 z-[200] p-3 sm:p-4 pointer-events-none"
+     role="region" aria-label="Cookies"
      x-cloak>
-    <div class="max-w-4xl mx-auto bg-white dark:bg-neutral-800 rounded-xl shadow-elevated border border-neutral-200 dark:border-neutral-700 p-4 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex-1">
-                <h3 class="font-semibold text-neutral-900 dark:text-white mb-1">
-                    🍪 Nous utilisons des cookies
-                </h3>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">
-                    Pour assurer le bon fonctionnement du site (connexion, panier, préférences) et améliorer votre expérience.
-                    En cliquant sur « Accepter », vous consentez à l'utilisation des cookies essentiels.
-                    <a href="{{ route('privacy') }}#cookies" class="text-primary-500 hover:text-primary-600 underline">En savoir plus</a>
-                </p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
-                <button @click="accept()"
-                        class="btn btn-primary btn-sm">
-                    Accepter
-                </button>
-                <button @click="decline()"
-                        class="btn btn-ghost btn-sm text-neutral-600 dark:text-neutral-400">
-                    Refuser les non essentiels
-                </button>
-            </div>
+    <div class="pointer-events-auto mx-auto max-w-3xl rounded-2xl bg-white text-neutral-900 px-4 py-3 sm:pl-5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-16px_rgba(0,0,0,.25)] flex flex-col sm:flex-row sm:items-center gap-3">
+        <p class="flex-1 text-sm leading-snug text-neutral-700">
+            Cookies : connexion, panier et préférences.
+            <a href="{{ route('privacy') }}#cookies" class="font-semibold text-[#C2410C] underline underline-offset-2 whitespace-nowrap">En savoir plus</a>
+        </p>
+        <div class="grid grid-cols-2 gap-2 shrink-0">
+            <button type="button" @click="decline()"
+                    class="min-h-10 px-3 rounded-xl text-sm font-semibold text-neutral-800 bg-neutral-100 hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-300">
+                Essentiels seulement
+            </button>
+            <button type="button" @click="accept()"
+                    class="min-h-10 px-4 rounded-xl text-sm font-semibold text-white bg-neutral-900 hover:bg-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-300">
+                Accepter
+            </button>
         </div>
     </div>
 </div>

@@ -1,14 +1,14 @@
 <x-layouts.auth title="Connexion">
+    <div class="text-center">
+        <h1 class="vt-h2 !text-[2rem] sm:!text-[2.375rem]">Connexion</h1>
+        <p class="mt-2 vt-muted">Accédez à l'espace de gestion de votre commerce.</p>
+    </div>
+
     @if (session('success'))
-        <div class="mb-6 p-4 rounded-2xl border-2 border-[#15803D] bg-[#F0FDF4] text-[#14532D] font-medium" role="status">
-            {{ session('success') }}
-        </div>
+        <div class="vt-alert vt-alert-ok mt-6 font-medium" role="status">{{ session('success') }}</div>
     @endif
 
-    <h1 class="vt-h2">Connexion</h1>
-    <p class="mt-2 vt-muted">Accédez à l'espace de gestion de votre commerce.</p>
-
-    <form method="POST" action="{{ route('login.post') }}" class="mt-8 space-y-6" x-data="{ loading: false, showPassword: false }" @submit="loading = true">
+    <form method="POST" action="{{ route('login.post') }}" class="mt-8 space-y-5" x-data="{ loading: false, showPassword: false }" @submit="loading = true">
         @csrf
 
         {{-- Identifiant : le contrôleur accepte le numéro WhatsApp OU l'adresse e-mail (LoginRequest) --}}
@@ -19,23 +19,23 @@
                    required autofocus autocomplete="username" autocapitalize="none" spellcheck="false"
                    aria-describedby="login-hint @error('login') login-error @enderror"
                    @error('login') aria-invalid="true" @enderror
-                   class="vt-input @error('login') !border-[#B91C1C] @enderror">
+                   class="vt-input">
             <p id="login-hint" class="mt-2 vt-hint">Le numéro utilisé à l'inscription. Inscrit avec un e-mail ? Saisissez-le ici.</p>
             @error('login')
-                <p id="login-error" class="mt-2 font-semibold text-[#B91C1C]" role="alert">{{ $message }}</p>
+                <p id="login-error" class="vt-error" role="alert">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
             <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-2">
                 <label for="password" class="vt-label !mb-0">Mot de passe</label>
-                <a href="{{ route('password.request') }}" class="vt-link text-[0.9375rem]">Mot de passe oublié ?</a>
+                <a href="{{ route('password.request') }}" class="text-[0.9375rem] font-semibold text-mp-ink underline-offset-4 hover:underline">Mot de passe oublié ?</a>
             </div>
             <div class="relative">
                 <input :type="showPassword ? 'text' : 'password'" type="password"
                        id="password" name="password" required autocomplete="current-password"
                        @error('password') aria-invalid="true" aria-describedby="password-error" @enderror
-                       class="vt-input !pr-14 @error('password') !border-[#B91C1C] @enderror">
+                       class="vt-input !pr-14">
                 <button type="button" @click="showPassword = !showPassword"
                         class="absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-xl text-mp-text hover:text-mp-black"
                         :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'" aria-label="Afficher le mot de passe">
@@ -44,16 +44,16 @@
                 </button>
             </div>
             @error('password')
-                <p id="password-error" class="mt-2 font-semibold text-[#B91C1C]" role="alert">{{ $message }}</p>
+                <p id="password-error" class="vt-error" role="alert">{{ $message }}</p>
             @enderror
         </div>
 
         <label for="remember" class="flex items-center gap-3 min-h-11 cursor-pointer select-none">
-            <input type="checkbox" id="remember" name="remember" class="w-6 h-6 rounded-md border-2 border-[#857C74] text-mp-black focus:ring-mp-orange" {{ old('remember') ? 'checked' : '' }}>
+            <input type="checkbox" id="remember" name="remember" class="vt-checkbox" {{ old('remember') ? 'checked' : '' }}>
             <span>Rester connecté sur ce téléphone</span>
         </label>
 
-        <button type="submit" class="vt-btn vt-btn-primary vt-btn-block relative" :disabled="loading" :aria-busy="loading.toString()">
+        <button type="submit" class="vt-btn vt-btn-dark vt-btn-block relative" :disabled="loading" :aria-busy="loading.toString()">
             <span :class="{ 'opacity-0': loading }">Se connecter</span>
             <span x-show="loading" x-cloak class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
                 <svg class="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -61,14 +61,14 @@
         </button>
     </form>
 
-    <div class="mt-10 rounded-2xl bg-mp-paper p-5">
-        <h2 class="vt-h3">Pas encore de compte ?</h2>
-        <p class="mt-1 vt-muted">Restaurant, maquis, stand ou boutique : {{ \App\Support\VitrineGrid::trialDays() }} jours d'essai gratuit.</p>
-        <a href="{{ route('register') }}" class="vt-btn vt-btn-dark vt-btn-block mt-4">Créer mon commerce</a>
+    <div class="mt-8 pt-6 border-t border-neutral-100 text-center">
+        <p class="font-semibold">Pas encore de compte ?</p>
+        <p class="mt-1 text-[0.9375rem] vt-muted">Restaurant, maquis, stand ou boutique : {{ \App\Support\VitrineGrid::trialDays() }} jours d'essai gratuit.</p>
+        <a href="{{ route('register') }}" class="vt-btn vt-btn-ghost vt-btn-block mt-4">Créer mon commerce</a>
     </div>
 
-    <ul class="mt-6 space-y-1 text-[0.9375rem] vt-muted">
-        <li>Connexion sécurisée (HTTPS).</li>
-        <li>Données protégées (loi ivoirienne n° 2013-450).</li>
-    </ul>
+    <p class="mt-6 flex items-center justify-center gap-2 text-sm vt-muted">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span>Connexion sécurisée (HTTPS). Données protégées (loi ivoirienne n° 2013-450).</span>
+    </p>
 </x-layouts.auth>

@@ -20,7 +20,7 @@
 
     {{-- ══════════ EN-TÊTE ══════════ --}}
     <header x-data="{ open: false }" @keydown.escape.window="open = false"
-            class="fixed top-0 inset-x-0 z-50 bg-white border-b border-mp-line">
+            class="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/[.06]">
         <div class="vt-wrap flex items-center justify-between gap-3 h-16">
             <a href="{{ route('home') }}" class="shrink-0 flex items-center" aria-label="{{ $appName }} — accueil">
                 <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="108" height="38" class="h-8 sm:h-9 w-auto object-contain">
@@ -29,21 +29,21 @@
             <nav class="hidden lg:flex items-center gap-1" aria-label="Navigation principale">
                 @foreach($navLinks as $link)
                     <a href="{{ $link['href'] }}" @if($link['active']) aria-current="page" @endif
-                       class="px-3 py-2 rounded-lg text-base font-semibold {{ $link['active'] ? 'text-mp-ink underline underline-offset-8 decoration-2' : 'text-mp-black hover:bg-mp-paper' }}">{{ $link['label'] }}</a>
+                       class="px-3 py-2 rounded-lg text-[0.9375rem] font-semibold {{ $link['active'] ? 'text-mp-black bg-neutral-100' : 'text-neutral-600 hover:text-mp-black hover:bg-neutral-100' }}">{{ $link['label'] }}</a>
                 @endforeach
-                <a href="https://app.menupro.ci" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg text-base font-semibold text-mp-black hover:bg-mp-paper">Commander un repas</a>
+                <a href="https://app.menupro.ci" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg text-[0.9375rem] font-semibold text-neutral-600 hover:text-mp-black hover:bg-neutral-100">Commander un repas</a>
             </nav>
 
             <div class="flex items-center gap-2">
                 @auth
-                    <a href="{{ route(auth()->user()->getDashboardRoute()) }}" class="vt-btn vt-btn-dark !min-h-11 !px-4 !text-base">Mon espace</a>
+                    <a href="{{ route(auth()->user()->getDashboardRoute()) }}" class="vt-btn vt-btn-dark !min-h-11 !px-4 !text-[0.9375rem] !rounded-xl">Mon espace</a>
                 @else
-                    <a href="{{ route('login') }}" class="hidden lg:inline-flex px-3 py-2 rounded-lg text-base font-semibold text-mp-black hover:bg-mp-paper">Connexion</a>
-                    <a href="{{ route('register') }}" class="vt-btn vt-btn-primary !min-h-11 !px-4 !text-base whitespace-nowrap">
+                    <a href="{{ route('login') }}" class="hidden lg:inline-flex px-3 py-2 rounded-lg text-[0.9375rem] font-semibold text-mp-black hover:bg-neutral-100">Connexion</a>
+                    <a href="{{ route('register') }}" class="vt-btn vt-btn-dark !min-h-11 !px-4 !text-[0.9375rem] !rounded-xl whitespace-nowrap">
                         <span class="sm:hidden">Essai gratuit</span><span class="hidden sm:inline">Créer mon commerce</span>
                     </a>
                 @endauth
-                <button type="button" @click="open = !open" class="lg:hidden w-12 h-12 -mr-2 flex items-center justify-center rounded-xl text-mp-black hover:bg-mp-paper"
+                <button type="button" @click="open = !open" class="lg:hidden w-12 h-12 -mr-2 flex items-center justify-center rounded-xl text-mp-black hover:bg-neutral-100"
                         :aria-expanded="open.toString()" aria-controls="menu-mobile" aria-label="Ouvrir le menu">
                     <svg x-show="!open" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
                     <svg x-show="open" x-cloak class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
@@ -53,17 +53,17 @@
 
         {{-- Menu mobile : une colonne de grands liens --}}
         <nav id="menu-mobile" x-show="open" x-cloak @click.outside="open = false"
-             class="lg:hidden border-t border-mp-line bg-white max-h-[calc(100dvh-4rem)] overflow-y-auto" aria-label="Menu">
+             class="lg:hidden border-t border-black/[.06] bg-white max-h-[calc(100dvh-4rem)] overflow-y-auto" aria-label="Menu">
             <ul class="vt-wrap py-2">
                 @foreach($navLinks as $link)
                     <li><a href="{{ $link['href'] }}" @click="open = false" @if($link['active']) aria-current="page" @endif
-                           class="flex items-center min-h-14 text-lg font-semibold border-b border-mp-line {{ $link['active'] ? 'text-mp-ink' : 'text-mp-black' }}">{{ $link['label'] }}</a></li>
+                           class="flex items-center min-h-14 text-lg font-semibold border-b border-neutral-100 {{ $link['active'] ? 'text-mp-ink' : 'text-mp-black' }}">{{ $link['label'] }}</a></li>
                 @endforeach
-                <li><a href="https://app.menupro.ci" target="_blank" rel="noopener" class="flex items-center min-h-14 text-lg font-semibold border-b border-mp-line">Commander un repas (app.menupro.ci)</a></li>
-                <li><a href="{{ route('representative.program') }}" class="flex items-center min-h-14 text-lg font-semibold border-b border-mp-line">Devenir représentant</a></li>
+                <li><a href="https://app.menupro.ci" target="_blank" rel="noopener" class="flex items-center min-h-14 text-lg font-semibold border-b border-neutral-100">Commander un repas (app.menupro.ci)</a></li>
+                <li><a href="{{ route('representative.program') }}" class="flex items-center min-h-14 text-lg font-semibold border-b border-neutral-100">Devenir représentant</a></li>
                 @guest
                     <li class="pt-4 pb-3 grid gap-3">
-                        <a href="{{ route('register') }}" class="vt-btn vt-btn-primary vt-btn-block">Créer mon commerce</a>
+                        <a href="{{ route('register') }}" class="vt-btn vt-btn-dark vt-btn-block">Créer mon commerce</a>
                         <a href="{{ route('login') }}" class="vt-btn vt-btn-ghost vt-btn-block">Connexion</a>
                     </li>
                 @endguest
@@ -90,18 +90,19 @@
     <div class="pt-16">
         @if($bannerEnabled && $bannerText)
             <div x-data="{ show: !sessionStorage.getItem('banner_closed_{{ md5($bannerText) }}') }" x-show="show" x-cloak
-                 class="bg-mp-black text-white">
-                <div class="vt-wrap flex items-center gap-3 py-2.5">
-                    <p class="flex-1 text-base font-medium">
+                 class="bg-[#FFF7ED] text-[#7C2D12] border-b border-[#FED7AA]" data-site-banner>
+                <div class="vt-wrap flex items-center gap-2 py-1">
+                    <p class="flex-1 min-w-0 text-sm font-medium sm:text-center py-1.5">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-mp-orange align-middle mr-2" aria-hidden="true"></span>
                         @if($bannerLink)
-                            <a href="{{ $bannerLink }}" class="underline underline-offset-4 decoration-mp-orange decoration-2">{{ $bannerText }}</a>
+                            <a href="{{ $bannerLink }}" class="underline underline-offset-4 decoration-[#FDBA74] hover:decoration-[#7C2D12]">{{ $bannerText }}</a>
                         @else
                             {{ $bannerText }}
                         @endif
                     </p>
                     <button type="button" @click="show = false; sessionStorage.setItem('banner_closed_{{ md5($bannerText) }}', '1')"
-                            class="w-11 h-11 shrink-0 flex items-center justify-center rounded-full hover:bg-white/15" aria-label="Fermer l'annonce">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                            class="w-10 h-10 -my-1 -mr-2 shrink-0 flex items-center justify-center rounded-full hover:bg-[#FFEDD5]" aria-label="Fermer l'annonce">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
                     </button>
                 </div>
             </div>
@@ -158,30 +159,31 @@
             ],
         ];
     @endphp
-    <footer class="bg-mp-black text-white">
+    <footer class="bg-[#FAFAF9] border-t border-black/[.06]">
         <div class="vt-wrap py-12 lg:py-16">
             <div class="grid gap-10 lg:grid-cols-[1.2fr_3fr]">
                 <div>
-                    <a href="{{ route('home') }}" class="inline-flex bg-white rounded-xl px-3 py-2" aria-label="{{ $appName }} — accueil">
+                    <a href="{{ route('home') }}" class="inline-flex" aria-label="{{ $appName }} — accueil">
                         <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="108" height="38" class="h-8 w-auto object-contain" loading="lazy">
                     </a>
-                    <p class="mt-5 text-neutral-300 max-w-xs">Commandes en ligne, paiement Mobile Money et livraison pour les restaurants, maquis, stands et boutiques de Côte d'Ivoire.</p>
+                    <p class="mt-4 text-[0.9375rem] text-neutral-600 max-w-xs">Commandes en ligne, paiement Mobile Money et livraison pour les restaurants, maquis, stands et boutiques de Côte d'Ivoire.</p>
+                    <a href="{{ route('register') }}" class="vt-btn vt-btn-dark !min-h-11 !px-4 !text-[0.9375rem] !rounded-xl mt-5">Créer mon commerce</a>
                     @if($socials)
-                        <ul class="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+                        <ul class="mt-5 flex flex-wrap gap-x-5 gap-y-1">
                             @foreach($socials as $network => $url)
-                                <li><a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 text-neutral-200 hover:text-mp-orange">{{ $network }}</a></li>
+                                <li><a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-10 items-center text-[0.9375rem] font-medium text-neutral-600 hover:text-mp-black">{{ $network }}</a></li>
                             @endforeach
                         </ul>
                     @endif
                 </div>
-                <div class="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
                     @foreach($footerColumns as $heading => $links)
                         <div>
-                            <h2 class="font-bold text-lg mb-3">{{ $heading }}</h2>
-                            <ul class="space-y-1">
+                            <h2 class="text-[0.9375rem] font-semibold text-mp-black mb-2">{{ $heading }}</h2>
+                            <ul>
                                 @foreach($links as [$label, $href])
                                     <li><a href="{{ $href }}" @if(str_starts_with($href, 'https://app.')) target="_blank" rel="noopener" @endif
-                                           class="inline-flex min-h-11 items-center text-neutral-300 hover:text-mp-orange">{{ $label }}</a></li>
+                                           class="inline-flex min-h-10 items-center text-[0.9375rem] text-neutral-600 hover:text-mp-black">{{ $label }}</a></li>
                                 @endforeach
                             </ul>
                         </div>
@@ -189,15 +191,15 @@
                 </div>
             </div>
 
-            <div class="mt-12 pt-6 border-t border-white/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[0.9375rem] text-neutral-300">
+            <div class="mt-12 pt-6 border-t border-black/[.08] flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-neutral-600">
                 <div>
                     <p>{{ $footerText }}</p>
-                    <p class="mt-1">Données protégées (loi ivoirienne n° 2013-450). Un produit <a href="https://peleai.online" target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-mp-orange">PeleAI</a>, fait en Côte d'Ivoire.</p>
+                    <p class="mt-1">Données protégées (loi ivoirienne n° 2013-450). Un produit <a href="https://peleai.online" target="_blank" rel="noopener" class="underline underline-offset-4 hover:text-mp-black">PeleAI</a>, fait en Côte d'Ivoire.</p>
                 </div>
-                <ul class="flex flex-wrap gap-x-5 gap-y-1">
-                    <li><a href="{{ route('terms') }}" class="inline-flex min-h-11 items-center hover:text-mp-orange">Conditions</a></li>
-                    <li><a href="{{ route('privacy') }}" class="inline-flex min-h-11 items-center hover:text-mp-orange">Confidentialité</a></li>
-                    <li><a href="{{ route('mentions-legales') }}" class="inline-flex min-h-11 items-center hover:text-mp-orange">Mentions légales</a></li>
+                <ul class="flex flex-wrap gap-x-5">
+                    <li><a href="{{ route('terms') }}" class="inline-flex min-h-10 items-center hover:text-mp-black">Conditions</a></li>
+                    <li><a href="{{ route('privacy') }}" class="inline-flex min-h-10 items-center hover:text-mp-black">Confidentialité</a></li>
+                    <li><a href="{{ route('mentions-legales') }}" class="inline-flex min-h-10 items-center hover:text-mp-black">Mentions légales</a></li>
                 </ul>
             </div>
         </div>

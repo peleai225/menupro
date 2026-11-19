@@ -41,25 +41,28 @@
     ];
 @endphp
 <x-layouts.public title="Questions fréquentes" description="Réponses aux questions sur MenuPro : tarifs, commandes en ligne, paiement Mobile Money, livraison, restaurants, stands et boutiques.">
-    <section class="pt-10 pb-6 md:pt-16">
+    <section class="vt-pagehead">
         <div class="vt-wrap max-w-3xl">
             <h1 class="vt-h1">Questions fréquentes</h1>
             <p class="vt-lead mt-4">Vous ne trouvez pas votre réponse ? <a href="{{ route('contact') }}" class="vt-link">Écrivez-nous</a>.</p>
 
-            <div class="mt-8" x-data="{ search: '' }">
-                <label for="faq-search" class="vt-label">Rechercher une question</label>
-                <input type="search" id="faq-search" x-model="search" placeholder="Ex. livraison, boutique, paiement"
-                       @input="
-                           const s = search.toLowerCase();
-                           document.querySelectorAll('[data-faq-item]').forEach(el => { el.hidden = !!s && !el.textContent.toLowerCase().includes(s); });
-                           document.querySelectorAll('[data-faq-group]').forEach(g => { g.hidden = !!s && !g.querySelector('[data-faq-item]:not([hidden])'); });
-                       "
-                       class="vt-input">
+            <div class="mt-8 max-w-xl mx-auto text-left" x-data="{ search: '' }">
+                <label for="faq-search" class="sr-only">Rechercher une question</label>
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+                    <input type="search" id="faq-search" x-model="search" placeholder="Rechercher : livraison, boutique, paiement…"
+                           @input="
+                               const s = search.toLowerCase();
+                               document.querySelectorAll('[data-faq-item]').forEach(el => { el.hidden = !!s && !el.textContent.toLowerCase().includes(s); });
+                               document.querySelectorAll('[data-faq-group]').forEach(g => { g.hidden = !!s && !g.querySelector('[data-faq-item]:not([hidden])'); });
+                           "
+                           class="vt-input has-icon !rounded-2xl">
+                </div>
             </div>
 
-            <nav class="mt-6 flex flex-wrap gap-2" aria-label="Thèmes">
+            <nav class="mt-6 flex flex-wrap justify-center gap-2" aria-label="Thèmes">
                 @foreach($groups as $key => [$label])
-                    <a href="#{{ $key }}" class="inline-flex items-center min-h-11 px-4 rounded-full border-2 border-mp-line font-semibold hover:border-mp-black">{{ $label }}</a>
+                    <a href="#{{ $key }}" class="inline-flex items-center min-h-11 px-4 rounded-full bg-white text-[0.9375rem] font-semibold shadow-[0_0_0_1px_#E7E5E4] hover:shadow-[0_0_0_1px_#A8A29E]">{{ $label }}</a>
                 @endforeach
             </nav>
         </div>
@@ -69,17 +72,15 @@
         <div class="vt-wrap max-w-3xl space-y-12">
             @foreach($groups as $key => [$label, $items])
                 <div id="{{ $key }}" class="scroll-mt-20" data-faq-group>
-                    <h2 class="vt-h2 text-[1.75rem]">{{ $label }}</h2>
-                    <div class="mt-4 border-t-2 border-mp-black">
+                    <h2 class="vt-display text-[1.75rem]">{{ $label }}</h2>
+                    <div class="vt-faq mt-4">
                         @foreach($items as [$q, $a])
-                            <details class="group border-b-2 border-mp-line" data-faq-item>
-                                <summary class="flex items-center justify-between gap-4 py-5 cursor-pointer list-none text-lg font-bold [&::-webkit-details-marker]:hidden">
+                            <details data-faq-item>
+                                <summary>
                                     {{ $q }}
-                                    <span class="flex-none w-9 h-9 rounded-full bg-mp-paper flex items-center justify-center group-open:rotate-45 transition-transform" aria-hidden="true">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                                    </span>
+                                    <span class="vt-faq-icon" aria-hidden="true"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
                                 </summary>
-                                <p class="pb-5 vt-muted">{{ $a }}</p>
+                                <p>{{ $a }}</p>
                             </details>
                         @endforeach
                     </div>
@@ -88,12 +89,14 @@
         </div>
     </section>
 
-    <section class="bg-mp-orange">
-        <div class="vt-wrap py-12 md:py-16 grid gap-6 md:grid-cols-[1.5fr_1fr] md:items-center">
-            <h2 class="vt-h2">Prêt à essayer ? {{ $trial }} jours gratuits.</h2>
-            <div class="grid gap-3">
-                <a href="{{ route('register') }}" class="vt-btn vt-btn-dark vt-btn-block">Créer mon commerce</a>
-                <a href="{{ route('contact') }}" class="vt-btn vt-btn-light vt-btn-block">Poser une question</a>
+    <section class="pb-14 md:pb-20">
+        <div class="vt-wrap">
+            <div class="vt-soft px-5 py-12 md:py-14 text-center">
+                <h2 class="vt-h2">Prêt à essayer ? {{ $trial }} jours gratuits.</h2>
+                <div class="mt-8 grid gap-3 sm:flex sm:justify-center">
+                    <a href="{{ route('register') }}" class="vt-btn vt-btn-dark">Créer mon commerce</a>
+                    <a href="{{ route('contact') }}" class="vt-btn vt-btn-ghost">Poser une question</a>
+                </div>
             </div>
         </div>
     </section>

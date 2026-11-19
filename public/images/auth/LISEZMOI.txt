@@ -1,14 +1,10 @@
-Visuel facultatif des pages de connexion et d'inscription
-=========================================================
+Visuel des pages de connexion et d'inscription
+==============================================
 
-Placez une image dans ce dossier avec l'un de ces noms :
-  - custom.webp (recommandé, le plus léger)
-  - custom.jpg
-  - custom.png
+Depuis la refonte « vitrine v3 », les pages de connexion et d'inscription
+n'affichent plus d'image : le formulaire est centré dans une carte, et
+l'aperçu du produit est dessiné en HTML/CSS (cartes flottantes, comme sur
+l'accueil). Rien n'est chargé depuis ce dossier.
 
-Elle s'affiche dans un cadre du panneau noir de gauche, SOUS le texte
-(jamais derrière), et uniquement sur ordinateur : rien n'est chargé sur téléphone.
-
-Conseils : une vraie capture du produit ou une vraie photo d'un commerce client
-(avec son accord), format paysage 16:9, 1200 x 675 px, moins de 120 Ko,
-sans texte incrusté dans l'image.
+custom.jpg est conservé pour archive : il contient une faute (« DIGIITATION »)
+et ne doit pas être réutilisé tel quel.

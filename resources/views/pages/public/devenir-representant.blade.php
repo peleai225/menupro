@@ -5,38 +5,41 @@
 <x-layouts.public title="Devenir représentant MenuPro" description="Représentez MenuPro dans votre ville : présentez-le aux restaurants, maquis, stands et boutiques, et touchez une part de chaque abonnement et de chaque livraison.">
 
 {{-- ══════════ EN-TÊTE ══════════ --}}
-<section class="pt-10 pb-12 md:pt-16 md:pb-16">
+<section class="vt-pagehead">
     <div class="vt-wrap max-w-4xl">
         <h1 class="vt-h1">Devenez représentant MenuPro dans votre ville</h1>
         <p class="vt-lead mt-5">Faites découvrir MenuPro aux restaurants, maquis, stands et boutiques de votre ville, accompagnez-les au quotidien et touchez une part de chaque abonnement et de chaque livraison, mois après mois.</p>
-        <a href="#candidature" class="vt-btn vt-btn-primary mt-8 w-full sm:w-auto">Déposer ma candidature</a>
+        <div class="mt-8 grid gap-3 sm:flex sm:justify-center">
+            <a href="#candidature" class="vt-btn vt-btn-dark">Déposer ma candidature</a>
+            <a href="#remuneration" class="vt-btn vt-btn-ghost">Voir la rémunération</a>
+        </div>
     </div>
 </section>
 
 {{-- ══════════ RÉMUNÉRATION ══════════ --}}
-<section class="vt-section bg-mp-paper">
+<section id="remuneration" class="vt-section pt-4 md:pt-6 scroll-mt-16">
     <div class="vt-wrap max-w-5xl">
-        <h2 class="vt-h2">Votre rémunération</h2>
+        <h2 class="vt-h2 text-center">Votre rémunération</h2>
         <div class="mt-8 grid gap-5 md:grid-cols-2">
-            <div class="rounded-2xl bg-white border-2 border-mp-black p-6">
-                <p class="text-5xl font-bold vt-num">{{ $subRate }} %</p>
-                <p class="mt-3 font-bold text-lg">des abonnements encaissés</p>
+            <div class="vt-soft p-6 md:p-8">
+                <p class="vt-display text-5xl md:text-6xl vt-num text-mp-ink">{{ $subRate }} %</p>
+                <p class="mt-3 font-semibold text-lg">des abonnements encaissés</p>
                 <p class="mt-1 vt-muted">Sur chaque abonnement payé par les commerces qui vous sont attribués, tant que le commerce reste actif.</p>
             </div>
-            <div class="rounded-2xl bg-white border-2 border-mp-black p-6">
-                <p class="text-5xl font-bold vt-num">{{ $delRate }} %</p>
-                <p class="mt-3 font-bold text-lg">de la commission MenuPro sur les livraisons</p>
+            <div class="vt-soft p-6 md:p-8">
+                <p class="vt-display text-5xl md:text-6xl vt-num text-mp-ink">{{ $delRate }} %</p>
+                <p class="mt-3 font-semibold text-lg">de la commission MenuPro sur les livraisons</p>
                 <p class="mt-1 vt-muted">Sur les commandes livrées via l'app client par les commerces de votre ville qui vous sont attribués.</p>
             </div>
         </div>
-        <ul class="mt-8 grid gap-6 md:grid-cols-3">
+        <ul class="mt-8 grid gap-2 md:grid-cols-3 md:gap-8">
             @foreach([
                 ['Exclusivité de la ville', 'Objectifs atteints ? Votre ville devient votre territoire exclusif : tous ses commerces vous sont attribués.'],
                 ['Aucune manipulation d\'argent', 'Les commerces paient MenuPro directement. Vous ne collectez jamais d\'argent.'],
                 ['Tout est transparent', 'Votre espace affiche vos commerces, les encaissements et votre part, calculée chaque mois.'],
             ] as [$title, $text])
-                <li class="border-t-2 border-mp-black pt-4">
-                    <h3 class="vt-h3">{{ $title }}</h3>
+                <li class="vt-benefit">
+                    <h3 class="vt-display text-xl">{{ $title }}</h3>
                     <p class="mt-1 vt-muted">{{ $text }}</p>
                 </li>
             @endforeach
@@ -45,20 +48,20 @@
 </section>
 
 {{-- ══════════ RÔLE + CONDITIONS ══════════ --}}
-<section class="vt-section">
-    <div class="vt-wrap max-w-5xl grid gap-10 md:grid-cols-2">
-        <div>
-            <h2 class="vt-h3 text-2xl">Votre rôle</h2>
-            <ul class="vt-checks mt-4 space-y-3">
+<section class="vt-section bg-[#FAFAF9]">
+    <div class="vt-wrap max-w-5xl grid gap-5 md:grid-cols-2">
+        <div class="vt-card p-6 md:p-8">
+            <h2 class="vt-display text-2xl">Votre rôle</h2>
+            <ul class="vt-checks-soft mt-4 space-y-3">
                 <li>Présenter MenuPro aux restaurants, maquis, hôtels, stands et boutiques de votre ville.</li>
                 <li>Les inscrire avec votre lien de parrainage personnel.</li>
                 <li>Les accompagner : prise en main du QR code, des commandes et de la livraison.</li>
                 <li>Faire remonter les besoins du terrain à l'équipe MenuPro.</li>
             </ul>
         </div>
-        <div>
-            <h2 class="vt-h3 text-2xl">Conditions d'entrée</h2>
-            <ul class="mt-4 space-y-3 list-disc pl-5 marker:text-mp-ink">
+        <div class="vt-card p-6 md:p-8">
+            <h2 class="vt-display text-2xl">Conditions d'entrée</h2>
+            <ul class="vt-checks-soft mt-4 space-y-3">
                 <li>Être majeur et résider dans la ville que vous souhaitez représenter.</li>
                 <li>Avoir un bon réseau local (restauration, commerce, associations…).</li>
                 <li>Disposer d'un smartphone et d'un numéro WhatsApp actif.</li>
@@ -70,20 +73,20 @@
 </section>
 
 {{-- ══════════ FORMULAIRE ══════════ --}}
-<section id="candidature" class="vt-section bg-mp-paper scroll-mt-16">
+<section id="candidature" class="vt-section scroll-mt-16">
     <div class="vt-wrap max-w-3xl">
-        <h2 class="vt-h2">Déposer ma candidature</h2>
-        <p class="vt-lead mt-3">Notre équipe étudie chaque dossier et vous recontacte sur WhatsApp pour un entretien.</p>
+        <h2 class="vt-h2 text-center">Déposer ma candidature</h2>
+        <p class="vt-lead mx-auto text-center mt-3">Notre équipe étudie chaque dossier et vous recontacte sur WhatsApp pour un entretien.</p>
 
         @if(session('application_sent'))
-            <div class="mt-6 rounded-2xl p-5 border-2 border-[#15803D] bg-[#F0FDF4] text-[#14532D]" role="status">
+            <div class="mt-6 vt-alert vt-alert-ok" role="status">
                 <p class="font-bold">Merci, votre candidature a bien été envoyée.</p>
                 <p class="mt-1">Nous vous recontactons sous quelques jours.</p>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="mt-6 rounded-2xl p-5 border-2 border-[#B91C1C] bg-[#FEF2F2] text-[#7F1D1D]" role="alert">
+            <div class="mt-6 vt-alert vt-alert-error" role="alert">
                 <p class="font-bold">Merci de corriger les points suivants :</p>
                 <ul class="list-disc pl-5 mt-1 space-y-0.5">
                     @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
@@ -92,7 +95,7 @@
         @endif
 
         <form method="POST" action="{{ route('representative.apply') }}" enctype="multipart/form-data"
-              class="mt-8 rounded-2xl bg-white border-2 border-mp-line p-5 sm:p-8 space-y-6 relative">
+              class="mt-8 vt-card p-5 sm:p-8 space-y-6 relative">
             @csrf
 
             {{-- Champ piège anti-robots : invisible pour les humains --}}
@@ -154,16 +157,16 @@
             <div>
                 <label for="attachment" class="vt-label">Pièce jointe <span class="vt-hint">(facultatif)</span></label>
                 <input id="attachment" name="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" aria-describedby="attachment-hint"
-                       class="block w-full text-base file:mr-3 file:min-h-11 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-mp-black file:text-white file:cursor-pointer">
+                       class="block w-full text-base file:mr-3 file:min-h-11 file:px-4 file:rounded-xl file:border-0 file:font-semibold file:bg-neutral-100 file:text-mp-black file:cursor-pointer">
                 <p id="attachment-hint" class="mt-1 vt-hint">CV ou présentation : PDF, Word, JPG ou PNG, 5 Mo maximum.</p>
             </div>
 
             <label class="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" name="accept_terms" value="1" required class="mt-0.5 w-6 h-6 rounded-md border-2 border-[#857C74] text-mp-black focus:ring-mp-orange" @checked(old('accept_terms'))>
+                <input type="checkbox" name="accept_terms" value="1" required class="vt-checkbox mt-0.5" @checked(old('accept_terms'))>
                 <span>J'accepte que MenuPro utilise ces informations pour étudier ma candidature et me recontacter. <a href="{{ route('privacy') }}" class="vt-link">Politique de confidentialité</a></span>
             </label>
 
-            <button type="submit" class="vt-btn vt-btn-primary vt-btn-block">Envoyer ma candidature</button>
+            <button type="submit" class="vt-btn vt-btn-dark vt-btn-block">Envoyer ma candidature</button>
         </form>
     </div>
 </section>
