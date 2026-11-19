@@ -7,7 +7,9 @@ use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessJekoPayoutJob;
 use App\Models\Order;
+use App\Models\Parcel;
 use App\Models\Subscription;
+use App\Services\Parcels\ParcelService;
 use App\Services\JekoGateway;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -95,6 +97,13 @@ class JekoWebhookController extends Controller
                 }
             }
 
+            // ─── Colis ────────────────────────────────────────────────────────
+            $parcel = $this->findParcel($reference, $paymentLinkId);
+            if ($parcel) {
+                $parcel = Parcel::whereKey($parcel->id)->lockForUpdate()->first();
+                app(ParcelService::class)->markPaid($parcel, $transactionId);
+            }
+
             // ─── Subscription ─────────────────────────────────────────────────
             $subscription = $this->findSubscription($reference, $paymentLinkId);
 
@@ -170,6 +179,13 @@ class JekoWebhookController extends Controller
                 }
             }
 
+            // Colis — paiement refusé : reste en attente, l'expéditeur peut relancer
+            $parcel = $this->findParcel($reference, $paymentLinkId);
+            if ($parcel) {
+                $parcel = Parcel::whereKey($parcel->id)->lockForUpdate()->first();
+                app(ParcelService::class)->markPaymentFailed($parcel);
+            }
+
             // Subscription — paiement échoué : on l'annule pour que le restaurant puisse relancer
             // (l'enum n'a pas de statut FAILED : l'utiliser faisait planter le webhook)
             $subscription = $this->findSubscription($reference);
@@ -224,6 +240,21 @@ class JekoWebhookController extends Controller
             return Order::withoutGlobalScope('restaurant')
                 ->where('payment_reference', $reference)
                 ->first();
+        }
+
+        return null;
+    }
+
+    protected function findParcel(?string $reference, ?string $paymentLinkId = null): ?Parcel
+    {
+        // 1. Via storeReference format PARCEL-{id}-{ts}
+        if ($reference && preg_match('/^PARCEL-(\d+)-/', $reference, $matches)) {
+            return Parcel::find($matches[1]);
+        }
+
+        // 2. Via l'identifiant du lien de paiement
+        if ($paymentLinkId) {
+            return Parcel::where('payment_link_id', $paymentLinkId)->first();
         }
 
         return null;

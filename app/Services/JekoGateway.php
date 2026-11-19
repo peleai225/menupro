@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\PaymentGatewayInterface;
 use App\Models\JekoSubMerchant;
 use App\Models\Order;
+use App\Models\Parcel;
 use App\Models\Restaurant;
 use App\Models\Subscription;
 use App\Models\SystemPaymentSetting;
@@ -96,7 +97,7 @@ class JekoGateway implements PaymentGatewayInterface
      * Crée une demande de paiement Jeko (payment_requests) avec redirection.
      * Montant en FCFA — converti en centimes pour l'API.
      */
-    public function createPayment(Order|Subscription $entity, string $successUrl, string $errorUrl, string $paymentMethod = 'wave'): array
+    public function createPayment(Order|Subscription|Parcel $entity, string $successUrl, string $errorUrl, string $paymentMethod = 'wave'): array
     {
         if (!$this->isConfigured()) {
             return ['success' => false, 'error' => 'Jeko API key not configured'];
@@ -104,15 +105,20 @@ class JekoGateway implements PaymentGatewayInterface
 
         if ($entity instanceof Order) {
             $amountCents = (int) $entity->total * 100;
+        } elseif ($entity instanceof Parcel) {
+            $amountCents = (int) $entity->price * 100;
         } else {
             $amountCents = (int) ($entity->amount_paid > 0 ? $entity->amount_paid : ($entity->plan?->price ?? 0)) * 100;
         }
 
-        $reference = $entity instanceof Order
-            ? 'ORDER-' . $entity->id . '-' . time()
+        $reference = match (true) {
+            $entity instanceof Order => 'ORDER-' . $entity->id . '-' . time(),
+            // Colis : reconnu par le webhook Jeko (JekoWebhookController::findParcel)
+            $entity instanceof Parcel => 'PARCEL-' . $entity->id . '-' . time() . random_int(100, 999),
             // Suffixe aléatoire : deux tentatives dans la même seconde (double appui, relance)
             // gardent des références distinctes (un échec ancien n'annule pas la relance)
-            : 'SUB-' . $entity->id . '-' . time() . random_int(100, 999);
+            default => 'SUB-' . $entity->id . '-' . time() . random_int(100, 999),
+        };
 
         try {
             $payload = [
@@ -138,7 +144,7 @@ class JekoGateway implements PaymentGatewayInterface
                 $data = $response->json();
 
                 Log::channel('payments')->info('Jeko payment request created', [
-                    'entity_type'    => $entity instanceof Order ? 'order' : 'subscription',
+                    'entity_type'    => self::entityType($entity),
                     'entity_id'      => $entity->id,
                     'payment_id'     => $data['id'] ?? null,
                     'amount_cents'   => $amountCents,
@@ -156,7 +162,7 @@ class JekoGateway implements PaymentGatewayInterface
             }
 
             Log::channel('payments')->error('Jeko payment request failed', [
-                'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
+                'entity_type' => self::entityType($entity),
                 'entity_id'   => $entity->id,
                 'status'      => $response->status(),
                 'body'        => $response->json(),
@@ -168,13 +174,22 @@ class JekoGateway implements PaymentGatewayInterface
             ];
         } catch (\Exception $e) {
             Log::channel('payments')->error('Jeko payment link exception', [
-                'entity_type' => $entity instanceof Order ? 'order' : 'subscription',
+                'entity_type' => self::entityType($entity),
                 'entity_id'   => $entity->id,
                 'error'       => $e->getMessage(),
             ]);
 
             return ['success' => false, 'error' => 'Impossible de contacter Jeko'];
         }
+    }
+
+    private static function entityType(object $entity): string
+    {
+        return match (true) {
+            $entity instanceof Order => 'order',
+            $entity instanceof Parcel => 'parcel',
+            default => 'subscription',
+        };
     }
 
     /**

@@ -81,6 +81,13 @@
                     </svg>
                     <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Livraisons</span>
                 </a>
+                <a href="{{ route('super-admin.parcels.index') }}"
+                   class="nav-item {{ request()->routeIs('super-admin.parcels*', 'super-admin.partners*') ? 'nav-active' : '' }}" title="Colis">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span x-show="expanded" x-transition.opacity class="whitespace-nowrap text-sm">Colis</span>
+                </a>
                 @endif
 
                 @if($u->canAdminSection('subscriptions'))
@@ -379,6 +386,7 @@
                 @if($u->canAdminSection('restaurants'))<a href="{{ route('super-admin.restaurants.index') }}" class="nav-item {{ request()->routeIs('super-admin.restaurants*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span class="text-sm flex-1">Restaurants</span>@if(($pendingRestaurants ?? 0) > 0)<span class="sidebar-badge-restaurants bg-amber-500 text-white text-[10px] font-bold min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full">{{ $pendingRestaurants ?? 0 }}</span>@endif</a>@endif
                 @if($u->canAdminSection('orders'))<a href="{{ route('super-admin.orders.index') }}" class="nav-item {{ request()->routeIs('super-admin.orders*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span class="text-sm">Commandes</span></a>@endif
                 @if($u->canAdminSection('deliveries'))<a href="{{ route('super-admin.deliveries.index') }}" class="nav-item {{ request()->routeIs('super-admin.deliveries*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg><span class="text-sm">Livraisons</span></a>@endif
+                @if($u->canAdminSection('deliveries'))<a href="{{ route('super-admin.parcels.index') }}" class="nav-item {{ request()->routeIs('super-admin.parcels*', 'super-admin.partners*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span class="text-sm">Colis</span></a>@endif
                 @if($u->canAdminSection('subscriptions'))<a href="{{ route('super-admin.plans.index') }}" class="nav-item {{ request()->routeIs('super-admin.plans*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span class="text-sm">Plans</span></a>@endif
                 @if($u->canAdminSection('subscriptions'))<a href="{{ route('super-admin.subscriptions.index') }}" class="nav-item {{ request()->routeIs('super-admin.subscriptions*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="text-sm">Abonnements</span></a>@endif
                 @if($u->isFullAdmin())<a href="{{ route('super-admin.utilisateurs.index') }}" class="nav-item {{ request()->routeIs('super-admin.utilisateurs*') ? 'nav-active' : '' }}"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="text-sm">Utilisateurs</span></a>@endif
@@ -646,6 +654,12 @@
                             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         </span>
                         <span class="text-[10px] font-medium text-neutral-700">Livraisons</span>
+                    </a>
+                    <a href="{{ route('super-admin.parcels.index') }}" @click="more = false" class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-neutral-50 {{ request()->routeIs('super-admin.parcels*', 'super-admin.partners*') ? 'bg-primary-50' : '' }}">
+                        <span class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        </span>
+                        <span class="text-[10px] font-medium text-neutral-700">Colis</span>
                     </a>
                     @endif
                     @if($u->canAdminSection('subscriptions'))

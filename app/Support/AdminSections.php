@@ -76,6 +76,8 @@ class AdminSections
         'delivery-cities' => 'deliveries',
         'delivery-zones'  => 'deliveries',
         'delivery'        => 'deliveries',
+        'parcels'         => 'deliveries',
+        // 'partners' (clés d'API partenaires) : absent ⇒ réservé aux admins complets
         'subscriptions'   => 'subscriptions',
         'plans'           => 'subscriptions',
         'commando'        => 'crm',

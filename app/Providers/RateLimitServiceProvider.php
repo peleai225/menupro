@@ -35,6 +35,29 @@ class RateLimitServiceProvider extends ServiceProvider
                 ], 429));
         });
 
+        // Colis client — max 30 créations/heure par compte
+        RateLimiter::for('api.parcels', function (Request $request) {
+            $key = $request->user() ? 'parcels:' . $request->user()->id : $request->ip();
+
+            return Limit::perHour(30)->by($key)
+                ->response(fn() => response()->json([
+                    'message' => 'Trop de colis créés en peu de temps. Réessayez plus tard.',
+                    'error_code' => 'rate_limited',
+                ], 429));
+        });
+
+        // API partenaires — limite propre à chaque partenaire (delivery_partners.rate_limit_per_minute)
+        RateLimiter::for('api.partner', function (Request $request) {
+            $partner = $request->attributes->get('delivery_partner');
+
+            return Limit::perMinute(max(1, (int) ($partner?->rate_limit_per_minute ?? 60)))
+                ->by('partner:' . ($partner?->id ?? $request->ip()))
+                ->response(fn() => response()->json([
+                    'message' => 'Limite de requêtes atteinte pour votre clé. Réessayez dans une minute.',
+                    'error_code' => 'rate_limited',
+                ], 429));
+        });
+
         // Commandes client — max 20 commandes/heure par client
         RateLimiter::for('api.orders', function (Request $request) {
             $key = $request->user()

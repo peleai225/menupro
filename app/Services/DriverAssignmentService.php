@@ -146,6 +146,30 @@ class DriverAssignmentService
     }
 
     /**
+     * Livreurs disponibles autour d'un point, triés par distance (utilisé par les colis).
+     * Pré-filtre SQL par boîte englobante (portable, sans fonctions trigonométriques SQL),
+     * puis distance exacte (Haversine) en PHP.
+     */
+    public function availableDriversAround(float $lat, float $lng, float $radiusKm, int $limit = 10): \Illuminate\Support\Collection
+    {
+        $dLat = $radiusKm / 111.0;
+        $dLng = $radiusKm / max(0.01, 111.0 * cos(deg2rad($lat)));
+
+        return DeliveryDriver::available()
+            ->whereBetween('latitude', [$lat - $dLat, $lat + $dLat])
+            ->whereBetween('longitude', [$lng - $dLng, $lng + $dLng])
+            ->get()
+            ->map(function (DeliveryDriver $d) use ($lat, $lng) {
+                $d->distance_km = $this->geo->distanceKm($lat, $lng, (float) $d->latitude, (float) $d->longitude);
+                return $d;
+            })
+            ->filter(fn (DeliveryDriver $d) => $d->distance_km <= $radiusKm)
+            ->sortBy('distance_km')
+            ->take($limit)
+            ->values();
+    }
+
+    /**
      * Cherche le livreur disponible le plus proche en élargissant le rayon progressivement.
      */
     public function findNearest(Delivery $delivery): ?DeliveryDriver

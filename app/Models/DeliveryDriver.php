@@ -84,6 +84,26 @@ class DeliveryDriver extends Model
             ->first();
     }
 
+    public function parcels(): HasMany
+    {
+        return $this->hasMany(Parcel::class, 'driver_id');
+    }
+
+    /** Colis en cours (assigné, ramassé ou en livraison). */
+    public function activeParcel(): ?Parcel
+    {
+        return $this->parcels()->activeForDriver()->first();
+    }
+
+    /** Un livreur ne mène qu'une course à la fois : repas OU colis. */
+    public function hasActiveCourse(): bool
+    {
+        return $this->deliveries()
+                ->whereIn('status', ['assigned', 'heading_to_restaurant', 'picked_up', 'delivering'])
+                ->exists()
+            || $this->parcels()->activeForDriver()->exists();
+    }
+
     public function isApproved(): bool
     {
         return $this->verification_status === 'approved';

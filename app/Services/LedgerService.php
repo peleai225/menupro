@@ -9,6 +9,7 @@ use App\Models\DriverEarning;
 use App\Models\LedgerEntry;
 use App\Models\Order;
 use App\Models\OrderRefund;
+use App\Models\Parcel;
 use App\Models\PaymentTransaction;
 use App\Models\PayoutTransaction;
 use App\Models\Restaurant;
@@ -598,11 +599,156 @@ class LedgerService
         ];
     }
 
+    // =========================================================================
+    // CONSTRUCTEURS — COLIS
+    // =========================================================================
+
+    public static function parcelPaymentKey(int $parcelId): string
+    {
+        return "parcel:{$parcelId}:payment";
+    }
+
+    public static function parcelRefundKey(int $parcelId): string
+    {
+        return "parcel:{$parcelId}:refund";
+    }
+
+    /**
+     * Paiement d'une course colis, même logique que l'encaissement d'une commande livrée :
+     *  - Jeko : MenuPro encaisse, garde prix − frais − part livreur ;
+     *  - espèces : le livreur détient l'argent, seule la commission revient à MenuPro (à recouvrer,
+     *    voir driver_cash_debts.parcel_id) ;
+     *  - partenaire : facturé au partenaire (statut « en attente » jusqu'au règlement de la facture).
+     */
+    public function parcelPaymentEntry(Parcel $parcel, ?string $via = null): ?array
+    {
+        $gross = (int) $parcel->price;
+        if ($gross <= 0) {
+            return null;
+        }
+
+        $method = match ($parcel->payment_method) {
+            Parcel::PAYMENT_JEKO => 'jeko',
+            Parcel::PAYMENT_CASH => 'cash',
+            default => 'other',
+        };
+        $rate = $method === 'jeko' ? $this->collectionFeePercent() : 0.0;
+        $fee = $this->fee($gross, $rate);
+        $commission = (int) $parcel->platform_commission;
+        $driverShare = (int) $parcel->driver_share;
+        $net = $method === 'jeko' ? $gross - $fee - $driverShare : $commission;
+
+        return array_merge($this->baseParcelEntry($parcel, $via), [
+            'idempotency_key' => self::parcelPaymentKey($parcel->id),
+            'occurred_at' => $parcel->paid_at ?? $parcel->delivered_at ?? now(),
+            'type' => LedgerEntry::TYPE_PARCEL_DELIVERY,
+            'direction' => 'in',
+            'status' => $parcel->payment_method === Parcel::PAYMENT_PARTNER
+                ? LedgerEntry::STATUS_PENDING
+                : LedgerEntry::STATUS_SUCCEEDED,
+            'method' => $method,
+            'method_detail' => $parcel->payment_method,
+            'payer_type' => $parcel->sender_type,
+            'payer_name' => $parcel->sender_name,
+            'payer_phone' => $parcel->sender_phone,
+            'beneficiary_type' => 'menupro',
+            'beneficiary_name' => 'MenuPro',
+            'gateway_reference' => $parcel->payment_reference,
+            'gateway_reference_alt' => $parcel->payment_link_id,
+            'gross_amount' => $gross,
+            'gateway_fee' => $fee,
+            'gateway_fee_rate' => $rate,
+            'menupro_commission' => $commission,
+            'driver_share' => $driverShare,
+            'net_menupro' => $net,
+            'description' => 'Colis #' . $parcel->reference . ' — ' . $parcel->city
+                . ($method === 'cash' ? ' (espèces remises au livreur)' : '')
+                . ($method === 'other' ? ' (facturé au partenaire)' : ''),
+            'metadata' => [
+                'sender_type' => $parcel->sender_type,
+                'distance_km' => $parcel->distance_km,
+                'size' => $parcel->size,
+                'partner_id' => $parcel->delivery_partner_id,
+            ],
+        ]);
+    }
+
+    /** Remboursement d'une course colis payée par Jeko (annulée avant ramassage). */
+    public function parcelRefundEntry(Parcel $parcel, ?string $via = null): ?array
+    {
+        $amount = (int) $parcel->price;
+        if ($amount <= 0 || $parcel->payment_method !== Parcel::PAYMENT_JEKO) {
+            return null;
+        }
+
+        $rate = $this->payoutFeePercent();
+        $fee = $this->fee($amount, $rate);
+        $commission = (int) $parcel->platform_commission;
+
+        return array_merge($this->baseParcelEntry($parcel, $via), [
+            'idempotency_key' => self::parcelRefundKey($parcel->id),
+            'occurred_at' => $parcel->refunded_at ?? now(),
+            'type' => LedgerEntry::TYPE_REFUND_CUSTOMER,
+            'direction' => 'out',
+            'status' => LedgerEntry::STATUS_SUCCEEDED,
+            'method' => 'jeko',
+            'method_detail' => $parcel->payment_method,
+            'payer_type' => 'menupro',
+            'payer_name' => 'MenuPro',
+            'beneficiary_type' => $parcel->sender_type,
+            'beneficiary_name' => trim($parcel->sender_name . ' ' . $parcel->sender_phone),
+            'gateway_reference' => $parcel->payment_reference,
+            'gross_amount' => $amount,
+            'gateway_fee' => $fee,
+            'gateway_fee_rate' => $rate,
+            'menupro_commission' => -$commission,
+            'driver_share' => -max(0, $amount - $commission),
+            'net_menupro' => -$commission - $fee,
+            'description' => 'Remboursement — colis #' . $parcel->reference
+                . ($parcel->cancellation_reason ? ' (' . mb_substr($parcel->cancellation_reason, 0, 120) . ')' : ''),
+        ]);
+    }
+
+    private function baseParcelEntry(Parcel $parcel, ?string $via): array
+    {
+        $restaurant = $this->restaurant($parcel->restaurant_id);
+
+        return [
+            'recorded_via' => $via ?? $this->currentVia(),
+            'channel' => match ($parcel->sender_type) {
+                Parcel::SENDER_RESTAURANT => 'restaurant_space',
+                Parcel::SENDER_PARTNER => 'partner_api',
+                default => 'client_app',
+            },
+            'restaurant_id' => $parcel->restaurant_id,
+            'restaurant_name' => $restaurant?->name,
+            'restaurant_plan' => $restaurant?->currentPlan?->slug,
+            'restaurant_plan_label' => $restaurant?->currentPlan?->name,
+            'is_demo' => (bool) ($restaurant?->is_demo ?? false),
+            'source_type' => 'parcel',
+            'source_id' => $parcel->id,
+            'order_id' => null,
+            'subscription_id' => null,
+            'order_reference' => $parcel->reference,
+            'menupro_commission' => 0,
+            'restaurant_share' => 0,
+            'driver_share' => 0,
+            'gateway_fee' => 0,
+            'gateway_fee_rate' => 0,
+            'net_menupro' => 0,
+            'metadata' => null,
+        ];
+    }
+
     /** Répartition des frais de livraison entre le livreur et MenuPro (mouvement interne). */
     public function driverEarningEntry(DriverEarning $earning, ?string $via = null): ?array
     {
         if ((int) $earning->gross_amount <= 0) {
             return null;
+        }
+
+        if ($earning->parcel_id && ($parcel = Parcel::find($earning->parcel_id))) {
+            return $this->parcelDriverEarningEntry($earning, $parcel, $via);
         }
 
         $order = $earning->order_id ? Order::withoutGlobalScope('restaurant')->find($earning->order_id) : null;
@@ -647,6 +793,42 @@ class LedgerService
             'driver_share' => (int) $earning->net_amount,
             'net_menupro' => (int) $earning->platform_cut,
             'description' => 'Frais de livraison : part livreur ' . number_format((int) $earning->net_amount, 0, ',', ' ')
+                . ' F, commission MenuPro ' . number_format((int) $earning->platform_cut, 0, ',', ' ') . ' F',
+        ]);
+    }
+
+    /** Course colis : part livreur / commission MenuPro (mouvement interne, comme pour un repas). */
+    private function parcelDriverEarningEntry(DriverEarning $earning, Parcel $parcel, ?string $via): array
+    {
+        $driver = $earning->driver()->with('user:id,name')->first();
+        $driverName = $driver?->user?->name ?? $driver?->name ?? 'Livreur';
+
+        return array_merge($this->baseParcelEntry($parcel, $via), [
+            'idempotency_key' => 'driver_earning:' . $earning->id,
+            'occurred_at' => $earning->created_at ?? now(),
+            'type' => LedgerEntry::TYPE_DRIVER_COMMISSION,
+            'direction' => 'int',
+            'status' => LedgerEntry::STATUS_SUCCEEDED,
+            'source_type' => 'driver_earning',
+            'source_id' => $earning->id,
+            'method' => match ($parcel->payment_method) {
+                Parcel::PAYMENT_JEKO => 'jeko',
+                Parcel::PAYMENT_CASH => 'cash',
+                default => 'other',
+            },
+            'method_detail' => $parcel->payment_method,
+            'payer_type' => $parcel->sender_type,
+            'payer_name' => $parcel->sender_name,
+            'payer_phone' => $parcel->sender_phone,
+            'beneficiary_type' => 'driver',
+            'beneficiary_name' => $driverName,
+            'gateway_reference' => $earning->payment_reference,
+            'gross_amount' => (int) $earning->gross_amount,
+            'menupro_commission' => (int) $earning->platform_cut,
+            'driver_share' => (int) $earning->net_amount,
+            'net_menupro' => (int) $earning->platform_cut,
+            'description' => 'Colis #' . $parcel->reference . ' : part livreur '
+                . number_format((int) $earning->net_amount, 0, ',', ' ')
                 . ' F, commission MenuPro ' . number_format((int) $earning->platform_cut, 0, ',', ' ') . ' F',
         ]);
     }

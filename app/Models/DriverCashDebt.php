@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class DriverCashDebt extends Model
 {
     protected $fillable = [
-        'driver_id', 'restaurant_id', 'order_id', 'delivery_id',
+        'driver_id', 'restaurant_id', 'order_id', 'delivery_id', 'parcel_id',
         'amount_xof', 'status', 'settled_at',
     ];
 
@@ -38,6 +38,11 @@ class DriverCashDebt extends Model
         return $this->belongsTo(Delivery::class);
     }
 
+    public function parcel(): BelongsTo
+    {
+        return $this->belongsTo(Parcel::class);
+    }
+
     public function remittance(): HasOne
     {
         return $this->hasOne(DriverCashRemittance::class, 'debt_id');
@@ -52,7 +57,7 @@ class DriverCashDebt extends Model
     {
         return static::where('driver_id', $driverId)
             ->where('status', 'pending')
-            ->with(['restaurant:id,name', 'order:id,reference'])
+            ->with(['restaurant:id,name', 'order:id,reference', 'parcel:id,reference'])
             ->get();
     }
 

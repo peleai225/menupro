@@ -265,6 +265,9 @@ Route::prefix('dashboard')
         Route::get('livraisons', \App\Livewire\Restaurant\Deliveries::class)->name('deliveries')->middleware('feature:delivery');
         Route::get('livreurs', \App\Livewire\Restaurant\DeliveryDrivers::class)->name('delivery-drivers')->middleware('feature:delivery');
 
+        // Colis — tous les plans (le commerçant paie la course par Jeko ou en espèces au livreur)
+        Route::get('colis', \App\Livewire\Restaurant\Parcels::class)->name('parcels');
+
         // Profil — accessible à tous les membres (changement de mot de passe)
         Route::get('profil', \App\Livewire\Restaurant\Profile::class)->name('profile');
 
@@ -481,6 +484,31 @@ Route::prefix('admin')
         // Deliveries Dashboard
         Route::get('livraisons', [\App\Http\Controllers\SuperAdmin\DeliveryDashboardController::class, 'index'])->name('deliveries.index');
         Route::get('api/live-deliveries', [\App\Http\Controllers\SuperAdmin\DeliveryDashboardController::class, 'liveDeliveries'])->name('api.live-deliveries');
+
+        // Colis
+        Route::prefix('colis')->name('parcels.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'index'])->name('index');
+            Route::get('tarifs', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'tariffs'])->name('tariffs');
+            Route::put('tarifs/{city}', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'updateTariff'])->name('tariffs.update');
+            Route::get('facturation-partenaires', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'billing'])->name('billing');
+            Route::get('{parcel}', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'show'])->name('show');
+            Route::post('{parcel}/annuler', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'cancel'])->name('cancel');
+            Route::post('{parcel}/rembourse', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'refunded'])->name('refunded');
+            Route::post('{parcel}/debloquer-code', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'unlock'])->name('unlock');
+            Route::post('{parcel}/commission-recue', [\App\Http\Controllers\SuperAdmin\ParcelController::class, 'settleCash'])->name('settle-cash');
+        });
+
+        // Partenaires livraison (API colis)
+        Route::prefix('partenaires-livraison')->name('partners.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'index'])->name('index');
+            Route::get('nouveau', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'store'])->name('store');
+            Route::get('{partner}', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'show'])->name('show');
+            Route::put('{partner}', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'update'])->name('update');
+            Route::post('{partner}/cle', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'regenerateKey'])->name('regenerate-key');
+            Route::post('{partner}/secret', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'regenerateSecret'])->name('regenerate-secret');
+            Route::post('{partner}/test-webhook', [\App\Http\Controllers\SuperAdmin\DeliveryPartnerController::class, 'testWebhook'])->name('test-webhook');
+        });
 
         // Subscriptions Management
         Route::get('abonnements', [\App\Http\Controllers\SuperAdmin\SubscriptionController::class, 'index'])->name('subscriptions.index');

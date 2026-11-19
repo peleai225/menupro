@@ -71,6 +71,8 @@ class RestaurantNavigation
             ['section' => 'Commerce', 'key' => 'pos', 'label' => 'Caisse (POS)', 'route' => 'restaurant.pos', 'active' => 'restaurant.pos*', 'icon' => 'pos', 'feature' => 'pos', 'id' => 'tour-pos'],
             ['section' => 'Commerce', 'key' => 'customers', 'label' => 'Clients', 'route' => 'restaurant.customers', 'active' => 'restaurant.customers*', 'icon' => 'users', 'feature' => 'customers', 'admin' => true, 'id' => 'tour-clients'],
             ['section' => 'Commerce', 'key' => 'reservations', 'label' => 'Réservations', 'route' => 'restaurant.reservations.index', 'active' => 'restaurant.reservations*', 'icon' => 'calendar', 'feature' => 'reservations', 'admin' => true, 'badge' => 'reservations'],
+            // Colis : tous les plans (pas de feature), course payée par le commerçant
+            ['section' => 'Commerce', 'key' => 'parcels', 'label' => 'Envoyer un colis', 'route' => 'restaurant.parcels', 'active' => 'restaurant.parcels*', 'icon' => 'box'],
             ['section' => 'Commerce', 'key' => 'reviews', 'label' => 'Avis', 'route' => 'restaurant.reviews', 'active' => 'restaurant.reviews*', 'icon' => 'star', 'feature' => 'reviews', 'admin' => true],
 
             ['section' => 'Pilotage', 'key' => 'analytics', 'label' => 'Statistiques', 'route' => 'restaurant.analytics', 'active' => 'restaurant.analytics*', 'icon' => 'chart', 'feature' => 'analytics', 'admin' => true, 'id' => 'tour-statistiques'],

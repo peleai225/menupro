@@ -122,7 +122,8 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Vous n\'êtes pas disponible.'], 422);
         }
 
-        if ($driver->activeDelivery()) {
+        // Une seule course à la fois : un colis en cours bloque aussi l'acceptation d'un repas
+        if ($driver->activeDelivery() || $driver->activeParcel()) {
             return response()->json(['message' => 'Vous avez déjà une course en cours.'], 422);
         }
 

@@ -128,3 +128,9 @@ Schedule::command('crm:monthly-processing')
     ->monthlyOn(1, '02:00')
     ->name('crm-monthly-processing')
     ->withoutOverlapping();
+
+// Colis : relance des livreurs, alerte admin (aucun livreur), expiration des colis non payés
+Schedule::command('parcels:surveiller')
+    ->everyMinute()
+    ->name('parcels-watch')
+    ->withoutOverlapping();
