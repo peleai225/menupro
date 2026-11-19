@@ -9,6 +9,14 @@ MenuPro est un **SaaS** pour commerçants ivoiriens (maquis, restaurants, stands
 Lecteur type : un patron sur un Android d'entrée de gamme, souvent dehors, connexion lente.
 Mission de la page : lui faire **créer son commerce** (essai gratuit), en montrant le **produit**, pas des promesses.
 
+## Direction validée par le client (2026-11-19)
+Style SaaS clair et aéré, inspiré du modèle « Active » fourni par le client (on reprend l'esprit, jamais le contenu) :
+- Héros **centré**, halo orange doux en haut, pastille « Nouveau » au-dessus du titre, titre en graisse moyenne (500–600), 3 points cochés, bouton noir + bouton contour.
+- Petites **cartes de tableau de bord flottantes** autour du titre (bureau) : ventes du jour, nouvelle commande.
+- Grille « bento » de cartes gris très clair (#F6F6F6, rayon 24 px) contenant chacune un **mini-aperçu réel de l'interface** MenuPro.
+- Liste d'avantages : titre à gauche, éléments à droite avec un trait orange vertical.
+- Police titres : **Urbanist** ; texte : DM Sans. Ombres douces uniquement.
+
 ## Idée signature : le ticket de commande
 L'objet central de la journée d'un commerçant MenuPro est la commande qui arrive toute seule (fini les appels).
 Le visuel fort du site est donc une **file de tickets de commande** (bord perforé, opérateur Mobile Money, montant, « Accepter »).
@@ -25,7 +33,7 @@ Une seule animation au chargement (les tickets arrivent), rien d'autre ne bouge.
 | Filet | `--color-mp-line` #E8DFD6 |
 | Payé / ouvert | #15803D |
 
-Typo : **Bricolage Grotesque** (titres, gros chiffres, `vt-display`) + **DM Sans** (texte). Pas d'autre police.
+Typo : **Urbanist** (titres, gros chiffres, `vt-display`) + **DM Sans** (texte). Pas d'autre police.
 Échelle : h1 clamp(2.5rem→5rem), h2 clamp(2rem→3.25rem), corps 17 px, lignes < 70 caractères.
 Rayons : 28 px pour les grands panneaux, 16 px cartes, 12 px boutons, pilules seulement pour les statuts.
 

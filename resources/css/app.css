@@ -1545,10 +1545,10 @@ section {
 .vt-section { padding-block: 3.5rem; }
 @media (min-width: 768px) { .vt-section { padding-block: 5.5rem; } }
 
-.vt-h1, .vt-h2, .vt-display { font-family: "Bricolage Grotesque", "DM Sans", ui-sans-serif, system-ui, sans-serif; font-optical-sizing: auto; }
-.vt-display { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-.vt-h1 { font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-size: clamp(2.5rem, 10.5vw, 4.5rem); text-wrap: balance; }
-.vt-h2 { font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; font-size: clamp(2rem, 7vw, 3.25rem); text-wrap: balance; }
+.vt-h1, .vt-h2, .vt-display { font-family: "Urbanist", "DM Sans", ui-sans-serif, system-ui, sans-serif; }
+.vt-display { font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.vt-h1 { font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; font-size: clamp(2.5rem, 10.5vw, 4.5rem); text-wrap: balance; }
+.vt-h2 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; font-size: clamp(2rem, 7vw, 3.25rem); text-wrap: balance; }
 .vt-h3 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; font-size: 1.25rem; }
 .vt-lead { font-size: 1.125rem; line-height: 1.6; color: var(--color-mp-text); max-width: 38rem; }
 @media (min-width: 768px) { .vt-lead { font-size: 1.25rem; } }
@@ -1642,4 +1642,20 @@ section {
 .vt-step { position: relative; display: flex; gap: 1.25rem; padding-bottom: 2rem; }
 .vt-step:last-child { padding-bottom: 0; }
 .vt-step:not(:last-child)::before { content: ""; position: absolute; left: 1.375rem; top: 3rem; bottom: .5rem; width: 2px; background: var(--color-mp-line); }
-.vt-step-n { flex: none; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: var(--color-mp-orange); color: #000; display: grid; place-items: center; font: 800 1.375rem/1 "Bricolage Grotesque", "DM Sans", sans-serif; }
+.vt-step-n { flex: none; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: var(--color-mp-orange); color: #000; display: grid; place-items: center; font: 700 1.375rem/1 "Urbanist", "DM Sans", sans-serif; }
+
+/* ── Vitrine v3 : héros centré, cartes flottantes, bento ── */
+.vt-hero3 { position: relative; overflow: hidden; padding-block: 3rem 3.5rem;
+    background: radial-gradient(60% 55% at 50% -5%, rgba(249,115,22,.30), rgba(249,115,22,.08) 45%, transparent 75%), #fff; }
+@media (min-width: 768px) { .vt-hero3 { padding-block: 5.5rem 5rem; } }
+.vt-float { display: none; position: absolute; width: 13.5rem; background: #fff; border-radius: 1.25rem; padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 24px 48px -20px rgba(0,0,0,.18); }
+@media (min-width: 1280px) {
+    .vt-float { display: block; }
+    .vt-float-left { left: 0; top: 9rem; transform: rotate(-4deg); }
+    .vt-float-right { right: 0; top: 5rem; transform: rotate(3deg); }
+}
+.vt-bento { background: #F6F6F6; border-radius: 1.5rem; padding: 1.5rem 1.5rem 0; overflow: hidden; display: flex; flex-direction: column; }
+.vt-mini { margin-top: auto; background: #fff; border-radius: 1rem 1rem 0 0; padding: 1rem 1rem 1.25rem; box-shadow: 0 -1px 0 rgba(0,0,0,.03), 0 18px 40px -18px rgba(0,0,0,.18); }
+.vt-benefit { position: relative; padding: 1.25rem 0 1.25rem 1.5rem; }
+.vt-benefit::before { content: ""; position: absolute; left: 0; top: 1.4rem; bottom: 1.4rem; width: 3px; border-radius: 3px; background: linear-gradient(var(--color-mp-orange), rgba(249,115,22,.15)); }

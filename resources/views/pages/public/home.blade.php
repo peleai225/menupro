@@ -36,87 +36,165 @@
 <script type="application/ld+json">{"@@context":"https://schema.org","@@type":"SoftwareApplication","name":"MenuPro","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"{{ url('/') }}","description":"Commandes en ligne, paiement Mobile Money et livraison pour restaurants, maquis, stands et boutiques en Côte d'Ivoire.","offers":{"@@type":"Offer","price":"{{ G::price('stand') }}","priceCurrency":"XOF"}}</script>
 @endpush
 
-{{-- ══════════ 1. ACCUEIL : la file de commandes (signature) ══════════ --}}
+{{-- ══════════ 1. ACCUEIL (centré, halo, cartes flottantes) ══════════ --}}
 @php
-    $tickets = [
-        ['n' => '1186', 'who' => 'Awa K.',     'mode' => 'Livraison',  'items' => '2 × Garba thon, 1 × Bissap', 'total' => '2 700', 'pay' => 'wave.png',         'payName' => 'Wave',         'state' => 'new'],
-        ['n' => '1185', 'who' => 'Table 4',    'mode' => 'Sur place',  'items' => '1 × Poulet braisé attiéké',  'total' => '3 500', 'pay' => 'orange-money.png', 'payName' => 'Orange Money', 'state' => 'cooking'],
-        ['n' => '1184', 'who' => 'Moussa D.',  'mode' => 'À emporter', 'items' => '3 × Alloco poisson',         'total' => '4 500', 'pay' => 'mtn-momo.png',     'payName' => 'MTN MoMo',     'state' => 'done'],
-    ];
+    $check = '<svg class="w-5 h-5 flex-none" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="#FFEDD5"/><path d="M6 10.2l2.6 2.6L14 7.4" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 @endphp
-<section class="vt-hero">
-    <div class="vt-wrap grid grid-cols-[minmax(0,1fr)] gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
-        <div>
-            <h1 class="vt-h1">Les commandes arrivent. Vous n'avez plus à décrocher.</h1>
-            <p class="vt-lead mt-6">MenuPro met votre restaurant, votre stand ou votre boutique en ligne. Vos clients commandent et paient en Mobile Money, vous acceptez d'un geste, un livreur s'occupe du reste.</p>
-            <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-                <a href="{{ route('register') }}" class="vt-btn vt-btn-primary">Créer mon commerce</a>
-                <a href="{{ route('pricing') }}" class="vt-btn vt-btn-ghost">Voir les tarifs</a>
+<section class="vt-hero3">
+    <div class="vt-wrap relative">
+        {{-- Carte flottante gauche : ventes du jour --}}
+        <div class="vt-float vt-float-left" aria-hidden="true">
+            <p class="text-sm vt-muted">Ventes du jour</p>
+            <p class="vt-display text-2xl vt-num mt-0.5">87 500 F <span class="text-sm font-semibold text-green-700 align-middle">+18 %</span></p>
+            <svg class="mt-3 w-full h-14" viewBox="0 0 200 56" fill="none" preserveAspectRatio="none"><path d="M0 46 C20 44 30 30 50 32 S80 48 100 36 130 12 150 18 180 30 200 8" stroke="#F97316" stroke-width="2.5" stroke-linecap="round"/><path d="M0 46 C20 44 30 30 50 32 S80 48 100 36 130 12 150 18 180 30 200 8 V56 H0Z" fill="url(#vtg)"/><defs><linearGradient id="vtg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F97316" stop-opacity=".18"/><stop offset="1" stop-color="#F97316" stop-opacity="0"/></linearGradient></defs></svg>
+            <p class="text-xs vt-muted mt-1">24 commandes · 19 livrées</p>
+        </div>
+        {{-- Carte flottante droite : nouvelle commande --}}
+        <div class="vt-float vt-float-right" aria-hidden="true">
+            <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold text-orange-700">Nouvelle commande</p>
+                <span class="vt-live"></span>
             </div>
-            <p class="mt-4 vt-muted">{{ $trial }} jours gratuits, sans carte bancaire ni engagement.</p>
-
-            <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
-                <p class="text-[0.9375rem] font-semibold vt-muted w-full sm:w-auto">Paiements acceptés</p>
-                <ul class="flex items-center gap-2.5" aria-label="Paiements acceptés">
-                    @foreach([['wave.png','Wave'],['orange-money.png','Orange Money'],['mtn-momo.png','MTN MoMo'],['moov-money.png','Moov Money']] as [$img, $name])
-                        <li><img src="{{ asset('images/payments/'.$img) }}" alt="{{ $name }}" title="{{ $name }}" width="40" height="40" class="w-10 h-10 rounded-xl object-contain bg-white ring-1 ring-black/5" loading="lazy" decoding="async"></li>
-                    @endforeach
-                </ul>
+            <p class="font-bold mt-1">#1186 · Awa K.</p>
+            <div class="mt-2 flex items-center justify-between">
+                <p class="flex items-center gap-2 text-sm"><img src="{{ asset('images/payments/wave.png') }}" alt="" width="20" height="20" class="w-5 h-5 rounded object-contain"> Payé par Wave</p>
+                <p class="vt-display text-lg vt-num">2 700 F</p>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
+                <span class="rounded-lg bg-mp-black text-white text-center py-2">Accepter</span>
+                <span class="rounded-lg bg-neutral-100 text-center py-2">Refuser</span>
             </div>
         </div>
 
-        {{-- File de commandes du commerçant (HTML pur) --}}
-        <figure class="vt-rail" role="img" aria-label="Exemple : trois commandes arrivent sur le tableau de bord MenuPro, payées par Wave, Orange Money et MTN MoMo. La plus récente attend d'être acceptée.">
-            <div aria-hidden="true">
-                <div class="flex items-center justify-between px-1 pb-4 text-white">
-                    <p class="vt-display text-xl">Commandes</p>
-                    <p class="flex items-center gap-2 text-[0.9375rem] font-semibold"><span class="vt-live"></span>En direct</p>
-                </div>
-                <ol class="grid gap-3">
-                    @foreach($tickets as $i => $t)
-                        <li class="vt-ticket {{ $t['state'] === 'new' ? 'is-new' : '' }}" style="--i: {{ $i }}">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <p class="font-bold">#{{ $t['n'] }} · {{ $t['who'] }}</p>
-                                    <p class="text-[0.9375rem] vt-muted truncate">{{ $t['items'] }}</p>
-                                </div>
-                                <p class="vt-display text-xl vt-num whitespace-nowrap">{{ $t['total'] }} F</p>
-                            </div>
-                            <div class="mt-3 flex items-center justify-between gap-3">
-                                <p class="flex items-center gap-2 text-[0.9375rem] font-semibold">
-                                    <img src="{{ asset('images/payments/'.$t['pay']) }}" alt="" width="22" height="22" class="w-[22px] h-[22px] rounded-md object-contain" loading="lazy" decoding="async">
-                                    Payé · {{ $t['mode'] }}
-                                </p>
-                                @if($t['state'] === 'new')
-                                    <span class="rounded-lg bg-mp-orange px-4 py-2 font-bold text-[0.9375rem]">Accepter</span>
-                                @elseif($t['state'] === 'cooking')
-                                    <span class="rounded-lg bg-amber-100 text-amber-900 px-3 py-1.5 font-semibold text-sm">En cuisine</span>
-                                @else
-                                    <span class="rounded-lg bg-green-100 text-green-800 px-3 py-1.5 font-semibold text-sm">Prête</span>
-                                @endif
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
+        <div class="relative mx-auto max-w-[42rem] text-center">
+            <a href="{{ $registerUrl('boutique') }}" class="inline-flex items-center gap-2 rounded-full bg-white/80 ring-1 ring-black/5 shadow-sm pl-1.5 pr-4 py-1.5 text-[0.9375rem] font-semibold">
+                <span class="rounded-full bg-mp-black text-white px-2.5 py-0.5 text-sm">Nouveau</span>
+                Les boutiques arrivent sur MenuPro
+            </a>
+            <h1 class="vt-h1 mt-6">Vos commandes arrivent toutes seules, payées en Mobile Money.</h1>
+            <p class="vt-lead mx-auto mt-6">Restaurant, maquis, stand ou boutique : vos clients commandent sur MenuPro, vous acceptez d'un geste, un livreur s'occupe du reste.</p>
+            <ul class="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-[0.9375rem] font-semibold">
+                <li class="flex items-center gap-2">{!! $check !!} Wave, Orange, MTN, Moov</li>
+                <li class="flex items-center gap-2">{!! $check !!} Livraison incluse</li>
+                <li class="flex items-center gap-2">{!! $check !!} {{ $trial }} jours gratuits</li>
+            </ul>
+            <div class="mt-9 grid gap-3 sm:flex sm:justify-center">
+                <a href="{{ route('register') }}" class="vt-btn vt-btn-dark">Créer mon commerce</a>
+                <a href="{{ route('pricing') }}" class="vt-btn vt-btn-ghost">Voir les tarifs</a>
             </div>
-        </figure>
+        </div>
+
+        {{-- Bande « paiements acceptés » --}}
+        <div class="relative mt-16 text-center">
+            <p class="text-[0.9375rem] vt-muted">Vos clients paient avec</p>
+            <ul class="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+                @foreach([['wave.png','Wave'],['orange-money.png','Orange Money'],['mtn-momo.png','MTN MoMo'],['moov-money.png','Moov Money']] as [$img, $name])
+                    <li class="flex items-center gap-2.5 text-lg font-semibold text-neutral-500">
+                        <img src="{{ asset('images/payments/'.$img) }}" alt="" width="32" height="32" class="w-8 h-8 rounded-lg object-contain" loading="lazy" decoding="async">{{ $name }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
     </div>
 </section>
 
-{{-- ══════════ 2. LES TROIS OFFRES ══════════ --}}
+{{-- ══════════ 2. FONCTIONNALITÉS (bento avec aperçus de l'interface) ══════════ --}}
+<section id="fonctions" class="vt-section scroll-mt-16">
+    <div class="vt-wrap">
+        <div class="text-center max-w-2xl mx-auto">
+            <h2 class="vt-h2">Tout votre commerce, dans un seul outil</h2>
+            <p class="vt-lead mx-auto mt-4">Commandes, paiements, livraison, caisse et chiffres : tout se gère depuis votre téléphone.</p>
+        </div>
+
+        <div class="mt-12 grid gap-4 md:grid-cols-6">
+            {{-- Commandes en direct --}}
+            <article class="vt-bento md:col-span-2">
+                <h3 class="vt-display text-xl">Commandes en direct</h3>
+                <p class="mt-1.5 vt-muted">Alerte sonore et notification, même téléphone verrouillé.</p>
+                <div class="vt-mini mt-6" aria-hidden="true">
+                    @foreach([['#1186', 'Awa K.', '2 700 F', 'Nouvelle', 'bg-orange-100 text-orange-800'], ['#1185', 'Table 4', '3 500 F', 'En cuisine', 'bg-amber-100 text-amber-900'], ['#1184', 'Moussa D.', '4 500 F', 'Prête', 'bg-green-100 text-green-800']] as [$n, $who, $tot, $st, $cls])
+                        <div class="flex items-center justify-between gap-2 py-2 {{ ! $loop->last ? 'border-b border-neutral-100' : '' }}">
+                            <p class="text-sm"><span class="font-bold">{{ $n }}</span> {{ $who }}</p>
+                            <span class="rounded-md px-2 py-0.5 text-xs font-semibold {{ $cls }}">{{ $st }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </article>
+            {{-- Mobile Money --}}
+            <article class="vt-bento md:col-span-2">
+                <h3 class="vt-display text-xl">Paiement Mobile Money</h3>
+                <p class="mt-1.5 vt-muted">L'argent arrive sur votre compte, retirable sur votre Mobile Money.</p>
+                <div class="vt-mini mt-6" aria-hidden="true">
+                    <p class="text-sm vt-muted">Solde disponible</p>
+                    <p class="vt-display text-2xl vt-num">142 300 F</p>
+                    <div class="mt-3 flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 text-sm">
+                        <span class="flex items-center gap-2"><img src="{{ asset('images/payments/orange-money.png') }}" alt="" width="20" height="20" class="w-5 h-5 rounded object-contain"> Reversement</span>
+                        <span class="font-semibold text-green-700">Envoyé</span>
+                    </div>
+                </div>
+            </article>
+            {{-- Livraison --}}
+            <article class="vt-bento md:col-span-2">
+                <h3 class="vt-display text-xl">Livraison incluse</h3>
+                <p class="mt-1.5 vt-muted">Un livreur MenuPro récupère et livre. {{ $rate }} seulement sur les commandes livrées.</p>
+                <div class="vt-mini mt-6" aria-hidden="true">
+                    <div class="flex items-center justify-between text-sm"><span class="font-bold">#1184 en route</span><span class="vt-muted">12 min</span></div>
+                    <div class="mt-3 flex items-center gap-1.5">
+                        @foreach(['Acceptée', 'Prête', 'En route', 'Livrée'] as $k => $s)
+                            <span class="h-1.5 flex-1 rounded-full {{ $k < 3 ? 'bg-mp-orange' : 'bg-neutral-200' }}"></span>
+                        @endforeach
+                    </div>
+                    <div class="mt-2 grid grid-cols-4 text-[0.6875rem] vt-muted"><span>Acceptée</span><span>Prête</span><span class="font-semibold text-mp-black">En route</span><span class="text-right">Livrée</span></div>
+                </div>
+            </article>
+            {{-- Caisse et stock --}}
+            <article class="vt-bento md:col-span-3">
+                <h3 class="vt-display text-xl">Caisse et stock</h3>
+                <p class="mt-1.5 vt-muted">Encaissez au comptoir, suivez les ruptures du jour.</p>
+                <div class="vt-mini mt-6" aria-hidden="true">
+                    @foreach([['Poulet braisé', '12 restants', 'w-2/3', 'bg-green-500'], ['Poisson thon', '3 restants', 'w-1/6', 'bg-amber-500'], ['Bissap 50 cl', 'Rupture', 'w-0', 'bg-red-500']] as [$p, $q, $w, $c])
+                        <div class="py-2">
+                            <div class="flex justify-between text-sm"><span class="font-semibold">{{ $p }}</span><span class="vt-muted">{{ $q }}</span></div>
+                            <div class="mt-1.5 h-1.5 rounded-full bg-neutral-100"><div class="h-full rounded-full {{ $w }} {{ $c }}"></div></div>
+                        </div>
+                    @endforeach
+                </div>
+            </article>
+            {{-- Statistiques --}}
+            <article class="vt-bento md:col-span-3">
+                <h3 class="vt-display text-xl">Statistiques</h3>
+                <p class="mt-1.5 vt-muted">Ventes du jour, produits phares, heures de pointe.</p>
+                <div class="vt-mini mt-6" aria-hidden="true">
+                    <div class="flex items-baseline justify-between"><p class="text-sm vt-muted">Cette semaine</p><p class="vt-display text-xl vt-num">612 000 F</p></div>
+                    <div class="mt-3 flex items-end gap-2 h-24">
+                        @foreach([['L', 45], ['M', 60], ['M', 40], ['J', 70], ['V', 85], ['S', 100], ['D', 75]] as [$d, $h])
+                            <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                                <span class="w-full rounded-md {{ $h === 100 ? 'bg-mp-orange' : 'bg-orange-100' }}" style="height: {{ $h }}%"></span>
+                                <span class="text-[0.6875rem] vt-muted">{{ $d }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+{{-- ══════════ 3. LES TROIS OFFRES ══════════ --}}
 <section id="offres" class="vt-section vt-surface scroll-mt-16">
     <div class="vt-wrap">
-        <h2 class="vt-h2 max-w-2xl">Un outil pour chaque commerce</h2>
-        <p class="vt-lead mt-4">Choisissez votre type de commerce : les fonctions et le prix s'adaptent.</p>
-
-        <div class="mt-10 grid gap-5 md:grid-cols-3">
+        <div class="text-center max-w-2xl mx-auto">
+            <h2 class="vt-h2">Une offre pour chaque commerce</h2>
+            <p class="vt-lead mx-auto mt-4">Choisissez votre type de commerce : les fonctions et le prix s'adaptent.</p>
+        </div>
+        <div class="mt-12 grid gap-4 md:grid-cols-3">
             @foreach($offers as $key => $offer)
                 @php $from = G::offerFrom($key); @endphp
                 <article class="vt-offer">
-                    <div class="relative">
-                        <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[4/3] object-cover" loading="lazy" decoding="async">
+                    <div class="relative p-2 pb-0">
+                        <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[4/3] object-cover rounded-[1.1rem]" loading="lazy" decoding="async">
                         @if(!empty($offer['new']))
-                            <span class="vt-pill absolute top-3 left-3 bg-mp-orange text-mp-black">Nouveau</span>
+                            <span class="vt-pill absolute top-5 left-5 bg-white text-mp-black shadow-sm">Nouveau</span>
                         @endif
                     </div>
                     <div class="flex flex-1 flex-col p-5 sm:p-6">
@@ -127,7 +205,7 @@
                             <span class="vt-display text-3xl vt-num whitespace-nowrap">{{ $from['amount'] }}</span>
                             <span class="font-semibold">{{ $from['unit'] }}</span>
                         </p>
-                        <a href="{{ $registerUrl($key) }}" class="vt-btn {{ !empty($offer['new']) ? 'vt-btn-primary' : 'vt-btn-dark' }} vt-btn-block mt-5">
+                        <a href="{{ $registerUrl($key) }}" class="vt-btn {{ !empty($offer['new']) ? 'vt-btn-dark' : 'vt-btn-ghost' }} vt-btn-block mt-5">
                             {{ ['restaurant' => 'Inscrire mon restaurant', 'stand' => 'Inscrire mon stand', 'boutique' => 'Inscrire ma boutique'][$key] }}
                         </a>
                     </div>
@@ -137,101 +215,33 @@
     </div>
 </section>
 
-{{-- ══════════ 3. CÔTÉ CLIENTS (vraie séquence) ══════════ --}}
-<section id="how-it-works" class="vt-section scroll-mt-16">
-    <div class="vt-wrap grid gap-10 lg:grid-cols-[1fr_1.3fr]">
-        <div>
-            <h2 class="vt-h2">Pour vos clients, c'est simple</h2>
-            <p class="vt-lead mt-4">Pas de compte compliqué, pas d'application obligatoire. Ils ouvrent app.menupro.ci, ou scannent votre QR code.</p>
+{{-- ══════════ 4. AVANTAGES (titre à gauche, liste à droite) ══════════ --}}
+<section class="vt-section">
+    <div class="vt-wrap grid gap-12 lg:grid-cols-2 lg:gap-20">
+        <div class="lg:sticky lg:top-24 lg:self-start">
+            <h2 class="vt-h2">Pensé pour les commerces de l'intérieur</h2>
+            <p class="vt-lead mt-4">Daloa, Bouaké, Yamoussoukro, San-Pédro : MenuPro fonctionne sur tous les téléphones, même avec peu de réseau.</p>
+            <ul class="mt-6 flex flex-wrap gap-2">
+                @foreach(['Sans application à installer', 'Support WhatsApp', 'Sans engagement', 'Paiement sécurisé'] as $chip)
+                    <li class="rounded-full bg-neutral-100 px-4 py-1.5 text-[0.9375rem] font-semibold">{{ $chip }}</li>
+                @endforeach
+            </ul>
             <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-                <a href="https://app.menupro.ci" target="_blank" rel="noopener" class="vt-btn vt-btn-dark">Ouvrir app.menupro.ci</a>
+                <a href="https://app.menupro.ci" target="_blank" rel="noopener" class="vt-btn vt-btn-dark">Voir l'app client</a>
                 <a href="{{ route('download.apk') }}" class="vt-btn vt-btn-ghost">Application Android</a>
             </div>
         </div>
-        <ol class="vt-steps">
+        <ul class="grid gap-2">
             @foreach([
-                ['Ils commandent', 'Depuis leur téléphone, sur votre page MenuPro : plats ou articles, quantités, sur place, à emporter ou en livraison.'],
-                ['Ils paient', 'Par Wave, Orange Money, MTN MoMo ou Moov Money. Ou en espèces si vous l\'acceptez.'],
-                ['Ils suivent leur commande', 'En direct : acceptée, en préparation, en route avec le livreur, livrée.'],
-            ] as $i => [$title, $text])
-                <li class="vt-step">
-                    <span class="vt-step-n" aria-hidden="true">{{ $i + 1 }}</span>
-                    <div>
-                        <h3 class="vt-h3">{{ $title }}</h3>
-                        <p class="mt-1 vt-muted">{{ $text }}</p>
-                    </div>
-                </li>
-            @endforeach
-        </ol>
-    </div>
-</section>
-
-{{-- ══════════ 4. CE QUE VOUS GÉREZ ══════════ --}}
-<section class="vt-section bg-mp-black text-white">
-    <div class="vt-wrap">
-        <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-        <div>
-        <h2 class="vt-h2 max-w-2xl">Tout se pilote depuis votre téléphone</h2>
-        <p class="vt-lead vt-on-dark mt-4">Votre tableau de bord MenuPro&nbsp;: chaque commande arrive avec une alerte, vous l'acceptez en un geste, et vous voyez vos ventes du jour en direct.</p>
-        </div>
-
-        {{-- Aperçu du tableau de bord commerçant (HTML pur, aucune image) --}}
-        <figure class="mx-auto w-full max-w-md text-mp-black">
-            <div class="rounded-3xl bg-white p-4 sm:p-5 shadow-[0_40px_80px_-30px_rgba(249,115,22,.45)]" role="img" aria-label="Exemple de tableau de bord MenuPro : ventes du jour, nouvelle commande à accepter et graphique des ventes.">
-                <div aria-hidden="true">
-                    <div class="flex items-center justify-between">
-                        <p class="font-bold text-lg">Aujourd'hui</p>
-                        <span class="vt-pill bg-green-100 text-green-800 text-sm">● Ouvert</span>
-                    </div>
-                    <div class="mt-3 grid grid-cols-3 gap-2">
-                        @foreach([['Ventes', '87 500 F'], ['Commandes', '24'], ['Livrées', '19']] as [$l, $v])
-                            <div class="rounded-xl bg-mp-paper p-3">
-                                <p class="text-xs font-semibold text-neutral-600">{{ $l }}</p>
-                                <p class="font-bold vt-num text-base sm:text-lg whitespace-nowrap">{{ $v }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-3 rounded-2xl ring-2 ring-mp-orange p-3">
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <p class="text-sm font-bold text-orange-700">Nouvelle commande · il y a 30 s</p>
-                                <p class="font-bold mt-0.5">#1184 · Awa K. · Livraison</p>
-                                <p class="text-sm text-neutral-600">2 × Garba thon, 1 × Jus de bissap</p>
-                            </div>
-                            <p class="font-bold vt-num whitespace-nowrap">2 700 F</p>
-                        </div>
-                        <p class="mt-1 text-sm font-semibold text-green-700">Payée par Wave</p>
-                        <div class="mt-3 grid grid-cols-2 gap-2">
-                            <span class="rounded-xl bg-mp-orange text-mp-black text-center py-2.5 font-bold">Accepter</span>
-                            <span class="rounded-xl border-2 border-mp-line text-center py-2.5 font-bold">Refuser</span>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-sm font-semibold text-neutral-600">Ventes par heure</p>
-                        <div class="mt-2 flex items-end gap-1.5 h-20">
-                            @foreach([20, 35, 70, 95, 55, 30, 45, 80, 100, 60] as $h)
-                                <span class="flex-1 rounded-t {{ $h >= 90 ? 'bg-mp-orange' : 'bg-neutral-300' }}" style="height: {{ $h }}%"></span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <figcaption class="mt-5 text-center text-[0.9375rem] text-neutral-300">Exemple de tableau de bord commerçant</figcaption>
-        </figure>
-        </div>
-
-        <ul class="mt-12 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach([
-                ['Commandes en direct', 'Alerte sonore à chaque commande, écran cuisine, impression du ticket.'],
-                ['Livraison incluse', 'Les livreurs MenuPro récupèrent et livrent. ' . $rate . ' uniquement sur les commandes livrées.'],
-                ['Mobile Money', 'Les paiements arrivent dans votre portefeuille MenuPro, retirables sur votre Mobile Money.'],
-                ['Caisse et stock', 'Encaissez au comptoir, suivez votre stock du jour et les ruptures.'],
-                ['Statistiques', 'Ventes du jour, produits qui marchent le mieux, heures de pointe.'],
-                ['Supports imprimés', 'Autocollants QR et affiche vitrine fournis selon votre plan.'],
+                ['Fini les appels pour confirmer', 'Chaque commande arrive avec son paiement. Vous acceptez ou refusez en un geste, le client est prévenu tout de suite.'],
+                ['Vos clients commandent sans compte compliqué', 'Ils scannent votre QR code ou ouvrent app.menupro.ci, choisissent, paient. C\'est tout.'],
+                ['Un livreur sans embaucher', 'Les livreurs MenuPro récupèrent la commande chez vous et la livrent. Vous ne payez qu\'une commission sur les commandes livrées.'],
+                ['Vos chiffres, chaque soir', 'Ce que vous avez vendu, ce qui marche, ce qui manque en stock : tout est calculé pour vous.'],
+                ['Un accompagnement près de chez vous', 'Là où MenuPro a un représentant, il vous aide à démarrer : menu, photos, QR codes.'],
             ] as [$title, $text])
-                <li class="border-t border-white/20 py-5">
-                    <h3 class="vt-h3 text-mp-orange">{{ $title }}</h3>
-                    <p class="mt-1 text-neutral-200">{{ $text }}</p>
+                <li class="vt-benefit">
+                    <h3 class="vt-display text-xl">{{ $title }}</h3>
+                    <p class="mt-1.5 vt-muted">{{ $text }}</p>
                 </li>
             @endforeach
         </ul>
