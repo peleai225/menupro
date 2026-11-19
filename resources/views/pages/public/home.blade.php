@@ -192,7 +192,7 @@
                 @php $from = G::offerFrom($key); @endphp
                 <article class="vt-offer">
                     <div class="relative p-2 pb-0">
-                        <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="800" height="533" class="w-full aspect-[4/3] object-cover rounded-[1.1rem]" loading="lazy" decoding="async">
+                        <img src="{{ asset('images/home/offre-'.$key.'.jpg') }}" alt="" width="1200" height="800" class="w-full aspect-[3/2] object-cover rounded-[1.1rem]" loading="lazy" decoding="async">
                         @if(!empty($offer['new']))
                             <span class="vt-pill absolute top-5 left-5 bg-white text-mp-black shadow-sm">Nouveau</span>
                         @endif
